@@ -135,22 +135,35 @@ Repositorio Git independiente, propiedad del usuario. `tuku init` lo siembra:
 ```
 mi-tuku/
 ├── .tuku/
-│   ├── profile.yaml       # id, schema_version, cadencia del ciclo, preferencias
+│   ├── config.yaml        # schema_version, tipos, derivaciones, clasificaciones
 │   └── procesos/          # punteros o symlinks a los procesos del motor
 ├── AGENTS.md              # instrucciones raíz para el agente
-├── ciclos/
-│   ├── bitacora_2026-08-04_turno.md
-│   ├── plan_2026-08-04_turno.md
-│   └── resultados_2026-07-28_turno.md
-├── entidades/
-│   ├── VIGENTES/
-│   └── ARCHIVADAS/
+├── entradas/              # canónico inmutable: un archivo por mes
+│   ├── 2026-08.md
+│   └── 2025/
 ├── tareas/
-│   ├── abiertas.md
-│   └── cerradas-2026.md
-├── notas/
-├── cadencias.md
-└── capacidad.md
+│   ├── abiertas.md        # único archivo mutable del sistema
+│   ├── 2026-08.md         # cerradas o canceladas ese mes
+│   └── 2025/
+├── ciclos/
+│   ├── plan_2026-08-10_temuco.md
+│   ├── resultados_2026-07-28_turno.md
+│   └── 2025/
+├── entidades/
+│   ├── personal/
+│   │   ├── personal.md
+│   │   └── medico/
+│   │       ├── medico.md
+│   │       └── pediatra.md
+│   └── paranal/
+│       ├── paranal.md
+│       └── sw-responsible.md
+├── tipos/
+│   └── pewma/cliente.md
+├── estrategia/
+│   ├── cadencias.md
+│   └── capacidad.md
+└── notas/
 ```
 
 **Los assets de agente deben ser descubribles desde el perfil.** Un agente de codificación
@@ -167,7 +180,7 @@ Consecuencia directa del principio fundamental: **los datos sobreviven al motor*
 usuario puede instalar TUKU, dejarlo dos años y volver; su repositorio debe seguir siendo
 legible, y el motor nuevo debe saber leer el formato viejo.
 
-- `.tuku/profile.yaml` declara `schema_version`.
+- `.tuku/config.yaml` declara `schema_version`.
 - El motor declara qué rango de esquemas soporta.
 - `tuku doctor` compara ambos y avisa.
 - `tuku migrate` transforma el perfil, **siempre en un commit propio y aislado**, para que

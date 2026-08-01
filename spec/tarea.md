@@ -22,21 +22,33 @@ tarea vivía duplicada en varias bitácoras y se copiaba a mano.
 
 ```
 tareas/
-├── abiertas.md        # mutable, pequeño
-└── tareas-2026.md     # completadas del año, inmutable
+├── abiertas.md         # mutable — el único archivo mutable del sistema
+├── 2026-08.md          # cerradas o canceladas ese mes
+├── 2026-07.md
+└── 2025/
+    └── 2025-12.md
 ```
 
-Una tarea completada permanece en `abiertas.md` durante un período configurable
-(`task_archive_delay`, por defecto 7 días) y luego se mueve al archivo del año de su
-completitud. El conjunto mutable se mantiene pequeño: importa para los diffs de Git, para la
+Rige la misma regla de partición que en `spec/entradas.md`:
+
+> **Lo inmutable se particiona por mes y se archiva por año en subdirectorio.
+> Lo mutable vive en un archivo único sin fecha.**
+
+Una tarea completada o cancelada permanece en `abiertas.md` durante un período configurable
+(`task_archive_delay`, por defecto 7 días) y luego se mueve al archivo del **mes de su
+cierre**. El conjunto mutable se mantiene pequeño: importa para los diffs de Git, para la
 velocidad de los janitors y para los merges.
 
-Front matter de ambos archivos:
+Beneficio lateral de particionar por mes de cierre: "qué cerré en julio" es leer un archivo,
+que es justo lo que necesitan el informe de cierre y los resúmenes anuales.
+
+Front matter:
 
 ```yaml
 ---
-id: tareas-abiertas          # o tareas-2026
+id: tareas-abiertas          # o tareas-2026-08
 type: tareas
+period: 2026-08              # solo en los archivados
 created: 2026-03-01
 modified: 2026-08-01
 ---
@@ -57,9 +69,9 @@ Una tarea ocupa una línea, opcionalmente seguida de líneas de detalle indentad
 Ejemplo:
 
 ```markdown
-- [ ] (2026-08-11) [deputy](../entidades/VIGENTES/deputy.md) Asistir a e-Connect training en Vitacura ^t-2026-0143
+- [ ] (2026-08-11) [deputy](../entidades/paranal/deputy.md) Asistir a e-Connect training en Vitacura ^t-2026-0143
       <!-- tuku: created=2026-07-20 cycles=1 -->
-- [ ] (next:descanso) [colaboraciones](../entidades/VIGENTES/colaboraciones.md) Enviar correo de postulación conjunta ^t-2026-0087
+- [ ] (next:descanso) [colaboraciones](../entidades/paranal/colaboraciones.md) Enviar correo de postulación conjunta ^t-2026-0087
       <!-- tuku: created=2026-05-13 cycles=6 deps=t-2026-0090 -->
       > Requiere acuerdo previo sobre autoría y reparto de horas.
 ```
@@ -87,7 +99,7 @@ vista, también aquí.
 
 `^t-YYYY-NNNN` al final de la línea. Es un *block id* nativo de Obsidian, así que sirve como
 ancla de enlace real, y a la vez es el `id` estable de la tarea (ADR 0001). Lo asigna el
-motor en el alta; no cambia nunca, ni al mover la tarea al archivo del año.
+motor en el alta; no cambia nunca, ni al mover la tarea al archivo del mes.
 
 ### 3.4 Estado
 
@@ -119,9 +131,10 @@ Cuatro modalidades. La cuarta es la más usada en la práctica y la que más exi
 
 ### 4.1 Relativa a ciclo
 
-`(next:<tipo>)` resuelve al **próximo ciclo de ese tipo** según el calendario que producen
-las cadencias. Requiere que el motor sepa proyectar ciclos futuros, no solo generar el
-actual: es una capacidad del motor de cadencias, no azúcar sintáctico.
+`(next:<tipo>)` resuelve al **próximo ciclo de ese tipo** según el calendario de ciclos, que
+es el conjunto de archivos `plan_*` existentes y proyectados por las cadencias
+(`spec/artefactos-ciclo.md` §2). Cuando el usuario declara un ciclo excepcional —una misión,
+un viaje— creando su plan, todas las tareas con `(next:<tipo>)` se re-resuelven solas.
 
 `(next)` sin tipo significa el próximo ciclo, sea cual sea.
 
@@ -186,7 +199,7 @@ alta ──► abierta ──► completada ──► archivada (tareas-YYYY.md)
 | **Alta** | El motor asigna `id` y `created`. La entidad es obligatoria salvo que quede `sin-clasificar` |
 | **Apertura de ciclo** | Se incrementa `cycles` de las abiertas; las vigentes se proyectan al ciclo |
 | **Completitud** | Se marca `- [x]`, se agrega `completed=`; se activan las tareas de `blocks` |
-| **Archivado** | Tras `task_archive_delay`, se mueve al archivo del año conservando su `id` |
+| **Archivado** | Tras `task_archive_delay`, se mueve al archivo del mes de cierre conservando su `id` |
 
 **Dónde se marca completada.** En el archivo canónico, o en cualquier proyección: si el
 usuario marca `- [x]` en el bloque renderizado de la bitácora, el janitor recoge la marca,
@@ -199,7 +212,7 @@ mecánica.
 
 | Proyección | Filtro |
 |---|---|
-| Tareas del ciclo, en la bitácora | vigentes para `[cycle_start, cycle_end]` |
+| Tareas del ciclo, en el plan | vigentes para `[cycle_start, cycle_end]` |
 | Tareas de la entidad, en su página | `entidad == {entidad}` y abiertas |
 | Postergadas | fecha posterior al ciclo actual |
 | Bloqueadas | `deps` sin resolver |

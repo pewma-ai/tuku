@@ -15,9 +15,13 @@
 unidad de registro de la bitácora. Inmutable: una entrada nunca cambia de fecha. No
 confundir con *bitácora*, que es el archivo donde se escriben.
 
-**Bitácora** — El archivo de un ciclo donde se registran las entradas de cada día
-(`bitacora_FECHA_tipo.md`). También, por extensión, la sección proyectada dentro de una
-entidad que muestra sus entradas; esa sección no es un archivo ni una copia.
+**Bitácora** — Cualquier **proyección** de entradas. La *bitácora del ciclo* filtra por rango
+de fechas; la *bitácora de una entidad* filtra por pertenencia. Ninguna es un almacén: las
+entradas viven en `entradas/`, particionadas por mes.
+
+**Ámbito** — Nivel raíz de la jerarquía de entidades y frontera de confidencialidad y de
+compartición (`personal/`, `paranal/`). Es lo que se federa, lo que se excluye de un export y
+lo que puede tener convenciones propias. Todo perfil tiene al menos un ámbito `personal`.
 
 **Tarea** — Compromiso de acción con estado, pertenencia a una entidad y temporalidad en
 tres grados: fecha precisa, ventana difusa ("en dos semanas") o sin fecha. Puede depender
@@ -25,17 +29,19 @@ de otras tareas y activar otras al completarse. En español siempre *tarea*; nun
 
 **Entidad** — Cualquier cosa sobre la que se gestiona: un área, un proyecto, un cliente, un
 instrumento, un profesional de la salud. Tiene `type` como string libre, plantilla,
-cadencias propias y una descripción que el agente infiere y el humano corrige. Vive en
-`VIGENTES/` o `ARCHIVADAS/`.
+cadencias propias, un `alineamiento` —su objetivo— y una descripción que el agente infiere y
+el humano corrige. Su estado es `lifecycle: vigente | archivada` en front matter; el path
+lleva la jerarquía, no el estado.
 
 **Cadencia** — Regla que produce artefactos en el tiempo: bitácoras, tareas o alertas.
 Tiene un **origen** (sistema, tipo de entidad, entidad concreta) y una **forma de disparo**
 (absoluta, relativa a evento, por ausencia, por completitud). Absorbe lo que en otros
 sistemas serían rituales cableados.
 
-**Ciclo** — El período que define la vida del usuario, no el almanaque: un turno de martes
-a martes, un descanso, una semana ISO, un semestre. Lo declara una cadencia. Al abrirse
-produce plan y bitácora; al cerrarse produce resultados.
+**Ciclo** — El período que define la vida del usuario, no el almanaque: un turno, un
+descanso, unas vacaciones, una misión. Lo **declara** su archivo `plan_*`, que fija tipo,
+lugar y fechas; una cadencia puede sembrarlo, pero el plan es la verdad. El conjunto de
+planes es el calendario del usuario y es contra él que se resuelven las fechas relativas.
 
 **Capacidad** — Tiempo y recursos disponibles del usuario, en `estrategia/capacidad.md`.
 Es la restricción contra la que se contrasta el plan y, junto con los objetivos de las

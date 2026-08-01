@@ -27,19 +27,34 @@ Detalle completo en [`deployment.md`](deployment.md).
 ```
 mi-tuku/
 ├── .tuku/
-│   ├── config.yaml          # schema_version, ciclo, tipos, derivaciones, clasificaciones
+│   ├── config.yaml          # schema_version, tipos, derivaciones, clasificaciones
 │   └── procesos/            # punteros a los procesos del motor instalado
 ├── AGENTS.md                # instrucciones de agente, anidables por nivel
-├── ciclos/
-│   ├── plan_2026-08-04_turno.md
-│   ├── bitacora_2026-08-04_turno.md
-│   └── resultados_2026-07-28_turno.md
-├── entidades/
-│   ├── VIGENTES/
-│   └── ARCHIVADAS/
+├── entradas/                # canónico inmutable
+│   ├── 2026-08.md
+│   └── 2025/
 ├── tareas/
-│   ├── abiertas.md          # mutable
-│   └── tareas-2026.md       # completadas del año, inmutable
+│   ├── abiertas.md          # único archivo mutable
+│   ├── 2026-08.md
+│   └── 2025/
+├── ciclos/
+│   ├── plan_2026-08-10_temuco.md
+│   ├── resultados_2026-07-28_turno.md
+│   └── 2025/
+├── entidades/
+│   ├── personal/
+│   │   ├── personal.md      # página del ámbito
+│   │   └── medico/
+│   │       ├── medico.md    # página del subdirectorio
+│   │       └── pediatra.md
+│   └── paranal/
+│       ├── paranal.md
+│       ├── sw-responsible.md
+│       └── log-analysis/
+│           ├── log-analysis.md
+│           └── spie2026-paper.md
+├── tipos/
+│   └── pewma/cliente.md
 ├── estrategia/
 │   ├── cadencias.md
 │   └── capacidad.md
@@ -48,14 +63,27 @@ mi-tuku/
 
 Dos observaciones sobre la forma:
 
-**La jerarquía POSIX no es solo organización.** Permite anidar instrucciones de agente:
-un `AGENTS.md` por nivel acota el contexto y el comportamiento esperado según dónde se
-esté trabajando. Es una razón de diseño, no una comodidad.
+**La jerarquía es sistema → ámbito → niveles libres → entidad.** El ámbito es obligatorio y
+es la frontera de confidencialidad y de compartición: `personal/` contiene salud y finanzas
+familiares, otro ámbito puede contener datos de clientes. Es el ámbito —no el área— lo que
+algún día se federa, lo que se excluye de un export, lo que puede tener convenciones
+propias. Entre el ámbito y la entidad, la profundidad es libre: algunas entidades cuelgan
+directo del ámbito y otras se agrupan en subdirectorios.
 
-**`entidades/` se divide por ciclo de vida, no por tipo.** `VIGENTES` y `ARCHIVADAS` son
-estados; el tipo va en el front matter (P6). Archivar es mover un archivo, no reclasificar.
+**Cada nivel tiene su página homónima**: `personal/personal.md`, `personal/medico/medico.md`.
+Da un lugar natural para describir el nivel, declarar su gobernanza y alojar sus
+proyecciones.
 
----
+**El path no lleva el estado.** El ciclo de vida es `lifecycle: vigente | archivada` en front
+matter. Archivar es cambiar una palabra, no mover un archivo: mover rompería enlaces
+relativos y ensuciaría el historial con renombres masivos.
+
+**`parent` se deriva del path**, no se declara. Declararlo además sería garantía de
+desincronización. El `id` sigue siendo estable e independiente, así que mover una entidad no
+rompe referencias.
+
+**El anidamiento de `AGENTS.md` es una razón de diseño, no una comodidad.** Cada nivel puede
+acotar el contexto y el comportamiento esperado del agente para lo que cuelga de él.
 
 ## 3. Canónico y proyección
 
@@ -66,17 +94,19 @@ canónico. Todo lo demás es proyección recomputable. Nada se copia; todo se pr
 
 | Almacén | Naturaleza | Notas |
 |---|---|---|
-| Entradas de bitácora | append-only | inmutables: una entrada nunca cambia de fecha |
-| Tareas abiertas | tabla mutable | única verdad del estado de una tarea |
+| `entradas/` | inmutable, particionado por mes | una entrada nunca cambia de fecha ni contenido |
+| `tareas/abiertas.md` | mutable | única verdad del estado de una tarea |
+| `ciclos/plan_*` | declaración del ciclo | dónde y cuándo estoy; el conjunto es el calendario |
 | Entidades: secciones editables | mutable | descripción, objetivos, recursos |
 | `estrategia/` | mutable con gate humano | capacidad y cadencias (P5) |
 | Notas | mutable | |
 
 **Proyecciones** (derivadas, jamás editadas a mano):
 
-- La bitácora de una entidad **no es un archivo ni una copia**: es una sección de su página
-  generada filtrando las entradas por pertenencia.
-- El bloque de tareas del ciclo en la bitácora.
+- La bitácora de una entidad y la bitácora de un ciclo son **la misma clase de objeto**:
+  proyecciones de `entradas/` con distinto filtro —por pertenencia una, por rango de fechas
+  la otra—. Ninguna es un almacén.
+- El bloque de tareas del ciclo, en el plan.
 - Índices, dashboards, resúmenes anuales.
 
 Esto resuelve el fallo estructural que motivó el rediseño: una tarea no se copia entre
@@ -124,12 +154,12 @@ La relación entre canónicos y proyecciones **se declara**, no se programa. En
 
 ```yaml
 derivations:
-  - target: "ciclos/bitacora_{fecha}_{tipo}.md#tareas-del-ciclo"
+  - target: "ciclos/plan_{fecha}_{tipo}.md#tareas-del-ciclo"
     sources: ["tareas/abiertas.md", "estrategia/cadencias.md"]
     build: "tareas_del_ciclo"
 
-  - target: "entidades/VIGENTES/{entidad}.md#bitacora-entidad"
-    sources: ["ciclos/bitacora_*.md"]
+  - target: "entidades/{ruta}/{entidad}.md#bitacora-entidad"
+    sources: ["entradas/**/*.md"]
     filter: "entidad == {entidad}"
     build: "proyeccion_entidad"
 ```
@@ -207,12 +237,21 @@ descanso, una semana ISO, un semestre. La cadencia de ciclo lo declara.
 | Momento | Artefacto | Dueño |
 |---|---|---|
 | Apertura | `plan_FECHA_tipo.md` | sembrado, luego del humano |
-| Apertura | `bitacora_FECHA_tipo.md` | humano y agente |
 | Cierre | `resultados_FECHA_tipo.md` | sembrado, luego del humano |
 
-**Un archivo, un dueño.** Separar el plan de la bitácora evita tener que marcar propiedad
-por zonas dentro de un mismo archivo, y deja la bitácora como superficie de escritura
-limpia.
+**El plan es la declaración canónica del ciclo**: `cycle_type` (string libre: turno,
+descanso, vacaciones, misión), lugar y fechas. El conjunto de archivos `plan_*` **es** el
+calendario del usuario, y es contra ese conjunto que se resuelve `(next:turno)`. Romper la
+cadencia declarando un ciclo excepcional es el mecanismo normal, no un caso especial.
+
+**No hay archivo de bitácora de ciclo.** Se escribe en `entradas/YYYY-MM.md`, cuyos días
+siembra la apertura. La vista del ciclo se congela dentro de `resultados_*` al cerrar. Así
+no queda ninguna zona donde el usuario pueda escribir sobre una proyección.
+
+**Ciclos de tipos distintos pueden solaparse** —una misión dentro de un turno, un ciclo
+mensual de finanzas sobre los turnos— porque las entradas no viven bajo el ciclo: dos ciclos
+solapados son dos filtros sobre el mismo conjunto. Solo se prohíbe el solapamiento entre
+ciclos del mismo tipo.
 
 **Las clasificaciones hacen barato el cierre.** Cada entrada lleva una clasificación
 extensible —`hito`, `decision`, `senal`, `friccion`, `msg`—, de modo que el informe de
