@@ -1,0 +1,1 @@
+# Proceso: apertura de ciclo

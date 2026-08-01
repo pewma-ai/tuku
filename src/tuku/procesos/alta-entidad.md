@@ -1,0 +1,1 @@
+# Proceso: alta de entidad

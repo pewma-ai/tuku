@@ -1,0 +1,1 @@
+# Proceso: cierre de ciclo

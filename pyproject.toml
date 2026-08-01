@@ -1,0 +1,14 @@
+[project]
+name = "tuku"
+requires-python = ">=3.11"
+dynamic = ["version"]
+
+[project.scripts]
+tuku = "tuku.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tuku = ["procesos/*.md", "templates/*", "migrations/*"]
+
