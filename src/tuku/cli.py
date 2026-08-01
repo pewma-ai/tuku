@@ -1,1 +1,2 @@
-def main() -> None:\n    raise SystemExit('tuku: no implementado aún')
+def main() -> None:
+    raise SystemExit('tuku: no implementado aún')
