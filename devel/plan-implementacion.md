@@ -70,6 +70,7 @@ dónde se implementa cada uno y, sobre todo, **dónde se verifica**.
 | [0014](../docs/decisiones/0014-formato-posicional-tareas.md) formato posicional | campos fijos + comentario del motor | F1 | round-trip exacto |
 | [0015](../docs/decisiones/0015-tuku-log-no-versionado.md) `tuku.log` | fuera de Git | F0 | `.gitignore` sembrado por `init` |
 | [0016](../docs/decisiones/0016-atomos-diferidos.md) átomos diferidos | **no se implementa transclusión** | — | alcance negativo explícito |
+| [0017](../docs/decisiones/0017-pydantic-v2-para-modelos.md) Pydantic v2 | modelos e I/O declarativos y acelerados | F1+F2 | validación de modelos Pydantic en `src/` |
 
 **0016 es el único que se implementa no haciendo nada**, y conviene tenerlo presente: el
 motor de la primera versión no implementa transclusión, lo que simplifica los janitors de
@@ -82,13 +83,13 @@ exacto y no algo más laxo.
 Cada fase termina con algo verificable y usable a mano (P2). Ninguna fase depende de trabajo
 de una posterior.
 
-### F0 — Cimientos (⅓ de una semana)
+### F0 — Cimientos ✅ *completado*
 
 Antes de escribir el motor hay dos cosas que retrofitear cuesta caro.
 
 | Entregable | Por qué ahora |
 |---|---|
-| `pyproject.toml` con `[dev]`: pytest, ruff, mypy | Definir el listón antes que el código |
+| `pyproject.toml` con `[dev]`: pytest, ruff, mypy (fijado en **Python 3.14**) | Definir el listón antes que el código |
 | `tuku --profile` y `tuku doctor` que reporte versión, commit y rama | `deployment.md` §2.3 lo exige: sin esto ningún bug es accionable |
 | `core/config.py`: cargar `.tuku/config.yaml` y validar `schema_version` | ADR 0003; el resto lo asume disponible |
 | `tuku init` que siembre el layout de `arquitectura.md` §2, **con `.gitignore` que excluya `tuku.log` y `.tuku/cache/`** | ADR 0015: si el log entra a Git una vez, sacarlo después no borra el historial de ruido |
@@ -99,44 +100,30 @@ en la versión 1, y hoy la plantilla está en 0. Propongo mantener 0 hasta el fi
 declarar 1 cuando el formato haya sobrevivido a las dos simulaciones completas. Migrar
 formatos durante la construcción sería trabajo puro de fricción.
 
-### F1 — Parser y serializador (~1 semana)
+### F1 — Parser y serializador ✅ *completado*
 
 El corazón. Todo lo demás lo consume.
 
-- Front matter (`spec/frontmatter.md` está **vacío** — ver §5, es un bloqueante).
+- Front matter (`spec/frontmatter.md` creado y compatible con `spec/*`).
 - Línea de tarea posicional de 7 campos + comentario `<!-- tuku: … -->` **en una sola línea**
   (ADR 0014) + cita `>`.
 - Entrada de bitácora: hora opcional, entidad opcional, clasificación, marcadores `#tag`,
   continuación indentada.
 - Gramática temporal completa: precisa, rango, difusa, `next:<tipo>`.
 - Zonas `<!-- tuku:editable -->` / `<!-- tuku:derived hash=… -->` / `<!-- tuku:cadencias -->`.
+- Adopción de Pydantic v2 (**ADR 0017**) para modelos e I/O declarativos.
 
 **Criterio de salida — round-trip exacto.** Parsear y volver a serializar cualquier archivo
-del perfil debe producir *byte por byte* el mismo contenido. Es más fuerte que "parsea bien"
-y es lo que hace seguro que un janitor reescriba un archivo del usuario sin destruir nada.
+del perfil produce *byte por byte* el mismo contenido (`test_roundtrip.py` parametrizado por `specref.casos()`).
 
-Este criterio no es exigencia mía: **ADR 0013 y 0014 lo obligan**. Ambos ponen contenido
-canónico dentro de comentarios HTML —la fuente de las cadencias en uno, los metadatos del
-motor en otro—, de modo que un serializador que "normalice" comentarios destruiría datos.
+### F2 — Janitors de invariantes ✅ *completado*
 
-> **Riesgo, ya acotado por el ADR 0014.** El formato posicional
-> (`created effort entity deadline followup blockuntil originator texto ^id`) es frágil ante
-> la edición manual que P2 exige soportar: basta un `-` de más o de menos para que todo se
-> corra un campo. El ADR **ya decidió** que el placeholder `-` es obligatorio y que omitir un
-> campo no es válido, justamente para que el parser no tenga que adivinar; y asume el costo
-> ("el canónico es incómodo de leer"). Lo que queda para la implementación es blindarlo: que
-> el parser **falle ruidosamente** con número y posición de campo, nunca en silencio, y que
-> `tuku doctor` muestre la línea alineada con sus nombres de campo. El ADR fija el formato;
-> el plan solo añade cómo se diagnostica.
+Inspección determinista de reglas sobre todo el perfil.
 
-> **Detalle del ADR 0014 que el diseño previo no tenía:** en el canónico, la entidad es un
-> **`id` plano, no un enlace Markdown**. Los enlaces enriquecidos viven en las proyecciones.
-> Esto simplifica el parser de tareas —no hay que resolver `[texto](ruta)` en la línea— pero
-> **no aplica a las entradas**, cuya gramática sí usa enlace Markdown
-> (`spec/entradas.md` §3.1). Son dos parsers con reglas distintas para el mismo concepto, y
-> conviene tenerlo explícito antes de escribirlos.
-
-### F2 — Janitors de invariantes (~1 semana)
+- Implementación del motor `Janitor` (`src/tuku/core/janitor.py`).
+- Verificaciones de invariantes de perfil, entidades, entradas, tareas, notas.
+- Subcomando CLI `tuku janitor [--fix]`.
+- Suite de pruebas de invariantes (`tests/test_janitor_invariantes.py`).
 
 Las 40+ invariantes ya están escritas y con garante asignado. Esta fase es sobre todo
 transcripción, y es donde el diseño paga.
