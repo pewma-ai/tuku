@@ -15,6 +15,29 @@ from tuku.core.init import init_perfil
 from tuku.core.sync import sync_perfil
 
 
+def _con_registrar_implicito(argv: list[str], subcomandos: set[str]) -> list[str]:
+    """Si el primer token posicional no es un subcomando conocido, inserta `registrar`.
+
+    Permite `tuku "texto"` como atajo de `tuku registrar "texto"`. Las flags globales
+    (`-p/--profile`) que preceden al texto se respetan y se dejan donde están.
+    """
+    i = 0
+    while i < len(argv):
+        tok = argv[i]
+        if tok in ("-h", "--help"):
+            return argv
+        if tok in ("-p", "--profile"):
+            i += 2
+            continue
+        if tok.startswith("-"):
+            i += 1
+            continue
+        if tok not in subcomandos:
+            return [*argv[:i], "registrar", *argv[i:]]
+        return argv
+    return argv
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="tuku",
@@ -31,6 +54,7 @@ def main(argv: list[str] | None = None) -> int:
             "  tuku -p ~/perfil doctor    Diagnostica un perfil específico\n"
             "  tuku sync                  Sincroniza punteros a procesos\n"
             "  tuku registrar \"Reunión con cliente #hito\"   Captura conversacional\n"
+            "  tuku \"Reunión con cliente #hito\"             Atajo de lo anterior\n"
             "  tuku abrir 2026-W32 --tipo semana             Abre un ciclo\n"
             "  tuku cerrar 2026-W32                          Cierra un ciclo\n\n"
             "Documentación: https://github.com/pewma-ai/tuku"
@@ -207,6 +231,9 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Fecha de fin del ciclo YYYY-MM-DD",
     )
+
+    argv = sys.argv[1:] if argv is None else list(argv)
+    argv = _con_registrar_implicito(argv, set(subparsers.choices))
 
     args = parser.parse_args(argv)
 

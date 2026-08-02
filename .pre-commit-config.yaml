@@ -1,0 +1,26 @@
+# Verificación previa al commit (devel/entorno-devel.md §5).
+# Hooks locales: reusan el entorno del proyecto vía `uv run`, sin mirrors
+# externos ni versiones de ruff/mypy separadas de pyproject.toml.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check .
+        language: system
+        pass_filenames: false
+        types: [python]
+
+      - id: mypy
+        name: mypy (src, modo estricto)
+        entry: uv run mypy src
+        language: system
+        pass_filenames: false
+        types: [python]
+
+      - id: pytest
+        name: pytest (suite determinista)
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        types: [python]

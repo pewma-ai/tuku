@@ -84,6 +84,13 @@ tuku registrar "Llamé al Colegio San Marcos, quieren cotización de 200 cuadern
 Si mencionas una entidad que TUKU no conoce (un cliente, un proveedor, una persona), no
 falla: la da de alta al vuelo. No necesitas crear nada de antemano.
 
+`registrar` es tan frecuente que tiene atajo: si escribes `tuku` seguido de un texto que
+no coincide con ningún subcomando, se interpreta como `tuku registrar`.
+
+```bash
+tuku "Llamé al Colegio San Marcos, quieren cotización de 200 cuadernos."
+```
+
 Para ver qué generaría un texto sin escribirlo todavía, usa `--dry-run`:
 
 ```bash

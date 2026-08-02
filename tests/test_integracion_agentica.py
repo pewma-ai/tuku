@@ -1,10 +1,10 @@
-"""Tests de integración agéntica — Fase 5.
+"""Tests de integración — Fase 5, ruta determinista (sin LLM).
 
 Arquitectura de la suite:
-- Tests deterministas (sin agente): verifican la lógica sin LLM.
-  Corren siempre. Cubren F5.2, F5.3, F5.4, e init con .hermes/.
-- Tests agénticos (con @pytest.mark.agentic): gastan tokens.
-  Excluidos por defecto; activar con `pytest -m agentic`.
+- Este archivo: todo lo determinista — provisión de `.hermes/`, ciclos, tesauro,
+  captura conversacional sin agente, CLI. Corre siempre, sin gastar tokens.
+- `test_integracion_hermes_llm.py`: llamadas reales a Hermes, marcadas
+  `@pytest.mark.agentic`. Excluidas por defecto; activar con `pytest -m agentic`.
 
 Reglas:
 - Ningún test toca datos reales (todo en tmp_path / perfil_tmp).
@@ -16,7 +16,6 @@ Ver `devel/checklist-implementacion.md` §F5 y ADR 0018.
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import pytest
@@ -28,8 +27,7 @@ from tuku.core.agent import (
     registrar_conversacional,
 )
 from tuku.core.cadence import abrir_ciclo, cerrar_ciclo
-from tuku.core.init import _provisionar_hermes, init_perfil
-
+from tuku.core.init import init_perfil
 
 # ---------------------------------------------------------------------------
 # F5.0 — tuku init provisiona .hermes/ (ADR 0018)
@@ -259,7 +257,7 @@ def test_registrar_clasifica_hito(perfil_tmp: Path) -> None:
 
 def test_registrar_verifica_entidad_inexistente(perfil_tmp: Path) -> None:
     """Si el texto cita una entidad que no existe, debe lanzar AgentError."""
-    with pytest.raises(AgentError, match="[Vv]erificaci"):
+    with pytest.raises(AgentError, match=r"[Vv]erificaci"):
         registrar_conversacional(
             perfil_tmp,
             "Reunión con [entidad-inexistente](../entidades/trabajo/entidad-inexistente.md)",
@@ -328,48 +326,3 @@ def test_cli_cerrar_crea_resultados(perfil_tmp: Path) -> None:
 
     assert rc == 0
     assert (perfil_tmp / "ciclos" / "resultados_2026-W98.md").exists()
-
-
-# ---------------------------------------------------------------------------
-# Tests agénticos (marcador `agentic` — excluidos por defecto)
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.agentic
-def test_registrar_con_agente_produce_canonica(hermes_efimero: dict) -> None:
-    """[AGENTE] registrar_conversacional con agente produce forma canónica parseable."""
-    if shutil.which("hermes") is None:
-        pytest.skip("hermes no instalado")
-
-    from tuku.io.entry import Entry
-
-    profile_dir = Path(hermes_efimero["HERMES_HOME"]).parent
-
-    tipo, canonico = registrar_conversacional(
-        profile_dir,
-        "Cerramos el mes con muy buenos resultados. #hito",
-        sin_agente=False,
-    )
-
-    assert tipo in ("entrada", "tarea")
-    if tipo == "entrada":
-        # Debe ser parseable
-        entry = Entry.parse_line(canonico)
-        assert entry.text
-
-
-@pytest.mark.agentic
-def test_hermes_mantiene_sesion_entre_llamadas(hermes_efimero: dict) -> None:
-    """[AGENTE] run_hermes con --continue mantiene contexto entre llamadas."""
-    if shutil.which("hermes") is None:
-        pytest.skip("hermes no instalado")
-
-    from tuku.core.agent import run_hermes
-
-    profile_dir = Path(hermes_efimero["HERMES_HOME"]).parent
-
-    r1 = run_hermes(profile_dir, "Recuerda el número 42 para la siguiente pregunta.")
-    r2 = run_hermes(profile_dir, "¿Qué número te pedí que recordaras?")
-
-    # La respuesta al segundo turno debe mencionar 42
-    assert "42" in r2, f"Hermes no mantuvo el contexto: {r2!r}"

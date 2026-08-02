@@ -67,3 +67,37 @@ def test_cli_help_subcomandos(subcommand: str, capsys: pytest.CaptureFixture[str
     output = captured.out
     assert f"usage: tuku {subcommand}" in output
     assert len(output.strip().splitlines()) >= 3
+
+
+def test_cli_registrar_implicito(tmp_path: Path) -> None:
+    """`tuku "texto"` sin subcomando equivale a `tuku registrar "texto"`."""
+    target = tmp_path / "perfil"
+    main(["init", str(target)])
+
+    texto = "Llamé a Juan #msg"
+    code_implicito = main(["-p", str(target), texto, "--dry-run"])
+    assert code_implicito == 0
+
+    code_explicito = main(["-p", str(target), "registrar", texto, "--dry-run"])
+    assert code_explicito == 0
+
+
+def test_cli_registrar_implicito_escribe_en_disco(tmp_path: Path) -> None:
+    """El atajo implícito realmente registra la entrada, no solo simula el parseo."""
+    target = tmp_path / "perfil"
+    main(["init", str(target)])
+
+    code = main(["-p", str(target), "Llamé a Juan #msg"])
+    assert code == 0
+
+    archivos = list((target / "entradas").glob("*.md"))
+    contenido = "\n".join(a.read_text(encoding="utf-8") for a in archivos)
+    assert "Llamé a Juan" in contenido
+
+
+def test_cli_registrar_implicito_no_interfiere_con_subcomandos(tmp_path: Path) -> None:
+    """Un texto que coincide por accidente con un subcomando no debe reescribirse."""
+    target = tmp_path / "perfil"
+    code = main(["init", str(target)])
+    assert code == 0
+    assert (target / ".tuku" / "config.yaml").exists()

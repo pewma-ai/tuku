@@ -88,3 +88,18 @@ uv run ruff check . && uv run mypy src && uv run pytest
 
 Los tres en verde. La suite incluye chequeos de coherencia documental que no dependen del
 motor, así que este comando es válido desde hoy.
+
+Este comando está automatizado vía [pre-commit](https://pre-commit.com)
+(`.pre-commit-config.yaml`, hooks locales que reusan `uv run` sin duplicar versiones de
+`ruff`/`mypy` fuera de `pyproject.toml`). Se instala una vez por clon:
+
+```bash
+uv run pre-commit install
+```
+
+A partir de ahí, `git commit` corre los tres pasos solo. Para ejecutarlos manualmente sin
+comitear:
+
+```bash
+uv run pre-commit run --all-files
+```

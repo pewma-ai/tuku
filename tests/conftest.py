@@ -71,18 +71,14 @@ def perfil_vacio(tmp_path: Path) -> Path:
 def perfil_tmp(perfil_vacio: Path) -> Path:
     """Perfil sembrado por `tuku init`.
 
-    Mientras `tuku init` no exista, se salta el test que lo pida. Esto permite
-    escribir hoy los tests de las fases F1–F4 y que se activen solos cuando el
-    comando aterrice, en vez de fallar en rojo durante semanas.
+    Llama a `init_perfil()` en proceso en vez de invocar el binario `tuku` vía
+    subprocess: mismo código que ejecuta `tuku init` (`cli.py` delega en esta
+    función), sin pagar un arranque de intérprete por test. Con ~20 tests que
+    consumen esta fixture, eso ahorra varios segundos por corrida.
     """
-    if not motor_implementa("init"):
-        pytest.skip("`tuku init` aún no implementado (F0.3)")
-    subprocess.run(
-        ["tuku", "init", str(perfil_vacio)],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    from tuku.core.init import init_perfil
+
+    init_perfil(perfil_vacio)
     return perfil_vacio
 
 
@@ -183,7 +179,8 @@ def hermes_efimero(perfil_tmp: Path) -> dict[str, str]:
 def hermes_oneshot(env: dict[str, str], prompt: str, timeout: int = 180) -> str:
     """Invoca Hermes en modo oneshot y devuelve solo la respuesta final.
 
-    Usa `hermes chat -z <prompt> --continue` (ADR 0018). Sin --safe-mode:
+    Usa `hermes -z <prompt> --continue` (ADR 0018): `-z`/`--continue` son
+    flags globales de Hermes, no del subcomando `chat`. Sin --safe-mode:
     Hermes accede a la memoria del perfil y aprende. El aislamiento lo da
     HERMES_HOME apuntando al .hermes/ del perfil efímero.
     """
@@ -192,7 +189,6 @@ def hermes_oneshot(env: dict[str, str], prompt: str, timeout: int = 180) -> str:
     proc = subprocess.run(
         [
             "hermes",
-            "chat",
             "-z",
             prompt,
             "--continue",

@@ -6,6 +6,7 @@ tesauro vivo acotado (F5.4), captura conversacional (F5.2) y registro canónico.
 
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
@@ -105,8 +106,9 @@ def run_hermes(
 ) -> str:
     """Invoca Hermes en modo oneshot con sesión persistente por perfil (ADR 0018).
 
-    Usa `hermes chat -z <prompt> --continue --safe-mode --source tool` con
-    HERMES_HOME apuntando al directorio `.hermes/` del perfil. La bandera
+    Usa `hermes -z <prompt> --continue` con HERMES_HOME apuntando al directorio
+    `.hermes/` del perfil. `-z`/`--continue` son flags globales de Hermes (van
+    antes de cualquier subcomando, no son parte de `chat`). La bandera
     `--continue` sin nombre retoma la sesión más reciente del HERMES_HOME
     activo; si no existe ninguna, crea una nueva.
 
@@ -127,7 +129,7 @@ def run_hermes(
 
     env = {**os.environ, "HERMES_HOME": str(hermes_home), "TZ": "UTC"}
 
-    cmd = ["hermes", "chat", "-z", prompt]
+    cmd = ["hermes", "-z", prompt]
     if continuar:
         cmd.append("--continue")
 

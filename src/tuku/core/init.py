@@ -107,17 +107,17 @@ Consulte `docs/` y `spec/` para el contrato de operabilidad.
 _HERMES_CONFIG_PERFIL = """\
 # Hermes Agent — config mínima del perfil TUKU (ADR 0018)
 # No editar a mano: gestionado por tuku init/sync.
-model: deepseek-v4-flash
+model:
+  default: deepseek-v4-flash
+  provider: opencode-go
+  show_reasoning: false
+  thinking: false
 
 tts:
   enabled: false
 
 stt:
   enabled: false
-
-model:
-  show_reasoning: false
-  thinking: false
 """
 
 
