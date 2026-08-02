@@ -57,7 +57,7 @@ Consolidación de decisiones ya tomadas y dispersas. Ninguno exige diseño nuevo
 | | Ítem | Fuente | Verificación |
 |---|---|---|---|
 | [x] | **F1.1** Front matter YAML | B1 | round-trip byte a byte, incluido el orden de claves ✅ *hecho* |
-| ☐ | **F1.2** Línea posicional de tareas | [ADR 0014](../docs/decisiones/0014-formato-posicional-tareas.md), [`tarea.md`](../spec/tarea.md) | cada campo por separado + placeholder `-` obligatorio |
+| [x] | **F1.2** Línea posicional de tareas | [ADR 0014](../docs/decisiones/0014-formato-posicional-tareas.md), [`tarea.md`](../spec/tarea.md) | cada campo por separado + placeholder `-` obligatorio ✅ *hecho* |
 | ☐ | **F1.3** Entradas: hora opcional, `[entidad](ruta)`, clasificación, `#marcadores` | [`entradas.md`](../spec/entradas.md) | los cuatro valores de clasificación y ninguno más |
 | ☐ | **F1.4** Gramática temporal: precisa, rango, difusa, `next:<tipo>` | [`tarea.md`](../spec/tarea.md) §4 | una fecha inválida se rechaza con posición |
 | ☐ | **F1.5** Delimitadores HTML (`tuku:editable`, `tuku:derived`, `tuku:cadencias`) | [ADR 0013](../docs/decisiones/0013-cadencias-en-comentario.md) | comentario preservado íntegro tras reescribir |
