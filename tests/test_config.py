@@ -1,3 +1,8 @@
+"""Pruebas del cargador y validador de configuración `.tuku/config.yaml` (F0.2).
+
+Verifica la carga de configuración, derivaciones y validación de `schema_version` (ADR 0003).
+"""
+
 from pathlib import Path
 
 import pytest
@@ -6,6 +11,7 @@ from tuku.core.config import SCHEMA_VERSION_MAX, ConfigError, ProfileConfig
 
 
 def test_cargar_configuracion_valida(tmp_path: Path) -> None:
+    """F0.2: Carga configuración válida con derivaciones y clasificaciones."""
     config_file = tmp_path / "config.yaml"
     config_file.write_text(
         """
@@ -33,6 +39,7 @@ derivations:
 
 
 def test_falta_schema_version_lanza_error_claro(tmp_path: Path) -> None:
+    """F0.2: Rechaza configuraciones que omitan el campo obligatorio schema_version."""
     config_file = tmp_path / "config.yaml"
     config_file.write_text("profile_name: test\n", encoding="utf-8")
 
@@ -41,6 +48,7 @@ def test_falta_schema_version_lanza_error_claro(tmp_path: Path) -> None:
 
 
 def test_schema_version_fuera_de_rango_lanza_error_claro(tmp_path: Path) -> None:
+    """F0.2 / ADR 0003: Rechaza esquemas con versión superior a la soportada por el motor."""
     config_file = tmp_path / "config.yaml"
     config_file.write_text(f"schema_version: {SCHEMA_VERSION_MAX + 1}\n", encoding="utf-8")
 
@@ -49,6 +57,7 @@ def test_schema_version_fuera_de_rango_lanza_error_claro(tmp_path: Path) -> None
 
 
 def test_archivo_inexistente_lanza_config_error(tmp_path: Path) -> None:
+    """F0.2: Lanza ConfigError al intentar cargar un archivo que no existe."""
     config_file = tmp_path / "no_existe.yaml"
     with pytest.raises(ConfigError, match="no encontrado"):
         ProfileConfig.from_yaml(config_file)
