@@ -13,9 +13,9 @@ Esa obviedad no sobrevive al uso real:
 - **El ciclo de vida cambia.** El sistema anterior movía las entidades a un directorio
   `VIGENTES/` y de ahí al archivo, lo que producía renombres masivos en el historial de Git
   y rompía de golpe todos los enlaces entrantes.
-- **Los objetos migran de archivo por diseño.** Una tarea nace en `tareas/abiertas.md` y
-  termina en `tareas/2026-08.md`; un mes de entradas vive en `entradas/2026-08.md` y luego
-  en `entradas/2026/`. La partición por mes y el archivado por año son parte del modelo
+- **Los objetos migran de archivo por diseño.** Una tarea nace en `tareas/tareas.md` y
+  termina en `tareas/tareas-2026-08.md`; un mes de entradas vive en `entradas/entradas.md` y luego
+  pasa a `entradas/entradas-2026-08.md`. La partición por mes y el archivado por año son parte del modelo
   ([`spec/tarea.md`](../../spec/tarea.md) §2, [`spec/entradas.md`](../../spec/entradas.md) §2).
 - **La federación entre perfiles, aunque aparcada, ya condiciona hoy.** Dos perfiles tienen
   árboles distintos; una referencia por ruta no cruza la frontera del perfil.

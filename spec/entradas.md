@@ -27,34 +27,22 @@ almacén: son dos vistas del mismo conjunto.
 
 ```
 entradas/
-├── 2026-08.md          # mes en curso — superficie de escritura
-├── 2026-07.md
+├── entradas.md         # activo — superficie de escritura sin fecha en el nombre
+├── entradas-2026-08.md # mes cerrado
 └── 2025/
-    ├── 2025-12.md
+    ├── entradas-2025-12.md
     └── …
 ```
 
-**Partición por mes.** El mes es una unidad de tiempo absoluta que ninguna cadencia puede
-redefinir. Particionar por ciclo ataría los datos históricos a una configuración que el
-usuario puede cambiar —de turnos a semanas ISO, por ejemplo— y dejaría archivos que ya no
-corresponden a ningún ciclo vigente. Con volúmenes reales observados (~55 entradas en 8
-días de alta intensidad) un mes queda en 150–250 líneas: cómodo en Obsidian y con diffs
-limpios.
+**Archivo activo `entradas/entradas.md`.** No lleva fecha en el nombre mientras está abierto. Al rotar (fin de mes, o al cerrar un ciclo que cruza el mes), el contenido del mes cerrado se separa a `entradas/entradas-YYYY-MM.md`; los años anteriores se ubican bajo `entradas/YYYY/`.
 
-**Archivado por año.** Los meses cerrados se mueven a subdirectorio del año. Es la misma
-regla que rige `tareas/`. No hay archivo mutable de entradas porque las entradas no mutan.
+**Partición por mes.** El mes es una unidad de tiempo absoluta que ninguna cadencia puede redefinir. Particionar por ciclo ataría los datos históricos a una configuración que el usuario puede cambiar —de turnos a semanas ISO, por ejemplo— y dejaría archivos que ya no corresponden a ningún ciclo vigente. Con volúmenes reales observados (~55 entradas en 8 días de alta intensidad) un mes queda en 150–250 líneas: cómodo en Obsidian y con diffs limpios.
+
+**Archivado por año.** Los meses cerrados se mueven a subdirectorio del año. Es la misma regla que rige `tareas/`. No hay archivo mutable de entradas porque las entradas no mutan.
 
 ### 2.1 Front matter
 
-```yaml
----
-id: ent-2026-08
-type: entradas
-period: 2026-08
-created: 2026-08-01
-modified: 2026-08-04
----
-```
+El `entradas.md` activo **no** lleva `period` (puede abarcar más de un mes). Los archivos archivados sí llevan `period: YYYY-MM` y `status: closed`.
 
 ### 2.2 Estructura interna
 
@@ -72,12 +60,9 @@ Encabezados por día en formato ISO más nombre del día:
 
 La fecha ISO en el encabezado hace la entrada autodescriptiva sin repetirla en cada línea.
 
-**Siembra de días.** La apertura de un ciclo escribe en el mes en curso los encabezados de
-los días de su rango, incluidos los que quedarán vacíos. El usuario abre el archivo del mes
-y encuentra sus días listos. Los encabezados son canónicos, no derivados: nada los reescribe.
+La vista de "los días de este ciclo" es una proyección bajo demanda, filtrada por `[cycle_start, cycle_end]` del plan vigente contra las entradas existentes. No se materializa nada en el canónico: el usuario escribe el día que corresponde cuando tiene algo que registrar, sin que el archivo le anticipe estructura.
 
-Un mes puede contener días de más de un ciclo, y días que no pertenecen a ningún ciclo
-declarado. Ninguna de las dos situaciones es un error.
+Un mes puede contener días de más de un ciclo, y días que no pertenecen a ningún ciclo declarado. Ninguna de las dos situaciones es un error.
 
 ---
 
@@ -100,14 +85,9 @@ Ejemplos válidos:
 
 ### 3.1 Referencia a entidad
 
-Enlace Markdown estándar: el **texto** es el `id` de la entidad y es lo que el motor lee; la
-**ruta** existe para que Obsidian navegue y la mantiene un janitor. Si la entidad se mueve,
-se reescribe la ruta y el `id` no cambia (ADR 0001).
+Enlace Markdown estándar: el **texto** es el `id` de la entidad y es lo que el motor lee; la **ruta** existe para que Obsidian navegue y la mantiene un janitor. Si la entidad se mueve, se reescribe la ruta y el `id` no cambia (ADR 0001).
 
-Una entrada **puede no tener entidad**. Ocurre de forma natural y frecuente en ciclos de
-descanso, donde buena parte de lo registrado es vida personal. Queda como `sin-clasificar` y
-el agente puede proponer entidad después. El sistema **no exige** clasificar al escribir:
-forzarlo rompería el único momento que debe ser sin fricción.
+Una entrada **puede no tener entidad**. Ocurre de forma natural y frecuente en ciclos de descanso, donde buena parte de lo registrado es vida personal. Queda como `sin-clasificar` y el agente puede proponer entidad después. El sistema **no exige** clasificar al escribir: forzarlo rompería el único momento que debe ser sin fricción.
 
 ### 3.2 Clasificación
 
@@ -120,15 +100,23 @@ Conjunto por defecto, extensible en `.tuku/config.yaml`:
 | `Señal` | Información a considerar, sin acción inmediata |
 | `msg` | Registro corriente; es el caso por defecto y no se escribe |
 
-**No existe clasificación de fricción.** Las desviaciones no se etiquetan al escribir: se
-deducen en el cierre contrastando el plan con la actividad. Sigue el uso real observado
-—`Hito` 59, `Decisión` 22, `Señal` 8, fricción 0— y evita pedirle al usuario que rotule sus
-propios fracasos mientras trabaja.
+**No existe clasificación de fricción.** Las desviaciones no se etiquetan al escribir: se deducen en el cierre contrastando el plan con la actividad. Sigue el uso real observado —`Hito` 59, `Decisión` 22, `Señal` 8, fricción 0— y evita pedirle al usuario que rotule sus propios fracasos mientras trabaja.
 
 ### 3.3 Entradas multilínea
 
-Una entrada puede continuar en líneas indentadas: sublistas, acuerdos numerados, bloques de
-código. Todo lo indentado pertenece a esa entrada y viaja con ella en las proyecciones.
+Una entrada puede continuar en líneas indentadas: sublistas, acuerdos numerados, bloques de código. Todo lo indentado pertenece a esa entrada y viaja con ella en las proyecciones.
+
+### 3.4 Marcadores
+
+Un marcador es una etiqueta inline —`#venta`, `#uno-a-uno`— **distinta de la clasificación** (§3.2). Mientras la clasificación dice el tipo de hecho (Hito, Decisión, Señal), el marcador dice el evento específico que una cadencia debe reconocer.
+
+String libre (P6): el sistema no valida contra un catálogo cerrado, solo indexa los marcadores en uso. Una cadencia con `trigger.on: uno-a-uno` referencia el marcador, no la clasificación:
+
+```markdown
+- [jefatura](…) **Hito:** Conversación individual con Persona1. #uno-a-uno
+```
+
+Sin marcador, una cadencia por evento no tiene contra qué hacer *match* — un Hito puede ser cualquier cosa; el marcador es lo que lo hace específico.
 
 ---
 

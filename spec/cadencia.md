@@ -79,14 +79,15 @@ sistema.
 entidad  >  tipo  >  ancestro más cercano  >  …  >  ámbito  >  sistema
 ```
 
-La entidad concreta gana sobre todo. El tipo gana sobre los ancestros porque describe la
-naturaleza de la cosa, no su ubicación. Entre ancestros, el más cercano gana.
+La entidad concreta gana sobre todo. El tipo gana sobre los ancestros porque describe la naturaleza de la cosa, no su ubicación. Entre ancestros, el más cercano gana.
 
-**Cualquier nivel puede silenciar lo heredado** declarando el mismo `id` con
-`enabled: false`. Silenciar es explícito y visible; no hay herencia que desaparezca sin
-dejar rastro.
+**Cualquier nivel puede silenciar lo heredado** declarando el mismo `id` con `enabled: false`. Silenciar es explícito y visible; no hay herencia que desaparezca sin dejar rastro.
+
+**Colector.** Antes de evaluar, un janitor combina todas las cadencias aplicables —sistema, ámbito, niveles, tipo, entidad— en un único conjunto resuelto, sobrescribiendo por `id` de cadencia según precedencia (§3.1). El resultado se cachea en `.tuku/cache/cadencias-resueltas.yaml`: no versionado, siempre reconstruible. **La autoridad última la tiene el archivo de la propia entidad**: si define una cadencia con el mismo `id` que algo heredado, gana ella, sin excepción.
 
 ### 3.2 El archivo de tipo
+
+Las cadencias van **dentro de un comentario HTML**, no en bloque visible. Lo visible es una proyección en lenguaje natural derivada de ese comentario — mismo patrón que los metadatos de tarea, pero invertido: ahí el comentario es metadata y lo visible es la fuente; aquí el comentario **es** la fuente y lo visible es la proyección.
 
 ```markdown
 ---
@@ -100,18 +101,21 @@ ambito: pewma
 Campos sugeridos: contacto, última compra, volumen.
 <!-- /tuku:editable -->
 
-<!-- tuku:editable id=cadencias -->
+<!-- tuku:cadencias
 - id: cad-cliente-reposicion
-  ...
-<!-- /tuku:editable -->
+  descripcion: Ofrecer reposición tres meses después de una venta
+  trigger: { type: event, on: venta, delta: 3M }
+  emit: { kind: tarea, text: "Contactar a {entidad} para ofrecer reposición" }
+-->
+<!-- tuku:derived id=cadencias-legibles hash=a1b2c3 -->
+**Cadencias de este tipo**
+- Cada venta registrada dispara, tres meses después, una tarea para ofrecer reposición.
+<!-- /tuku:derived -->
 ```
 
-Un tipo es *plantilla de front matter + lista de cadencias*, declarado en Markdown. No hay
-editor de esquemas, ni validación fuerte, ni UI de configuración (P6). El usuario define
-tipos conversando; el agente los escribe.
+Un tipo es *plantilla de front matter + lista de cadencias*, declarado en Markdown. No hay editor de esquemas, ni validación fuerte, ni UI de configuración (P6). El usuario define tipos conversando; el agente los escribe.
 
-Al vivir dentro de un ámbito, un tipo es **autocontenido y compartible**: otro perfil puede
-instalar el tipo `cliente` sin importar nada más.
+Al vivir dentro de un ámbito, un tipo es **autocontenido y compartible**: otro perfil puede instalar el tipo `cliente` sin importar nada más.
 
 ---
 
@@ -127,8 +131,7 @@ trigger: { type: calendar, rule: "yearly:04-30" }
 trigger: { type: calendar, rule: "every:14d", from: 2026-03-04 }
 ```
 
-Es la que produce el momento de mayor valor del producto: abrir el ciclo y encontrar lo que
-se había olvidado.
+Es la que produce el momento de mayor valor del producto: abrir el ciclo y encontrar lo que se había olvidado.
 
 ### 4.2 Relativa a evento (`event`)
 
@@ -138,8 +141,7 @@ Se dispara por algo registrado en una entidad, más un desfase.
 trigger: { type: event, on: venta, delta: 3M }
 ```
 
-`on` referencia una clasificación de entrada o un marcador declarado en `config.yaml`. Una
-sola primitiva cubre CRM, seguimiento clínico, mantenimiento y renovación de contratos.
+`on` referencia un **marcador** (`spec/entradas.md` §3.4), no una clasificación. Es lo que permite que la cadencia dispare con esta conversación individual específica y no con cualquier Hito de la entidad.
 
 ### 4.3 Por ausencia (`absence`)
 
@@ -174,7 +176,7 @@ Es la forma general de lo que `blocks` hace tarea-a-tarea (`spec/tarea.md` §5).
 
 | `kind` | Produce | Notas |
 |---|---|---|
-| `tarea` | entrada en `tareas/abiertas.md` | con `origin=<id de la cadencia>` |
+| `tarea` | entrada en `tareas/tareas.md` | con `origin=<id de la cadencia>` |
 | `ciclo` | archivo `plan_*` sembrado | es como se generan los ciclos regulares |
 | `alerta` | zona derivada en la página del nivel | efímera: desaparece cuando la condición cesa |
 
@@ -284,6 +286,7 @@ del primer día —un perfil vacío ya tiene comportamiento— sin cerrar nada.
 | K6 | Toda cadencia tiene `descripcion` no vacía | janitor |
 | K7 | Un `origin` colgante **no** es violación | — |
 | K8 | La emisión de tareas y ciclos es determinista y reproducible | test de replay |
+| K9 | El colector resuelve precedencia por sobrescritura simple sobre `id`; la entidad tiene la última palabra | janitor |
 
 ---
 
@@ -292,5 +295,4 @@ del primer día —un perfil vacío ya tiene comportamiento— sin cerrar nada.
 | # | Decisión |
 |---|---|
 | 1 | Sintaxis exacta de `rule` en disparos de calendario: ¿subconjunto propio o cron extendido? |
-| 2 | Si `on` en disparos por evento puede referirse a texto libre además de clasificaciones |
-| 3 | Si una alerta puede escalar a tarea automáticamente tras N ciclos sin atención |
+| 2 | Si una alerta puede escalar a tarea automáticamente tras N ciclos sin atención |

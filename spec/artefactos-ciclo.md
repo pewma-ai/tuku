@@ -89,40 +89,39 @@ mismas reglas.
 - …
 
 <!-- tuku:derived id=tareas-del-ciclo hash=… -->
-…tareas vigentes, postergadas y bloqueadas…
+…tareas vigentes de este ciclo…
 <!-- /tuku:derived -->
+```
+
+En el bloque derivado `tareas-del-ciclo`, las tareas se proyectan mostrando el texto y enlazando al canónico con anchor de Obsidian:
+
+```markdown
+- [ ] [Enviar correo de postulación conjunta](../tareas/tareas.md#^t-2026-0087) ⟳7
 ```
 
 ### 2.4 "No entra (y por qué)"
 
-Sección obligatoria y no vacía. Declara el alcance **negativo** del ciclo con su
-justificación.
+Sección obligatoria y no vacía. Declara el alcance **negativo** del ciclo con su justificación.
 
-Es lo que convierte un plan en un compromiso: sin ella, todo lo no hecho parece
-incumplimiento. Con ella, el cierre distingue tres cosas —lo que se decidió no hacer, lo que
-se intentó y no salió, y lo que se olvidó— y solo las dos últimas son desviaciones. Está en
-uso en los ocho ciclos del corpus real, sin excepción. Si no hay nada excluido, el plan no
-está acotado.
+Es lo que convierte un plan en un compromiso: sin ella, todo lo no hecho parece incumplimiento. Con ella, el cierre distingue tres cosas —lo que se decidió no hacer, lo que se intentó y no salió, y lo que se olvidó— y solo las dos últimas son desviaciones. Está en uso en los ocho ciclos del corpus real, sin excepción. Si no hay nada excluido, el plan no está acotado.
+
+Cuando el usuario mueve una entidad a "No entra" al corregir el plan, el motor **resuelve en ese momento**, no después: aplica §4.1 de `spec/entidad.md` (bloquea la entidad hasta el cierre del ciclo) y pregunta qué hacer con las tareas vigentes de esa entidad para este ciclo — postergarlas al mismo `cycle_type` siguiente es la opción por defecto. Esto reemplaza cualquier mecanismo de detección posterior: la consecuencia se decide al mismo tiempo que la exclusión.
 
 ### 2.5 Insumos del sembrado
 
 | Insumo | Aporta |
 |---|---|
 | `resultados_*` de los 3–4 ciclos anteriores | aprendizajes, desviaciones, momentum |
-| `tareas/abiertas.md` | vigentes, postergadas al ciclo, bloqueadas, arrastre |
+| `tareas/tareas.md` | vigentes, postergadas al ciclo, bloqueadas, arrastre |
 | Entidades vigentes con su `alineamiento` | qué está activo y qué persigue |
 | `estrategia/capacidad.md` | límite contra el que se contrasta la intención |
 | Cadencias vigentes | compromisos rítmicos que caen en el ciclo |
 
-Sin las entidades vigentes y sus objetivos el cruce con capacidad es decorativo. Es el
-insumo que más eleva la calidad del plan y el más fácil de omitir.
+Sin las entidades vigentes y sus objetivos el cruce con capacidad es decorativo. Es el insumo que más eleva la calidad del plan y el más fácil de omitir.
 
 ### 2.6 Delta de corrección
 
-El motor registra la diferencia entre lo sembrado y lo que queda tras la corrección humana
-en `<!-- tuku: seed_delta=… -->`. Cuesta cero capturarlo y es la única medida directa de qué
-tan mal calibrado está el sembrado. Un delta grande y sostenido no es fallo del usuario: es
-señal de revisar el proceso de apertura.
+El motor registra la diferencia entre lo sembrado y lo que queda tras la corrección humana en `<!-- tuku: seed_delta=… -->`. Cuesta cero capturarlo y es la única medida directa de qué tan mal calibrado está el sembrado. Un delta grande y sostenido no es fallo del usuario: es señal de revisar el proceso de apertura.
 
 ---
 
@@ -146,77 +145,36 @@ señal de revisar el proceso de apertura.
 <!-- /tuku:derived -->
 ```
 
-### 3.2 Cómo se genera: filtro primero, redacción después
+### 3.2 Cómo se genera: alcance por entidad, no solo por filtro
+
+El alcance evaluable de un cierre es la unión de dos conjuntos: las entidades declaradas en la Intención del plan, y las entidades que efectivamente registraron entradas durante el ciclo, aunque no estuvieran planeadas. **Lo declarado en "No entra" y lo no tocado ni declarado quedan fuera: no se evalúan.**
+
+Para cada entidad del alcance, el agente contrasta qué debería haber pasado —inferido de su `alineamiento`, de su descripción inferida (el modelo ligero de cómo opera esa entidad, `spec/entidad.md` §3.3) y de sus cadencias vigentes— contra lo que efectivamente pasó, leído de sus entradas y del estado de sus tareas. **Es una tarea cognitivamente compleja**: se hace como la haría un especialista de ese dominio, no como un filtro mecánico. Donde una clasificación basta (Hito → Avance), se usa el filtro simple de la tabla siguiente; donde hace falta juicio —¿esto era lo esperado? ¿esto es una desviación real o una decisión ya tomada?— el agente lo resuelve con ese contraste.
 
 | Sección | Origen | Familia |
 |---|---|---|
-| Avances | entradas `Hito` + tareas completadas en el rango | derivación |
-| Desviaciones | intención sin entradas asociadas · tareas del ciclo no cerradas · tareas con `cycles` sobre el umbral | derivación |
-| Aprendizajes | entradas `Señal` y `Decisión` | derivación como insumo, redacción semántica |
-| Momentum y señales | entradas `Señal` + entidades con actividad creciente o detenida | derivación como insumo, redacción semántica |
+| Avances | entradas `Hito` + tareas completadas + contraste por entidad | derivación + juicio |
+| Desviaciones | intención sin correspondencia + arrastre sobre umbral + contraste por entidad | derivación + juicio |
+| Aprendizajes | entradas `Señal`/`Decisión` + lo que el contraste revela | juicio |
+| Momentum y señales | señales + entidades con actividad anómala | derivación + juicio |
 
-El agente **no busca** qué pasó: recibe un conjunto ya filtrado y lo redacta. Esa es la razón
-por la que existen las clasificaciones de entrada, y lo que hace el cierre barato y
-reproducible.
+**Curiosidad acotada.** Si el contraste revela algo que sorprendería a un especialista del dominio —una tarea que se destraba tras arrastre extremo, una desviación mayor, una contradicción entre lo declarado y lo ocurrido— el agente lo señala explícitamente, con como máximo una pregunta puntual para capturar la explicación. No es interrogatorio: es la misma alarma que notaría un humano responsable ante algo genuinamente fuera de lo esperado.
 
-**Lo excluido en "No entra" nunca cuenta como desviación.** Es la regla que impide confundir
-una decisión con un fracaso.
+**Lo excluido en "No entra" nunca cuenta como desviación.** Es la regla que impide confundir una decisión con un fracaso.
 
 **Las tareas canceladas se listan aparte de las incumplidas**, con su razón.
-
-### 3.3 Formato estable, obligatorio
-
-El informe es la **memoria de largo plazo**: Markdown no es una base de datos y la consulta
-histórica se responde por informes, no escaneando el detalle. Un informe pobre es memoria
-perdida.
-
-- **Front matter completo**, incluidas las entidades tocadas, para que un agente lo encuentre
-  sin leerlo entero.
-- **Encabezados fijos**: las cuatro secciones más el TL;DR no cambian de nombre ni de orden
-  entre ciclos ni entre versiones del motor. Todo lo variable va en los informes por
-  audiencia (§4).
-
-```yaml
----
-id: res-2026-06-30-turno
-type: resultados
-cycle_type: turno
-cycle_start: 2026-06-30
-cycle_end: 2026-07-07
-entities: [coordinacion, sw-responsible, datos, colaboraciones]
-carryover_alerts: [t-2026-0087]
-generated: 2026-07-07T18:04:00-04:00
-seeded_by: tuku 0.4.2+g27b3aed / deepseek-v4-flash
----
-```
-
-### 3.4 Cierre del plan
-
-El cierre marca `status: closed` en el `plan_*` del ciclo.
-
-### 3.5 Bitácora del ciclo congelada
-
-La proyección de las entradas del rango se genera **una vez, al cerrar**, y queda dentro de
-`resultados_*` como zona derivada con su hash. Durante el ciclo no existe: quien quiera ver
-"lo del ciclo" lo consulta en `entradas/`, filtrado por la interfaz.
-
-Esto elimina la única zona donde el usuario podría haber escrito sobre una proyección.
 
 ---
 
 ## 4. Informes por audiencia
 
-`resultados_*` tiene una audiencia: el propio usuario, en el ciclo siguiente. Otros informes
-se generan **desde el mismo material** para audiencias distintas, con idioma, estructura y
-detalle propios.
+`resultados_*` tiene una audiencia: el propio usuario, en el ciclo siguiente. Otros informes se generan **desde el mismo material** para audiencias distintas, con idioma, estructura y detalle propios.
 
-Caso observado: los ciclos de tipo `turno` producen un informe de fin de turno en inglés,
-organizado por rol, destinado a colegas de la institución. Los de tipo `descanso` no.
+Caso observado: los ciclos de tipo `turno` producen un informe de fin de turno en inglés, organizado por rol, destinado a colegas de la institución. Los de tipo `descanso` no.
 
 ### 4.1 Modelo
 
-Un informe por audiencia es un **skill invocable** y opcionalmente una **cadencia asociada
-al fin de un ciclo de cierto tipo**:
+Un informe por audiencia es un **skill invocable** y opcionalmente una **cadencia asociada al fin de un ciclo de cierto tipo**:
 
 ```yaml
 reports:
@@ -231,13 +189,9 @@ En ambos casos el resultado es **sembrado**.
 
 ### 4.2 Plantillas
 
-La estructura de un informe por audiencia **va a cambiar** con el tiempo: depende de qué
-espera quien lo lee. Por eso vive en una **plantilla editable del perfil**, no en el código.
-Cambiar la forma del informe de fin de turno es editar un Markdown, no actualizar TUKU.
+La estructura de un informe por audiencia **va a cambiar** con el tiempo: depende de qué espera quien lo lee. Por eso vive en una **plantilla editable del perfil**, no en el código. Cambiar la forma del informe de fin de turno es editar un Markdown, no actualizar TUKU.
 
-Las plantillas admiten marcadores de sección que el motor rellena con material ya filtrado
-(§3.2): quien edita la plantilla decide **qué aparece y en qué orden**, sin describir cómo
-obtenerlo.
+Las plantillas admiten marcadores de sección que el motor rellena con material ya filtrado (§3.2): quien edita la plantilla decide **qué aparece y en qué orden**, sin describir cómo obtenerlo.
 
 ### 4.3 Dónde viven
 
@@ -251,17 +205,14 @@ plantillas/fin-de-turno.md
 ## 5. Apertura — orden de operaciones
 
 1. Resolver el ciclo desde las cadencias, o tomar el `plan_*` que el usuario ya declaró.
-2. Sembrar los encabezados de día del rango en `entradas/YYYY-MM.md`.
-3. Incrementar `cycles` de las tareas abiertas.
-4. Re-resolver las fechas relativas contra el calendario de planes.
-5. Crear `plan_*` sembrado con los insumos de §2.5.
-6. Renderizar las derivadas del plan.
-7. Janitors de invariantes.
-8. Commit semántico.
+2. Incrementar `cycles` de las tareas abiertas.
+3. Re-resolver las fechas relativas contra el calendario de planes.
+4. Crear `plan_*` sembrado con los insumos de §2.5.
+5. Renderizar las derivadas del plan.
+6. Janitors de invariantes.
+7. Commit semántico.
 
-Los pasos 1–4 y 6–8 son deterministas y funcionan sin ningún modelo. Solo el 5 requiere
-agente, y sin agente el plan se crea con los insumos listados y sin redacción. **El ciclo
-abre igual sin conexión.**
+Los pasos 1–3 y 5–7 son deterministas y funcionan sin ningún modelo. Solo el 4 requiere agente, y sin agente el plan se crea con los insumos listados y sin redacción. **El ciclo abre igual sin conexión.**
 
 ---
 
@@ -289,11 +240,8 @@ abre igual sin conexión.**
 | C5 | `plan_*` tiene "No entra" no vacío | janitor |
 | C6 | Un artefacto sembrado no se regenera tras la corrección humana | janitor de build |
 | C7 | Los encabezados de `resultados_*` son los de §3.1 | janitor |
-| C8 | Todo día sembrado en `entradas/` cae en el rango de algún plan | janitor (advertencia, no error) |
 
-C3 es deliberado: una misión dentro de un turno, o un ciclo mensual de finanzas sobre los
-turnos, son casos legítimos. Como las entradas viven en `entradas/` y no bajo el ciclo, el
-solapamiento no duplica nada: son dos filtros sobre el mismo conjunto.
+C3 es deliberado: una misión dentro de un turno, o un ciclo mensual de finanzas sobre los turnos, son casos legítimos. Como las entradas viven en `entradas/` y no bajo el ciclo, el solapamiento no duplica nada: son dos filtros sobre el mismo conjunto.
 
 ---
 

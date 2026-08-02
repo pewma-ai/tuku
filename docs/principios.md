@@ -122,9 +122,9 @@ aunque los haya empezado a escribir la máquina.
 **Se viola cuando.** El agente regenera algo que el humano ya corrigió, o cuando corregir
 exige más esfuerzo que escribir desde cero.
 
-**Se verifica.** Medir el delta entre lo sembrado y lo que queda tras la corrección. Un
-delta grande y sostenido no es un fallo del usuario: es la señal de que el sembrado está
-mal calibrado.
+**Se verifica.** Medir el delta entre lo sembrado y lo que queda tras la corrección. Un delta grande y sostenido no es un fallo del usuario: es la señal de que el sembrado está mal calibrado.
+
+**Curiosidad acotada.** Cuando el agente detecta una anomalía —no cualquier desviación, sino la que un humano responsable notaría de inmediato—, la señala en voz activa en vez de esperar a que se le pregunte. El límite es la alarma: como máximo unas pocas preguntas por apertura o cierre, reservadas para lo que genuinamente sorprendería a un especialista del dominio.
 
 ---
 

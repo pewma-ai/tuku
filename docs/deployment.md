@@ -138,12 +138,15 @@ mi-tuku/
 │   ├── config.yaml        # schema_version, tipos, derivaciones, clasificaciones
 │   └── procesos/          # punteros o symlinks a los procesos del motor
 ├── AGENTS.md              # instrucciones raíz para el agente
-├── entradas/              # canónico inmutable: un archivo por mes
-│   ├── 2026-08.md
+├── tuku.log               # log del motor, no versionado
+├── .gitignore
+├── entradas/
+│   ├── entradas.md        # activo — superficie de escritura sin fecha en el nombre
+│   ├── entradas-2026-08.md
 │   └── 2025/
 ├── tareas/
-│   ├── abiertas.md        # único archivo mutable del sistema
-│   ├── 2026-08.md         # cerradas o canceladas ese mes
+│   ├── tareas.md          # único archivo mutable
+│   ├── tareas-2026-08.md
 │   └── 2025/
 ├── ciclos/
 │   ├── plan_2026-08-10_viaje.md

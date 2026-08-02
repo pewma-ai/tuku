@@ -209,12 +209,11 @@ gobernanza es para el usuario y el agente por igual; el `AGENTS.md` es instrucci
 | `paused` | detenida a propósito; las cadencias por ausencia no disparan |
 | `blocked_until: YYYY-MM-DD` | esperando a un tercero; no dispara hasta esa fecha |
 
-Sin esto, la cadencia por ausencia produce ruido semanal sobre entidades quietas por
-decisión, el usuario aprende a ignorar el bloque completo, y muere la confianza en el sistema
-entero. **La cadencia dispara siempre, de forma determinista; el `status` la silencia.** La
-inteligencia va en interpretar el silencio, no en decidir si avisar.
+Sin esto, la cadencia por ausencia produce ruido semanal sobre entidades quietas por decisión, el usuario aprende a ignorar el bloque completo, y muere la confianza en el sistema entero. **La cadencia dispara siempre, de forma determinista; el `status` la silencia.** La inteligencia va en interpretar el silencio, no en decidir si avisar.
 
 `status` lo fija el usuario con una frase al agente. Es corregible en una línea.
+
+**Resolución automática desde el plan.** Cuando el usuario mueve una entidad a "No entra" al corregir el plan de un ciclo, el motor escribe automáticamente `status: blocked_until: <cycle_end de ese ciclo>` en la entidad. Reutiliza el campo que ya existe para "esperando a un tercero" en vez de crear uno nuevo — simplificación deliberada; si en el futuro hace falta distinguir "decidí no tocarlo" de "un tercero me tiene esperando", se separa en `paused_reason`.
 
 ---
 

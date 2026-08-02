@@ -30,12 +30,14 @@ mi-tuku/
 │   ├── config.yaml          # schema_version, tipos, derivaciones, clasificaciones
 │   └── procesos/            # punteros a los procesos del motor instalado
 ├── AGENTS.md                # instrucciones de agente, anidables por nivel
+├── tuku.log                 # log del motor, no versionado
 ├── entradas/                # canónico inmutable
-│   ├── 2026-08.md
+│   ├── entradas.md          # activo — superficie de escritura sin fecha en el nombre
+│   ├── entradas-2026-08.md  # mes cerrado
 │   └── 2025/
 ├── tareas/
-│   ├── abiertas.md          # único archivo mutable
-│   ├── 2026-08.md
+│   ├── tareas.md            # único archivo mutable
+│   ├── tareas-2026-08.md
 │   └── 2025/
 ├── ciclos/
 │   ├── plan_2026-08-10_viaje.md
@@ -95,7 +97,7 @@ canónico. Todo lo demás es proyección recomputable. Nada se copia; todo se pr
 | Almacén | Naturaleza | Notas |
 |---|---|---|
 | `entradas/` | inmutable, particionado por mes | una entrada nunca cambia de fecha ni contenido |
-| `tareas/abiertas.md` | mutable | única verdad del estado de una tarea |
+| `tareas/tareas.md` | mutable | única verdad del estado de una tarea |
 | `ciclos/plan_*` | declaración del ciclo | dónde y cuándo estoy; el conjunto es el calendario |
 | Entidades: secciones editables | mutable | descripción, objetivos, recursos |
 | `estrategia/` | mutable con gate humano | capacidad y cadencias (P5) |
@@ -155,7 +157,7 @@ La relación entre canónicos y proyecciones **se declara**, no se programa. En
 ```yaml
 derivations:
   - target: "ciclos/plan_{fecha}_{tipo}.md#tareas-del-ciclo"
-    sources: ["tareas/abiertas.md", "estrategia/cadencias.md"]
+    sources: ["tareas/tareas.md", "estrategia/cadencias.md"]
     build: "tareas_del_ciclo"
 
   - target: "entidades/{ruta}/{entidad}.md#bitacora-entidad"
@@ -275,23 +277,17 @@ problema de arquitectura.
 | Procesos | Markdown ejecutable por humano o agente medio |
 | Scheduler | cron: revisa cadencias vencidas, tareas difusas por reevaluar, encadenamientos |
 | Configuración | `.tuku/config.yaml`, uno por perfil |
+| `tuku.log` | Log del motor —qué corrió, manual o vía cron—, en la raíz del perfil, **no versionado**. Distinto de `entradas/`, que es del usuario. Si se pierde, no importa: es diagnóstico, no memoria. |
 
-**El scheduler no es opcional.** Sin un lazo periódico, las cadencias solo se evalúan
-cuando el usuario aparece, y el sistema pierde su carácter proactivo — que es justamente lo
-que promete el nombre.
+**El scheduler no es opcional.** Sin un lazo periódico, las cadencias solo se evalúan cuando el usuario aparece, y el sistema pierde su carácter proactivo — que es justamente lo que promete el nombre.
 
-**La elección del modelo económico es una prueba de P2**, no una restricción de
-presupuesto: si un proceso necesita un modelo de frontera para no descarrilar, el proceso
-está mal escrito.
+**La elección del modelo económico es una prueba de P2**, no una restricción de presupuesto: si un proceso necesita un modelo de frontera para no descarrilar, el proceso está mal escrito.
 
 ---
 
 ## 9. Versionado del esquema
 
-Los datos sobreviven al motor. El perfil declara `schema_version` en `.tuku/config.yaml`;
-el motor declara qué rango soporta; `tuku doctor` compara; `tuku migrate` transforma, en un
-commit propio y aislado para que el usuario revise el diff. Las migraciones se acumulan y
-ninguna se borra.
+Los datos sobreviven al motor. El perfil declara `schema_version` en `.tuku/config.yaml`; el motor declara qué rango soporta; `tuku doctor` compara; `tuku migrate` transforma, en un commit propio y aislado para que el usuario revise el diff. Las migraciones se acumulan y ninguna se borra.
 
 ---
 
@@ -302,4 +298,20 @@ ninguna se borra.
 | 1 | `effortTime` en tareas y su mecanismo de aprendizaje | Hacer verificable el cruce con capacidad. Se decidirá con experiencia de uso |
 | 2 | Cuándo se reevalúa la descripción inferida de una entidad | Frescura del modelo de operación vs. ruido de reescritura |
 | 3 | Formato interno del informe de cierre | Es la memoria de largo plazo; debe ser re-consultable por un agente |
+
+---
+
+## 11. Modos de evaluación
+
+Tres formas de obtener información del perfil, con costo y persistencia distintos:
+
+| Modo | Materializa | Cuándo |
+|---|---|---|
+| **Build** | sí, con hash de fuentes | derivaciones declaradas en el grafo |
+| **Invariante** | no, solo valida | janitors de coherencia |
+| **Consulta (RADAR)** | no, nunca | bajo demanda, siempre fresca |
+
+**RADAR** es la capa de consulta: revisa tareas trancadas, entidades con actividad anómala, `followup` vencidos, entidades recién desbloqueadas — todo lo que un humano responsable notaría con solo mirar el estado actual, sin que nadie se lo pida. Es determinista: se calcula con Python sobre el estado presente, sin LLM. El agente la invoca en mitad de una conversación, o una GUI la muestra como panel de alertas. No tiene archivo propio ni existe fuera del momento en que se consulta.
+
+Especificación completa diferida a un futuro `spec/agente.md`.
 | 4 | Promoción de secciones a átomos | Diferida; el gancho (`id` por sección) ya está |

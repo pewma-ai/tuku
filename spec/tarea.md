@@ -22,11 +22,11 @@ tarea vivía duplicada en varias bitácoras y se copiaba a mano.
 
 ```
 tareas/
-├── abiertas.md         # mutable — el único archivo mutable del sistema
-├── 2026-08.md          # cerradas o canceladas ese mes
-├── 2026-07.md
+├── tareas.md           # mutable — el único archivo mutable del sistema
+├── tareas-2026-08.md    # cerradas o canceladas ese mes
+├── tareas-2026-07.md
 └── 2025/
-    └── 2025-12.md
+    └── tareas-2025-12.md
 ```
 
 Rige la misma regla de partición que en `spec/entradas.md`:
@@ -34,9 +34,9 @@ Rige la misma regla de partición que en `spec/entradas.md`:
 > **Lo inmutable se particiona por mes y se archiva por año en subdirectorio.
 > Lo mutable vive en un archivo único sin fecha.**
 
-Una tarea completada o cancelada permanece en `abiertas.md` durante un período configurable
+Una tarea completada o cancelada permanece en `tareas.md` durante un período configurable
 (`task_archive_delay`, por defecto 7 días) y luego se mueve al archivo del **mes de su
-cierre**. El conjunto mutable se mantiene pequeño: importa para los diffs de Git, para la
+cierre** (`tareas-YYYY-MM.md`). El conjunto mutable se mantiene pequeño: importa para los diffs de Git, para la
 velocidad de los janitors y para los merges.
 
 Beneficio lateral de particionar por mes de cierre: "qué cerré en julio" es leer un archivo,
@@ -46,7 +46,7 @@ Front matter:
 
 ```yaml
 ---
-id: tareas-abiertas          # o tareas-2026-08
+id: tareas                   # o tareas-2026-08
 type: tareas
 period: 2026-08              # solo en los archivados
 created: 2026-03-01
@@ -191,7 +191,7 @@ contador visible hace imposible esa fuga.
 
 ```
 alta ──► abierta ──► completada ──► archivada (tareas-YYYY.md)
-                └──► cancelada ──► archivada
+                └──► cancelada/expirada ──► archivada
 ```
 
 | Momento | Qué ocurre |
@@ -201,10 +201,9 @@ alta ──► abierta ──► completada ──► archivada (tareas-YYYY.md)
 | **Completitud** | Se marca `- [x]`, se agrega `completed=`; se activan las tareas de `blocks` |
 | **Archivado** | Tras `task_archive_delay`, se mueve al archivo del mes de cierre conservando su `id` |
 
-**Dónde se marca completada.** En el archivo canónico, o en cualquier proyección: si el
-usuario marca `- [x]` en el bloque renderizado de la bitácora, el janitor recoge la marca,
-la propaga al canónico y regenera la proyección. La escritura es natural; la consistencia es
-mecánica.
+**Entidad o cadencia origen archivada/eliminada:** Si la entidad o la cadencia que originó una tarea futura desaparece o se archiva antes de su fecha, el motor la resuelve `outcome=expired` con la razón en el comentario HTML (`- [-] ... <!-- tuku: outcome=expired reason="..." -->`), en vez de dejarla colgando sin explicación.
+
+**Dónde se marca completada.** En el archivo canónico, o en cualquier proyección: si el usuario marca `- [x]` en el bloque renderizado de la bitácora, el janitor recoge la marca, la propaga al canónico y regenera la proyección. La escritura es natural; la consistencia es mecánica.
 
 ---
 
@@ -240,6 +239,6 @@ Todas son derivadas: regenerables, idempotentes, borrables sin pérdida.
 
 | # | Decisión |
 |---|---|
-| 1 | `effortTime` por tarea y su estimación aprendida del historial. Diferida hasta tener experiencia de uso; sin ella el cruce con capacidad es cualitativo |
-| 2 | Si la tarea puede apuntar a la entrada de bitácora que la originó (depende de la decisión abierta 1 de `spec/entradas.md`) |
-| 3 | Umbral y forma de presentación del arrastre: si `⟳6` basta o hace falta escalarlo a una alerta |
+| 1 | `blockuntil` reutiliza el campo a nivel de tarea con el mismo nombre que `blocked_until` a nivel de entidad; evaluar si algún día hace falta distinguir causa (decisión propia / espera de terceros) de efecto (silenciar). |
+| 2 | Si la tarea puede apuntar a la entrada de bitácora que la originó (depende de la decisión abierta 1 de `spec/entradas.md`). |
+| 3 | Umbral y forma de presentación del arrastre: si `⟳6` basta o hace falta escalarlo a una alerta. |
