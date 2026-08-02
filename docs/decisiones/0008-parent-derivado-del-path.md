@@ -13,8 +13,8 @@ rutas, y el motor no depende de convenciones de nombrado de directorios.
 ## Decisión
 
 **`parent` no se declara**. Se deriva del path: el padre de
-`entidades/trabajo/log-analysis/spie2026-paper.md` es `log-analysis`, cuya página es
-`entidades/trabajo/log-analysis/log-analysis.md`.
+`entidades/trabajo/analisis-datos/paper-congreso.md` es `analisis-datos`, cuya página es
+`entidades/trabajo/analisis-datos/analisis-datos.md`.
 
 El path tiene dos funciones a la vez: namespace de navegación (para Obsidian) y declaración
 de jerarquía (para el motor). Son compatibles porque la regla de derivación es trivial y

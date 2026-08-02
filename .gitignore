@@ -73,3 +73,4 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+uv.lock

@@ -25,7 +25,7 @@ La resolución de `(next:turno)` ocurre buscando el `plan_*` más próximo con
 
 Esto tiene una consecuencia que es su ventaja principal: **declarar un ciclo excepcional es
 el mecanismo normal, no un caso especial**. Si la próxima semana el usuario trabaja desde
-otra ciudad, crea `plan_2026-08-10_temuco.md`; todas las tareas con `(next:turno)` se
+otra ciudad, crea `plan_2026-08-10_viaje.md`; todas las tareas con `(next:turno)` se
 re-resuelven solas. Romper la cadencia no exige modificar ninguna regla.
 
 ## Consecuencias

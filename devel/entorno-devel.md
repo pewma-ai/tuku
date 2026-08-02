@@ -1,32 +1,88 @@
-# Entorno de Desarrollo y Restricciones de Ejecución
+# Entorno de desarrollo y restricciones de ejecución
 
-> `devel/entorno-devel.md` · Normas de desarrollo, aislamiento de entorno y herramientas.
+> `devel/entorno-devel.md` · Normas de desarrollo, aislamiento y herramientas.
 
 ---
 
 ## 1. Aislamiento con `uv`
 
-Para garantizar reproducibilidad y evitar contaminación del entorno Python global o del sistema:
+Para garantizar reproducibilidad y no contaminar el Python del sistema:
 
-1. **Gestión de Entorno Virtual y Dependencias**:
-   - Se utiliza **`uv`** para la gestión de dependencias y creación del entorno virtual Python.
-   - Creación del venv: `uv venv`
-   - Sincronización de dependencias: `uv pip sync` o `uv sync`
+```bash
+uv venv                          # crea el entorno
+uv pip install -e ".[dev]"       # motor en editable + herramientas de desarrollo
+```
 
-2. **Ejecución de Comandos y Tests**:
-   - Todo comando de desarrollo (`pytest`, `ruff`, `mypy`, `tuku`) debe ejecutarse dentro del entorno de `uv`:
-     ```bash
-     uv run pytest
-     uv run ruff check .
-     uv run mypy src
-     uv run tuku doctor
-     ```
+Todo comando de desarrollo se ejecuta dentro del entorno:
+
+```bash
+uv run pytest                    # suite completa, sin tests agénticos
+uv run ruff check .              # estilo e imports
+uv run ruff format .             # formateo
+uv run mypy src                  # tipos, en modo estricto
+uv run tuku doctor               # el motor, cuando exista
+```
 
 ---
 
-## 2. Restricciones y Principios de Desarrollo
+## 2. Comandos de la suite
 
-- **No gastar tokens en F0–F4**: Todo el desarrollo de parsers, janitors, derivaciones, cadencias y comandos CLI se prueba de forma determinista mediante `pytest` sin invocar modelos/LLM.
-- **Spec-Driven**: El código en `src/` no inventa reglas; implementa exactamente lo especificado en `spec/`, `docs/` y validado por los ADR.
-- **Round-Trip Byte-a-Byte**: Los parsers y serializadores deben ser capaces de leer un archivo canónico y volverlo a escribir sin alterar ni un solo byte de espaciado o comentarios.
-- **Aislamiento de Tests Agénticos (F5)**: Cuando se ejecuten pruebas de integración con Hermes, cada test instanciará un perfil de Hermes desde cero (entorno efímero aislado).
+| Comando | Para qué |
+|---|---|
+| `uv run pytest` | todo salvo lo agéntico — es lo que corre en CI |
+| `uv run pytest -m spec` | solo los ejemplos normativos de `spec/` |
+| `uv run pytest -m invariante` | solo los janitors |
+| `uv run pytest -m aceptacion` | las simulaciones de `corpus/` |
+| `uv run pytest -m replay` | reconstrucción con diff cero |
+| `uv run pytest -m agentic` | **gasta tokens**, se pide explícitamente |
+| `uv run pytest --cov=tuku` | cobertura de código |
+
+`-m "not agentic"` está fijado en `pyproject.toml`: los tests que invocan un modelo nunca
+corren por accidente.
+
+**`--strict-markers` es deliberado.** Un marcador mal escrito (`@pytest.mark.agente` en vez
+de `agentic`) haría que el test se saltara en silencio y nadie lo notaría durante meses. Con
+esta opción, falla al instante.
+
+---
+
+## 3. Restricciones y principios
+
+- **No gastar tokens en F0–F4.** Parsers, janitors, derivaciones, cadencias y CLI se prueban
+  de forma determinista, sin invocar modelos. Un test que necesite un LLM en esas fases es
+  señal de agencia mal ubicada (P3), no de que falte un modelo.
+- **Spec-driven.** `src/` no inventa reglas: implementa lo que dice `spec/`, validado por los
+  ADR. Ver el contrato en [`README.md`](README.md).
+- **Round-trip byte a byte.** Leer un archivo canónico y reescribirlo no altera ni un byte de
+  espaciado ni de comentarios. Obligación derivada de los ADR 0013 y 0014, que guardan datos
+  canónicos dentro de comentarios HTML.
+- **Aislamiento agéntico (F5).** Cada test instancia un perfil de Hermes desde cero vía
+  `HERMES_HOME` apuntando a `tmp_path`.
+
+---
+
+## 4. Determinismo del entorno
+
+Tres fuentes de irreproducibilidad, y cómo se cierran:
+
+| Fuente | Cómo se cierra |
+|---|---|
+| **Zona horaria** | `TZ=UTC` fijado en `tests/conftest.py` antes de cualquier llamada a `localtime()` |
+| **Fecha actual** | ninguna función del motor llama a `date.today()` directamente: la fecha se inyecta |
+| **Entorno del usuario** | `--safe-mode` e `--ignore-rules` en Hermes; sin ellos, el `SOUL.md` y las skills locales entran al prompt |
+
+La tercera es la que convierte "corre en mi máquina" en "corre igual en CI".
+
+**Regla dura de Hermes:** nunca dos gateways contra el mismo directorio de datos. Los tests
+no levantan gateway — solo `hermes -z`.
+
+---
+
+## 5. Antes de cada commit
+
+```bash
+uv run ruff check . && uv run mypy src && uv run pytest
+```
+
+Los tres en verde. La suite incluye chequeos de coherencia documental que no dependen del
+motor, así que este comando es válido desde hoy.
