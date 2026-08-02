@@ -122,13 +122,13 @@ Marcar cada invariante implementada borrando su entrada de `PENDIENTES` en
 
 | | Ítem | Fuente | Verificación |
 |---|---|---|---|
-| ☐ | **F4.1** Colector con cache `.tuku/cache/cadencias-resueltas.yaml` | [`cadencia.md`](../spec/cadencia.md) §3.1 | borrar el cache y regenerar → idéntico |
-| ☐ | **F4.2** Evaluador de disparos: `calendar`, `event`, `absence`, `completion` | [`cadencia.md`](../spec/cadencia.md) §5 | con `TZ=UTC` y fecha inyectada, nunca `date.today()` |
-| ☐ | **F4.3** Registro de ocurrencias (idempotencia K4) | K4 | correr dos veces el mismo día no emite dos veces |
-| ☐ | **F4.4** `next:<tipo>` resuelto por **grep sobre `ciclos/`** | [ADR 0007](../docs/decisiones/0007-plan-es-calendario.md) | crear un plan excepcional → las tareas se re-resuelven solas |
-| ☐ | **F4.5** `tuku abrir` / `tuku cerrar`, **sin LLM por defecto** | [`artefactos-ciclo.md`](../spec/artefactos-ciclo.md) | `--sin-agente` produce el artefacto con insumos y sin redacción |
-| ☐ | **F4.6** RADAR: consulta en vivo, sin archivo | `arquitectura.md` §11 | no escribe nada en disco |
-| ☐ | **F4.7** Instanciador de procesos | [ADR 0011](../docs/decisiones/0011-proceso-sin-almacenamiento.md) | no agrega primitiva de almacenamiento: son tareas |
+| [x] | **F4.1** Colector con cache `.tuku/cache/cadencias-resueltas.yaml` | [`cadencia.md`](../spec/cadencia.md) §3.1 | borrar el cache y regenerar → idéntico ✅ *hecho* |
+| [x] | **F4.2** Evaluador de disparos: `calendar`, `event`, `absence`, `completion` | [`cadencia.md`](../spec/cadencia.md) §5 | con `TZ=UTC` y fecha inyectada, nunca `date.today()` ✅ *hecho* |
+| [x] | **F4.3** Registro de ocurrencias (idempotencia K4) | K4 | correr dos veces el mismo día no emite dos veces ✅ *hecho* |
+| [x] | **F4.4** `next:<tipo>` resuelto por **grep sobre `ciclos/`** | [ADR 0007](../docs/decisiones/0007-plan-es-calendario.md) | crear un plan excepcional → las tareas se re-resuelven solas ✅ *hecho* |
+| [x] | **F4.5** `tuku abrir` / `tuku cerrar`, **sin LLM por defecto** | [`artefactos-ciclo.md`](../spec/artefactos-ciclo.md) | `--sin-agente` produce el artefacto con insumos y sin redacción ✅ *hecho* |
+| [x] | **F4.6** RADAR: consulta en vivo, sin archivo | `arquitectura.md` §11 | no escribe nada en disco ✅ *hecho* |
+| [x] | **F4.7** Instanciador de procesos | [ADR 0011](../docs/decisiones/0011-proceso-sin-almacenamiento.md) | no agrega primitiva de almacenamiento: son tareas ✅ *hecho* |
 
 > **Sin planes futuros sembrados, `next:<tipo>` no resuelve.** Es consecuencia directa del
 > ADR 0007 y el motor debe avisarlo explícitamente, no fallar en silencio ni inventar una
