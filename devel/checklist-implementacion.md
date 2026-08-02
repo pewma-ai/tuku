@@ -1,78 +1,177 @@
 # Checklist de Implementación (Spec-Driven Development)
 
-> `devel/checklist-implementacion.md` · Lista de control trazable para la construcción de TUKU fase por fase.
+> `devel/checklist-implementacion.md` · Lista de control trazable, fase por fase. El porqué
+> del orden está en [`plan-implementacion.md`](plan-implementacion.md) §1.1; cómo se ejecuta,
+> en [`entorno-devel.md`](entorno-devel.md).
 
 ---
 
-## 🏗️ Fase 0 — Cimientos y Tooling
+## Cómo se usa
 
-- [ ] **F0.1** Configurar `pyproject.toml` con `uv`, `pytest`, `ruff`, `mypy`.
-- [ ] **F0.2** Implementar `core/config.py`: lectura de `.tuku/config.yaml` y validación de `schema_version` (ADR 0003).
-- [ ] **F0.3** Implementar `tuku init`: creación del árbol de directorios y siembra de `.gitignore` excluyendo `tuku.log` y `.tuku/cache/` (ADR 0015).
-- [ ] **F0.4** Implementar `tuku sync`: generación de punteros a procesos y `AGENTS.md` por nivel (ADR 0002).
-- [ ] **F0.5** Implementar `tuku doctor`: reporte de versión, commit, rama Git y validación de perfil.
+Cada ítem declara tres cosas: **qué** se implementa, **de dónde sale** la regla (spec o ADR),
+y **cómo se verifica**. Un ítem sin verificación no se marca como hecho.
 
----
+La columna *Verificación* nombra el test que debe existir. Esa es la definición de terminado:
 
-## 🔤 Fase 1 — Parsers y Serializadores (Round-Trip Exacto)
+> **Definición de terminado.** El código existe, su test existe y nombra la regla que
+> comprueba, `uv run pytest` pasa en verde, `ruff` y `mypy` no protestan, y ningún ítem
+> posterior tuvo que modificarse para acomodarlo.
 
-- [ ] **F1.1** Implementar parser/serializador de Front Matter YAML (`spec/frontmatter.md`).
-- [ ] **F1.2** Implementar parser/serializador posicional de tareas: `<created> <effort> <entity|-> <deadline|-> <followup|-> <blockuntil|-> <originator> <texto> ^t-<id>` + `<!-- tuku: ... -->` + `>` (ADR 0014).
-- [ ] **F1.3** Implementar parser/serializador de entradas: hora opcional, `[entidad](ruta)`, clasificación y `#marcadores` (`spec/entradas.md`).
-- [ ] **F1.4** Implementar parser de gramática temporal: precisa, rango, difusa, `next:<tipo>`.
-- [ ] **F1.5** Preservar delimitadores HTML (`<!-- tuku:editable -->`, `<!-- tuku:derived -->`, `<!-- tuku:cadencias -->`) (ADR 0013).
-- [ ] **F1.6** Tests de Round-Trip byte-a-byte con fixtures de las specs en `tests/`.
+Antes de marcar cualquier casilla de F1 en adelante, los tres **bloqueantes** de abajo deben
+estar cerrados.
 
 ---
 
-## 🛡️ Fase 2 — Janitors e Invariantes
+## 🚧 Bloqueantes — antes de F1
 
-- [ ] **F2.1** Invariantes de Entidad (N1–N9).
-- [ ] **F2.2** Invariantes de Entradas (E1–E7).
-- [ ] **F2.3** Invariantes de Tarea (T1–T8).
-- [ ] **F2.4** Invariantes de Cadencia (K1–K9).
-- [ ] **F2.5** Invariantes de Ciclo (C1–C7).
-- [ ] **F2.6** Invariantes de Proceso (R1–R6).
-- [ ] **F2.7** Invariantes de Nota (O1–O8).
-- [ ] **F2.8** Invariantes de Perfil (F1–F2).
-- [ ] **F2.9** CLI `tuku janitor [--fix]` (idempotente).
+Consolidación de decisiones ya tomadas y dispersas. Ninguno exige diseño nuevo.
 
----
-
-## 📊 Fase 3 — Grafo de Derivaciones y Builders
-
-- [ ] **F3.1** Grafo de derivaciones en `config.yaml` y chequeo de aciclicidad.
-- [ ] **F3.2** Builder `bitacora_entidad`.
-- [ ] **F3.3** Builder `tareas_del_ciclo`.
-- [ ] **F3.4** Builder `cadencias-legibles`.
-- [ ] **F3.5** Builder `indice_notas` y `notas_entidad`.
-- [ ] **F3.6** Hash de fuentes y detección de divergencia antes de sobrescribir (ADR 0005).
-- [ ] **F3.7** Build sobre diff (recomputación incremental).
+- [ ] **B1** Escribir [`spec/frontmatter.md`](../spec/frontmatter.md), hoy vacío. Es
+      transversal: F1 lo necesita para el parser y F2 para N1/E1/T1. Los campos están hoy
+      repartidos entre siete specs.
+      *Verificación:* `test_frontmatter_campos_minimos` sobre los ejemplos de la propia spec.
+- [ ] **B2** Completar [`spec/perfil.md`](../spec/perfil.md) con el formato real de
+      `.tuku/config.yaml`. F0 lo carga y F3 lee de él el grafo de derivaciones. Hoy existe
+      solo como fragmentos ilustrativos en cuatro documentos.
+      *Verificación:* `test_config_perfil_valida` + el ejemplo normativo de la spec.
+- [x] **B3** Resolver la **colisión del prefijo `P`** entre `proceso.md` y `perfil.md` (resuelto: `spec/proceso.md` usa `R1`–`R6`).
+      *Verificación:* `test_prefijos_de_invariante_no_colisionan` pasa ✅.
 
 ---
 
-## ⏱️ Fase 4 — Cadencias, Ciclos, Procesos y RADAR
+## 🏗️ Fase 0 — Cimientos y tooling
 
-- [ ] **F4.1** Colector de cadencias con cache `.tuku/cache/cadencias-resueltas.yaml`.
-- [ ] **F4.2** Evaluador de disparos: `calendar`, `event`, `absence`, `completion`.
-- [ ] **F4.3** Registro de ocurrencias para idempotencia (K4).
-- [ ] **F4.4** Resolución de `next:<tipo>` mediante grep sobre `ciclos/` (ADR 0007).
-- [ ] **F4.5** `tuku abrir` / `tuku cerrar` (sin LLM por defecto).
-- [ ] **F4.6** Módulo RADAR (consulta en vivo sobre el perfil).
-- [ ] **F4.7** Instanciador de Procesos (`spec/proceso.md`, ADR 0011).
+| | Ítem | Fuente | Verificación |
+|---|---|---|---|
+| ☐ | **F0.1** `pyproject.toml` con `uv`, `pytest`, `ruff`, `mypy` | — | `uv run pytest` arranca ✅ *hecho* |
+| ☐ | **F0.2** `core/config.py`: lee `.tuku/config.yaml`, valida `schema_version` | [ADR 0003](../docs/decisiones/0003-version-de-esquema.md), B2 | esquema fuera de rango → error claro, no traceback |
+| ☐ | **F0.3** `tuku init`: árbol de directorios + `.gitignore` con `tuku.log` y `.tuku/cache/` | [ADR 0015](../docs/decisiones/0015-tuku-log-no-versionado.md) | `tuku init` + `git status` limpio; `notas/` sembrado con índice y `AGENTS.md` |
+| ☐ | **F0.4** `tuku sync`: punteros a procesos y `AGENTS.md` por nivel | [ADR 0002](../docs/decisiones/0002-motor-fuera-del-perfil.md) | idempotente: dos corridas → diff cero |
+| ☐ | **F0.5** `tuku doctor`: versión, commit, rama, validación de perfil | `deployment.md` §2.3 | reporta commit real, no `unknown` |
 
----
-
-## 🤖 Fase 5 — Integración Agéntica (Hermes)
-
-- [ ] **F5.1** Redactar markdown ejecutables de procesos en `src/tuku/procesos/`.
-- [ ] **F5.2** `tuku registrar` (captura conversacional -> canónico).
-- [ ] **F5.3** Siembra asistida por LLM en `tuku abrir` / `tuku cerrar`.
-- [ ] **F5.4** Inyección del Tesauro Vivo en contexto.
-- [ ] **F5.5** Test Harness de Hermes (perfiles efímeros limpios).
+> **Por qué `init` va antes que todo:** casi toda la suite depende de la fixture `perfil_tmp`,
+> que llama a `tuku init`. Mientras no exista, los tests de F1–F4 se saltan solos (`skip`) en
+> vez de fallar. Ese `skip` masivo es el indicador de que F0 no está cerrada.
 
 ---
 
-## ⏰ Fase 6 — Scheduler Proactivo
+## 🔤 Fase 1 — Parsers y serializadores (round-trip exacto)
 
-- [ ] **F6.1** Lazo de evaluación periódica (cron) para cadencias, `followup` y franjas de notificación (`notify_window`).
+| | Ítem | Fuente | Verificación |
+|---|---|---|---|
+| ☐ | **F1.1** Front matter YAML | B1 | round-trip byte a byte, incluido el orden de claves |
+| ☐ | **F1.2** Línea posicional de tareas | [ADR 0014](../docs/decisiones/0014-formato-posicional-tareas.md), [`tarea.md`](../spec/tarea.md) | cada campo por separado + placeholder `-` obligatorio |
+| ☐ | **F1.3** Entradas: hora opcional, `[entidad](ruta)`, clasificación, `#marcadores` | [`entradas.md`](../spec/entradas.md) | los cuatro valores de clasificación y ninguno más |
+| ☐ | **F1.4** Gramática temporal: precisa, rango, difusa, `next:<tipo>` | [`tarea.md`](../spec/tarea.md) §4 | una fecha inválida se rechaza con posición |
+| ☐ | **F1.5** Delimitadores HTML (`tuku:editable`, `tuku:derived`, `tuku:cadencias`) | [ADR 0013](../docs/decisiones/0013-cadencias-en-comentario.md) | comentario preservado íntegro tras reescribir |
+| ☐ | **F1.6** Round-trip sobre **todos** los ejemplos normativos de `spec/` | [`spec/README.md`](../spec/README.md) | `test_roundtrip.py` parametrizado por `specref.casos()` |
+
+> **La asimetría que hay que tener presente antes de escribir una línea.** En el canónico de
+> tareas la entidad es un **`id` plano** (`nucleo-datos`); en las entradas es un **enlace
+> Markdown** (`[nucleo-datos](../entidades/...)`). Son dos parsers con reglas distintas para
+> el mismo concepto. No unificarlos por instinto: cada forma está justificada en su spec.
+
+> **El round-trip no es purismo.** Los ADR 0013 y 0014 guardan datos canónicos dentro de
+> comentarios HTML. Un serializador que "normaliza" espacios destruye información real.
+
+---
+
+## 🛡️ Fase 2 — Janitors e invariantes
+
+Un test por invariante, con el nombre `test_<ID>_<qué_viola>`. El test **viola la invariante
+a propósito** y exige que el janitor la detecte.
+
+| | Ítem | Invariantes | Spec |
+|---|---|---|---|
+| ☐ | **F2.1** Entidad | N1–N9 | [`entidad.md`](../spec/entidad.md) |
+| ☐ | **F2.2** Entradas | E1–E7 | [`entradas.md`](../spec/entradas.md) |
+| ☐ | **F2.3** Tarea | T1–T8 | [`tarea.md`](../spec/tarea.md) |
+| ☐ | **F2.4** Cadencia | K1–K6, K8, K9 | [`cadencia.md`](../spec/cadencia.md) |
+| ☐ | **F2.5** Ciclo | C1, C2, C4–C7 | [`artefactos-ciclo.md`](../spec/artefactos-ciclo.md) |
+| ☐ | **F2.6** Proceso | P1–P4, P6 | [`proceso.md`](../spec/proceso.md) |
+| ☐ | **F2.7** Nota | O1–O8 | [`nota.md`](../spec/nota.md) |
+| ☐ | **F2.8** Perfil | F1, F2 | [`perfil.md`](../spec/perfil.md) |
+| ☐ | **F2.9** CLI `tuku janitor [--fix]` | — | **idempotente**: dos corridas seguidas → diff cero |
+
+> K7, C3 y P5 no llevan test: son invariantes **negativas** (declaran que algo *no* es
+> violación) y su garante es `—`. La suite las excluye sola.
+
+Marcar cada invariante implementada borrando su entrada de `PENDIENTES` en
+[`../tests/test_cobertura_specs.py`](../tests/test_cobertura_specs.py). Si se olvida, el test
+`test_la_lista_de_pendientes_no_miente` avisa.
+
+---
+
+## 📊 Fase 3 — Grafo de derivaciones y builders
+
+| | Ítem | Fuente | Verificación |
+|---|---|---|---|
+| ☐ | **F3.1** Grafo en `config.yaml` + chequeo de aciclicidad | B2 | un ciclo declarado → error al arrancar, no en mitad del build |
+| ☐ | **F3.2** Builder `bitacora_entidad` | [`entradas.md`](../spec/entradas.md) | borrar derivadas y regenerar → **diff cero** |
+| ☐ | **F3.3** Builder `tareas_del_ciclo` | [`tarea.md`](../spec/tarea.md) | ídem |
+| ☐ | **F3.4** Builder `cadencias-legibles` | [`cadencia.md`](../spec/cadencia.md) | ídem |
+| ☐ | **F3.5** Builders `indice_notas` y `notas_entidad` | [`nota.md`](../spec/nota.md) O8 | ídem |
+| ☐ | **F3.6** Hash de fuentes y detección de divergencia | [ADR 0005](../docs/decisiones/0005-derivadas-no-readonly.md) | editar a mano una zona derivada → el motor pregunta, no sobrescribe |
+| ☐ | **F3.7** Build sobre diff (recomputación incremental) | — | mismo resultado que el build completo |
+
+> **La trampa que el propio ADR 0005 advierte.** Si el hash se calcula sobre bytes crudos, un
+> cambio de formato dispara la pregunta de divergencia en todos los perfiles a la vez. La
+> consecuencia: **la función de normalización es parte del contrato de esquema**, y cambiarla
+> es una migración ([ADR 0003](../docs/decisiones/0003-version-de-esquema.md)), no un refactor.
+
+---
+
+## ⏱️ Fase 4 — Cadencias, ciclos, procesos y RADAR
+
+| | Ítem | Fuente | Verificación |
+|---|---|---|---|
+| ☐ | **F4.1** Colector con cache `.tuku/cache/cadencias-resueltas.yaml` | [`cadencia.md`](../spec/cadencia.md) §3.1 | borrar el cache y regenerar → idéntico |
+| ☐ | **F4.2** Evaluador de disparos: `calendar`, `event`, `absence`, `completion` | [`cadencia.md`](../spec/cadencia.md) §5 | con `TZ=UTC` y fecha inyectada, nunca `date.today()` |
+| ☐ | **F4.3** Registro de ocurrencias (idempotencia K4) | K4 | correr dos veces el mismo día no emite dos veces |
+| ☐ | **F4.4** `next:<tipo>` resuelto por **grep sobre `ciclos/`** | [ADR 0007](../docs/decisiones/0007-plan-es-calendario.md) | crear un plan excepcional → las tareas se re-resuelven solas |
+| ☐ | **F4.5** `tuku abrir` / `tuku cerrar`, **sin LLM por defecto** | [`artefactos-ciclo.md`](../spec/artefactos-ciclo.md) | `--sin-agente` produce el artefacto con insumos y sin redacción |
+| ☐ | **F4.6** RADAR: consulta en vivo, sin archivo | `arquitectura.md` §11 | no escribe nada en disco |
+| ☐ | **F4.7** Instanciador de procesos | [ADR 0011](../docs/decisiones/0011-proceso-sin-almacenamiento.md) | no agrega primitiva de almacenamiento: son tareas |
+
+> **Sin planes futuros sembrados, `next:<tipo>` no resuelve.** Es consecuencia directa del
+> ADR 0007 y el motor debe avisarlo explícitamente, no fallar en silencio ni inventar una
+> fecha.
+
+---
+
+## 🤖 Fase 5 — Integración agéntica (Hermes)
+
+Primera fase que gasta tokens. Todo test aquí lleva el marcador `agentic` y **no** corre por
+defecto.
+
+| | Ítem | Verificación |
+|---|---|---|
+| ☐ | **F5.1** Procesos ejecutables en `src/tuku/procesos/` | ejecutables a mano por una persona con un editor (P2) |
+| ☐ | **F5.2** `tuku registrar` (captura conversacional → canónico) | capa **factual**: todo `id` citado existe en el canónico |
+| ☐ | **F5.3** Siembra asistida en `tuku abrir` / `tuku cerrar` | capa **estructural**: encabezados de C7, secciones de C5 no vacías |
+| ☐ | **F5.4** Inyección del tesauro vivo | el prompt no crece sin cota |
+| ☐ | **F5.5** Harness de Hermes con perfiles efímeros | fixture `hermes_efimero`: `HERMES_HOME` a `tmp_path` |
+
+> **Todo test agéntico tiene un gemelo sin agente**, y ese camino se testea siempre. Si un
+> proceso solo funciona con un modelo de frontera, **el proceso está mal escrito** (P2) — por
+> eso la suite corre con el modelo económico y no con el mejor disponible.
+
+---
+
+## ⏰ Fase 6 — Scheduler proactivo
+
+| | Ítem | Verificación |
+|---|---|---|
+| ☐ | **F6.1** Lazo periódico: cadencias, `followup`, `notify_window` | con reloj inyectado; ningún test espera tiempo real |
+
+---
+
+## Salud permanente de la suite
+
+Estos corren desde hoy y deben seguir en verde en cada commit:
+
+- [x] Enlaces relativos de `docs/`, `spec/`, `devel/` y `corpus/` resuelven.
+- [x] Ninguna referencia a specs eliminadas.
+- [x] Sin identificadores del contexto real en el repositorio público.
+- [x] Toda invariante de `spec/` tiene test o entrada declarada en `PENDIENTES`.
+- [x] Toda invariante declara garante reconocible.

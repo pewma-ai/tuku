@@ -195,12 +195,12 @@ disparos perdidos— sin excepción.
 
 | # | Regla | Garante |
 |---|---|---|
-| P1 | Todo `process` referencia una instancia con al menos una tarea | janitor |
-| P2 | `step` pertenece a la plantilla del proceso indicado en `originator` | janitor |
-| P3 | El grafo de `deps` dentro de una instancia es acíclico | janitor |
-| P4 | Una plantilla solo se instancia sobre tipos declarados en `applies_to` | janitor |
-| P5 | Un `originator` de proceso colgante **no** es violación | — |
-| P6 | Toda plantilla tiene cuerpo en prosa ejecutable a mano | janitor (advertencia) |
+| R1 | Todo `process` referencia una instancia con al menos una tarea | janitor |
+| R2 | `step` pertenece a la plantilla del proceso indicado en `originator` | janitor |
+| R3 | El grafo de `deps` dentro de una instancia es acíclico | janitor |
+| R4 | Una plantilla solo se instancia sobre tipos declarados en `applies_to` | janitor |
+| R5 | Un `originator` de proceso colgante **no** es violación | — |
+| R6 | Toda plantilla tiene cuerpo en prosa ejecutable a mano | janitor (advertencia) |
 
 ---
 

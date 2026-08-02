@@ -9,9 +9,14 @@
 
 ## 1. Punto de partida
 
-El diseño está cerrado a un nivel poco común para un proyecto sin código: siete specs
-completas con invariantes numeradas y garante declarado, tres ADR, y **dos simulaciones que
-son de facto los tests de aceptación** ([`corpus/simulaciones/`](../corpus/simulaciones/)).
+El diseño está cerrado a un nivel poco común para un proyecto sin código: ocho specs
+completas con invariantes numeradas y garante declarado, **dieciséis ADR**, y **dos
+simulaciones que son de facto los tests de aceptación**
+([`corpus/simulaciones/`](../corpus/simulaciones/)).
+
+Los ADR importan para este plan más de lo habitual: no solo registran por qué el sistema es
+como es, sino que **cada uno fija un comportamiento verificable**. La §2.1 los mapea a las
+fases que los implementan.
 
 Lo que existe en `src/` es un esqueleto: `cli.py` lanza `SystemExit('no implementado aún')`,
 y `core/`, `janitors/`, `migrations/` son `__init__.py` vacíos.
@@ -42,6 +47,38 @@ gastar un solo token**.
 
 ## 2. Fases
 
+### 2.1 Qué ADR implementa cada fase
+
+Los dieciséis ADR no son historia: son la especificación del comportamiento. Este mapeo dice
+dónde se implementa cada uno y, sobre todo, **dónde se verifica**.
+
+| ADR | Qué fija | Fase | Cómo se verifica |
+|---|---|---|---|
+| [0001](../docs/decisiones/0001-id-estable.md) `id` estable | identidad independiente del path | F1 | mover una entidad no rompe referencias |
+| [0002](../docs/decisiones/0002-motor-fuera-del-perfil.md) motor fuera | punteros, no vendorizado | F0 | `tuku init` + `tuku sync` |
+| [0003](../docs/decisiones/0003-version-de-esquema.md) esquema | `schema_version`, migraciones acumulativas | F0 | `tuku doctor` ante esquema mayor |
+| [0004](../docs/decisiones/0004-canonico-no-es-vista.md) canónico ≠ vista | qué es fuente y qué proyección | F3 | borrar derivadas y regenerar → diff cero |
+| [0005](../docs/decisiones/0005-derivadas-no-readonly.md) no read-only | detección por hash, preguntar antes de pisar | F3 | editar zona derivada → el motor pregunta |
+| [0006](../docs/decisiones/0006-regla-muere-emitido-sobrevive.md) regla muere | `origin` colgante no es violación | F2 | K7: borrar cadencia, la tarea sobrevive |
+| [0007](../docs/decisiones/0007-plan-es-calendario.md) plan = calendario | `next:X` resuelve por grep, no por cálculo | F4 | crear plan excepcional → tareas se re-resuelven |
+| [0008](../docs/decisiones/0008-parent-derivado-del-path.md) `parent` derivado | jerarquía desde el path | F1 | N3/N4 |
+| [0009](../docs/decisiones/0009-type-string-libre.md) `type` libre | sin catálogo cerrado | F2 | simulación 2 sin tocar `src/` |
+| [0010](../docs/decisiones/0010-friccion-no-se-declara.md) fricción | no hay clasificación; se descubre | F5 | §5.1 |
+| [0011](../docs/decisiones/0011-proceso-sin-almacenamiento.md) proceso sin almacén | instancia = grupo de tareas | F4 | estado por consulta, no por campo |
+| [0012](../docs/decisiones/0012-blockuntil-causa-unica.md) `blocked_until` | un campo, dos causas | F4 | `blocked_until >= hoy` → no dispara |
+| [0013](../docs/decisiones/0013-cadencias-en-comentario.md) cadencias en comentario | comentario es fuente, lo visible es derivado | F1 + F3 | round-trip + builder `cadencias-legibles` |
+| [0014](../docs/decisiones/0014-formato-posicional-tareas.md) formato posicional | campos fijos + comentario del motor | F1 | round-trip exacto |
+| [0015](../docs/decisiones/0015-tuku-log-no-versionado.md) `tuku.log` | fuera de Git | F0 | `.gitignore` sembrado por `init` |
+| [0016](../docs/decisiones/0016-atomos-diferidos.md) átomos diferidos | **no se implementa transclusión** | — | alcance negativo explícito |
+
+**0016 es el único que se implementa no haciendo nada**, y conviene tenerlo presente: el
+motor de la primera versión no implementa transclusión, lo que simplifica los janitors de
+build. El gancho —`id` por sección— ya existe sin costo.
+
+**Dos ADR concentran el riesgo de F1**: 0013 y 0014, porque ambos ponen contenido semántico
+dentro de comentarios HTML. Son la razón de que el criterio de salida de F1 sea round-trip
+exacto y no algo más laxo.
+
 Cada fase termina con algo verificable y usable a mano (P2). Ninguna fase depende de trabajo
 de una posterior.
 
@@ -54,7 +91,8 @@ Antes de escribir el motor hay dos cosas que retrofitear cuesta caro.
 | `pyproject.toml` con `[dev]`: pytest, ruff, mypy | Definir el listón antes que el código |
 | `tuku --profile` y `tuku doctor` que reporte versión, commit y rama | `deployment.md` §2.3 lo exige: sin esto ningún bug es accionable |
 | `core/config.py`: cargar `.tuku/config.yaml` y validar `schema_version` | ADR 0003; el resto lo asume disponible |
-| `tuku init` que siembre el layout de `arquitectura.md` §2 | Sin perfil sembrado no hay nada que testear |
+| `tuku init` que siembre el layout de `arquitectura.md` §2, **con `.gitignore` que excluya `tuku.log` y `.tuku/cache/`** | ADR 0015: si el log entra a Git una vez, sacarlo después no borra el historial de ruido |
+| `tuku sync`: punteros a procesos + `AGENTS.md` por nivel | ADR 0002; sin esto los assets de agente no son descubribles |
 
 **Nota sobre `schema_version`.** El ADR 0003 declara que el compromiso de migración empieza
 en la versión 1, y hoy la plantilla está en 0. Propongo mantener 0 hasta el final de F4 y
@@ -66,7 +104,8 @@ formatos durante la construcción sería trabajo puro de fricción.
 El corazón. Todo lo demás lo consume.
 
 - Front matter (`spec/frontmatter.md` está **vacío** — ver §5, es un bloqueante).
-- Línea de tarea posicional de 7 campos + comentario `<!-- tuku: … -->` + cita `>`.
+- Línea de tarea posicional de 7 campos + comentario `<!-- tuku: … -->` **en una sola línea**
+  (ADR 0014) + cita `>`.
 - Entrada de bitácora: hora opcional, entidad opcional, clasificación, marcadores `#tag`,
   continuación indentada.
 - Gramática temporal completa: precisa, rango, difusa, `next:<tipo>`.
@@ -76,13 +115,26 @@ El corazón. Todo lo demás lo consume.
 del perfil debe producir *byte por byte* el mismo contenido. Es más fuerte que "parsea bien"
 y es lo que hace seguro que un janitor reescriba un archivo del usuario sin destruir nada.
 
-> **Riesgo señalado.** El formato posicional
-> (`created effort entity deadline followup blockuntil originator texto ^id`) es compacto y
-> se lee bien, pero seis campos separados por espacio con `-` como placeholder es frágil
-> ante la edición manual, que P2 exige soportar: basta un `-` de más o de menos para que
-> todo se corra un campo. Sugiero que el parser **falle ruidosamente** con número y posición
-> de campo, nunca en silencio, y que `tuku doctor` tenga un modo que muestre la línea
-> alineada con sus nombres de campo. No propongo cambiar el formato; propongo blindarlo.
+Este criterio no es exigencia mía: **ADR 0013 y 0014 lo obligan**. Ambos ponen contenido
+canónico dentro de comentarios HTML —la fuente de las cadencias en uno, los metadatos del
+motor en otro—, de modo que un serializador que "normalice" comentarios destruiría datos.
+
+> **Riesgo, ya acotado por el ADR 0014.** El formato posicional
+> (`created effort entity deadline followup blockuntil originator texto ^id`) es frágil ante
+> la edición manual que P2 exige soportar: basta un `-` de más o de menos para que todo se
+> corra un campo. El ADR **ya decidió** que el placeholder `-` es obligatorio y que omitir un
+> campo no es válido, justamente para que el parser no tenga que adivinar; y asume el costo
+> ("el canónico es incómodo de leer"). Lo que queda para la implementación es blindarlo: que
+> el parser **falle ruidosamente** con número y posición de campo, nunca en silencio, y que
+> `tuku doctor` muestre la línea alineada con sus nombres de campo. El ADR fija el formato;
+> el plan solo añade cómo se diagnostica.
+
+> **Detalle del ADR 0014 que el diseño previo no tenía:** en el canónico, la entidad es un
+> **`id` plano, no un enlace Markdown**. Los enlaces enriquecidos viven en las proyecciones.
+> Esto simplifica el parser de tareas —no hay que resolver `[texto](ruta)` en la línea— pero
+> **no aplica a las entradas**, cuya gramática sí usa enlace Markdown
+> (`spec/entradas.md` §3.1). Son dos parsers con reglas distintas para el mismo concepto, y
+> conviene tenerlo explícito antes de escribirlos.
 
 ### F2 — Janitors de invariantes (~1 semana)
 
@@ -100,10 +152,7 @@ transcripción, y es donde el diseño paga.
 | Nota | O1–O8 |
 | Perfil | P1–P2 (`spec/perfil.md`) |
 
-**Colisión de prefijos detectada**: `spec/proceso.md` y `spec/perfil.md` usan ambos `P`. Hay
-que renombrar uno antes de escribir el código que los reporta — es de esas cosas que cuestan
-un minuto ahora y una confusión permanente después. Propongo `R` para proceso (de *proceso
-recurrente*) o `F` para perfil.
+**Colisión de prefijos resuelta**: `spec/proceso.md` usa `R` (R1–R6, de *proceso recurrente*) y `spec/perfil.md` conserva `F` / `P` para perfil, evitando colisiones en el reporte del janitor.
 
 Salida: `tuku janitor [--fix]`, idempotente por construcción. Correrlo dos veces produce el
 mismo resultado.
@@ -113,12 +162,21 @@ mismo resultado.
 - Grafo declarado en `config.yaml`, validación de aciclicidad al arrancar.
 - Builders: `bitacora_entidad` (agrupada por mes y clasificación), `tareas_del_ciclo`,
   `dashboard`, `cadencias-legibles`, `indice_notas`, `notas_entidad`.
-- **Hash de fuentes y detección de divergencia** (`arquitectura.md` §3.2): si el usuario
-  escribió dentro de una zona derivada, se pregunta antes de sobrescribir. No se bloquea.
+- **Hash de fuentes y detección de divergencia** (ADR 0005): si el usuario escribió dentro de
+  una zona derivada, se pregunta antes de sobrescribir. No se bloquea nada a nivel de
+  sistema de archivos.
 - Build sobre diff: recibe archivos cambiados, recomputa solo lo alcanzable.
 
 **Criterio de salida:** borrar todas las zonas derivadas del perfil y reconstruirlas produce
-diff cero.
+diff cero (ADR 0004: "borrar una proyección es limpieza, no pérdida").
+
+> **Trampa señalada por el propio ADR 0005**, y que conviene resolver en esta fase y no
+> después: si el hash se calcula sobre bytes crudos, cualquier cambio de formato entre
+> versiones del motor dispara la pregunta de divergencia en **todos** los perfiles
+> existentes, aunque el contenido sea semánticamente idéntico. El ADR indica la mitigación
+> —normalizar antes de hashear: espacios finales, saltos de línea— y advierte que "requiere
+> atención en las migraciones". Traducción para F3: **la función de normalización es parte
+> del contrato de esquema**, y cambiarla es una migración (ADR 0003), no un refactor.
 
 ### F4 — Cadencias, ciclo y RADAR (~1½ semanas)
 
@@ -130,15 +188,27 @@ Aquí el sistema empieza a cumplir su promesa.
    `status`), `completion`.
 3. **Registro de ocurrencias** para idempotencia (K4) — es lo que permite que el cron corra
    tan seguido como haga falta.
-4. **`tuku abrir` / `tuku cerrar`**: los órdenes de operaciones de `artefactos-ciclo.md` §5 y
+4. **Resolución de `next:<tipo>`** (ADR 0007): es **un grep sobre `ciclos/`**, no un cálculo
+   desde las reglas de cadencia. El ADR lo dice explícitamente y simplifica la
+   implementación: buscar el `plan_*` más próximo con ese `cycle_type` y `cycle_start > hoy`.
+5. **`tuku abrir` / `tuku cerrar`**: los órdenes de operaciones de `artefactos-ciclo.md` §5 y
    §6, **con el paso del agente omitible**. Sin modelo, el plan se crea con los insumos y sin
    redacción.
-5. **RADAR** (`arquitectura.md` §11): consulta en vivo, determinista, sin archivo propio.
-6. **Procesos** (`spec/proceso.md`): instanciación, `deps` entre pasos, `repeatable`,
-   `closes_instance`.
+6. **RADAR** (`arquitectura.md` §11): consulta en vivo, determinista, sin archivo propio.
+   ADR 0011 le agrega una responsabilidad: **el estado de una instancia de proceso es una
+   consulta de RADAR**, no un campo — se deduce de qué tareas del grupo siguen abiertas.
+7. **Procesos** (`spec/proceso.md`, ADR 0011): instanciación, `deps` entre pasos,
+   `repeatable`, `closes_instance`. Sin primitiva de almacenamiento nueva: todo vive en
+   `tareas/tareas.md` con `process=` y `step=` en el comentario.
 
 **Criterio de salida — el test de recuerdo** (criterio 3 del brief): una cadencia declarada
 meses atrás produce su tarea en el ciclo correcto, sin ningún LLM en el lazo.
+
+> **Advertencia heredada del ADR 0007**, que vale como requisito de `tuku doctor`: si el
+> usuario no tiene planes futuros sembrados, `next:<tipo>` **no puede resolverse** —las
+> cadencias siembran el plan inmediato siguiente, no el calendario de los próximos meses—.
+> El ADR ya nombra la mitigación: el motor advierte cuando una tarea con `(next:X)` no tiene
+> plan futuro contra el cual resolver. Es una advertencia, no un error.
 
 ### F5 — Agente y Hermes (~1½ semanas)
 
@@ -220,10 +290,28 @@ El criterio de éxito 1 del brief y, según P3, **un detector de agencia mal ubi
 
 ### Fixtures
 
-Un `perfil_tmp` como fixture de pytest: perfil sembrado por `tuku init` en un `tmp_path`, con
-Git inicializado. Todos los tests corren contra perfiles desechables; ninguno toca datos
+**Ya construidas** en [`../tests/conftest.py`](../tests/conftest.py): `perfil_tmp` (perfil
+sembrado por `tuku init` en un `tmp_path` con Git inicializado), `hermes_efimero` y
+`assert_diff_cero`. Todos los tests corren contra perfiles desechables; ninguno toca datos
 reales. `corpus/referencia/` (hoy solo un `.gitkeep`) se llena con los perfiles de las dos
 simulaciones.
+
+Mientras `tuku init` no exista, `perfil_tmp` **salta** el test en vez de fallar. Eso permite
+escribir hoy los tests de F1–F4 y que se activen solos cuando el comando aterrice, en vez de
+vivir en rojo durante semanas. Un `skip` masivo es el indicador de que F0 sigue abierta.
+
+### Lo que ya corre sin motor
+
+La suite pasa en verde desde hoy, y lo que verifica no es código sino el corpus documental
+del que come el desarrollo asistido: que los enlaces relativos resuelvan, que no queden
+referencias a specs eliminadas, que no se filtren identificadores del contexto real, y que
+toda invariante de `spec/` tenga test o esté declarada pendiente.
+
+Esto último es el mecanismo que hace que la cobertura no se degrade en silencio: si alguien
+agrega `T9` a una spec, la suite falla hasta que exista su test o se registre la deuda. El
+mapeo 1:1 deja de depender de que alguien se acuerde.
+
+Ver [`../tests/README.md`](../tests/README.md).
 
 ---
 
@@ -321,12 +409,17 @@ Tres cosas que conviene cerrar antes de F1, ordenadas por costo de arreglarlas d
 
 Ninguno exige diseño nuevo: los tres son consolidación de decisiones ya tomadas y dispersas.
 
-### 5.1 Consecuencia para E5
+El tercero ya no depende de la memoria de nadie: `test_prefijos_de_invariante_no_colisionan`
+está marcado `xfail(strict=True)`. Mientras la colisión exista, falla y la suite sigue verde;
+el día que alguien renombre el prefijo, el test pasa a XPASS y **rompe la suite**, obligando
+a retirar el marcador. Un bloqueante conocido no se convierte así en un bloqueante olvidado.
 
-La clasificación `friccion` fue retirada de brief, arquitectura y glosario (2026-08-01), de
-modo que el conjunto por defecto queda cerrado en **`hito`, `decision`, `senal`, `msg`**, más
-lo que el usuario extienda en `config.yaml`. Es el conjunto contra el que valida E5 y el que
-debe sembrar `tuku init`.
+### 5.1 Consecuencia para E5 (ADR 0010)
+
+La clasificación `friccion` quedó descartada por [ADR 0010](../docs/decisiones/0010-friccion-no-se-declara.md),
+de modo que el conjunto por defecto queda cerrado en **`hito`, `decision`, `senal`, `msg`**,
+más lo que el usuario extienda en `config.yaml`. Es el conjunto contra el que valida E5 y el
+que debe sembrar `tuku init`.
 
 La consecuencia de diseño importa más que la lista: **las Desviaciones no salen de un filtro
 por clasificación**, sino del contraste por entidad del cierre
@@ -368,6 +461,14 @@ justamente lo que P2 exige y lo que hace que este orden sea el correcto.
 - **Las decisiones abiertas de `spec/`**, que se cierran con experiencia de uso y no antes:
   `effortTime`, reevaluación de la descripción inferida, formato interno del informe anual.
 - **Federación entre perfiles vía MCP.** Aparcada; el ADR 0001 ya dejó el gancho.
+
+Dos cosas que este plan **ya no decide porque un ADR las cerró**, y que conviene no reabrir
+durante la construcción: la promoción de secciones a átomos
+([0016](../docs/decisiones/0016-atomos-diferidos.md) — diferida, sin transclusión en la
+primera versión) y la separación de `blocked_until` en causa y efecto
+([0012](../docs/decisiones/0012-blockuntil-causa-unica.md) — un campo, dos causas, y la
+distinción la infiere el agente si hace falta). Ambas son tentaciones naturales al escribir
+el código; ambas tienen su costo ya declarado y aceptado.
 
 ---
 
@@ -418,8 +519,8 @@ No es copia literal: el modelo viejo choca con decisiones ya tomadas en TUKU.
 
 | Sistema viejo | TUKU | Por qué cambia |
 |---|---|---|
-| `area:` apunta a `org/{ORG}/VIGENTES/` | `entidad:` con `id` estable | ADR 0001 eliminó el estado en el path |
-| `topic` whitelist estricta ("NEVER invent") | string libre indexado | P6 no admite catálogos cerrados (§3.2 de la spec) |
+| `area:` apunta a `org/{ORG}/VIGENTES/` | `entidad:` con `id` estable | ADR 0001 y 0008: el path lleva jerarquía, nunca estado |
+| `topic` whitelist estricta ("NEVER invent") | string libre indexado | ADR 0009: sin catálogo cerrado; el sistema indexa, no valida |
 | `[[wikilinks]]` prohibidos por convención | prohibidos por invariante **O5** | la regla existía y había 135 en el corpus: sin garante, no es regla |
 
 La segunda merece atención en la implementación. La whitelist resolvía un problema real
