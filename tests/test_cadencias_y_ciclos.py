@@ -78,6 +78,17 @@ def test_F4_5_abrir_ciclo_sin_agente(tmp_path: Path) -> None:
 def test_F4_6_radar_consulta_en_vivo_sin_disco(tmp_path: Path) -> None:
     """F4.6: Consulta en vivo de estado RADAR sin escribir nada en disco."""
     perfil_dir = init_perfil(tmp_path / "perfil")
-    res = radar_query(perfil_dir)
-    assert res["radar_status"] == "OK"
-    assert "open_tasks" in res
+
+    # Sembrar una tarea bloqueada y una tarea con followup
+    task_file = perfil_dir / "tareas" / "tareas.md"
+    t_line = (
+        "- [ ] 2026-08-01 1h proj-a 2026-08-10 2026-08-01 2026-08-15 "
+        "manual Tarea bloqueada ^t-2026-0001\n"
+    )
+    task_file.write_text(t_line, encoding="utf-8")
+
+    res = radar_query(perfil_dir, current_date="2026-08-05")
+    assert res.radar_status == "OK"
+    assert res.open_tasks == 1
+    assert len(res.blocked_tasks) == 1
+    assert len(res.followup_due) == 1

@@ -9,9 +9,8 @@ from __future__ import annotations
 import re
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from tuku.io.frontmatter import parse_frontmatter
 from tuku.io.html_blocks import extract_html_blocks
@@ -161,19 +160,52 @@ class CadenceEngine(BaseModel):
         return emitted_tasks
 
 
-def radar_query(profile_dir: Path) -> dict[str, Any]:
-    """F4.6: Consulta en vivo de estado del perfil (RADAR), sin escribir nada en disco."""
-    tareas_dir = profile_dir / "tareas"
-    open_tasks_count = 0
-    if tareas_dir.exists():
-        for f in tareas_dir.rglob("*.md"):
-            text = f.read_text(encoding="utf-8")
-            open_tasks_count += text.count("- [ ]")
+class RadarReport(BaseModel):
+    open_tasks: int = 0
+    blocked_tasks: list[str] = Field(default_factory=list)
+    followup_due: list[str] = Field(default_factory=list)
+    radar_status: str = "OK"
 
-    return {
-        "open_tasks": open_tasks_count,
-        "radar_status": "OK",
-    }
+
+def radar_query(profile_dir: Path, current_date: str | None = None) -> RadarReport:
+    """F4.6: Consulta en vivo de estado del perfil (RADAR), sin escribir nada en disco.
+
+    Calcula tareas trancadas, seguimiento vencido y estado determinista bajo demanda
+    acorde a `docs/arquitectura.md` §11.
+    """
+    today_str = current_date or datetime.now(UTC).strftime("%Y-%m-%d")
+    tareas_dir = profile_dir / "tareas"
+
+    open_count = 0
+    blocked: list[str] = []
+    followups: list[str] = []
+
+    if tareas_dir.exists():
+        for f in sorted(tareas_dir.rglob("*.md")):
+            lines = f.read_text(encoding="utf-8").splitlines()
+            for i, line in enumerate(lines):
+                if line.strip().startswith("- [ ]"):
+                    open_count += 1
+                    comment = lines[i + 1] if i + 1 < len(lines) else None
+                    try:
+                        task = TukuTask.parse_line(line, comment_line=comment)
+                        if task.blockuntil and task.blockuntil >= today_str:
+                            blocked.append(
+                                f"{task.task_id}: {task.text} (hasta {task.blockuntil})"
+                            )
+                        if task.followup and task.followup <= today_str:
+                            followups.append(
+                                f"{task.task_id}: {task.text} (seguimiento {task.followup})"
+                            )
+                    except Exception:
+                        pass
+
+    return RadarReport(
+        open_tasks=open_count,
+        blocked_tasks=blocked,
+        followup_due=followups,
+        radar_status="OK",
+    )
 
 
 def abrir_ciclo(profile_dir: Path, cycle_name: str, sin_agente: bool = True) -> Path:

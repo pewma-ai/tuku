@@ -84,6 +84,17 @@ def main(argv: list[str] | None = None) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
+    # radar
+    subparsers.add_parser(
+        "radar",
+        help="Consulta determinista en vivo del estado del perfil (sin escrituras en disco)",
+        description=(
+            "Calcula el estado actual bajo demanda: tareas abiertas, tareas bloqueadas\n"
+            "por blockuntil y seguimientos vencidos (ADR 0011 / arquitectura §11)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
     # janitor
     parser_janitor = subparsers.add_parser(
         "janitor",
@@ -130,6 +141,20 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
         print("Estado: OK")
+        return 0
+
+    if args.command == "radar":
+        from tuku.core.cadence import radar_query
+
+        rad = radar_query(args.profile)
+        print("RADAR — Estado del perfil bajo demanda:")
+        print(f" - Tareas abiertas: {rad.open_tasks}")
+        print(f" - Tareas bloqueadas (blockuntil): {len(rad.blocked_tasks)}")
+        for b in rad.blocked_tasks:
+            print(f"   • {b}")
+        print(f" - Seguimientos vencidos (followup): {len(rad.followup_due)}")
+        for f in rad.followup_due:
+            print(f"   • {f}")
         return 0
 
     if args.command == "janitor":
