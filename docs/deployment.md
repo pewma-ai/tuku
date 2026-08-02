@@ -122,7 +122,7 @@ default_profile = "personal"
 path = "~/repos/tuku-personal"
 
 [profiles.trabajo]
-path = "~/repos/tuku-paranal"
+path = "~/repos/tuku-trabajo"
 ```
 
 Todo lo de `cache/` es reconstruible: borrarlo nunca pierde información.
@@ -146,7 +146,7 @@ mi-tuku/
 │   ├── 2026-08.md         # cerradas o canceladas ese mes
 │   └── 2025/
 ├── ciclos/
-│   ├── plan_2026-08-10_temuco.md
+│   ├── plan_2026-08-10_viaje.md
 │   ├── resultados_2026-07-28_turno.md
 │   └── 2025/
 ├── entidades/
@@ -155,8 +155,8 @@ mi-tuku/
 │   │   └── medico/
 │   │       ├── medico.md
 │   │       └── pediatra.md
-│   └── paranal/
-│       ├── paranal.md
+│   └── trabajo/
+│       ├── trabajo.md
 │       └── sw-responsible.md
 ├── tipos/
 │   └── pewma/cliente.md
@@ -197,7 +197,7 @@ Definirlo hoy cuesta poco; retrofitearlo cuesta muchísimo.
 ```
 tuku init [ruta]        # crea el perfil, siembra cadencias de sistema
 tuku setup              # modelo, claves, canal de entrada
-tuku abrir              # bitacora_ + plan_
+tuku abrir              # plan_ + siembra de días en entradas/
 tuku cerrar             # resultados_
 tuku tarea ...          # alta, cierre, consulta del backlog canónico
 tuku janitor            # garantiza invariantes (idempotente)

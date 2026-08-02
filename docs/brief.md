@@ -76,9 +76,9 @@ se copia; todo se proyecta.
 
 ### 3.3 El ciclo no es la semana
 
-El ciclo lo define la vida del usuario, no el almanaque: un turno de observatorio de
-martes a martes, un descanso de miércoles a lunes, una semana ISO para quien trabaja
-9-a-5, un semestre académico. El sistema no impone calendario; lee el del usuario desde
+El ciclo lo define la vida del usuario, no el almanaque: un turno de faena de martes a
+martes, un descanso de miércoles a lunes, una semana ISO para quien trabaja 9-a-5, un
+semestre académico. El sistema no impone calendario; lee el del usuario desde
 sus cadencias.
 
 ### 3.4 La cadencia es la pieza central

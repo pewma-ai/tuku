@@ -38,7 +38,7 @@ mi-tuku/
 │   ├── 2026-08.md
 │   └── 2025/
 ├── ciclos/
-│   ├── plan_2026-08-10_temuco.md
+│   ├── plan_2026-08-10_viaje.md
 │   ├── resultados_2026-07-28_turno.md
 │   └── 2025/
 ├── entidades/
@@ -47,12 +47,12 @@ mi-tuku/
 │   │   └── medico/
 │   │       ├── medico.md    # página del subdirectorio
 │   │       └── pediatra.md
-│   └── paranal/
-│       ├── paranal.md
+│   └── trabajo/
+│       ├── trabajo.md
 │       ├── sw-responsible.md
-│       └── log-analysis/
-│           ├── log-analysis.md
-│           └── spie2026-paper.md
+│       └── analisis-datos/
+│           ├── analisis-datos.md
+│           └── paper-congreso.md
 ├── tipos/
 │   └── pewma/cliente.md
 ├── estrategia/

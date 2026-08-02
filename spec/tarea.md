@@ -2,7 +2,7 @@
 
 > Define el backlog canónico, la gramática de una tarea y su ciclo de vida.
 > Depende de [`docs/arquitectura.md`](../docs/arquitectura.md) §3 y §6.
-> Ver también [`spec/bitacora.md`](bitacora.md) y [`spec/cadencia.md`](cadencia.md).
+> Ver también [`spec/entradas.md`](entradas.md) y [`spec/cadencia.md`](cadencia.md).
 
 ---
 
@@ -69,9 +69,9 @@ Una tarea ocupa una línea, opcionalmente seguida de líneas de detalle indentad
 Ejemplo:
 
 ```markdown
-- [ ] (2026-08-11) [deputy](../entidades/paranal/deputy.md) Asistir a e-Connect training en Vitacura ^t-2026-0143
+- [ ] (2026-08-11) [coordinacion](../entidades/trabajo/coordinacion.md) Asistir a la capacitación anual en la oficina central ^t-2026-0143
       <!-- tuku: created=2026-07-20 cycles=1 -->
-- [ ] (next:descanso) [colaboraciones](../entidades/paranal/colaboraciones.md) Enviar correo de postulación conjunta ^t-2026-0087
+- [ ] (next:descanso) [colaboraciones](../entidades/trabajo/colaboraciones.md) Enviar correo de postulación conjunta ^t-2026-0087
       <!-- tuku: created=2026-05-13 cycles=6 deps=t-2026-0090 -->
       > Requiere acuerdo previo sobre autoría y reparto de horas.
 ```
@@ -241,5 +241,5 @@ Todas son derivadas: regenerables, idempotentes, borrables sin pérdida.
 | # | Decisión |
 |---|---|
 | 1 | `effortTime` por tarea y su estimación aprendida del historial. Diferida hasta tener experiencia de uso; sin ella el cruce con capacidad es cualitativo |
-| 2 | Si la tarea puede apuntar a la entrada de bitácora que la originó (depende de la decisión abierta 1 de `spec/bitacora.md`) |
+| 2 | Si la tarea puede apuntar a la entrada de bitácora que la originó (depende de la decisión abierta 1 de `spec/entradas.md`) |
 | 3 | Umbral y forma de presentación del arrastre: si `⟳6` basta o hace falta escalarlo a una alerta |

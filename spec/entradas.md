@@ -1,7 +1,7 @@
 # spec/entradas.md — Entradas y bitácoras
 
-> Reemplaza a `spec/bitacora.md`. Define el almacén canónico de entradas y las bitácoras
-> como proyecciones.
+> Define el almacén canónico de entradas y las bitácoras como proyecciones. Reemplaza al
+> modelo anterior, donde la bitácora de cada ciclo era un archivo canónico.
 > Depende de [`docs/arquitectura.md`](../docs/arquitectura.md) §3.
 > Ver también [`spec/tarea.md`](tarea.md) y [`spec/artefactos-ciclo.md`](artefactos-ciclo.md).
 
@@ -62,8 +62,8 @@ Encabezados por día en formato ISO más nombre del día:
 
 ```markdown
 ## 2026-08-04, Martes
-- [sw-responsible](../entidades/paranal/sw-responsible.md) **Hito:** Instalación validada en el ambiente de pruebas.
-- (09:30) [colaboraciones](../entidades/paranal/colaboraciones.md) Reunión por continuación de tesis.
+- [sw-responsible](../entidades/trabajo/sw-responsible.md) **Hito:** Instalación validada en el ambiente de pruebas.
+- (09:30) [colaboraciones](../entidades/trabajo/colaboraciones.md) Reunión por continuación de tesis.
 - Compra de insumos para la casa.
 
 ## 2026-08-05, Miércoles
@@ -92,9 +92,9 @@ Todo lo que va entre corchetes en esta gramática es opcional, incluida la entid
 Ejemplos válidos:
 
 ```markdown
-- [sw-responsible](../entidades/paranal/sw-responsible.md) Solucionado el problema de sincronía.
-- (09:30) [colaboraciones](../entidades/paranal/colaboraciones.md) Reunión con estudiantes.
-- [pds](../entidades/paranal/pds.md) **Hito:** Reporte de volumetría generado.
+- [sw-responsible](../entidades/trabajo/sw-responsible.md) Solucionado el problema de sincronía.
+- (09:30) [colaboraciones](../entidades/trabajo/colaboraciones.md) Reunión con estudiantes.
+- [pds](../entidades/trabajo/pds.md) **Hito:** Reporte de volumetría generado.
 - **Señal:** El primer día de descanso exige desconexión total; la energía vuelve al segundo.
 ```
 
@@ -135,7 +135,7 @@ código. Todo lo indentado pertenece a esa entrada y viaja con ella en las proye
 ## 4. Escritura por agente
 
 El usuario dicta o escribe en lenguaje natural; **el agente normaliza a la forma canónica**.
-Resolver "avancé en ELIANA" al `id` correcto es trabajo del agente usando el tesauro vivo.
+Resolver "avancé en el paper" al `id` correcto es trabajo del agente usando el tesauro vivo.
 
 La forma escrita es formal y estable; la entrada es libre. **El parser nunca interpreta
 sinónimos, el agente sí.**

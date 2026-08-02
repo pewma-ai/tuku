@@ -20,7 +20,7 @@ de fechas; la *bitácora de una entidad* filtra por pertenencia. Ninguna es un a
 entradas viven en `entradas/`, particionadas por mes.
 
 **Ámbito** — Nivel raíz de la jerarquía de entidades y frontera de confidencialidad y de
-compartición (`personal/`, `paranal/`). Es lo que se federa, lo que se excluye de un export y
+compartición (`personal/`, `trabajo/`). Es lo que se federa, lo que se excluye de un export y
 lo que puede tener convenciones propias. Todo perfil tiene al menos un ámbito `personal`.
 
 **Tarea** — Compromiso de acción con estado, pertenencia a una entidad y temporalidad en
@@ -125,5 +125,5 @@ promesa: lo que entró vuelve solo cuando corresponde.
 Un artefacto sembrado se genera una vez; ningún janitor vuelve a pisarlo.
 
 **Tesauro vivo** — Índice de nombres de entidades y sus `keywords`, inyectado en el
-contexto del agente en cada turno. Es lo que permite entender "avancé en ELIANA" sin
+contexto del agente en cada turno. Es lo que permite entender "avancé en el paper" sin
 ambigüedad.

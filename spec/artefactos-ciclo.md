@@ -17,7 +17,7 @@
 
 ```
 ciclos/
-├── plan_2026-08-10_temuco.md
+├── plan_2026-08-10_viaje.md
 ├── resultados_2026-07-28_turno.md
 └── 2025/
 ```
@@ -40,10 +40,10 @@ primero es lo que lo convierte en pieza estructural.
 
 ```yaml
 ---
-id: plan-2026-08-10-temuco
+id: plan-2026-08-10-viaje
 type: plan
-cycle_type: temuco          # string libre
-place: Temuco               # opcional
+cycle_type: viaje           # string libre
+place: Santiago             # opcional
 cycle_start: 2026-08-10
 cycle_end: 2026-08-16
 status: open                # open | closed
@@ -53,7 +53,7 @@ seeded_by: tuku 0.4.2+g27b3aed / deepseek-v4-flash
 ---
 ```
 
-`cycle_type` es **string libre**: `turno`, `descanso`, `vacaciones`, `mision`, `temuco`. Es
+`cycle_type` es **string libre**: `turno`, `descanso`, `vacaciones`, `mision`, `viaje`. Es
 P6 aplicado al eje temporal — los modos de vida de una persona no son anticipables y no
 tienen por qué serlo.
 
@@ -65,7 +65,7 @@ ahí se siguen tres cosas:
 - Las cadencias **proponen** ciclos y siembran sus planes; el archivo de plan es la verdad.
 - `(next:turno)` y sus formas se resuelven contra este conjunto (`spec/tarea.md` §4.1).
 - **Romper la cadencia es normal, no excepcional.** Si la próxima semana el usuario trabaja
-  desde otra ciudad, crea `plan_2026-08-10_temuco.md`; las tareas postergadas al próximo
+  desde otra ciudad, crea `plan_2026-08-10_viaje.md`; las tareas postergadas al próximo
   turno se re-resuelven solas al turno que efectivamente corresponda.
 
 Un ciclo declarado a mano y uno sembrado por cadencia son indistinguibles: mismo formato,
@@ -183,7 +183,7 @@ type: resultados
 cycle_type: turno
 cycle_start: 2026-06-30
 cycle_end: 2026-07-07
-entities: [deputy, sw-responsible, pds, colaboraciones]
+entities: [coordinacion, sw-responsible, datos, colaboraciones]
 carryover_alerts: [t-2026-0087]
 generated: 2026-07-07T18:04:00-04:00
 seeded_by: tuku 0.4.2+g27b3aed / deepseek-v4-flash

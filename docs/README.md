@@ -1,7 +1,7 @@
 # docs/ — Cómo leer esta documentación
 
 Este directorio contiene el **porqué** de TUKU. El **qué** exacto de cada formato vive en
-`spec/`, y el **cómo** del código vive en `src/`.
+[`../spec/`](../spec/), y el **cómo** del código vive en `../src/`.
 
 La regla que ordena todo: cada documento se justifica por referencia a los anteriores. Si
 algo no puede derivarse de lo que está aguas arriba, o falta una premisa o hay un error.
@@ -29,7 +29,7 @@ consulta.
 | Si estás escribiendo… | Va en… |
 |---|---|
 | Una razón, una intención, un principio | `docs/` |
-| El formato exacto de un archivo o campo | `spec/` |
+| El formato exacto de un archivo o campo | [`../spec/`](../spec/) — ver su [README](../spec/README.md) |
 | Una decisión que cerró una alternativa viable | `docs/decisiones/NNNN-titulo.md` |
 | Instrucciones ejecutables por humano o agente | `src/tuku/procesos/` |
 | Lo que se siembra en el perfil de un usuario | `src/tuku/templates/` |
@@ -41,22 +41,12 @@ repite. La duplicación en documentación se desincroniza igual que en código.
 
 ## Decisiones (ADR)
 
-Un ADR se escribe cuando una decisión **cierra una alternativa que era viable**. No se
-escribe para registrar lo obvio ni lo que ya está en el brief.
+Un ADR se escribe cuando una decisión **cierra una alternativa que era viable**. El índice
+de las decisiones tomadas está en [`decisiones/`](decisiones/); cómo se escribe una, en
+[`decisiones/INSTRUCCIONES.md`](decisiones/INSTRUCCIONES.md).
 
-Formato: numeración correlativa de cuatro dígitos, nombre en kebab-case, y cuatro
-secciones — Contexto, Decisión, Consecuencias, Estado. Un ADR nunca se borra ni se
-reescribe: si la decisión cambia, se escribe uno nuevo que declara al anterior superado.
-
-Convención de estado: `propuesto` · `aceptado` · `superado por NNNN`.
-
----
-
-## Decisiones abiertas
-
-Las decisiones que aún no se toman **no viven aquí**: viven como issues o en la sección
-correspondiente de `arquitectura.md`, marcadas como abiertas. `docs/decisiones/` es
-historial de lo cerrado, no lista de pendientes.
+Las decisiones que aún **no** se toman no viven ahí: viven como issues o en la sección
+correspondiente de [`arquitectura.md`](arquitectura.md), marcadas como abiertas.
 
 ---
 

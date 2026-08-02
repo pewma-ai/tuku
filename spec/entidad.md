@@ -35,12 +35,12 @@ entidades/
 │   │   └── traumatologo.md
 │   └── finanzas/
 │       └── finanzas.md
-├── paranal/
-│   ├── paranal.md
+├── trabajo/
+│   ├── trabajo.md
 │   ├── sw-responsible.md        # cuelga directo del ámbito
-│   └── log-analysis/
-│       ├── log-analysis.md
-│       └── spie2026-paper.md
+│   └── analisis-datos/
+│       ├── analisis-datos.md
+│       └── paper-congreso.md
 └── pewma/
     ├── pewma.md
     └── productos/
@@ -64,7 +64,7 @@ Entre el ámbito y la entidad, la profundidad la decide el usuario. Algunas enti
 directo del ámbito y otras se agrupan. Fijar tres niveles obligaría a inventar niveles vacíos
 para cumplir el formato.
 
-Cada nivel tiene su **página homónima**: `medico/medico.md`, `log-analysis/log-analysis.md`.
+Cada nivel tiene su **página homónima**: `medico/medico.md`, `analisis-datos/analisis-datos.md`.
 Es donde se describe el nivel, se declara su gobernanza y se alojan sus proyecciones.
 
 ### 2.3 El path es la jerarquía; el estado no
@@ -94,15 +94,15 @@ comodidad.
 
 ```yaml
 ---
-id: spie2026-paper            # estable, único en el perfil
+id: paper-congreso            # estable, único en el perfil
 type: proyecto                # string libre
 lifecycle: vigente            # vigente | archivada
 status: active                # active | paused | blocked_until: YYYY-MM-DD
 alineamiento: >
-  Publicación estratégica sobre clasificación automática de logs.
+  Publicación estratégica sobre clasificación automática de registros.
 created: 2026-04-25
 modified: 2026-07-06
-keywords: [spie, eliana, paper]
+keywords: [congreso, paper, deteccion]
 ---
 ```
 
@@ -126,10 +126,10 @@ Una entidad es un **compuesto**: mezcla zonas editables y derivadas, marcadas
 explícitamente. Toda zona está marcada; no hay ambigüedad.
 
 ```markdown
-# SPIE 2026 Paper
+# Paper del congreso
 
 <!-- tuku:editable id=descripcion -->
-Paper sobre clasificación automática de logs operacionales.
+Paper sobre clasificación automática de registros operacionales.
 <!-- /tuku:editable -->
 
 <!-- tuku:derived id=tareas-entidad hash=… -->
@@ -174,10 +174,10 @@ derivado puro:
 
 ```markdown
 <!-- tuku:derived id=dashboard hash=… -->
-**[SW Responsible](sw-responsible.md)** — Business as usual.
-- 🤖 *Foco: generar el printout legible de los performance checks.*
+**[SW Responsible](sw-responsible.md)** — Operación normal.
+- 🤖 *Foco: generar el reporte legible de las revisiones periódicas.*
 
-**[Operational Tools](operational-tools.md)** — Servidor DEV1 frágil; no intervenir.
+**[Herramientas](herramientas.md)** — Servidor de pruebas frágil; no intervenir.
 - 📅 *Sin actividad en más de 1 mes*
 <!-- /tuku:derived -->
 ```

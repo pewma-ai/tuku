@@ -57,7 +57,7 @@ Una cadencia se hereda por **dos vías independientes**:
 
 **La cadena de padres** — sistema → ámbito → niveles → entidad.
 Aquí caen las cadencias personales del usuario y las institucionales: "el día 1, pagar
-cuentas" en `personal/`, "reunión de líderes cada mes" en `paranal/`.
+cuentas" en `personal/`, "reunión de líderes cada mes" en `trabajo/`.
 
 **El tipo** — ortogonal a la cadena.
 Aquí caen las que describen la naturaleza de la cosa: "todo cliente se contacta a los tres
