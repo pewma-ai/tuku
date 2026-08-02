@@ -84,6 +84,22 @@ def main(argv: list[str] | None = None) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
+    # janitor
+    parser_janitor = subparsers.add_parser(
+        "janitor",
+        help="Ejecuta verificaciones de invariantes sobre el perfil",
+        description=(
+            "Inspecciona el perfil en búsqueda de violaciones a las invariantes de spec/\n"
+            "y permite reparación automática idempotente con --fix."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser_janitor.add_argument(
+        "--fix",
+        action="store_true",
+        help="Aplica reparaciones automáticas de forma idempotente",
+    )
+
     args = parser.parse_args(argv)
 
     if args.command == "init":
@@ -115,6 +131,22 @@ def main(argv: list[str] | None = None) -> int:
 
         print("Estado: OK")
         return 0
+
+    if args.command == "janitor":
+        from tuku.core.janitor import Janitor
+
+        janitor = Janitor(args.profile)
+        report = janitor.run_all(fix=args.fix)
+        if report.is_clean:
+            print("Janitor: perfil limpio sin violaciones de invariantes.")
+            return 0
+
+        print(f"Janitor: {len(report.violations)} violaciones detectadas:")
+        for v in report.violations:
+            rel = v.file_path.relative_to(args.profile.resolve())
+            print(f" - [{v.invariant_id}] {rel}: {v.message}")
+
+        return 1
 
     parser.print_help()
     return 0

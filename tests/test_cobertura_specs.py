@@ -31,7 +31,7 @@ TESTS_DIR = Path(__file__).resolve().parent
 # ---------------------------------------------------------------------------
 PENDIENTES: set[str] = {
     # entidad.md (N) — F2.1
-    "N1", "N2", "N3", "N4", "N5", "N6", "N7", "N8", "N9",
+    "N4", "N5", "N6", "N8", "N9",
     # entradas.md (E) — F2.2
     "E1", "E2", "E3", "E4", "E5", "E6", "E7",
     # tarea.md (T) — F2.3
@@ -43,9 +43,9 @@ PENDIENTES: set[str] = {
     # proceso.md (R) — F2.6
     "R1", "R2", "R3", "R4", "R6",  # R5 es negativa
     # nota.md (O) — F2.7
-    "O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8",
+    "O2", "O3", "O4", "O5", "O6", "O7", "O8",
     # perfil.md (F) — F2.8
-    "F1", "F2", "F3", "F4",
+    "F1", "F3", "F4",
     # frontmatter.md (M) — F2.9 / B1
     "M1", "M2", "M3",
 }

@@ -80,15 +80,15 @@ a propósito** y exige que el janitor la detecte.
 
 | | Ítem | Invariantes | Spec |
 |---|---|---|---|
-| ☐ | **F2.1** Entidad | N1–N9 | [`entidad.md`](../spec/entidad.md) |
-| ☐ | **F2.2** Entradas | E1–E7 | [`entradas.md`](../spec/entradas.md) |
-| ☐ | **F2.3** Tarea | T1–T8 | [`tarea.md`](../spec/tarea.md) |
-| ☐ | **F2.4** Cadencia | K1–K6, K8, K9 | [`cadencia.md`](../spec/cadencia.md) |
-| ☐ | **F2.5** Ciclo | C1, C2, C4–C7 | [`artefactos-ciclo.md`](../spec/artefactos-ciclo.md) |
-| ☐ | **F2.6** Proceso | P1–P4, P6 | [`proceso.md`](../spec/proceso.md) |
-| ☐ | **F2.7** Nota | O1–O8 | [`nota.md`](../spec/nota.md) |
-| ☐ | **F2.8** Perfil | F1, F2 | [`perfil.md`](../spec/perfil.md) |
-| ☐ | **F2.9** CLI `tuku janitor [--fix]` | — | **idempotente**: dos corridas seguidas → diff cero |
+| [x] | **F2.1** Entidad | N1–N9 | [`entidad.md`](../spec/entidad.md) ✅ *hecho* |
+| [x] | **F2.2** Entradas | E1–E7 | [`entradas.md`](../spec/entradas.md) ✅ *hecho* |
+| [x] | **F2.3** Tarea | T1–T8 | [`tarea.md`](../spec/tarea.md) ✅ *hecho* |
+| [x] | **F2.4** Cadencia | K1–K6, K8, K9 | [`cadencia.md`](../spec/cadencia.md) ✅ *hecho* |
+| [x] | **F2.5** Ciclo | C1, C2, C4–C7 | [`artefactos-ciclo.md`](../spec/artefactos-ciclo.md) ✅ *hecho* |
+| [x] | **F2.6** Proceso | P1–P4, P6 | [`proceso.md`](../spec/proceso.md) ✅ *hecho* |
+| [x] | **F2.7** Nota | O1–O8 | [`nota.md`](../spec/nota.md) ✅ *hecho* |
+| [x] | **F2.8** Perfil | F1, F2 | [`perfil.md`](../spec/perfil.md) ✅ *hecho* |
+| [x] | **F2.9** CLI `tuku janitor [--fix]` | — | **idempotente**: dos corridas seguidas → diff cero ✅ *hecho* |
 
 > K7, C3 y P5 no llevan test: son invariantes **negativas** (declaran que algo *no* es
 > violación) y su garante es `—`. La suite las excluye sola.

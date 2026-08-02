@@ -1,3 +1,8 @@
+"""Pruebas del CLI de TUKU.
+
+Verifica la ejecución de subcomandos `init`, `sync`, `doctor` y `janitor` (Fase 0 y Fase 2).
+"""
+
 from pathlib import Path
 
 import pytest
@@ -6,6 +11,7 @@ from tuku.cli import main
 
 
 def test_cli_init(tmp_path: Path) -> None:
+    """Verifica que el subcomando tuku init siembre el perfil en la ruta indicada."""
     target = tmp_path / "perfil"
     code = main(["init", str(target)])
     assert code == 0
@@ -13,6 +19,7 @@ def test_cli_init(tmp_path: Path) -> None:
 
 
 def test_cli_sync(tmp_path: Path) -> None:
+    """Verifica que tuku sync enlace correctamente los punteros a procesos."""
     target = tmp_path / "perfil"
     main(["init", str(target)])
     code = main(["-p", str(target), "sync"])
@@ -20,9 +27,18 @@ def test_cli_sync(tmp_path: Path) -> None:
 
 
 def test_cli_doctor(tmp_path: Path) -> None:
+    """Verifica que tuku doctor diagnostique un perfil recién inicializado."""
     target = tmp_path / "perfil"
     main(["init", str(target)])
     code = main(["-p", str(target), "doctor"])
+    assert code == 0
+
+
+def test_cli_janitor(tmp_path: Path) -> None:
+    """F2.9: Verifica que tuku janitor reporte OK en un perfil limpio."""
+    target = tmp_path / "perfil"
+    main(["init", str(target)])
+    code = main(["-p", str(target), "janitor"])
     assert code == 0
 
 
@@ -38,9 +54,10 @@ def test_cli_help_general(capsys: pytest.CaptureFixture[str]) -> None:
     assert "init" in output
     assert "sync" in output
     assert "doctor" in output
+    assert "janitor" in output
 
 
-@pytest.mark.parametrize("subcommand", ["init", "sync", "doctor"])
+@pytest.mark.parametrize("subcommand", ["init", "sync", "doctor", "janitor"])
 def test_cli_help_subcomandos(subcommand: str, capsys: pytest.CaptureFixture[str]) -> None:
     """F0.6: Cada subcomando de suku tiene ayuda documentada con descripcion explícita."""
     with pytest.raises(SystemExit) as exc_info:
