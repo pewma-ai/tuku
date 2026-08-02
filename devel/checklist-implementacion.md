@@ -44,6 +44,7 @@ Consolidación de decisiones ya tomadas y dispersas. Ninguno exige diseño nuevo
 | [x] | **F0.3** `tuku init`: árbol de directorios + `.gitignore` con `tuku.log` y `.tuku/cache/` | [ADR 0015](../docs/decisiones/0015-tuku-log-no-versionado.md) | `tuku init` + `git status` limpio; `notas/` sembrado con índice y `AGENTS.md` ✅ *hecho* |
 | [x] | **F0.4** `tuku sync`: punteros a procesos y `AGENTS.md` por nivel | [ADR 0002](../docs/decisiones/0002-motor-fuera-del-perfil.md) | idempotente: dos corridas → diff cero ✅ *hecho* |
 | [x] | **F0.5** `tuku doctor`: versión, commit, rama, validación de perfil | `deployment.md` §2.3 | reporta commit real, no `unknown` ✅ *hecho* |
+| [x] | **F0.6** Verificación de ayuda CLI (`tuku --help`) | `deployment.md` §2 | test automatizado verifica ayuda y descripción por cada subcomando ✅ *hecho* |
 
 > **Por qué `init` va antes que todo:** casi toda la suite depende de la fixture `perfil_tmp`,
 > que llama a `tuku init`. Mientras no exista, los tests de F1–F4 se saltan solos (`skip`) en
