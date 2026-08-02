@@ -12,6 +12,8 @@
 | [0001](0001-id-estable.md) | Identidad estable independiente del path | Identidad por path, con un janitor que reescribe las referencias en cada movimiento | `aceptado` |
 | [0002](0002-motor-fuera-del-perfil.md) | El motor nunca se vendoriza en el perfil | Copiar el código dentro del repositorio de datos para reproducibilidad y descubribilidad | `aceptado` |
 | [0003](0003-version-de-esquema.md) | Versionado de esquema y migraciones | No versionar; versionar por versión del motor; migrar implícitamente al vuelo | `aceptado` |
+| [0004](0004-canonico-no-es-vista.md) | Cada dato se escribe una sola vez en un lugar canónico | Mantener copias sincronizadas a mano en múltiples lugares | `aceptado` |
+| [0005](0005-derivadas-no-readonly.md) | Las zonas derivadas no se hacen read-only; se detecta divergencia por hash | Hacer archivos o zonas read-only a nivel de sistema de archivos (`chmod 444`) | `aceptado` |
 | [0006](0006-regla-muere-emitido-sobrevive.md) | La regla muere con su portador; lo emitido sobrevive siempre | Consistencia total: borrar la regla borra también sus consecuencias | `aceptado` |
 | [0007](0007-plan-es-calendario.md) | El conjunto de archivos `plan_*` es el calendario del usuario | Calcular el calendario futuro desde las reglas de cadencia, sin archivos explícitos | `aceptado` |
 | [0008](0008-parent-derivado-del-path.md) | `parent` se deriva del path, no se declara | Declarar `parent` en el front matter para que la jerarquía sea explícita e independiente de la ruta | `aceptado` |
