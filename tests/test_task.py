@@ -1,9 +1,13 @@
-"""Pruebas del parser/serializador posicional de tareas (F1.2)."""
+"""Pruebas del parser y serializador posicional de tareas Markdown (F1.2).
+
+Verifica el parsing y la serialización exacta byte a byte acorde a ADR 0014.
+"""
 
 from tuku.io.task import TukuTask
 
 
 def test_roundtrip_tarea_posicional_exacto() -> None:
+    """F1.2: Extracción y serialización exacta de los 8 campos posicionales y metadata HTML."""
     line = (
         "- [ ] 2026-08-01 2h nucleo-datos 2026-08-10 - - manual Diseñar interfaz ^t-2026-0001"
     )

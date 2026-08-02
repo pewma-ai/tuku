@@ -1,9 +1,13 @@
-"""Pruebas del parser de delimitadores HTML (F1.5)."""
+"""Pruebas del parser de delimitadores HTML especiales (F1.5).
+
+Verifica la preservación de comentarios canónicos de cadencias y zonas derivadas según ADR 0013.
+"""
 
 from tuku.io.html_blocks import extract_html_blocks, replace_derived_block
 
 
 def test_preservar_comentario_cadencias() -> None:
+    """F1.5: Extrae comentarios HTML de cadencias preservando YAML."""
     doc = """
 # Entidad
 
@@ -20,6 +24,7 @@ def test_preservar_comentario_cadencias() -> None:
 
 
 def test_reemplazar_zona_derivada_preserva_delimitadores() -> None:
+    """F1.5: Reescritura de contenido derivado preservando marca y hash."""
     doc = (
         "# Índice\n"
         "<!-- tuku:derived id=indice hash=123 -->\n"
