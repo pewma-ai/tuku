@@ -45,7 +45,7 @@ PENDIENTES: set[str] = {
     # nota.md (O) — F2.7
     "O2", "O3", "O4", "O5", "O6", "O7", "O8",
     # perfil.md (F) — F2.8
-    "F1", "F3", "F4",
+    "F1", "F4",
     # frontmatter.md (M) — F2.9 / B1
     "M1", "M2", "M3",
 }

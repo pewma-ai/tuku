@@ -103,13 +103,13 @@ Marcar cada invariante implementada borrando su entrada de `PENDIENTES` en
 
 | | Ítem | Fuente | Verificación |
 |---|---|---|---|
-| ☐ | **F3.1** Grafo en `config.yaml` + chequeo de aciclicidad | B2 | un ciclo declarado → error al arrancar, no en mitad del build |
-| ☐ | **F3.2** Builder `bitacora_entidad` | [`entradas.md`](../spec/entradas.md) | borrar derivadas y regenerar → **diff cero** |
-| ☐ | **F3.3** Builder `tareas_del_ciclo` | [`tarea.md`](../spec/tarea.md) | ídem |
-| ☐ | **F3.4** Builder `cadencias-legibles` | [`cadencia.md`](../spec/cadencia.md) | ídem |
-| ☐ | **F3.5** Builders `indice_notas` y `notas_entidad` | [`nota.md`](../spec/nota.md) O8 | ídem |
-| ☐ | **F3.6** Hash de fuentes y detección de divergencia | [ADR 0005](../docs/decisiones/0005-derivadas-no-readonly.md) | editar a mano una zona derivada → el motor pregunta, no sobrescribe |
-| ☐ | **F3.7** Build sobre diff (recomputación incremental) | — | mismo resultado que el build completo |
+| [x] | **F3.1** Grafo en `config.yaml` + chequeo de aciclicidad | B2 | un ciclo declarado → error al arrancar, no en mitad del build ✅ *hecho* |
+| [x] | **F3.2** Builder `bitacora_entidad` | [`entradas.md`](../spec/entradas.md) | borrar derivadas y regenerar → **diff cero** ✅ *hecho* |
+| [x] | **F3.3** Builder `tareas_del_ciclo` | [`tarea.md`](../spec/tarea.md) | ídem ✅ *hecho* |
+| [x] | **F3.4** Builder `cadencias-legibles` | [`cadencia.md`](../spec/cadencia.md) | ídem ✅ *hecho* |
+| [x] | **F3.5** Builders `indice_notas` y `notas_entidad` | [`nota.md`](../spec/nota.md) O8 | ídem ✅ *hecho* |
+| [x] | **F3.6** Hash de fuentes y detección de divergencia | [ADR 0005](../docs/decisiones/0005-derivadas-no-readonly.md) | editar a mano una zona derivada → el motor pregunta, no sobrescribe ✅ *hecho* |
+| [x] | **F3.7** Build sobre diff (recomputación incremental) | — | mismo resultado que el build completo ✅ *hecho* |
 
 > **La trampa que el propio ADR 0005 advierte.** Si el hash se calcula sobre bytes crudos, un
 > cambio de formato dispara la pregunta de divergencia en todos los perfiles a la vez. La
