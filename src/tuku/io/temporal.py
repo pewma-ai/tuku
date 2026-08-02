@@ -1,25 +1,20 @@
 """Parser y gramática de expresiones temporales (F1.4).
 
-Cumple `spec/tarea.md` §4.
-Soporta:
-- Precisa: `YYYY-MM-DD` o `YYYY-MM-DD HH:MM`
-- Rango: `YYYY-MM-DD/YYYY-MM-DD`
-- Difusa: `~YYYY-MM` o `~Ns` / `~Nm`
-- Relativa a ciclo: `next:<tipo>` o `next`
+Cumple `spec/tarea.md` §4 y ADR 0017 (Pydantic v2).
 """
 
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+
+from pydantic import BaseModel
 
 
 class DateGrammarError(Exception):
     """Error al parsear una expresión temporal."""
 
 
-@dataclass
-class TemporalExpr:
+class TemporalExpr(BaseModel):
     kind: str  # 'precise', 'range', 'fuzzy', 'next'
     start_date: str | None = None
     end_date: str | None = None

@@ -1,6 +1,6 @@
 """Parser y serializador de delimitadores HTML en Markdown (F1.5).
 
-Cumple ADR 0013 y preserva íntegramente comentarios especiales:
+Cumple ADR 0013, ADR 0017 (Pydantic v2) y preserva íntegramente comentarios especiales:
 - `<!-- tuku:editable --> ... <!-- /tuku:editable -->`
 - `<!-- tuku:derived id=... hash=... --> ... <!-- /tuku:derived -->`
 - `<!-- tuku:cadencias ... -->`
@@ -9,13 +9,13 @@ Cumple ADR 0013 y preserva íntegramente comentarios especiales:
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+
+from pydantic import BaseModel, Field
 
 
-@dataclass
-class HTMLBlock:
+class HTMLBlock(BaseModel):
     kind: str  # 'editable', 'derived', 'cadencias'
-    attrs: dict[str, str] = field(default_factory=dict)
+    attrs: dict[str, str] = Field(default_factory=dict)
     content: str = ""
     raw: str = ""
 

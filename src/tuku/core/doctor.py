@@ -1,13 +1,14 @@
 """Diagnóstico de perfil y motor `tuku doctor`.
 
-Implementa las verificaciones descritas en `docs/deployment.md` §2.3.
+Implementa las verificaciones descritas en `docs/deployment.md` §2.3 y ADR 0017.
 """
 
 from __future__ import annotations
 
 import subprocess
-from dataclasses import dataclass, field
 from pathlib import Path
+
+from pydantic import BaseModel, Field
 
 from tuku.core.config import ConfigError, ProfileConfig
 
@@ -42,15 +43,14 @@ def get_git_info(cwd: Path) -> tuple[str, str, str]:
     return version, commit, branch
 
 
-@dataclass
-class DoctorResult:
+class DoctorResult(BaseModel):
     version: str
     commit: str
     branch: str
     profile_path: Path
     valid_config: bool
     schema_version: int | None = None
-    issues: list[str] = field(default_factory=list)
+    issues: list[str] = Field(default_factory=list)
 
 
 def run_doctor(profile_dir: Path) -> DoctorResult:

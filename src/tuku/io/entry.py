@@ -1,14 +1,13 @@
 """Parser y serializador de Entradas de Bitácora (F1.3).
 
-Cumple `spec/entradas.md` §3.
-Gramática:
-- [(HH:MM)] [[<entidad>](<ruta>)][ **<Clasificación>:**] <texto> [#marcadores]
+Cumple `spec/entradas.md` §3 y ADR 0017 (Pydantic v2).
 """
 
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+
+from pydantic import BaseModel, Field
 
 VALORES_CLASIFICACION_DEFAULT = {"Hito", "Decisión", "Señal", "Msg"}
 
@@ -17,14 +16,13 @@ class EntryError(Exception):
     """Error al parsear o serializar una entrada de bitácora."""
 
 
-@dataclass
-class Entry:
-    time: str | None
-    entity_id: str | None
-    entity_path: str | None
-    classification: str | None
+class Entry(BaseModel):
+    time: str | None = None
+    entity_id: str | None = None
+    entity_path: str | None = None
+    classification: str | None = None
     text: str
-    tags: list[str] = field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
 
     @classmethod
     def parse_line(

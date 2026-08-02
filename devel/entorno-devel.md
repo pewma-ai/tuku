@@ -56,6 +56,7 @@ esta opción, falla al instante.
 - **Round-trip byte a byte.** Leer un archivo canónico y reescribirlo no altera ni un byte de
   espaciado ni de comentarios. Obligación derivada de los ADR 0013 y 0014, que guardan datos
   canónicos dentro de comentarios HTML.
+- **Modelos y validaciones con Pydantic v2.** Toda estructura de datos interna (`ProfileConfig`, `TukuTask`, `Entry`, etc.) se define mediante `pydantic.BaseModel` ([ADR 0017](../docs/decisiones/0017-pydantic-v2-para-modelos.md)), aprovechando su motor en Rust para validación y deserialización acelerada.
 - **Tests bien documentados.** Todo módulo y función de test en `tests/` debe llevar docstring explícito explicando **qué regla o invariante verifica** y la razón de su diseño, sirviendo como especificación ejecutable.
 - **Aislamiento agéntico (F5).** Cada test instancia un perfil de Hermes desde cero vía
   `HERMES_HOME` apuntando a `tmp_path`.

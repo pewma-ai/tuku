@@ -1,36 +1,32 @@
 """Parser y serializador posicional de tareas Markdown (F1.2).
 
-Cumple ADR 0014 y `spec/tarea.md` §3.
-Formato posicional:
-- [ ] <created> <effort> <entity|-> <deadline|-> <followup|-> <blockuntil|->
-      <originator> <texto> ^t-<id>
-      <!-- tuku: cycles=N outcome=... completed=... deps=... process=... -->
+Cumple ADR 0014, ADR 0017 (Pydantic v2) y `spec/tarea.md` §3.
 """
 
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
 from typing import Any
+
+from pydantic import BaseModel, Field
 
 
 class TaskError(Exception):
     """Error al parsear o serializar una tarea posicional."""
 
 
-@dataclass
-class TukuTask:
+class TukuTask(BaseModel):
     created: str
     effort: str
-    entity: str | None
-    deadline: str | None
-    followup: str | None
-    blockuntil: str | None
+    entity: str | None = None
+    deadline: str | None = None
+    followup: str | None = None
+    blockuntil: str | None = None
     originator: str
     text: str
     task_id: str
     status: str = "open"  # 'open' ([ ]), 'completed' ([x]), 'cancelled' ([-])
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     quote: str | None = None
 
     @classmethod
