@@ -6,10 +6,10 @@
 
 ## 1. Aislamiento con `uv`
 
-Para garantizar reproducibilidad y no contaminar el Python del sistema:
+Para garantizar reproducibilidad y no contaminar el Python del sistema (requiere **Python 3.14**):
 
 ```bash
-uv venv                          # crea el entorno
+uv venv --python 3.14            # crea el entorno fijado en Python 3.14
 uv pip install -e ".[dev]"       # motor en editable + herramientas de desarrollo
 ```
 

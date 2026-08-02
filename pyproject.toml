@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tuku"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dynamic = ["version"]
 
 [project.scripts]
@@ -68,7 +68,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 ignore = ["RUF001", "RUF002", "RUF003"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.14"
 files = ["src"]
 strict = true
 

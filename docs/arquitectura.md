@@ -284,7 +284,7 @@ problema de arquitectura.
 | Componente | Decisión |
 |---|---|
 | Almacén | archivos `.md` + Git |
-| Janitors | Python 3 |
+| Janitors | Python 3.14 |
 | Motor agéntico (pruebas) | Hermes + modelo económico, invocado por CLI |
 | Procesos | Markdown ejecutable por humano o agente medio |
 | Scheduler | cron: revisa cadencias vencidas, tareas difusas por reevaluar, encadenamientos |
