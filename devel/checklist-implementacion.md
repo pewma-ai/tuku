@@ -60,7 +60,7 @@ Consolidación de decisiones ya tomadas y dispersas. Ninguno exige diseño nuevo
 | [x] | **F1.2** Línea posicional de tareas | [ADR 0014](../docs/decisiones/0014-formato-posicional-tareas.md), [`tarea.md`](../spec/tarea.md) | cada campo por separado + placeholder `-` obligatorio ✅ *hecho* |
 | [x] | **F1.3** Entradas: hora opcional, `[entidad](ruta)`, clasificación, `#marcadores` | [`entradas.md`](../spec/entradas.md) | los cuatro valores de clasificación y ninguno más ✅ *hecho* |
 | [x] | **F1.4** Gramática temporal: precisa, rango, difusa, `next:<tipo>` | [`tarea.md`](../spec/tarea.md) §4 | una fecha inválida se rechaza con posición ✅ *hecho* |
-| ☐ | **F1.5** Delimitadores HTML (`tuku:editable`, `tuku:derived`, `tuku:cadencias`) | [ADR 0013](../docs/decisiones/0013-cadencias-en-comentario.md) | comentario preservado íntegro tras reescribir |
+| [x] | **F1.5** Delimitadores HTML (`tuku:editable`, `tuku:derived`, `tuku:cadencias`) | [ADR 0013](../docs/decisiones/0013-cadencias-en-comentario.md) | comentario preservado íntegro tras reescribir ✅ *hecho* |
 | ☐ | **F1.6** Round-trip sobre **todos** los ejemplos normativos de `spec/` | [`spec/README.md`](../spec/README.md) | `test_roundtrip.py` parametrizado por `specref.casos()` |
 
 > **La asimetría que hay que tener presente antes de escribir una línea.** En el canónico de
