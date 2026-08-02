@@ -40,18 +40,25 @@ verificable.
 
 ---
 
-## Arranque en frío
+## Arranque en frío y prueba local
 
 ```bash
 uv venv && uv pip install -e ".[dev]"
-uv run pytest          # debe pasar en verde HOY, antes de que exista el motor
+uv run pytest          # suite determinista
 uv run ruff check .
 uv run mypy src
 ```
 
-`pytest` en verde sin motor no es un truco: la suite ya verifica la coherencia del corpus
-documental —enlaces, anonimización, cobertura de invariantes—, que es el insumo del que come
-el desarrollo asistido. Ver [`../tests/README.md`](../tests/README.md).
+### Probar el CLI manualmente
+
+```bash
+uv run tuku --help                        # ayuda general
+uv run tuku init /tmp/mi-perfil           # sembrar perfil de prueba
+uv run tuku -p /tmp/mi-perfil doctor      # verificar salud del perfil
+uv run tuku -p /tmp/mi-perfil sync        # sincronizar assets
+```
+
+O instalar en el sistema para usar `tuku` directo: `pipx install -e . --force`.
 
 ---
 
