@@ -17,25 +17,72 @@ from tuku.core.sync import sync_perfil
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="tuku",
-        description="TUKU — Management as Code para la vida personal",
+        description=(
+            "TUKU — Management as Code (MaC) para la vida personal.\n\n"
+            "Sistema de gestión basado en archivos Markdown planos versionados en Git,\n"
+            "operado mediante janitors deterministas y asistencia conversacional."
+        ),
+        epilog=(
+            "Ejemplos:\n"
+            "  tuku init                  Siembra un nuevo perfil en el CWD\n"
+            "  tuku init ~/mi-perfil      Siembra un perfil en la ruta dada\n"
+            "  tuku doctor                Diagnostica la salud del perfil\n"
+            "  tuku -p ~/perfil doctor    Diagnostica un perfil específico\n"
+            "  tuku sync                  Sincroniza punteros a procesos\n\n"
+            "Documentación: https://github.com/pewma-ai/tuku"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "-p", "--profile", type=Path, default=Path.cwd(), help="Ruta al perfil TUKU"
+        "-p",
+        "--profile",
+        type=Path,
+        default=Path.cwd(),
+        help="Ruta al perfil TUKU (default: directorio actual)",
     )
 
-    subparsers = parser.add_subparsers(dest="command")
+    subparsers = parser.add_subparsers(dest="command", title="Subcomandos")
 
     # init
-    parser_init = subparsers.add_parser("init", help="Siembra un nuevo perfil TUKU")
+    parser_init = subparsers.add_parser(
+        "init",
+        help="Siembra un nuevo perfil TUKU con la estructura canónica",
+        description=(
+            "Inicializa el árbol de directorios (entradas/, tareas/, ciclos/, entidades/,\n"
+            "estrategia/, notas/) y siembra los archivos iniciales, incluyendo .gitignore\n"
+            "y .tuku/config.yaml."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser_init.add_argument(
-        "target", type=Path, nargs="?", default=Path.cwd(), help="Directorio destino"
+        "target",
+        type=Path,
+        nargs="?",
+        default=Path.cwd(),
+        help="Directorio destino donde sembrar el perfil (default: directorio actual)",
     )
 
     # sync
-    subparsers.add_parser("sync", help="Sincroniza punteros a procesos y assets de agente")
+    subparsers.add_parser(
+        "sync",
+        help="Sincroniza punteros a procesos y assets de agente",
+        description=(
+            "Genera y actualiza los punteros en .tuku/procesos/ e instrucciones AGENTS.md\n"
+            "desde el motor instalado hacia el perfil, sin vendorizar código ejecutable."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
 
     # doctor
-    subparsers.add_parser("doctor", help="Diagnóstico de salud del perfil y versión del motor")
+    subparsers.add_parser(
+        "doctor",
+        help="Diagnóstico de salud del perfil y versión del motor",
+        description=(
+            "Verifica la versión del motor, commit/rama Git de build,\n"
+            "validez de .tuku/config.yaml y presencia de canónicos."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
 
     args = parser.parse_args(argv)
 
