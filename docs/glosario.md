@@ -29,7 +29,9 @@ confundir con *bitácora*, que es el archivo donde se escriben.
 
 **Capacidad** — Tiempo y recursos disponibles del usuario, en `estrategia/capacidad.md`. Es la restricción contra la que se contrasta el plan y, junto con los objetivos de las entidades vigentes, lo que determina qué se archiva.
 
-**Nota** — Documento del eje deliberativo: ideas desarrolladas y conclusiones sedimentadas. No es temporal ni pertenece necesariamente a una entidad. La destilación ocurre al escribirla; no hay ritual de destilación en el sistema.
+**Nota** — Documento del eje deliberativo: una idea desarrollada o una conclusión sedimentada. No es temporal y puede pertenecer a una entidad sin estar obligada a ello. A diferencia de una entrada —hecho fechado e inmutable— una nota es mutable y se corrige editándola. Lleva `summary` obligatorio, que es lo que hace consultable el corpus sin leerlo entero. La destilación ocurre al escribirla; no hay ritual de destilación en el sistema (`spec/nota.md`).
+
+**Stub** — Nota que existe solo para que un enlace resuelva, con `summary: ""`. Es un estado válido y declarado, no un pendiente: un stub que sigue vacío un año es información sobre la importancia real de ese concepto.
 
 **Clasificación** — Etiqueta obligatoria de una entrada, extensible por configuración: `hito`, `decision`, `senal`, `msg`. Es lo que permite que el informe de cierre sea mayormente un filtro determinista.
 

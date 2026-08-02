@@ -167,6 +167,8 @@ mi-tuku/
 │   ├── cadencias.md
 │   └── capacidad.md
 └── notas/
+    ├── notas.md         # índice derivado
+    └── ARCHIVADO/
 ```
 
 **Los assets de agente deben ser descubribles desde el perfil.** Un agente de codificación
@@ -174,6 +176,11 @@ lee lo que está en la carpeta; si los procesos viven solo en site-packages, no 
 pierde la ventaja del anidamiento POSIX de instrucciones. Por eso `tuku init` genera
 `.tuku/procesos/` como punteros o symlinks al motor instalado, y `AGENTS.md` por nivel.
 Se regenera con `tuku sync` y no ensucia el historial de datos.
+
+`notas/` se siembra con su índice vacío y su propio `AGENTS.md`, que acota el comportamiento
+del agente sobre el corpus deliberativo (`spec/nota.md`). Un directorio vacío no enseña nada:
+sembrado con el índice, el usuario ve desde el primer día dónde va una nota y qué forma
+tiene.
 
 ---
 
@@ -200,9 +207,10 @@ Definirlo hoy cuesta poco; retrofitearlo cuesta muchísimo.
 ```
 tuku init [ruta]        # crea el perfil, siembra cadencias de sistema
 tuku setup              # modelo, claves, canal de entrada
-tuku abrir              # plan_ + siembra de días en entradas/
+tuku abrir              # plan_ del ciclo
 tuku cerrar             # resultados_
 tuku tarea ...          # alta, cierre, consulta del backlog canónico
+tuku nota ...           # alta y consulta del corpus deliberativo
 tuku janitor            # garantiza invariantes (idempotente)
 tuku sync               # regenera punteros y AGENTS.md tras actualizar el motor
 tuku doctor             # versión, esquema, enlaces rotos, estado del cron

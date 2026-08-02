@@ -61,6 +61,8 @@ mi-tuku/
 │   ├── cadencias.md
 │   └── capacidad.md
 └── notas/
+    ├── notas.md         # índice derivado
+    └── ARCHIVADO/
 ```
 
 Dos observaciones sobre la forma:
@@ -101,7 +103,7 @@ canónico. Todo lo demás es proyección recomputable. Nada se copia; todo se pr
 | `ciclos/plan_*` | declaración del ciclo | dónde y cuándo estoy; el conjunto es el calendario |
 | Entidades: secciones editables | mutable | descripción, objetivos, recursos |
 | `estrategia/` | mutable con gate humano | capacidad y cadencias (P5) |
-| Notas | mutable | |
+| `notas/*.md` | mutable | eje deliberativo; a diferencia de una entrada, se corrige editando (`spec/nota.md`) |
 
 **Proyecciones** (derivadas, jamás editadas a mano):
 
@@ -109,6 +111,7 @@ canónico. Todo lo demás es proyección recomputable. Nada se copia; todo se pr
   proyecciones de `entradas/` con distinto filtro —por pertenencia una, por rango de fechas
   la otra—. Ninguna es un almacén.
 - El bloque de tareas del ciclo, en el plan.
+- El índice de notas (`notas/notas.md`) y la proyección de notas en la página de su entidad.
 - Índices, dashboards, resúmenes anuales.
 
 Esto resuelve el fallo estructural que motivó el rediseño: una tarea no se copia entre
@@ -246,19 +249,28 @@ descanso, vacaciones, misión), lugar y fechas. El conjunto de archivos `plan_*`
 calendario del usuario, y es contra ese conjunto que se resuelve `(next:turno)`. Romper la
 cadencia declarando un ciclo excepcional es el mecanismo normal, no un caso especial.
 
-**No hay archivo de bitácora de ciclo.** Se escribe en `entradas/YYYY-MM.md`, cuyos días
-siembra la apertura. La vista del ciclo se congela dentro de `resultados_*` al cerrar. Así
-no queda ninguna zona donde el usuario pueda escribir sobre una proyección.
+**No hay archivo de bitácora de ciclo.** Se escribe en `entradas/entradas.md`, el archivo
+activo, que rota a `entradas/entradas-YYYY-MM.md` al cerrarse el mes. La apertura no siembra
+días: el usuario escribe el día que corresponde cuando tiene algo que registrar, y "los días
+de este ciclo" es una proyección bajo demanda (`spec/entradas.md` §2.2). La vista del ciclo se
+congela dentro de `resultados_*` al cerrar. Así no queda ninguna zona donde el usuario pueda
+escribir sobre una proyección.
 
 **Ciclos de tipos distintos pueden solaparse** —una misión dentro de un turno, un ciclo
 mensual de finanzas sobre los turnos— porque las entradas no viven bajo el ciclo: dos ciclos
 solapados son dos filtros sobre el mismo conjunto. Solo se prohíbe el solapamiento entre
 ciclos del mismo tipo.
 
-**Las clasificaciones hacen barato el cierre.** Cada entrada lleva una clasificación
-extensible —`hito`, `decision`, `senal`, `friccion`, `msg`—, de modo que el informe de
-cierre es mayormente un filtro determinista que el agente **redacta**, no una inferencia
-que el agente inventa. Avances ← hitos. Desviaciones ← fricciones. Señales ← senal.
+**Las clasificaciones abaratan el cierre, pero no lo resuelven.** Cada entrada lleva una
+clasificación extensible —`hito`, `decision`, `senal`, `msg`—, de modo que buena parte del
+informe parte de un filtro determinista que el agente **redacta**, no de una inferencia que
+el agente inventa: Avances ← hitos. Aprendizajes ← decisiones y señales.
+
+**Las desviaciones no salen de un filtro.** No existe clasificación de fricción: nadie rotula
+sus propios fracasos mientras trabaja —cero apariciones en el corpus real— y por eso el cierre
+las **descubre** contrastando, entidad por entidad, lo esperado de ella contra lo registrado
+(`spec/artefactos-ciclo.md` §3.2). Es la parte del cierre que genuinamente requiere juicio, y
+la razón por la que el alcance del informe se define por entidad y no por filtro plano.
 
 **El informe es la memoria de largo plazo.** Markdown no es una base de datos: la consulta
 histórica se responde por informes, no escaneando el detalle. El crudo se conserva por año

@@ -21,8 +21,10 @@ Cada spec declara en su cabecera de qué depende. El orden que sigue respeta esa
 | 3 | [`tarea.md`](tarea.md) | El backlog canónico, la gramática temporal y el arrastre | completa |
 | 4 | [`cadencia.md`](cadencia.md) | La regla que produce artefactos en el tiempo: herencia, disparos, emisión | completa |
 | 5 | [`artefactos-ciclo.md`](artefactos-ciclo.md) | `plan_*`, `resultados_*` e informes por audiencia | completa |
+| 6 | [`proceso.md`](proceso.md) | Plantillas de trabajo recurrente y sus instancias como grupos de tareas | completa |
+| 7 | [`nota.md`](nota.md) | El eje deliberativo: notas, `summary`, enlaces justificados e índice | completa |
 | — | [`frontmatter.md`](frontmatter.md) | Los campos mínimos, transversales a todo tipo de archivo | **pendiente** |
-| — | [`perfil.md`](perfil.md) | El layout del perfil y el contrato con el motor: `.tuku/config.yaml` | **pendiente** |
+| — | [`perfil.md`](perfil.md) | El layout del perfil y el contrato con el motor: `.tuku/config.yaml` | parcial — solo `capacidad.md` |
 
 Lectura mínima para escribir código del motor: **entidad → entradas → tarea**. Son las tres
 primitivas; el resto se construye sobre ellas.
@@ -61,6 +63,8 @@ inequívoca desde cualquier lugar del repositorio:
 | `T` | tarea |
 | `K` | cadencia |
 | `C` | artefactos de ciclo |
+| `O` | nota |
+| `P` | proceso · **colisiona con perfil**; renombrar uno antes de implementar |
 
 Toda invariante declara su **garante**: `janitor`, `janitor de build`, `motor`, o `test de
 replay`. Es la aplicación directa de P3 —cada garantía tiene un costo conocido— y lo que

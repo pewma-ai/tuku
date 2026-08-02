@@ -44,7 +44,7 @@ TUKU implementa la metodología **Management as Code (MaC)** en su variante pers
 
 ## PEWMA.AI
 
-Este proyecto es desarrollado y mantenido por **PEWMA.AI**, laboratorio de innovación enfocado en herramientas agenticas y arquitectura de software para el Sur Global.
+Este proyecto es desarrollado y mantenido por **PEWMA.AI**, laboratorio de innovación enfocado en herramientas agénticas y arquitectura de software para el Sur Global.
 
 🌐 [pewma.ai](https://pewma.ai)
 

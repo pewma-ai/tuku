@@ -59,7 +59,7 @@ El ciclo de gestión se proyecta sobre tres ejes:
 
 | Eje | Pregunta | Materialización |
 |---|---|---|
-| **Temporal** | ¿cuándo? | ciclos, con su bitácora, plan y resultados |
+| **Temporal** | ¿cuándo? | ciclos, con su plan y resultados |
 | **Organizacional** | ¿sobre qué? | entidades: áreas, proyectos, clientes, lo que el usuario defina |
 | **Deliberativo** | ¿por qué así? | notas: ideas desarrolladas y conclusiones sedimentadas |
 
@@ -73,6 +73,12 @@ De este cruce se deduce la regla de oro del modelo de datos: entrada y tarea se 
 **una sola vez, en un lugar canónico**, y todo lo demás — la bitácora del ciclo, la página
 de la entidad, el informe anual — son **proyecciones** recomputables de ese canónico. Nada
 se copia; todo se proyecta.
+
+**El eje deliberativo no cruza: toca.** Una nota puede declarar una entidad, y entonces se
+proyecta en su página; pero no tiene fecha, no pertenece a un ciclo, no la despiertan las
+cadencias y no aparece en el cierre. Es el artefacto más inerte del sistema y eso es
+deliberado — el pensamiento no tiene ritmo propio, y forzarle uno sería convertirlo en
+tarea. Su especificación es [`spec/nota.md`](../spec/nota.md).
 
 ### 3.3 El ciclo no es la semana
 
@@ -180,18 +186,26 @@ del usuario a una VM multiusuario cambia dónde viven los perfiles, no el modelo
 
 ### 5.2 Los artefactos del ciclo
 
-La apertura de un ciclo crea dos archivos; el cierre crea uno:
+La apertura de un ciclo declara el ciclo; el cierre produce su informe:
 
 | Artefacto | Dueño | Contenido |
 |---|---|---|
 | `plan_FECHA_tipo` | sembrado por el agente, corregido por el humano | intención, tareas del ciclo, restricciones |
-| `bitacora_FECHA_tipo` | humano/agente | entradas del día, superficie de escritura |
 | `resultados_FECHA_tipo` | sembrado, corregido | avances, desviaciones, aprendizajes |
 
-Un archivo, un dueño. Las entradas de bitácora llevan prefijo estructurado — fecha, autor,
-entidad, clasificación — y las clasificaciones (`hito`, `decision`, `senal`, `friccion`,
-extensibles) permiten que el informe de cierre sea mayormente un filtro determinista que
-el agente redacta, no una inferencia que el agente inventa.
+No hay archivo de bitácora del ciclo: las entradas se escriben en `entradas/`, particionadas
+por mes, y la vista del ciclo es una proyección que se congela dentro de `resultados_*` al
+cerrar. Así no queda ninguna zona donde el usuario pueda escribir sobre una proyección.
+
+Un archivo, un dueño. Las entradas llevan prefijo estructurado —fecha, entidad,
+clasificación— y las clasificaciones (`hito`, `decision`, `senal`, extensibles) permiten que
+el informe de cierre parta de un filtro determinista que el agente redacta, no de una
+inferencia que el agente inventa.
+
+**No hay clasificación de fricción.** Las desviaciones no se etiquetan al escribir: se
+descubren en el cierre contrastando lo esperado de cada entidad con lo efectivamente
+registrado. Pedirle al usuario que rotule sus propios fracasos mientras trabaja es pedirle lo
+que no va a hacer — en el corpus real, cero veces.
 
 ### 5.3 El primer día
 
@@ -209,8 +223,11 @@ nada.
 
 ## 6. Lo que TUKU no es
 
-- **No es un wiki ni un segundo cerebro genérico.** Existe para gestionar, no para
-  coleccionar. Las notas sirven al ciclo de gestión; no compiten con Obsidian como PKM.
+- **No es un segundo cerebro genérico.** Existe para gestionar, no para coleccionar. El eje
+  deliberativo tiene peso real —notas con clasificación, enlaces justificados e índice
+  derivado (`spec/nota.md`)— pero está al servicio del ciclo de gestión: una nota se escribe
+  para decidir mejor, no para completar una colección. TUKU no compite con Obsidian; escribe
+  Markdown plano que Obsidian lee, y esa es toda la relación.
 - **No es una plataforma de esquemas configurables.** No hay editor de tipos, ni
   validación fuerte de campos, ni UI de configuración. Notion ya existe.
 - **No es un ejército de agentes.** Hay una sola interfaz conversacional visible. Las
