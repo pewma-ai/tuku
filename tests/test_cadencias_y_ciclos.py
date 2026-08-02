@@ -56,7 +56,7 @@ def test_F4_4_resolucion_next_ciclo_por_grep(tmp_path: Path) -> None:
         "cycle_end: 2026-08-23\n"
         "status: open\n"
         "---\n"
-        "# Plan del Ciclo 2026-W34\n"
+        "# Plan del ciclo\n"
     )
     plan_path.write_text(plan_doc, encoding="utf-8")
 
@@ -72,7 +72,7 @@ def test_F4_5_abrir_ciclo_sin_agente(tmp_path: Path) -> None:
     plan_file = abrir_ciclo(perfil_dir, "2026-W33", sin_agente=True)
     assert plan_file.exists()
     text = plan_file.read_text(encoding="utf-8")
-    assert "# Plan del Ciclo 2026-W33" in text
+    assert "# Plan del ciclo" in text
 
 
 def test_F4_6_radar_consulta_en_vivo_sin_disco(tmp_path: Path) -> None:

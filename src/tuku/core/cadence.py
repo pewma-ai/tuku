@@ -186,10 +186,11 @@ def abrir_ciclo(profile_dir: Path, cycle_name: str, sin_agente: bool = True) -> 
 
     content = (
         f"---\nid: plan-{cycle_name}\ntype: plan\n---\n"
-        f"# Plan del Ciclo {cycle_name}\n\n"
+        "# Plan del ciclo\n\n"
         f"<!-- Rango: {today_str}/{today_str} -->\n\n"
-        "## Insumos y Capacidad\n"
-        "- Capacidad calculada: 100%\n"
+        "## Intención\n"
+        "## No entra (y por qué)\n"
+        "## Restricciones y contexto\n"
     )
     file_path.write_text(content, encoding="utf-8")
     return file_path
