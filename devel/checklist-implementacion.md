@@ -41,7 +41,7 @@ Consolidación de decisiones ya tomadas y dispersas. Ninguno exige diseño nuevo
 |---|---|---|---|
 | [x] | **F0.1** `pyproject.toml` con `uv`, `pytest`, `ruff`, `mypy` | — | `uv run pytest` arranca ✅ *hecho* |
 | [x] | **F0.2** `core/config.py`: lee `.tuku/config.yaml`, valida `schema_version` | [ADR 0003](../docs/decisiones/0003-version-de-esquema.md), B2 | esquema fuera de rango → error claro, no traceback ✅ *hecho* |
-| ☐ | **F0.3** `tuku init`: árbol de directorios + `.gitignore` con `tuku.log` y `.tuku/cache/` | [ADR 0015](../docs/decisiones/0015-tuku-log-no-versionado.md) | `tuku init` + `git status` limpio; `notas/` sembrado con índice y `AGENTS.md` |
+| [x] | **F0.3** `tuku init`: árbol de directorios + `.gitignore` con `tuku.log` y `.tuku/cache/` | [ADR 0015](../docs/decisiones/0015-tuku-log-no-versionado.md) | `tuku init` + `git status` limpio; `notas/` sembrado con índice y `AGENTS.md` ✅ *hecho* |
 | ☐ | **F0.4** `tuku sync`: punteros a procesos y `AGENTS.md` por nivel | [ADR 0002](../docs/decisiones/0002-motor-fuera-del-perfil.md) | idempotente: dos corridas → diff cero |
 | ☐ | **F0.5** `tuku doctor`: versión, commit, rama, validación de perfil | `deployment.md` §2.3 | reporta commit real, no `unknown` |
 
