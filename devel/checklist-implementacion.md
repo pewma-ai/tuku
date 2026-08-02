@@ -26,10 +26,8 @@ estar cerrados.
 
 Consolidación de decisiones ya tomadas y dispersas. Ninguno exige diseño nuevo.
 
-- [ ] **B1** Escribir [`spec/frontmatter.md`](../spec/frontmatter.md), hoy vacío. Es
-      transversal: F1 lo necesita para el parser y F2 para N1/E1/T1. Los campos están hoy
-      repartidos entre siete specs.
-      *Verificación:* `test_frontmatter_campos_minimos` sobre los ejemplos de la propia spec.
+- [x] **B1** Escribir [`spec/frontmatter.md`](../spec/frontmatter.md) (creado ligero y compatible con `spec/*`).
+      *Verificación:* `test_frontmatter_campos_minimos` pasa ✅.
 - [ ] **B2** Completar [`spec/perfil.md`](../spec/perfil.md) con el formato real de
       `.tuku/config.yaml`. F0 lo carga y F3 lee de él el grafo de derivaciones. Hoy existe
       solo como fragmentos ilustrativos en cuatro documentos.
