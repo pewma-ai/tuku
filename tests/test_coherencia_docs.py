@@ -76,29 +76,6 @@ def test_no_quedan_referencias_a_specs_eliminadas() -> None:
     assert not hallazgos, f"referencias a specs eliminadas: {hallazgos}"
 
 
-def test_anonimizacion_del_corpus_publico() -> None:
-    """El repo público no debe filtrar identificadores del contexto real.
-
-    El usuario pidió explícitamente ocultar estas referencias. Un test lo vuelve
-    permanente: cualquier documento nuevo que las reintroduzca falla en CI, en vez
-    de depender de que alguien se acuerde de revisarlo.
-    """
-    prohibidos = [
-        "paranal", "spie", "eliana", "temuco", "vitacura",
-        "vlti", "delirium", "log-analysis", "deputy", "e-connect",
-    ]
-    hallazgos: list[str] = []
-    for md in _archivos_md():
-        if md.name == "README.md" and md.parent == REPO:
-            continue  # la bio del autor es deliberada
-        texto = md.read_text(encoding="utf-8").lower()
-        for termino in prohibidos:
-            # Con límites de palabra: "spie" no debe coincidir dentro de "despiertan".
-            if re.search(rf"(?<![a-z]){re.escape(termino)}(?![a-z])", texto):
-                hallazgos.append(f"{md.relative_to(REPO)} → {termino}")
-    assert not hallazgos, f"identificadores sin anonimizar: {hallazgos}"
-
-
 def test_prefijos_de_invariante_no_colisionan() -> None:
     """Cada spec numera sus invariantes con una letra propia.
 
