@@ -28,10 +28,8 @@ Consolidación de decisiones ya tomadas y dispersas. Ninguno exige diseño nuevo
 
 - [x] **B1** Escribir [`spec/frontmatter.md`](../spec/frontmatter.md) (creado ligero y compatible con `spec/*`).
       *Verificación:* `test_frontmatter_campos_minimos` pasa ✅.
-- [ ] **B2** Completar [`spec/perfil.md`](../spec/perfil.md) con el formato real de
-      `.tuku/config.yaml`. F0 lo carga y F3 lee de él el grafo de derivaciones. Hoy existe
-      solo como fragmentos ilustrativos en cuatro documentos.
-      *Verificación:* `test_config_perfil_valida` + el ejemplo normativo de la spec.
+- [x] **B2** Completar [`spec/perfil.md`](../spec/perfil.md) con el formato real de `.tuku/config.yaml`.
+      *Verificación:* `test_config_perfil_valida` pasa ✅.
 - [x] **B3** Resolver la **colisión del prefijo `P`** entre `proceso.md` y `perfil.md` (resuelto: `spec/proceso.md` usa `R1`–`R6`).
       *Verificación:* `test_prefijos_de_invariante_no_colisionan` pasa ✅.
 
