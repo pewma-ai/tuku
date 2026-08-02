@@ -179,9 +179,11 @@ Es la forma general de lo que `blocks` hace tarea-a-tarea (`spec/tarea.md` §5).
 | `tarea` | entrada en `tareas/tareas.md` | con `origin=<id de la cadencia>` |
 | `ciclo` | archivo `plan_*` sembrado | es como se generan los ciclos regulares |
 | `alerta` | zona derivada en la página del nivel | efímera: desaparece cuando la condición cesa |
+| `proceso` | instancia de un proceso sobre una entidad | emite el grupo completo de tareas (`spec/proceso.md`) |
 
-Diferencia importante: **tarea y ciclo son objetos canónicos que persisten; la alerta es
-derivada.** Una alerta no se completa ni se arrastra — se apaga sola cuando deja de aplicar.
+**Notificación (`notify`).** `emit` acepta `notify: window | immediate`. Con `window` (por defecto), la notificación se difiere hasta la próxima franja declarada en `estrategia/capacidad.md` (`notify_window`). **La emisión de la tarea o proceso es inmediata siempre**; lo que se difiere es el aviso. Una tarea nunca se retrasa por una preferencia de notificación.
+
+Diferencia importante: **tarea, proceso y ciclo son objetos canónicos que persisten; la alerta es derivada.** Una alerta no se completa ni se arrastra — se apaga sola cuando deja de aplicar.
 
 ### 5.1 Emisión de ciclos
 

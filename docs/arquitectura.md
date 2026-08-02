@@ -283,6 +283,8 @@ problema de arquitectura.
 
 **La elección del modelo económico es una prueba de P2**, no una restricción de presupuesto: si un proceso necesita un modelo de frontera para no descarrilar, el proceso está mal escrito.
 
+**Aislamiento de pruebas agénticas:** En la ejecución de tests integrados con Hermes, cada test debe instanciar un perfil de Hermes desde cero (entorno efímero aislado), garantizando que las pruebas sean deterministas y no arrastren contexto previo del asistente.
+
 ---
 
 ## 9. Versionado del esquema

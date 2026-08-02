@@ -107,9 +107,8 @@ variante personal. Metodología y producto se versionan por separado.
 **TUKU** — De *tukulpan*, mapudungun: recordar, traer a la memoria. El nombre es la
 promesa: lo que entró vuelve solo cuando corresponde.
 
-**Sembrar** — Generar un borrador que el humano corregirá y del que pasará a ser dueño.
-Un artefacto sembrado se genera una vez; ningún janitor vuelve a pisarlo.
+**Proceso** — Patrón repetible de gestión que define pasos ordenados, responsables y reglas de avance (ej. cotización a cliente, resolución de bug). Especificado en `spec/proceso.md`.
 
-**Tesauro vivo** — Índice de nombres de entidades y sus `keywords`, inyectado en el
-contexto del agente en cada turno. Es lo que permite entender "avancé en el paper" sin
-ambigüedad.
+**Instancia de proceso** — La aplicación concreta de una plantilla de proceso sobre una entidad específica en el tiempo (ej. cotización `cot-0042` sobre `distribuidora-sur`). Emite un grupo de tareas vinculadas por `process` y `step`.
+
+**Tesauro vivo** — Índice de nombres de entidades y sus `keywords`, inyectado en el contexto del agente en cada turno. Es lo que permite entender "avancé en el paper" sin ambigüedad.

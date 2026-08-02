@@ -61,20 +61,23 @@ modified: 2026-08-01
 Una tarea ocupa una línea, opcionalmente seguida de líneas de detalle indentadas:
 
 ```
-- [ ] [(<fecha>)] [<entidad>](<ruta>) <texto> ^<id>
-      <!-- tuku: created=… cycles=… deps=… blocks=… -->
-      > <descripción extendida>
+- [ ] <created> <effort> <entity|-> <deadline|-> <followup|-> <blockuntil|-> <originator> <texto> ^t-<id>
+      <!-- tuku: cycles=N outcome=… completed=… deps=… blocks=… process=cot-0042 step=2 -->
 ```
 
-Ejemplo:
+| Posición | Campo | Opcional | Placeholder vacío |
+|---|---|---|---|
+| 1 | `created` | no | — |
+| 2 | `effort` | no, con default | `1h` si no se especifica |
+| 3 | `entity` | sí | `-` |
+| 4 | `deadline` | sí | `-` |
+| 5 | `followup` | sí | `-` |
+| 6 | `blockuntil` | sí | `-` |
+| 7 | `originator` | no | `manual` o `id` de la cadencia que la emitió |
+| — | `texto` | no | resto de la línea |
+| — | `^t-id` | no | al final, después del texto (requisito de Obsidian) |
 
-```markdown
-- [ ] (2026-08-11) [coordinacion](../entidades/trabajo/coordinacion.md) Asistir a la capacitación anual en la oficina central ^t-2026-0143
-      <!-- tuku: created=2026-07-20 cycles=1 -->
-- [ ] (next:descanso) [colaboraciones](../entidades/trabajo/colaboraciones.md) Enviar correo de postulación conjunta ^t-2026-0087
-      <!-- tuku: created=2026-05-13 cycles=6 deps=t-2026-0090 -->
-      > Requiere acuerdo previo sobre autoría y reparto de horas.
-```
+`process` agrupa tareas que pertenecen a la misma instancia de proceso (`spec/proceso.md`); `step` identifica el paso de la plantilla que la generó. Ambos los escribe el motor.
 
 ### 3.1 Reparto de propiedad por línea
 

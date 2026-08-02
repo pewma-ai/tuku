@@ -53,10 +53,9 @@ entidades/
 Nivel raíz, obligatorio. Todo perfil tiene al menos `personal/`. El conjunto de ámbitos es
 propio de cada usuario.
 
-El ámbito no es "el nivel de más arriba": es la **frontera de confidencialidad y de
-compartición**. Es lo que algún día se federa con colegas, lo que se excluye de un export, lo
-que puede tener convenciones o idioma propios. Por eso tiene derechos que los niveles
-intermedios no tienen —tipos propios, gobernanza declarada— y por eso es obligatorio.
+El ámbito no es "el nivel de más arriba": es la **frontera de confidencialidad y de compartición**. Es lo que algún día se federa con colegas, lo que se excluye de un export, lo que puede tener convenciones o idioma propios. Por eso tiene derechos que los niveles intermedios no tienen —tipos propios, gobernanza declarada— y por eso es obligatorio.
+
+Cuando el alta de una entidad requiere un ámbito que no existe, el motor **pregunta**; no lo infiere. El ámbito es la frontera de confidencialidad y de compartición, y no es una decisión que el sistema deba tomar solo. Se pregunta una vez por ámbito nuevo y nunca más: las altas siguientes dentro de un ámbito existente no vuelven a preguntar.
 
 ### 2.2 Profundidad libre
 

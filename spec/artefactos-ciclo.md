@@ -44,6 +44,7 @@ id: plan-2026-08-10-viaje
 type: plan
 cycle_type: viaje           # string libre
 place: Santiago             # opcional
+parent_cycle: plan-2026-08-03-semana    # opcional; si existe, es un plan anidado
 cycle_start: 2026-08-10
 cycle_end: 2026-08-16
 status: open                # open | closed
@@ -164,6 +165,20 @@ Para cada entidad del alcance, el agente contrasta qué debería haber pasado �
 
 **Las tareas canceladas se listan aparte de las incumplidas**, con su razón.
 
+> En la simulación de un perfil comercial, el aprendizaje más útil del ciclo —el atraso de un proveedor propagándose a un compromiso con cliente— **no provino de ninguna clasificación**. Ninguna entrada estaba marcada. Salió del contraste por entidad entre lo esperado y lo registrado. Es la evidencia de por qué no existe una clasificación de fricción: **la fricción no se declara, se descubre.**
+
+**Ciclo sin Intención declarada.** El mecanismo de Desviaciones asume un plan previo, que no existe en el primer ciclo de un perfil nuevo. En ese caso el cierre **omite Desviaciones** y en su lugar propone la Intención del ciclo siguiente a partir de lo observado. El primer cierre no evalúa: **arranca el ciclo de gestión.**
+
+### 3.6 Planes anidados
+
+Un plan con `parent_cycle` es **anidado**. Al cerrarse:
+
+- **No genera `resultados_*` propio.** Sus avances, desviaciones y aprendizajes se integran como material del cierre de su contenedor.
+- Sus entradas ya pertenecen al contenedor por rango de fechas: no hay duplicación ni doble narración, porque las entradas no viven bajo el ciclo.
+- Si el anidado termina **después** que su contenedor, el contenedor cierra igual con lo ocurrido hasta su propia fecha; el resto cae en el ciclo siguiente. Nada se pierde.
+
+**Solo hay un cierre completo por ciclo raíz.** Un anidado que necesite informe propio es un caso de informe por audiencia (§4), no un cierre.
+
 ---
 
 ## 4. Informes por audiencia
@@ -234,10 +249,10 @@ Los pasos 1–3 y 5–7 son deterministas y funcionan sin ningún modelo. Solo e
 | # | Regla | Garante |
 |---|---|---|
 | C1 | Plan y resultados de un ciclo comparten `cycle_start` y `cycle_type` | janitor |
-| C2 | No se solapan dos ciclos del **mismo** `cycle_type` | janitor |
+| C2 | Dos ciclos del mismo `cycle_type` no se solapan, y un plan anidado no puede tener el mismo `cycle_type` que su padre | janitor |
 | C3 | Ciclos de tipos distintos **sí** pueden solaparse | — |
 | C4 | Un ciclo cerrado tiene plan y resultados | janitor |
-| C5 | `plan_*` tiene "No entra" no vacío | janitor |
+| C5 | `plan_*` tiene "No entra" no vacío (salvo el primer ciclo de un perfil nuevo sin plan sembrado) | janitor |
 | C6 | Un artefacto sembrado no se regenera tras la corrección humana | janitor de build |
 | C7 | Los encabezados de `resultados_*` son los de §3.1 | janitor |
 
