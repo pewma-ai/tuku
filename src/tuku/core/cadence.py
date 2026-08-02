@@ -13,6 +13,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from tuku.io.frontmatter import parse_frontmatter
 from tuku.io.html_blocks import extract_html_blocks
 from tuku.io.task import TukuTask
 
@@ -32,30 +33,45 @@ class CycleInfo(BaseModel):
 
 
 def resolve_next_cycle(profile_dir: Path, cycle_type: str) -> CycleInfo | None:
-    """F4.4: Resuelve `next:<tipo>` por grep sobre `ciclos/` (ADR 0007)."""
+    """F4.4: Resuelve `next:<tipo>` por grep/Front Matter sobre `ciclos/` (ADR 0007)."""
     ciclos_dir = profile_dir / "ciclos"
     if not ciclos_dir.exists():
         return None
 
-    # Buscar archivos plan_*.md
     today_str = datetime.now(UTC).strftime("%Y-%m-%d")
     found_cycles: list[CycleInfo] = []
 
     for f in sorted(ciclos_dir.glob("plan_*.md")):
         text = f.read_text(encoding="utf-8")
-        # Parsear header o delimitadores
-        match = re.search(r"(\d{4}-\d{2}-\d{2})/(\d{4}-\d{2}-\d{2})", text)
-        if match:
-            start_date, end_date = match.group(1), match.group(2)
-            if start_date > today_str:
+        try:
+            fm, _ = parse_frontmatter(text)
+            start_date = str(fm.get("cycle_start", ""))
+            end_date = str(fm.get("cycle_end", ""))
+            c_type = str(fm.get("cycle_type", cycle_type))
+
+            if start_date and start_date > today_str:
                 found_cycles.append(
                     CycleInfo(
-                        cycle_type=cycle_type,
+                        cycle_type=c_type,
                         cycle_id=f.stem,
                         start_date=start_date,
                         end_date=end_date,
                     )
                 )
+        except Exception:
+            # Fallback por regex si no hay frontmatter estructurado
+            match = re.search(r"(\d{4}-\d{2}-\d{2})/(\d{4}-\d{2}-\d{2})", text)
+            if match:
+                start_date, end_date = match.group(1), match.group(2)
+                if start_date > today_str:
+                    found_cycles.append(
+                        CycleInfo(
+                            cycle_type=cycle_type,
+                            cycle_id=f.stem,
+                            start_date=start_date,
+                            end_date=end_date,
+                        )
+                    )
 
     return found_cycles[0] if found_cycles else None
 

@@ -38,22 +38,32 @@ def test_F4_2_F4_3_evaluacion_cadencias_es_idempotente(tmp_path: Path) -> None:
 
 
 def test_F4_4_resolucion_next_ciclo_por_grep(tmp_path: Path) -> None:
-    """F4.4: Verifica la resolución de next:<tipo> leyendo la fecha en ciclos/ (ADR 0007)."""
+    """F4.4: Resuelve next:<tipo> leyendo Front Matter en ciclos/ (ADR 0007 / spec §2.1)."""
     perfil_dir = init_perfil(tmp_path / "perfil")
 
     # Sin plan sembrado -> regresa None
     assert resolve_next_cycle(perfil_dir, "semana") is None
 
-    # Crear plan futuro
-    plan_path = perfil_dir / "ciclos" / "plan_2026-W35.md"
+    # Crear plan futuro con Front Matter canónico (spec/artefactos-ciclo.md §2.1)
+    plan_path = perfil_dir / "ciclos" / "plan_2026-08-17_semana.md"
     plan_path.parent.mkdir(parents=True, exist_ok=True)
-    plan_path.write_text(
-        "# Plan 2026-W35\n\nPeríodo: 2099-01-01/2099-01-07\n", encoding="utf-8"
+    plan_doc = (
+        "---\n"
+        "id: plan-2026-08-17-semana\n"
+        "type: plan\n"
+        "cycle_type: semana\n"
+        "cycle_start: 2026-08-17\n"
+        "cycle_end: 2026-08-23\n"
+        "status: open\n"
+        "---\n"
+        "# Plan del Ciclo 2026-W34\n"
     )
+    plan_path.write_text(plan_doc, encoding="utf-8")
 
     cycle_info = resolve_next_cycle(perfil_dir, "semana")
     assert cycle_info is not None
-    assert cycle_info.start_date == "2099-01-01"
+    assert cycle_info.start_date == "2026-08-17"
+    assert cycle_info.end_date == "2026-08-23"
 
 
 def test_F4_5_abrir_ciclo_sin_agente(tmp_path: Path) -> None:
