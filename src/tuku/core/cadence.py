@@ -208,21 +208,102 @@ def radar_query(profile_dir: Path, current_date: str | None = None) -> RadarRepo
     )
 
 
-def abrir_ciclo(profile_dir: Path, cycle_name: str, sin_agente: bool = True) -> Path:
-    """F4.5: Abre un nuevo ciclo sembrando artefacto sin LLM por defecto."""
+def abrir_ciclo(
+    profile_dir: Path,
+    cycle_name: str,
+    cycle_type: str = "semana",
+    cycle_start: str | None = None,
+    cycle_end: str | None = None,
+    sin_agente: bool = True,
+) -> Path:
+    """F4.5 / F5.3: Abre un nuevo ciclo sembrado con estructura canónica completa.
+
+    Sem breda `plan_<cycle_name>.md` con front matter completo (C1–C5) y las
+    secciones obligatorias incluyendo `## No entra (y por qué)` (C5).
+    Sin agente (`--sin-agente`) el contenido es estructural; con agente se
+    puede enriquecer la intención en un paso posterior.
+    """
     ciclos_dir = profile_dir / "ciclos"
     ciclos_dir.mkdir(parents=True, exist_ok=True)
 
     file_path = ciclos_dir / f"plan_{cycle_name}.md"
     today_str = datetime.now(UTC).strftime("%Y-%m-%d")
+    start = cycle_start or today_str
+    end = cycle_end or today_str
 
     content = (
-        f"---\nid: plan-{cycle_name}\ntype: plan\n---\n"
-        "# Plan del ciclo\n\n"
-        f"<!-- Rango: {today_str}/{today_str} -->\n\n"
-        "## Intención\n"
-        "## No entra (y por qué)\n"
-        "## Restricciones y contexto\n"
+        f"---\n"
+        f"id: plan-{cycle_name}\n"
+        f"type: plan\n"
+        f"cycle_type: {cycle_type}\n"
+        f"cycle_start: {start}\n"
+        f"cycle_end: {end}\n"
+        f"status: open\n"
+        f"created: {today_str}\n"
+        f"modified: {today_str}\n"
+        f"seeded_by: tuku\n"
+        f"---\n"
+        f"# Plan del ciclo\n\n"
+        f"## Intención\n\n"
+        f"> _Qué se busca lograr en este ciclo por entidad._\n\n"
+        f"## No entra (y por qué)\n\n"
+        f"> _Qué queda deliberadamente fuera. Esta sección no puede estar vacía (C5)._\n\n"
+        f"## Restricciones y contexto\n\n"
+        f"> _Viajes, reuniones fijas, disponibilidad._\n\n"
+        f"## Señales a vigilar\n\n"
     )
     file_path.write_text(content, encoding="utf-8")
     return file_path
+
+
+def cerrar_ciclo(
+    profile_dir: Path,
+    cycle_name: str,
+    cycle_type: str = "semana",
+    cycle_start: str | None = None,
+    cycle_end: str | None = None,
+) -> Path:
+    """F5.3: Cierra un ciclo sembrando `resultados_<cycle_name>.md` (C7).
+
+    Marca el plan correspondiente como `status: closed` si existe.
+    Las cinco secciones obligatorias de C7 se siembran vacías; el agente
+    puede rellenarlas en un paso posterior.
+    """
+    ciclos_dir = profile_dir / "ciclos"
+    ciclos_dir.mkdir(parents=True, exist_ok=True)
+
+    today_str = datetime.now(UTC).strftime("%Y-%m-%d")
+    start = cycle_start or today_str
+    end = cycle_end or today_str
+
+    # Sembrar resultados_*
+    result_path = ciclos_dir / f"resultados_{cycle_name}.md"
+    content = (
+        f"---\n"
+        f"id: resultados-{cycle_name}\n"
+        f"type: resultados\n"
+        f"cycle_type: {cycle_type}\n"
+        f"cycle_start: {start}\n"
+        f"cycle_end: {end}\n"
+        f"status: closed\n"
+        f"created: {today_str}\n"
+        f"seeded_by: tuku\n"
+        f"---\n"
+        f"# Resultados del ciclo\n\n"
+        f"## TL;DR\n\n"
+        f"> _Una o dos frases: carácter del ciclo y su saldo._\n\n"
+        f"## Avances\n\n"
+        f"## Desviaciones\n\n"
+        f"## Aprendizajes\n\n"
+        f"## Momentum y señales\n\n"
+    )
+    result_path.write_text(content, encoding="utf-8")
+
+    # Marcar plan como closed si existe
+    plan_path = ciclos_dir / f"plan_{cycle_name}.md"
+    if plan_path.exists():
+        plan_text = plan_path.read_text(encoding="utf-8")
+        plan_text = plan_text.replace("status: open", "status: closed", 1)
+        plan_path.write_text(plan_text, encoding="utf-8")
+
+    return result_path

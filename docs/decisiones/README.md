@@ -26,6 +26,7 @@
 | [0015](0015-tuku-log-no-versionado.md) | `tuku.log` vive en el perfil sin versionar | Log versionado en Git junto al resto del perfil | `aceptado` |
 | [0016](0016-atomos-diferidos.md) | Promoción de secciones a átomos: diferida hasta evidencia de necesidad | Implementar transclusión desde el principio para secciones que puedan crecer | `aceptado` |
 | [0017](0017-pydantic-v2-para-modelos.md) | Adopción de Pydantic v2 para modelos de datos y validación acelerada | Validación imperativa manual con `dataclasses` estándar de Python puro | `aceptado` |
+| [0018](0018-hermes-subproceso-por-perfil.md) | Integración agéntica vía subproceso `hermes chat` con sesión persistente por perfil | API Python interna de Hermes (`AIAgent`) o binario sin aislamiento por perfil | `aceptado` |
 
 ---
 

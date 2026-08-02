@@ -16,7 +16,6 @@ import os
 import shutil
 import subprocess
 import time
-from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -155,36 +154,27 @@ requiere_motor = pytest.mark.skipif(
 
 
 # ---------------------------------------------------------------------------
-# Hermes — perfil efímero (plan §4.1)
+# Hermes — perfil efímero (ADR 0018)
 # ---------------------------------------------------------------------------
-
-CONFIG_HERMES_TEST = """\
-# Perfil efímero para tests de TUKU. Sin gateway: los tests nunca levantan uno.
-model: {modelo}
-tts: {{enabled: false}}
-stt: {{enabled: false}}
-"""
-
-MODELO_ECONOMICO = os.environ.get("TUKU_TEST_MODEL", "deepseek-v4-flash")
 
 
 @pytest.fixture
-def hermes_efimero(tmp_path: Path) -> Iterator[dict[str, str]]:
-    """Entorno con `HERMES_HOME` apuntando a un directorio desechable.
+def hermes_efimero(perfil_tmp: Path) -> dict[str, str]:
+    """Entorno con `HERMES_HOME` apuntando al directorio `.hermes/` del perfil.
 
-    `HERMES_HOME` es la frontera del perfil de Hermes: config, .env, sesiones,
-    memoria, skills, estado, PID del gateway y logs se resuelven contra ella.
-    Redirigirla es lo que hace que un test integrado no arrastre contexto previo
-    ni toque `~/.hermes`.
+    `tuku init` (llamado por `perfil_tmp`) ya provisiona `.hermes/` con
+    symlinks a credenciales y config mínima (ADR 0018). Esta fixture solo
+    expone el `env` resultante para que los tests lo pasen a `subprocess.run`.
+
+    Si `~/.hermes` no existe (CI sin Hermes), el test que use esta fixture
+    se marca skip automáticamente para no bloquear la suite determinista.
     """
-    home = tmp_path / "hermes-home"
-    home.mkdir()
-    (home / "config.yaml").write_text(
-        CONFIG_HERMES_TEST.format(modelo=MODELO_ECONOMICO), encoding="utf-8"
-    )
-    yield {
+    hermes_home = perfil_tmp / ".hermes"
+    if not hermes_home.exists():
+        pytest.skip("~/.hermes no encontrado — Hermes no instalado en este entorno")
+    return {
         **os.environ,
-        "HERMES_HOME": str(home),
+        "HERMES_HOME": str(hermes_home),
         "TZ": "UTC",
         "NO_COLOR": "1",
     }
@@ -193,21 +183,19 @@ def hermes_efimero(tmp_path: Path) -> Iterator[dict[str, str]]:
 def hermes_oneshot(env: dict[str, str], prompt: str, timeout: int = 180) -> str:
     """Invoca Hermes en modo oneshot y devuelve solo la respuesta final.
 
-    `--safe-mode` e `--ignore-rules` son lo que convierte "corre en mi máquina"
-    en "corre igual en CI": sin ellos, el SOUL.md, las skills y la memoria del
-    usuario entran al prompt y el test deja de ser reproducible.
+    Usa `hermes chat -z <prompt> --continue` (ADR 0018). Sin --safe-mode:
+    Hermes accede a la memoria del perfil y aprende. El aislamiento lo da
+    HERMES_HOME apuntando al .hermes/ del perfil efímero.
     """
     if shutil.which("hermes") is None:
         pytest.skip("hermes no está instalado en este entorno")
     proc = subprocess.run(
         [
             "hermes",
+            "chat",
             "-z",
             prompt,
-            "--safe-mode",
-            "--ignore-rules",
-            "-m",
-            MODELO_ECONOMICO,
+            "--continue",
         ],
         env=env,
         capture_output=True,

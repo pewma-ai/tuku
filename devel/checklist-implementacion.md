@@ -143,11 +143,12 @@ defecto.
 
 | | Ítem | Verificación |
 |---|---|---|
-| ☐ | **F5.1** Procesos ejecutables en `src/tuku/procesos/` | ejecutables a mano por una persona con un editor (P2) |
-| ☐ | **F5.2** `tuku registrar` (captura conversacional → canónico) | capa **factual**: todo `id` citado existe en el canónico |
-| ☐ | **F5.3** Siembra asistida en `tuku abrir` / `tuku cerrar` | capa **estructural**: encabezados de C7, secciones de C5 no vacías |
-| ☐ | **F5.4** Inyección del tesauro vivo | el prompt no crece sin cota |
-| ☐ | **F5.5** Harness de Hermes con perfiles efímeros | fixture `hermes_efimero`: `HERMES_HOME` a `tmp_path` |
+| [x] | **F5.0** `tuku init` provisiona `.hermes/` por perfil con symlinks a credenciales ([ADR 0018](../docs/decisiones/0018-hermes-subproceso-por-perfil.md)) | `test_init_crea_hermes_dir`, `test_init_hermes_enlaza_credenciales`, `test_gitignore_contiene_hermes` ✅ *hecho* |
+| [x] | **F5.1** Procesos ejecutables en `src/tuku/procesos/` | `alta-entidad.md`, `apertura-ciclo.md`, `cierre-ciclo.md`, `registro-conversacional.md` completos ✅ *hecho* |
+| [x] | **F5.2** `tuku registrar` (captura conversacional → canónico) | capa factual activa: `test_registrar_verifica_entidad_inexistente`; heurísticas: `test_registrar_detecta_*` ✅ *hecho* |
+| [x] | **F5.3** Siembra asistida en `tuku abrir` / `tuku cerrar` | `test_abrir_ciclo_secciones_obligatorias`, `test_cerrar_ciclo_secciones_c7`, `test_cerrar_ciclo_marca_plan_closed` ✅ *hecho* |
+| [x] | **F5.4** Inyección del tesauro vivo | `test_tesauro_respeta_limite_chars`, `test_tesauro_excluye_archivadas`, `test_tesauro_incluye_vigentes` ✅ *hecho* |
+| [x] | **F5.5** Harness de Hermes con perfiles efímeros | fixture `hermes_efimero` usa `.hermes/` del `perfil_tmp`; tests agénticos (`@pytest.mark.agentic`) en gemelo ✅ *hecho* |
 
 > **Todo test agéntico tiene un gemelo sin agente**, y ese camino se testea siempre. Si un
 > proceso solo funciona con un modelo de frontera, **el proceso está mal escrito** (P2) — por

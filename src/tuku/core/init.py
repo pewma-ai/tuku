@@ -1,6 +1,7 @@
 """Inicialización y siembra de perfiles TUKU.
 
 Implementa `tuku init` acorde a `docs/arquitectura.md` §2 y ADR 0015.
+ADR 0018: provisiona `.hermes/` por perfil si Hermes está instalado.
 """
 
 from __future__ import annotations
@@ -10,6 +11,9 @@ from pathlib import Path
 DEFAULT_GITIGNORE = """# TUKU runtime logs y caches (ADR 0015)
 tuku.log
 .tuku/cache/
+
+# Hermes Agent — estado del perfil agéntico (ADR 0018, nunca versionar)
+.hermes/
 """
 
 DEFAULT_CONFIG_YAML = """# Configuración del perfil TUKU (spec/perfil.md)
@@ -99,8 +103,55 @@ Consulte `docs/` y `spec/` para el contrato de operabilidad.
 """
 
 
+# Configuración mínima de Hermes para el perfil TUKU (ADR 0018)
+_HERMES_CONFIG_PERFIL = """\
+# Hermes Agent — config mínima del perfil TUKU (ADR 0018)
+# No editar a mano: gestionado por tuku init/sync.
+model: deepseek-v4-flash
+
+tts:
+  enabled: false
+
+stt:
+  enabled: false
+
+model:
+  show_reasoning: false
+  thinking: false
+"""
+
+
+def _provisionar_hermes(target_dir: Path) -> bool:
+    """Crea .hermes/ en el perfil con symlinks a credenciales del sistema (ADR 0018).
+
+    Retorna True si se provisionó, False si ~/.hermes no existe o hubo error.
+    La operación es idempotente: si .hermes/ ya existe, solo actualiza el config.
+    """
+    sistema_home = Path.home() / ".hermes"
+    if not sistema_home.exists():
+        return False
+
+    hermes_dir = target_dir / ".hermes"
+    hermes_dir.mkdir(exist_ok=True)
+
+    # Symlinks a credenciales — nunca se copian, solo se enlazan
+    for cred_file in [".env", "auth.json"]:
+        src = sistema_home / cred_file
+        dst = hermes_dir / cred_file
+        if src.exists() and not dst.exists():
+            dst.symlink_to(src)
+
+    # Config mínima (siempre se escribe para mantenerla actualizada)
+    (hermes_dir / "config.yaml").write_text(_HERMES_CONFIG_PERFIL, encoding="utf-8")
+
+    return True
+
+
 def init_perfil(target_dir: Path) -> Path:
     """Siembra el árbol de directorios y archivos iniciales de un perfil TUKU.
+
+    Si ~/.hermes existe, provisiona .hermes/ en el perfil con symlinks a
+    credenciales y config mínima (ADR 0018). La ausencia de Hermes no es error.
 
     Retorna la ruta absoluta del perfil inicializado.
     """
@@ -139,5 +190,8 @@ def init_perfil(target_dir: Path) -> Path:
     for path, content in archivos:
         if not path.exists():
             path.write_text(content, encoding="utf-8")
+
+    # ADR 0018: provisionar Hermes por perfil si está instalado
+    _provisionar_hermes(target_dir)
 
     return target_dir
