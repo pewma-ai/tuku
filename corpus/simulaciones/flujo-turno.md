@@ -203,7 +203,7 @@ proyecciones de `soporte-sw`, `persona2` y `datos`.
 - Entrada `Hito` en `colaboraciones`.
 - Cierra `t-2026-0087`: `[x] … ^t-2026-0087` `<!-- tuku: cycles=7 outcome=done
   completed=2026-08-06 -->`.
-- **Curiosidad acotada** (`docs/principios.md` P4, `spec/artefactos-ciclo.md` §3.2): siete
+- **Curiosidad acotada** (`docs/brief.md` P4, `spec/artefactos-ciclo.md` §3.2): siete
   ciclos de arrastre es una alarma real. El agente pregunta, una sola vez: *"Esta tarea
   llevaba siete ciclos sin cerrarse — ¿qué la destrabó hoy?"*
   **▸ INPUT:** *"Tenía dudas de reparto de horas con el otro equipo, las resolvimos ayer."*
@@ -376,7 +376,7 @@ queda en cero, y eso también es información sobre qué tan bien calibrado estu
 
 **Lo que queda genuinamente abierto:**
 - El límite exacto de "cuántas preguntas de curiosidad por cierre" sigue siendo criterio del
-  agente, no una regla numérica — es deliberado (`docs/principios.md` P4), pero conviene
+  agente, no una regla numérica — es deliberado (`docs/brief.md` P4), pero conviene
   observar en uso real si el umbral se siente bien calibrado.
 - `blocked_until` a nivel de entidad ahora carga dos causas distintas —espera de terceros y
   decisión propia del ciclo— bajo el mismo campo. Sigue siendo una simplificación aceptada,

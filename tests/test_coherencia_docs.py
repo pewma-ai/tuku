@@ -65,8 +65,11 @@ def test_enlaces_relativos_resuelven(md: Path) -> None:
 
 
 def test_no_quedan_referencias_a_specs_eliminadas() -> None:
-    """`spec/bitacora.md` se eliminó; ninguna referencia debe sobrevivir."""
-    eliminadas = ["spec/bitacora.md", "bitacora.md"]
+    """`spec/bitacora.md` y `docs/principios.md` se eliminaron.
+
+    Ninguna referencia navegable o en código a esos archivos debe sobrevivir.
+    """
+    eliminadas = ["spec/bitacora.md", "bitacora.md", "docs/principios.md"]
     hallazgos: list[str] = []
     for md in _archivos_md():
         texto = md.read_text(encoding="utf-8")

@@ -2,8 +2,8 @@
 
 > `devel/plan-implementacion.md` · Propuesta, 2026-08-01. **No es un compromiso ni una spec**:
 > es una ruta de construcción para discutir. Lo que aquí se decida y cierre una alternativa
-> viable pasa a [`docs/decisiones/`](../docs/decisiones/); lo que fije un formato, a
-> [`spec/`](../spec/).
+> viable pasa a [`docs/decisiones/`](../../../docs/decisiones/); lo que fije un formato, a
+> [`spec/`](../../../spec/).
 
 ---
 
@@ -12,7 +12,7 @@
 El diseño está cerrado a un nivel poco común para un proyecto sin código: ocho specs
 completas con invariantes numeradas y garante declarado, **dieciséis ADR**, y **dos
 simulaciones que son de facto los tests de aceptación**
-([`corpus/simulaciones/`](../corpus/simulaciones/)).
+([`corpus/simulaciones/`](../../../corpus/simulaciones/)).
 
 Los ADR importan para este plan más de lo habitual: no solo registran por qué el sistema es
 como es, sino que **cada uno fija un comportamiento verificable**. La §2.1 los mapea a las
@@ -54,23 +54,23 @@ dónde se implementa cada uno y, sobre todo, **dónde se verifica**.
 
 | ADR | Qué fija | Fase | Cómo se verifica |
 |---|---|---|---|
-| [0001](../docs/decisiones/0001-id-estable.md) `id` estable | identidad independiente del path | F1 | mover una entidad no rompe referencias |
-| [0002](../docs/decisiones/0002-motor-fuera-del-perfil.md) motor fuera | punteros, no vendorizado | F0 | `tuku init` + `tuku sync` |
-| [0003](../docs/decisiones/0003-version-de-esquema.md) esquema | `schema_version`, migraciones acumulativas | F0 | `tuku doctor` ante esquema mayor |
-| [0004](../docs/decisiones/0004-canonico-no-es-vista.md) canónico ≠ vista | qué es fuente y qué proyección | F3 | borrar derivadas y regenerar → diff cero |
-| [0005](../docs/decisiones/0005-derivadas-no-readonly.md) no read-only | detección por hash, preguntar antes de pisar | F3 | editar zona derivada → el motor pregunta |
-| [0006](../docs/decisiones/0006-regla-muere-emitido-sobrevive.md) regla muere | `origin` colgante no es violación | F2 | K7: borrar cadencia, la tarea sobrevive |
-| [0007](../docs/decisiones/0007-plan-es-calendario.md) plan = calendario | `next:X` resuelve por grep, no por cálculo | F4 | crear plan excepcional → tareas se re-resuelven |
-| [0008](../docs/decisiones/0008-parent-derivado-del-path.md) `parent` derivado | jerarquía desde el path | F1 | N3/N4 |
-| [0009](../docs/decisiones/0009-type-string-libre.md) `type` libre | sin catálogo cerrado | F2 | simulación 2 sin tocar `src/` |
-| [0010](../docs/decisiones/0010-friccion-no-se-declara.md) fricción | no hay clasificación; se descubre | F5 | §5.1 |
-| [0011](../docs/decisiones/0011-proceso-sin-almacenamiento.md) proceso sin almacén | instancia = grupo de tareas | F4 | estado por consulta, no por campo |
-| [0012](../docs/decisiones/0012-blockuntil-causa-unica.md) `blocked_until` | un campo, dos causas | F4 | `blocked_until >= hoy` → no dispara |
-| [0013](../docs/decisiones/0013-cadencias-en-comentario.md) cadencias en comentario | comentario es fuente, lo visible es derivado | F1 + F3 | round-trip + builder `cadencias-legibles` |
-| [0014](../docs/decisiones/0014-formato-posicional-tareas.md) formato posicional | campos fijos + comentario del motor | F1 | round-trip exacto |
-| [0015](../docs/decisiones/0015-tuku-log-no-versionado.md) `tuku.log` | fuera de Git | F0 | `.gitignore` sembrado por `init` |
-| [0016](../docs/decisiones/0016-atomos-diferidos.md) átomos diferidos | **no se implementa transclusión** | — | alcance negativo explícito |
-| [0017](../docs/decisiones/0017-pydantic-v2-para-modelos.md) Pydantic v2 | modelos e I/O declarativos y acelerados | F1+F2 | validación de modelos Pydantic en `src/` |
+| [0001](../../../docs/decisiones/0001-id-estable.md) `id` estable | identidad independiente del path | F1 | mover una entidad no rompe referencias |
+| [0002](../../../docs/decisiones/0002-motor-fuera-del-perfil.md) motor fuera | punteros, no vendorizado | F0 | `tuku init` + `tuku sync` |
+| [0003](../../../docs/decisiones/0003-version-de-esquema.md) esquema | `schema_version`, migraciones acumulativas | F0 | `tuku doctor` ante esquema mayor |
+| [0004](../../../docs/decisiones/0004-canonico-no-es-vista.md) canónico ≠ vista | qué es fuente y qué proyección | F3 | borrar derivadas y regenerar → diff cero |
+| [0005](../../../docs/decisiones/0005-derivadas-no-readonly.md) no read-only | detección por hash, preguntar antes de pisar | F3 | editar zona derivada → el motor pregunta |
+| [0006](../../../docs/decisiones/0006-regla-muere-emitido-sobrevive.md) regla muere | `origin` colgante no es violación | F2 | K7: borrar cadencia, la tarea sobrevive |
+| [0007](../../../docs/decisiones/0007-plan-es-calendario.md) plan = calendario | `next:X` resuelve por grep, no por cálculo | F4 | crear plan excepcional → tareas se re-resuelven |
+| [0008](../../../docs/decisiones/0008-parent-derivado-del-path.md) `parent` derivado | jerarquía desde el path | F1 | N3/N4 |
+| [0009](../../../docs/decisiones/0009-type-string-libre.md) `type` libre | sin catálogo cerrado | F2 | simulación 2 sin tocar `src/` |
+| [0010](../../../docs/decisiones/0010-friccion-no-se-declara.md) fricción | no hay clasificación; se descubre | F5 | §5.1 |
+| [0011](../../../docs/decisiones/0011-proceso-sin-almacenamiento.md) proceso sin almacén | instancia = grupo de tareas | F4 | estado por consulta, no por campo |
+| [0012](../../../docs/decisiones/0012-blockuntil-causa-unica.md) `blocked_until` | un campo, dos causas | F4 | `blocked_until >= hoy` → no dispara |
+| [0013](../../../docs/decisiones/0013-cadencias-en-comentario.md) cadencias en comentario | comentario es fuente, lo visible es derivado | F1 + F3 | round-trip + builder `cadencias-legibles` |
+| [0014](../../../docs/decisiones/0014-formato-posicional-tareas.md) formato posicional | campos fijos + comentario del motor | F1 | round-trip exacto |
+| [0015](../../../docs/decisiones/0015-tuku-log-no-versionado.md) `tuku.log` | fuera de Git | F0 | `.gitignore` sembrado por `init` |
+| [0016](../../../docs/decisiones/0016-atomos-diferidos.md) átomos diferidos | **no se implementa transclusión** | — | alcance negativo explícito |
+| [0017](../../../docs/decisiones/0017-pydantic-v2-para-modelos.md) Pydantic v2 | modelos e I/O declarativos y acelerados | F1+F2 | validación de modelos Pydantic en `src/` |
 
 **0016 es el único que se implementa no haciendo nada**, y conviene tenerlo presente: el
 motor de la primera versión no implementa transclusión, lo que simplifica los janitors de
@@ -221,7 +221,7 @@ Cuatro niveles, tres de ellos sin gastar un token.
 
 ### Nivel 1 — Unitarios sobre los ejemplos de las specs
 
-[`spec/README.md`](../spec/README.md) declara que **los ejemplos son normativos**: los
+[`spec/README.md`](../../../spec/README.md) declara que **los ejemplos son normativos**: los
 bloques de código de las specs son casos que el parser debe aceptar. Se extraen a fixtures y
 se testean uno a uno.
 
@@ -251,8 +251,8 @@ inventa, se transcribe. Y una invariante sin test es visible de inmediato.
 ### Nivel 3 — Las simulaciones como tests de aceptación
 
 Esto es lo más valioso que tiene el repo y conviene no desaprovecharlo.
-[`flujo-turno.md`](../corpus/simulaciones/flujo-turno.md) y
-[`flujo-pyme-semana.md`](../corpus/simulaciones/flujo-pyme-semana.md) narran, paso a paso y
+[`flujo-turno.md`](../../../corpus/simulaciones/flujo-turno.md) y
+[`flujo-pyme-semana.md`](../../../corpus/simulaciones/flujo-pyme-semana.md) narran, paso a paso y
 con marcas `▸ INPUT` / `⚙ TUKU`, dos ciclos completos con sus artefactos esperados.
 
 Propongo convertirlas en fixtures ejecutables: perfil inicial + secuencia de inputs + estado
@@ -277,7 +277,7 @@ El criterio de éxito 1 del brief y, según P3, **un detector de agencia mal ubi
 
 ### Fixtures
 
-**Ya construidas** en [`../tests/conftest.py`](../tests/conftest.py): `perfil_tmp` (perfil
+**Ya construidas** en [`../tests/conftest.py`](../../../tests/conftest.py): `perfil_tmp` (perfil
 sembrado por `tuku init` en un `tmp_path` con Git inicializado), `hermes_efimero` y
 `assert_diff_cero`. Todos los tests corren contra perfiles desechables; ninguno toca datos
 reales. `corpus/referencia/` (hoy solo un `.gitkeep`) se llena con los perfiles de las dos
@@ -298,7 +298,7 @@ Esto último es el mecanismo que hace que la cobertura no se degrade en silencio
 agrega `T9` a una spec, la suite falla hasta que exista su test o se registre la deuda. El
 mapeo 1:1 deja de depender de que alguien se acuerde.
 
-Ver [`../tests/README.md`](../tests/README.md).
+Ver [`../tests/README.md`](../../../tests/README.md).
 
 ---
 
@@ -390,7 +390,7 @@ Tres cosas que conviene cerrar antes de F1, ordenadas por costo de arreglarlas d
 
 | # | Qué | Por qué bloquea | Costo |
 |---|---|---|---|
-| 1 | **[`spec/frontmatter.md`](../spec/frontmatter.md) está vacío** (solo el título) | Es transversal: F1 lo necesita para el parser y F2 para N1/E1/T1. Hoy los campos están dispersos en siete specs | medio |
+| 1 | **[`spec/frontmatter.md`](../../../spec/frontmatter.md) está vacío** (solo el título) | Es transversal: F1 lo necesita para el parser y F2 para N1/E1/T1. Hoy los campos están dispersos en siete specs | medio |
 | 2 | **`.tuku/config.yaml` sin spec completa** | Existe como fragmentos ilustrativos en cuatro documentos. F0 lo carga y F3 lee de él el grafo de derivaciones. `spec/perfil.md` hoy solo cubre `capacidad.md` | medio |
 | 3 | **Colisión de prefijos `P`** entre `proceso.md` y `perfil.md` | Trivial ahora, permanente después | mínimo |
 
@@ -403,7 +403,7 @@ a retirar el marcador. Un bloqueante conocido no se convierte así en un bloquea
 
 ### 5.1 Consecuencia para E5 (ADR 0010)
 
-La clasificación `friccion` quedó descartada por [ADR 0010](../docs/decisiones/0010-friccion-no-se-declara.md),
+La clasificación `friccion` quedó descartada por [ADR 0010](../../../docs/decisiones/0010-friccion-no-se-declara.md),
 de modo que el conjunto por defecto queda cerrado en **`hito`, `decision`, `senal`, `msg`**,
 más lo que el usuario extienda en `config.yaml`. Es el conjunto contra el que valida E5 y el
 que debe sembrar `tuku init`.
@@ -451,9 +451,9 @@ justamente lo que P2 exige y lo que hace que este orden sea el correcto.
 
 Dos cosas que este plan **ya no decide porque un ADR las cerró**, y que conviene no reabrir
 durante la construcción: la promoción de secciones a átomos
-([0016](../docs/decisiones/0016-atomos-diferidos.md) — diferida, sin transclusión en la
+([0016](../../../docs/decisiones/0016-atomos-diferidos.md) — diferida, sin transclusión en la
 primera versión) y la separación de `blocked_until` en causa y efecto
-([0012](../docs/decisiones/0012-blockuntil-causa-unica.md) — un campo, dos causas, y la
+([0012](../../../docs/decisiones/0012-blockuntil-causa-unica.md) — un campo, dos causas, y la
 distinción la infiere el agente si hace falta). Ambas son tentaciones naturales al escribir
 el código; ambas tienen su costo ya declarado y aceptado.
 
@@ -464,7 +464,7 @@ el código; ambas tienen su costo ya declarado y aceptado.
 Incorporado el 2026-08-01, después de constatar que el sistema predecesor `mac-jpgil` tenía
 **181 notas y 1.7 MB** con ontología propia, janitor de índice y reglas de enlace, mientras
 TUKU solo declaraba `notas/` como directorio vacío en el layout. La spec resultante
-—[`spec/nota.md`](../spec/nota.md)— **transcribe una práctica probada**; no diseña un formato
+—[`spec/nota.md`](../../../spec/nota.md)— **transcribe una práctica probada**; no diseña un formato
 nuevo.
 
 ### 8.1 Por qué no altera el orden de las fases

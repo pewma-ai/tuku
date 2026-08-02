@@ -174,6 +174,6 @@ Para ver este flujo narrado con un caso completo, revisa
 ## Más documentación
 
 - [`docs/brief.md`](brief.md) — visión y problema que resuelve TUKU.
-- [`docs/principios.md`](principios.md) — principios arquitectónicos.
+- [`docs/brief.md`](brief.md#3-principios) — principios arquitectónicos.
 - [`docs/arquitectura.md`](arquitectura.md) — modelo de datos y motor.
 - [`docs/glosario.md`](glosario.md) — vocabulario del dominio.

@@ -1,6 +1,6 @@
 # Arquitectura
 
-> `docs/arquitectura.md` · La forma del sistema. Se apoya en [`principios.md`](principios.md)
+> `docs/arquitectura.md` · La forma del sistema. Se apoya en [`brief.md#3-principios`](brief.md#3-principios)
 > y precede a `spec/`, que fija los formatos exactos.
 
 ---

@@ -13,7 +13,7 @@ operativo se encarga de impedir la edición accidental.
 Su costo es que contradice el contexto de uso. El usuario principal trabaja en Obsidian,
 donde read-only a nivel de sistema de archivos hace el archivo inutilizable en el editor.
 Más en general, el principio de operabilidad manual (P2,
-[`docs/principios.md`](../principios.md)) exige que el sistema funcione con un editor de
+[`docs/brief.md`](../brief.md#3-principios)) exige que el sistema funcione con un editor de
 texto cualquiera: un archivo que no se puede abrir y editar rompe ese principio. Y el hábito
 de edición directa —corregir una línea de redacción en la zona derivada porque se ve mal—
 es legítimo y no debería prohibirse.

@@ -10,14 +10,13 @@ algo no puede derivarse de lo que está aguas arriba, o falta una premisa o hay 
 
 ## Orden de lectura
 
-| # | Documento | Qué contiene | Léelo si… |
-|---|---|---|---|
-| 1 | [`brief.md`](brief.md) | Qué es TUKU, para quién, el modelo conceptual, los principios y los criterios de éxito | …quieres entender el proyecto. Es el documento fundacional |
-| 2 | [`principios.md`](principios.md) | Los seis principios de diseño desarrollados: implicaciones, cómo se violan, cómo se verifican | …vas a tomar una decisión de diseño |
-| 3 | [`arquitectura.md`](arquitectura.md) | La forma del sistema: motor y perfil, canónico y proyección, grafo de derivaciones, coherencia | …vas a escribir código o specs |
-| 4 | [`deployment.md`](deployment.md) | Instalación, `~/.tuku/`, versionado de esquema, migraciones, camino a servidor | …vas a instalar, empaquetar o desplegar |
-| 5 | [`glosario.md`](glosario.md) | Vocabulario preciso del proyecto | …dudas de un término. Consúltalo en cualquier momento |
-| 6 | [`decisiones/`](decisiones/) | ADR: decisiones tomadas, con su contexto y sus consecuencias | …quieres saber por qué algo es como es |
+| #   | Documento                                        | Qué contiene                                                                                   | Léelo si…                                                  |
+| --- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 1   | [`brief.md`](brief.md)                           | Qué es TUKU, para quién, el modelo conceptual, los principios y los criterios de éxito         | …quieres entender el proyecto. Es el documento fundacional |
+| 3   | [`arquitectura.md`](arquitectura.md)             | La forma del sistema: motor y perfil, canónico y proyección, grafo de derivaciones, coherencia | …vas a escribir código o specs                             |
+| 4   | [`deployment.md`](deployment.md)                 | Instalación, `~/.tuku/`, versionado de esquema, migraciones, camino a servidor                 | …vas a instalar, empaquetar o desplegar                    |
+| 5   | [`glosario.md`](glosario.md)                     | Vocabulario preciso del proyecto                                                               | …dudas de un término. Consúltalo en cualquier momento      |
+| 6   | [`decisiones/`](decisiones/)                     | ADR: decisiones tomadas, con su contexto y sus consecuencias                                   | …quieres saber por qué algo es como es                     |
 
 Lectura mínima para contribuir: **brief → principios → arquitectura**. Lo demás es
 consulta.

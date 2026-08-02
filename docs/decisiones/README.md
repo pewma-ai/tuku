@@ -2,7 +2,7 @@
 
 > `docs/decisiones/README.md` · Índice del historial de decisiones cerradas. Cómo se escribe
 > un ADR: [`INSTRUCCIONES.md`](INSTRUCCIONES.md). El porqué general vive en
-> [`../brief.md`](../brief.md) y [`../principios.md`](../principios.md); el qué exacto de
+> [`../brief.md`](../brief.md) y [`../brief.md#3-principios`](../brief.md#3-principios); el qué exacto de
 > cada formato, en [`../../spec/`](../../spec/).
 
 ---

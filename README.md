@@ -27,7 +27,7 @@ TUKU implementa la metodología **Management as Code (MaC)** en su variante pers
 ## 📚 Documentación
 
 - [`docs/brief.md`](docs/brief.md) — Visión, problema y criterios de éxito.
-- [`docs/principios.md`](docs/principios.md) — Los 6 principios arquitectónicos del sistema.
+- [`docs/brief.md#3-principios`](docs/brief.md#3-principios) — Los 6 principios arquitectónicos del sistema.
 - [`docs/arquitectura.md`](docs/arquitectura.md) — Modelo de datos, janitors, derivaciones y motor.
 - [`docs/glosario.md`](docs/glosario.md) — Vocabulario preciso del dominio TUKU.
 - [`spec/`](spec/) — Especificaciones técnicas de primitivas (`tarea`, `entradas`, `entidad`, `cadencia`, `proceso`, `artefactos-ciclo`).

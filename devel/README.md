@@ -11,8 +11,8 @@
 | Documento | Responde | Cuándo se lee |
 |---|---|---|
 | [`entorno-devel.md`](entorno-devel.md) | Cómo se ejecuta y se verifica | antes del primer comando |
-| [`plan-implementacion.md`](plan-implementacion.md) | Por qué las fases van en ese orden | una vez, al empezar |
-| [`checklist-implementacion.md`](checklist-implementacion.md) | Qué toca ahora y cómo se comprueba | en cada sesión de trabajo |
+| [`plan-implementacion.md`](iteraciones/2026-08-01/plan-implementacion.md) | Por qué las fases van en ese orden | una vez, al empezar |
+| [`checklist-implementacion.md`](iteraciones/2026-08-01/checklist-implementacion.md) | Qué toca ahora y cómo se comprueba | en cada sesión de trabajo |
 | [`../tests/README.md`](../tests/README.md) | Cómo se prueba lo que se escribe | al escribir cualquier test |
 
 Si solo vas a leer uno, lee el **checklist**: cada ítem enlaza a su spec y declara su
