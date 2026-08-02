@@ -97,3 +97,33 @@ def test_O1_O2_nota_sin_summary(tmp_path: Path) -> None:
     report = janitor.run_all()
     inv_ids = [v.invariant_id for v in report.violations]
     assert "O2" in inv_ids
+
+
+def test_E1_entradas_type_invalido(tmp_path: Path) -> None:
+    """E1: Violación por archivo en entradas/ cuyo type no es 'entradas'."""
+    perfil_dir = init_perfil(tmp_path / "perfil")
+    ent_file = perfil_dir / "entradas" / "entradas_bad.md"
+    ent_file.write_text(
+        "---\nid: ent-bad\ntype: nota\n---\n# Entradas mala\n",
+        encoding="utf-8",
+    )
+
+    janitor = Janitor(perfil_dir)
+    report = janitor.run_all()
+    inv_ids = [v.invariant_id for v in report.violations]
+    assert "E1" in inv_ids
+
+
+def test_T1_tareas_type_invalido(tmp_path: Path) -> None:
+    """T1: Violación por archivo en tareas/ cuyo type no es 'tareas'."""
+    perfil_dir = init_perfil(tmp_path / "perfil")
+    task_file = perfil_dir / "tareas" / "tareas_bad.md"
+    task_file.write_text(
+        "---\nid: task-bad\ntype: nota\n---\n# Tareas mala\n",
+        encoding="utf-8",
+    )
+
+    janitor = Janitor(perfil_dir)
+    report = janitor.run_all()
+    inv_ids = [v.invariant_id for v in report.violations]
+    assert "T1" in inv_ids

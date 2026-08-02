@@ -33,9 +33,9 @@ PENDIENTES: set[str] = {
     # entidad.md (N) — F2.1
     "N4", "N5", "N6", "N8", "N9",
     # entradas.md (E) — F2.2
-    "E1", "E2", "E3", "E4", "E5", "E6", "E7",
+    "E2", "E3", "E4", "E5", "E6", "E7",
     # tarea.md (T) — F2.3
-    "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8",
+    "T2", "T3", "T4", "T5", "T6", "T7", "T8",
     # cadencia.md (K) — F2.4
     "K1", "K2", "K3", "K4", "K5", "K6", "K8", "K9",  # K7 es negativa: nada que garantizar
     # artefactos-ciclo.md (C) — F2.5
