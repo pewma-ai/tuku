@@ -10,6 +10,7 @@
 
 Todo documento `.md` canónico en TUKU (salvo notas sueltas en borrador) comienza con un bloque de Front Matter YAML delimitado por `---`:
 
+<!-- tuku:caso id=frontmatter-base tipo=frontmatter -->
 ```yaml
 ---
 id: identificador-unico
