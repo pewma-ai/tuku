@@ -16,7 +16,7 @@ El capítulo "Para quién" fue absorbido como §1.1 y todo lo demás corrió un 
 
 ## Vocabulario
 
-- **reporte** vs. **informe**: el brief y el glosario dicen ahora *reporte*. `docs/arquitectura.md` y los specs siguen diciendo *informe*.
+- **reporte** vs. **informe**: el brief y el glosario dicen ahora *reporte*. ~~`docs/arquitectura.md`~~ ya corregido; los specs siguen diciendo *informe*.
 - **sembrar / siembra** salió del brief y del glosario a favor de *proponer / propuesta*. Probablemente sobrevive en `spec/` y en `docs/deployment.md`.
 - **humano** vs. **usuario**: el brief usa *usuario* cuando el contraste es con el sistema, y *humano* solo cuando el contraste es con el agente. Queda por decidir si se unifica en el resto de la documentación.
 
@@ -24,7 +24,7 @@ El capítulo "Para quién" fue absorbido como §1.1 y todo lo demás corrió un 
 
 `docs/brief.md` §4.2 nombra ahora las puertas concretas: Obsidian en local, Quartz en la web, Telegram en el bolsillo, y Hermes como el agente detrás de las tres.
 
-- `docs/arquitectura.md` no describe canales ni la relación entre el agente y los janitors. Falta al menos un párrafo.
+- ~~`docs/arquitectura.md` no describe canales ni la relación entre el agente y los janitors.~~ Resuelto: §3.4 "Canales y el agente".
 - Puede ameritar ADR: adoptar Hermes como agente de referencia de las fases iniciales y Quartz como publicación web, ambos declarados reemplazables.
 
 ## Contenido que sale del brief
