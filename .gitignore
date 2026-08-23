@@ -75,3 +75,11 @@ Thumbs.db
 *.swo
 uv.lock
 .obsidian
+.ruff_cache/
+.mypy_cache/
+.claude
+.gemini
+
+# Playground: experimentos locales de TUKU, no se versionan
+playground/*
+!playground/.gitkeep
