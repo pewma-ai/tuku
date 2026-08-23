@@ -1,0 +1,1 @@
+El espacio `playground` contiene experimentos de TUKU con la estructura y funcionamiento necesarios.

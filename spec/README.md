@@ -1,96 +1,43 @@
-# spec/ — Cómo leer las especificaciones
+# spec
 
-Este directorio contiene el **qué exacto** de cada formato: nombres de archivo, campos de
-front matter, gramáticas, invariantes. El **porqué** vive en [`../docs/`](../docs/) y el
-**cómo** del código en [`../src/`](../src/).
+> Especificaciones del modelo. Se justifican por referencia a `../docs/brief.md` y `../docs/principios.md`. Lo que aquí se afirma es normativo; lo que se contradiga con esos dos documentos es un error de este directorio, no de ellos.
 
-Una spec es el contrato entre los datos y el motor. Cuando el código y la spec discrepan, el
-defecto está en el código — salvo que la spec no pueda derivarse de
-[`../docs/arquitectura.md`](../docs/arquitectura.md), en cuyo caso el defecto está aquí.
-
----
+Estas specs se van a ir corrigiendo con el uso. Las escribo desde lo que ya probé, y cada experimento que haga sobre el sistema real puede mover lo que aquí está escrito: eso es el método, no una deuda. Un spec que lleva meses sin tocarse no está maduro necesariamente, puede ser que esa parte no se haya usado todavía.
 
 ## Orden de lectura
 
-Cada spec declara en su cabecera de qué depende. El orden que sigue respeta esas dependencias:
+Los specs se leen en el orden en que las cosas se derivan unas de otras:
 
-| # | Documento | Define | Estado |
-|---|---|---|---|
-| 1 | [`entidad.md`](entidad.md) | Entidades, ámbitos, jerarquía, zonas editables y derivadas, `status` | completa |
-| 2 | [`entradas.md`](entradas.md) | El almacén canónico de entradas y las bitácoras como proyecciones | completa |
-| 3 | [`tarea.md`](tarea.md) | El backlog canónico, la gramática temporal y el arrastre | completa |
-| 4 | [`cadencia.md`](cadencia.md) | La regla que produce artefactos en el tiempo: herencia, disparos, emisión | completa |
-| 5 | [`artefactos-ciclo.md`](artefactos-ciclo.md) | `plan_*`, `resultados_*` e informes por audiencia | completa |
-| 6 | [`proceso.md`](proceso.md) | Plantillas de trabajo recurrente y sus instancias como grupos de tareas | completa |
-| 7 | [`nota.md`](nota.md) | El eje deliberativo: notas, `summary`, enlaces justificados e índice | completa |
-| — | [`frontmatter.md`](frontmatter.md) | Los campos mínimos, transversales a todo tipo de archivo | **pendiente** |
-| — | [`perfil.md`](perfil.md) | El layout del perfil y el contrato con el motor: `.tuku/config.yaml` | parcial — solo `capacidad.md` |
+| #   | Documento                      | Qué especifica                                                                                           |
+| --- | ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| 1   | [bitacora.md](spec/bitacora.md)     | La primitiva única: eventos fechados con hora, inmutables, y el formato de viñeta del que todo se extrae |
+| 2   | [pendientes.md](pendientes.md) | Doble fuente (bitácora de origen, `PENDIENTES.md` operativo), ciclo de vida y emparejamiento semántico   |
+| 3   | [notas.md](notas.md)           | Las tres clases de nota, la convención de MAYÚSCULAS para inducción, y el criterio de "ver además"       |
+| 4   | [entidades.md](entidades.md)   | El objeto de trabajo, los tipos que define cada autor, y las prácticas heredadas por tipo                |
+| 5   | [cadencias.md](cadencias.md)   | El ciclo (apertura, cierre) y las reglas que hacen aparecer tareas, incluida la disparada por ausencia   |
+| 6   | [corpus.md](corpus.md)         | Convenciones transversales: formato, transclusión, diagramas, marcas de autoría y procedencia            |
+| 7   | [coherencia.md](coherencia.md) | El libro de estilo como única edición humana, sus derivados, y qué es un janitor                         |
 
-Lectura mínima para escribir código del motor: **entidad → entradas → tarea**. Son las tres
-primitivas; el resto se construye sobre ellas.
+Los primeros cinco describen **qué hay en el repositorio del autor**. Los dos últimos, **cómo se mantiene coherente**.
 
-`entidad.md` va primero porque casi todo lo demás la referencia: una entrada pertenece a una
-entidad, una tarea nace de una entidad, una cadencia se hereda por su cadena de padres.
+## Qué está fuera de alcance
 
-Las dos pendientes son transversales y hoy están dispersas: los campos de front matter
-aparecen repartidos entre las cinco specs completas, y el formato real de `.tuku/config.yaml`
-solo existe como fragmentos ilustrativos en `arquitectura.md` §4 y en las specs que lo
-mencionan. **`perfil.md` es lo que bloquea la implementación**: el grafo de derivaciones y
-los janitors dependen de ese formato.
+La estrategia en sentido amplio (objetivos, recursos, capacidad, planes de largo alcance) no está especificada: no se ha logrado generalizar a todos los casos de uso. Lo que sí se sostiene con experiencia de campo es el ciclo y sus cadencias. Ver `../docs/brief.md` §4.
 
----
+Las **reglas de tratamiento** de tareas (prioridad, tipos, encadenamiento, criterios de vencimiento) están pendientes de un documento propio. `pendientes.md` cubre solo el modelo.
 
-## Anatomía de una spec
+Los **assets binarios** rompen la autocontención por definición y requieren regla propia de referencia rota. Prioridad menor, pendiente de diseño (`corpus.md`).
 
-| Parte | Contiene |
-|---|---|
-| **Cabecera** | Qué define, de qué depende, qué otras specs conviene tener a mano |
-| **Definición** | El término, con la precisión del [glosario](../docs/glosario.md) |
-| **Formato** | Nombres de archivo, front matter, gramática, ejemplos válidos |
-| **Ciclo de vida** | Qué ocurre en el alta, la modificación, el archivado, la eliminación |
-| **Invariantes** | Tabla numerada con prefijo por spec, y el garante de cada una |
-| **Decisiones abiertas** | Lo que aún no se decide, numerado |
+## Decisiones abiertas
 
-### Las invariantes llevan prefijo
+Cada una vive en su spec y se cierra con un ADR:
 
-Cada spec numera sus invariantes con una letra propia, de modo que una referencia sea
-inequívoca desde cualquier lugar del repositorio:
+- ¿Las alertas sobre pendientes críticos son un janitor propio, o son cómo se implementa una cadencia? (`cadencias.md`)
+- ¿Un janitor descargado desde upstream se aplica solo, o pasa por la misma regresión que un cambio local? (`coherencia.md`)
+- ¿Es "janitor" el nombre de todo el motor determinista, o de una parte? Hoy se usa como sinónimo del motor completo. (`coherencia.md`)
 
-| Prefijo | Spec |
-|---|---|
-| `N` | entidad |
-| `E` | entradas |
-| `T` | tarea |
-| `K` | cadencia |
-| `C` | artefactos de ciclo |
-| `O` | nota |
-| `P` | proceso · **colisiona con perfil**; renombrar uno antes de implementar |
+## El test operativo
 
-Toda invariante declara su **garante**: `janitor`, `janitor de build`, `motor`, o `test de
-replay`. Es la aplicación directa de P3 —cada garantía tiene un costo conocido— y lo que
-permite saber qué se verifica sin invocar ningún modelo.
+Borrar todo lo derivado y reconstruirlo desde lo que el autor escribió debe devolver el mismo sistema: idéntico lo que producen los janitors, equivalente en sentido lo que redactan los agentes. Es el criterio de éxito 4 y el test del proyecto entero.
 
-### Los ejemplos son normativos
-
-Los bloques de código de una spec no son ilustraciones: son casos que el parser debe
-aceptar y el motor reproducir. Cuando entren los tests, salen de ahí.
-
----
-
-## Convenciones
-
-**Idioma.** La prosa en español. Los campos de front matter y los identificadores internos
-en inglés (`lifecycle`, `cycle_start`, `enabled`). Las primitivas del dominio en español
-—entrada, tarea, entidad, cadencia, ciclo— tanto aquí como en lo que ve el usuario.
-
-**No dupliques.** Si un formato está definido en una spec, las demás lo enlazan con su
-número de sección; no lo repiten. La duplicación en documentación se desincroniza igual que
-en código.
-
-**Canónico ≠ vista.** Toda spec distingue explícitamente qué es fuente de verdad y qué es
-proyección recomputable ([`../docs/arquitectura.md`](../docs/arquitectura.md) §3). Si una
-spec no lo deja claro para su artefacto, está incompleta.
-
-**Las decisiones abiertas se numeran y se quedan.** Viven al final de cada spec hasta que se
-cierran. Si al cerrarse descartan una alternativa viable, se convierten en un
-[ADR](../docs/decisiones/) y se retiran de la lista.
+El corpus de regresión que lo ejecuta (`../corpus-regresion/`, con su contrato de regeneración) está referenciado por `coherencia.md` pero aún no existe en el repositorio.

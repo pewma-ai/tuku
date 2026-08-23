@@ -1,5 +1,8 @@
 # Guía rápida — primeros pasos con TUKU
 
+IMPORTANTE: ESTE DOCUMENTO ESTÁ DESACTUALIZADO. Hay que reevaluarlo.
+----------
+
 > Para quien nunca usó TUKU y solo quiere empezar a registrar su semana. No necesitas
 > saber Markdown ni entender la arquitectura interna: basta con escribir lo que te pasa.
 
