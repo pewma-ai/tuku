@@ -54,7 +54,7 @@ ruta. El path expresa jerarquía y partición; nunca identidad ni estado.**
   integridad: si se atrasa, el motor sigue resolviendo bien.
 - Los renombres masivos desaparecen del historial de Git, que queda legible como historial
   de la gestión y no del refactor de carpetas.
-- El test de replay ([`docs/brief.md`](../brief.md#3-principios) P3) se vuelve posible: sin
+- El test de replay ([`docs/brief.md`](devel/VAULT/old/brief.md#3-principios) P3) se vuelve posible: sin
   identidad estable no hay forma de afirmar que un objeto reconstruido es *el mismo* objeto.
 - La federación vía MCP queda abierta sin rediseño.
 

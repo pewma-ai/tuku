@@ -170,13 +170,13 @@ viernes    tuku cerrar 2026-W32 --tipo semana
 ```
 
 Para ver este flujo narrado con un caso completo, revisa
-[`corpus/simulaciones/flujo-pyme-semana.md`](../corpus/simulaciones/flujo-pyme-semana.md).
+[`corpus/simulaciones/flujo-pyme-semana.md`](flujo-pyme-semana.md).
 
 ---
 
 ## Más documentación
 
-- [`docs/brief.md`](brief.md) — visión y problema que resuelve TUKU.
-- [`docs/brief.md`](brief.md#3-principios) — principios arquitectónicos.
+- [`docs/brief.md`](devel/VAULT/old/brief.md) — visión y problema que resuelve TUKU.
+- [`docs/brief.md`](devel/VAULT/old/brief.md#3-principios) — principios arquitectónicos.
 - [`docs/arquitectura.md`](arquitectura.md) — modelo de datos y motor.
 - [`docs/glosario.md`](glosario.md) — vocabulario del dominio.

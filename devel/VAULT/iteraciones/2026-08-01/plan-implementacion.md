@@ -221,7 +221,7 @@ Cuatro niveles, tres de ellos sin gastar un token.
 
 ### Nivel 1 — Unitarios sobre los ejemplos de las specs
 
-[`spec/README.md`](../../../spec/README.md) declara que **los ejemplos son normativos**: los
+[`spec/README.md`](devel/VAULT/spec/README.md) declara que **los ejemplos son normativos**: los
 bloques de código de las specs son casos que el parser debe aceptar. Se extraen a fixtures y
 se testean uno a uno.
 
@@ -251,8 +251,8 @@ inventa, se transcribe. Y una invariante sin test es visible de inmediato.
 ### Nivel 3 — Las simulaciones como tests de aceptación
 
 Esto es lo más valioso que tiene el repo y conviene no desaprovecharlo.
-[`flujo-turno.md`](../../../corpus/simulaciones/flujo-turno.md) y
-[`flujo-pyme-semana.md`](../../../corpus/simulaciones/flujo-pyme-semana.md) narran, paso a paso y
+[`flujo-turno.md`](flujo-turno.md) y
+[`flujo-pyme-semana.md`](flujo-pyme-semana.md) narran, paso a paso y
 con marcas `▸ INPUT` / `⚙ TUKU`, dos ciclos completos con sus artefactos esperados.
 
 Propongo convertirlas en fixtures ejecutables: perfil inicial + secuencia de inputs + estado
@@ -277,7 +277,7 @@ El criterio de éxito 1 del brief y, según P3, **un detector de agencia mal ubi
 
 ### Fixtures
 
-**Ya construidas** en [`../tests/conftest.py`](../../../tests/conftest.py): `perfil_tmp` (perfil
+**Ya construidas** en [`../tests/conftest.py`](conftest.py): `perfil_tmp` (perfil
 sembrado por `tuku init` en un `tmp_path` con Git inicializado), `hermes_efimero` y
 `assert_diff_cero`. Todos los tests corren contra perfiles desechables; ninguno toca datos
 reales. `corpus/referencia/` (hoy solo un `.gitkeep`) se llena con los perfiles de las dos
@@ -298,7 +298,7 @@ Esto último es el mecanismo que hace que la cobertura no se degrade en silencio
 agrega `T9` a una spec, la suite falla hasta que exista su test o se registre la deuda. El
 mapeo 1:1 deja de depender de que alguien se acuerde.
 
-Ver [`../tests/README.md`](../../../tests/README.md).
+Ver [`../tests/README.md`](tests/README.md).
 
 ---
 

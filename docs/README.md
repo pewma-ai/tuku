@@ -2,16 +2,18 @@
 
 Sistema de gestión personal en archivos Markdown, operado por agentes y gobernado por su autor. Implementa la metodología MaC (Management as Code) de PEWMA.AI en su variante personal.
 
-Este repositorio contiene el diseño del **software**. El libro de cada autor —bitácora, notas, pendientes, su libro de estilo— vive en un repositorio distinto, propio de esa persona.
+Este repositorio contiene el diseño del **software**. El libro de cada autor —bitácora, notas, pendientes, su propio libro de estilo y ámbitos— vive en su repositorio personal.
 
-| Documento                                | Qué contiene                                                                              | Estabilidad                       |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------- |
-| [`brief.md`](brief.md)                   | Qué es, para quién, el problema, el marco conceptual                                      | Alta — cambia poco                |
-| [`principios.md`](principios.md)         | Principios normativos, cadena de descarga cognitiva, leyes del agente, criterios de éxito | Alta                              |
-| [`spec/`](spec/README.md)                | Una especificación por primitiva y por convención transversal                             | Baja — muta con la implementación |
-| [`agentes.md`](agentes.md)               | Ecosistema multi-agente, canal único, economía de contexto                                | Media                             |
-| [`plantillas/`](plantillas/)             | Libro de estilo por defecto y demás plantillas que TUKU instala en el repo del autor      | Media                             |
-| [`corpus-regresion/`](corpus-regresion/) | Contrato de regeneración: qué debe reproducir TUKU y con qué criterio de igualdad         | Alta                              |
-| [`decisiones/`](decisiones/)             | ADRs                                                                                      | Aditiva                           |
+| Documento | Qué contiene | Estabilidad |
+|---|---|---|
+| [`brief.md`](docs/brief.md) | Qué es, para quién, marco conceptual y funcionamiento en tres niveles | Alta — cambia poco |
+| [`principios.md`](principios.md) | Principios normativos de diseño, descarga cognitiva, primitivas y jerarquía determinista | Alta |
+| [`libro-de-estilo.md`](libro-de-estilo.md) | Reglas de escritura, organización, formato de bitácora/pendientes/ámbitos y división janitor/agente | Alta — referencia canónica |
 
-**Cómo usarlo.** `brief.md` y `principios.md` son la referencia: si una decisión no se deriva de ellos, o están incompletos o la decisión está equivocada — en ambos casos corresponde un ADR. `spec/` puede mutar libremente mientras el contrato de regeneración se siga cumpliendo.
+---
+
+**Cómo usarlo:**
+- `brief.md` y `principios.md` definen la visión, el alcance y las invariantes del diseño.
+- `libro-de-estilo.md` es la referencia viva de cómo interactúan humanos, agentes y herramientas con los archivos Markdown.
+- Cualquier cambio o decisión de diseño de software debe ser coherente con estos tres documentos.
+

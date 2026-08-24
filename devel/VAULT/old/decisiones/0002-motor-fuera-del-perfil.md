@@ -5,7 +5,7 @@
 TUKU se compone de dos cosas con ciclos de vida distintos: el **motor** —código, janitors,
 procesos, plantillas, versionado por PEWMA.AI, vida útil de años— y el **perfil** —los datos
 del usuario, versionados por él, con vida útil de décadas
-([`docs/arquitectura.md`](../arquitectura.md) §1).
+([`docs/arquitectura.md`](arquitectura.md) §1).
 
 La pregunta es dónde vive el motor respecto del perfil. Hay dos opciones viables y la
 tentación de vendorizar es genuina, no un error de principiante:

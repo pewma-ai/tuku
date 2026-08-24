@@ -1,6 +1,6 @@
 # Glosario
 
-> `docs/glosario.md` · Vocabulario preciso del proyecto. Cuando un término aparece en `docs/`, `spec/` o en el código, significa esto y no otra cosa. El porqué de cada uno está en [`brief.md`](brief.md); aquí solo está la definición.
+> `docs/glosario.md` · Vocabulario preciso del proyecto. Cuando un término aparece en `docs/`, `spec/` o en el código, significa esto y no otra cosa. El porqué de cada uno está en [`brief.md`](devel/VAULT/old/brief.md); aquí solo está la definición.
 >
 > Convención de idioma: las primitivas del dominio se nombran en español, tanto en la documentación como en lo que ve el usuario. Los campos de front matter y los identificadores internos van en inglés.
 

@@ -12,9 +12,9 @@ algo no puede derivarse de lo que está aguas arriba, o falta una premisa o hay 
 
 | #   | Documento                                        | Qué contiene                                                                                   | Léelo si…                                                  |
 | --- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| 1   | [`brief.md`](brief.md)                           | Qué es TUKU, para quién, el modelo conceptual, los principios y los criterios de éxito         | …quieres entender el proyecto. Es el documento fundacional |
+| 1   | [`brief.md`](devel/VAULT/old/brief.md)                           | Qué es TUKU, para quién, el modelo conceptual, los principios y los criterios de éxito         | …quieres entender el proyecto. Es el documento fundacional |
 | 2   | [`arquitectura.md`](arquitectura.md)             | La forma del sistema: motor y perfil, canónico y proyección, grafo de derivaciones, coherencia | …vas a escribir código o specs                             |
-| 3   | [`technical_stack.md`](technical_stack.md)       | Stack tecnológico: lenguaje, persistencia, dependencias, tooling y ejecución                   | …necesitas conocer las herramientas y dependencias del motor |
+| 3   | [`technical_stack.md`](devel/VAULT/technical_stack.md)       | Stack tecnológico: lenguaje, persistencia, dependencias, tooling y ejecución                   | …necesitas conocer las herramientas y dependencias del motor |
 | 4   | [`deployment.md`](deployment.md)                 | Instalación, `~/.tuku/`, versionado de esquema, migraciones, camino a servidor                 | …vas a instalar, empaquetar o desplegar                    |
 | 5   | [`glosario.md`](glosario.md)                     | Vocabulario preciso del proyecto                                                               | …dudas de un término. Consúltalo en cualquier momento      |
 | 6   | [`decisiones/`](decisiones/)                     | ADR: decisiones tomadas, con su contexto y sus consecuencias                                   | …quieres saber por qué algo es como es                     |
@@ -29,7 +29,7 @@ consulta.
 | Si estás escribiendo… | Va en… |
 |---|---|
 | Una razón, una intención, un principio | `docs/` |
-| El formato exacto de un archivo o campo | [`../spec/`](../spec/) — ver su [README](../spec/README.md) |
+| El formato exacto de un archivo o campo | [`../spec/`](../spec/) — ver su [README](devel/VAULT/spec/README.md) |
 | Una decisión que cerró una alternativa viable | `docs/decisiones/NNNN-titulo.md` |
 | Instrucciones ejecutables por humano o agente | `src/tuku/procesos/` |
 | Lo que se siembra en el perfil de un usuario | `src/tuku/templates/` |
@@ -43,7 +43,7 @@ repite. La duplicación en documentación se desincroniza igual que en código.
 
 Un ADR se escribe cuando una decisión **cierra una alternativa que era viable**. El índice
 de las decisiones tomadas está en [`decisiones/`](decisiones/); cómo se escribe una, en
-[`decisiones/INSTRUCCIONES.md`](decisiones/INSTRUCCIONES.md).
+[`decisiones/INSTRUCCIONES.md`](INSTRUCCIONES.md).
 
 Las decisiones que aún **no** se toman no viven ahí: viven como issues o en la sección
 correspondiente de [`arquitectura.md`](arquitectura.md), marcadas como abiertas.

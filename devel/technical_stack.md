@@ -1,6 +1,6 @@
 # Stack Técnico (Technical Stack)
 
-> `docs/technical_stack.md` · Definición del stack tecnológico, dependencias, herramientas de calidad y arquitectura de ejecución de TUKU. Se deriva de [`brief.md`](brief.md), [`arquitectura.md`](arquitectura.md), [`deployment.md`](deployment.md) y las decisiones de diseño del proyecto.
+> `docs/technical_stack.md` · Definición del stack tecnológico, dependencias, herramientas de calidad y arquitectura de ejecución de TUKU. Se deriva de [`brief.md`](devel/VAULT/old/brief.md), [`arquitectura.md`](arquitectura.md), [`deployment.md`](deployment.md) y las decisiones de diseño del proyecto.
 
 ---
 
@@ -41,7 +41,7 @@ TUKU no utiliza bases de datos relacionales ni embebidas para la verdad del domi
 
 ## 4. Dependencias del Motor (Core Dependencies)
 
-Definidas en [`pyproject.toml`](../pyproject.toml) bajo la premisa de dependencia mínima:
+Definidas en [`pyproject.toml`](pyproject.toml) bajo la premisa de dependencia mínima:
 
 | Dependencia | Versión | Rol en el Sistema |
 |---|---|---|

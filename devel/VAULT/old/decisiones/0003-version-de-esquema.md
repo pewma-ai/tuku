@@ -68,7 +68,7 @@ es explícita, aislada y acumulativa.**
   `tuku doctor`, que lo detecta y lo indica; nunca migrando en silencio.
 
 **Sobre `schema_version: 0`.** El valor sembrado hoy en
-[`src/tuku/templates/profile.yaml`](../../src/tuku/templates/profile.yaml) declara que el
+[`src/tuku/templates/profile.yaml`](profile.yaml) declara que el
 esquema **aún no es estable**. Mientras sea 0, no hay garantía de migración automática entre
 cambios de formato y los perfiles son experimentales. El compromiso de este ADR empieza a
 regir en `schema_version: 1`, que se declarará cuando cierren las decisiones abiertas de

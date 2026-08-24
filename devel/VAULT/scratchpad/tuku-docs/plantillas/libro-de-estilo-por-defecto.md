@@ -108,10 +108,10 @@ Enlaces a los procesos que sostienen el sistema. No necesitas operarlos, pero s�
 
 | Proceso | Propósito |
 |---|---|
-| [Configuración (`tuku.yaml`)](procesos/configuracion.md) | Un solo archivo con los valores de este libro de estilo. No se edita directo: se edita aquí y el sistema lo verifica. |
-| [Janitors](procesos/janitors.md) | Procesos automáticos que ordenan, proyectan pendientes, generan resúmenes y avisan de inconsistencias. |
-| [Agentes](procesos/agentes.md) | Quiénes son, qué hace cada uno y qué pueden hacer sin preguntarte. |
-| [Autoría](procesos/autoria.md) | Cómo el sistema distingue lo que escribiste tú de lo que redactó una IA. |
+| [Configuración (`tuku.yaml`)](configuracion.md) | Un solo archivo con los valores de este libro de estilo. No se edita directo: se edita aquí y el sistema lo verifica. |
+| [Janitors](janitors.md) | Procesos automáticos que ordenan, proyectan pendientes, generan resúmenes y avisan de inconsistencias. |
+| [Agentes](devel/VAULT/scratchpad/tuku-docs/plantillas/procesos/agentes.md) | Quiénes son, qué hace cada uno y qué pueden hacer sin preguntarte. |
+| [Autoría](autoria.md) | Cómo el sistema distingue lo que escribiste tú de lo que redactó una IA. |
 
 ### Reglas de coherencia
 

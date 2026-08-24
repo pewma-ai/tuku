@@ -9,7 +9,7 @@
 ## Qué es un ADR
 
 Un *Architecture Decision Record* es el registro de una decisión que **cerró una alternativa
-que era viable**. No documenta cómo funciona el sistema —eso es [`../arquitectura.md`](../arquitectura.md)
+que era viable**. No documenta cómo funciona el sistema —eso es [`../arquitectura.md`](arquitectura.md)
 y [`../../spec/`](../../spec/)— sino por qué funciona así y no de la otra forma que también
 habría servido.
 
@@ -21,7 +21,7 @@ que se reconstruya mal.
 ## Cuándo se escribe
 
 Cuando la decisión cierra una alternativa defendible. No se escribe para registrar lo obvio,
-ni lo que ya está en el [brief](../brief.md), ni una preferencia sin alternativa perdida.
+ni lo que ya está en el [brief](devel/VAULT/old/brief.md), ni una preferencia sin alternativa perdida.
 
 La prueba: si dentro de dos años alguien puede preguntar razonablemente *"¿y por qué no se
 hizo de la otra forma?"*, hace falta un ADR. Si la otra forma nunca fue defendible, no.
@@ -74,7 +74,7 @@ se intentó, y evita que la misma alternativa se reintente sin saber que ya se p
 ## Lo que no va aquí
 
 **Las decisiones abiertas.** Viven en la sección *Decisiones abiertas* del documento que les
-corresponde —[`../arquitectura.md`](../arquitectura.md) §10 y el cierre de cada archivo de
+corresponde —[`../arquitectura.md`](arquitectura.md) §10 y el cierre de cada archivo de
 `spec/`— o como issues. Este directorio es historial de lo cerrado, no lista de pendientes.
 
 Cuando una de esas decisiones abiertas se cierra, y solo si cerró una alternativa viable, se

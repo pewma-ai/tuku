@@ -34,7 +34,7 @@ Los almacenes canónicos son:
 
 Todo lo demás —bitácora de entidad, bloque de tareas del plan, dashboards de ámbito,
 informes de ciclo— es proyección declarada en el grafo de derivaciones
-([`docs/arquitectura.md`](../arquitectura.md) §4) y marcada `<!-- tuku:derived id=… hash=… -->`.
+([`docs/arquitectura.md`](arquitectura.md) §4) y marcada `<!-- tuku:derived id=… hash=… -->`.
 
 La bitácora del ciclo y la bitácora de una entidad son **la misma clase de objeto**: dos
 filtros distintos sobre el mismo conjunto de entradas. Una filtra por rango de fechas, la

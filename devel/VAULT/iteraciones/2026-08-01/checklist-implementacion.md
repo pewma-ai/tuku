@@ -2,7 +2,7 @@
 
 > `devel/checklist-implementacion.md` · Lista de control trazable, fase por fase. El porqué
 > del orden está en [`plan-implementacion.md`](plan-implementacion.md) §1.1; cómo se ejecuta,
-> en [`../../entorno-devel.md`](../../entorno-devel.md).
+> en [`../../entorno-devel.md`](entorno-devel.md).
 
 ---
 
@@ -61,7 +61,7 @@ Consolidación de decisiones ya tomadas y dispersas. Ninguno exige diseño nuevo
 | [x] | **F1.3** Entradas: hora opcional, `[entidad](ruta)`, clasificación, `#marcadores` | [`entradas.md`](../../../spec/entradas.md) | los cuatro valores de clasificación y ninguno más ✅ *hecho* |
 | [x] | **F1.4** Gramática temporal: precisa, rango, difusa, `next:<tipo>` | [`tarea.md`](../../../spec/tarea.md) §4 | una fecha inválida se rechaza con posición ✅ *hecho* |
 | [x] | **F1.5** Delimitadores HTML (`tuku:editable`, `tuku:derived`, `tuku:cadencias`) | [ADR 0013](../../../docs/decisiones/0013-cadencias-en-comentario.md) | comentario preservado íntegro tras reescribir ✅ *hecho* |
-| [x] | **F1.6** Round-trip sobre **todos** los ejemplos normativos de `spec/` | [`spec/README.md`](../../../spec/README.md) | `test_roundtrip.py` parametrizado por `specref.casos()` ✅ *hecho* |
+| [x] | **F1.6** Round-trip sobre **todos** los ejemplos normativos de `spec/` | [`spec/README.md`](devel/VAULT/spec/README.md) | `test_roundtrip.py` parametrizado por `specref.casos()` ✅ *hecho* |
 
 > **La asimetría que hay que tener presente antes de escribir una línea.** En el canónico de
 > tareas la entidad es un **`id` plano** (`nucleo-datos`); en las entradas es un **enlace
@@ -94,7 +94,7 @@ a propósito** y exige que el janitor la detecte.
 > violación) y su garante es `—`. La suite las excluye sola.
 
 Marcar cada invariante implementada borrando su entrada de `PENDIENTES` en
-[`../tests/test_cobertura_specs.py`](../../../tests/test_cobertura_specs.py). Si se olvida, el test
+[`../tests/test_cobertura_specs.py`](test_cobertura_specs.py). Si se olvida, el test
 `test_la_lista_de_pendientes_no_miente` avisa.
 
 ---

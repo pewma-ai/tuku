@@ -10,7 +10,7 @@ Los specs se leen en el orden en que las cosas se derivan unas de otras:
 
 | #   | Documento                      | Qué especifica                                                                                           |
 | --- | ------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| 1   | [bitacora.md](spec/bitacora.md)     | La primitiva única: eventos fechados con hora, inmutables, y el formato de viñeta del que todo se extrae |
+| 1   | [bitacora.md](devel/VAULT/spec/bitacora.md)     | La primitiva única: eventos fechados con hora, inmutables, y el formato de viñeta del que todo se extrae |
 | 2   | [pendientes.md](pendientes.md) | Doble fuente (bitácora de origen, `PENDIENTES.md` operativo), ciclo de vida y emparejamiento semántico   |
 | 3   | [notas.md](notas.md)           | Las tres clases de nota, la convención de MAYÚSCULAS para inducción, y el criterio de "ver además"       |
 | 4   | [entidades.md](entidades.md)   | El objeto de trabajo, los tipos que define cada autor, y las prácticas heredadas por tipo                |
