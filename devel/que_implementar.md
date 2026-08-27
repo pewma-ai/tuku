@@ -549,7 +549,7 @@ flowchart TD
     J["Janitor invocado con argumentos<br/>(operaciones del sistema)"]
 
     subgraph CONS["(5) Consecuencias, leyendo lo escrito"]
-        direction LR
+        direction TB
         K1["Alta o baja<br/>en PENDIENTES.md"]
         K2["Enlaces a<br/>páginas existentes"]
         K4["Alta o cambio<br/>de cadencia"]
