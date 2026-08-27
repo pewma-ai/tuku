@@ -1,6 +1,6 @@
 # TUKU: principios
 
-> Orientación normativa, no contrato rígido. Sirven para tomar decisiones cuando el uso diario plantee dilemas no resueltos. Si un principio empieza a requerir explicaciones largas, ya es una decisión arquitectónica y le corresponde un ADR.
+> Orientación normativa, no contrato rígido. Sirven para tomar decisiones cuando el uso diario plantee dilemas no resueltos.
 
 ### 1. El archivo de texto es lo primero
 
