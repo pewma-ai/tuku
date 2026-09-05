@@ -10,7 +10,7 @@ Lo que una corrida produce va a `playground/`, que se pisa cada vez que se vuelv
 
 No hay problema en que esto crezca a cientos de archivos chicos: son texto, cuestan casi nada.
 
-Esta suite se escribe desde cero. No reutiliza los tests del diseño anterior, que documenta [`../README.md`](../README.md).
+Esta suite se escribe desde cero: la del diseño anterior se borró entera.
 
 ## Convención de nombre
 
@@ -50,10 +50,12 @@ Lo que ningún script puede verificar todavía, y hay que juzgar leyendo el resu
 
 ## Cómo correr
 
+El nombre del test ya es el tag: `-k` de pytest filtra por él, con guion bajo (no guion, que no encuentra nada y no avisa).
+
 ```bash
-tests/correr.sh                 # todo
-tests/correr.sh 001              # un epic
-tests/correr.sh 001-002          # un escenario
+uv run pytest tests/escenarios/            # todo
+uv run pytest tests/escenarios/ -k 001      # un epic
+uv run pytest tests/escenarios/ -k 001_002  # un escenario
 ```
 
 ## Índice

@@ -46,8 +46,8 @@ El procedimiento a mano equivalente está en [`template/README.md`](template/REA
 Los escenarios son narrativos (Dado/Cuando/Entonces), no unitarios, porque buena parte del sistema depende de un agente y no da un resultado único. El caso y su arnés viven juntos en `tests/escenarios/`, y lo que solo se puede juzgar leyendo queda escrito en el propio escenario bajo "Qué se mira a mano".
 
 ```bash
-tests/correr.sh                 # todo tests/escenarios/
-tests/correr.sh 001              # un epic
+uv run pytest tests/escenarios/            # todo
+uv run pytest tests/escenarios/ -k 001      # un epic
 ```
 
 Determinista, sin depender de un agente. `tests/` se construye solo desde los epics: la suite del diseño anterior se borró entera en vez de arrastrarla a medio migrar.

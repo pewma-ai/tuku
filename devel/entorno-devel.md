@@ -9,12 +9,12 @@ uv run mypy src
 uv run pytest
 ```
 
-La suite del diseño anterior se borró entera (importaba un paquete `tuku` que ya no existe): `tests/` se construye solo desde los epics, no por adelantado. Hoy solo hay `tests/escenarios/`:
+La suite del diseño anterior se borró entera (importaba un paquete `tuku` que ya no existe): `tests/` se construye solo desde los epics, no por adelantado. Hoy solo hay `tests/escenarios/`, y el nombre del test ya es el tag de su epic (`test_XXX_YYY_slug`):
 
 ```bash
-tests/correr.sh                 # todo tests/escenarios/
-tests/correr.sh 001              # un epic
-tests/correr.sh 001-002          # un escenario
+uv run pytest tests/escenarios/            # todo
+uv run pytest tests/escenarios/ -k 001      # un epic
+uv run pytest tests/escenarios/ -k 001_002  # un escenario
 ```
 
 El hook de `pre-commit` está en `.pre-commit-config.yaml` y se instala una vez con `uv run pre-commit install`.
