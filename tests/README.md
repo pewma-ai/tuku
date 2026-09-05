@@ -4,7 +4,7 @@
 
 ## Estado
 
-`uv run pytest` no corre todavía: los marcadores de abajo son del motor anterior. Los tests que lo necesitan se saltan (`skip`) mientras no exista.
+Esta suite (los archivos sueltos de este directorio) no corre todavía: importan un paquete `tuku` que ya no existe en `src/`. `tests/escenarios/` sí corre, aislada, con `tests/correr.sh`.
 
 ## Los cuatro niveles
 

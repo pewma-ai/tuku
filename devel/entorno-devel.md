@@ -9,10 +9,12 @@ uv run mypy src
 uv run pytest
 ```
 
-`uv run pytest` todavía no corre: los marcadores y la jerarquía de `pyproject.toml` son del diseño anterior y se redefinen en el epic 2, junto con la suite. Mientras tanto los escenarios se corren directo:
+`uv run pytest` sobre todo `tests/` todavía no corre: los archivos sueltos del diseño anterior importan un paquete `tuku` que ya no existe, y se rehacen en el epic 2. La suite nueva sí corre, aislada en `tests/escenarios/`:
 
 ```bash
-python3 tests/escenarios/test_001_001_instalacion_minima.py
+tests/correr.sh                 # todo tests/escenarios/
+tests/correr.sh 001              # un epic
+tests/correr.sh 001-002          # un escenario
 ```
 
 El hook de `pre-commit` está en `.pre-commit-config.yaml` y se instala una vez con `uv run pre-commit install`.

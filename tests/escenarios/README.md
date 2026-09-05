@@ -48,6 +48,14 @@ Comando para reproducirlo en `playground/`.
 Lo que ningún script puede verificar todavía, y hay que juzgar leyendo el resultado.
 ```
 
+## Cómo correr
+
+```bash
+tests/correr.sh                 # todo
+tests/correr.sh 001              # un epic
+tests/correr.sh 001-002          # un escenario
+```
+
 ## Índice
 
 | Escenario | Cubre | Notas |
