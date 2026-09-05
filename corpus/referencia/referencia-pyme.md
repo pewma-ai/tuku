@@ -157,7 +157,7 @@ Lo que trae al sistema: se le olvidan los seguimientos de cotización, que es ex
 > [!tip] Ground Truth para benchmarking de modelos
 > Reproduce la entrada canónica que corresponde a cada dictado de la Parte 1, según `spec/bitacora.md`. Permite evaluar si un agente transforma habla desestructurada en entradas que se sostienen solas, con la marca correcta de la ontología cerrada (`**pendiente**`, `~~(Hecho)~~`, `**cadencia**`) y una clasificación abierta razonable.
 >
-> Tres cosas que este corpus pone a prueba y el de developer no: **la instrucción dirigida al oyente desaparece** ("nota mental que siempre se me olvida" no se registra, la cadencia sí); **el monto y el plazo son parte del hecho**, no adorno, porque de ellos dependen las consecuencias; y **una frase de negocio suele ser dos hechos**, la venta y su condición de pago.
+> Tres cosas que este corpus pone a prueba y el de faena no: **la instrucción dirigida al oyente desaparece** ("nota mental que siempre se me olvida" no se registra, la cadencia sí); **el monto y el plazo son parte del hecho**, no adorno, porque de ellos dependen las consecuencias; y **una frase de negocio suele ser dos hechos**, la venta y su condición de pago.
 
 ## Semana 1 (10 al 16 de Agosto de 2026)
 
