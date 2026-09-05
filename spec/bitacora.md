@@ -1,6 +1,6 @@
 # spec · bitácora
 
-> La única entrada del sistema. Se justifica por el principio 1 y el principio 3 de `../docs/principios.md`. El marco que la rodea (por qué el registro termina donde termina) está en [flujo-informacion.md](flujo-informacion.md).
+> La única entrada del sistema. Se justifica por el principio 1 y el principio 3 de [`../docs/principios.md`](../docs/principios.md). El marco que la rodea (por qué el registro termina donde termina) está en [flujo-informacion.md](flujo-informacion.md).
 
 Lo hablado y lo registrado no son lo mismo. El dictado va dirigido a quien lleva la bitácora; la entrada registra el hecho. Son dos registros distintos: el habla es situada y efímera, la entrada tiene que sostenerse sola durante años.
 
@@ -64,7 +64,7 @@ El costo que la mantiene honesta: la lista vive en el código del linter, así q
 
 **Abierta, del autor.** `**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`. Son **semánticos**: ningún janitor actúa sobre ellos. Sirven para leer, filtrar y destilar. Si el autor usa un tipo nuevo se acepta, y en un ciclo posterior se le pregunta qué significa para formalizarlo.
 
-**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos viven en `docs/libro-de-estilo.md`, cada uno bajo su propio encabezado, y de ahí los lee el janitor:
+**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos viven en el `LIBRO-DE-ESTILO.md` del vault del autor (semilla en [`../template/vanilla/LIBRO-DE-ESTILO.md`](../template/vanilla/LIBRO-DE-ESTILO.md)), cada uno bajo su propio encabezado, y de ahí los lee el janitor:
 
 | Vocabulario abierto | Encabezado en el libro de estilo |
 | --- | --- |
@@ -92,6 +92,6 @@ El cuerpo es el mismo en los tres lugares: la entrada que abre, el ítem en `PEN
 
 ## No entra
 
-- Qué pasa con el cuerpo una vez que llega a `PENDIENTES.md` (escalera de horizontes, vencimiento). Eso es `pendientes.md`.
-- Cómo se infiere el ámbito o se resuelve la regla más cercana. Eso es `ambitos.md`.
-- Cómo un agente decide qué inyectar antes de interpretar el dictado. Eso es `agente.md`.
+- Qué pasa con el cuerpo una vez que llega a `PENDIENTES.md` (escalera de horizontes, vencimiento). Eso es [`pendientes.md`](pendientes.md).
+- Cómo se infiere el ámbito o se resuelve la regla más cercana. Eso es [`ambitos.md`](ambitos.md).
+- Cómo un agente decide qué inyectar antes de interpretar el dictado. Eso es [`agente.md`](agente.md).
