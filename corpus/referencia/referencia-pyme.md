@@ -425,6 +425,8 @@ ambitos/
 
 Por horizonte, según la escalera de `spec/pendientes.md`.
 
+Los nombres de los horizontes son **vocabulario abierto**: salen de `### Horizontes` en el libro de estilo del autor, no de TUKU. Andrea no tiene turnos, tiene semanas, así que sus horizontes son `^esta-semana` y `^proxima-semana` donde el corpus de developer dice `^este-turno` y `^proximo-turno`. La escalera es la misma y el janitor no cambia: lo que cambia es cómo se llama cada escalón.
+
 * **Cerrados durante las dos semanas:**
   - `administracion`: pagar cotizaciones previsionales de Katia Fuenzalida en Previred.
   - `clientes/colegio-los-robles`: enviar cotización, llamar por la cotización sin respuesta, despachar el pedido.
@@ -438,14 +440,14 @@ Por horizonte, según la escalera de `spec/pendientes.md`.
   - `equipo`: contratar a Katia Fuenzalida para el inventario, contratar flete a Hernán Vidal, pagar la primera mitad del catálogo.
   - `personal`: asistir a reunión de apoderados de Emilia.
 
-* **`^este-turno` (semana del 24 de agosto):**
+* **`^esta-semana` (semana del 24 de agosto):**
   - `bodega`: realizar el inventario de fin de mes con Katia Fuenzalida.
   - `clientes/escuela-los-maitenes`: decidir si se acepta el pedido a sesenta días.
   - `catalogo-marzo`: enviar la lista de precios corregida a Paula Ibáñez.
   - `clientes/libreria-el-compas`: ofrecer reposición a Librería El Compás.
   - `bodega`: pedir cartulina de color y pegamento en barra.
 
-* **`^proximo-turno`:**
+* **`^proxima-semana`:**
   - `temporada-marzo`: consultar a Gloria Pinto si Importadora Andina trae línea Montessori.
   - `catalogo-marzo`: fotografiar el mobiliario para el catálogo.
   - `administracion/financiamiento`: seguimiento de la respuesta del banco (vence el 2 de septiembre).
