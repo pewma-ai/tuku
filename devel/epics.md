@@ -44,6 +44,7 @@ Preparación ya hecha, fuera de los epics: `spec/` y `docs/glosario.md` ordenan 
 4. **El código vive en `src/` (raíz), no en `devel/VAULT/src/`.** Es donde `pyproject.toml` ya apuntaba (`where = ["src"]`); `devel/VAULT/src/` resultó ser código del diseño anterior (`entradas/`, `tareas/`, `entidades/`) y queda como referencia histórica, no como base para seguir escribiendo. El primer archivo es `src/install_test_scenario.py`: instala una variante de `template/` y resuelve las fechas de `AHORA.md`, sin depender de nada fuera de la librería estándar.
 5. **Los escenarios de prueba son narrativos (Dado/Cuando/Entonces), no unitarios**, y separan dato de arnés: el caso vive en `corpus/escenarios/` (dato, puede haber cientos), lo que lo ejecuta y compara en `tests/escenarios/`, y los pasos deterministas reutilizables entre escenarios en `tests/scripts/`.
 6. **Instalar es una línea de `curl`, no `git clone`.** `install.sh` baja el tarball del branch desde GitHub, extrae `template/vanilla/` y corre `src/install_test_scenario.py`. Probado el 2026-09-04 contra `pewma-ai/tuku@devel` real: `curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- <destino>`.
+7. **Sobrescribir se pregunta, salvo en la herramienta de prueba.** `install.sh` (usuario final) pide confirmación si el destino ya existe y no está vacío; `TUKU_FORCE=1` la salta para uso automatizado. `src/install_test_scenario.py` (herramienta de prueba, invocada muchas veces contra `playground/`) sigue sobrescribiendo sin preguntar, a propósito.
 
 **Qué falta decidir.**
 

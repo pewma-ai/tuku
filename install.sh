@@ -7,10 +7,17 @@
 # copia template/vanilla/ al destino y resuelve las fechas de AHORA.md con
 # src/install_test_scenario.py. Requiere curl, tar y python3, nada más.
 #
+# Si el destino ya existe y no está vacío, pregunta antes de sobrescribir.
+# install_test_scenario.py, en cambio, sobrescribe sin preguntar a propósito:
+# es la herramienta de prueba que se invoca desde playground/ para pisar un
+# escenario a cada corrida. Este script es el único camino para un usuario
+# final, y ahí sobrescribir en silencio es justo lo que no debe pasar.
+#
 # Variables de entorno opcionales:
 #   TUKU_REPO   dueño/repo en GitHub (default: pewma-ai/tuku)
 #   TUKU_REF    rama o tag (default: devel)
 #   TUKU_VARIANTE  variante de template/ a instalar (default: vanilla)
+#   TUKU_FORCE  si es "1", sobrescribe sin preguntar (para uso automatizado)
 
 set -eu
 
@@ -23,6 +30,15 @@ DESDE="${2:-}"
 for bin in curl tar python3; do
   command -v "$bin" >/dev/null 2>&1 || { echo "falta '$bin', no se puede instalar" >&2; exit 1; }
 done
+
+if [ -e "$DESTINO" ] && [ -n "$(ls -A "$DESTINO" 2>/dev/null)" ] && [ "${TUKU_FORCE:-}" != "1" ]; then
+  printf '%s ya existe y no está vacío. ¿Sobrescribir? [s/N] ' "$DESTINO" >&2
+  RESPUESTA="$( { read -r r < /dev/tty && printf '%s' "$r"; } 2>/dev/null )" || RESPUESTA=""
+  case "$RESPUESTA" in
+    s|S|si|Si|SI|sí|Sí) ;;
+    *) echo "cancelado, nada se tocó." >&2; exit 1 ;;
+  esac
+fi
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT

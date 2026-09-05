@@ -16,8 +16,13 @@ Uso:
     python3 src/install_test_scenario.py --variante vanilla --destino /ruta --desde 2026-09-01
 
 --desde fija el lunes del primer ciclo. Por defecto, el lunes de esta semana.
-Si el destino ya existe, se borra y se reinstala: es lo que permite pisar
-un escenario de playground/ al recrearlo.
+Si el destino ya existe, se borra y se reinstala sin preguntar: es lo que
+permite pisar un escenario de playground/ al recrearlo, a propósito.
+
+Esta herramienta es para probar, no para un usuario final: no confirma nada
+porque se invoca en automático, muchas veces, contra directorios desechables.
+El instalador para un usuario final es install.sh, que sí pregunta antes de
+sobrescribir si el destino ya tiene contenido.
 """
 
 from __future__ import annotations
