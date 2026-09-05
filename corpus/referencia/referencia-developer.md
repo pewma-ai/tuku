@@ -39,7 +39,7 @@
 * "Dejé cargando el auto eléctrico 94 para que Cristóbal Carrasco lo pueda usar mañana viernes temprano."
 * "Le recordé al equipo de SAE que la API de LASCAR tiene prioridad."
 * "Irene Morales tuvo un inconveniente médico y tuvo que bajar de Faena a las 7 AM."
-* "Estuve reunido con Xander Gálvez y Tomás Toledo de Casa Matriz. Coincidimos en aumentar la comunicación entre Casa Matriz y Faena para romper silos. Están esperando la estrategia del directorado, lo que calza con el apoyo de Elena Soto. Tomo el consejo de Mauricio Barra de capitalizar todo lo que haga en entregables tangibles. En Casa Matriz perciben la IA con desfase y más que la fuga de datos les preocupa el riesgo real de descontrol de agentes. Sugirieron presentar casos aplicados en los Data Coffee de Fabina. Les envié por correo la recopilación curada sobre gobernanza de agentes IA."
+* "Estuve reunido con Xander Gálvez y Tomás Toledo de Casa Matriz. Coincidimos en aumentar la comunicación entre Casa Matriz y Faena para romper silos. Están esperando la estrategia del directorado, lo que calza con el apoyo de Elena Sepúlveda. Tomo el consejo de Mauricio Barra de capitalizar todo lo que haga en entregables tangibles. En Casa Matriz perciben la IA con desfase y más que la fuga de datos les preocupa el riesgo real de descontrol de agentes. Sugirieron presentar casos aplicados en los Data Coffee de Fabina. Les envié por correo la recopilación curada sobre gobernanza de agentes IA."
 * "Apoyé a Raúl Araya ajustando la justificación técnica de la solicitud de tiempo técnico de noviembre para el interferómetro."
 * "Marcelo Jensen me invitó a integrarme al comité de revisión Phase A del proyecto Multi Site Operations."
 * "Despaché el correo de la propuesta Concurso I+D Tecnológico 2027 a Carlos Silva, Fabina Méndez y Víctor Lagos."
@@ -194,7 +194,7 @@
 - jefatura: Irene Morales tuvo un problema médico, bajó a las 7 AM.
 - ~~(Hecho)~~ responsable-sw: (jueves a las 18:00) Cargar el auto 94 para que Cristóbal Carrasco lo use el viernes en la mañana.
 - ~~(Hecho)~~ jefatura: Recordar a SAE que LASCAR API tiene prioridad.
-- faena-ai: Reunión con Xander Gálvez y Tomás Toledo. Deslicé la idea de incrementar la comunicación entre Casa Matriz y Faena; ambos de acuerdo (trabajaron en empresas geographically distribuidas: la falta de comunicación es el mayor obstáculo, crea barreras y culturas internas propias). Están esperando la estrategia que prepara el directorado — se alinea con lo que quiero hacer y con el apoyo de Elena Soto. Reflexión: tomar el consejo de Mauricio Barra y capitalizar todo lo que hago — documentos, acuerdos, software — en algo tangible. Observación de contexto: en Casa Matriz, salvo los muy avanzados técnicamente, la gente piensa 2-3 años atrás respecto a la IA; y lo que hay que regular realmente no me preocupa tanto la fuga de datos, sino el peligro real de que un agente se descontrole, sea maliciosamente o por error. Ellos sugirieron exponer ingeniería aplicada, caso de uso real, en los Data Coffee que gestiona Fabina Méndez.
+- faena-ai: Reunión con Xander Gálvez y Tomás Toledo. Deslicé la idea de incrementar la comunicación entre Casa Matriz y Faena; ambos de acuerdo (trabajaron en empresas geographically distribuidas: la falta de comunicación es el mayor obstáculo, crea barreras y culturas internas propias). Están esperando la estrategia que prepara el directorado — se alinea con lo que quiero hacer y con el apoyo de Elena Sepúlveda. Reflexión: tomar el consejo de Mauricio Barra y capitalizar todo lo que hago — documentos, acuerdos, software — en algo tangible. Observación de contexto: en Casa Matriz, salvo los muy avanzados técnicamente, la gente piensa 2-3 años atrás respecto a la IA; y lo que hay que regular realmente no me preocupa tanto la fuga de datos, sino el peligro real de que un agente se descontrole, sea maliciosamente o por error. Ellos sugirieron exponer ingeniería aplicada, caso de uso real, en los Data Coffee que gestiona Fabina Méndez.
 - ~~(Hecho)~~ faena-ai: Enviar correo a Tomás Toledo y Xander Gálvez (IT) con el resumen de referencias sobre gobernanza de AI Agents ("AI Agents Governance, curated references"), disponible en Evaluación de riesgo y gobernanza de agentes en la Organización.
 - responsable-sw: Apoyo a Raúl Araya en la modificación del *rationale* de la solicitud de tiempo técnico (TTR) de noviembre en el interferómetro.
 - operaciones-general: Invitación recibida de Marcelo Jensen ("Invitation to become part of the Multi Site Operations Project Phase A review board").
@@ -431,32 +431,32 @@ org/
 ## 3. Personas Enlazadas (Notas de Entidad en `notas/`)
 
 * **Ámbito Laboral e Institucional:**
-  - `Fabina Méndez` (FMO) — Contraparte clave en exploraciones operacionales e iniciativas de IA.
-  - `Carlos Silva` (CST) — Jefatura de ingeniería / operaciones; validación de estrategia de soporte-datos y colaboración científica.
-  - `Víctor Lagos` (VLI) — Liderazgo técnico; gobernanza de IA, ODAP y objetivos de equipo.
-  - `Mauricio Barra` (MBO) — Dirección de operaciones; asesoría estratégica y patrocinio institucional.
-  - `Jorge Muñoz` (JMI) — Mantenimiento predictivo, RCA y ranking de criticidad de sistemas.
-  - `Carla Fuentes` (CFA) — Gestión de datos PLC de espectrógrafo y soporte a tesis de grado.
+  - `Fabina Méndez` (FME) — Contraparte clave en exploraciones operacionales e iniciativas de IA.
+  - `Carlos Silva` (CSI) — Jefatura de ingeniería / operaciones; validación de estrategia de soporte-datos y colaboración científica.
+  - `Víctor Lagos` (VLA) — Liderazgo técnico; gobernanza de IA, ODAP y objetivos de equipo.
+  - `Mauricio Barra` (MBA) — Dirección de operaciones; asesoría estratégica y patrocinio institucional.
+  - `Jorge Muñoz` (JMU) — Mantenimiento predictivo, RCA y ranking de criticidad de sistemas.
+  - `Carla Fuentes` (CFU) — Gestión de datos PLC de espectrógrafo y soporte a tesis de grado.
   - `Florencia Morales` — Colaboradora en gestión de datos y repositorio GitHub.
   - `Javier Castro` — Tesista de ingeniería analizando datos de telemetría.
-  - `Tomás Toledo` (TTU) — IT Casa Matriz; servicios de plataforma y gobernanza de agentes.
+  - `Tomás Toledo` (TTO) — IT Casa Matriz; servicios de plataforma y gobernanza de agentes.
   - `Xander Gálvez` — IT Casa Matriz; arquitectura tecnológica y gobernanza IA.
   - `Rodrigo Álvarez` — IT Casa Matriz; infraestructura NVIDIA y plataforma v2.
   - `Bernardo Salinas` — Primer intern receptor de API key Azure LLM.
-  - `Esteban Parra` (EPE) — Casos de uso de LLM en ingeniería y operaciones.
+  - `Esteban Parra` (EPA) — Casos de uso de LLM en ingeniería y operaciones.
   - `Cristóbal Carrasco` — Colega de turno de software y logística.
-  - `Raúl Araya` (RAB) — Solicitudes de tiempo técnico (TTR) de instrumentos interferométricos.
+  - `Raúl Araya` (RAR) — Solicitudes de tiempo técnico (TTR) de instrumentos interferométricos.
   - `César Espinoza` — Relevo y entrega de turno en rol de Jefe de División.
   - `Alejandro Palma` — Jefe de operadores de telescopio; coordinación de Comité Conjunto.
-  - `Patricio Soto` (PSI) — Colega de área de ingeniería (ergonomía / standing desk).
-  - `Valeria Pizarro` (VPU) — Nueva contratación DevOps; asignación de metas iniciales.
+  - `Patricio Soto` (PSO) — Colega de área de ingeniería (ergonomía / standing desk).
+  - `Valeria Pizarro` (VPI) — Nueva contratación DevOps; asignación de metas iniciales.
   - `Alicia Abarca` — Coordinación de estudiantes y calendarios de turnos de soporte.
   - `Marcelo Jensen` — Líder de proyecto Multi Site Operations.
   - `Agustín Díaz` — Representante de la Organización para captación académica y charlas.
-  - `Nelson Morales` (NMI) — Responsable de software de instrumentos interferométricos y CINTILATOR.
+  - `Nelson Morales` (NMO) — Responsable de software de instrumentos interferométricos y CINTILATOR.
   - `Alex` — Colaborador técnico en modos de observación CINTILATOR.
   - `Irene Morales` — Colega de jefatura/gestión de equipo en faena.
-  - `Elena Soto` (ESA) — Contraparte científica para estrategia y documentos de IA.
+  - `Elena Sepúlveda` (ESE) — Contraparte científica para estrategia y documentos de IA.
 
 * **Ámbito Familiar y Personal:**
   - `Mateo` — Hijo, informático; transición de arriendo Depto Centro y trabajo agéntico con Markdown.
@@ -488,7 +488,3 @@ org/
   - `PILWA, ideas para Zettelkasten criollo` — Patrón de captura, refinamiento y generación de artefactos.
 
 ----
-## Ver Además
-* [TUKU - Dispatch a agentes con clear context](TUKU%20-%20Dispatch%20a%20agentes%20con%20clear%20context.md) — Patrón arquitectónico y ciclo de vida de contexto para TUKU.
-* [Voice JPG - cómo escribir en primera persona](Voice%20JPG%20-%20cómo%20escribir%20en%20primera%20persona.md) — Guía de tono, voz y registros directos.
-* [tuku](../org/PEWMA.AI/VIGENTES/tuku.md) — Ficha de proyecto del sistema agéntico TUKU.
