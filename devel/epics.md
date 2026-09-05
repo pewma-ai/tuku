@@ -2,7 +2,9 @@
 
 > Unidad de entrega, no unidad técnica. Un epic termina con algo que una persona puede usar. Las fases de [`que_implementar.md`](que_implementar.md) siguen siendo el corte técnico y funcionan como checklist interno de cada epic: un epic puede abarcar varias fases, pero no puede cerrar sin cumplir el criterio de salida de las que abarca.
 
-Los epics se numeran por orden de ejecución. Solo los dos primeros están desarrollados, y es deliberado: el resto se escribe cuando el epic 2 haya enseñado lo que hoy no sabemos.
+Los epics se numeran por orden de ejecución, con tres dígitos: ese número es el `XXX` de los escenarios que el epic valida (`corpus/escenarios/XXX-YYY-slug.md`) y de los tests que los automatizan. Un escenario dice a qué epic pertenece por su nombre de archivo, sin que haya que abrirlo.
+
+ Solo los dos primeros están desarrollados, y es deliberado: el resto se escribe cuando el epic 002 haya enseñado lo que hoy no sabemos.
 
 ## Los epics mueven el diseño
 
@@ -18,17 +20,17 @@ Actualizado el 2026-09-04.
 
 | Epic | Nombre | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- |
-| 1 | Un TUKU mínimo instalable | en curso | probarlo con una persona, podar `docs/libro-de-estilo.md` |
-| 2 | El día uno simulado | sin empezar | depende del epic 1 |
-| 3+ | El resto | sin desarrollar | se escriben al cerrar el epic 2 |
+| 001 | Un TUKU mínimo instalable | en curso | probarlo con una persona, podar `docs/libro-de-estilo.md` |
+| 002 | El día uno simulado | sin empezar | depende del epic 001 |
+| 003+ | El resto | sin desarrollar | se escriben al cerrar el epic 002 |
 
-Lo hecho en el epic 1 hasta ahora: existe `template/vanilla/`, con los 11 archivos del estado cero y el procedimiento de instalación a mano en `template/README.md`. El mecanismo que lo automatiza para probarlo repetidas veces es `src/install_test_scenario.py`.
+Lo hecho en el epic 001 hasta ahora: existe `template/vanilla/`, con los 11 archivos del estado cero y el procedimiento de instalación a mano en `template/README.md`. El mecanismo que lo automatiza para probarlo repetidas veces es `src/install_test_scenario.py`.
 
 El detalle día a día vive en [`iteraciones/`](iteraciones/README.md). Los casos que se están probando, en forma narrativa (Dado/Cuando/Entonces) y no unitaria, viven en `../corpus/escenarios/`; el arnés que eventualmente los ejecuta, en `../tests/escenarios/` y `../tests/scripts/`.
 
 Preparación ya hecha, fuera de los epics: `spec/` y `docs/glosario.md` ordenan el vocabulario y lo que hoy se cree del diseño, y `que_implementar.md` quedó reducido al plan de fases. Es punto de partida, no diseño cerrado.
 
-## Epic 1. Un TUKU mínimo instalable
+## Epic 001 · Un TUKU mínimo instalable
 
 **Qué entrega.** Que una persona nueva pueda instalar un vault de TUKU en un directorio vacío y empezar a escribir el mismo día, sin configurar nada y sin saber qué es TUKU.
 
@@ -59,7 +61,7 @@ Preparación ya hecha, fuera de los epics: `spec/` y `docs/glosario.md` ordenan 
 
 **No entra.** Ningún janitor, ningún agente, ningún LLM. Tampoco decidir el tipo de ciclo real de quien lo usa: arranca en semanal y el tipo verdadero emerge después.
 
-## Epic 2. El día uno simulado
+## Epic 002 · El día uno simulado
 
 **Qué entrega.** Un conjunto de entradas de bitácora estándar que, inyectadas sobre el estado cero, producen sus consecuencias de forma reproducible. Y con eso, la plataforma de pruebas que todo lo demás va a usar.
 
@@ -76,7 +78,7 @@ Preparación ya hecha, fuera de los epics: `spec/` y `docs/glosario.md` ordenan 
 1. **Qué entradas componen el día uno.** Tienen que ser representativas y cubrir al menos las tres marcas de la ontología cerrada. Hay material en `corpus/`.
 2. **Cómo se verifica lo que depende del agente.** El criterio byte a byte sirve para las consecuencias, que son deterministas. Para la redacción de la entrada hace falta otro criterio, y decidirlo es parte del epic.
 3. **Qué arnés de agente se usa** y cómo se aísla para que la suite no gaste tokens por accidente.
-4. **Dónde vive el código y cómo se ejecuta.** Aquí ya no se puede diferir: es la decisión que el epic 1 dejó pendiente.
+4. **Dónde vive el código y cómo se ejecuta.** Aquí ya no se puede diferir: es la decisión que el epic 001 dejó pendiente.
 
 **Qué se espera que mueva en el diseño.** Es el epic que más va a mover. El formato de entrada se prueba por primera vez contra dictado real, y si no aguanta, lo que cambia es `spec/bitacora.md`, no el corpus. También obliga a escribir cómo se verifica lo semi determinista, que hoy no está en ninguna parte.
 
@@ -90,7 +92,7 @@ Va de simple a complejo, igual que los epics: se rescata lo puntual que un epic 
 
 ## Epics siguientes
 
-Sin desarrollar a propósito. Se escriben cuando el epic 2 haya cerrado, porque es el que va a corregir los supuestos.
+Sin desarrollar a propósito. Se escriben cuando el epic 002 haya cerrado, porque es el que va a corregir los supuestos.
 
 El material de partida está en las fases 3 a 9 de [`que_implementar.md`](que_implementar.md): el árbol de ámbitos, las cadencias, el tejido de notas y enlaces, el ciclo completo, el plan y el resumen, el endurecimiento y la inferencia semántica.
 

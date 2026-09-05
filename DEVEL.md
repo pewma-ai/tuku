@@ -46,10 +46,10 @@ El procedimiento a mano equivalente está en [`template/README.md`](template/REA
 Los escenarios son narrativos (Dado/Cuando/Entonces), no unitarios, porque buena parte del sistema depende de un agente y no da un resultado único. El caso vive en `corpus/escenarios/`, el arnés en `tests/escenarios/`, y lo que solo se puede juzgar leyendo queda escrito en el propio escenario bajo "Qué se mira a mano".
 
 ```bash
-python3 tests/escenarios/test_instalacion_minima.py
+python3 tests/escenarios/test_001_001_instalacion_minima.py
 ```
 
-Corre con la librería estándar, sin dependencias. `uv run pytest` todavía no funciona: `pyproject.toml` quedó apuntando a un `src/` que no existía, y arreglarlo es parte del epic 2.
+Corre con la librería estándar, sin dependencias. `uv run pytest` todavía no funciona: `pyproject.toml` quedó apuntando a un `src/` que no existía, y arreglarlo es parte del epic 002.
 
 ## Entorno
 

@@ -1,6 +1,6 @@
-"""Test byte a byte del escenario instalacion-minima.
+"""Test byte a byte del escenario 001-001-instalacion-minima.
 
-Corpus: ../../corpus/escenarios/instalacion-minima.md
+Corpus: ../../corpus/escenarios/001-001-instalacion-minima.md
 
 Fecha fija: 2026-08-11 (martes), el mismo día donde arranca el ground truth
 de corpus/referencia/referencia-developer.md ("Turno Faena"). El usuario
@@ -9,7 +9,7 @@ la fecha para que el resultado sea comparable byte a byte, siempre, tal
 como pide el principio 9.
 
 Ejecutable directo (sin pytest instalado, que hoy no lo está en este
-repo): `python3 tests/escenarios/test_instalacion_minima.py`. Cuando el
+repo): `python3 tests/escenarios/test_001_001_instalacion_minima.py`. Cuando el
 entorno tenga pytest, esta misma función se recolecta sola por su nombre.
 """
 
@@ -27,7 +27,7 @@ sys.path.insert(0, str(RAIZ / "src"))
 from install_test_scenario import instalar  # noqa: E402
 
 FECHA_FIJA = date(2026, 8, 11)
-ESPERADO = Path(__file__).resolve().parent / "fixtures" / "instalacion-minima" / "esperado"
+ESPERADO = Path(__file__).resolve().parent / "fixtures" / "001-001-instalacion-minima" / "esperado"
 
 
 def _diff_recursivo(a: Path, b: Path) -> list[str]:
@@ -38,7 +38,7 @@ def _diff_recursivo(a: Path, b: Path) -> list[str]:
     return diferencias
 
 
-def test_instalacion_minima_byte_a_byte() -> None:
+def test_001_001_instalacion_minima_byte_a_byte() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         destino = Path(tmp) / "vault"
         instalar("vanilla", destino, FECHA_FIJA)
@@ -47,5 +47,5 @@ def test_instalacion_minima_byte_a_byte() -> None:
 
 
 if __name__ == "__main__":
-    test_instalacion_minima_byte_a_byte()
+    test_001_001_instalacion_minima_byte_a_byte()
     print("ok: instalación idéntica byte a byte al fixture esperado")

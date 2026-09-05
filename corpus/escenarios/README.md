@@ -8,7 +8,15 @@ Lo que ejecuta un escenario, y lo que esa ejecución produce, va en `playground/
 
 No hay problema en que esto crezca a cientos de archivos chicos: son texto, cuestan casi nada.
 
-## Convención
+## Convención de nombre
+
+`XXX-YYY-slug.md`, donde `XXX` es el epic al que pertenece el escenario y `YYY` su orden dentro de ese epic, ambos con tres dígitos. Así `001-002-instalacion-local.md` es el segundo escenario del epic 001.
+
+Tres dígitos y no dos por una razón sola: que ordenar alfabéticamente sea ordenar de verdad, hoy y con cien escenarios. El número dice de dónde salió el escenario, no en qué orden conviene leerlo, así que no se renumera cuando cambia el orden de trabajo.
+
+El mismo par `XXX-YYY` identifica al test que lo automatiza (`../../tests/escenarios/test_XXX_YYY_slug.py`) y a la corrida desechable (`playground/XXX-YYY-slug/`).
+
+## Convención de formato
 
 ```markdown
 # Escenario · <nombre>
@@ -34,5 +42,5 @@ Lo que ningún script puede verificar todavía, y hay que juzgar leyendo el resu
 
 | Escenario | Cubre | Notas |
 | --- | --- | --- |
-| [`instalacion-minima.md`](instalacion-minima.md) | Epic 1, fase 0 | El camino completo: `curl` contra GitHub |
-| [`instalacion-local.md`](instalacion-local.md) | Epic 1, fase 0 | El mismo mecanismo, sin red ni git, para iterar rápido |
+| [`001-001-instalacion-minima.md`](001-001-instalacion-minima.md) | Epic 001, fase 0 | El camino completo: `curl` contra GitHub |
+| [`001-002-instalacion-local.md`](001-002-instalacion-local.md) | Epic 001, fase 0 | El mismo mecanismo, sin red ni git, para iterar rápido |
