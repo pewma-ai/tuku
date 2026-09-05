@@ -1,42 +1,30 @@
-# Entorno de Desarrollo y Restricciones
+# Entorno de desarrollo
 
-Normas del entorno de desarrollo, determinismo e invariantes de ejecución.
-
----
-
-## 1. Comandos de Verificación (`uv`)
-
-Requiere **Python 3.14**. Todo comando de desarrollo corre con `uv run`:
+Python 3.14 con `uv`. Todo comando corre con `uv run`:
 
 ```bash
-uv run pytest              # Suite sin tests agénticos (default en CI)
-uv run ruff check .        # Linter de estilo e imports
-uv run ruff format . --check # Formateo
-uv run mypy src            # Verificación de tipos estricta
+uv run ruff check .
+uv run ruff format . --check
+uv run mypy src
+uv run pytest
 ```
 
-### Hook pre-commit
-Configurado en `.pre-commit-config.yaml` reusando `uv run`. Instalación única:
+`uv run pytest` todavía no corre: los marcadores y la jerarquía de `pyproject.toml` son del diseño anterior y se redefinen en el epic 2, junto con la suite. Mientras tanto los escenarios se corren directo:
+
 ```bash
-uv run pre-commit install
+python3 tests/escenarios/test_001_001_instalacion_minima.py
 ```
 
----
+El hook de `pre-commit` está en `.pre-commit-config.yaml` y se instala una vez con `uv run pre-commit install`.
 
-## 2. Marcadores Pytest
+## Tres invariantes de determinismo
 
-- `not agentic` (default en `pyproject.toml`): Desactiva tests con LLM para no gastar tokens por accidente.
-- `-m agentic`: Ejecución explícita de tests agénticos (F5).
-- `--strict-markers`: Falla inmediatamente si un marcador no está registrado.
+Son lo único de este documento que no depende de qué suite exista.
 
----
+| Invariante | Cómo se cumple |
+| --- | --- |
+| **Zona horaria** | `TZ=UTC` forzado en `tests/conftest.py`, antes de la primera llamada a `time.localtime()`. Un test que pase en Chile y falle en CI es una tarde perdida |
+| **Fecha actual** | Se inyecta por parámetro. Prohibido llamar `date.today()` dentro de la lógica: el usuario instala con hoy, el test con una fecha fija |
+| **Round-trip byte a byte** | Leer y escribir un archivo canónico no altera espacios ni comentarios. Es el criterio del escenario `001-001` |
 
-## 3. Determinismo e Invariantes
-
-| Invariante                 | Solución                                                                                                                        |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Zona horaria**           | `TZ=UTC` forzado en `tests/conftest.py`.                                                                                        |
-| **Fecha actual**           | Inyectada por parámetros; prohibido llamar `date.today()` directamente.                                                         |
-| **Aislamiento Hermes**     | Tests usan `--safe-mode` + `--ignore-rules` y `HERMES_HOME` en `tmp_path`. Nunca levantar gateways en tests (usar `hermes -z`). |
-| **Round-trip byte-a-byte** | Lectura/escritura de archivos canónicos no debe alterar espacios ni comentarios HTML                                            |
-| **Modelos internos**       | Toda entidad interna debe usar `pydantic.BaseModel` v2                                                                          |
+La segunda no es teórica: `sembrar_ahora()` etiquetaba los días por posición y solo se vio al fijar la fecha en un martes.

@@ -90,6 +90,14 @@ Preparación ya hecha, fuera de los epics: `spec/` y `docs/glosario.md` ordenan 
 
 Va de simple a complejo, igual que los epics: se rescata lo puntual que un epic en curso necesite, nunca un bloque completo por adelantado. Rescatar algo es una decisión de ese epic, con su propia verificación contra `spec/`, no una migración aparte.
 
+## Material para epics siguientes
+
+Rescatado de `technical_stack.md` (hoy solo en `VAULT/`) antes de borrarlo de `devel/`, porque es lo único que no estaba escrito en otra parte. Son decisiones de producto, no de stack, y ninguna está tomada:
+
+- **Obsidian** es el visor local del stack recomendado, y el epic 2 lo pone a prueba por primera vez.
+- **Quartz** para publicar el vault en web, en modo solo lectura.
+- **Telegram** como canal de captura móvil hacia la bitácora, que es donde el dictado ocurre de verdad.
+
 ## Epics siguientes
 
 Sin desarrollar a propósito. Se escriben cuando el epic 002 haya cerrado, porque es el que va a corregir los supuestos.

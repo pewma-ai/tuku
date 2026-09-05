@@ -27,7 +27,7 @@ Cuesta dos minutos y es lo que permite que la siguiente sesión retome sin depen
 | [`tests/`](tests/escenarios/README.md) | El arnés que ejecuta los escenarios | Verificación |
 | `playground/` | Corridas desechables. Ignorado por git, se pisa al recrear | Descartable |
 
-Dentro de `devel/`: [`epics.md`](devel/epics.md) es el estado, [`que_implementar.md`](devel/que_implementar.md) el plan de fases y su justificación, [`iteraciones/`](devel/iteraciones/README.md) el diario por día, [`entorno-devel.md`](devel/entorno-devel.md) y [`technical_stack.md`](devel/technical_stack.md) el entorno.
+Dentro de `devel/`: [`epics.md`](devel/epics.md) es el estado, [`que_implementar.md`](devel/que_implementar.md) el plan de fases y su justificación, [`iteraciones/`](devel/iteraciones/README.md) el diario por día, [`entorno-devel.md`](devel/entorno-devel.md) el entorno.
 
 `devel/VAULT/` es **historia**: el diseño y el código anteriores a la reescritura de agosto de 2026. No es base para nada nuevo. Se rescata algo puntual solo cuando un epic lo necesita.
 
@@ -53,6 +53,6 @@ Corre con la librería estándar, sin dependencias. `uv run pytest` todavía no 
 
 ## Entorno
 
-Python 3.14 con `uv`. Higiene con `ruff` y `mypy`, según [`devel/entorno-devel.md`](devel/entorno-devel.md).
+Python 3.14 con `uv`. Higiene con `ruff` y `mypy`, y las tres invariantes de determinismo, en [`devel/entorno-devel.md`](devel/entorno-devel.md).
 
 Los janitors se especifican en prosa dentro del vault del autor (`reglas/janitors.tuku.md`) y su código se instala aparte, en `~/.tuku/janitors`. La especificación sobrevive, la implementación se reemplaza.
