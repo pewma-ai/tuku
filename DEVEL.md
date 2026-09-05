@@ -8,6 +8,12 @@ Cada documento carga un solo tipo de información, y por eso acá no se repite n
 
 [`devel/epics.md`](devel/epics.md). Tiene el estado del trabajo, qué epic está en curso y qué falta para cerrarlo.
 
+## Por dónde terminar
+
+Regla de buena educación, para quien trabaje acá, persona o agente: **al cerrar una sesión de trabajo, deja el resumen del día en [`devel/iteraciones/AAAA-MM-DD.md`](devel/iteraciones/README.md)**, con qué se hizo, qué se decidió y qué queda pendiente.
+
+Cuesta dos minutos y es lo que permite que la siguiente sesión retome sin depender de que alguien se acuerde de la conversación. Una decisión que solo existe en un chat es una decisión perdida.
+
 ## Dónde vive cada cosa
 
 | Directorio | Qué contiene | Naturaleza |
