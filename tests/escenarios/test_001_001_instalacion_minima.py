@@ -36,7 +36,9 @@ from install_test_scenario import instalar  # noqa: E402
 
 FECHA_FIJA = date(2026, 8, 11)
 TEMPLATE_VANILLA = RAIZ / "template" / "vanilla"
-AHORA_ESPERADO = Path(__file__).resolve().parent / "fixtures" / "001-001-instalacion-minima" / "AHORA.md"
+AHORA_ESPERADO = (
+    Path(__file__).resolve().parent / "fixtures" / "001-001-instalacion-minima" / "AHORA.md"
+)
 
 
 def _diff_recursivo(a: Path, b: Path, *, ignorar: set[str] = frozenset()) -> list[str]:
@@ -57,9 +59,11 @@ def test_001_001_instalacion_minima_byte_a_byte() -> None:
 
         ahora_obtenido = (destino / "AHORA.md").read_text(encoding="utf-8")
         ahora_esperado = AHORA_ESPERADO.read_text(encoding="utf-8")
-        assert ahora_obtenido == ahora_esperado, "AHORA.md no coincide con el fixture de fecha fija"
+        assert ahora_obtenido == ahora_esperado, (
+            "AHORA.md no coincide con el fixture de fecha fija"
+        )
 
 
 if __name__ == "__main__":
     test_001_001_instalacion_minima_byte_a_byte()
-    print("ok: instalación idéntica a template/vanilla/, y AHORA.md idéntico al fixture de fecha fija")
+    print("ok: instalación idéntica a template/vanilla/, AHORA.md idéntico al fixture")
