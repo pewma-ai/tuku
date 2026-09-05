@@ -3,7 +3,7 @@
 Corpus: ../../corpus/escenarios/001-001-instalacion-minima.md
 
 Fecha fija: 2026-08-11 (martes), el mismo día donde arranca el ground truth
-de corpus/referencia/referencia-developer.md ("Turno Faena"). El usuario
+de corpus/referencia/referencia-faena.md ("Turno Faena"). El usuario
 real instala con la fecha de hoy (ver template/README.md); este test fija
 la fecha para que el resultado sea comparable byte a byte, siempre, tal
 como pide el principio 9.

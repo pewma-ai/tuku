@@ -3,7 +3,7 @@
 > Corpus de referencia, ficticio y público. La autora, su familia, sus clientes, proveedores y colaboradores son inventados: no hay correspondencia con ninguna persona o empresa real, ni acá ni en ninguna parte. Cualquier nombre que aparezca acá se trata como el nombre real de este corpus.
 
 > [!note] Para qué sirve este corpus
-> Es el par de [`referencia-developer.md`](referencia-developer.md) en un dominio deliberadamente distinto. Allá quien escribe TUKU registra su propio trabajo técnico, con vocabulario que el diseño ya conoce. Acá la usuaria **nunca vio Markdown**, su operación es comercial y su calendario lo fijan terceros: el SII, el banco, los colegios y el año escolar.
+> Es el par de [`referencia-faena.md`](referencia-faena.md) en un dominio deliberadamente distinto. Allá quien escribe TUKU registra su propio trabajo técnico, con vocabulario que el diseño ya conoce. Acá la usuaria **nunca vio Markdown**, su operación es comercial y su calendario lo fijan terceros: el SII, el banco, los colegios y el año escolar.
 >
 > Sirve para dos cosas. Probar que el modelo aguanta un dominio ajeno al de su autor sin tocar `src/`, y probar las cadencias, que en un negocio son casi todas de fecha fija impuesta desde afuera, no de ritmo propio.
 
@@ -362,7 +362,7 @@ Lo que trae al sistema: se le olvidan los seguimientos de cotización, que es ex
 # Parte 3: Estado Reconstruible del Repositorio
 
 > [!abstract] Especificación de Estado Objetivo
-> El estado documental y relacional que un sistema agéntico debe poder inferir, actualizar o reconstruir a partir de los inputs anteriores. A diferencia del corpus de developer, acá el árbol se escribe con la estructura de `spec/ambitos.md`: `ambitos/` con `AGENTS.md` y `CADENCIAS.md` obligatorios en cada directorio.
+> El estado documental y relacional que un sistema agéntico debe poder inferir, actualizar o reconstruir a partir de los inputs anteriores. A diferencia del corpus de faena, acá el árbol se escribe con la estructura de `spec/ambitos.md`: `ambitos/` con `AGENTS.md` y `CADENCIAS.md` obligatorios en cada directorio.
 
 ## 1. Árbol de ámbitos
 
@@ -425,7 +425,7 @@ ambitos/
 
 Por horizonte, según la escalera de `spec/pendientes.md`.
 
-Los nombres de los horizontes son **vocabulario abierto**: salen de `### Horizontes` en el libro de estilo del autor, no de TUKU. Andrea no tiene turnos, tiene semanas, así que sus horizontes son `^esta-semana` y `^proxima-semana` donde el corpus de developer dice `^este-turno` y `^proximo-turno`. La escalera es la misma y el janitor no cambia: lo que cambia es cómo se llama cada escalón.
+Los nombres de los horizontes son **vocabulario abierto**: salen de `### Horizontes` en el libro de estilo del autor, no de TUKU. Andrea no tiene turnos, tiene semanas, así que sus horizontes son `^esta-semana` y `^proxima-semana` donde el corpus de faena dice `^este-turno` y `^proximo-turno`. La escalera es la misma y el janitor no cambia: lo que cambia es cómo se llama cada escalón.
 
 * **Cerrados durante las dos semanas:**
   - `administracion`: pagar cotizaciones previsionales de Katia Fuenzalida en Previred.
@@ -503,7 +503,7 @@ Con sus siglas de tres letras, formadas por la inicial del nombre y las dos prim
 
 ## 5. Cadencias vigentes
 
-Cada una vive en el `CADENCIAS.md` del ámbito donde aplica, según `spec/cadencias.md`. Casi todas tienen fecha impuesta desde afuera, que es la diferencia central con el corpus de developer, donde el ritmo lo pone quien escribe.
+Cada una vive en el `CADENCIAS.md` del ámbito donde aplica, según `spec/cadencias.md`. Casi todas tienen fecha impuesta desde afuera, que es la diferencia central con el corpus de faena, donde el ritmo lo pone quien escribe.
 
 | Cadencia | Ámbito | Cuándo | Emite |
 | --- | --- | --- | --- |
