@@ -1,18 +1,14 @@
 # Epics de TUKU
 
-> Unidad de entrega, no unidad técnica. Un epic termina con algo que una persona puede usar. Las fases de [`que_implementar.md`](que_implementar.md) siguen siendo el corte técnico y funcionan como checklist interno de cada epic: un epic puede abarcar varias fases, pero no puede cerrar sin cumplir el criterio de salida de las que abarca.
+> Unidad de entrega, no unidad técnica. Un epic termina con algo que una persona puede usar. Las fases de [`que_implementar.md`](que_implementar.md) son el corte técnico interno: un epic puede abarcar varias y no cierra sin cumplir el criterio de salida de las que abarca.
 
-Los epics se numeran por orden de ejecución, con tres dígitos: ese número es el `XXX` de los escenarios que el epic valida (`corpus/escenarios/XXX-YYY-slug.md`) y de los tests que los automatizan. Un escenario dice a qué epic pertenece por su nombre de archivo, sin que haya que abrirlo.
+Se numeran por orden de ejecución, tres dígitos. Ese número es el `XXX` de `corpus/escenarios/XXX-YYY-slug.md` y de sus tests.
 
- Solo los dos primeros están desarrollados, y es deliberado: el resto se escribe cuando el epic 002 haya enseñado lo que hoy no sabemos.
+Solo los dos primeros están desarrollados. El resto se escribe cuando el epic 002 haya enseñado lo que hoy no sabemos.
 
 ## Los epics mueven el diseño
 
-El diseño lo dirige la experimentación y sus resultados. No se puede saber de antemano el resultado final, así que `spec/` y `docs/` van a cambiar por efecto de los epics, y eso es el método funcionando, no una spec mal escrita.
-
-Cada epic tiene entonces dos salidas: lo que entrega, y lo que le enseña al diseño.
-
-Por eso **ningún epic cierra solo con su entregable**: cierra cuando además está escrito qué movió en `../spec/` o en `../docs/`, aunque la respuesta sea "nada". Dentro de un epic la spec manda sobre el código; entre epics, el resultado del experimento manda sobre la spec.
+El diseño lo dirige la experimentación, no al revés: `spec/` y `docs/` cambian por efecto de los epics. Cada epic entrega dos cosas, su producto y lo que le enseñó al diseño (aunque sea nada). Dentro de un epic la spec manda sobre el código; entre epics, el experimento manda sobre la spec.
 
 ## Estado
 
@@ -24,88 +20,68 @@ Actualizado el 2026-09-04.
 | 002 | El día uno simulado | sin empezar | depende del epic 001 |
 | 003+ | El resto | sin desarrollar | se escriben al cerrar el epic 002 |
 
-Lo hecho en el epic 001 hasta ahora: existe `template/vanilla/`, con los 11 archivos del estado cero y el procedimiento de instalación a mano en `template/README.md`. El mecanismo que lo automatiza para probarlo repetidas veces es `src/install_test_scenario.py`.
+Lo hecho en el 001: `template/vanilla/` (estado cero, 11 archivos) y `src/install_test_scenario.py` (mecanismo). Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos en `../corpus/escenarios/`; arnés en `../tests/escenarios/` y `../tests/scripts/`.
 
-El detalle día a día vive en [`iteraciones/`](iteraciones/README.md). Los casos que se están probando, en forma narrativa (Dado/Cuando/Entonces) y no unitaria, viven en `../corpus/escenarios/`; el arnés que eventualmente los ejecuta, en `../tests/escenarios/` y `../tests/scripts/`.
+Preparación previa, fuera de los epics: `spec/` y `docs/glosario.md` ordenan el vocabulario, `que_implementar.md` quedó reducido al plan de fases. Punto de partida, no diseño cerrado.
 
-Preparación ya hecha, fuera de los epics: `spec/` y `docs/glosario.md` ordenan el vocabulario y lo que hoy se cree del diseño, y `que_implementar.md` quedó reducido al plan de fases. Es punto de partida, no diseño cerrado.
+## Epic 001. Un TUKU mínimo instalable
 
-## Epic 001 · Un TUKU mínimo instalable
+Que una persona nueva instale un vault en un directorio vacío y empiece a escribir el mismo día, sin configurar nada y sin saber qué es TUKU. Va primero porque obliga al repositorio a tener estructura, instalación y template, y nada más lo va a forzar. Cubre la fase 0.
 
-**Qué entrega.** Que una persona nueva pueda instalar un vault de TUKU en un directorio vacío y empezar a escribir el mismo día, sin configurar nada y sin saber qué es TUKU.
+Decidido:
 
-**Por qué va primero.** No es solo la fase 0. Es lo que obliga al repositorio a tener estructura, procedimiento de instalación y template, tres cosas que hoy no existen y que ninguna otra tarea va a forzar.
+1. El instalador es un template que se copia, no un CLI. El empaquetado se difiere a cuando haya janitors.
+2. `template/`, una carpeta por variante, hermanas y sin composición. `vanilla/` es la mínima.
+3. `reglas/config.tuku.md` declara zona horaria y tipo de ciclo, en prosa.
+4. El código vive en `src/` (raíz), no en `devel/VAULT/src/` (diseño anterior). Primer archivo: `src/install_test_scenario.py`.
+5. Escenarios narrativos (Dado/Cuando/Entonces): dato en `corpus/escenarios/`, arnés en `tests/escenarios/` y `tests/scripts/`.
+6. Instalar es una línea de `curl` (`install.sh`), no `git clone`. Probado contra `pewma-ai/tuku@devel` real.
+7. Sobrescribir se pregunta en `install.sh`, salvo con `TUKU_FORCE=1`. `install_test_scenario.py` sobrescribe siempre.
+8. El estado cero se verifica byte a byte con fecha fija (`--desde 2026-08-11`, la del ground truth en `referencia-faena.md`), distinta de la que usa el autor real. Encontró un bug real: días etiquetados por posición, ya corregido.
 
-**Fases que cubre.** Fase 0.
+Falta decidir: podar `docs/libro-de-estilo.md`. Mover a `spec/` la matriz de reglas y responsabilidades (§7, lo único no duplicado), y recién entonces podar.
 
-**Decidido, resolviendo por construcción.**
+Lo que va a mover en el diseño: esa poda, y probablemente `reglas/config.tuku.md`, ya en decisiones abiertas.
 
-1. **El instalador es un template que se copia**, no el CLI de Python. El estado cero es un directorio de markdown, y que sea copiable a mano es lo que exige el principio 1. El empaquetado se difiere a cuando haya janitors que empaquetar.
-2. **El template vive en `template/`, una carpeta por variante.** `vanilla/` es la mínima y la más adaptable. Las variantes futuras son hermanas, nunca capas encima: si dos comparten un archivo, se duplica, porque un template que hay que componer deja de ser copiable a mano.
-3. **`reglas/config.tuku.md` declara zona horaria y tipo de ciclo**, en prosa con campos en negrita, igual que las cadencias. Cierra una de las decisiones abiertas de `../spec/README.md`, a falta del visto bueno del autor.
-4. **El código vive en `src/` (raíz), no en `devel/VAULT/src/`.** Es donde `pyproject.toml` ya apuntaba (`where = ["src"]`); `devel/VAULT/src/` resultó ser código del diseño anterior (`entradas/`, `tareas/`, `entidades/`) y queda como referencia histórica, no como base para seguir escribiendo. El primer archivo es `src/install_test_scenario.py`: instala una variante de `template/` y resuelve las fechas de `AHORA.md`, sin depender de nada fuera de la librería estándar.
-5. **Los escenarios de prueba son narrativos (Dado/Cuando/Entonces), no unitarios**, y separan dato de arnés: el caso vive en `corpus/escenarios/` (dato, puede haber cientos), lo que lo ejecuta y compara en `tests/escenarios/`, y los pasos deterministas reutilizables entre escenarios en `tests/scripts/`.
-6. **Instalar es una línea de `curl`, no `git clone`.** `install.sh` baja el tarball del branch desde GitHub, extrae `template/vanilla/` y corre `src/install_test_scenario.py`. Probado el 2026-09-04 contra `pewma-ai/tuku@devel` real: `curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- <destino>`.
-7. **Sobrescribir se pregunta, salvo en la herramienta de prueba.** `install.sh` (usuario final) pide confirmación si el destino ya existe y no está vacío; `TUKU_FORCE=1` la salta para uso automatizado. `src/install_test_scenario.py` (herramienta de prueba, invocada muchas veces contra `playground/`) sigue sobrescribiendo sin preguntar, a propósito.
+Criterio de salida: instalar en vacío produce el estado cero de `docs/principios.md` §2; alguien que no sabe qué es TUKU escribe una línea en `AHORA.md` sin romper nada. Se verifica con una persona, no con un diff. Y queda escrito qué movió en `spec/` o `docs/`.
 
-8. **Cómo se verifica un estado cero que depende de la fecha: con una fecha fija, distinta de la que usa el autor real.** El usuario instala sin fecha (usa la de hoy); el test de la fase 0 fija `--desde 2026-08-11` (el arranque del ground truth en `corpus/referencia/referencia-faena.md`) y compara byte a byte contra un fixture en `tests/escenarios/fixtures/`. Escribir este test encontró un bug real: los nombres de día se etiquetaban por posición, no por el día de la semana real de la fecha (ver `src/install_test_scenario.py`, corregido).
+No entra: janitors, agentes, LLM. Tampoco el tipo de ciclo real de quien lo usa: arranca semanal y el tipo verdadero emerge después.
 
-**Qué falta decidir.**
+## Epic 002. El día uno simulado
 
-1. **Qué se hace con `docs/libro-de-estilo.md`.** El starter ya existe en el template. El de `docs/` es documentación de diseño y cinco de sus siete secciones están duplicadas en `spec/`. Falta mover a `spec/` la matriz de reglas y responsabilidades (§7), que es lo único que no está, y recién entonces podar.
-3. ~~Qué pasa con `devel/VAULT/src/` y el resto de `devel/VAULT/`.~~ **Resuelto:** `devel/VAULT/` es historia, no base para código nuevo. Queda como referencia; algo puntual se puede rescatar cuando un epic lo necesite, evaluado caso a caso, no de bloque.
+Un conjunto de entradas de bitácora estándar que, inyectadas sobre el estado cero, producen sus consecuencias de forma reproducible. Es también la plataforma de pruebas que todo lo demás va a usar.
 
-**Qué se espera que mueva en el diseño.** La poda de `docs/libro-de-estilo.md` y el reparto de su contenido entre el template y `spec/`. Materializar el estado cero probablemente revele que falta especificar `reglas/config.tuku.md`, que ya está anotado como decisión abierta.
+Va segundo porque fuerza a la vez el testing semi determinista, la validación del stack recomendado (Obsidian + directorio + agente que lee reglas) y la primera prueba real del formato de entrada. Semi determinista porque la entrada depende de un agente: qué se compara byte a byte y qué solo se evalúa es el problema central del epic.
 
-**Criterio de salida.** Instalar en un directorio vacío produce el estado cero descrito en `docs/principios.md` §2. Una persona que no sabe qué es TUKU abre `AHORA.md`, escribe una línea a mano y no rompe nada. Se verifica con una persona, no con un diff. Y queda escrito qué movió en `../spec/` o en `../docs/`.
+Cubre las fases 1 y 2 completas, y partes de la 3 y la 5 (ámbito nuevo, enlazar una nota).
 
-**No entra.** Ningún janitor, ningún agente, ningún LLM. Tampoco decidir el tipo de ciclo real de quien lo usa: arranca en semanal y el tipo verdadero emerge después.
+Vocabulario: el día uno produce consecuencias (pendientes, ámbitos, enlaces, notas tipadas), no "entidades" (diseño anterior, no aparece en `spec/`).
 
-## Epic 002 · El día uno simulado
+Para empezar hay que decidir:
 
-**Qué entrega.** Un conjunto de entradas de bitácora estándar que, inyectadas sobre el estado cero, producen sus consecuencias de forma reproducible. Y con eso, la plataforma de pruebas que todo lo demás va a usar.
+1. Qué entradas componen el día uno, representativas, con las tres marcas de la ontología cerrada.
+2. Cómo se verifica lo que depende del agente: byte a byte para consecuencias, otro criterio para la redacción.
+3. Qué arnés de agente se usa y cómo se aísla para no gastar tokens por accidente.
+4. Dónde vive el código y cómo se ejecuta. Ya no se puede diferir.
 
-**Por qué va segundo.** Fuerza tres cosas a la vez que no se pueden conseguir por separado: el sistema de testing replicable y semi determinista, la validación del stack recomendado (Obsidian, un directorio y un agente que lee las reglas), y la primera prueba real de que el formato de entrada aguanta.
+Es el epic que más va a mover el diseño: si el formato de entrada no aguanta el dictado real, cambia `spec/bitacora.md`. También obliga a escribir cómo se verifica lo semi determinista, que hoy no está en ninguna parte.
 
-**Semi determinista** porque la entrada depende de un agente. Esa es la dificultad central del epic: definir qué se compara byte a byte y qué solo se puede evaluar.
+Criterio de salida: inyectar el día uno sobre el estado cero produce las consecuencias esperadas, es reproducible, y abre en Obsidian sin errores. Y queda escrito qué movió en `spec/` o `docs/`.
 
-**Fases que cubre.** Fases 1 y 2 completas, y las partes de la 3 y la 5 que el día uno toque (crear un ámbito nuevo, enlazar una nota).
-
-**Vocabulario.** Lo que el día uno produce a partir de las entradas son **consecuencias** (pendientes, ámbitos nuevos, enlaces, notas tipadas), no "entidades". "Entidad" es vocabulario del diseño anterior y no aparece en `spec/`.
-
-**Qué hay que decidir para empezar.**
-
-1. **Qué entradas componen el día uno.** Tienen que ser representativas y cubrir al menos las tres marcas de la ontología cerrada. Hay material en `corpus/`.
-2. **Cómo se verifica lo que depende del agente.** El criterio byte a byte sirve para las consecuencias, que son deterministas. Para la redacción de la entrada hace falta otro criterio, y decidirlo es parte del epic.
-3. **Qué arnés de agente se usa** y cómo se aísla para que la suite no gaste tokens por accidente.
-4. **Dónde vive el código y cómo se ejecuta.** Aquí ya no se puede diferir: es la decisión que el epic 001 dejó pendiente.
-
-**Qué se espera que mueva en el diseño.** Es el epic que más va a mover. El formato de entrada se prueba por primera vez contra dictado real, y si no aguanta, lo que cambia es `spec/bitacora.md`, no el corpus. También obliga a escribir cómo se verifica lo semi determinista, que hoy no está en ninguna parte.
-
-**Criterio de salida.** Partiendo del estado cero, inyectar el día uno produce las consecuencias esperadas, dos veces seguidas da lo mismo, y el conjunto se puede abrir en Obsidian sin cajas de error ni enlaces rotos. Y queda escrito qué movió en `../spec/` o en `../docs/`.
-
-**No entra.** Abrir y cerrar ciclos, cadencias, inferencia semántica. Tampoco reutilizar la suite actual de `tests/`, que es del diseño anterior y se rehace.
+No entra: abrir/cerrar ciclos, cadencias, inferencia semántica. Tampoco la suite actual de `tests/` (diseño anterior, se rehace).
 
 ## Rescatar de `devel/VAULT/`
 
-Va de simple a complejo, igual que los epics: se rescata lo puntual que un epic en curso necesite, nunca un bloque completo por adelantado. Rescatar algo es una decisión de ese epic, con su propia verificación contra `spec/`, no una migración aparte.
+De simple a complejo: se rescata lo puntual que un epic en curso necesite, nunca un bloque completo por adelantado.
 
 ## Material para epics siguientes
 
-Rescatado de `technical_stack.md` (hoy solo en `VAULT/`) antes de borrarlo de `devel/`, porque es lo único que no estaba escrito en otra parte. Son decisiones de producto, no de stack, y ninguna está tomada:
-
-- **Obsidian** es el visor local del stack recomendado, y el epic 2 lo pone a prueba por primera vez.
-- **Quartz** para publicar el vault en web, en modo solo lectura.
-- **Telegram** como canal de captura móvil hacia la bitácora, que es donde el dictado ocurre de verdad.
+Rescatado de `technical_stack.md` antes de borrarlo. Ninguna decisión tomada: Obsidian como visor (el epic 002 lo prueba), Quartz para publicar el vault en web, Telegram como canal de captura móvil.
 
 ## Epics siguientes
 
-Sin desarrollar a propósito. Se escriben cuando el epic 002 haya cerrado, porque es el que va a corregir los supuestos.
+Sin desarrollar hasta que cierre el epic 002. Material de partida: fases 3 a 9 de [`que_implementar.md`](que_implementar.md) — ámbitos, cadencias, notas y enlaces, ciclo, plan y resumen, endurecimiento, inferencia semántica.
 
-El material de partida está en las fases 3 a 9 de [`que_implementar.md`](que_implementar.md): el árbol de ámbitos, las cadencias, el tejido de notas y enlaces, el ciclo completo, el plan y el resumen, el endurecimiento y la inferencia semántica.
+## Cómo se actualiza
 
-## Cómo se actualiza este documento
-
-La tabla de Estado se edita al empezar y al cerrar cada epic, y cuando una decisión abierta se resuelve. Las decisiones que se resuelven no se borran: se reescriben como afirmación, para que se sepa qué se decidió y no solo que había una duda.
-
-Las decisiones de diseño que afectan al producto y no al plan no van aquí, van a `../spec/README.md`.
+La tabla de Estado se edita al empezar y cerrar cada epic, y al resolver una decisión abierta (se reescribe como afirmación, no se borra). Decisiones de diseño que afectan al producto van a `../spec/README.md`, no aquí.
