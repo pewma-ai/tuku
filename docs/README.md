@@ -9,6 +9,7 @@ Este directorio contiene el diseño canónico del **software**. El libro del aut
 | [`brief.md`](brief.md) | Qué es, para quién, marco conceptual y funcionamiento en tres niveles | Alta — cambia poco |
 | [`principios.md`](principios.md) | Principios normativos de diseño, descarga cognitiva, conjunto canónico y jerarquía determinista | Alta — marco rector |
 | [`libro-de-estilo.md`](libro-de-estilo.md) | Reglas canónicas de escritura, flujo de información, anatomía de archivos, ciclos y matriz janitor/agente | Alta — referencia viva |
+| [`glosario.md`](glosario.md) | El vocabulario de TUKU, una línea por término | Media — crece con el diseño |
 
 ---
 
