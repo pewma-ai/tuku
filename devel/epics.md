@@ -18,7 +18,7 @@ Actualizado el 2026-09-04.
 
 | Epic | Nombre | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- |
-| 1 | Un TUKU mínimo instalable | en curso | probarlo con una persona, podar `docs/libro-de-estilo.md`, y resolver cómo se verifica un estado cero que depende de la fecha |
+| 1 | Un TUKU mínimo instalable | en curso | probarlo con una persona, podar `docs/libro-de-estilo.md` |
 | 2 | El día uno simulado | sin empezar | depende del epic 1 |
 | 3+ | El resto | sin desarrollar | se escriben al cerrar el epic 2 |
 
@@ -46,10 +46,11 @@ Preparación ya hecha, fuera de los epics: `spec/` y `docs/glosario.md` ordenan 
 6. **Instalar es una línea de `curl`, no `git clone`.** `install.sh` baja el tarball del branch desde GitHub, extrae `template/vanilla/` y corre `src/install_test_scenario.py`. Probado el 2026-09-04 contra `pewma-ai/tuku@devel` real: `curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- <destino>`.
 7. **Sobrescribir se pregunta, salvo en la herramienta de prueba.** `install.sh` (usuario final) pide confirmación si el destino ya existe y no está vacío; `TUKU_FORCE=1` la salta para uso automatizado. `src/install_test_scenario.py` (herramienta de prueba, invocada muchas veces contra `playground/`) sigue sobrescribiendo sin preguntar, a propósito.
 
+8. **Cómo se verifica un estado cero que depende de la fecha: con una fecha fija, distinta de la que usa el autor real.** El usuario instala sin fecha (usa la de hoy); el test de la fase 0 fija `--desde 2026-08-11` (el arranque del ground truth en `corpus/referencia/referencia-developer.md`) y compara byte a byte contra un fixture en `tests/escenarios/fixtures/`. Escribir este test encontró un bug real: los nombres de día se etiquetaban por posición, no por el día de la semana real de la fecha (ver `src/install_test_scenario.py`, corregido).
+
 **Qué falta decidir.**
 
-1. **Cómo se verifica un estado cero que depende de la fecha.** El `AHORA.md` del template lleva placeholders (`desde: AAAA-MM-DD`, `## Lunes DD de mes`) porque los días reales dependen de cuándo se instale. Eso rompe el criterio de la fase 0 tal como está escrito, que pide reproducir el fixture `vacio` byte a byte. O el fixture se parametriza por fecha, o el criterio se reescribe.
-2. **Qué se hace con `docs/libro-de-estilo.md`.** El starter ya existe en el template. El de `docs/` es documentación de diseño y cinco de sus siete secciones están duplicadas en `spec/`. Falta mover a `spec/` la matriz de reglas y responsabilidades (§7), que es lo único que no está, y recién entonces podar.
+1. **Qué se hace con `docs/libro-de-estilo.md`.** El starter ya existe en el template. El de `docs/` es documentación de diseño y cinco de sus siete secciones están duplicadas en `spec/`. Falta mover a `spec/` la matriz de reglas y responsabilidades (§7), que es lo único que no está, y recién entonces podar.
 3. ~~Qué pasa con `devel/VAULT/src/` y el resto de `devel/VAULT/`.~~ **Resuelto:** `devel/VAULT/` es historia, no base para código nuevo. Queda como referencia; algo puntual se puede rescatar cuando un epic lo necesite, evaluado caso a caso, no de bloque.
 
 **Qué se espera que mueva en el diseño.** La poda de `docs/libro-de-estilo.md` y el reparto de su contenido entre el template y `spec/`. Materializar el estado cero probablemente revele que falta especificar `reglas/config.tuku.md`, que ya está anotado como decisión abierta.

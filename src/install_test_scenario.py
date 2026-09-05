@@ -50,6 +50,12 @@ def lunes_de_esta_semana(hoy: date) -> date:
 def sembrar_ahora(contenido: str, desde: date) -> str:
     """Reemplaza los placeholders de AHORA.md por fechas reales.
 
+    El template escribe los siete encabezados en el orden fijo Lunes..Domingo
+    (`DIAS[i]` localiza el placeholder i-ésimo, sin importar qué día caiga
+    `desde`); el nombre real de cada día sale de `fecha.weekday()`, no de esa
+    misma posición. Si `desde` no es lunes, ambos difieren a propósito: nada
+    en `spec/` obliga a que un ciclo semanal empiece en lunes.
+
     No interpreta el archivo como YAML ni como Markdown estructurado:
     reemplaza texto literal. Si el template cambia de forma, este script
     hay que actualizarlo con él, no al revés.
@@ -57,10 +63,10 @@ def sembrar_ahora(contenido: str, desde: date) -> str:
     hasta = desde + timedelta(days=6)
     contenido = contenido.replace("desde: AAAA-MM-DD", f"desde: {desde.isoformat()}")
     contenido = contenido.replace("hasta: AAAA-MM-DD", f"hasta: {hasta.isoformat()}")
-    for i, nombre_dia in enumerate(DIAS):
+    for i in range(7):
         fecha = desde + timedelta(days=i)
-        placeholder = f"## {nombre_dia} DD de mes"
-        real = f"## {nombre_dia} {fecha.day} de {MESES[fecha.month - 1]}"
+        placeholder = f"## {DIAS[i]} DD de mes"
+        real = f"## {DIAS[fecha.weekday()]} {fecha.day} de {MESES[fecha.month - 1]}"
         contenido = contenido.replace(placeholder, real)
     return contenido
 

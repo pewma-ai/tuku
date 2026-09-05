@@ -30,12 +30,22 @@ Instalador de una línea, probado el 2026-09-04 contra el repo real:
 curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- playground/epic-1_test-1
 ```
 
-Agregar una fecha (`sh -s -- playground/epic-1_test-1 2026-09-01`) fija el lunes del primer ciclo; sin ella, usa el lunes de la semana en curso. Correrlo de nuevo pisa el destino.
+Sin fecha, usa el lunes de la semana en curso (así lo va a usar el autor real). Correrlo de nuevo pisa el destino.
 
-Para no depender de la red ni del commit ya empujado, el mismo mecanismo se invoca directo:
+Para no depender de la red ni del commit ya empujado, el mismo mecanismo se invoca directo (ver también `instalacion-local.md`):
 
 ```bash
 python3 src/install_test_scenario.py --variante vanilla --destino playground/epic-1_test-1 --desde AAAA-MM-DD
+```
+
+## El test byte a byte
+
+`../../tests/escenarios/test_instalacion_minima.py` fija la fecha en **2026-08-11** (martes), el mismo día donde arranca el ground truth de `corpus/referencia/referencia-developer.md` ("Turno Faena"), y compara contra el fixture en `../../tests/escenarios/fixtures/instalacion-minima/esperado/`.
+
+La fecha fija no es arbitraria ni tiene que ser lunes: nada en `spec/` exige que un ciclo semanal empiece en lunes, así que el test elige a propósito una fecha que no lo es, para no dejar ese supuesto sin probar.
+
+```bash
+python3 tests/escenarios/test_instalacion_minima.py
 ```
 
 ## Qué se mira a mano
@@ -46,4 +56,5 @@ python3 src/install_test_scenario.py --variante vanilla --destino playground/epi
 
 ## Qué destapó ya
 
-- El estado cero no es reproducible byte a byte sin fijar `--desde`: depende de la fecha de instalación. La fase 0 en `que_implementar.md` todavía dice "produce byte a byte el fixture `vacio`", y hay que decidir si el fixture fija una fecha o si el criterio se reescribe.
+- ~~El estado cero no es reproducible byte a byte sin fijar `--desde`...~~ **Resuelto:** el test fija `--desde 2026-08-11` y compara contra un fixture. El usuario real sigue instalando sin fecha (usa la de hoy); lo reproducible byte a byte es la garantía de prueba, no la experiencia real de instalar.
+- **Bug real, encontrado por este mismo test al escribirlo:** `sembrar_ahora()` nombraba los siete días en orden fijo Lunes..Domingo sin mirar el día de la semana real de `--desde`. Con `--desde 2026-08-11` (martes), el primer día salía etiquetado "Lunes 11 de agosto". Corregido: el nombre real sale de `fecha.weekday()`.
