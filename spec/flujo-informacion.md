@@ -1,6 +1,6 @@
 # spec · flujo de la información
 
-> El marco al que sirven las demás specs. Se justifica por el principio 3 y el principio 4 de `../docs/principios.md`.
+> El marco al que sirven las demás specs. Se justifica por el principio 3 y el principio 4 de [`../docs/principios.md`](../docs/principios.md).
 
 El flujo no depende de quién lo ejecute. Debe poder entregarse como instructivo a una persona contratada para llevar la bitácora, y funcionar igual. Lo que cambia cuando el ejecutor es un agente de IA está en [agente.md](agente.md), no aquí.
 
@@ -99,5 +99,5 @@ Un solo dictado puede producir varias entradas y varios cambios, porque cada hec
 
 ## No entra
 
-- El detalle del formato de cada archivo (`AHORA.md`, `PENDIENTES.md`, `CADENCIAS.md`). Eso vive en `ciclo.md`, `pendientes.md` y `cadencias.md` respectivamente.
-- Cómo se comporta un agente de IA frente a este flujo (silencio por defecto, carga diferida de reglas, reparto entre LLM y script). Eso es `agente.md`.
+- El detalle del formato de cada archivo (`AHORA.md`, `PENDIENTES.md`, `CADENCIAS.md`). Eso vive en [`ciclo.md`](ciclo.md), [`pendientes.md`](pendientes.md) y [`cadencias.md`](cadencias.md) respectivamente.
+- Cómo se comporta un agente de IA frente a este flujo (silencio por defecto, carga diferida de reglas, reparto entre LLM y script). Eso es [`agente.md`](agente.md).

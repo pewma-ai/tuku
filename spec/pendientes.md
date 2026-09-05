@@ -1,6 +1,6 @@
 # spec · pendientes
 
-> `PENDIENTES.md` es fuente de verdad, nunca derivado. Se justifica por el principio 9 de `../docs/principios.md`, con la excepción declarada más abajo.
+> `PENDIENTES.md` es fuente de verdad, nunca derivado. Se justifica por el principio 9 de [`../docs/principios.md`](../docs/principios.md), con la excepción declarada más abajo.
 
 Ningún pendiente vive fuera de este archivo. Todo lo demás que los muestre (`AHORA.md`, páginas de ámbito, `reportes/`) se genera desde aquí por transclusión o por janitor.
 
@@ -56,7 +56,11 @@ Cada pendiente está en exactamente un callout y baja de escalón a medida que s
 
 Con fecha exacta aparece bajo el día correspondiente de `AHORA.md` por transclusión del ancla, sin copiar.
 
-El movimiento de escalón **no se registra en la bitácora**: mover un pendiente no es un hecho de la vida del autor, es un hecho del sistema. El janitor lo hace por sí mismo (segunda vía, ver `flujo-informacion.md`).
+**Escribir en un día es fecharlo.** Una entrada `**pendiente**` escrita en el día de hoy o en uno futuro de `AHORA.md` abre el pendiente ya con la fecha de ese día, y queda transcluido al inicio de ese día. No hay un comando aparte para agendar: agendar es escribir donde corresponde, que es lo que alguien haría en una agenda de papel.
+
+Esto ataja el escalón: un pendiente puede nacer con fecha exacta sin pasar por `^sin-fecha` ni por un horizonte. La escalera describe cómo se concreta lo que nació difuso, no un camino obligatorio.
+
+El movimiento de escalón **no se registra en la bitácora**: mover un pendiente no es un hecho de la vida del autor, es un hecho del sistema. El janitor lo hace por sí mismo (segunda vía, ver [`flujo-informacion.md`](flujo-informacion.md)).
 
 ## Sincronía de transclusiones
 
@@ -84,4 +88,4 @@ La segunda es la peligrosa. La primera se ve: hay una caja rota y alguien la arr
 ## No entra
 
 - **Las reglas de tratamiento** de pendientes (prioridad, tipos, encadenamiento, criterios de vencimiento más allá de la fecha) van en un documento propio, aún por escribir. Esto cubre solo el modelo.
-- **Promover pendientes entre ciclos** en el detalle de apertura/cierre. La mecánica general está aquí (regla 3); la secuencia completa de abrir y cerrar un ciclo está en `ciclo.md`.
+- **Promover pendientes entre ciclos** en el detalle de apertura/cierre. La mecánica general está aquí (regla 3); la secuencia completa de abrir y cerrar un ciclo está en [`ciclo.md`](ciclo.md).

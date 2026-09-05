@@ -1,8 +1,8 @@
 # spec · cadencias
 
-> Una cadencia es una regla que emite algo con regularidad. Se justifica por el principio 7 de `../docs/principios.md`: vive donde aplica, no en un archivo central.
+> Una cadencia es una regla que emite algo con regularidad. Se justifica por el principio 7 de [`../docs/principios.md`](../docs/principios.md): vive donde aplica, no en un archivo central.
 
-Vive **donde aplica**: en el ámbito o subdirectorio al que pertenece. Una cadencia de conversaciones individuales vive en `jefatura`; una de pagos mensuales vive en `personal`. La más cercana prevalece (ver `ambitos.md`).
+Vive **donde aplica**: en el ámbito o subdirectorio al que pertenece. Una cadencia de conversaciones individuales vive en `jefatura`; una de pagos mensuales vive en `personal`. La más cercana prevalece (ver [`ambitos.md`](ambitos.md)).
 
 Poner el alcance en la carpeta evita declararlo dentro de cada cadencia. El árbol ya lo dice.
 
@@ -52,7 +52,7 @@ Tres campos son de máquina y dos son de persona:
 
 ## Un solo destino de emisión
 
-Una cadencia emite un **pendiente con fecha**, y aparece en el día correspondiente de `AHORA.md` por la transclusión que ya existe (ver `pendientes.md`). No hay un segundo destino de emisión distinto de los pendientes.
+Una cadencia emite un **pendiente con fecha**, y aparece en el día correspondiente de `AHORA.md` por la transclusión que ya existe (ver [`pendientes.md`](pendientes.md)). No hay un segundo destino de emisión distinto de los pendientes.
 
 ## El trigger no es solo calendario
 
@@ -68,5 +68,5 @@ Dos trampas conocidas: los rangos que cruzan el borde de mes (*"entre el 31 y el
 
 ## No entra
 
-- **Inferir cadencias implícitas del histórico.** Eso es inferencia semántica y pertenece a una fase posterior de implementación (ver `../devel/que_implementar.md`), no al modelo aquí especificado.
+- **Inferir cadencias implícitas del histórico.** Eso es inferencia semántica y pertenece a una fase posterior de implementación (ver [`../devel/que_implementar.md`](../devel/que_implementar.md)), no al modelo aquí especificado.
 - **Las alertas sobre pendientes críticos.** Sigue abierto si son un janitor propio o una forma de implementar una cadencia.

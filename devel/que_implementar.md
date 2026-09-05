@@ -1,25 +1,30 @@
 # En qué orden implementar los tests
 
+> **Qué es este documento.** La vista de alto nivel de [`epics.md`](epics.md): el corte técnico que hay debajo de los epics, con el detalle de qué se construye en cada tramo y cómo se prueba. Lo que decide qué se hace y en qué orden es `epics.md`; esto explica de qué está hecho cada epic por dentro. Si los dos se contradicen, manda `epics.md`.
+
 ## Fases
 
-Diez fases. **Cada una termina con un vault que alguien puede usar**, no con una capa que solo le sirve a la siguiente. Si una fase no se puede entregar sola, está mal cortada.
+Nueve fases. **Cada una termina con un vault que alguien puede usar**, no con una capa que solo le sirve a la siguiente. Si una fase no se puede entregar sola, está mal cortada.
+
+Las fases cortan **por primitiva**; los epics cortan **por el estado del vault** con el que empiezan. Son ejes perpendiculares y por eso un epic abarca varias fases, a veces solo en parte: el epic 002 hace la versión mínima de las fases 3 y 5, y el 003 las completa contra un vault ya poblado.
 
 El LLM aparece en los dos extremos y el medio es determinista, que es el principio 4 convertido en plan de trabajo: primero lo que se verifica exacto, al final lo que solo se puede evaluar.
 
-| Fase | Nombre | Qué se puede hacer al terminarla | LLM | Fixture |
-| --- | --- | --- | --- | --- |
-| 0 | El vault que se puede abrir | Empezar a escribir a mano | no | `vacio` |
-| 1 | La entrada | Dictar y que quede bien escrito | sí | `primer-dia` |
-| 2 | Pendientes | Que no se olvide nada | no | `ciclo-en-curso` |
-| 3 | El árbol de ámbitos | Que cada cosa tenga su lugar | no | `ciclo-en-curso` |
-| 4 | Cadencias | Que el sistema recuerde solo | no | `ciclo-en-curso` |
-| 5 | Notas y enlaces | Que el tejido se mantenga | no | `ciclo-en-curso` |
-| 6 | El ciclo | Abrir y cerrar sin perder nada | no | `ciclo-por-cerrar` |
-| 7 | Plan y resumen | Que la propuesta valga la pena leerla | sí | `ciclo-por-cerrar` |
-| 8 | Endurecimiento | Usarlo en serio | no | `historico` |
-| 9 | Inferencia semántica | Que note cosas que nadie pidió | sí | `historico` |
+| Fase | Nombre | Qué se puede hacer al terminarla | LLM | Fixture | Epic |
+| --- | --- | --- | --- | --- | --- |
+| 0 | El vault que se puede abrir | Empezar a escribir a mano | no | `vacio` | 001 |
+| 1 | La entrada | Dictar y que quede bien escrito | sí | `primer-dia` | 002 |
+| 2 | Pendientes | Que no se olvide nada | no | `ciclo-en-curso` | 002 |
+| 3 | El árbol de ámbitos | Que cada cosa tenga su lugar | no | `ciclo-en-curso` | 002 mínimo, 003 completo |
+| 4 | Cadencias | Que el sistema recuerde solo | no | `ciclo-en-curso` | 002 declara, 004 emite |
+| 5 | Notas y enlaces | Que el tejido se mantenga | no | `ciclo-en-curso` | 002 mínimo, 003 completo |
+| 6 | El ciclo | Abrir y cerrar sin perder nada | no | `ciclo-por-cerrar` | 004 |
+| 7 | Plan y resumen | Que la propuesta valga la pena leerla | sí | `ciclo-por-cerrar` | 004 |
+| 9 | Inferencia semántica | Que note cosas que nadie pidió | sí | `historico` | 005 |
 
 Cada fase se describe igual, con una sección **No entra** que es lo mismo que TUKU le pide a un plan de ciclo: decir qué se deja fuera y por qué, para que no se arrastre sin darse cuenta.
+
+La numeración salta la 8 a propósito. **El endurecimiento pasó a la wishlist** de `epics.md`: no agregaba capacidades, cerraba huecos, y ninguna otra fase lo bloquea. Renumerar habría roto las referencias por número que hay repartidas por el repositorio, y la fase 9 es conocida por su nombre.
 
 ### Fase 0. El vault que se puede abrir
 
@@ -127,19 +132,13 @@ Ese es el truco de corte de esta fase: **el cierre se prueba entero antes de que
 
 Primera fase donde el criterio de salida **se parte en dos**: lo que se verifica con script (secciones presentes, veredicto correcto, capacidad bien restada) y lo que solo se evalúa. Conviene decirlo en vez de fingir que todo se puede afirmar.
 
-### Fase 8. Endurecimiento
+### Fase 8. Endurecimiento · movida a la wishlist
 
-**Pregunta.** ¿Aguanta el uso real y el error humano?
+**Qué era.** Los casos de error, la reconstrucción completa y la idempotencia medida sobre todo el sistema junto y no janitor por janitor.
 
-**Se construye.** Los casos de error, la reconstrucción completa y la idempotencia medida sobre todo el sistema junto y no janitor por janitor.
+Ya no es una fase con epic asignado: vive en la wishlist de [`epics.md`](epics.md), porque no agrega capacidades y ninguna otra fase la bloquea. Lo que sí vale desde ahora, sin esperar a que la fase exista: **un error del autor nunca se rechaza, se reporta.** Rechazar lo que alguien acaba de dictar es la forma más rápida de que deje de usar TUKU.
 
-**Janitors.** `jntr.reconstruir`, y todos los lint corriendo a la vez.
-
-**Sale cuando.** Borrar todo lo derivado y regenerarlo devuelve byte a byte lo mismo. El conjunto canónico (`AHORA.md`, `bitacoras/`, `PENDIENTES.md`, `ambitos/`, `notas/`) no se toca nunca. Y cada caso de error produce un reporte, no una excepción.
-
-**No entra.** Nada nuevo. Esta fase no agrega capacidades, cierra huecos.
-
-La regla que gobierna la fase: **un error del autor nunca se rechaza, se reporta.** Rechazar lo que alguien acaba de dictar es la forma más rápida de que deje de usar TUKU.
+La idempotencia no se va con la fase: sigue atravesando todas, como dice más abajo.
 
 ### Fase 9. Inferencia semántica
 
@@ -161,7 +160,7 @@ Tres criterios, en este orden:
 
 1. **Entregable solo.** Cada fase deja algo usable. Es lo que permite parar en cualquier punto sin quedarse con un sistema a medio construir.
 2. **Un fixture nuevo por vez.** Una fase que necesita dos estados iniciales nuevos está haciendo dos cosas.
-3. **El LLM se aísla.** Las fases 1, 7 y 9 lo usan y las demás no. Que estén separadas es lo que deja medir cuánto del sistema depende de un modelo, y ese número debería ser chico.
+3. **El LLM se aísla.** Las fases 1, 7 y 9 lo usan y las demás no. Que estén separadas es lo que deja medir cuánto del sistema depende de un modelo, y ese número debería ser chico. Un epic puede fundir una fase con LLM y una sin él (el 004 junta la 6 y la 7), y entonces el corte interno pasa a ser criterio de salida del epic, no desaparece.
 
 ### Lo que atraviesa todas las fases
 
@@ -371,10 +370,10 @@ En este orden:
 	- **No entra, y por qué**: la razón es parte del plan, no un comentario
 	- **Restricciones y contexto**: lo que acota el ciclo antes de empezar
 	- **Señales a vigilar**: qué observar durante el ciclo sin que sea tarea
-- Calcular la capacidad antes de planificar → `jntr.capacidad-calcular`
-	- Partir de las horas del ciclo y restar el costo fijo: roles operativos, viajes, días con los niños
-	- Un rol operativo cuesta horas **por día**, no una vez
-	- Se planifica contra lo que queda. Planificar contra las horas brutas es la forma más común de fallar
+- Calcular la capacidad antes de planificar → `jntr.capacidad-calcular`, leyendo los `CAPACIDAD.md` del árbol (formato en [`../spec/ciclo.md`](../spec/ciclo.md))
+	- Partir de los días que cuentan en el ciclo y restarles el costo fijo: roles operativos, viajes, días con los niños
+	- Un rol operativo se cobra cada día que dura, no una vez
+	- Se planifica contra lo que queda, en el mismo vocabulario cerrado con que se declaró (nunca horas)
 - Traer al plan
 	- Pendientes heredados del ciclo anterior → `jntr.pendientes-promover`
 	- Cadencias que caen dentro del ciclo → `jntr.cadencias-resolver`
