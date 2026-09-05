@@ -1,75 +1,6 @@
 # Sesiones de ejemplo TUKU
 
-> [!example] Diccionario canónico de anonimización y placeholders
-> | Categoría | Entidad Original | Placeholder Canónico |
-> |---|---|---|
-> | **Ubicaciones** | Paranal | **Faena** |
-> | | Antofagasta | **Ciudad Base** |
-> | | Garching / Alemania | **Casa Matriz** |
-> | | Vitacura | **Oficina Regional** |
-> | | Departamento Viana | **Depto Centro** |
-> | | Departamento Lautaro Rosas | **Depto Cerro** |
-> | | Centro Médico HOLOS | **Centro Kine** |
-> | | Lucid Dreams | **Arcade VR** |
-> | **Colegas / Trabajo** | Faviola Molina | **Fabina Méndez** |
-> | | Cristian Stephan | **Carlos Silva** |
-> | | Vicente Lizana | **Víctor Lagos** |
-> | | Maxime Boccas | **Mauricio Barra** |
-> | | Juan Millar | **Jorge Muñoz** |
-> | | Cecilia Farías | **Carla Fuentes** |
-> | | Fernanda Muñoz | **Florencia Morales** |
-> | | JP Castillo | **Javier Castro** |
-> | | Tamas Tutuntzisz | **Tomás Toledo** |
-> | | Xavier García | **Xander Gálvez** |
-> | | Rafael Alves | **Rodrigo Álvarez** |
-> | | Benjamín Salamanca | **Bernardo Salinas** |
-> | | Eduardo Peña | **Esteban Parra** |
-> | | Claudio Cumani | **Cristóbal Carrasco** |
-> | | Roberto Abuter | **Raúl Araya** |
-> | | Cristián Elao | **César Espinoza** |
-> | | Andrés Pino | **Alejandro Palma** |
-> | | Pedro Silva | **Patricio Soto** |
-> | | Vanessa Pulgar | **Valeria Pizarro** |
-> | | Andrea Acuña | **Alicia Abarca** |
-> | | Matias Jaeger | **Marcelo Jensen** |
-> | | Amal Daire | **Agustín Díaz** |
-> | | Nicolás Miranda | **Nelson Morales** |
-> | | Akke | **Alex** |
-> | | Ingeborg Muñoz | **Irene Morales** |
-> | | Eleonora Sani | **Elena Soto** |
-> | **Familia / Personal** | Martín (hijo) | **Mateo (hijo)** |
-> | | Luciano (hijo) | **Lucas (hijo)** |
-> | | Gabriel (hijo) | **Gaspar (hijo)** |
-> | | Nahuel (amigo) | **Nico (amigo)** |
-> | | Claudia Núñez (admin Viana) | **Carmen Navarro (admin Depto Centro)** |
-> | | Marcela Carreño (admin Lautaro) | **Mónica Castro (admin Depto Cerro)** |
-> | | Carlos Araya (psicólogo) | **Camilo Aguirre (psicólogo)** |
-> | | Dr. Pedro López | **Dr. Pablo Lara** |
-> | **Instituciones / Roles / Sistemas** | ESO | **Organización** |
-> | | UFRO | **Universidad Sur** |
-> | | UC | **Universidad Centro** |
-> | | ANID Fondef IDeA 2027 | **Concurso I+D Tecnológico 2027** |
-> | | Turbus | **Bus interurbano** |
-> | | KairosDB | **MetricDB** |
-> | | pswopenai (instancia Azure) | **faenaopenai (instancia Azure)** |
-> | | OSS | **Soporte** |
-> | | COE / Chief Operational Engineer | **Jefe de División** |
-> | | GRAVITY / GRA4MAT | **CINTILATOR** |
-> | **Áreas / Proyectos (ORG)** | paranal-AI | **faena-ai** |
-> | | deputy-management | **jefatura** |
-> | | arriendo-viana | **arriendo-depto-centro** |
-> | | tesis-jp-castillo | **tesis-javier-castro** |
-> | | spie2026-paper | **paper-conferencia** |
-> | | devops-2026-hiring | **devops-contrataciones** |
-> | | mac-jpgil | **mac-personal** |
-> | | estado-medico-jp | **salud-personal** |
-> | | teoria-pairgraph | **tesis-grafos** |
-> | | sw-responsible | **responsable-sw** |
-> | | iop-explorations | **exploraciones-operacionales** |
-> | | iop-digital-trans | **transformacion-digital** |
-> | | iop-general | **operaciones-general** |
-> | | ds-core | **soporte-datos** |
-> | | streamlit-to-operations | **streamlit-operaciones** |
+> Corpus de referencia, ficticio y público. Personas, lugares, instituciones y proyectos están anonimizados, y la correspondencia con sus originales **no vive en este repositorio ni en ninguna parte pública**. Cualquier nombre que aparezca acá se trata como el nombre real de este corpus, no como un seudónimo de alguien.
 
 ---
 
@@ -217,7 +148,7 @@
 # Parte 2: Tabla de Verdad (Ground Truth — Formato Bitácora MaC)
 
 > [!tip] Ground Truth para benchmarking de modelos
-> Esta sección reproduce la estructura canónica exacta generada en las bitácoras originales (`actividad/`), aplicando de manera estricta los placeholders del diccionario de anonimización y sin enlaces. Permite evaluar la capacidad de un agente para transformar inputs en lenguaje natural desestructurados en entradas MaC estructuradas con metadatos, tags y jerarquía.
+> Esta sección reproduce la estructura canónica exacta generada en las bitácoras originales (`actividad/`), sin enlaces. Permite evaluar la capacidad de un agente para transformar inputs en lenguaje natural desestructurados en entradas MaC estructuradas con metadatos, tags y jerarquía.
 
 ## Turno Faena (11 al 19 de Agosto de 2026)
 
@@ -410,7 +341,7 @@
 # Parte 3: Estado Reconstruible del Repositorio (Grafo de Entidades y Metadatos MaC)
 
 > [!abstract] Especificación de Estado Objetivo
-> Esta sección describe el estado documental y relacional completo del repositorio que un sistema agéntico debe ser capaz de inferir, actualizar o reconstruir a partir de los inputs de actividad anteriores, utilizando el diccionario canónico de anonimización.
+> Esta sección describe el estado documental y relacional completo del repositorio que un sistema agéntico debe ser capaz de inferir, actualizar o reconstruir a partir de los inputs de actividad anteriores.
 
 ## 1. Árbol de Organizaciones y Áreas (ORG)
 
