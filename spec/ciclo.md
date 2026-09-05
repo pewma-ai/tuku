@@ -1,6 +1,6 @@
 # spec · ciclo
 
-> `AHORA.md` es el ciclo en curso. Se justifica por el principio 1 y el principio 9 de `../docs/principios.md`. Si el ciclo es o no una primitiva propia sigue abierto (ver `README.md`).
+> `AHORA.md` es el ciclo en curso. Se justifica por el principio 1 y el principio 9 de [`../docs/principios.md`](../docs/principios.md). Si el ciclo es o no una primitiva propia sigue abierto (ver [`README.md`](README.md)).
 
 ## `AHORA.md`, el ciclo en curso
 
@@ -77,7 +77,7 @@ En este orden:
 2. Sembrar los días con `## Día, DD de MM` → `jntr.ciclo-abrir`
 3. Rodar y promover pendientes: `este-turno` sin fecha rueda, `proximo-turno` promueve → `jntr.pendientes-promover`
 4. Colectar cadencias desde el árbol y emitir lo que corresponda → `jntr.cadencias-colectar`, `jntr.cadencias-resolver`, `jntr.cadencia-inyectar`
-5. Generar el plan en `planes/` y transcluirlo → `jntr.capacidad-calcular` lo alimenta
+5. Generar el plan en `planes/` y transcluirlo → `jntr.capacidad-calcular` lo alimenta, leyendo los `CAPACIDAD.md` del árbol
 6. Transcluir los pendientes de cada día → `jntr.transclusiones-sync`
 
 Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
@@ -107,9 +107,62 @@ Estructura del plan:
 
 Calcular la capacidad antes de planificar → `jntr.capacidad-calcular`:
 
-- Partir de las horas del ciclo y restar el costo fijo: roles operativos, viajes, días con los niños.
-- Un rol operativo cuesta horas **por día**, no una vez.
-- Se planifica contra lo que queda. Planificar contra las horas brutas es la forma más común de fallar.
+- Partir de los días que cuentan en el ciclo y restarles el costo fijo: roles operativos, viajes, días con los niños.
+- Un rol operativo se cobra **cada día que dura**, no una vez.
+- Se planifica contra lo que queda. Planificar contra el ciclo entero es la forma más común de fallar.
+
+### De dónde lee: `CAPACIDAD.md`
+
+El bruto y los costos fijos los declara el autor en archivos `CAPACIDAD.md` repartidos por el árbol de ámbitos (dónde vive cada uno y por qué se acumulan, en [`ambitos.md`](ambitos.md)).
+
+**No se declara en horas.** Pedirle al autor que cuantifique su semana es la forma más rápida de que deje de mantener el archivo, y además es una precisión falsa: nadie sabe cuántas horas le va a costar un turno. Se declara con el mismo vocabulario grueso con que uno lo diría en voz alta.
+
+```markdown
+## Bruto
+
+**Días que cuentan:** de lunes a viernes
+**Qué tan lleno:** un día completo, salvo el viernes, que es media jornada
+
+## Costo fijo
+
+### Turno operativo
+**Cuesta:** casi todo el día
+**Cuándo:** los días de turno del ciclo
+**Por qué:** el turno no deja bloques largos, solo huecos entre operaciones
+
+### Traslado a Paranal
+**Cuesta:** el día entero
+**Cuándo:** el primer y el último día del turno
+```
+
+`Bruto` va una sola vez, en `ambitos/personal/`. Cada bloque de `Costo fijo` va en el ámbito que lo causa, y todos se restan del mismo bruto.
+
+Dos campos son de máquina, uno es de persona:
+
+| Campo | Para quién | Qué hace |
+| --- | --- | --- |
+| `Cuesta` | máquina | Cuánto consume del día, en el vocabulario cerrado de abajo |
+| `Cuándo` | máquina | Qué días del ciclo lo cobran |
+| `Por qué` | persona | La razón, para que no se borre cuando parezca exagerado |
+
+**El vocabulario de magnitud es cerrado**, como las tres marcas de la bitácora. Cuatro escalones, y el autor no los puede extender:
+
+| Se escribe | Qué significa |
+| --- | --- |
+| `el día entero` | Ese día no entra nada más |
+| `casi todo el día` | Queda un hueco, sirve para una cosa corta |
+| `media jornada` | Queda la mitad utilizable |
+| `un rato` | Descuenta, pero el día sigue siendo un día |
+
+Cerrado porque es lo que permite que el janitor sume sin interpretar, y corto porque un quinto escalón obliga al autor a deliberar sobre la diferencia entre dos etiquetas parecidas, que es exactamente el trabajo que el sistema le está quitando. Las variantes de redacción (*"casi entero"*, *"casi completo"*) las normaliza el linter, igual que hace con las clasificaciones.
+
+Lo que sale de sumar no es un número de horas: es cuánto cabe en el ciclo, en la misma escala. El plan se dimensiona contra eso.
+
+`Cuándo` depende del tipo de ciclo, igual que el trigger de una cadencia: *"los días de turno"* no se resuelve con un almanaque. El cálculo de capacidad hereda esa dependencia y sus dos trampas conocidas (ver [`cadencias.md`](cadencias.md)).
+
+`Por qué` cumple aquí el mismo papel que `Historia` en una cadencia. Un costo fijo sin razón escrita es lo primero que el autor recorta cuando quiere que el ciclo le quepa, y es exactamente lo que no debe recortar.
+
+**La capacidad no se registra en la bitácora.** Declararla es escribir una regla, no ocurrió como hecho. Cambiarla sí es una decisión y el autor puede registrarla como tal, pero eso es una entrada más, no el mecanismo.
 
 Trae al plan:
 
@@ -138,4 +191,4 @@ El veredicto sale de comparar plan contra ejecución, no de resumir la actividad
 ## No entra
 
 - **Juzgar la calidad de la prosa** del plan o el resumen.
-- **Decidir el tipo de ciclo real de quien lo usa.** El estado cero arranca en semanal y el tipo verdadero emerge después; esa regla de arranque vive en `../devel/que_implementar.md` (estrategia de pruebas, estado cero).
+- **Decidir el tipo de ciclo real de quien lo usa.** El estado cero arranca en semanal y el tipo verdadero emerge después; esa regla de arranque vive en [`../devel/que_implementar.md`](../devel/que_implementar.md) (estrategia de pruebas, estado cero).

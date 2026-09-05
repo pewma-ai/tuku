@@ -27,6 +27,7 @@
 | `archivado/` | Ramas cerradas, con sus enlaces todavía resolviendo. |
 | `AGENTS.md` | Reglas que aplican a un directorio y a todo lo que cuelga de él. Uno por carpeta. |
 | `CADENCIAS.md` | Las cadencias de un directorio. Uno por carpeta. |
+| `CAPACIDAD.md` | Lo que cuesta sostener un ámbito. Opcional y deseable: solo donde hay algo que declarar. El bruto, si se declara, va en `ambitos/personal/`. |
 | `LIBRO-DE-ESTILO.md` | Un archivo único con las reglas de escritura y organización del autor, en prosa. De aquí nacen los janitors. No confundir con el vault, que es el repositorio entero. |
 
 **MAYÚSCULAS es de TUKU, minúsculas es del autor.** Se distingue de un vistazo sin abrir nada.
@@ -56,7 +57,10 @@
 | **Transclusión** | Mostrar un texto en otro archivo sin copiarlo, con `![[archivo#^ancla]]`. Al cerrar el ciclo se aplana a texto. |
 | **Ciclo** | La ventana de tiempo que se abre, se planifica y se cierra. Semanal por defecto, o el turno real del autor. |
 | **Cadencia** | Una regla que emite un pendiente con fecha cada cierto tiempo. Vive en el `CADENCIAS.md` del ámbito al que pertenece. |
-| **Capacidad** | Las horas reales que quedan en un ciclo, después de restar el costo fijo. Es contra eso que se planifica. |
+| **Bruto** | Lo que rinde un día del autor antes de restar nada. Se declara una sola vez, en `ambitos/personal/CAPACIDAD.md`. |
+| **Costo fijo** | Lo que un ámbito consume del ciclo antes de que se planifique nada: un turno, un traslado, un rol operativo. Se resta del bruto, y varios se acumulan. |
+| **Capacidad** | Lo que queda del bruto después de restar los costos fijos. Es contra eso que se planifica, no contra el ciclo entero. |
+| **Vocabulario de magnitud** | Las cuatro etiquetas cerradas con que se declara cuánto consume un bruto o un costo fijo: `el día entero`, `casi todo el día`, `media jornada`, `un rato`. Nunca horas: pedir un número es la fricción que este vocabulario evita. |
 
 ## El árbol de ámbitos
 
