@@ -23,11 +23,13 @@ Cuesta dos minutos y es lo que permite que la siguiente sesión retome sin depen
 | [`devel/`](devel/epics.md) | Cómo se construye: epics, plan de fases, entorno, diario | Plan |
 | [`template/`](template/README.md) | Estructuras iniciales en Markdown que se copian al vault | Producto |
 | `src/` | El código | Implementación |
-| [`corpus/`](corpus/README.md) | Datos de prueba: escenarios narrativos, referencia, simulaciones | Dato |
-| [`tests/`](tests/escenarios/README.md) | El arnés que ejecuta los escenarios | Verificación |
+| [`corpus/`](corpus/README.md) | Dictado de referencia, real e imaginado: fuente de fechas y de ideas de proceso | Dato |
+| [`tests/`](tests/README.md) | El caso narrativo (Dado/Cuando/Entonces) y su arnés, uno junto al otro | Verificación |
 | `playground/` | Corridas desechables. Ignorado por git, se pisa al recrear | Descartable |
 
 Dentro de `devel/`: [`epics.md`](devel/epics.md) es el estado, [`que_implementar.md`](devel/que_implementar.md) el plan de fases y su justificación, [`iteraciones/`](devel/iteraciones/README.md) el diario por día, [`entorno-devel.md`](devel/entorno-devel.md) el entorno.
+
+Cómo se relacionan estos cuatro: un epic da el número y la meta; un escenario lo cubre y, si necesita dictado o fechas reales, las toma de `corpus/`; el escenario y el test que lo verifica viven juntos en `tests/escenarios/`; lo que produce correrlo queda en `playground/`, que se pisa cada vez.
 
 `devel/VAULT/` es **historia**: el diseño y el código anteriores a la reescritura de agosto de 2026. No es base para nada nuevo. Se rescata algo puntual solo cuando un epic lo necesita.
 
