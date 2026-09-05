@@ -22,9 +22,13 @@ El mismo par nombra las tres cosas: el caso (`XXX-YYY-slug.md`), el arnés (`tes
 
 ## Fixtures
 
-`fixtures/XXX-YYY-slug/`, con guiones, porque es un directorio de datos y no un módulo.
+`fixtures/XXX-YYY-slug/`, con guiones, porque es un directorio de datos y no un módulo. Hoy no hay ninguno, y no es un descuido.
 
-Un fixture guarda solo lo que el mecanismo bajo prueba transforma. Lo que se copia sin tocar se compara en vivo contra su origen: congelar una copia paralela de algo que nunca debería diferir obliga a regenerarla a mano cada vez que cambia el original. Por eso el fixture de `001-001` es un solo archivo (`AHORA.md`, el único que `instalar()` sustituye) y el resto del árbol se compara contra `template/vanilla/` directamente.
+**Nada que provenga de `template/` se congela.** Congelar una copia paralela de algo que nunca debería diferir obliga a regenerarla a mano cada vez que cambia el original, y convierte cada cambio del template en un test roto que no señala ningún defecto. El árbol instalado se compara en vivo contra `template/<variante>/`, y lo que el instalador transforma se deriva del template aplicándole el resultado que el escenario afirma a mano.
+
+El epic 001 empezó con un fixture de `AHORA.md` y se eliminó por esto mismo: congelaba también el frontmatter fijo y el título, que el instalador no toca.
+
+Un fixture se justifica cuando la entrada no sale del repositorio (un dictado, una respuesta de agente, un archivo que el autor trajo de afuera). Ahí no hay original vivo contra el cual comparar, y congelar es la única opción.
 
 ## Convención de formato
 

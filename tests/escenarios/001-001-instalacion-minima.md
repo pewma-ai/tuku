@@ -40,7 +40,17 @@ python3 src/install_test_scenario.py --variante vanilla --destino playground/001
 
 ## El test byte a byte
 
-`test_001_001_instalacion_minima.py` fija la fecha en **2026-08-11** (martes), el mismo día donde arranca el ground truth de `corpus/referencia/referencia-faena.md` ("Turno Faena"), y compara contra el fixture en `fixtures/001-001-instalacion-minima/`.
+`test_001_001_instalacion_minima.py` fija la fecha en **2026-08-11** (martes), el mismo día donde arranca el ground truth de `corpus/referencia/referencia-faena.md` ("Turno Faena").
+
+**No compara contra ninguna copia congelada del template.** El contraste es siempre contra `template/vanilla/` en vivo, y son tres afirmaciones que fallan por separado:
+
+1. El árbol instalado no difiere de `template/vanilla/` en ningún archivo salvo `AHORA.md`, ni sobra ni falta ninguno.
+2. `AHORA.md` queda igual al del template con las fechas resueltas. El esperado se deriva del template real; lo único escrito a mano son los siete encabezados de día, que es donde estuvo el bug.
+3. Ningún archivo del vault conserva un placeholder (`AAAA-MM-DD`, `DD de mes`) fuera de un bloque de código.
+
+La tercera es la que cubre el crecimiento del template: si un archivo nuevo trae un placeholder que el instalador no sabe sustituir, las otras dos pasan en silencio y esta no. Los bloques de código quedan fuera del escaneo a propósito: ahí un `AAAA-MM-DD` es el ejemplo de formato que el autor lee, no una marca pendiente.
+
+La consecuencia práctica es que **el template puede cambiar todo lo que haga falta sin tocar el test**. Solo lo rompe un cambio en la forma de `AHORA.md` o en la lógica de sembrado, que es exactamente cuando debe romperse.
 
 La fecha fija no es arbitraria ni tiene que ser lunes: nada en `spec/` exige que un ciclo semanal empiece en lunes, así que el test elige a propósito una fecha que no lo es, para no dejar ese supuesto sin probar.
 
@@ -56,5 +66,7 @@ python3 tests/escenarios/test_001_001_instalacion_minima.py
 
 ## Qué destapó ya
 
-- ~~El estado cero no es reproducible byte a byte sin fijar `--desde`...~~ **Resuelto:** el test fija `--desde 2026-08-11` y compara contra un fixture. El usuario real sigue instalando sin fecha (usa la de hoy); lo reproducible byte a byte es la garantía de prueba, no la experiencia real de instalar.
+- ~~El estado cero no es reproducible byte a byte sin fijar `--desde`...~~ **Resuelto:** el test fija `--desde 2026-08-11`. El usuario real sigue instalando sin fecha (usa la de hoy); lo reproducible byte a byte es la garantía de prueba, no la experiencia real de instalar.
+- ~~El fixture congelaba `AHORA.md` entero, no solo lo que `instalar()` transforma...~~ **Resuelto:** el fixture se eliminó. Congelaba también el frontmatter fijo, el título y las líneas en blanco, así que cualquier cambio en `template/vanilla/AHORA.md` obligaba a regenerarlo a mano. Ahora el esperado se deriva del template.
+- **La verificación de placeholders encontró uno al escribirse:** `ambitos/CADENCIAS.md` contiene `AAAA-MM-DD` dentro de su bloque de ejemplo de formato. No es un defecto, y obligó a declarar la regla: dentro de un fence es documentación, fuera es una marca sin sustituir.
 - **Bug real, encontrado por este mismo test al escribirlo:** `sembrar_ahora()` nombraba los siete días en orden fijo Lunes..Domingo sin mirar el día de la semana real de `--desde`. Con `--desde 2026-08-11` (martes), el primer día salía etiquetado "Lunes 11 de agosto". Corregido: el nombre real sale de `fecha.weekday()`.
