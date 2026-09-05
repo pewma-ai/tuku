@@ -24,11 +24,19 @@ Y nada se rompe si nunca corre ningún janitor
 
 ## Cómo se corre
 
+Instalador de una línea, probado el 2026-09-04 contra el repo real:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- playground/epic-1_test-1
+```
+
+Agregar una fecha (`sh -s -- playground/epic-1_test-1 2026-09-01`) fija el lunes del primer ciclo; sin ella, usa el lunes de la semana en curso. Correrlo de nuevo pisa el destino.
+
+Para no depender de la red ni del commit ya empujado, el mismo mecanismo se invoca directo:
+
 ```bash
 python3 src/install_test_scenario.py --variante vanilla --destino playground/epic-1_test-1 --desde AAAA-MM-DD
 ```
-
-Sin `--desde`, usa el lunes de la semana en curso. Correrlo de nuevo pisa `playground/epic-1_test-1`.
 
 ## Qué se mira a mano
 

@@ -43,6 +43,7 @@ Preparación ya hecha, fuera de los epics: `spec/` y `docs/glosario.md` ordenan 
 3. **`reglas/config.tuku.md` declara zona horaria y tipo de ciclo**, en prosa con campos en negrita, igual que las cadencias. Cierra una de las decisiones abiertas de `../spec/README.md`, a falta del visto bueno del autor.
 4. **El código vive en `src/` (raíz), no en `devel/VAULT/src/`.** Es donde `pyproject.toml` ya apuntaba (`where = ["src"]`); `devel/VAULT/src/` resultó ser código del diseño anterior (`entradas/`, `tareas/`, `entidades/`) y queda como referencia histórica, no como base para seguir escribiendo. El primer archivo es `src/install_test_scenario.py`: instala una variante de `template/` y resuelve las fechas de `AHORA.md`, sin depender de nada fuera de la librería estándar.
 5. **Los escenarios de prueba son narrativos (Dado/Cuando/Entonces), no unitarios**, y separan dato de arnés: el caso vive en `corpus/escenarios/` (dato, puede haber cientos), lo que lo ejecuta y compara en `tests/escenarios/`, y los pasos deterministas reutilizables entre escenarios en `tests/scripts/`.
+6. **Instalar es una línea de `curl`, no `git clone`.** `install.sh` baja el tarball del branch desde GitHub, extrae `template/vanilla/` y corre `src/install_test_scenario.py`. Probado el 2026-09-04 contra `pewma-ai/tuku@devel` real: `curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- <destino>`.
 
 **Qué falta decidir.**
 
