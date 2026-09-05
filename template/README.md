@@ -14,6 +14,25 @@ El mecanismo que copia una variante y resuelve sus fechas es código, no templat
 
 Las variantes futuras se agregan como hermanas de `vanilla/`, nunca como capas encima. Si dos variantes comparten un archivo, se duplica: un template que hay que componer deja de ser copiable a mano y rompe el principio 1.
 
+## El estado cero
+
+Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2: infraestructura mínima, sin un solo dato sobre la vida de quien lo instala.
+
+| Archivo | Qué trae |
+| --- | --- |
+| `AGENTS.md` | Reglas de todo el repositorio |
+| `LIBRO-DE-ESTILO.md` | Reglas del autor sobre cómo se escribe |
+| `AHORA.md` | Los días del primer ciclo sembrados, sin entradas |
+| `PENDIENTES.md` | Los callouts de horizonte, vacíos |
+| `ambitos/AGENTS.md`, `ambitos/CADENCIAS.md` | Reglas y cadencias de toda la rama |
+| `ambitos/personal/` | La única rama inicial: `AGENTS.md`, `CADENCIAS.md`, `CAPACIDAD.md`, `personal.md` |
+| `notas/AGENTS.md` | Reglas del zettelkasten |
+| `reglas/config.tuku.md` | Zona horaria y tipo de ciclo, en prosa |
+
+La tabla es la referencia, no un inventario cerrado: lo que importa es que cualquier cosa que se agregue supone algo sobre el autor y hay que justificarlo.
+
+`CADENCIAS.md` y `CAPACIDAD.md` de `personal/` se siembran **sin un solo dato**, diciendo que todavía no se ha declarado nada y por qué conviene hacerlo. Son opcionales y deseables, no requisitos (ver [`../spec/ambitos.md`](../spec/ambitos.md)): el vault opera sin ninguno de los dos. Existen en el estado cero porque un archivo que se explica solo es la forma barata de que el autor sepa que puede escribirlo, y no rompe el principio 2 mientras no le pida declarar nada para empezar.
+
 ## Instalar a mano
 
 Copiar el contenido de la variante a un directorio vacío y hacer tres cosas:

@@ -1,8 +1,12 @@
 # spec
 
-> Especificaciones normativas de TUKU. Se justifican por referencia a `../docs/principios.md` y `../docs/brief.md`. Lo que aquí se afirma es normativo para el motor: el código no inventa reglas, implementa lo que dice este directorio. Cuando código y spec discrepan, el defecto está en el código, salvo que la spec no se derive de `../docs/principios.md`, en cuyo caso el defecto está en la spec (ver el contrato en `../devel/README.md`).
+> **Qué es este directorio.** Qué hace el sistema, con nombres de archivo, formatos e invariantes. Es la única capa que puede nombrar rutas y herramientas, y la única que cambia cuando cambia el layout. Los otros dos documentos del marco: [`../docs/brief.md`](../docs/brief.md) dice qué problema resuelve y para quién, y [`../docs/principios.md`](../docs/principios.md) da el criterio para decidir lo que aún no está escrito.
 
-Este directorio reemplaza al contenido normativo que antes vivía mezclado dentro de `../devel/que_implementar.md`. Ese archivo sigue existiendo, pero ahora responde solo "en qué orden se implementa"; lo que responde "qué hace el sistema" vive aquí.
+> Especificaciones normativas de TUKU. Se justifican por referencia a [`../docs/principios.md`](../docs/principios.md) y [`../docs/brief.md`](../docs/brief.md). Lo que aquí se afirma es normativo para el motor: el código no inventa reglas, implementa lo que dice este directorio. Cuando código y spec discrepan, el defecto está en el código, salvo que la spec no se derive de [`../docs/principios.md`](../docs/principios.md), en cuyo caso el defecto está en la spec.
+> [!question] Referencia rota #REVISAR
+> Esta nota citaba "el contrato en `../devel/README.md`", archivo que no existe en el repositorio. No hay ningún documento que hoy desarrolle ese contrato; decidir si se escribe o si la frase se borra.
+
+Este directorio reemplaza al contenido normativo que antes vivía mezclado dentro de [`../devel/que_implementar.md`](../devel/que_implementar.md). Ese archivo sigue existiendo, pero ahora responde solo "en qué orden se implementa"; lo que responde "qué hace el sistema" vive aquí.
 
 ## Normativo no quiere decir definitivo
 
@@ -49,10 +53,12 @@ ambitos/                      # el árbol de la vida
   personal/
     AGENTS.md
     CADENCIAS.md
+    CAPACIDAD.md              # el bruto, si se declara. Opcional
     personal.md               # página propia: es ámbito
   trabajo/
     AGENTS.md
     CADENCIAS.md
+    CAPACIDAD.md              # costo fijo de este ámbito. Opcional
     trabajo.md
     clientes/                 # sin página: es categoría
       AGENTS.md
@@ -117,12 +123,15 @@ El campo **A mano** no es cortesía documental, es lo que sostiene el principio 
 
 Cada spec declara su propio "no entra" en la sección correspondiente. A nivel de directorio:
 
-- **Los janitors reales, en código.** Este directorio especifica su contrato (qué leen, qué escriben, el campo "A mano"); la implementación vive fuera del repositorio del autor, en `~/.tuku/janitors`, y su plan de construcción vive en `../devel/que_implementar.md`.
-- **El orden de implementación y la estrategia de pruebas.** Eso es `../devel/que_implementar.md`, no este directorio: aquí se especifica qué hace el sistema, no en qué fase se construye ni cómo se verifica.
+- **Los janitors reales, en código.** Este directorio especifica su contrato (qué leen, qué escriben, el campo "A mano"); la implementación vive fuera del repositorio del autor, en `~/.tuku/janitors`, y su plan de construcción vive en [`../devel/que_implementar.md`](../devel/que_implementar.md).
+- **El orden de implementación y la estrategia de pruebas.** Eso es [`../devel/que_implementar.md`](../devel/que_implementar.md), no este directorio: aquí se especifica qué hace el sistema, no en qué fase se construye ni cómo se verifica.
 - **La deliberación con el autor** (archivar una rama, aprobar una propuesta). Se especifica la mecánica que la rodea, nunca el criterio para decidir.
+
+## Decidido
+
+- **La capacidad vive repartida por ámbito**, en archivos `CAPACIDAD.md` opcionales: el bruto, si se declara, una sola vez en `ambitos/personal/`; los costos fijos en el ámbito que los causa. Se acumulan en vez de prevalecer, que es lo que la distingue de los otros dos archivos por directorio. Es deseable, no requisito: el sistema se opera sin capacidad y sin cadencias. Formato y cálculo en [ciclo.md](ciclo.md), ubicación en el árbol en [ambitos.md](ambitos.md).
 
 ## Decisiones abiertas
 
-- Si el ciclo es una primitiva propia o se compone sobre bitácora, pendientes y notas. Hoy `../docs/principios.md` lo lista entre las primitivas pero lo describe como composición temporal.
-- Dónde vive la capacidad del ciclo (costo fijo a restar de las horas brutas): un archivo global, o repartida por ámbito como las cadencias.
+- Si el ciclo es una primitiva propia o se compone sobre bitácora, pendientes y notas. Hoy [`../docs/principios.md`](../docs/principios.md) lo lista entre las primitivas pero lo describe como composición temporal.
 - Qué declara `reglas/config.tuku.md` y con qué formato. El árbol lo nombra (zona horaria, tipos de ciclo) pero nada lo especifica todavía.
