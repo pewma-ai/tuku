@@ -1,64 +1,52 @@
 # Desarrollo de TUKU
 
-Guía de desarrollo, arquitectura y estrategia de implementación para el motor de software de TUKU.
+Índice del espacio de desarrollo. Este repositorio es el **software**; el libro del autor (su vault) vive en otro lado y es lo que TUKU instala y mantiene.
 
----
+Cada documento carga un solo tipo de información, y por eso acá no se repite ninguno: esto solo dice dónde está cada cosa.
 
-## 1. Estructura del espacio de desarrollo
+## Por dónde empezar
 
-- **[`devel/`](devel/)** — Especificaciones técnicas maestras, notas de arquitectura y diseño:
-  - [`que_implementar.md`](devel/que_implementar.md): Documento maestro de implementación en 10 fases y estrategia de pruebas.
-  - [`technical_stack.md`](devel/technical_stack.md): Stack técnico formal, decisiones de dependencias y herramientas.
-  - [`entorno-devel.md`](devel/entorno-devel.md): Configuración del entorno de desarrollo local.
-  - `VAULT/`: Vaults de referencia y fixtures para pruebas.
-- **[`tests/`](tests/)** — Suite de pruebas automatizadas y fixtures de transición de estado.
-- **[`corpus/`](corpus/)** — Datos de prueba, grabaciones y ground truth para evaluar formateo de entrada.
-- **[`playground/`](playground/)** — Prototipado rápido de janitors, scripts y experimentación con comandos del CLI.
+[`devel/epics.md`](devel/epics.md). Tiene el estado del trabajo, qué epic está en curso y qué falta para cerrarlo.
 
----
+## Dónde vive cada cosa
 
-## 2. Plan Maestro de Implementación (10 Fases)
+| Directorio | Qué contiene | Naturaleza |
+|---|---|---|
+| [`docs/`](docs/README.md) | El porqué: brief, principios, glosario, libro de estilo | Marco rector |
+| [`spec/`](spec/README.md) | Qué hace el sistema, un archivo por primitiva | Normativo, y provisional entre epics |
+| [`devel/`](devel/epics.md) | Cómo se construye: epics, plan de fases, entorno, diario | Plan |
+| [`template/`](template/README.md) | Estructuras iniciales en Markdown que se copian al vault | Producto |
+| `src/` | El código | Implementación |
+| [`corpus/`](corpus/README.md) | Datos de prueba: escenarios narrativos, referencia, simulaciones | Dato |
+| [`tests/`](tests/escenarios/README.md) | El arnés que ejecuta los escenarios | Verificación |
+| `playground/` | Corridas desechables. Ignorado por git, se pisa al recrear | Descartable |
 
-El desarrollo sigue estrictamente las 10 fases definidas en [`devel/que_implementar.md`](devel/que_implementar.md). **Cada fase concluye con un vault plenamente funcional** que una persona puede operar a mano:
+Dentro de `devel/`: [`epics.md`](devel/epics.md) es el estado, [`que_implementar.md`](devel/que_implementar.md) el plan de fases y su justificación, [`iteraciones/`](devel/iteraciones/README.md) el diario por día, [`entorno-devel.md`](devel/entorno-devel.md) y [`technical_stack.md`](devel/technical_stack.md) el entorno.
 
-| Fase | Nombre | Qué se puede hacer al terminarla | LLM | Fixture |
-|:---:|---|---|:---:|---|
-| **0** | El vault que se puede abrir | Empezar a escribir a mano en estado cero | No | `vacio` |
-| **1** | La entrada | Dictar y formatear a línea de bitácora canónica | Sí | `primer-dia` |
-| **2** | Pendientes | Mantener `PENDIENTES.md` de forma determinista | No | `ciclo-en-curso` |
-| **3** | El árbol de ámbitos | Resolver reglas por cercanía y organizar frentes | No | `ciclo-en-curso` |
-| **4** | Cadencias | Resolver y sembrar recurrencias con idempotencia | No | `ciclo-en-curso` |
-| **5** | Notas y enlaces | Zettelkasten, notas tipadas y tejido de enlaces | No | `ciclo-en-curso` |
-| **6** | El ciclo | Apertura y cierre de ciclo con aplanado de texto | No | `ciclo-por-cerrar` |
-| **7** | Plan y resumen | Cálculo de capacidad neta, plan y resumen | Sí | `ciclo-por-cerrar` |
-| **8** | Endurecimiento | Reconstrucción completa e idempotencia global | No | `historico` |
-| **9** | Inferencia semántica | Detección de patrones y destilado en contexto aislado | Sí | `historico` |
+`devel/VAULT/` es **historia**: el diseño y el código anteriores a la reescritura de agosto de 2026. No es base para nada nuevo. Se rescata algo puntual solo cuando un epic lo necesita.
 
----
+## Instalar un vault
 
-## 3. Estrategia de Pruebas y Fixtures
+Una línea, sin `git clone` y sin instalar ningún programa:
 
-### Cada prueba es una transición de estado
-Toda prueba evalúa una transición determinista:
-```text
-fixtures/<nombre>/
-  inicial/          # Estado del vault antes de la operación
-  operacion.txt     # Línea a inyectar en bitácora o janitor a invocar
-  esperado/         # Estado exacto del vault después
+```bash
+curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- mi-vault
 ```
 
-### Principios de verificación:
-- **Diff byte a byte:** Toda operación de janitor debe coincidir exactamente con el estado esperado.
-- **Idempotencia estricta:** Ejecutar cualquier janitor o conjunto de operaciones dos veces seguidas no debe modificar nada ni generar duplicados.
-- **Escalera de fixtures:** `vacio` $\to$ `primer-dia` $\to$ `ciclo-en-curso` $\to$ `ciclo-por-cerrar` $\to$ `historico`. Generar la escalera por reproducción es en sí misma la prueba de integración del sistema.
+El procedimiento a mano equivalente está en [`template/README.md`](template/README.md), y debe seguir funcionando siempre: si el vault solo se puede crear ejecutando algo, se rompió el principio 1.
 
----
+## Probar
 
-## 4. Entorno Técnico y Convenciones
+Los escenarios son narrativos (Dado/Cuando/Entonces), no unitarios, porque buena parte del sistema depende de un agente y no da un resultado único. El caso vive en `corpus/escenarios/`, el arnés en `tests/escenarios/`, y lo que solo se puede juzgar leyendo queda escrito en el propio escenario bajo "Qué se mira a mano".
 
-- **Lenguaje:** Python 3.12+ gestionado con `uv`.
-- **CLI:** Punto de entrada `tuku` (para instalación de vaults, apertura/cierre de ciclos y linting).
-- **Janitors:** 
-  - Especificación en el repositorio: `reglas/janitors.tuku.md`.
-  - Código instalado: `~/.tuku/janitors/` (aislado del vault del autor).
-- **Higiene de código:** `ruff`, `pre-commit`, typing estricto con `mypy` / `pyright`.
+```bash
+python3 tests/escenarios/test_instalacion_minima.py
+```
+
+Corre con la librería estándar, sin dependencias. `uv run pytest` todavía no funciona: `pyproject.toml` quedó apuntando a un `src/` que no existía, y arreglarlo es parte del epic 2.
+
+## Entorno
+
+Python 3.14 con `uv`. Higiene con `ruff` y `mypy`, según [`devel/entorno-devel.md`](devel/entorno-devel.md).
+
+Los janitors se especifican en prosa dentro del vault del autor (`reglas/janitors.tuku.md`) y su código se instala aparte, en `~/.tuku/janitors`. La especificación sobrevive, la implementación se reemplaza.
