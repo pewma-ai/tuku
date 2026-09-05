@@ -12,7 +12,7 @@
 
 * "Subí a Faena e inicié el turno, Fabina Méndez está presente acá en el cerro."
 * "Estuve viendo que el agente Hermes con las reglas de MaC toma demasiado tiempo; siento que estoy repitiendo lógica que el modelo ya maneja internamente. Tengo que investigar cómo minimizar reglas aprovechando el aprendizaje nativo de los agentes."
-* "Nos pidieron identificar exhaustivamente las interfaces de ODAP. Quedó pendiente reunirme con Víctor Lagos para dividirlas en tareas manejables."
+* "Nos pidieron identificar exhaustivamente las interfaces de ODIP. Quedó pendiente reunirme con Víctor Lagos para dividirlas en tareas manejables."
 * "Propuesta de marco de trabajo de casos de uso con Azure LLM redactada y lista para presentársela a Fabina Méndez."
 * "Terminamos la reunión con Fabina Méndez: Carlos Silva y Víctor Lagos aprobaron el nuevo esquema de exploraciones operacionales; dejamos fijada la primera reunión con practicantes para el viernes 14 (yo veo la logística y Fabina los contacta); Alicia Abarca nos mandó el listado completo; el director dio visto bueno para colaboraciones con Mauricio Barra y proyectos de investigación; y la tesis de Javier Castro avanza con el repositorio de Carla Fuentes."
 * "Tuve una reunión informal con un alto cargo de IT aficionado a la ciencia ficción."
@@ -37,7 +37,7 @@
 ### Jueves 13 de Agosto
 
 * "Dejé cargando el auto eléctrico 94 para que Cristóbal Carrasco lo pueda usar mañana viernes temprano."
-* "Le recordé al equipo de SAE que la API de LASCAR tiene prioridad."
+* "Le recordé al equipo de SAF que la API de LASCOR tiene prioridad."
 * "Irene Morales tuvo un inconveniente médico y tuvo que bajar de Faena a las 7 AM."
 * "Estuve reunido con Xander Gálvez y Tomás Toledo de Casa Matriz. Coincidimos en aumentar la comunicación entre Casa Matriz y Faena para romper silos. Están esperando la estrategia del directorado, lo que calza con el apoyo de Elena Sepúlveda. Tomo el consejo de Mauricio Barra de capitalizar todo lo que haga en entregables tangibles. En Casa Matriz perciben la IA con desfase y más que la fuga de datos les preocupa el riesgo real de descontrol de agentes. Sugirieron presentar casos aplicados en los Data Coffee de Fabina. Les envié por correo la recopilación curada sobre gobernanza de agentes IA."
 * "Apoyé a Raúl Araya ajustando la justificación técnica de la solicitud de tiempo técnico de noviembre para el interferómetro."
@@ -71,7 +71,7 @@
 
 ### Domingo 16 de Agosto
 
-* "Jornada dominical dedicada completa al rol de Jefe de División por la emergencia climática: les avisé a los colegas que la subida del martes se pospone al miércoles, actualicé la planificación de turnos de software, reasigné roles operacionales en telescopios e instrumentos (TST, TCO, VLTIM), aseguré suministros y emití el comunicado general a todo el observatorio."
+* "Jornada dominical dedicada completa al rol de Jefe de División por la emergencia climática: les avisé a los colegas que la subida del martes se pospone al miércoles, actualicé la planificación de turnos de software, reasigné roles operacionales en telescopios e instrumentos (TSO, TCU, ITOM), aseguré suministros y emití el comunicado general a todo el observatorio."
 
 ---
 
@@ -99,7 +99,7 @@
 
 * "Bajada de Faena de madrugada y turno cerrado."
 * "Le mandé el calendario de turnos de Soporte a Alicia Abarca."
-* "Marqué como comisionado en Jira el ticket CCB-1003427 sobre el proceso de lecciones aprendidas."
+* "Marqué como comisionado en Jira el ticket CRB-1003427 sobre el proceso de lecciones aprendidas."
 * "Despaché el correo de wrap-up de la propuesta Concurso I+D Tecnológico 2027 a Carlos Silva, Fabina Méndez y Jorge Muñoz con los casos de uso de mantenimiento predictivo y RCA."
 * "Dejé lista la versión de agosto 2026 del documento conceptual de soporte de datos estructurado en sus tres pilares (Operación, Desarrollo y Gobernanza) para la próxima reunión del grupo."
 * "Me citaron a una tercera entrevista extendida para la televisión internacional; interesante el patrón de visibilidad en medios."
@@ -154,12 +154,12 @@
 
 ### Martes 11 de Agosto
 > [!tldr]
-> Subida a Faena e inicio de turno con visita de Fabina Méndez. Reunión clave exploraciones-operacionales para definir esquema de internships y colaboraciones de investigación; avances en ODAP y IA en Faena (coordinación con IT), más gestión personal de GGCC Depto Centro.
+> Subida a Faena e inicio de turno con visita de Fabina Méndez. Reunión clave exploraciones-operacionales para definir esquema de internships y colaboraciones de investigación; avances en ODIP y IA en Faena (coordinación con IT), más gestión personal de GGCC Depto Centro.
 
 - ~~(Hecho)~~ Subida a Faena / inicio de turno.
 - exploraciones-operacionales: Presencia de Fabina Méndez en cerro.
 - tuku: Observación: el agente Hermes + reglas MaC toman mucho tiempo; temo que estoy repitiendo lógica que Hermes ya maneja por dentro. Investigar cómo minimizar las reglas de MaC/TUKU y aprovechar el aprendizaje de Hermes y futuros agentes.
-- transformacion-digital: Solicitada identificación exhaustiva de las interfaces de ODAP. Pendiente reunión con Víctor Lagos para dividir en tareas manejables.
+- transformacion-digital: Solicitada identificación exhaustiva de las interfaces de ODIP. Pendiente reunión con Víctor Lagos para dividir en tareas manejables.
 - ~~(Hecho)~~ faena-ai: Redactar propuesta de marco de trabajo de casos de uso con Azure LLM para presentar a Fabina Méndez.
 - exploraciones-operacionales: **Hito:** Finalizada reunión con Fabina Méndez (Reunión exploraciones-operacionales 11 de agosto 2026 con Fabina). Takeaways: Carlos Silva y Víctor Lagos aprueban nuevo esquema exploraciones-operacionales; 1ra reunión con interns fijada para el vie 14 ago (JPG logística, Fabina Méndez contacta); listado completo recibido de Alicia Abarca; dir. da aprobación implícita para colaboraciones con Mauricio Barra en el loop e integración de proyectos de investigación; tesis Javier Castro avanza con repo GitHub de Carla Fuentes (manuales no directos) y diccionarios se conversan mié 12.
 - faena-ai: Reunión informal con alto cargo de IT (aficionado a la ciencia ficción).
@@ -189,14 +189,14 @@
 
 ### Jueves 13 de Agosto
 > [!tldr]
-> Alineación con Casa Matriz (Xander Gálvez y Tomás Toledo) en gobernanza de agentes IA y envío de referencias especializadas. Tramitada propuesta Concurso I+D Tecnológico 2027 con Silva, Méndez y Lagos. Apoyo técnico en TTR del interferómetro, invitación al review board de Multi Site Operations y primeras gestiones de API keys en Azure.
+> Alineación con Casa Matriz (Xander Gálvez y Tomás Toledo) en gobernanza de agentes IA y envío de referencias especializadas. Tramitada propuesta Concurso I+D Tecnológico 2027 con Silva, Méndez y Lagos. Apoyo técnico en TTQ del interferómetro, invitación al review board de Multi Site Operations y primeras gestiones de API keys en Azure.
 
 - jefatura: Irene Morales tuvo un problema médico, bajó a las 7 AM.
 - ~~(Hecho)~~ responsable-sw: (jueves a las 18:00) Cargar el auto 94 para que Cristóbal Carrasco lo use el viernes en la mañana.
-- ~~(Hecho)~~ jefatura: Recordar a SAE que LASCAR API tiene prioridad.
+- ~~(Hecho)~~ jefatura: Recordar a SAF que LASCOR API tiene prioridad.
 - faena-ai: Reunión con Xander Gálvez y Tomás Toledo. Deslicé la idea de incrementar la comunicación entre Casa Matriz y Faena; ambos de acuerdo (trabajaron en empresas geographically distribuidas: la falta de comunicación es el mayor obstáculo, crea barreras y culturas internas propias). Están esperando la estrategia que prepara el directorado — se alinea con lo que quiero hacer y con el apoyo de Elena Sepúlveda. Reflexión: tomar el consejo de Mauricio Barra y capitalizar todo lo que hago — documentos, acuerdos, software — en algo tangible. Observación de contexto: en Casa Matriz, salvo los muy avanzados técnicamente, la gente piensa 2-3 años atrás respecto a la IA; y lo que hay que regular realmente no me preocupa tanto la fuga de datos, sino el peligro real de que un agente se descontrole, sea maliciosamente o por error. Ellos sugirieron exponer ingeniería aplicada, caso de uso real, en los Data Coffee que gestiona Fabina Méndez.
 - ~~(Hecho)~~ faena-ai: Enviar correo a Tomás Toledo y Xander Gálvez (IT) con el resumen de referencias sobre gobernanza de AI Agents ("AI Agents Governance, curated references"), disponible en Evaluación de riesgo y gobernanza de agentes en la Organización.
-- responsable-sw: Apoyo a Raúl Araya en la modificación del *rationale* de la solicitud de tiempo técnico (TTR) de noviembre en el interferómetro.
+- responsable-sw: Apoyo a Raúl Araya en la modificación del *rationale* de la solicitud de tiempo técnico (TTQ) de noviembre en el interferómetro.
 - operaciones-general: Invitación recibida de Marcelo Jensen ("Invitation to become part of the Multi Site Operations Project Phase A review board").
 - ~~(Hecho)~~ colaboraciones: Enviar correo "Concurso I+D Tecnológico 2027" a Carlos Silva, Fabina Méndez y Víctor Lagos.
 - ~~(Hecho)~~ exploraciones-operacionales: Registro de formularios de API keys Azure (repositorio compartido con Fabina Méndez y equipo).
@@ -229,50 +229,50 @@
 - ~~(Hecho)~~ devops-contrataciones: Realizado One2One con Valeria Pizarro.
 - ~~(Hecho)~~ devops-contrataciones: Solicitados los objetivos a Víctor Lagos (quien hablará directamente con Valeria Pizarro).
 - ~~(Hecho)~~ exploraciones-operacionales: Enviadas las condiciones de API keys a Esteban Parra.
-- ~~(Hecho)~~ soporte-datos: Agendada reunión para el lunes 17 de agosto con Carlos Silva y Jorge Muñoz (propuesta Data Support / Data-driven Maintenance).
+- ~~(Hecho)~~ soporte-datos: Agendada reunión para el lunes 17 de agosto con Carlos Silva y Jorge Muñoz (propuesta Data Stewardship / Data-led Maintenance).
 - faena-ai: **Señal:** Alejandro Palma (jefe de operadores de telescopio) informó que en noviembre se reunirá el Comité Conjunto del Departamento de Operaciones (Faena, Ciencia e Ingeniería) y uno de los temas a tratar será la *Estrategia de Inteligencia Artificial*. Mantener atención prioritaria.
 - tesis-grafos: Reflexión de almuerzo: el sistema de generación del corpus de la tesis de grafos (Markdown crudo -> pipelines asistidos por IA -> artefactos finales) es un patrón exportable directamente a la documentación de soporte-datos y define el concepto central de PILWA en PEWMA.AI / tuku (contenedor de insumos que se filtran, destilan y procesan para generar artefactos).
-- soporte-datos: **Hito:** Carlos Silva aceptó la idea general de la propuesta. Solicitó vincular la iniciativa al desarrollo de procesos e incluir a Jorge Muñoz (responsable de Data-driven Maintenance, RCA y Predictive Maintenance) para asegurar un caso de uso ligado a procesos reales.
+- soporte-datos: **Hito:** Carlos Silva aceptó la idea general de la propuesta. Solicitó vincular la iniciativa al desarrollo de procesos e incluir a Jorge Muñoz (responsable de Data-led Maintenance, RCA y Predictive Maintenance) para asegurar un caso de uso ligado a procesos reales.
 - exploraciones-operacionales: **Aprendizaje:** El traslape presencial en cerro con Fabina Méndez durante la primera mitad del turno (11 al 14 ago) resultó altamente productivo (reestructuración exploraciones-operacionales, avances en tesis Javier Castro con Carla Fuentes y marco Azure LLM). Mantener días de traslape con Fabina se confirma como un patrón de trabajo clave.
-- jefatura: Creada la nota Plan de contingencia por mal tiempo agosto 2026 estableciendo el protocolo operacional y de coordinación del equipo PSW ante mal tiempo en cerro.
+- jefatura: Creada la nota Plan de contingencia por mal tiempo agosto 2026 estableciendo el protocolo operacional y de coordinación del equipo de software ante mal tiempo en cerro.
 - responsable-sw: **Desviación Jefe de División:** La intención de trabajar en la documentación y otros temas fue completamente barrida por la emergencia climática que tomó entre las 17:00 y las 22:00. Se intentará avanzar mañana en lo pendiente, pero ya no con el mismo nivel de profundidad; contingencia esperable inherente al rol de Jefe de División.
 
 ---
 
 ### Domingo 16 de Agosto
 > [!tldr]
-> Jornada dominical de turno como Jefe de División dedicada íntegramente a organizar la contingencia por emergencia climática: reprogramación de viajes y subidas a miércoles, reasignación de turnos operacionales TST/TCO/VLTIM, aseguramiento de suministros y emisión del comunicado general al observatorio.
+> Jornada dominical de turno como Jefe de División dedicada íntegramente a organizar la contingencia por emergencia climática: reprogramación de viajes y subidas a miércoles, reasignación de turnos operacionales TSO/TCU/ITOM, aseguramiento de suministros y emisión del comunicado general al observatorio.
 
 - ~~(Hecho)~~ jefatura: Avisar a los colegas que suben que no van a subir el martes y que llegarán el miércoles.
-- ~~(Hecho)~~ jefatura: Actualizado PSW_scheduling.
+- ~~(Hecho)~~ jefatura: Actualizado calendario_sw.
 - ~~(Hecho)~~ jefatura: Revisados los roles operacionales (labor de Jefe de División).
-- jefatura: Jornada completa dedicada a la labor de Jefe de División en la organización del plan de contingencia ante la emergencia climática (logística de traslados, cancelación de viajes del martes, reasignación de turnos operacionales TST/TCO/VLTIM, aseguramiento de suministros y emisión del comunicado general).
+- jefatura: Jornada completa dedicada a la labor de Jefe de División en la organización del plan de contingencia ante la emergencia climática (logística de traslados, cancelación de viajes del martes, reasignación de turnos operacionales TSO/TCU/ITOM, aseguramiento de suministros y emisión del comunicado general).
 
 ---
 
 ### Lunes 17 de Agosto
 > [!tldr]
-> Última jornada de turno como Jefe de División en Faena con cierre del rol operacional. Reunión ANID (16:30) con Carlos Silva, Jorge Muñoz y Fabina Méndez acuerda Go en herramienta de telemetría/log analysis alineada a Data-driven Maintenance. Avances en exploraciones-operacionales (gobernanza de API keys a Víctor Lagos); plan de contingencia climática reenviado a Mauricio Barra.
+> Última jornada de turno como Jefe de División en Faena con cierre del rol operacional. Reunión Concurso I+D (16:30) con Carlos Silva, Jorge Muñoz y Fabina Méndez acuerda Go en herramienta de telemetría/log analysis alineada a Data-led Maintenance. Avances en exploraciones-operacionales (gobernanza de API keys a Víctor Lagos); plan de contingencia climática reenviado a Mauricio Barra.
 
 - ~~(Hecho)~~ responsable-sw: Fin de turno de Jefe de División (14:00) y entrega a César Espinoza. Mañana dedicada a ajustes finales; planes de contingencia en marcha y en ejecución, concluyendo una buena gestión del turno.
-- soporte-datos: Foco al 100% durante la tarde en tareas pendientes de Data Support y temas de datos en general.
-- ~~(Hecho)~~ colaboraciones: **Hito:** Realizada reunión de coordinación para postulación Concurso I+D Tecnológico 2027 (16:30) con Carlos Silva, Jorge Muñoz y Fabina Méndez. Acordado Go: foco en herramienta de telemetría y log analysis alineada con Data-driven Maintenance / RCA (usando ranking de criticidad de sistemas de Muñoz), integración de predicción de fallas y métodos estándar de análisis de causa raíz; JP distribuirá versión pulida para agendar reunión con Universidad Sur y Universidad Centro.
+- soporte-datos: Foco al 100% durante la tarde en tareas pendientes de Data Stewardship y temas de datos en general.
+- ~~(Hecho)~~ colaboraciones: **Hito:** Realizada reunión de coordinación para postulación Concurso I+D Tecnológico 2027 (16:30) con Carlos Silva, Jorge Muñoz y Fabina Méndez. Acordado Go: foco en herramienta de telemetría y log analysis alineada con Data-led Maintenance / RCA (usando ranking de criticidad de sistemas de Muñoz), integración de predicción de fallas y métodos estándar de análisis de causa raíz; JP distribuirá versión pulida para agendar reunión con Universidad Sur y Universidad Centro.
 - jefatura: **Aprendizaje:** El Plan de contingencia por mal tiempo agosto 2026 resultó ser un recurso valioso para la gestión de Jefe de División; reenviado a Mauricio Barra y César Espinoza.
 - exploraciones-operacionales: **Decisión:** JPG administrará la instancia de Azure OpenAI (`faenaopenai`). Procesados dos formularios adicionales en exploraciones-operacionales tras la aprobación de Fabina Méndez y enviado correo a Víctor Lagos explicando el esquema de gobernanza de las API keys.
 - #IDEA: Crear un canal o espacio de comunicación abierto para interesados en inteligencia artificial (ej. Slack, Discord, Discourse o plataforma open source/foro especializado) para compartir ideas, comentar y construir una comunidad viva.
-- soporte-datos: Las últimas dos horas pude finalmente estudiar la documentación del Data Support Group: el concepto de operaciones de Carlos Silva y el documento fundacional de Data Driven Operations, insumos clave para terminar el documento de Data Support — parte de la misma arquitectura que debe implementar los conceptos de los dos documentos anteriores.
+- soporte-datos: Las últimas dos horas pude finalmente estudiar la documentación del Data Stewardship Group: el concepto de operaciones de Carlos Silva y el documento fundacional de Data-led Operations, insumos clave para terminar el documento de Data Stewardship — parte de la misma arquitectura que debe implementar los conceptos de los dos documentos anteriores.
 - #IDEA: Estudiando el concepto operacional, veo que el modelo de Carlos Silva no dista mucho del que encontré para TUKU (antes Management as Code). Termina en acción y aprendizaje, pero está pensado para organizaciones y aprendizaje sistematizado (baselines, modelos actualizados). Echo de menos cómo dar espacios para que los profesionales reflexionen sobre las acciones, a nivel individual y colectivo, y que los aprendizajes sean compartidos. El conocimiento tribal no desaparece (según ciertas teorías de administración); el aprendizaje debería apoyarse en reuniones de especialistas, foros, proyectos en común y transmisión de boca en boca, complementando el aprendizaje sistematizado que propone Carlos Silva.
 
 ---
 
 ### Martes 18 de Agosto
 > [!tldr]
-> Último día de turno en Faena: con Nelson Morales se definieron pendientes software para el próximo turno (SEQ.CENTERSC, FT MODE, POLARIZATION, tablas faltantes). Con Carlos Silva y Víctor Lagos se cerró el roadmap de Data-driven Operations: el equipo de soporte de datos lo implementa de forma iterativa, con gobernanza formal exigida por Phase B. Vacaciones armonizadas, bajada de madrugada confirmada y cierre recreativo con el equipo.
+> Último día de turno en Faena: con Nelson Morales se definieron pendientes software para el próximo turno (SEQ.CENTERSC, FT MODE, POLARIZATION, tablas faltantes). Con Carlos Silva y Víctor Lagos se cerró el roadmap de Data-led Operations: el equipo de soporte de datos lo implementa de forma iterativa, con gobernanza formal exigida por Phase B. Vacaciones armonizadas, bajada de madrugada confirmada y cierre recreativo con el equipo.
 
 - responsable-sw: Reunión con Nelson Morales sobre temas de software del interferómetro y CINTILATOR. Se identificaron los pendientes operacionales para el próximo turno: corrección de keyword SEQ.CENTERSC por software (reportado por Johan, actualmente cambiado manual por astronomía), keyword FT MODE en CINTILATOR (Alex), commit SVN de polarización y tablas faltantes del 5 de agosto (Takao).
 - jefatura: Confirmada la bajada de Faena muy temprano en la mañana para mañana miércoles.
 - jefatura: Revisadas las fechas de vacaciones y permisos de los colegas en Faena; calendario general armonizado.
-- ~~(Hecho)~~ soporte-datos: **Hito:** Reunión con Carlos Silva y Víctor Lagos sobre la hoja de ruta de Data-driven Operations. Carlos compartió que recibió feedback de Phase B requiriendo gobernanza formal para la puesta en marcha de Data Driven Ops. Se acordó que el equipo de soporte de datos implementa la estrategia operativa de dicho documento y funcionará de manera iterativa (retroalimentando a Carlos ante vacíos clave). Además, se destacó que en exploraciones-operacionales ya se están testeando activamente esquemas de gobernanza.
+- ~~(Hecho)~~ soporte-datos: **Hito:** Reunión con Carlos Silva y Víctor Lagos sobre la hoja de ruta de Data-led Operations. Carlos compartió que recibió feedback de Phase B requiriendo gobernanza formal para la puesta en marcha de Data-led Ops. Se acordó que el equipo de soporte de datos implementa la estrategia operativa de dicho documento y funcionará de manera iterativa (retroalimentando a Carlos ante vacíos clave). Además, se destacó que en exploraciones-operacionales ya se están testeando activamente esquemas de gobernanza.
 - jefatura: Cierre de jornada dedicado a labores administrativas con el grupo, tras un momento de recreación y juego en la nieve con el equipo.
 - Nota: Por tres veces pude explicarle a las cámaras de televisión internacional el increíble lugar donde estoy.
 
@@ -280,13 +280,13 @@
 
 ### Miércoles 19 de Agosto
 > [!tldr]
-> Bajada temprana de Faena y cierre de turno tras una semana de emergencia climática y gestión de Jefe de División. Enviado el calendario de Soporte a Alicia Abarca y comisionado el ticket CCB-1003427. Despachado correo de wrap-up y casos de uso de investigación 2027 a Silva, Méndez y Muñoz. Documentación de soporte-datos completada y citación a entrevista extendida para la TV internacional.
+> Bajada temprana de Faena y cierre de turno tras una semana de emergencia climática y gestión de Jefe de División. Enviado el calendario de Soporte a Alicia Abarca y comisionado el ticket CRB-1003427. Despachado correo de wrap-up y casos de uso de investigación 2027 a Silva, Méndez y Muñoz. Documentación de soporte-datos completada y citación a entrevista extendida para la TV internacional.
 
 - Fin de turno / bajada de Faena muy temprano en la mañana.
 - ~~(Hecho)~~ jefatura: Enviado el calendario de Soporte a Alicia Abarca.
-- responsable-sw: Marcado como comisionado en Jira el ticket CCB-1003427 ("Application of the Lessons Learned process in JIRA (ITS)").
+- responsable-sw: Marcado como comisionado en Jira el ticket CRB-1003427 ("Application of the Lessons Learned process in JIRA (ITK)").
 - colaboraciones: Enviado correo de wrap-up/follow-up de la propuesta Concurso I+D Tecnológico 2027 a Carlos Silva, Fabina Méndez y Jorge Muñoz con casos de uso (mantenimiento predictivo, RCA) y próximos pasos.
-- ~~(Hecho)~~ soporte-datos: Preparada la documentación para la próxima reunión del Data Support Group (Data Support Concept - Version Agosto 2026).
+- ~~(Hecho)~~ soporte-datos: Preparada la documentación para la próxima reunión del Data Stewardship Group (Data Stewardship Concept - Version Agosto 2026).
 - Citado a una tercera entrevista (esta vez más extendida) para la televisión internacional. #REFLEXION ¿Habrá un patrón mediático aquí?
 - Personal: Pagado a Camilo Aguirre (psicólogo) ayer miércoles.
 
@@ -383,7 +383,7 @@ org/
 * **Completados `[x]`:**
   - `arriendo-depto-centro`: Enviar boleta de Gastos Comunes de Depto Centro a Carmen Navarro por WhatsApp.
   - `responsable-sw`: Cargar auto eléctrico 94 para Cristóbal Carrasco.
-  - `jefatura`: Recordar a SAE que LASCAR API tiene prioridad.
+  - `jefatura`: Recordar a SAF que LASCOR API tiene prioridad.
   - `faena-ai`: Enviar correo a Tomás Toledo y Xander Gálvez sobre gobernanza de agentes IA.
   - `colaboraciones`: Enviar correo Concurso I+D Tecnológico 2027 a Carlos Silva, Fabina Méndez y Víctor Lagos.
   - `exploraciones-operacionales`: Registro y validación de formularios de API keys Azure LLM.
@@ -395,20 +395,20 @@ org/
   - `responsable-sw`: Handover de Jefe de División y fin de turno con entrega a César Espinoza.
   - `jefatura`: Avisos de postergación de subida por mal tiempo, actualización de turnos y roles operacionales.
   - `jefatura`: Enviar calendario de turnos de Soporte a Alicia Abarca.
-  - `responsable-sw`: Comisionamiento del ticket CCB-1003427 en Jira.
+  - `responsable-sw`: Comisionamiento del ticket CRB-1003427 en Jira.
   - `colaboraciones`: Despacho de correo de wrap-up y casos de uso de investigación 2027.
   - `soporte-datos`: Preparar versión agosto 2026 de documentación conceptual de soporte-datos.
   - `Personal`: Pagos de psicólogo Camilo Aguirre y regularización de gastos comunes Depto Cerro.
 
 * **Postergados / Heredados al siguiente ciclo:**
-  - `responsable-sw`: Limpieza de tickets ITS en Soporte (postergado al próximo turno).
+  - `responsable-sw`: Limpieza de tickets ITK en Soporte (postergado al próximo turno).
   - `responsable-sw`: CINTILATOR: Revisar keyword SEQ.CENTERSC reportado por Johan.
   - `responsable-sw`: CINTILATOR: Revisar keyword FT MODE en CINTILATOR con Alex.
   - `responsable-sw`: CINTILATOR: Revisar commit de polarización y tablas faltantes del 5 de agosto (Takao).
-  - `ccb-grism`: Refactorización de script de chequeo (postergado por contingencia climática).
-  - `soporte-datos`: Formalizar rol Data-Driven Operations (DDO).
+  - `crb-grism`: Refactorización de script de chequeo (postergado por contingencia climática).
+  - `soporte-datos`: Formalizar rol Data-led Operations (DLO).
   - `devops-contrataciones`: Escribir objetivos de Valeria Pizarro en portal de RRHH.
-  - `transformacion-digital`: Dividir interfaces ODAP en tareas manejables con Víctor Lagos.
+  - `transformacion-digital`: Dividir interfaces ODIP en tareas manejables con Víctor Lagos.
   - `exploraciones-operacionales`: Calendario de feedback de proyectos y revisión de ADRs.
   - `Personal`: Comprar maleta, hora en Centro Kine y bioimpedanciometría con Dr. Pablo Lara.
 
@@ -433,7 +433,7 @@ org/
 * **Ámbito Laboral e Institucional:**
   - `Fabina Méndez` (FME) — Contraparte clave en exploraciones operacionales e iniciativas de IA.
   - `Carlos Silva` (CSI) — Jefatura de ingeniería / operaciones; validación de estrategia de soporte-datos y colaboración científica.
-  - `Víctor Lagos` (VLA) — Liderazgo técnico; gobernanza de IA, ODAP y objetivos de equipo.
+  - `Víctor Lagos` (VLA) — Liderazgo técnico; gobernanza de IA, ODIP y objetivos de equipo.
   - `Mauricio Barra` (MBA) — Dirección de operaciones; asesoría estratégica y patrocinio institucional.
   - `Jorge Muñoz` (JMU) — Mantenimiento predictivo, RCA y ranking de criticidad de sistemas.
   - `Carla Fuentes` (CFU) — Gestión de datos PLC de espectrógrafo y soporte a tesis de grado.
@@ -445,7 +445,7 @@ org/
   - `Bernardo Salinas` — Primer intern receptor de API key Azure LLM.
   - `Esteban Parra` (EPA) — Casos de uso de LLM en ingeniería y operaciones.
   - `Cristóbal Carrasco` — Colega de turno de software y logística.
-  - `Raúl Araya` (RAR) — Solicitudes de tiempo técnico (TTR) de instrumentos interferométricos.
+  - `Raúl Araya` (RAR) — Solicitudes de tiempo técnico (TTQ) de instrumentos interferométricos.
   - `César Espinoza` — Relevo y entrega de turno en rol de Jefe de División.
   - `Alejandro Palma` — Jefe de operadores de telescopio; coordinación de Comité Conjunto.
   - `Patricio Soto` (PSO) — Colega de área de ingeniería (ergonomía / standing desk).
@@ -475,7 +475,7 @@ org/
   - `Responsible Vibe Coding` — Proyecto y filosofía de codificación asistida con agentes autónomos.
   - `Evaluación de riesgo y gobernanza de agentes en la Organización` — Referencias curadas para IT.
 * **Operaciones y Arquitectura de Datos:**
-  - `Data Support Concept - Version Agosto 2026` — Documento base en 3 pilares (Operación, Desarrollo, Gobernanza).
+  - `Data Stewardship Concept - Version Agosto 2026` — Documento base en 3 pilares (Operación, Desarrollo, Gobernanza).
   - `Concurso I+D Tecnológico 2027 log-analysis` — Propuesta interuniversitaria de telemetría y RCA.
   - `Plan de contingencia por mal tiempo agosto 2026` — Protocolo operacional ante mal tiempo en Faena.
   - `Cosas que hablar con Víctor - 2026-08-15` — Colector de temas pendientes para sincronización semanal.
