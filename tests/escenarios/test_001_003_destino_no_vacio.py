@@ -22,11 +22,26 @@ por qué depender de que la red funcione): basta con ver que imprime
 "bajando..." en vez de "cancelado" para saber que pasó la pregunta, y
 ahí se mata el proceso.
 
+El tercero prueba que `TUKU_FORCE=1` salta la pregunta entera: ni
+siquiera necesita una tty, porque el `if` que la dispara no se ejecuta.
+Mismo criterio que el segundo: se lee la primera línea de `stderr` y se
+mata el proceso apenas se confirma que fue "bajando...", sin esperar la
+descarga real.
+
+En el segundo y el tercero, "matar el proceso" tiene que matar el grupo
+entero (`os.killpg`), no solo el pid del shell: para cuando se los mata
+ya lanzaron `curl | tar` como su propia tubería, y una señal al shell no
+siempre alcanza a esos hijos ni llega a tiempo, lo que dejaba el test
+colgado esperando a que una descarga real terminara.
+
 Ejecutable directo: `python3 tests/escenarios/test_001_003_destino_no_vacio.py`.
 """
 
 from __future__ import annotations
 
+import contextlib
+import os
+import signal
 import subprocess
 import tempfile
 from pathlib import Path
@@ -77,10 +92,53 @@ def test_001_003_destino_no_vacio_confirma_y_continua() -> None:
             indice = hijo.expect(["bajando", "cancelado"])
             assert indice == 0, f"no continuó tras confirmar: {hijo.before!r}"
         finally:
+            # SIGKILL solo a hijo.pid no basta: pexpect crea una sesión nueva
+            # (hijo.pid es el líder de grupo), pero install.sh ya lanzó a esa
+            # altura la tubería curl | tar como procesos propios. Matar el
+            # grupo entero evita dejarlos corriendo en segundo plano o, peor,
+            # que este `finally` se quede esperando a que el shell reaccione
+            # a una señal que a veces solo procesa al terminar el comando en
+            # curso.
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(hijo.pid, signal.SIGKILL)
             hijo.close(force=True)
+
+
+def test_001_003_destino_no_vacio_tuku_force_salta_la_pregunta() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        destino = Path(tmp) / "vault"
+        destino.mkdir()
+        (destino / "algo-que-ya-estaba.txt").write_text("no tocar\n", encoding="utf-8")
+
+        proceso = subprocess.Popen(
+            ["sh", str(INSTALL_SH), str(destino)],
+            env={**os.environ, "TUKU_FORCE": "1"},
+            stdin=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            text=True,
+            start_new_session=True,
+        )
+        try:
+            primera_linea = proceso.stderr.readline()
+        finally:
+            # Matar solo proceso.pid no basta: es el shell, y para esa altura
+            # ya lanzó curl | tar como su propia tubería. SIGTERM al shell no
+            # siempre corta esos hijos, y algunos shells difieren la señal
+            # hasta que el comando en curso termina, lo que deja el `wait()`
+            # colgado esperando una descarga real. Con start_new_session=True
+            # el pid del proceso es también el del grupo: matar el grupo se
+            # lleva puesto todo.
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(proceso.pid, signal.SIGKILL)
+            proceso.wait(timeout=5)
+            proceso.stderr.close()
+
+        assert "Sobrescribir" not in primera_linea, f"preguntó igual: {primera_linea!r}"
+        assert "bajando" in primera_linea, f"no continuó: {primera_linea!r}"
 
 
 if __name__ == "__main__":
     test_001_003_destino_no_vacio_pregunta_y_no_sobrescribe()
     test_001_003_destino_no_vacio_confirma_y_continua()
-    print("ok: install.sh pregunta, no sobrescribe sin confirmar, y continúa si se confirma")
+    test_001_003_destino_no_vacio_tuku_force_salta_la_pregunta()
+    print("ok: install.sh pregunta, respeta la respuesta, y TUKU_FORCE=1 la salta")
