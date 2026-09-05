@@ -2,7 +2,7 @@
 
 > Unidad de entrega, no unidad técnica. Un epic termina con algo que una persona puede usar. Las fases de [`que_implementar.md`](que_implementar.md) son el corte técnico interno: un epic puede abarcar varias y no cierra sin cumplir el criterio de salida de las que abarca.
 
-Se numeran por orden de ejecución, tres dígitos. Ese número es el `XXX` de `corpus/escenarios/XXX-YYY-slug.md` y de sus tests.
+Se numeran por orden de ejecución, tres dígitos. Ese número es el `XXX` de `tests/escenarios/XXX-YYY-slug.md` y de sus tests.
 
 Solo los dos primeros están desarrollados. El resto se escribe cuando el epic 002 haya enseñado lo que hoy no sabemos.
 
@@ -12,7 +12,7 @@ El diseño lo dirige la experimentación, no al revés: `spec/` y `docs/` cambia
 
 ## Estado
 
-Actualizado el 2026-09-04.
+Actualizado el 2026-09-05.
 
 | Epic | Nombre | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ Actualizado el 2026-09-04.
 | 002 | El día uno simulado | sin empezar | depende del epic 001 |
 | 003+ | El resto | sin desarrollar | se escriben al cerrar el epic 002 |
 
-Lo hecho en el 001: `template/vanilla/` (estado cero, 11 archivos) y `src/install_test_scenario.py` (mecanismo). Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos en `../corpus/escenarios/`; arnés en `../tests/escenarios/` y `../tests/scripts/`.
+Lo hecho en el 001: `template/vanilla/` (estado cero, 11 archivos) y `src/install_test_scenario.py` (mecanismo). Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos y arnés en `../tests/escenarios/`, pasos compartidos en `../tests/scripts/`.
 
 Preparación previa, fuera de los epics: `spec/` y `docs/glosario.md` ordenan el vocabulario, `que_implementar.md` quedó reducido al plan de fases. Punto de partida, no diseño cerrado.
 
@@ -34,7 +34,7 @@ Decidido:
 2. `template/`, una carpeta por variante, hermanas y sin composición. `vanilla/` es la mínima.
 3. `reglas/config.tuku.md` declara zona horaria y tipo de ciclo, en prosa.
 4. El código vive en `src/` (raíz), no en `devel/VAULT/src/` (diseño anterior). Primer archivo: `src/install_test_scenario.py`.
-5. Escenarios narrativos (Dado/Cuando/Entonces): dato en `corpus/escenarios/`, arnés en `tests/escenarios/` y `tests/scripts/`.
+5. Escenarios narrativos (Dado/Cuando/Entonces): caso y arnés juntos en `tests/escenarios/`, pasos compartidos en `tests/scripts/`.
 6. Instalar es una línea de `curl` (`install.sh`), no `git clone`. Probado contra `pewma-ai/tuku@devel` real.
 7. Sobrescribir se pregunta en `install.sh`, salvo con `TUKU_FORCE=1`. `install_test_scenario.py` sobrescribe siempre.
 8. El estado cero se verifica byte a byte con fecha fija (`--desde 2026-08-11`, la del ground truth en `referencia-faena.md`), distinta de la que usa el autor real. Encontró un bug real: días etiquetados por posición, ya corregido.
@@ -63,6 +63,7 @@ Para empezar hay que decidir:
 2. Cómo se verifica lo que depende del agente: byte a byte para consecuencias, otro criterio para la redacción.
 3. Qué arnés de agente se usa y cómo se aísla para no gastar tokens por accidente.
 4. Dónde vive el código y cómo se ejecuta. Ya no se puede diferir.
+5. De dónde sale el estado inicial. Un test de "agregar un pendiente" no parte del estado cero sino de un vault a medio llenar, y ese vault es dato: va en `corpus/`, no en `tests/`. Falta decidir su forma (uno por test, uno compartido, o generado corriendo entradas sobre el estado cero), y no se decide antes de tener el primer consumidor real.
 
 Es el epic que más va a mover el diseño: si el formato de entrada no aguanta el dictado real, cambia `spec/bitacora.md`. También obliga a escribir cómo se verifica lo semi determinista, que hoy no está en ninguna parte.
 

@@ -40,7 +40,7 @@ python3 src/install_test_scenario.py --variante vanilla --destino playground/001
 
 ## El test byte a byte
 
-`../../tests/escenarios/test_001_001_instalacion_minima.py` fija la fecha en **2026-08-11** (martes), el mismo día donde arranca el ground truth de `corpus/referencia/referencia-faena.md` ("Turno Faena"), y compara contra el fixture en `../../tests/escenarios/fixtures/001-001-instalacion-minima/esperado/`.
+`test_001_001_instalacion_minima.py` fija la fecha en **2026-08-11** (martes), el mismo día donde arranca el ground truth de `corpus/referencia/referencia-faena.md` ("Turno Faena"), y compara contra el fixture en `fixtures/001-001-instalacion-minima/esperado/`.
 
 La fecha fija no es arbitraria ni tiene que ser lunes: nada en `spec/` exige que un ciclo semanal empiece en lunes, así que el test elige a propósito una fecha que no lo es, para no dejar ese supuesto sin probar.
 

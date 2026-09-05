@@ -43,7 +43,7 @@ El procedimiento a mano equivalente está en [`template/README.md`](template/REA
 
 ## Probar
 
-Los escenarios son narrativos (Dado/Cuando/Entonces), no unitarios, porque buena parte del sistema depende de un agente y no da un resultado único. El caso vive en `corpus/escenarios/`, el arnés en `tests/escenarios/`, y lo que solo se puede juzgar leyendo queda escrito en el propio escenario bajo "Qué se mira a mano".
+Los escenarios son narrativos (Dado/Cuando/Entonces), no unitarios, porque buena parte del sistema depende de un agente y no da un resultado único. El caso y su arnés viven juntos en `tests/escenarios/`, y lo que solo se puede juzgar leyendo queda escrito en el propio escenario bajo "Qué se mira a mano".
 
 ```bash
 python3 tests/escenarios/test_001_001_instalacion_minima.py

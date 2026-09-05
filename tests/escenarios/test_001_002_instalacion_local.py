@@ -1,24 +1,17 @@
-"""Test byte a byte del escenario 001-001-instalacion-minima.
+"""Test byte a byte del escenario 001-002-instalacion-local.
 
-Escenario: 001-001-instalacion-minima.md
+Escenario: 001-002-instalacion-local.md
 
-`instalar()` hace dos cosas: copia `template/vanilla/` tal cual, y sustituye
-las fechas de `AHORA.md`. Solo lo segundo necesita un fixture congelado
-(fixtures/001-001-instalacion-minima/esperado/AHORA.md, para la fecha fija
-de abajo); todo lo demás se compara en vivo contra `template/vanilla/`, para
-que un cambio en el template no exija acordarse de regenerar una copia
-paralela que nunca debería haber divergido. Si el árbol de destino agrega
-o quita un archivo respecto a `template/vanilla/`, el test también lo dice.
+Este escenario no tiene fixture propio: su afirmación es que instalar
+local (sin red ni curl) produce el mismo vault que 001-001-instalacion-minima
+para la misma fecha. Por eso compara, igual que ese otro test, contra
+`template/vanilla/` en vivo (todo salvo AHORA.md, que `instalar()` sustituye)
+y contra el mismo fixture de AHORA.md, en vez de duplicar ninguno de los dos.
+Si algún día divergen, el defecto está en `install.sh` (la parte que arma
+el tarball y localiza `ORIGEN`), no en `instalar()`, que es lo que prueban
+ambos escenarios.
 
-Fecha fija: 2026-08-11 (martes), el mismo día donde arranca el ground truth
-de corpus/referencia/referencia-faena.md ("Turno Faena"). El usuario
-real instala con la fecha de hoy (ver template/README.md); este test fija
-la fecha para que el resultado sea comparable byte a byte, siempre, tal
-como pide el principio 9.
-
-Ejecutable directo (sin pytest instalado, que hoy no lo está en este
-repo): `python3 tests/escenarios/test_001_001_instalacion_minima.py`. Cuando el
-entorno tenga pytest, esta misma función se recolecta sola por su nombre.
+Ejecutable directo: `python3 tests/escenarios/test_001_002_instalacion_local.py`.
 """
 
 from __future__ import annotations
@@ -47,7 +40,7 @@ def _diff_recursivo(a: Path, b: Path, *, ignorar: set[str] = frozenset()) -> lis
     return diferencias
 
 
-def test_001_001_instalacion_minima_byte_a_byte() -> None:
+def test_001_002_instalacion_local_coincide_con_001_001() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         destino = Path(tmp) / "vault"
         instalar("vanilla", destino, FECHA_FIJA)
@@ -61,5 +54,5 @@ def test_001_001_instalacion_minima_byte_a_byte() -> None:
 
 
 if __name__ == "__main__":
-    test_001_001_instalacion_minima_byte_a_byte()
-    print("ok: instalación idéntica a template/vanilla/, y AHORA.md idéntico al fixture de fecha fija")
+    test_001_002_instalacion_local_coincide_con_001_001()
+    print("ok: instalación local idéntica a template/vanilla/, y AHORA.md idéntico al fixture de fecha fija")
