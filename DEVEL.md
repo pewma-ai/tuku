@@ -50,7 +50,7 @@ tests/correr.sh                 # todo tests/escenarios/
 tests/correr.sh 001              # un epic
 ```
 
-Determinista, sin depender de un agente. `pytest` sobre todo `tests/` todavía no funciona: los archivos sueltos fuera de `escenarios/` son del diseño anterior y se rehacen en el epic 002.
+Determinista, sin depender de un agente. `tests/` se construye solo desde los epics: la suite del diseño anterior se borró entera en vez de arrastrarla a medio migrar.
 
 ## Entorno
 

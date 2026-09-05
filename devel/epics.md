@@ -69,7 +69,7 @@ Es el epic que más va a mover el diseño: si el formato de entrada no aguanta e
 
 Criterio de salida: inyectar el día uno sobre el estado cero produce las consecuencias esperadas, es reproducible, y abre en Obsidian sin errores. Y queda escrito qué movió en `spec/` o `docs/`.
 
-No entra: abrir/cerrar ciclos, cadencias, inferencia semántica. Tampoco la suite actual de `tests/` (diseño anterior, se rehace).
+No entra: abrir/cerrar ciclos, cadencias, inferencia semántica.
 
 ## Rescatar de `devel/VAULT/`
 

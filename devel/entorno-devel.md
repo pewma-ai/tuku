@@ -9,7 +9,7 @@ uv run mypy src
 uv run pytest
 ```
 
-`uv run pytest` sobre todo `tests/` todavía no corre: los archivos sueltos del diseño anterior importan un paquete `tuku` que ya no existe, y se rehacen en el epic 2. La suite nueva sí corre, aislada en `tests/escenarios/`:
+La suite del diseño anterior se borró entera (importaba un paquete `tuku` que ya no existe): `tests/` se construye solo desde los epics, no por adelantado. Hoy solo hay `tests/escenarios/`:
 
 ```bash
 tests/correr.sh                 # todo tests/escenarios/
@@ -25,7 +25,7 @@ Son lo único de este documento que no depende de qué suite exista.
 
 | Invariante | Cómo se cumple |
 | --- | --- |
-| **Zona horaria** | `TZ=UTC` forzado en `tests/conftest.py`, antes de la primera llamada a `time.localtime()`. Un test que pase en Chile y falle en CI es una tarde perdida |
+| **Zona horaria** | `TZ=UTC` en todo el proceso, antes de la primera llamada a `time.localtime()`. Ningún test de hoy depende de la hora local (usan fechas fijas por parámetro); cuando alguno la necesite, se fuerza en un `conftest.py`, no dentro de la lógica. Un test que pase en Chile y falle en CI es una tarde perdida |
 | **Fecha actual** | Se inyecta por parámetro. Prohibido llamar `date.today()` dentro de la lógica: el usuario instala con hoy, el test con una fecha fija |
 | **Round-trip byte a byte** | Leer y escribir un archivo canónico no altera espacios ni comentarios. Es el criterio del escenario `001-001` |
 
