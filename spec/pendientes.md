@@ -30,15 +30,17 @@ Un archivo, callouts con ancla. El título del callout es la fuente: el janitor 
 > [!TODO] pendientes sin fecha ^sin-fecha
 > - [[ambito]] - cuerpo
 
-> [!TODO] pendientes de este turno ^este-turno
+> [!TODO] pendientes de esta semana ^esta-semana
 > - [[ambito]] - cuerpo
 
-> [!TODO] pendientes del proximo turno ^proximo-turno
+> [!TODO] pendientes de la proxima semana ^proxima-semana
 > - [[ambito]] - cuerpo
 
 > [!TODO] pendientes del 2026-04-02 ^2026-04-02
 > - [[ambito]] - cuerpo
 ```
+
+Los nombres de los tres horizontes del medio son del autor, no de TUKU: salen de `### Horizontes` en el libro de estilo, y el estado cero los siembra en semanas (`esta-semana`, `proxima-semana`, `fin-de-mes`) porque es el ritmo de casi todo el mundo. Un autor que trabaja por turnos los renombra ahí y en los anclas de `PENDIENTES.md`. `atrasados` y `sin-fecha` sí son de TUKU: no dependen de ningún ritmo.
 
 Los cinco callouts de horizonte son **permanentes**: existen siempre, aunque estén vacíos, y así la escalera se lee completa. Los callouts de fecha son **efímeros**: nacen cuando un pendiente recibe esa fecha y mueren cuando se va el último.
 
@@ -50,7 +52,7 @@ El ítem es siempre `- [[ambito]] - cuerpo`. Toda la información temporal vive 
 
 Cada pendiente está en exactamente un callout y baja de escalón a medida que se concreta:
 
-`sin-fecha` → `este-turno` / `proximo-turno` / `fin-de-mes` → fecha exacta → cerrado
+`sin-fecha` → `esta-semana` / `proxima-semana` / `fin-de-mes` → fecha exacta → cerrado
 
 Con fecha exacta aparece bajo el día correspondiente de `AHORA.md` por transclusión del ancla, sin copiar.
 
@@ -73,7 +75,7 @@ La segunda es la peligrosa. La primera se ve: hay una caja rota y alguien la arr
 
 1. Un pendiente está en un solo callout, siempre.
 2. Todo pendiente con fecha anterior a HOY se mueve a `^atrasados`, estampando su vencimiento.
-3. Al cerrar ciclo, lo que quede en `este-turno` sin fecha rueda al `este-turno` del ciclo nuevo. Solo lo fechado cae en `^atrasados`.
+3. Al cerrar ciclo, lo que quede en el horizonte del ciclo en curso sin fecha rueda al mismo horizonte del ciclo nuevo. Solo lo fechado cae en `^atrasados`.
 4. El ítem **no lleva fecha**. El horizonte lo da el callout y la fecha de origen ya está en la bitácora. La antigüedad se saca del historial de git de `PENDIENTES.md`, que se versiona como fuente. Única excepción: `^atrasados`, ver arriba.
 5. HOY se evalúa en la zona horaria del autor. La VM hereda el TZ del laptop, así que no hay que convertir, pero sí declararlo en `reglas/` para que ningún janitor asuma UTC.
 6. **Ninguna transclusión apunta a un ancla que no existe.** Cada vez que un pendiente se crea, se mueve de escalón o se borra, un janitor revisa las transclusiones y las sincroniza. Una caja de error en `AHORA.md` es un defecto, no un estado válido.

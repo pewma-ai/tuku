@@ -30,11 +30,13 @@ Los plazos a los que puede estar asignado un pendiente. Son los cinco callouts p
 | --- | --- |
 | `atrasados` | Lo que tenía fecha y ya venció. |
 | `sin-fecha` | Lo abierto que todavía no tiene plazo. |
-| `este-turno` | Lo comprometido para el ciclo en curso. |
-| `proximo-turno` | Lo que va al ciclo siguiente. |
+| `esta-semana` | Lo comprometido para la semana en curso. |
+| `proxima-semana` | Lo que va a la semana siguiente. |
 | `fin-de-mes` | Lo que debe estar antes de que termine el mes. |
 
 Un pendiente va bajando de escalón a medida que se concreta: primero sin fecha, después un horizonte, después un día exacto.
+
+Estos nombres son tuyos, no de TUKU: los horizontes salen de esta tabla y de los anclas de `PENDIENTES.md`. Si tu ritmo no es la semana sino el turno, la quincena o la temporada, renómbralos en los dos lugares y el sistema sigue funcionando igual. La escalera es la que importa, no cómo se llame cada escalón.
 
 ### Tipos de nota
 

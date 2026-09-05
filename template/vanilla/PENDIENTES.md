@@ -2,8 +2,8 @@
 
 > [!TODO] pendientes sin fecha ^sin-fecha
 
-> [!TODO] pendientes de este turno ^este-turno
+> [!TODO] pendientes de esta semana ^esta-semana
 
-> [!TODO] pendientes del proximo turno ^proximo-turno
+> [!TODO] pendientes de la proxima semana ^proxima-semana
 
 > [!TODO] pendientes de fin de mes ^fin-de-mes
