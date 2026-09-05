@@ -29,7 +29,7 @@ from install_test_scenario import instalar  # noqa: E402
 
 FECHA_FIJA = date(2026, 8, 11)
 TEMPLATE_VANILLA = RAIZ / "template" / "vanilla"
-AHORA_ESPERADO = Path(__file__).resolve().parent / "fixtures" / "001-001-instalacion-minima" / "esperado" / "AHORA.md"
+AHORA_ESPERADO = Path(__file__).resolve().parent / "fixtures" / "001-001-instalacion-minima" / "AHORA.md"
 
 
 def _diff_recursivo(a: Path, b: Path, *, ignorar: set[str] = frozenset()) -> list[str]:
