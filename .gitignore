@@ -83,3 +83,4 @@ uv.lock
 # Playground: experimentos locales de TUKU, no se versionan
 playground/*
 !playground/.gitkeep
+!playground/README.md
