@@ -40,9 +40,10 @@ Copiar el contenido de la variante a un directorio vacío y hacer tres cosas:
 1. En `reglas/config.tuku.md`, poner la zona horaria.
 2. En `AHORA.md`, escribir `desde` y `hasta` con las fechas del primer ciclo. Por defecto es semanal, que es el ritmo menos sorprendente para quien nunca ha usado esto.
 3. En `AHORA.md`, reemplazar los encabezados de día por los días reales de ese rango.
+4. Opcional: en `LIBRO-DE-ESTILO.md`, sección "El autor", poner el nombre del autor. Dejarlo en blanco no impide escribir; el autor lo completa cuando quiera.
 
-Después de eso ya se puede escribir. Todo lo demás emerge del uso.
+Después de los tres primeros ya se puede escribir. Todo lo demás emerge del uso.
 
 ## Por qué se instala a mano
 
-Porque tiene que poder hacerse sin TUKU. Un vault que solo se puede crear ejecutando un programa es un vault que dentro de veinte años no se puede crear. Cuando exista un instalador, hará exactamente estos tres pasos y ninguno más.
+Porque tiene que poder hacerse sin TUKU. Un vault que solo se puede crear ejecutando un programa es un vault que dentro de veinte años no se puede crear. `install.sh` hace exactamente estos pasos y ninguno más, y de forma opcional pregunta el nombre del autor para el paso 4.

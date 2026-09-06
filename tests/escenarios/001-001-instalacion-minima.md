@@ -54,6 +54,8 @@ La consecuencia práctica es que **el template puede cambiar todo lo que haga fa
 
 La fecha fija no es arbitraria ni tiene que ser lunes: nada en `spec/` exige que un ciclo semanal empiece en lunes, así que el test elige a propósito una fecha que no lo es, para no dejar ese supuesto sin probar.
 
+El mismo archivo trae una segunda función, `test_001_001_instalador_siembra_el_autor`, única cobertura del flag `--autor`: instalar con un nombre afirma que `LIBRO-DE-ESTILO.md` contiene `**Nombre del autor:** <nombre>` y ya no contiene el placeholder `por declarar`.
+
 ```bash
 python3 tests/escenarios/test_001_001_instalacion_minima.py
 ```

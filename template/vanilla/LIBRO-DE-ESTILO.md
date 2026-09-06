@@ -1,26 +1,26 @@
 # Libro de estilo
 
-> Tus reglas de escritura. Este archivo es tuyo: empieza con lo mínimo y crece cuando el uso revele una regla que valga la pena fijar.
+> Las reglas de escritura del autor. Este archivo es suyo: empieza con lo mínimo y crece cuando el uso revele una regla que valga la pena fijar.
 
-Cómo funciona el sistema no se explica aquí, está en `AGENTS.md`. Aquí va solo el vocabulario que eliges tú.
+Cómo funciona el sistema no se explica aquí, está en `AGENTS.md`. Aquí va solo el vocabulario que elige el autor.
 
 ## Los tres encabezados de abajo son contrato
 
-Las automatizaciones leen las tablas que siguen buscando estos encabezados exactos. Puedes agregar, quitar o cambiar **filas** cuando quieras. Si renombras un **encabezado**, las automatizaciones dejan de encontrar el vocabulario.
+Las automatizaciones leen las tablas que siguen buscando estos encabezados exactos. Las **filas** se agregan, se quitan o se cambian cuando haga falta. Si se renombra un **encabezado**, las automatizaciones dejan de encontrar el vocabulario.
 
 ### Clasificaciones
 
-De qué clase es cada entrada. Nadie las valida en forma estricta: si usas una que no está en la tabla, se acepta y ya la formalizarás después.
+De qué clase es cada entrada. Nadie las valida en forma estricta: si se usa una que no está en la tabla, se acepta y se formaliza después.
 
 | Clasificación | Qué significa |
 | --- | --- |
 | `progreso` | Avance concreto en algo que estaba en curso. |
 | `decisión` | Una elección tomada, con su razón. |
-| `fricción` | Algo que te costó ejecutar o te bloqueó. |
+| `fricción` | Algo que costó ejecutar o que bloqueó al autor. |
 | `señal` | Un patrón o un hecho externo que merece atención más allá de hoy. |
 | `nota` | Un hecho que no calza en las anteriores. |
 
-La distinción que más se usa es `señal` contra `fricción`: la señal es algo que observas, la fricción es algo que te pesó. Sin esa distinción, todo lo desagradable termina siendo fricción.
+La distinción que más se usa es `señal` contra `fricción`: la señal es algo que se observa, la fricción es algo que pesó. Sin esa distinción, todo lo desagradable termina siendo fricción.
 
 ### Horizontes
 
@@ -36,7 +36,7 @@ Los plazos a los que puede estar asignado un pendiente. Son los cinco callouts p
 
 Un pendiente va bajando de escalón a medida que se concreta: primero sin fecha, después un horizonte, después un día exacto.
 
-Estos nombres son tuyos, no de TUKU: los horizontes salen de esta tabla y de los anclas de `PENDIENTES.md`. Si tu ritmo no es la semana sino el turno, la quincena o la temporada, renómbralos en los dos lugares y el sistema sigue funcionando igual. La escalera es la que importa, no cómo se llame cada escalón.
+Estos nombres son del autor, no de TUKU: los horizontes salen de esta tabla y de los anclas de `PENDIENTES.md`. Si el ritmo no es la semana sino el turno, la quincena o la temporada, se renombran en los dos lugares y el sistema sigue funcionando igual. La escalera es la que importa, no cómo se llame cada escalón.
 
 ### Tipos de nota
 
@@ -44,15 +44,21 @@ Las notas pueden ser libres. Algunas, sobre cosas que se repiten, conviene que s
 
 | Tipo | Para qué | Cuidado |
 | --- | --- | --- |
-| `persona` | Trabajar mejor con alguien con quien tratas seguido. | Escribe solo lo que le mostrarías a esa persona. |
+| `persona` | Trabajar mejor con alguien con quien el autor trata seguido. | Se escribe solo lo que se le mostraría a esa persona. |
 
-Empieza con uno. Los demás aparecerán cuando notes que algo se repite lo suficiente como para merecer página propia.
+Empieza con uno. Los demás aparecen cuando algo se repite lo suficiente como para merecer página propia.
 
-## Cómo escribes tú
+## El autor
 
-Cuatro reglas de partida. Cámbialas si tu forma de escribir es otra, salvo la última, de la que dependen las automatizaciones.
+**Nombre del autor:** por declarar. El instalador lo pregunta al crear el vault; si se deja en blanco, el autor lo escribe aquí cuando quiera.
+
+El sistema escribe en primera persona y esa primera persona es el autor. Cuando su nombre aparece en un dictado, se refiere a él y no a un tercero.
+
+## Cómo escribe el autor
+
+Cuatro reglas de partida. Se cambian si la forma de escribir del autor es otra, salvo la última, de la que dependen las automatizaciones.
 
 1. **Se registra el hecho, no la conversación.** Fuera el rodeo y lo dirigido a quien escucha. Una sola frase puede dar varias entradas.
-2. **La entrada se sostiene sola.** Se va a leer en años, sin el resto del día. Nombra a las personas con su rol la primera vez y convierte "el otro día" en una fecha.
-3. **No agregues lo que no dijiste.** Lo que un hecho sugiere se propone, no se da por hecho.
+2. **La entrada se sostiene sola.** Se va a leer en años, sin el resto del día. Las personas se nombran con su rol la primera vez y "el otro día" se convierte en una fecha.
+3. **No se agrega lo que no se dijo.** Lo que un hecho sugiere se propone, no se da por hecho.
 4. **El pendiente va en infinitivo y su cierre repite el mismo texto.** De esto depende que cerrar un pendiente funcione sin que nadie tenga que interpretar nada.

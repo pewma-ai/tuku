@@ -89,6 +89,11 @@ def test_001_003_destino_no_vacio_confirma_y_continua() -> None:
         try:
             hijo.expect(r"Sobrescribir\? \[s/N\]")
             hijo.sendline("s")
+            # Tras confirmar la sobrescritura, install.sh hace una segunda
+            # pregunta (el nombre del autor); se responde con Enter vacío, que
+            # es válido y no cancela.
+            hijo.expect("Nombre del autor")
+            hijo.sendline("")
             indice = hijo.expect(["bajando", "cancelado"])
             assert indice == 0, f"no continuó tras confirmar: {hijo.before!r}"
         finally:

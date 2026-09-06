@@ -21,6 +21,10 @@ La tercera es la que cubre el crecimiento del template: si un archivo nuevo
 de `template/vanilla/` trae `DD de mes` y el instalador no lo sustituye, las
 otras dos pasan en silencio y esta no.
 
+Una segunda función, `test_001_001_instalador_siembra_el_autor`, es la única
+cobertura del flag `--autor`: instalar con un nombre lo escribe en la sección
+"El autor" de `LIBRO-DE-ESTILO.md` y borra el placeholder "por declarar".
+
 Fecha fija: 2026-08-11 (martes), el mismo día donde arranca el ground truth
 de corpus/referencia/referencia-faena.md ("Turno Faena"). El usuario real
 instala con la fecha de hoy (ver template/README.md); este test la fija para
@@ -63,6 +67,21 @@ DIAS = [
 ]
 
 
+def test_001_001_instalador_siembra_el_autor() -> None:
+    """El flag --autor escribe el nombre en la sección "El autor" del libro de estilo.
+
+    Única cobertura de `--autor`: instalar con un nombre reemplaza el placeholder
+    "por declarar" por ese nombre, sobre la línea `**Nombre del autor:**`.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        destino = Path(tmp) / "vault"
+        instalar("vanilla", destino, FECHA_FIJA, autor="Fulana Pérez de Tal")
+
+        libro = (destino / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
+        assert "**Nombre del autor:** Fulana Pérez de Tal" in libro
+        assert "por declarar" not in libro
+
+
 def test_001_001_instalacion_minima_byte_a_byte() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         destino = Path(tmp) / "vault"
@@ -82,3 +101,5 @@ def test_001_001_instalacion_minima_byte_a_byte() -> None:
 if __name__ == "__main__":
     test_001_001_instalacion_minima_byte_a_byte()
     print("ok: árbol idéntico a template/vanilla/, AHORA.md sembrado, sin placeholders vivos")
+    test_001_001_instalador_siembra_el_autor()
+    print("ok: --autor siembra el nombre en LIBRO-DE-ESTILO.md")

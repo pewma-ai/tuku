@@ -18,6 +18,8 @@
 #   TUKU_REF    rama o tag (default: devel)
 #   TUKU_VARIANTE  variante de template/ a instalar (default: vanilla)
 #   TUKU_FORCE  si es "1", sobrescribe sin preguntar (para uso automatizado)
+#   TUKU_AUTOR  nombre del autor para el libro de estilo; opcional. Si falta y
+#               hay una terminal, se pregunta; con TUKU_FORCE=1 no se pregunta.
 
 set -eu
 
@@ -40,6 +42,12 @@ if [ -e "$DESTINO" ] && [ -n "$(ls -A "$DESTINO" 2>/dev/null)" ] && [ "${TUKU_FO
   esac
 fi
 
+AUTOR="${TUKU_AUTOR:-}"
+if [ -z "$AUTOR" ] && [ "${TUKU_FORCE:-}" != "1" ]; then
+  printf '¿Nombre del autor de este vault? (Enter para dejarlo en blanco) ' >&2
+  AUTOR="$( { read -r r < /dev/tty && printf '%s' "$r"; } 2>/dev/null )" || AUTOR=""
+fi
+
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -53,10 +61,9 @@ if [ -z "$ORIGEN" ]; then
   exit 1
 fi
 
-if [ -n "$DESDE" ]; then
-  python3 "$ORIGEN/src/install_test_scenario.py" --variante "$VARIANTE" --destino "$DESTINO" --desde "$DESDE"
-else
-  python3 "$ORIGEN/src/install_test_scenario.py" --variante "$VARIANTE" --destino "$DESTINO"
-fi
+set -- --variante "$VARIANTE" --destino "$DESTINO"
+[ -n "$DESDE" ] && set -- "$@" --desde "$DESDE"
+[ -n "$AUTOR" ] && set -- "$@" --autor "$AUTOR"
+python3 "$ORIGEN/src/install_test_scenario.py" "$@"
 
 echo "listo. abre $DESTINO/AHORA.md y escribe tu primera línea." >&2

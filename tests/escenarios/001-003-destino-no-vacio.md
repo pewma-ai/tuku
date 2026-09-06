@@ -44,7 +44,7 @@ sh install.sh /tmp/destino-no-vacio
 `test_001_003_destino_no_vacio.py` tiene uno por cada rama:
 
 - **No confirmar:** corre `install.sh` en un subproceso sin terminal de control (`start_new_session=True`). Al no poder abrir `/dev/tty`, el script trata eso igual que una respuesta vacía, que cancela. Es exactamente lo que pasa en cualquier invocación no interactiva (un script, un cron, un agente), y es el caso que hay que blindar: si algún día deja de preguntar ahí, sobrescribiría en silencio.
-- **Confirmar:** `read -r r < /dev/tty` no lee la entrada estándar, así que un subproceso con pipes no le puede escribir una respuesta. Se usa [`pexpect`](https://pexpect.readthedocs.io/), que abre una pty real y se la deja de terminal de control.
+- **Confirmar:** `read -r r < /dev/tty` no lee la entrada estándar, así que un subproceso con pipes no le puede escribir una respuesta. Se usa [`pexpect`](https://pexpect.readthedocs.io/), que abre una pty real y se la deja de terminal de control. Tras confirmar la sobrescritura, `install.sh` hace una segunda pregunta (el nombre del autor para el libro de estilo); el test la responde con Enter vacío, que es válido y no cancela.
 - **`TUKU_FORCE=1`:** ni siquiera necesita una tty, porque el `if` que dispara la pregunta no se ejecuta.
 
 Ninguno espera a que la descarga real termine: los tres ven que `install.sh` imprime "bajando..." (o "cancelado", en el primero) y ahí matan el proceso, sin depender de que la red funcione. Matar el proceso mata el grupo entero (`os.killpg`), no solo el shell: para esa altura ya lanzó `curl | tar` como su propia tubería, y una señal solo al shell no siempre alcanza a esos hijos ni llega a tiempo.

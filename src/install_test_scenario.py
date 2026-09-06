@@ -14,8 +14,11 @@ siendo el camino.
 Uso:
     python3 src/install_test_scenario.py --variante vanilla --destino /ruta/destino
     python3 src/install_test_scenario.py --variante vanilla --destino /ruta --desde 2026-09-01
+    python3 src/install_test_scenario.py --variante vanilla --destino /ruta --autor "J. Pérez"
 
 --desde fija el lunes del primer ciclo. Por defecto, el lunes de esta semana.
+--autor, si se pasa y no viene vacío, escribe el nombre en la sección "El autor"
+de LIBRO-DE-ESTILO.md. Si falta, ese archivo se copia sin tocar.
 Si el destino ya existe, se borra y se reinstala sin preguntar: es lo que
 permite pisar un escenario de playground/ al recrearlo, a propósito.
 
@@ -71,7 +74,30 @@ def sembrar_ahora(contenido: str, desde: date) -> str:
     return contenido
 
 
-def instalar(variante: str, destino: Path, desde: date) -> Path:
+def sembrar_autor(destino: Path, autor: str) -> None:
+    """Escribe el nombre del autor en LIBRO-DE-ESTILO.md del vault instalado.
+
+    Reemplaza la línea completa que empieza con el marcador `**Nombre del autor:**`
+    por esa misma etiqueta seguida del nombre. Calza por prefijo de línea, no por
+    la oración entera: lo que el template pone tras la etiqueta ("por declarar")
+    es prosa que puede cambiar sin que esto deje de funcionar.
+    """
+    libro = destino / "LIBRO-DE-ESTILO.md"
+    marcador = "**Nombre del autor:**"
+    lineas = libro.read_text(encoding="utf-8").splitlines(keepends=True)
+    for i, linea in enumerate(lineas):
+        if linea.lstrip().startswith(marcador):
+            fin = "\n" if linea.endswith("\n") else ""
+            lineas[i] = f"{marcador} {autor}{fin}"
+            libro.write_text("".join(lineas), encoding="utf-8")
+            return
+    raise RuntimeError(
+        f"no se encontró la línea '{marcador}' en {libro}: el template cambió el "
+        "marcador del nombre del autor y este script no lo sabe."
+    )
+
+
+def instalar(variante: str, destino: Path, desde: date, autor: str | None = None) -> Path:
     variante_dir = TEMPLATE_DIR / variante
     if not variante_dir.is_dir():
         sys.exit(f"no existe la variante: {variante_dir}")
@@ -84,6 +110,9 @@ def instalar(variante: str, destino: Path, desde: date) -> Path:
     if ahora.exists():
         ahora.write_text(sembrar_ahora(ahora.read_text(encoding="utf-8"), desde), encoding="utf-8")
 
+    if autor and autor.strip():
+        sembrar_autor(destino, autor)
+
     return destino
 
 
@@ -95,10 +124,14 @@ def main() -> None:
         "--desde", type=date.fromisoformat, default=None,
         help="lunes del primer ciclo (AAAA-MM-DD). Por defecto, el lunes de esta semana.",
     )
+    parser.add_argument(
+        "--autor", default=None,
+        help="nombre del autor para LIBRO-DE-ESTILO.md. Opcional; si falta, no se toca.",
+    )
     args = parser.parse_args()
 
     desde = args.desde or lunes_de_esta_semana(date.today())
-    instalar(args.variante, args.destino, desde)
+    instalar(args.variante, args.destino, desde, args.autor)
     print(f"instalado '{args.variante}' en {args.destino} (ciclo desde {desde.isoformat()})")
 
 

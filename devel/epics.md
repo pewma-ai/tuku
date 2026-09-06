@@ -54,12 +54,15 @@ Decidido:
 6. Instalar es una línea de `curl` (`install.sh`), no `git clone`. Probado contra `pewma-ai/tuku@devel` real.
 7. Sobrescribir se pregunta en `install.sh`, salvo con `TUKU_FORCE=1`. `install_test_scenario.py` sobrescribe siempre.
 8. El estado cero se verifica byte a byte con fecha fija (`--desde 2026-08-11`, la del ground truth en `referencia-faena.md`), distinta de la que usa el autor real. Encontró un bug real: días etiquetados por posición, ya corregido.
+9. Capa de identidad mínima: el nombre del autor vive en `LIBRO-DE-ESTILO.md` (sección "El autor"), `install.sh` lo pregunta al instalar y es opcional (Enter vacío deja el vault operable, principio 2). El libro de estilo vanilla se reescribió entero a tercera persona en la misma sesión.
 
 **Decidido:** `docs/libro-de-estilo.md` se podó y se borró. Las ocho secciones que duplicaba a `spec/` desaparecieron con él; las tres filas de su matriz que no estaban cubiertas ([`ver además` y su motivo](../spec/notas.md), [el emparejamiento no literal al cerrar un pendiente](../spec/agente.md)) se migraron antes de borrar. El bug que destapó la migración: `spec/bitacora.md` citaba este documento de diseño como si fuera el `LIBRO-DE-ESTILO.md` que se instala en el vault del autor. Corregido.
 
 Lo que va a mover en el diseño: esa poda, y probablemente `reglas/config.tuku.md`, ya en decisiones abiertas.
 
-Criterio de salida: instalar en vacío produce el estado cero de `template/README.md`; alguien que no sabe qué es TUKU escribe una línea en `AHORA.md` sin romper nada. Se verifica con una persona, no con un diff. Y queda escrito qué movió en `spec/` o `docs/`.
+Decisión abierta que deja la capa de identidad: **dónde se especifica el comportamiento del agente** al dirigirse al autor (trato, registro, cómo lo nombra en conversación). Se implementó solo el nombre; el comportamiento queda sin resolver.
+
+Criterio de salida: instalar en vacío produce el estado cero de `template/README.md`; alguien que no sabe qué es TUKU escribe una línea en `AHORA.md` sin romper nada. El instalador puede preguntar el nombre del autor, y dejarlo en blanco no impide escribir. Se verifica con una persona, no con un diff. Y queda escrito qué movió en `spec/` o `docs/`.
 
 No entra: janitors, agentes, LLM. Tampoco el tipo de ciclo real de quien lo usa: arranca semanal y el tipo verdadero emerge después.
 
