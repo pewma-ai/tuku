@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh
 
 Solo necesita `curl`, `tar` y `python3`; no instala ningún programa.
 
-No pregunta la zona horaria: pregunta el nombre del autor (opcional, Enter lo deja en blanco), y si el destino ya existe y no está vacío pide confirmación antes de sobrescribir. Nada más.
+Pregunta el nombre del autor (opcional, Enter lo deja en blanco), y si el destino ya existe y no está vacío pide confirmación antes de sobrescribir. Nada más.
 
 Al terminar, abrir `mi-vault/AHORA.md` y escribir la primera línea.
 
