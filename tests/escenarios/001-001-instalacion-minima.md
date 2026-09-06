@@ -38,6 +38,8 @@ Para no depender de la red ni del commit ya empujado, el mismo mecanismo se invo
 python3 src/install_test_scenario.py --variante vanilla --destino playground/001-001-instalacion-minima --desde AAAA-MM-DD
 ```
 
+Correr el test de pytest byte a byte también deja el resultado en `playground/001-001-instalacion-minima/`: su arnés instala ahí, no en un tempdir que se bota.
+
 ## El test byte a byte
 
 `test_001_001_instalacion_minima.py` fija la fecha en **2026-08-11** (martes), el mismo día donde arranca el ground truth de `corpus/referencia/referencia-faena.md` ("Turno Faena").

@@ -27,6 +27,8 @@ Los dos deben coincidir. Si un vault instalado por `curl` difiere de uno instala
 python3 src/install_test_scenario.py --variante vanilla --destino playground/001-002-instalacion-local --desde AAAA-MM-DD
 ```
 
+Correr el test de pytest también deja el resultado en `playground/001-002-instalacion-local/`: su arnés instala ahí, no en un tempdir que se bota.
+
 ## El test byte a byte
 
 `test_001_002_instalacion_local.py` fija la misma fecha que `001-001-instalacion-minima` (2026-08-11) e instala directo con `instalar()`, sin fixture propio: compara contra el fixture de `001-001-instalacion-minima`, que es la afirmación misma de este escenario.

@@ -6,7 +6,7 @@ Son narrativos y no unitarios porque buena parte de TUKU depende de un agente y 
 
 Un escenario referencia `spec/` pero no lo reemplaza. Si un escenario contradice `spec/`, se corrige `spec/` (ver [`../../devel/epics.md`](../../devel/epics.md), "los epics mueven el diseño"), no el escenario.
 
-Lo que una corrida produce va a `playground/`, que se pisa cada vez que se vuelve a correr.
+Lo que una corrida produce va a `playground/<XXX-YYY-slug>/`, la carpeta propia de ese escenario. El arnés de pytest instala ahí directo (no en un tempdir que se bota) para los escenarios que dejan algo que revisar, de modo que correr `uv run pytest tests/escenarios/` deja cada corrida a la vista para el `## Qué se mira a mano` del escenario. Se pisa cada vez que se vuelve a correr, y `playground/` está en `.gitignore`, así que nada de esto se versiona. El arnés borra y recrea **solo esa subcarpeta**, nunca `playground/` completo ni ninguna otra carpeta dentro: las corridas manuales exploratorias que uno deje en `playground/` con otro nombre sobreviven a `uv run pytest`. No es "todos los tests": uno que solo verifica un detalle con `assert`, sin nada que juzgar a mano, puede seguir usando un tempdir.
 
 No hay problema en que esto crezca a cientos de archivos chicos: son texto, cuestan casi nada.
 

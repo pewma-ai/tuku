@@ -11,12 +11,46 @@ template real y le aplica las sustituciones que el escenario espera, escritas
 a mano por el test. Así un cambio en el template no obliga a regenerar nada,
 y un cambio en la lógica de sembrado sigue rompiendo el test, que es lo que
 debe hacer.
+
+`preparar_playground()` da el directorio donde cada arnés instala: los
+escenarios que dejan algo que revisar a mano instalan en `../../playground/`
+(git-ignored) en vez de un tempdir, para que correr la suite deje el
+resultado a la vista.
 """
 
 from __future__ import annotations
 
 import filecmp
+import shutil
 from pathlib import Path
+
+#: Raíz del repo, calculada como en `../../src/install_test_scenario.py`
+#: (allá es `parent.parent`; acá hay un nivel más: `tests/scripts/`).
+RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
+
+
+def preparar_playground(slug: str) -> Path:
+    """Directorio de playground para un escenario, recién vaciado.
+
+    El arnés de cada escenario instala aquí en vez de en un tempdir: así correr
+    la suite deja el resultado a la vista para el `## Qué se mira a mano` del
+    escenario. Se pisa en cada corrida, como dice `../escenarios/README.md`.
+    `playground/` está en `.gitignore`, nada de esto se versiona.
+
+    El arnés pisa **solo la carpeta de su propio escenario**,
+    `playground/<slug>/`, nunca `playground/` completo ni ninguna otra carpeta
+    dentro. El usuario tiene corridas manuales exploratorias en `playground/`
+    con otros nombres: esas sobreviven a cualquier corrida de la suite. El
+    `rmtree` es siempre sobre `playground/<slug>`, y el guard de abajo hace
+    imposible que `slug` apunte a la raíz o se escape del subdirectorio.
+    """
+    if not slug or "/" in slug or slug in (".", ".."):
+        raise ValueError(f"slug de playground inválido: {slug!r}")
+    destino = RAIZ_REPO / "playground" / slug
+    if destino.exists():
+        shutil.rmtree(destino)
+    return destino
+
 
 #: Marcas que el template deja para que el instalador las sustituya. Ninguna
 #: puede sobrevivir a una instalación: si sobrevive, el instalador no conoce
