@@ -26,17 +26,17 @@ Las prácticas que se implementan salen de [`mac-jpgil`](../../mac-jpgil), el va
 
 ## Estado
 
-Actualizado el 2026-09-05.
+Actualizado el 2026-09-06.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
-| 001 | Un TUKU mínimo instalable | `vacio` | en curso | probarlo con una persona |
-| 002 | El día uno | `vacio` → `primer-dia` | sin empezar | depende del epic 001 |
+| 001 | Un TUKU mínimo instalable | `vacio` | cerrado | nada, cerrado el 2026-09-06 |
+| 002 | El día uno | `vacio` → `primer-dia` | sin empezar | desbloqueado, listo para empezar |
 | 003 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 002 |
 | 004 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 003 |
 | 005 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 004 |
 
-Lo hecho en el 001: `template/vanilla/` (el estado cero) y `src/install_test_scenario.py` (mecanismo). Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos y arnés en `../tests/escenarios/`, pasos compartidos en `../tests/scripts/`.
+Lo hecho en el 001: `template/vanilla/` (el estado cero), `src/install_test_scenario.py` (mecanismo), `install.sh` (instalación de una línea, que pregunta antes de sobrescribir y pregunta el nombre del autor, y que con `TUKU_ORIGEN` instala desde un árbol local sin red), la capa de identidad del autor en `LIBRO-DE-ESTILO.md`, y los escenarios `001-001` a `001-004`. Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos y arnés en `../tests/escenarios/`, pasos compartidos en `../tests/scripts/`.
 
 Preparación previa, fuera de los epics: `spec/` y `docs/glosario.md` ordenan el vocabulario, [`que_implementar.md`](que_implementar.md) quedó reducido al plan de fases. Punto de partida, no diseño cerrado.
 
@@ -58,11 +58,13 @@ Decidido:
 
 **Decidido:** `docs/libro-de-estilo.md` se podó y se borró. Las ocho secciones que duplicaba a `spec/` desaparecieron con él; las tres filas de su matriz que no estaban cubiertas ([`ver además` y su motivo](../spec/notas.md), [el emparejamiento no literal al cerrar un pendiente](../spec/agente.md)) se migraron antes de borrar. El bug que destapó la migración: `spec/bitacora.md` citaba este documento de diseño como si fuera el `LIBRO-DE-ESTILO.md` que se instala en el vault del autor. Corregido.
 
-Lo que va a mover en el diseño: esa poda, y probablemente `reglas/config.tuku.md`, ya en decisiones abiertas.
+Lo que movió en el diseño, al cerrar: la poda de `docs/libro-de-estilo.md` que cuenta el párrafo anterior, y nada más. `reglas/config.tuku.md` estaba anotado como probable y no se movió: la identidad del autor terminó en `LIBRO-DE-ESTILO.md`. El criterio que los separó vale para la próxima vez que aparezca la duda: `config.tuku.md` guarda lo que necesitan las automatizaciones deterministas y no pueden adivinar (zona horaria, tipo de ciclo), y el libro de estilo guarda lo que gobierna cómo se escribe, que es lo que consume la redacción. `spec/` no se tocó en todo el epic: se evaluó agregar a `spec/bitacora.md` una línea sobre dónde vive la identidad del autor y se descartó, porque ese documento es el contrato del formato de entrada y difiere a `spec/agente.md` todo lo relativo a interpretar el dictado. Lo que sí se movió fue producto y no marco: `template/vanilla/`, con el libro de estilo reescrito a tercera persona y la sección "El autor" al inicio, y `template/README.md`.
 
 Decisión abierta que deja la capa de identidad: **dónde se especifica el comportamiento del agente** al dirigirse al autor (trato, registro, cómo lo nombra en conversación). Se implementó solo el nombre; el comportamiento queda sin resolver.
 
 Criterio de salida: instalar en vacío produce el estado cero de `template/README.md`; alguien que no sabe qué es TUKU escribe una línea en `AHORA.md` sin romper nada. El instalador puede preguntar el nombre del autor, y dejarlo en blanco no impide escribir. Se verifica con una persona, no con un diff. Y queda escrito qué movió en `spec/` o `docs/`.
+
+Verificado el 2026-09-06. La prueba la hizo el autor sobre su propia instalación, revisando los vaults que la suite deja en `playground/`. El `## Qué se mira a mano` del escenario `001-001` pedía además una persona ajena al diseño, no el autor: eso no se hizo, no bloqueó el cierre y queda como tarea en la Wishlist.
 
 No entra: janitors, agentes, LLM. Tampoco el tipo de ciclo real de quien lo usa: arranca semanal y el tipo verdadero emerge después.
 
@@ -88,6 +90,7 @@ Antes de empezar hay que decidir:
 2. Cómo se verifica lo que depende del agente: byte a byte para las consecuencias, otro criterio para la redacción.
 3. Qué arnés de agente se usa y cómo se aísla para no gastar tokens por accidente.
 4. Dónde vive el código y cómo se ejecuta. Ya no se puede diferir.
+5. Dónde se especifica el comportamiento del agente al dirigirse al autor: trato, registro, cómo lo nombra en conversación. Viene abierta del epic 001, que implementó solo el nombre.
 
 Lo que va a mover en el diseño, ya identificado:
 
@@ -151,6 +154,7 @@ No entra: ejecutar cualquier cosa sin aprobación.
 Lo que hay que hacer y no bloquea a nadie. No son epics: entran cuando duelan.
 
 - **Endurecimiento.** Los casos de error, la reconstrucción completa y la idempotencia medida sobre el sistema entero junto y no janitor por janitor. Era la fase 8, y no agrega capacidades: cierra huecos. La regla que la gobierna vale desde ya, aunque la fase no exista: **un error del autor nunca se rechaza, se reporta.**
+- **Probar la instalación con una persona ajena al diseño.** Que instale con el one-liner de `curl`, escriba una entrada leyendo solo `AGENTS.md`, y cuánto le toma.
 - **Publicar el vault en web** con Quartz.
 - **Telegram como canal de captura móvil.**
 
