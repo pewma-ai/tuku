@@ -1,0 +1,57 @@
+# Escenario · 002-004-cerrar-pendiente
+
+> Corpus, no diseño: esto es un caso a favor del que se prueba el sistema, referencia `spec/`
+> pero no lo reemplaza. Si el resultado contradice `spec/`, se corrige `spec/`, no este archivo
+> (ver `devel/epics.md`, "los epics mueven el diseño").
+
+**Cubre:** epic 002, fase 2. Punto 2 del epic, segunda mitad: una entrada `~~(Hecho)~~` cierra el pendiente. Y el caso negativo del cierre sin pareja, que es el error que el vault real del autor cometía (ver [`../../devel/lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 4).
+
+## Estado inicial
+
+El que dejó [`002-003-abrir-pendiente`](002-003-abrir-pendiente.md): un ítem en `^sin-fecha`.
+
+## Escenario: el cierre repite el texto y borra el ítem
+
+Dado un pendiente abierto en `^sin-fecha` con cuerpo `avisar de los GGCC a la administradora`
+Cuando se inyecta `- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora`
+Entonces el ítem desaparece de `^sin-fecha`
+Y el callout `^sin-fecha` sigue existiendo, vacío
+Y la entrada de apertura de las 14:20 sigue escrita en el martes 11, sin tocar
+Y el diff toca `AHORA.md` y `PENDIENTES.md`, y nada más
+
+El cierre no se reescribe en pasado: repite el texto del pendiente, y por eso el emparejamiento es literal y no semántico ([`../../spec/bitacora.md`](../../spec/bitacora.md)). El historial de lo cerrado queda en la bitácora, no en `PENDIENTES.md`.
+
+## Escenario: un cierre sin pendiente abierto se reporta, no se inventa nada
+
+Dado que nunca se abrió ningún pendiente con el cuerpo `comprar una maleta`
+Cuando se inyecta `- 19:10 - [[personal]] ~~(Hecho)~~: comprar una maleta`
+Entonces el janitor lo reporta como cierre sin pareja
+Y `PENDIENTES.md` queda byte a byte igual que antes de la inyección
+Y no se crea el pendiente que falta, ni se borra ningún otro ítem
+Y la línea queda escrita en la bitácora, porque un error del autor se reporta y nunca se rechaza
+
+Es el caso negativo más importante del epic. Con `PENDIENTES.md` como fuente de verdad, un cierre inventado no tiene qué borrar y deja el archivo mintiendo.
+
+## Escenario: cerrar dos veces no vuelve a mover
+
+Dado el pendiente ya cerrado
+Cuando se corre el janitor otra vez sobre la misma entrada
+Entonces el diff es vacío
+Y el segundo pase se reporta igual que el primer cierre sin pareja, porque ya no hay nada abierto que emparejar
+
+El segundo pase de un cierre correcto es, por construcción, un cierre sin pareja. Que los dos casos den el mismo reporte es lo que hace que el janitor sea idempotente sin llevar estado.
+
+## Lo que este escenario deja fuera
+
+El cierre **no literal**, cuando el dictado no repite el texto palabra por palabra. Deja de ser paso 5 y pasa a ser juicio del agente ([`../../spec/agente.md`](../../spec/agente.md)), y ante la duda se confirma con el autor. Entra en el tramo con LLM, [`002-010`](002-010-dictado-del-dia-uno.md), no acá.
+
+## Cómo se corre
+
+```bash
+uv run pytest tests/escenarios/ -k 002_004
+```
+
+## Qué se mira a mano
+
+- Leer el martes 11 completo: la apertura de las 14:20 y el cierre de las 19:05 tienen que leerse como la misma tarea, tachada.
+- El reporte del cierre sin pareja: que le diga al autor qué escribió y qué esperaba el sistema, sin sonar a rechazo.

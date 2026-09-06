@@ -70,3 +70,26 @@ uv run pytest tests/escenarios/ -k 001_002  # un escenario
 | [`001-002-instalacion-local.md`](001-002-instalacion-local.md) | Epic 001, fase 0 | El mismo mecanismo, sin red ni git, para iterar rápido |
 | [`001-003-destino-no-vacio.md`](001-003-destino-no-vacio.md) | Epic 001, fase 0 | `install.sh` no sobrescribe sin preguntar, salvo `TUKU_FORCE=1`; el único de los tres que prueba `install.sh` mismo, no `instalar()`. Usa `pexpect` para simular la respuesta a un prompt que lee `/dev/tty` |
 | [`001-004-instalador-pregunta-el-nombre.md`](001-004-instalador-pregunta-el-nombre.md) | Epic 001, fase 0 | La capa de identidad de punta a punta: se responde el nombre en el prompt de `install.sh` y queda en `LIBRO-DE-ESTILO.md`. Instala desde `TUKU_ORIGEN`, sin red, y es el único que deja completar la instalación |
+| [`002-001-entrada-en-su-dia.md`](002-001-entrada-en-su-dia.md) | Epic 002, fase 1 | Primer paso de la cadena. Día correcto, orden cronológico, y el diff no toca `PENDIENTES.md` |
+| [`002-002-lint-de-entrada.md`](002-002-lint-de-entrada.md) | Epic 002, fase 1 | Cerrada estricta, abierta permisiva. El lint informa y no escribe |
+| [`002-003-abrir-pendiente.md`](002-003-abrir-pendiente.md) | Epic 002, fase 2 | Abrir es copiar el cuerpo literal. Lleva un `#REVISAR` sobre una ambigüedad de `spec/pendientes.md` |
+| [`002-004-cerrar-pendiente.md`](002-004-cerrar-pendiente.md) | Epic 002, fase 2 | Cerrar es borrar, y el cierre sin pareja se reporta sin inventar nada |
+| [`002-005-escribir-en-un-dia-fecha.md`](002-005-escribir-en-un-dia-fecha.md) | Epic 002, fase 2 | El punto 3 del epic: agendar es escribir donde corresponde. Fechar mueve, nunca copia |
+| [`002-006-transclusiones-sincronizadas.md`](002-006-transclusiones-sincronizadas.md) | Epic 002, fase 2 | Las dos direcciones de falla, por la segunda vía. La silenciosa es la que justifica el janitor |
+| [`002-007-crear-ambito.md`](002-007-crear-ambito.md) | Epic 002, fase 3 mínima | El árbol correcto y el enlazado retroactivo, que acá llega solo hasta `AHORA.md` |
+| [`002-008-crear-nota.md`](002-008-crear-nota.md) | Epic 002, fase 5 mínima | Obliga a agregar la consecuencia "nota" a `spec/flujo-informacion.md` |
+| [`002-009-propuesta-no-escribe.md`](002-009-propuesta-no-escribe.md) | Epic 002 | El principio 3 en test. Último paso determinista: su estado final es el criterio de salida del epic |
+| [`002-010-dictado-del-dia-uno.md`](002-010-dictado-del-dia-uno.md) | Epic 002, fase 1 con LLM | El único que gasta tokens, fuera de la corrida por defecto. Dueño del fixture que consumen los otros nueve |
+
+## Escenarios encadenados, desde el epic 002
+
+Dentro de un epic, **el estado inicial de un escenario es el estado final del anterior**. El primero parte del fixture con el que el epic empieza (`vacio` para el 002) y el último deja el fixture con el que empieza el epic siguiente. Es la escalera de [`../../devel/que_implementar.md`](../../devel/que_implementar.md) bajada de grano: los estados intermedios no se escriben a mano ni se congelan, se reproducen corriendo la cadena.
+
+Tres consecuencias prácticas:
+
+1. **El assert es el diff entre dos estados**, no una comparación de árbol completo. Así se ven los efectos colaterales que un assert por archivo no mira, y la idempotencia sale gratis: el segundo pase de una operación tiene que dar diff vacío.
+2. **Cada paso deja su propio snapshot** en `playground/<XXX-YYY-slug>/`, copiando el estado heredado antes de operar. La regla del playground no cambia, y la revisión a mano pasa a ser `diff -r` entre dos carpetas consecutivas.
+3. **Un paso que falla salta los siguientes en vez de reprobarlos**, y correr uno suelto con `-k` reproduce la cadena desde el estado inicial del epic. Es barato porque el tramo entero es determinista: el único escenario con LLM va al final, fuera de la cadena, y su salida se congela como fixture.
+
+> [!question] Pendiente de decisión #REVISAR
+> Con cadena, el `YYY` pasa a ser **orden de ejecución** dentro del epic, y eso contradice la sección "Convención de nombre" de más arriba, que dice que el número no es orden de lectura y que no se renumera. Queda sin resolver a propósito: es una regla del repositorio, no del epic.
