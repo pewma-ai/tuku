@@ -47,6 +47,8 @@ sh install.sh /tmp/destino-no-vacio
 - **Confirmar:** `read -r r < /dev/tty` no lee la entrada estándar, así que un subproceso con pipes no le puede escribir una respuesta. Se usa [`pexpect`](https://pexpect.readthedocs.io/), que abre una pty real y se la deja de terminal de control. Tras confirmar la sobrescritura, `install.sh` hace una segunda pregunta (el nombre del autor para el libro de estilo); el test la responde con Enter vacío, que es válido y no cancela.
 - **`TUKU_FORCE=1`:** ni siquiera necesita una tty, porque el `if` que dispara la pregunta no se ejecuta.
 
+Los tres usan tempdirs y no `playground/`, y no es una excepción a la regla de [`README.md`](README.md): este escenario no produce ningún vault, porque el proceso se mata antes de que la instalación escriba nada.
+
 Ninguno espera a que la descarga real termine: los tres ven que `install.sh` imprime "bajando..." (o "cancelado", en el primero) y ahí matan el proceso, sin depender de que la red funcione. Matar el proceso mata el grupo entero (`os.killpg`), no solo el shell: para esa altura ya lanzó `curl | tar` como su propia tubería, y una señal solo al shell no siempre alcanza a esos hijos ni llega a tiempo.
 
 ```bash

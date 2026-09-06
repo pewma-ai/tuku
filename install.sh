@@ -20,6 +20,10 @@
 #   TUKU_FORCE  si es "1", sobrescribe sin preguntar (para uso automatizado)
 #   TUKU_AUTOR  nombre del autor para el libro de estilo; opcional. Si falta y
 #               hay una terminal, se pregunta; con TUKU_FORCE=1 no se pregunta.
+#   TUKU_ORIGEN directorio de un árbol del repositorio ya presente en disco.
+#               Si está seteada, no se baja nada: se instala desde ahí, sin red
+#               ni curl. Es lo que usa el escenario 001-004. Debe existir y
+#               contener src/install_test_scenario.py.
 
 set -eu
 
@@ -32,6 +36,21 @@ DESDE="${2:-}"
 for bin in curl tar python3; do
   command -v "$bin" >/dev/null 2>&1 || { echo "falta '$bin', no se puede instalar" >&2; exit 1; }
 done
+
+# Origen local: si TUKU_ORIGEN apunta a un árbol del repositorio ya presente en
+# disco, no hay nada que bajar. Se valida acá, antes de preguntar nada, para no
+# hacerle contestar dos prompts a alguien y recién ahí fallar por una ruta mala.
+ORIGEN="${TUKU_ORIGEN:-}"
+if [ -n "$ORIGEN" ]; then
+  if [ ! -d "$ORIGEN" ]; then
+    echo "TUKU_ORIGEN no es un directorio: $ORIGEN" >&2
+    exit 1
+  fi
+  if [ ! -f "$ORIGEN/src/install_test_scenario.py" ]; then
+    echo "TUKU_ORIGEN no parece un árbol de TUKU: falta $ORIGEN/src/install_test_scenario.py" >&2
+    exit 1
+  fi
+fi
 
 if [ -e "$DESTINO" ] && [ -n "$(ls -A "$DESTINO" 2>/dev/null)" ] && [ "${TUKU_FORCE:-}" != "1" ]; then
   printf '%s ya existe y no está vacío. ¿Sobrescribir? [s/N] ' "$DESTINO" >&2
@@ -48,17 +67,19 @@ if [ -z "$AUTOR" ] && [ "${TUKU_FORCE:-}" != "1" ]; then
   AUTOR="$( { read -r r < /dev/tty && printf '%s' "$r"; } 2>/dev/null )" || AUTOR=""
 fi
 
-TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
-
-echo "bajando ${REPO}@${REF}..." >&2
-curl -fsSL "https://github.com/${REPO}/archive/refs/heads/${REF}.tar.gz" | tar -xz -C "$TMP"
-
-# El tarball de GitHub crea una sola carpeta, <repo>-<ref>/
-ORIGEN="$(find "$TMP" -mindepth 1 -maxdepth 1 -type d | head -n1)"
 if [ -z "$ORIGEN" ]; then
-  echo "no se pudo extraer el repositorio" >&2
-  exit 1
+  TMP="$(mktemp -d)"
+  trap 'rm -rf "$TMP"' EXIT
+
+  echo "bajando ${REPO}@${REF}..." >&2
+  curl -fsSL "https://github.com/${REPO}/archive/refs/heads/${REF}.tar.gz" | tar -xz -C "$TMP"
+
+  # El tarball de GitHub crea una sola carpeta, <repo>-<ref>/
+  ORIGEN="$(find "$TMP" -mindepth 1 -maxdepth 1 -type d | head -n1)"
+  if [ -z "$ORIGEN" ]; then
+    echo "no se pudo extraer el repositorio" >&2
+    exit 1
+  fi
 fi
 
 set -- --variante "$VARIANTE" --destino "$DESTINO"

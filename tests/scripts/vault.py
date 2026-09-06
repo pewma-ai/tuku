@@ -12,10 +12,10 @@ a mano por el test. Así un cambio en el template no obliga a regenerar nada,
 y un cambio en la lógica de sembrado sigue rompiendo el test, que es lo que
 debe hacer.
 
-`preparar_playground()` da el directorio donde cada arnés instala: los
-escenarios que dejan algo que revisar a mano instalan en `../../playground/`
-(git-ignored) en vez de un tempdir, para que correr la suite deje el
-resultado a la vista.
+`preparar_playground()` da el directorio donde cada arnés instala: todo test
+que produce un vault lo deja en `../../playground/<slug>/` (git-ignored) y
+nunca en un tempdir que se descarta, para que correr la suite deje el
+resultado a la vista del autor.
 """
 
 from __future__ import annotations
@@ -32,10 +32,11 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 def preparar_playground(slug: str) -> Path:
     """Directorio de playground para un escenario, recién vaciado.
 
-    El arnés de cada escenario instala aquí en vez de en un tempdir: así correr
-    la suite deja el resultado a la vista para el `## Qué se mira a mano` del
-    escenario. Se pisa en cada corrida, como dice `../escenarios/README.md`.
-    `playground/` está en `.gitignore`, nada de esto se versiona.
+    Todo arnés que instale un vault lo hace aquí, nunca en un tempdir: así
+    correr la suite deja el resultado a la vista para el `## Qué se mira a
+    mano` del escenario. Es regla, no preferencia (`../escenarios/README.md`).
+    Se pisa en cada corrida, y `playground/` está en `.gitignore`, así que
+    nada de esto se versiona.
 
     El arnés pisa **solo la carpeta de su propio escenario**,
     `playground/<slug>/`, nunca `playground/` completo ni ninguna otra carpeta

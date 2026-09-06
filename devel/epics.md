@@ -54,7 +54,7 @@ Decidido:
 6. Instalar es una línea de `curl` (`install.sh`), no `git clone`. Probado contra `pewma-ai/tuku@devel` real.
 7. Sobrescribir se pregunta en `install.sh`, salvo con `TUKU_FORCE=1`. `install_test_scenario.py` sobrescribe siempre.
 8. El estado cero se verifica byte a byte con fecha fija (`--desde 2026-08-11`, la del ground truth en `referencia-faena.md`), distinta de la que usa el autor real. Encontró un bug real: días etiquetados por posición, ya corregido.
-9. Capa de identidad mínima: el nombre del autor vive en `LIBRO-DE-ESTILO.md` (sección "El autor"), `install.sh` lo pregunta al instalar y es opcional (Enter vacío deja el vault operable, principio 2). El libro de estilo vanilla se reescribió entero a tercera persona en la misma sesión.
+9. Capa de identidad mínima: el nombre del autor vive en `LIBRO-DE-ESTILO.md` (sección "El autor", al inicio del documento), `install.sh` lo pregunta al instalar y es opcional (Enter vacío deja el vault operable, principio 2). El libro de estilo vanilla se reescribió entero a tercera persona en la misma sesión. Lo cubre de punta a punta el escenario `001-004-instalador-pregunta-el-nombre`, que instala desde `TUKU_ORIGEN` (un árbol ya presente en disco, sin red) y responde el prompt del nombre.
 
 **Decidido:** `docs/libro-de-estilo.md` se podó y se borró. Las ocho secciones que duplicaba a `spec/` desaparecieron con él; las tres filas de su matriz que no estaban cubiertas ([`ver además` y su motivo](../spec/notas.md), [el emparejamiento no literal al cerrar un pendiente](../spec/agente.md)) se migraron antes de borrar. El bug que destapó la migración: `spec/bitacora.md` citaba este documento de diseño como si fuera el `LIBRO-DE-ESTILO.md` que se instala en el vault del autor. Corregido.
 

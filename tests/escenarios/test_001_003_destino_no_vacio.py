@@ -6,6 +6,9 @@ Escenario: 001-003-destino-no-vacio.md
 pregunta corre antes de bajar nada de la red: los dos casos se prueban
 sin `curl` ni GitHub.
 
+Los tres tests usan tempdirs y no `playground/`: este escenario no produce
+ningún vault, así que no cae bajo la regla de `../escenarios/README.md`.
+
 El primer test simula que nadie respondió: el subproceso corre con
 `start_new_session=True` (setsid), sin terminal de control, así que
 abrir `/dev/tty` falla y el script lee eso como respuesta vacía, que

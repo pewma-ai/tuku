@@ -4,6 +4,12 @@
 
 Cómo funciona el sistema no se explica aquí, está en `AGENTS.md`. Aquí va solo el vocabulario que elige el autor.
 
+## El autor
+
+**Nombre del autor:** por declarar. El instalador lo pregunta al crear el vault; si se deja en blanco, el autor lo escribe aquí cuando quiera.
+
+El sistema escribe en primera persona y esa primera persona es el autor. Cuando su nombre aparece en un dictado, se refiere a él y no a un tercero.
+
 ## Los tres encabezados de abajo son contrato
 
 Las automatizaciones leen las tablas que siguen buscando estos encabezados exactos. Las **filas** se agregan, se quitan o se cambian cuando haga falta. Si se renombra un **encabezado**, las automatizaciones dejan de encontrar el vocabulario.
@@ -47,12 +53,6 @@ Las notas pueden ser libres. Algunas, sobre cosas que se repiten, conviene que s
 | `persona` | Trabajar mejor con alguien con quien el autor trata seguido. | Se escribe solo lo que se le mostraría a esa persona. |
 
 Empieza con uno. Los demás aparecen cuando algo se repite lo suficiente como para merecer página propia.
-
-## El autor
-
-**Nombre del autor:** por declarar. El instalador lo pregunta al crear el vault; si se deja en blanco, el autor lo escribe aquí cuando quiera.
-
-El sistema escribe en primera persona y esa primera persona es el autor. Cuando su nombre aparece en un dictado, se refiere a él y no a un tercero.
 
 ## Cómo escribe el autor
 

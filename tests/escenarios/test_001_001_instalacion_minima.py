@@ -25,11 +25,9 @@ La corrida byte a byte instala en `playground/001-001-instalacion-minima/`
 (git-ignored, se pisa en cada corrida), así el estado cero queda a la vista
 para el `## Qué se mira a mano` del escenario.
 
-Una segunda función, `test_001_001_instalador_siembra_el_autor`, es la única
-cobertura del flag `--autor`: instalar con un nombre lo escribe en la sección
-"El autor" de `LIBRO-DE-ESTILO.md` y borra el placeholder "por declarar".
-Esa función se queda en un tempdir: solo hace un `assert` de detalle, no deja
-superficie de revisión a mano.
+La cobertura del flag `--autor` vive en el escenario 001-004, que ejerce el
+camino completo por `install.sh` y deja el vault en
+`playground/001-004-instalador-pregunta-el-nombre/`.
 
 Fecha fija: 2026-08-11 (martes), el mismo día donde arranca el ground truth
 de corpus/referencia/referencia-faena.md ("Turno Faena"). El usuario real
@@ -43,7 +41,6 @@ Ejecutable directo, sin pytest:
 from __future__ import annotations
 
 import sys
-import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -78,24 +75,6 @@ DIAS = [
 ]
 
 
-def test_001_001_instalador_siembra_el_autor() -> None:
-    """El flag --autor escribe el nombre en la sección "El autor" del libro de estilo.
-
-    Única cobertura de `--autor`: instalar con un nombre reemplaza el placeholder
-    "por declarar" por ese nombre, sobre la línea `**Nombre del autor:**`.
-    """
-    # Tempdir a propósito: lo que se mira a mano del 001-001 es el estado cero
-    # que deja la función byte a byte; esta solo verifica que --autor escribe
-    # el nombre, no deja nada que revisar en playground/.
-    with tempfile.TemporaryDirectory() as tmp:
-        destino = Path(tmp) / "vault"
-        instalar("vanilla", destino, FECHA_FIJA, autor="Fulana Pérez de Tal")
-
-        libro = (destino / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
-        assert "**Nombre del autor:** Fulana Pérez de Tal" in libro
-        assert "por declarar" not in libro
-
-
 def test_001_001_instalacion_minima_byte_a_byte() -> None:
     destino = preparar_playground("001-001-instalacion-minima")
     instalar("vanilla", destino, FECHA_FIJA)
@@ -117,5 +96,3 @@ if __name__ == "__main__":
         "ok: árbol idéntico a template/vanilla/, AHORA.md sembrado, sin placeholders vivos "
         "(queda en playground/001-001-instalacion-minima/)"
     )
-    test_001_001_instalador_siembra_el_autor()
-    print("ok: --autor siembra el nombre en LIBRO-DE-ESTILO.md")
