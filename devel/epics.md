@@ -18,11 +18,24 @@ El motivo es el criterio de entrega: "los pendientes funcionan" no es una experi
 
 La consecuencia práctica es que los epics 002 y 003 construyen **las mismas capacidades dos veces**, contra vaults distintos. No es repetición: en el 002 el vault está vacío y cada capacidad tiene que crear lo que necesita; en el 003 ya existe un árbol de ámbitos, notas y pendientes con historia, y la misma capacidad tiene que aprovecharlo. Casi todo lo que se descubre está en la segunda vuelta.
 
+## El orden, siempre el mismo
+
+Vale entre epics y entre escenarios de un epic:
+
+1. **De lo determinista a lo agéntico.** Un tramo determinista corre mil veces gratis; uno agéntico cuesta y no repite resultado. El escenario con LLM va al final, nunca en la base de una cadena.
+2. **De lo simple a lo complejo.** Una primitiva antes que la combinación, un ámbito antes que un árbol, el mínimo de entradas antes que el volumen con ruido.
+3. **Del happy path al caso borde.**
+
+Es la apuesta del proyecto: implementando en ese orden, la comprensión de TUKU emerge del uso en vez de decidirse por adelantado.
+
 ## De dónde sale el material
 
-Las prácticas que se implementan salen de [`mac-jpgil`](../../mac-jpgil), el vault real del autor, donde llevan meses probadas: sus `AGENTS.md`, templates, procesos y reglas. La consecuencia "nota" del epic 002 sale de ahí, no de un diseño en abstracto.
+Dos fuentes con papeles distintos:
 
-**Se trae epic por epic, nunca por adelantado.** Ir a buscar todo lo que `mac-jpgil` hace y especificarlo antes de necesitarlo es la forma más rápida de construir sobreingeniería sobre prácticas que quizá no sobreviven al empaquetado. Cuando un epic empieza, se revisa qué resolvió ya el vault real para eso, y solo eso.
+- **[`mac-jpgil`](../../mac-jpgil) dice qué se construye.** El vault real del autor, con meses de práctica probada. La consecuencia "nota" del epic 002 sale de ahí. Nunca es blanco de un test.
+- **[`../corpus/referencia/`](../corpus/README.md) dice cómo se ve lo correcto.** `referencia-faena.md` y `referencia-pyme.md` son las únicas guías canónicas de los tests. El fixture no se copia del corpus: lo genera un agente desde él.
+
+**Se trae epic por epic, nunca por adelantado.** Especificar antes de necesitarlo es sobreingeniería sobre prácticas que quizá no sobreviven al empaquetado. Por eso la Parte 3 de `referencia-faena.md` sigue sin traducir: la necesita el epic 003.
 
 ## Estado
 
@@ -72,6 +85,8 @@ No entra: janitors, agentes, LLM. Tampoco el tipo de ciclo real de quien lo usa:
 
 Alguien instala TUKU y empieza a usarlo el mismo día. Todo lo que hace, lo hace sobre un vault que está vacío: cada cosa que necesita, la crea al escribirla.
 
+Los ejemplos salen de [`referencia-faena.md`](../corpus/referencia/referencia-faena.md), martes 11 de agosto de 2026: primer día del turno, y el único que un vault recién instalado recibe sin inventar ámbitos previos.
+
 Qué tiene que funcionar:
 
 1. **La entrada se reformatea sola.** El autor dicta y lo que queda escrito cumple las reglas de `docs/` y `spec/`: hora, ámbito, marca de la ontología cerrada, clasificación, cuerpo. En el día correcto y en orden cronológico.
@@ -91,6 +106,7 @@ Antes de empezar hay que decidir:
 3. Qué arnés de agente se usa y cómo se aísla para no gastar tokens por accidente.
 4. Dónde vive el código y cómo se ejecuta. Ya no se puede diferir.
 5. Dónde se especifica el comportamiento del agente al dirigirse al autor: trato, registro, cómo lo nombra en conversación. Viene abierta del epic 001, que implementó solo el nombre.
+6. Si las cadencias se declaran acá con material prestado de `referencia-pyme.md`, o se difieren al epic 004. `referencia-faena.md` no declara ninguna, así que hoy la tercera marca de la ontología cerrada no tiene ejemplo en el día uno.
 
 Lo que va a mover en el diseño, ya identificado:
 

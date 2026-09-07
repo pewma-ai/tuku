@@ -1,9 +1,5 @@
 # Escenario · 001-004-instalador-pregunta-el-nombre
 
-> Corpus, no diseño: esto es un caso a favor del que se prueba el sistema, referencia `spec/`
-> pero no lo reemplaza. Si el resultado contradice `spec/`, se corrige `spec/`, no este archivo
-> (ver `devel/epics.md`, "los epics mueven el diseño").
-
 **Cubre:** epic 001, fase 0, decidido #9 de [`../../devel/epics.md`](../../devel/epics.md), la capa de identidad mínima.
 
 ## Escenario: el instalador pregunta el nombre y queda escrito en el libro de estilo

@@ -1,18 +1,4 @@
-"""Stub del escenario 002-007-crear-ambito.
-
-Escenario: 002-007-crear-ambito.md
-
-Fase 3 en versión mínima. Crear `depto-centro` deja el directorio con sus dos
-archivos obligatorios y su página propia (que es lo que lo hace ámbito y no
-categoría), no toca `ambitos/personal/` y no crea ningún `CAPACIDAD.md`. El
-enlazado retroactivo convierte la mención suelta que 002-001 dejó escrita en
-el martes 11, sin reescribir el resto de la línea, y no sale de `AHORA.md`.
-
-Segundo caso, negativo: un directorio sin página propia es categoría, y una
-entrada que le apunta se reporta sin rechazarse.
-
-Falla a propósito. El escenario está escrito y el mecanismo no existe todavía.
-"""
+"""Stub. Escenario en 002-007-crear-ambito.md. Falla a propósito."""
 
 from __future__ import annotations
 

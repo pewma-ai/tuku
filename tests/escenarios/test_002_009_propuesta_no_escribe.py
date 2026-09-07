@@ -1,19 +1,4 @@
-"""Stub del escenario 002-009-propuesta-no-escribe.
-
-Escenario: 002-009-propuesta-no-escribe.md
-
-El principio 3 convertido en test, y el último paso determinista de la cadena:
-su estado final es el que se revisa contra el criterio de salida del epic.
-
-La entrada se registra, lo que sugiere se propone, y el diff contra el estado
-anterior es exactamente esa línea de `AHORA.md`: `PENDIENTES.md`, `ambitos/` y
-`notas/` quedan byte a byte iguales. Rechazar la propuesta da diff vacío.
-Aprobarla abre el pendiente como en 002-003, y el test revierte esa rama para
-que el estado heredado sea el del rechazo, que es como termina el día uno del
-corpus.
-
-Falla a propósito. El escenario está escrito y el mecanismo no existe todavía.
-"""
+"""Stub. Escenario en 002-009-propuesta-no-escribe.md. Falla a propósito."""
 
 from __future__ import annotations
 

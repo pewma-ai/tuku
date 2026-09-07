@@ -1,9 +1,5 @@
 # Escenario · 001-003-destino-no-vacio
 
-> Corpus, no diseño: esto es un caso a favor del que se prueba el sistema, referencia `spec/`
-> pero no lo reemplaza. Si el resultado contradice `spec/`, se corrige `spec/`, no este archivo
-> (ver `devel/epics.md`, "los epics mueven el diseño").
-
 **Cubre:** epic 001, fase 0, decidido #7 de [`../../devel/epics.md`](../../devel/epics.md).
 
 ## Escenario: no sobrescribir un destino que ya tiene algo, sin preguntar

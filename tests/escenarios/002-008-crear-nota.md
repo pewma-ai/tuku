@@ -1,9 +1,5 @@
 # Escenario · 002-008-crear-nota
 
-> Corpus, no diseño: esto es un caso a favor del que se prueba el sistema, referencia `spec/`
-> pero no lo reemplaza. Si el resultado contradice `spec/`, se corrige `spec/`, no este archivo
-> (ver `devel/epics.md`, "los epics mueven el diseño").
-
 **Cubre:** epic 002, punto 5, fase 5 en su **versión mínima**: crear una nota a petición y enlazarla. Notas tipadas con plantilla y destilado del histórico no entran.
 
 ## Estado inicial
@@ -12,9 +8,7 @@ El que dejó [`002-007-crear-ambito`](002-007-crear-ambito.md): existe el ámbit
 
 ## La consecuencia "nota" todavía no está en la spec
 
-[`../../spec/flujo-informacion.md`](../../spec/flujo-informacion.md) tiene una tabla de consecuencias con pendientes, enlaces, cadencias y propuesta. La nota no está, y el punto 5 del epic la exige. La spec dice que la lista es abierta y que agregar una consecuencia es agregar un archivo en `reglas/`, así que este escenario es el que obliga a escribir `reglas/notas.tuku.md` y la fila que falta.
-
-Es lo primero que el epic 002 mueve en el diseño, y estaba previsto en `epics.md` antes de empezar.
+La tabla de consecuencias de [`spec/flujo-informacion.md`](../../spec/flujo-informacion.md) tiene pendientes, enlaces, cadencias y propuesta. La nota no está y el punto 5 la exige. Como la spec declara la lista abierta y agregar una consecuencia es agregar un archivo en `reglas/`, este escenario obliga a escribir `reglas/notas.tuku.md` y la fila que falta. Es lo primero que el epic 002 mueve en el diseño, previsto en `epics.md` antes de empezar.
 
 ## Escenario: la nota se escribe donde corresponde
 
@@ -32,7 +26,7 @@ Entonces hay una entrada nueva en el martes 11 que deja constancia de la nota cr
 Y esa entrada enlaza a la nota
 Y no hay ninguna otra entrada narrando el mecanismo
 
-Crear la nota es un hecho de la vida del autor (lo pidió), a diferencia de mover un pendiente de escalón, que es un hecho del sistema. Por eso esta sí se registra y aquella no.
+Crear la nota es un hecho de la vida del autor, que la pidió; mover un pendiente de escalón es del sistema. Por eso esta se registra y aquella no.
 
 ## Escenario: la nota queda enlazada a su ámbito, porque se pidió así
 
@@ -51,7 +45,7 @@ Entonces la nota tiene una sección `## Ver además`
 Y cada enlace de esa sección va seguido de texto de motivo
 Y el lint no falla
 
-La **presencia** de la sección y del motivo es verificable sin juicio. Que el motivo sea pertinente y no relleno solo lo evalúa quien lee, y por eso está más abajo y no acá ([`../../spec/notas.md`](../../spec/notas.md)).
+La **presencia** de la sección y del motivo se verifica sin juicio. Que el motivo sea pertinente y no relleno lo evalúa quien lee, y está más abajo ([`spec/notas.md`](../../spec/notas.md)).
 
 ## Escenario: crear la nota dos veces no duplica nada
 
@@ -62,7 +56,7 @@ Y no hay una segunda entrada de constancia en la bitácora
 
 ## De dónde sale el contenido
 
-Del fixture `fixtures/002-010-dictado-del-dia-uno/`, igual que las entradas de la cadena: el texto de la nota es salida de agente y no tiene original vivo contra el cual compararse. Lo que este escenario prueba es todo lo demás (dónde queda el archivo, la constancia, el enlace, el lint), que es determinista.
+Del fixture `fixtures/002-010-dictado-del-dia-uno/`: el texto de la nota es salida de agente. Todo lo que este escenario prueba (dónde queda el archivo, la constancia, el enlace, el lint) es determinista.
 
 ## Cómo se corre
 
@@ -72,6 +66,6 @@ uv run pytest tests/escenarios/ -k 002_008
 
 ## Qué se mira a mano
 
-- **Leer el motivo del "Ver además".** Es la parte que ningún script puede juzgar: si el motivo no responde para qué le sirve al lector de esta nota hacer clic, está de relleno.
+- **Leer el motivo del "Ver además".** Ningún script lo juzga: si no responde para qué le sirve al lector hacer clic, está de relleno.
 - Que la entrada de constancia en la bitácora se lea como un hecho del día y no como un log de sistema.
 - Que la nota se sostenga sola dentro de un año, sin la conversación que la pidió.

@@ -22,13 +22,24 @@ El mismo par nombra las tres cosas: el caso (`XXX-YYY-slug.md`), el arnés (`tes
 
 ## Fixtures
 
-`fixtures/XXX-YYY-slug/`, con guiones, porque es un directorio de datos y no un módulo. Hoy no hay ninguno, y no es un descuido.
+`fixtures/XXX-YYY-slug/`, con guiones, porque es un directorio de datos y no un módulo.
 
 **Nada que provenga de `template/` se congela.** Congelar una copia paralela de algo que nunca debería diferir obliga a regenerarla a mano cada vez que cambia el original, y convierte cada cambio del template en un test roto que no señala ningún defecto. El árbol instalado se compara en vivo contra `template/<variante>/`, y lo que el instalador transforma se deriva del template aplicándole el resultado que el escenario afirma a mano.
 
 El epic 001 empezó con un fixture de `AHORA.md` y se eliminó por esto mismo: congelaba también el frontmatter fijo y el título, que el instalador no toca.
 
-Un fixture se justifica cuando la entrada no sale del repositorio (un dictado, una respuesta de agente, un archivo que el autor trajo de afuera). Ahí no hay original vivo contra el cual comparar, y congelar es la única opción.
+### El fixture se genera desde el corpus, no se copia
+
+Lo que un escenario inyecta sale de [`../../corpus/referencia/`](../../corpus/README.md), **generado por un agente LLM avanzado**, adaptado a lo que ese escenario prueba. Adaptado en dos ejes:
+
+1. **El tamaño es variable del test.** Probar una primitiva pide el mínimo: tres entradas si bastan tres. Probar si el agente o el janitor se distraen pide muchas, casi todas ruido. El mismo escenario puede tener las dos versiones.
+2. **El dominio se elige.** Un escenario de cadencias genera desde pyme, porque faena no declara ninguna.
+
+Copiar literal amarra el test a un texto que el corpus puede cambiar, y le entrega al agente el ejemplo que después se le pide reproducir.
+
+### Qué sí se congela
+
+Solo la **salida de un agente** que otros escenarios consumen: no hay original vivo contra el cual comparar. El dictado de entrada no, que se genera.
 
 ## Convención de formato
 
@@ -82,6 +93,8 @@ uv run pytest tests/escenarios/ -k 001_002  # un escenario
 | [`002-010-dictado-del-dia-uno.md`](002-010-dictado-del-dia-uno.md) | Epic 002, fase 1 con LLM | El único que gasta tokens, fuera de la corrida por defecto. Dueño del fixture que consumen los otros nueve |
 
 ## Escenarios encadenados, desde el epic 002
+
+El orden lo fija [`../../devel/epics.md`](../../devel/epics.md), "El orden, siempre el mismo". La cadena es la forma que toma acá.
 
 Dentro de un epic, **el estado inicial de un escenario es el estado final del anterior**. El primero parte del fixture con el que el epic empieza (`vacio` para el 002) y el último deja el fixture con el que empieza el epic siguiente. Es la escalera de [`../../devel/que_implementar.md`](../../devel/que_implementar.md) bajada de grano: los estados intermedios no se escriben a mano ni se congelan, se reproducen corriendo la cadena.
 

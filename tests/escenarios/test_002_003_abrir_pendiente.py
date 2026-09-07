@@ -1,21 +1,4 @@
-"""Stub del escenario 002-003-abrir-pendiente.
-
-Escenario: 002-003-abrir-pendiente.md
-
-Una entrada `**pendiente**` deja el ítem en `^sin-fecha` con el cuerpo copiado
-literal, sin fecha en el ítem, y el diff toca `AHORA.md` y `PENDIENTES.md` y
-nada más. Los cinco horizontes permanentes siguen existiendo aunque estén
-vacíos, y correr el janitor dos veces da diff vacío.
-
-**Bloqueado por una ambigüedad de `spec/`**, marcada con `#REVISAR` en el
-escenario: `spec/pendientes.md` dice a la vez que un dictado de hoy cae en
-`^sin-fecha` (su ejemplo) y que escribir en el día de hoy fecha el pendiente
-(su regla). Este test afirma `^sin-fecha`. Si la spec se resuelve al revés,
-este escenario cambia y el epic 002 se queda sin ninguna vía de entrada a
-`^sin-fecha`.
-
-Falla a propósito. El escenario está escrito y el mecanismo no existe todavía.
-"""
+"""Stub. Escenario en 002-003-abrir-pendiente.md. Falla a propósito."""
 
 from __future__ import annotations
 

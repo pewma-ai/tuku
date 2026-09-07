@@ -1,9 +1,5 @@
 # Escenario · 001-002-instalacion-local
 
-> Corpus, no diseño: esto es un caso a favor del que se prueba el sistema, referencia `spec/`
-> pero no lo reemplaza. Si el resultado contradice `spec/`, se corrige `spec/`, no este archivo
-> (ver `devel/epics.md`, "los epics mueven el diseño").
-
 **Cubre:** epic 001, fase 0. Complementa a [`001-001-instalacion-minima.md`](001-001-instalacion-minima.md), que instala vía `curl` contra GitHub.
 
 ## Escenario: instalar sin red ni git, por simplicidad

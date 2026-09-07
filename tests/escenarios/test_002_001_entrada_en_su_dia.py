@@ -1,15 +1,4 @@
-"""Stub del escenario 002-001-entrada-en-su-dia.
-
-Escenario: 002-001-entrada-en-su-dia.md
-
-Primer paso de la cadena del epic 002. Instala el fixture `vacio` con
-`--desde 2026-08-11` (el mismo estado con que cerró el epic 001), inyecta tres
-entradas fuera de orden y afirma tres cosas: caen en el día de hoy, quedan
-ordenadas por hora, y el diff contra el estado inicial toca `AHORA.md` y nada
-más. Esa última es el criterio de corte de la fase 1.
-
-Falla a propósito. El escenario está escrito y el mecanismo no existe todavía.
-"""
+"""Stub. Escenario en 002-001-entrada-en-su-dia.md. Falla a propósito."""
 
 from __future__ import annotations
 

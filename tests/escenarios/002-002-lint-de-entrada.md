@@ -1,9 +1,5 @@
 # Escenario · 002-002-lint-de-entrada
 
-> Corpus, no diseño: esto es un caso a favor del que se prueba el sistema, referencia `spec/`
-> pero no lo reemplaza. Si el resultado contradice `spec/`, se corrige `spec/`, no este archivo
-> (ver `devel/epics.md`, "los epics mueven el diseño").
-
 **Cubre:** epic 002, fase 1, criterio de salida. `jntr.entrada-lint`: ontología cerrada estricta, ontología abierta permisiva.
 
 ## Estado inicial
@@ -18,7 +14,7 @@ Entonces la entrada queda escrita en su día
 Y el lint la reporta como tipo desconocido, para preguntar más adelante
 Y el reporte no es un error: el lint termina en estado de éxito
 
-Un linter que rechaza vocabulario nuevo impide que la organización emerja, que es justo lo que el diseño busca ([`../../spec/bitacora.md`](../../spec/bitacora.md)).
+Rechazar vocabulario nuevo impediría que la organización emerja ([`spec/bitacora.md`](../../spec/bitacora.md)).
 
 ## Escenario: la ontología cerrada se valida estricta
 
@@ -44,7 +40,7 @@ Cuando se corre el lint dos veces seguidas sin inyectar nada
 Entonces el diff contra el estado inicial es vacío las dos veces
 Y el reporte es idéntico
 
-El lint informa, no corrige. Es lo que permite correrlo cuantas veces haga falta sin miedo.
+El lint informa, no corrige.
 
 ## Cómo se corre
 
@@ -54,5 +50,5 @@ uv run pytest tests/escenarios/ -k 002_002
 
 ## Qué se mira a mano
 
-- Leer el reporte del lint como lo leería el autor: que se entienda cuál de los tres hallazgos exige acción y cuál es solo una pregunta pendiente.
-- Que el hallazgo del tipo desconocido no suene a reto. Es vocabulario del autor, y el sistema está preguntando qué significa.
+- Leer el reporte: que se entienda cuál de los tres hallazgos exige acción y cuál es solo una pregunta.
+- Que el hallazgo del tipo desconocido no suene a reto: es vocabulario del autor y el sistema pregunta qué significa.

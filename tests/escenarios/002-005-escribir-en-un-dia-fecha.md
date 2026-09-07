@@ -1,10 +1,6 @@
 # Escenario · 002-005-escribir-en-un-dia-fecha
 
-> Corpus, no diseño: esto es un caso a favor del que se prueba el sistema, referencia `spec/`
-> pero no lo reemplaza. Si el resultado contradice `spec/`, se corrige `spec/`, no este archivo
-> (ver `devel/epics.md`, "los epics mueven el diseño").
-
-**Cubre:** epic 002, punto 3, que es la razón de ser del epic y lo que ningún otro escenario cubre: agendar es escribir donde corresponde, y no hay un comando aparte para fechar.
+**Cubre:** epic 002, punto 3, la razón de ser del epic: agendar es escribir donde corresponde, sin un comando aparte para fechar.
 
 ## Estado inicial
 
@@ -20,7 +16,7 @@ Y contiene `- [[personal]] - pagar la sesión con el psicólogo`
 Y el miércoles 12 de `AHORA.md` abre con la transclusión de ese ancla
 Y el pendiente **no** aparece en `^sin-fecha` ni en ningún horizonte con nombre
 
-El pendiente nació con fecha exacta sin pasar por la escalera. La escalera describe cómo se concreta lo que nació difuso, no un camino obligatorio ([`../../spec/pendientes.md`](../../spec/pendientes.md)).
+Nació con fecha exacta sin pasar por la escalera, que describe cómo se concreta lo que nació difuso y no es un camino obligatorio ([`spec/pendientes.md`](../../spec/pendientes.md)).
 
 ## Escenario: fechar mueve, nunca copia
 
@@ -29,7 +25,7 @@ Cuando se termina la inyección
 Entonces el pendiente está en exactamente un callout
 Y `jntr.pendientes-lint` no encuentra ninguna aparición duplicada
 
-Es la regla 1 de `spec/pendientes.md`, y es el error que el vault real del autor tuvo que prohibir por escrito: escribir la misma tarea en el callout del día y en la caja de la semana (ver [`../../devel/lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 7).
+Regla 1 de `spec/pendientes.md`, y el error que el vault real tuvo que prohibir por escrito: la misma tarea en el callout del día y en la caja de la semana ([`lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 7).
 
 ## Escenario: el callout de fecha es efímero, el de horizonte no
 
@@ -62,5 +58,5 @@ uv run pytest tests/escenarios/ -k 002_005
 
 ## Qué se mira a mano
 
-- **Abrir el resultado en Obsidian**, que es donde esto se verifica de verdad: el miércoles 12 tiene que mostrar el pendiente transcluido, no una caja de error ni el texto crudo del embed.
+- **Abrirlo en Obsidian**, que es donde esto se verifica: el miércoles 12 muestra el pendiente transcluido, no una caja de error ni el texto crudo del embed.
 - Que agendar se haya sentido como escribir en una agenda de papel. Si el autor tuvo que pensar en callouts o anclas, el punto 3 del epic no está cumplido.
