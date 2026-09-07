@@ -3,7 +3,7 @@
 Escenario: 002-001-registro-en-su-dia.md
 
 Primer paso de la cadena del epic 002. Instala vanilla con --desde 2026-08-11,
-inyecta tres líneas fuera de orden bajo el día de hoy con jntr.registrar
+inyecta tres líneas fuera de orden bajo el día de hoy con tuku entry add
 y afirma: caen en su día ordenados por hora, el de las 18:40 no se reescribe,
 los otros seis días siguen vacíos, PENDIENTES.md no se toca, y la línea sin
 ámbito ni clasificación queda escrita igual.
@@ -23,7 +23,7 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
 from cadena import delta, instantanea, preparar_paso  # noqa: E402
 
-from jntr.registrar import registrar  # noqa: E402
+from tuku.entry import add  # noqa: E402
 
 SLUG = "002-001-registro-en-su-dia"
 PREVIO = None
@@ -46,7 +46,7 @@ def _sembrar_registros() -> Path:
     vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
     ahora = vault / "AHORA.md"
     ahora.write_text(
-        registrar(ahora.read_text(encoding="utf-8"), REGISTROS, dia=HOY),
+        add(ahora.read_text(encoding="utf-8"), REGISTROS, dia=HOY),
         encoding="utf-8",
     )
     return vault
@@ -79,7 +79,7 @@ def test_002_001_la_fase_1_no_toca_pendientes() -> None:
     antes = instantanea(vault)
     ahora = vault / "AHORA.md"
     ahora.write_text(
-        registrar(ahora.read_text(encoding="utf-8"), REGISTROS, dia=HOY),
+        add(ahora.read_text(encoding="utf-8"), REGISTROS, dia=HOY),
         encoding="utf-8",
     )
     assert delta(antes, instantanea(vault)) == {"AHORA.md": "modificado"}

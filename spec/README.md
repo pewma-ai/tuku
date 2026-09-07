@@ -104,10 +104,10 @@ El **código** vive fuera, instalado, en `~/.tuku/janitors`. El `AGENTS.md` de l
 
 La división es la de siempre: **la especificación sobrevive, la implementación se reemplaza.** Un script de 2026 no va a correr en 2046, pero la descripción de lo que hacía sí se va a leer. Y así el repositorio del autor no se vuelve una copia del código de TUKU que después diverge por su cuenta.
 
-Cada janitor se especifica igual:
+El nombre canónico de cada janitor es su comando `tuku <noun> <verb>`, y ese es el encabezado con que se especifica. Cada janitor se especifica igual:
 
 ```markdown
-## pendientes-atrasados
+## todo overdue
 
 **Qué hace:** mueve a `^atrasados` los pendientes con fecha anterior a HOY, estampando el vencimiento.
 **Cuándo:** a diario.

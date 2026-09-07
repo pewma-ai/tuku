@@ -9,7 +9,7 @@ AMBITO = "depto-centro"
 
 FALTA = (
     "la consecuencia 'nota' en spec/flujo-informacion.md y su reglas/notas.tuku.md; "
-    "el paso de cadena de tests/scripts/; jntr.notas-lint"
+    "el paso de cadena de tests/scripts/; tuku note lint"
 )
 
 

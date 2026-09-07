@@ -23,7 +23,7 @@ Lo que cambia entre tipos es la plantilla y qué se infiere. El procedimiento es
 5. Se escribe la nota con la plantilla del tipo.
 6. Se indexa y las menciones sueltas se convierten en enlaces.
 
-El paso 3 es caro y conviene aislarlo: barrer meses de bitácoras no cabe dentro de una conversación. Se ejecuta en **contexto aislado**, vía `jntr.nota-destilar`.
+El paso 3 es caro y conviene aislarlo: barrer meses de bitácoras no cabe dentro de una conversación. Se ejecuta en **contexto aislado**, vía `tuku note distill`.
 
 ## Lo que declara un tipo
 
@@ -46,7 +46,7 @@ Toda nota cierra con una sección `## Ver además`: la lista de sus enlaces sali
 
 Sin el motivo, el enlace es un dato; con él, es una decisión que alguien más puede evaluar sin abrir la otra nota. Dos niveles de exigencia, y son de naturaleza distinta:
 
-- **Que la sección exista y que cada enlace lleve motivo** es verificable sin juicio → `jntr.notas-lint`.
+- **Que la sección exista y que cada enlace lleve motivo** es verificable sin juicio → `note lint`.
 - **Que el motivo sea pertinente y no relleno** solo lo evalúa quien lee → agente, juicio semántico.
 
 ## Inferir sobre terceros

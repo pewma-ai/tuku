@@ -7,7 +7,7 @@ PREVIO = "002-005-escribir-en-un-dia-fecha"
 ANCLA_VIVA = "^2026-08-12"
 ANCLA_INEXISTENTE = "^2026-08-14"
 
-FALTA = "el paso de cadena de tests/scripts/; jntr.transclusiones-sync"
+FALTA = "el paso de cadena de tests/scripts/; tuku transclusion sync"
 
 
 def test_002_006_las_dos_direcciones_de_falla_se_reparan() -> None:

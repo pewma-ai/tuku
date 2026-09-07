@@ -36,7 +36,7 @@ Criterio de corte de la fase 1: si algo escribe en `PENDIENTES.md`, el corte est
 
 Dado el mismo estado
 Cuando se inyecta la línea de las 11:30, que no lleva `[[ambito]]` ni `**clasificacion**`
-Entonces `jntr.registrar` lo deja escrito tal cual, sin marcarlo
+Entonces `tuku entry add` lo deja escrito tal cual, sin marcarlo
 
 Ámbito y clasificación son opcionales según el contexto ([`spec/bitacora.md`](../../spec/bitacora.md)). Que además el lint no lo marque se prueba en [`002-002`](002-002-lint-de-registro.md), que arranca de este estado.
 

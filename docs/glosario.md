@@ -84,7 +84,7 @@
 
 | Término | Qué es |
 |---|---|
-| **Janitor** | Un proceso determinista que mantiene el vault. Se nombran `jntr.*`, se especifican en `reglas/` y su código vive fuera, en `~/.tuku/janitors`. |
+| **Janitor** | Un proceso determinista que mantiene el vault. Su nombre canónico es su comando `tuku <noun> <verb>`, se especifican en `reglas/` y su código vive fuera, en `~/.tuku/janitors`. |
 | **"A mano"** | El campo que declara cómo hacer a mano lo que hace un janitor. Un janitor sin ese campo es una dependencia disfrazada. |
 | **Agente** | El LLM que conversa con el autor, interpreta el dictado y propone. Secretario, nunca dueño. |
 | **Conjunto canónico** | Lo que el autor escribió y nunca se regenera: `AHORA.md`, `bitacoras/`, `PENDIENTES.md`, `ambitos/`, `notas/`. |

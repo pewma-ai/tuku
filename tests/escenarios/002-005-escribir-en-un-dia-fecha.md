@@ -23,7 +23,7 @@ Nació con fecha exacta sin pasar por la escalera, que describe cómo se concret
 Dado el mismo estado
 Cuando se termina la inyección
 Entonces el pendiente está en exactamente un callout
-Y `jntr.pendientes-lint` no encuentra ninguna aparición duplicada
+Y `tuku todo lint` no encuentra ninguna aparición duplicada
 
 Regla 1 de `spec/pendientes.md`, y el error que el vault real tuvo que prohibir por escrito: la misma tarea en el callout del día y en la caja de la semana ([`lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 7).
 

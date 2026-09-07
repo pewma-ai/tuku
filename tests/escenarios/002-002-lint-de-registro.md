@@ -1,6 +1,6 @@
 # Escenario · 002-002-lint-de-registro
 
-**Cubre:** epic 002, fase 1, criterio de salida. `jntr.registro-lint`: ontología cerrada estricta, ontología abierta permisiva.
+**Cubre:** epic 002, fase 1, criterio de salida. `tuku entry lint`: ontología cerrada estricta, ontología abierta permisiva.
 
 ## Estado inicial
 

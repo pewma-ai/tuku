@@ -8,7 +8,7 @@ CUERPO = "avisar de los GGCC a la administradora"
 
 FALTA = (
     "resolver la ambigüedad #REVISAR de spec/pendientes.md (hoy: horizonte o fecha); "
-    "el paso de cadena de tests/scripts/; jntr.pendiente-abrir"
+    "el paso de cadena de tests/scripts/; tuku todo open"
 )
 
 

@@ -7,7 +7,7 @@ PREVIO = "002-003-abrir-pendiente"
 CUERPO_ABIERTO = "avisar de los GGCC a la administradora"
 CUERPO_SIN_PAREJA = "comprar una maleta"
 
-FALTA = "el paso de cadena de tests/scripts/; jntr.pendiente-cerrar; jntr.pendientes-lint"
+FALTA = "el paso de cadena de tests/scripts/; tuku todo close; tuku todo lint"
 
 
 def test_002_004_cerrar_borra_el_item_y_el_cierre_sin_pareja_se_reporta() -> None:

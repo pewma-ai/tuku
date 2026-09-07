@@ -19,8 +19,8 @@ No entra solo la voz. Entran cuatro cosas y ninguna es opcional, porque una pers
 | Qué | De dónde sale | Sin esto no se puede |
 | --- | --- | --- |
 | Lo dicho o escrito | del autor, en lenguaje natural | nada |
-| Contexto reciente | `jntr.contexto-reciente` | evitar repreguntar o duplicar lo ya escrito |
-| Vocabulario de ámbitos | `jntr.vocabulario-ambitos`, desde los frontmatter | elegir ámbito, porque no se sabe cuáles existen |
+| Contexto reciente | `tuku context show` | evitar repreguntar o duplicar lo ya escrito |
+| Vocabulario de ámbitos | `tuku vocab show`, desde los frontmatter | elegir ámbito, porque no se sabe cuáles existen |
 | Vocabularios abiertos | `LIBRO-DE-ESTILO.md`, en sus tres subtítulos | elegir clasificación |
 
 ## Los cinco pasos
@@ -88,9 +88,9 @@ Las cajas rosadas son las que necesitan juicio, y son las únicas. Todo lo verde
 
 | Consecuencia | Qué hace | Reglas | Janitors |
 | --- | --- | --- | --- |
-| Pendientes | Alta o baja en `PENDIENTES.md` | `reglas/pendientes.tuku.md` | `jntr.pendiente-abrir`, `jntr.pendiente-cerrar` |
-| Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md` | `jntr.paginas-index`, `jntr.menciones-enlazar` |
-| Cadencias | Alta o cambio de una cadencia en su ámbito | `reglas/cadencias.tuku.md` | `jntr.cadencia-alta`, `jntr.cadencia-inyectar` |
+| Pendientes | Alta o baja en `PENDIENTES.md` | `reglas/pendientes.tuku.md` | `todo open`, `todo close` |
+| Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md` | `page index`, `link backfill` |
+| Cadencias | Alta o cambio de una cadencia en su ámbito | `reglas/cadencias.tuku.md` | `cadence add`, `cadence inject` |
 | Propuesta | Sugiere algo al autor y espera aprobación | `reglas/propuestas.tuku.md` | sin janitor, a propósito |
 
 La lista es **abierta** y va a crecer a medida que el uso la revele. Agregar una consecuencia es agregar un archivo en `reglas/`, no tocar el flujo. Esa es la prueba de que el corte está bien hecho.

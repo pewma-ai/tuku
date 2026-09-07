@@ -9,8 +9,8 @@ CATEGORIA = "depto-centro/gastos"
 MENCION_SUELTA = "del depto centro"
 
 FALTA = (
-    "el paso de cadena de tests/scripts/; jntr.ambito-crear; "
-    "jntr.menciones-enlazar; jntr.ambitos-lint"
+    "el paso de cadena de tests/scripts/; tuku scope create; "
+    "tuku link backfill; tuku scope lint"
 )
 
 

@@ -73,12 +73,12 @@ El resumen es la excepción y va como enlace: es un documento de decisión compl
 
 En este orden:
 
-1. Crear `AHORA.md` con frontmatter (`ciclo`, `desde`, `hasta`) → `jntr.ciclo-abrir`
-2. Sembrar los días con `## Día, DD de MM` → `jntr.ciclo-abrir`
-3. Rodar y promover pendientes: `este-turno` sin fecha rueda, `proximo-turno` promueve → `jntr.pendientes-promover`
-4. Colectar cadencias desde el árbol y emitir lo que corresponda → `jntr.cadencias-colectar`, `jntr.cadencias-resolver`, `jntr.cadencia-inyectar`
-5. Generar el plan en `planes/` y transcluirlo → `jntr.capacidad-calcular` lo alimenta, leyendo los `CAPACIDAD.md` del árbol
-6. Transcluir los pendientes de cada día → `jntr.transclusiones-sync`
+1. Crear `AHORA.md` con frontmatter (`ciclo`, `desde`, `hasta`) → `cycle open`
+2. Sembrar los días con `## Día, DD de MM` → `cycle open`
+3. Rodar y promover pendientes: `este-turno` sin fecha rueda, `proximo-turno` promueve → `todo promote`
+4. Colectar cadencias desde el árbol y emitir lo que corresponda → `cadence collect`, `cadence resolve`, `cadence inject`
+5. Generar el plan en `planes/` y transcluirlo → `capacity calc` lo alimenta, leyendo los `CAPACIDAD.md` del árbol
+6. Transcluir los pendientes de cada día → `transclusion sync`
 
 Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
 
@@ -86,11 +86,11 @@ Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
 
 En este orden:
 
-1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `jntr.ciclo-extracto` lo alimenta
-2. Aplanar el plan y los pendientes de cada día → `jntr.transclusiones-aplanar`
-3. Dejar el enlace al resumen → `jntr.ciclo-cerrar`
-4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` → `jntr.ciclo-cerrar`
-5. Dejar `AHORA.md` limpio para el ciclo siguiente → `jntr.ciclo-cerrar`
+1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `cycle extract` lo alimenta
+2. Aplanar el plan y los pendientes de cada día → `transclusion flatten`
+3. Dejar el enlace al resumen → `cycle close`
+4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` → `cycle close`
+5. Dejar `AHORA.md` limpio para el ciclo siguiente → `cycle close`
 
 **El orden importa**: aplanar antes de generar el resumen lo deja sin de dónde leer.
 
@@ -105,7 +105,7 @@ Estructura del plan:
 - **Restricciones y contexto**: lo que acota el ciclo antes de empezar
 - **Señales a vigilar**: qué observar durante el ciclo sin que sea tarea
 
-Calcular la capacidad antes de planificar → `jntr.capacidad-calcular`:
+Calcular la capacidad antes de planificar → `capacity calc`:
 
 - Partir de los días que cuentan en el ciclo y restarles el costo fijo: roles operativos, viajes, días con los niños.
 - Un rol operativo se cobra **cada día que dura**, no una vez.
@@ -166,17 +166,17 @@ Lo que sale de sumar no es un número de horas: es cuánto cabe en el ciclo, en 
 
 Trae al plan:
 
-- Pendientes heredados del ciclo anterior → `jntr.pendientes-promover`
-- Cadencias que caen dentro del ciclo → `jntr.cadencias-resolver`
-- Qué quedó abierto y sin cerrar en el ciclo anterior → `jntr.ciclo-extracto`
+- Pendientes heredados del ciclo anterior → `todo promote`
+- Cadencias que caen dentro del ciclo → `cadence resolve`
+- Qué quedó abierto y sin cerrar en el ciclo anterior → `cycle extract`
 
-El plan se propone al autor y no se escribe sin su aprobación. Mover algo a "No entra" pospone sus pendientes y silencia sus alertas de ausencia → `jntr.plan-no-entra`.
+El plan se propone al autor y no se escribe sin su aprobación. Mover algo a "No entra" pospone sus pendientes y silencia sus alertas de ausencia → `plan exclude`.
 
-Registrar cuánto corrigió el autor el plan propuesto → `jntr.plan-delta`. Sin correcciones también es información: dice que la propuesta estuvo bien calibrada.
+Registrar cuánto corrigió el autor el plan propuesto → `plan delta`. Sin correcciones también es información: dice que la propuesta estuvo bien calibrada.
 
 ## Resumen del ciclo
 
-Al cerrar, se genera en `reportes/` y se deja solo el enlace en la bitácora → `jntr.ciclo-extracto`.
+Al cerrar, se genera en `reportes/` y se deja solo el enlace en la bitácora → `cycle extract`.
 
 Estructura del resumen:
 

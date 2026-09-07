@@ -40,7 +40,7 @@ Si la petición no hubiera nombrado un ámbito, la nota quedaría suelta y eso s
 ## Escenario: "Ver además" existe y cada enlace lleva motivo
 
 Dado la nota ya escrita
-Cuando corre `jntr.notas-lint`
+Cuando corre `tuku note lint`
 Entonces la nota tiene una sección `## Ver además`
 Y cada enlace de esa sección va seguido de texto de motivo
 Y el lint no falla

@@ -9,8 +9,8 @@ ANCLA = "^2026-08-12"
 CUERPO = "pagar la sesión con el psicólogo"
 
 FALTA = (
-    "el paso de cadena de tests/scripts/; jntr.pendiente-abrir con fecha desde el día; "
-    "jntr.transclusiones-sync; jntr.pendientes-lint"
+    "el paso de cadena de tests/scripts/; tuku todo open con fecha desde el día; "
+    "tuku transclusion sync; tuku todo lint"
 )
 
 

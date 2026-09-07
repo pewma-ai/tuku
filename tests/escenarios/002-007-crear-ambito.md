@@ -44,7 +44,7 @@ Que los ciclos cerrados sean inmutables no se puede probar el día uno, porque n
 Dado el ámbito `depto-centro` ya creado
 Cuando se crea el directorio `ambitos/depto-centro/gastos/` con sus dos archivos obligatorios y **sin** página propia
 Y se inyecta un registro que apunta a `[[gastos]]`
-Entonces `jntr.ambitos-lint` lo reporta
+Entonces `tuku scope lint` lo reporta
 Y el registro queda escrito igual, porque un error del autor se reporta y nunca se rechaza
 
 Una categoría agrupa y no tiene de qué hablar. Es la única regla de los tres roles verificable sin un árbol profundo, y por eso entra en la versión mínima.

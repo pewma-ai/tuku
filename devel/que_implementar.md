@@ -44,7 +44,7 @@ Es la única fase cuyo criterio de salida **no es técnico**. Se verifica con un
 
 **Se construye.** Inyección de contexto reciente y vocabulario, formateo a `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`, inserción en el día correcto y en orden cronológico, y lint.
 
-**Janitors.** `jntr.contexto-reciente`, `jntr.vocabulario-ambitos`, `jntr.registrar`, `jntr.registro-lint`
+**Janitors.** `context show`, `vocab show`, `entry add`, `entry lint`
 
 **Sale cuando.** El corpus se reproduce con la ontología cerrada exacta, marca y posición, y con el ámbito correcto. La clasificación abierta se mide aparte y no bloquea la fase, porque es vocabulario del autor y no del sistema.
 
@@ -58,7 +58,7 @@ Esta fase es la que habilita todas las demás: a partir de acá, inyectar un cas
 
 **Se construye.** Abrir, cerrar, bajar de escalón, vencer, unicidad, sincronía de transclusiones y el reporte por actividad.
 
-**Janitors.** `jntr.pendiente-abrir`, `jntr.pendiente-cerrar`, `jntr.pendiente-mover`, `jntr.pendientes-atrasados`, `jntr.pendientes-lint`, `jntr.transclusiones-sync`, `jntr.pendientes-por-actividad`
+**Janitors.** `todo open`, `todo close`, `todo move`, `todo overdue`, `todo lint`, `transclusion sync`, `todo by-scope`
 
 **Sale cuando.** Abrir es copiar texto literal y cerrar es borrarlo, sin LLM, gracias a la regla del infinitivo. Ningún pendiente aparece en dos callouts. Correr los janitors dos veces da lo mismo.
 
@@ -72,7 +72,7 @@ Primera fase de inyección pura. Las transclusiones se pueden probar acá porque
 
 **Se construye.** Los tres roles (ámbito, categoría, actividad), la creación, la obligatoriedad de `AGENTS.md` y `CADENCIAS.md`, la resolución de reglas por cercanía, el archivado y la reescritura de enlaces.
 
-**Janitors.** `jntr.ambito-crear`, `jntr.ambitos-lint`, `jntr.reglas-resolver`, `jntr.paginas-index`, `jntr.archivar`, `jntr.enlaces-reescribir`, `jntr.ambitos-inactivos`
+**Janitors.** `scope create`, `scope lint`, `rule resolve`, `page index`, `scope archive`, `link rewrite`, `scope stale`
 
 **Sale cuando.** Con un fixture de tres niveles se comprueba que la regla más cercana gana. Un registro nunca apunta a una categoría. Archivar deja resolviendo los enlaces desde bitácoras ya cerradas.
 
@@ -84,7 +84,7 @@ Primera fase de inyección pura. Las transclusiones se pueden probar acá porque
 
 **Se construye.** Alta desde un registro, colecta desde el árbol, resolución del trigger (calendario más tipo de ciclo), inyección en el día que corresponde y el reporte del autor.
 
-**Janitors.** `jntr.cadencia-alta`, `jntr.cadencias-colectar`, `jntr.cadencias-resolver`, `jntr.cadencia-inyectar`, `jntr.cadencias-reporte`
+**Janitors.** `cadence add`, `cadence collect`, `cadence resolve`, `cadence inject`, `cadence report`
 
 **Sale cuando.** Las cadencias reales de `mac-jpgil` se expresan en el formato sin perder información, incluidas las de rango que cruzan el borde de mes y las tres que caen el día 10. Inyectar dos veces no duplica lo emitido.
 
@@ -98,7 +98,7 @@ Primera fase con un banco de pruebas real y no inventado. **Si una cadencia del 
 
 **Se construye.** Notas tipadas, conversión de menciones en enlaces, `index.md` desde los frontmatter, detección de enlaces rotos y notas huérfanas.
 
-**Janitors.** `jntr.menciones-enlazar`, `jntr.notas-index`, `jntr.notas-lint`, `jntr.enlaces-lint`
+**Janitors.** `link backfill`, `note index`, `note lint`, `link lint`
 
 **Sale cuando.** Crear una nota tipada y enlazarla desde un registro es determinista. Todo `[[enlace]]` resuelve. El index se regenera igual dos veces.
 
@@ -110,7 +110,7 @@ Primera fase con un banco de pruebas real y no inventado. **Si una cadencia del 
 
 **Se construye.** Las dos secuencias ordenadas completas, la promoción de pendientes entre ciclos, el aplanado de transclusiones y el archivo.
 
-**Janitors.** `jntr.ciclo-abrir`, `jntr.pendientes-promover`, `jntr.transclusiones-aplanar`, `jntr.ciclo-cerrar`
+**Janitors.** `cycle open`, `todo promote`, `transclusion flatten`, `cycle close`
 
 **Sale cuando.** Abrir dos veces no duplica días, pendientes ni emisiones. Cerrar dos veces no vuelve a mover. Y hay una prueba que **falla a propósito** si se aplana antes de generar el resumen, porque ese es el orden que importa y sin prueba se pierde.
 
@@ -124,7 +124,7 @@ Ese es el truco de corte de esta fase: **el cierre se prueba entero antes de que
 
 **Se construye.** Cálculo de capacidad, plan con sus cuatro secciones, "no entra" con su efecto sobre pendientes y alertas, registro del delta, y resumen con sus cinco secciones y su veredicto por intención.
 
-**Janitors.** `jntr.capacidad-calcular`, `jntr.plan-no-entra`, `jntr.plan-delta`, `jntr.ciclo-extracto`
+**Janitors.** `capacity calc`, `plan exclude`, `plan delta`, `cycle extract`
 
 **Sale cuando.** La capacidad se calcula restando el costo fijo y no sobre horas brutas. El veredicto sale de comparar plan contra ejecución, lo que se verifica con un caso doble: la misma actividad contra un plan cumplido y contra uno incumplido tiene que dar veredictos distintos. El delta queda registrado, incluso cuando es cero.
 
@@ -146,7 +146,7 @@ La idempotencia no se va con la fase: sigue atravesando todas, como dice más ab
 
 **Se construye.** Detección de recurrencias, destilado de notas tipadas desde el histórico en contexto aislado, inferencia de cadencias implícitas, prioridades por ámbito y el ciclo de propuesta y aprobación.
 
-**Janitors.** `jntr.recurrencias`, `jntr.nota-destilar`, `jntr.periodicidad`
+**Janitors.** `recurrence detect`, `note distill`, `cadence infer`
 
 **Sale cuando.** No hay criterio byte a byte para lo que propone. Se mide por la proporción de propuestas que el autor acepta, y esa medición solo tiene sentido después de varios ciclos de uso real.
 
@@ -271,71 +271,71 @@ De abajo hacia arriba: primero lo que no depende de nada, al final lo que compon
 Casi ninguna prueba se sostiene sola: la mayoría necesita un janitor que inyecte contexto, busque información o corrija inconsistencias. Van anotados al lado con `→`. Los nombres son el encabezado en `reglas/janitors.tuku.md`.
 
 ### Registro
-- Inyectar contexto reciente y vocabulario antes de interpretar nada → `jntr.contexto-reciente`, `jntr.vocabulario-ambitos`
+- Inyectar contexto reciente y vocabulario antes de interpretar nada → `context show`, `vocab show`
 - Formatear el registro. Ambito y clasificacion opcionales según el contexto.
   `- HH:MM - [[ambito]] **clasificacion**: cuerpo`
 - La marca de la ontología cerrada va en la misma posición, antes de la clasificación:
   `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`
-- Inferir ámbitos según el texto → `jntr.vocabulario-ambitos`
+- Inferir ámbitos según el texto → `vocab show`
 - Un dictado con varios hechos produce varios registros
-- Insertar en el día correcto y en orden cronológico, sin reordenar lo ya escrito → `jntr.registrar`
-- Lint → `jntr.registro-lint`
+- Insertar en el día correcto y en orden cronológico, sin reordenar lo ya escrito → `entry add`
+- Lint → `entry lint`
 	- Ontología cerrada estricta, ontología abierta permisiva
 	- Un tipo desconocido se reporta para preguntar después, nunca se rechaza
 
 ### Pendientes
-- Abrir un pendiente desde la bitácora → `jntr.pendiente-abrir`
+- Abrir un pendiente desde la bitácora → `todo open`
 	- Cae en `^sin-fecha`, con el cuerpo copiado literal del registro
-- Cerrar un pendiente desde la bitácora → `jntr.pendiente-cerrar`
+- Cerrar un pendiente desde la bitácora → `todo close`
 	- Desaparece del callout donde esté, sin importar el escalón
-- Bajar de escalón → `jntr.pendiente-mover`
+- Bajar de escalón → `todo move`
 	- `sin-fecha` → horizonte → fecha exacta, sin registrar el movimiento en la bitácora
-- Vencer → `jntr.pendientes-atrasados`
+- Vencer → `todo overdue`
 	- Lo fechado antes de HOY pasa a `^atrasados` con el vencimiento estampado
-- Unicidad → `jntr.pendientes-lint`
+- Unicidad → `todo lint`
 	- Ningún pendiente aparece en dos callouts
-- Sincronía de transclusiones → `jntr.transclusiones-sync`
+- Sincronía de transclusiones → `transclusion sync`
 	- Crear, mover o borrar un pendiente deja `AHORA.md` sin cajas de error
 	- Y sin pendientes fechados que falten en su día
-- Generar `reportes/pendientes-por-actividad.md` desde `PENDIENTES.md` → `jntr.pendientes-por-actividad`
+- Generar `reportes/pendientes-por-actividad.md` desde `PENDIENTES.md` → `todo by-scope`
 	- Esto permite hacer transclusiones dentro de las paginas de ambito/actividad
 
 ### Cadencias
 - Especifica una cadencia
 	- Se registra como registro `**cadencia**`
-	- Se escribe la cadencia en el ámbito que corresponde → `jntr.cadencia-alta`
-	- Se verifica la bitácora actual y se modifica si es necesario, para incluir la nueva cadencia en el día que corresponde → `jntr.cadencia-inyectar`
-- El trigger conoce el tipo de ciclo, no solo el calendario → `jntr.cadencias-resolver`
-- Colectar las cadencias vigentes desde el árbol → `jntr.cadencias-colectar`
-- Publicar la vista del autor en `reportes/cadencias.md` → `jntr.cadencias-reporte`
+	- Se escribe la cadencia en el ámbito que corresponde → `cadence add`
+	- Se verifica la bitácora actual y se modifica si es necesario, para incluir la nueva cadencia en el día que corresponde → `cadence inject`
+- El trigger conoce el tipo de ciclo, no solo el calendario → `cadence resolve`
+- Colectar las cadencias vigentes desde el árbol → `cadence collect`
+- Publicar la vista del autor en `reportes/cadencias.md` → `cadence report`
 - Idempotencia
 	- Inyectar dos veces la misma cadencia no duplica lo emitido
 
 ### Ambitos
-- Crear un nuevo ámbito → `jntr.ambito-crear`
+- Crear un nuevo ámbito → `scope create`
 - Crear una nueva actividad dentro del ambito
 - Crear una nueva categoria dentro de ambito (por ejemplos, trabajo/clientes/juanito_perez.md)
-- Todo directorio nace con `AGENTS.md` y `CADENCIAS.md`, aunque vacíos → `jntr.ambitos-lint`
+- Todo directorio nace con `AGENTS.md` y `CADENCIAS.md`, aunque vacíos → `scope lint`
 - Agregar reglas específicas por ámbito o categoría
-	- La más cercana prevalece → `jntr.reglas-resolver`
-- Un registro nunca apunta a una categoría → `jntr.ambitos-lint`
-- Detectar ámbitos activos sin actividad hace mucho → `jntr.ambitos-inactivos`
-- Archivar una actividad (terminé el proyecto de streamlit) → `jntr.archivar`
+	- La más cercana prevalece → `rule resolve`
+- Un registro nunca apunta a una categoría → `scope lint`
+- Detectar ámbitos activos sin actividad hace mucho → `scope stale`
+- Archivar una actividad (terminé el proyecto de streamlit) → `scope archive`
 	- Caro.. requiere deliberación con el autor
-	- Los enlaces desde bitácoras ya cerradas siguen resolviendo → `jntr.enlaces-reescribir`
-- Archivar un ámbito (ya no trabajo en Calzones Bendek) → `jntr.archivar`
+	- Los enlaces desde bitácoras ya cerradas siguen resolviendo → `link rewrite`
+- Archivar un ámbito (ya no trabajo en Calzones Bendek) → `scope archive`
 	- Caro.. requiere deliberación con el autor
 
 ### Notas
 - Crear una nota y enlazarla desde un registro
-- Destilar una nota tipada desde el histórico, en contexto aislado → `jntr.nota-destilar`
-- Convertir menciones sueltas en enlaces → `jntr.menciones-enlazar`
-- Mantener `index.md` desde los frontmatter, OKF compliant → `jntr.notas-index`
-- Detectar enlaces rotos y notas huérfanas → `jntr.enlaces-lint`
-- "Ver además": presencia de la sección y de texto de motivo → `jntr.notas-lint`
+- Destilar una nota tipada desde el histórico, en contexto aislado → `note distill`
+- Convertir menciones sueltas en enlaces → `link backfill`
+- Mantener `index.md` desde los frontmatter, OKF compliant → `note index`
+- Detectar enlaces rotos y notas huérfanas → `link lint`
+- "Ver además": presencia de la sección y de texto de motivo → `note lint`
 
 ### Enlaces y propuestas
-- Enlazar a páginas que ya existen, en el momento de escribir el registro → `jntr.paginas-index`
+- Enlazar a páginas que ya existen, en el momento de escribir el registro → `page index`
 - Una propuesta se muestra y espera aprobación, no se ejecuta sola
 - Rechazar una propuesta no deja rastro en las primitivas
 	- Sin janitor a propósito: una propuesta rechazada no escribe nada, así que no hay nada que limpiar
@@ -343,23 +343,23 @@ Casi ninguna prueba se sostiene sola: la mayoría necesita un janitor que inyect
 ### Abrir un ciclo
 En este orden:
 
-1. Crear `AHORA.md` con frontmatter (`ciclo`, `desde`, `hasta`) → `jntr.ciclo-abrir`
-2. Sembrar los días con `## Día, DD de MM` → `jntr.ciclo-abrir`
-3. Rodar y promover pendientes: `este-turno` sin fecha rueda, `proximo-turno` promueve → `jntr.pendientes-promover`
-4. Colectar cadencias desde el árbol y emitir lo que corresponda → `jntr.cadencias-colectar`, `jntr.cadencias-resolver`, `jntr.cadencia-inyectar`
-5. Generar el plan en `planes/` y transcluirlo → `jntr.capacidad-calcular` lo alimenta
-6. Transcluir los pendientes de cada día → `jntr.transclusiones-sync`
+1. Crear `AHORA.md` con frontmatter (`ciclo`, `desde`, `hasta`) → `cycle open`
+2. Sembrar los días con `## Día, DD de MM` → `cycle open`
+3. Rodar y promover pendientes: `este-turno` sin fecha rueda, `proximo-turno` promueve → `todo promote`
+4. Colectar cadencias desde el árbol y emitir lo que corresponda → `cadence collect`, `cadence resolve`, `cadence inject`
+5. Generar el plan en `planes/` y transcluirlo → `capacity calc` lo alimenta
+6. Transcluir los pendientes de cada día → `transclusion sync`
 
 - Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones
 
 ### Cerrar un ciclo
 En este orden:
 
-1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `jntr.ciclo-extracto` lo alimenta
-2. Aplanar el plan y los pendientes de cada día → `jntr.transclusiones-aplanar`
-3. Dejar el enlace al resumen → `jntr.ciclo-cerrar`
-4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` → `jntr.ciclo-cerrar`
-5. Dejar `AHORA.md` limpio para el ciclo siguiente → `jntr.ciclo-cerrar`
+1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `cycle extract` lo alimenta
+2. Aplanar el plan y los pendientes de cada día → `transclusion flatten`
+3. Dejar el enlace al resumen → `cycle close`
+4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` → `cycle close`
+5. Dejar `AHORA.md` limpio para el ciclo siguiente → `cycle close`
 
 - El orden importa: aplanar antes de generar el resumen lo deja sin de dónde leer
 - Idempotencia: cerrar dos veces no vuelve a mover ni a duplicar
@@ -370,22 +370,22 @@ En este orden:
 	- **No entra, y por qué**: la razón es parte del plan, no un comentario
 	- **Restricciones y contexto**: lo que acota el ciclo antes de empezar
 	- **Señales a vigilar**: qué observar durante el ciclo sin que sea tarea
-- Calcular la capacidad antes de planificar → `jntr.capacidad-calcular`, leyendo los `CAPACIDAD.md` del árbol (formato en [`../spec/ciclo.md`](../spec/ciclo.md))
+- Calcular la capacidad antes de planificar → `capacity calc`, leyendo los `CAPACIDAD.md` del árbol (formato en [`../spec/ciclo.md`](../spec/ciclo.md))
 	- Partir de los días que cuentan en el ciclo y restarles el costo fijo: roles operativos, viajes, días con los niños
 	- Un rol operativo se cobra cada día que dura, no una vez
 	- Se planifica contra lo que queda, en el mismo vocabulario cerrado con que se declaró (nunca horas)
 - Traer al plan
-	- Pendientes heredados del ciclo anterior → `jntr.pendientes-promover`
-	- Cadencias que caen dentro del ciclo → `jntr.cadencias-resolver`
-	- Qué quedó abierto y sin cerrar en el ciclo anterior → `jntr.ciclo-extracto`
+	- Pendientes heredados del ciclo anterior → `todo promote`
+	- Cadencias que caen dentro del ciclo → `cadence resolve`
+	- Qué quedó abierto y sin cerrar en el ciclo anterior → `cycle extract`
 - El plan se propone al autor y no se escribe sin su aprobación
-- Mover algo a "No entra" pospone sus pendientes y silencia sus alertas de ausencia → `jntr.plan-no-entra`
-- Registrar cuánto corrigió el autor el plan propuesto → `jntr.plan-delta`
+- Mover algo a "No entra" pospone sus pendientes y silencia sus alertas de ausencia → `plan exclude`
+- Registrar cuánto corrigió el autor el plan propuesto → `plan delta`
 	- Sin correcciones también es información: dice que la propuesta estuvo bien calibrada
 
 ### Análisis
 - Al cerrar un ciclo
-	- Generar el resumen del ciclo en `reportes/`, y dejar solo el enlace en la bitácora → `jntr.ciclo-extracto`
+	- Generar el resumen del ciclo en `reportes/`, y dejar solo el enlace en la bitácora → `cycle extract`
 	- Estructura del resumen
 		- **Resumen ejecutivo**: tema dominante del ciclo, qué se logró, dónde está el foco urgente
 		- **Veredicto por intención**: cumplida, parcial, en riesgo o sin avance, cada una con su acción siguiente
@@ -396,26 +396,26 @@ En este orden:
 - Prioridades por ámbito / dir / dir
 
 ### Integridad
-- Borrar todo lo derivado y regenerarlo devuelve lo mismo → `jntr.reconstruir`
+- Borrar todo lo derivado y regenerarlo devuelve lo mismo → `rebuild`
 - El conjunto canónico no se regenera: `AHORA.md`, `bitacoras/`, `PENDIENTES.md`, `ambitos/`, `notas/`
-- Todo `[[enlace]]` resuelve a una página existente → `jntr.enlaces-lint`
-- Archivar no rompe enlaces desde bitácoras ya cerradas → `jntr.enlaces-lint`
+- Todo `[[enlace]]` resuelve a una página existente → `link lint`
+- Archivar no rompe enlaces desde bitácoras ya cerradas → `link lint`
 
 ### Inferencias
-- Detectar que algo recurrente merece nota propia, y de qué tipo → `jntr.recurrencias`
+- Detectar que algo recurrente merece nota propia, y de qué tipo → `recurrence detect`
 	- Proponer al autor, nunca crearla sola
-	- Barrer el histórico en contexto aislado, no en la conversación → `jntr.nota-destilar`
+	- Barrer el histórico en contexto aislado, no en la conversación → `note distill`
 	- Si el tipo es `persona`, no escribir nada que no se le podría mostrar
-- Inferir cadencias implícitas estudiando las bitácoras anteriores → `jntr.periodicidad`
-- Detectar ámbitos y actividades → `jntr.recurrencias`
+- Inferir cadencias implícitas estudiando las bitácoras anteriores → `cadence infer`
+- Detectar ámbitos y actividades → `recurrence detect`
 - Prioridades por ámbito
 
 ### Casos de error
-- El ámbito no existe → `jntr.ambitos-lint`
-- Se cierra un pendiente que no está abierto, o se cierra dos veces → `jntr.pendientes-lint`
+- El ámbito no existe → `scope lint`
+- Se cierra un pendiente que no está abierto, o se cierra dos veces → `todo lint`
 - El dictado es ambiguo y no se puede situar
-- Una cadencia emite algo que ya está en el día → `jntr.cadencia-inyectar`
-- El registro cae fuera del rango del ciclo abierto → `jntr.registro-lint`
+- Una cadencia emite algo que ya está en el día → `cadence inject`
+- El registro cae fuera del rango del ciclo abierto → `entry lint`
 
 ## Qué especifica cada primitiva
 

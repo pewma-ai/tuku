@@ -39,7 +39,7 @@ Dos fuentes con papeles distintos:
 
 ## Estado
 
-Actualizado el 2026-09-06.
+Actualizado el 2026-09-07.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
@@ -104,7 +104,7 @@ Antes de empezar hay que decidir:
 1. Qué registros componen el día uno, representativas, con las tres marcas de la ontología cerrada.
 2. Cómo se verifica lo que depende del agente: byte a byte para las consecuencias, otro criterio para la redacción.
 3. Qué arnés de agente se usa y cómo se aísla para no gastar tokens por accidente.
-4. Dónde vive el código y cómo se ejecuta. Ya no se puede diferir.
+4. **Resuelto el 2026-09-07.** Dónde vive el código y cómo se ejecuta. TUKU se distribuye como paquete Python instalable con `pipx` o `uv tool install` directo desde la rama `devel` del repo (`git+https://github.com/pewma-ai/tuku.git@devel`), sin pasar por PyPI. La instalación deja el repo completo en `~/.tuku`: código, `template/`, `spec/`, `reglas/`, el árbol entero. El ejecutable es `tuku`, un CLI con subcomandos de dos niveles `tuku <noun> <verb>`, todo en inglés, porque quien lo usa sabe inglés. `tuku init [<dir>]` siembra un vault nuevo copiando desde `~/.tuku/template/<variante>`, sin red, y reemplaza a `install.sh` y a `src/install_test_scenario.py`. La lógica de cada janitor vive en funciones importables bajo `src/tuku/`; el CLI es una capa fina de argparse, y los tests llaman a las funciones sin lanzar subprocesos, salvo el que prueba el propio `pipx install`. La especificación en prosa de cada janitor sigue en `reglas/janitors.tuku.md` del vault del autor, y su nombre canónico pasa a ser el comando `tuku <noun> <verb>` en vez de `jntr.<algo>`.
 5. Dónde se especifica el comportamiento del agente al dirigirse al autor: trato, registro, cómo lo nombra en conversación. Viene abierta del epic 001, que implementó solo el nombre.
 6. Si las cadencias se declaran acá con material prestado de `referencia-pyme.md`, o se difieren al epic 004. `referencia-faena.md` no declara ninguna, así que hoy la tercera marca de la ontología cerrada no tiene ejemplo en el día uno.
 

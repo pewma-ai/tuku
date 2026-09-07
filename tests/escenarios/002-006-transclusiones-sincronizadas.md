@@ -1,6 +1,6 @@
 # Escenario · 002-006-transclusiones-sincronizadas
 
-**Cubre:** epic 002, fase 2, regla 6 de [`spec/pendientes.md`](../../spec/pendientes.md). `jntr.transclusiones-sync`, las dos direcciones de falla.
+**Cubre:** epic 002, fase 2, regla 6 de [`spec/pendientes.md`](../../spec/pendientes.md). `tuku transclusion sync`, las dos direcciones de falla.
 
 ## Estado inicial
 
@@ -12,7 +12,7 @@ Las dos inyecciones entran por la **segunda vía**: no son hechos de la vida del
 
 Dado el pendiente fechado y su transclusión en el miércoles 12
 Cuando se borra a mano la línea de transclusión, dejando el callout intacto
-Y se corre `jntr.transclusiones-sync`
+Y se corre `tuku transclusion sync`
 Entonces la línea de transclusión vuelve al inicio del miércoles 12
 Y el diff contra el estado inicial de este escenario es vacío
 
@@ -22,7 +22,7 @@ La peligrosa de las dos, porque no se ve: el pendiente no aparece en la agenda y
 
 Dado el mismo estado, ya reparado
 Cuando se agrega a mano `![[PENDIENTES#^2026-08-14]]` bajo el viernes 14, sin que ese ancla exista
-Y se corre `jntr.transclusiones-sync`
+Y se corre `tuku transclusion sync`
 Entonces la línea se quita del viernes
 Y no se crea el callout `^2026-08-14` para justificarla
 
