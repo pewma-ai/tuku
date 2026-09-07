@@ -24,8 +24,7 @@ import filecmp
 import shutil
 from pathlib import Path
 
-#: Raíz del repo, calculada como en `../../src/install_test_scenario.py`
-#: (allá es `parent.parent`; acá hay un nivel más: `tests/scripts/`).
+#: Raíz del repo. `tests/scripts/` cuelga tres niveles bajo la raíz.
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 
 

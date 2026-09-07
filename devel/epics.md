@@ -43,13 +43,13 @@ Actualizado el 2026-09-07.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
-| 001 | Un TUKU mínimo instalable | `vacio` | reabierto | reabierto el 2026-09-07 por el cambio a `pipx` + `tuku init` (decisión 4 del epic 002); faltan los escenarios `001-00X` rehechos |
+| 001 | Un TUKU mínimo instalable | `vacio` | reabierto, mecanismo hecho | `tuku init` (mecanismo `pipx`) implementado y los cinco `001-00X` reescritos y en verde (2026-09-07); falta la re-verificación con una persona sobre `uv tool install` + `tuku init` |
 | 002 | El día uno | `vacio` → `primer-dia` | sin empezar | desbloqueado, listo para empezar |
 | 003 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 002 |
 | 004 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 003 |
 | 005 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 004 |
 
-Lo hecho en el 001, firme tras reabrirlo: `template/vanilla/` (el estado cero), la capa de identidad del autor en `LIBRO-DE-ESTILO.md` con el libro de estilo vanilla reescrito a tercera persona, y la poda y borrado de `docs/libro-de-estilo.md`. Lo que se rehace: el mecanismo de instalación (`src/install_test_scenario.py` e `install.sh` se reemplazan por `tuku init` bajo `src/tuku/`) y los escenarios `001-001` a `001-004`, más uno nuevo. Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos y arnés en `../tests/escenarios/`, pasos compartidos en `../tests/scripts/`.
+Lo hecho en el 001, firme tras reabrirlo: `template/vanilla/` (el estado cero), la capa de identidad del autor en `LIBRO-DE-ESTILO.md` con el libro de estilo vanilla reescrito a tercera persona, y la poda y borrado de `docs/libro-de-estilo.md`. Rehecho el 2026-09-07: el mecanismo de instalación. `src/install_test_scenario.py` e `install.sh` se borraron; en su lugar `src/tuku/init.py` (función `init()` importable) y `src/tuku/cli.py` (capa fina de argparse, `tuku init`). El wheel empaqueta `template/` en `tuku/_home/` vía `setup.py`, y `resolver_home()` cae en cascada `home=` → `TUKU_HOME` → `~/.tuku` → copia empaquetada (que se materializa en `~/.tuku` la primera vez) → raíz del checkout. Los cinco escenarios `001-001`..`001-005` reescritos. Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos y arnés en `../tests/escenarios/`, pasos compartidos en `../tests/scripts/`.
 
 Preparación previa, fuera de los epics: `spec/` y `docs/glosario.md` ordenan el vocabulario, [`que_implementar.md`](que_implementar.md) quedó reducido al plan de fases. Punto de partida, no diseño cerrado.
 
@@ -64,10 +64,10 @@ El entregable: una persona corre `uv tool install git+https://github.com/pewma-a
 Decidido:
 
 1. TUKU se distribuye como paquete Python instalable con `pipx` o `uv tool install` directo desde `git+https://github.com/pewma-ai/tuku.git@devel`. Sin PyPI. Lo fijó la decisión 4 del epic 002.
-2. Esa instalación deja el repositorio completo en `~/.tuku`: código, `template/`, `spec/`, `reglas/`, el árbol entero. `tuku init` siembra desde ahí.
+2. Esa instalación deja en `~/.tuku` lo que `tuku init` necesita. **Ajuste del 2026-09-07 (simple a complejo):** el wheel empaqueta hoy solo `template/` (lo único que `tuku init` copia), no `spec/` ni el árbol entero. La copia empaquetada se materializa en `~/.tuku` la primera vez que se siembra desde ahí, así el árbol queda a la vista y editable. Bundlear el resto se hará cuando un comando lo pida.
 3. `tuku init [<dir>]` reemplaza a `install.sh` y a `src/install_test_scenario.py`. Copia `~/.tuku/template/<variante>` al destino (`vanilla` por defecto) y siembra `AHORA.md` con las fechas del primer ciclo. **Offline: no toca la red.** `install.sh` se borra, sin wrapper de reemplazo: `pipx install` ya es un comando y un wrapper solo reintroduce el `curl | sh` que este modelo elimina. La instalación "a mano" de `template/README.md` pasa a ser copiar `~/.tuku/template/vanilla/` sin más.
-4. `src/install_test_scenario.py` se reemplaza por la función `init` bajo `src/tuku/`. El CLI (`src/tuku/cli.py`, aún sin escribir) es una capa fina de argparse; la lógica es importable y los tests la llaman sin subprocesos, salvo el que prueba el propio `pipx install`.
-5. `tuku` resuelve la ubicación del repositorio con la variable de entorno `TUKU_HOME` (por defecto `~/.tuku`). Es el punto de override para instalaciones no estándar y para los tests, que la apuntan al checkout de trabajo y ejercen `tuku init` sin instalar nada.
+4. `src/install_test_scenario.py` se reemplaza por la función `init` bajo `src/tuku/` (`src/tuku/init.py`). El CLI (`src/tuku/cli.py`) es una capa fina de argparse; la lógica es importable y los tests la llaman sin subprocesos, salvo `001-001` que prueba el propio `uv tool install`.
+5. `tuku` resuelve la ubicación del árbol con `resolver_home()`: argumento `home=` → variable `TUKU_HOME` → `~/.tuku` → copia empaquetada en el wheel → raíz del checkout. `home=` y `TUKU_HOME` son el override para tests e instalaciones no estándar; los tests apuntan al checkout y ejercen `tuku init` sin instalar nada.
 6. `template/`, una carpeta por variante, hermanas y sin composición. `vanilla/` es la mínima. Sin cambio respecto al cierre anterior.
 7. `reglas/config.tuku.md` declara zona horaria y tipo de ciclo, en prosa. Sin cambio.
 8. Sembrar en un directorio que ya tiene contenido se rechaza, salvo `tuku init --force`. Reemplaza al prompt por `/dev/tty` de `install.sh` y a su `TUKU_FORCE=1`: ahora es un flag, no una pregunta interactiva, porque el CLI no depende de una tty.
@@ -96,7 +96,7 @@ Se rehacen los cuatro escenarios `001-00X` para el modelo nuevo y se agrega uno.
 - `001-004-init-author` — `tuku init --author "..."` deja el nombre en la sección "El autor" de `LIBRO-DE-ESTILO.md`, y omitir el flag (o pasarlo vacío) deja el vault operable sin nombre. Reemplaza al viejo `001-004-instalador-pregunta-el-nombre`. — **usa pipx: no**
 - `001-005-init-no-toca-la-red` — con el socket parchado para fallar, `tuku init` completa la siembra igual. Aísla la afirmación "offline" que `001-002` da por supuesta. Nuevo, no reemplaza a nadie. — **usa pipx: no**
 
-Marcador de pytest para `001-001`: hoy `pyproject.toml` tiene `lento`, que no basta porque ese test además necesita red y descarga un repositorio. Hace falta un marcador nuevo tipo `red` y que la corrida por defecto lo excluya igual que a `agentic` (`-m "not agentic and not red"`). Solo se enuncia; `pyproject.toml` no se toca en esta tarea.
+Marcador de pytest para `001-001`: `pyproject.toml` ganó el marcador `red` (descarga o instala desde la red) y la corrida por defecto lo excluye igual que a `agentic` (`addopts` pasó a `-m "not agentic and not red"`). `001-001` lleva `red` y `lento`.
 
 ## Epic 002. El día uno
 

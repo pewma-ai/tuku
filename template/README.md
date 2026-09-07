@@ -4,7 +4,7 @@
 
 Lo que hay dentro de una variante se copia tal cual. Nada de lo que está en este `README.md` viaja al vault del autor.
 
-El mecanismo que copia una variante y resuelve sus fechas es código, no template: vive en [`../src/install_test_scenario.py`](../src/install_test_scenario.py).
+El mecanismo que copia una variante y resuelve sus fechas es código, no template: vive en [`../src/tuku/init.py`](../src/tuku/init.py) y se ejecuta con `tuku init`.
 
 ## Variantes
 
@@ -46,4 +46,4 @@ Después de los tres primeros ya se puede escribir. Todo lo demás emerge del us
 
 ## Por qué se instala a mano
 
-Porque tiene que poder hacerse sin TUKU. Un vault que solo se puede crear ejecutando un programa es un vault que dentro de veinte años no se puede crear. `install.sh` hace exactamente estos pasos y ninguno más, y de forma opcional pregunta el nombre del autor para el paso 4.
+Porque tiene que poder hacerse sin TUKU. Un vault que solo se puede crear ejecutando un programa es un vault que dentro de veinte años no se puede crear. `tuku init` hace exactamente estos pasos y ninguno más, con `--author` para el paso 4.

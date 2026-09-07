@@ -1,52 +1,39 @@
 # Escenario · 001-003-destino-no-vacio
 
-**Cubre:** epic 001, fase 0, decidido #7 de [`../../devel/epics.md`](../../devel/epics.md).
+**Cubre:** epic 001, fase 0, decidido #8 de [`../../devel/epics.md`](../../devel/epics.md).
 
-## Escenario: no sobrescribir un destino que ya tiene algo, sin preguntar
+## Escenario: no sembrar sobre un directorio que ya tiene algo
 
 Dado un directorio destino que ya existe y no está vacío
-Cuando se corre `install.sh` sin `TUKU_FORCE=1`
-Entonces se pregunta antes de continuar, por `stderr`
-Y si no se confirma, no se descarga nada y el destino queda exactamente igual a como estaba
+Cuando se llama a `init()` sin `force`
+Entonces lanza `DestinoNoVacio` y el destino queda exactamente igual a como estaba
 
-## Escenario: confirmar sí continúa
-
-Dado el mismo directorio destino
-Cuando se corre `install.sh` y se responde "s" a la pregunta
-Entonces el script sigue de largo, no cancela
-
-## Escenario: TUKU_FORCE=1 salta la pregunta
+## Escenario: `--force` siembra igual
 
 Dado el mismo directorio destino
-Cuando se corre `install.sh` con `TUKU_FORCE=1`
-Entonces no se pregunta nada y el script sigue de largo
+Cuando se llama a `init(..., force=True)`
+Entonces el contenido previo se reemplaza y queda un vault operable
+
+## Escenario: un destino vacío se siembra sin `force`
+
+Dado un directorio que no existe o está vacío
+Cuando se llama a `init()` sin `force`
+Entonces siembra sin más: la negativa es por contenido, no por que el directorio exista
 
 ## Por qué importa
 
-Es el único caso de los tres donde equivocarse borra trabajo de alguien: si `install.sh` sobrescribiera en silencio un directorio que ya tenía algo, la primera vez que alguien lo reinstale por error pierde lo que había escrito. `001-001` y `001-002` prueban que la instalación llega a buen puerto; este prueba que el instalador no hace daño cuando no debería tocar nada.
+Es el único caso donde equivocarse borra trabajo de alguien. `001-001` y `001-002` prueban que la siembra llega a buen puerto; este prueba que no hace daño cuando no debería tocar nada.
 
-La pregunta corre antes de bajar nada de la red (`install.sh`, sección del `if` inicial), así que se prueba sin depender de `curl` ni de GitHub.
+Cambió respecto al cierre del 2026-09-06: `install.sh` preguntaba por `/dev/tty` y el test respondía el prompt con `pexpect`. La decisión 8 lo reemplazó por el flag `--force` (`force=True` en la función), porque la lógica es importable y no depende de una tty. Ya no hace falta `pexpect` ni pty.
 
 ## Cómo se corre
 
 ```bash
-mkdir -p /tmp/destino-no-vacio && touch /tmp/destino-no-vacio/algo
-sh install.sh /tmp/destino-no-vacio
-# responde "n" o cualquier cosa que no sea "s": debe cancelar sin tocar el directorio
+uv run pytest tests/escenarios/ -k 001_003
 ```
 
-## Los tests
+Los tres comparten `playground/001-003-destino-no-vacio/` y cada uno lo vacía al empezar.
 
-`test_001_003_destino_no_vacio.py` tiene uno por cada rama:
+## Qué se mira a mano
 
-- **No confirmar:** corre `install.sh` en un subproceso sin terminal de control (`start_new_session=True`). Al no poder abrir `/dev/tty`, el script trata eso igual que una respuesta vacía, que cancela. Es exactamente lo que pasa en cualquier invocación no interactiva (un script, un cron, un agente), y es el caso que hay que blindar: si algún día deja de preguntar ahí, sobrescribiría en silencio.
-- **Confirmar:** `read -r r < /dev/tty` no lee la entrada estándar, así que un subproceso con pipes no le puede escribir una respuesta. Se usa [`pexpect`](https://pexpect.readthedocs.io/), que abre una pty real y se la deja de terminal de control. Tras confirmar la sobrescritura, `install.sh` hace una segunda pregunta (el nombre del autor para el libro de estilo); el test la responde con Enter vacío, que es válido y no cancela.
-- **`TUKU_FORCE=1`:** ni siquiera necesita una tty, porque el `if` que dispara la pregunta no se ejecuta.
-
-Los tres usan tempdirs y no `playground/`, y no es una excepción a la regla de [`README.md`](README.md): este escenario no produce ningún vault, porque el proceso se mata antes de que la instalación escriba nada.
-
-Ninguno espera a que la descarga real termine: los tres ven que `install.sh` imprime "bajando..." (o "cancelado", en el primero) y ahí matan el proceso, sin depender de que la red funcione. Matar el proceso mata el grupo entero (`os.killpg`), no solo el shell: para esa altura ya lanzó `curl | tar` como su propia tubería, y una señal solo al shell no siempre alcanza a esos hijos ni llega a tiempo.
-
-```bash
-python3 tests/escenarios/test_001_003_destino_no_vacio.py
-```
+- Que el mensaje de `DestinoNoVacio` se entienda sin contexto y diga cómo forzar (`tuku init --force`).

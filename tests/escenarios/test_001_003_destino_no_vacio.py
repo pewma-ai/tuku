@@ -2,151 +2,84 @@
 
 Escenario: 001-003-destino-no-vacio.md
 
-`install.sh` pregunta antes de sobrescribir un destino no vacío, y esa
-pregunta corre antes de bajar nada de la red: los dos casos se prueban
-sin `curl` ni GitHub.
+`init()` se niega a sembrar en un directorio que ya tiene contenido y lanza
+`DestinoNoVacio`, sin tocar nada. Con `force=True` lo reemplaza entero. Ya no
+hay prompt ni `/dev/tty`: la decisión 8 del epic 001 lo cambió por un flag,
+porque la lógica es importable y no depende de una tty.
 
-Los tres tests usan tempdirs y no `playground/`: este escenario no produce
-ningún vault, así que no cae bajo la regla de `../escenarios/README.md`.
+Tres afirmaciones:
 
-El primer test simula que nadie respondió: el subproceso corre con
-`start_new_session=True` (setsid), sin terminal de control, así que
-abrir `/dev/tty` falla y el script lee eso como respuesta vacía, que
-cancela. Es el camino que toma cualquier invocación no interactiva (un
-script, un cron, un agente), y es el que hay que blindar: si algún día
-deja de preguntar ahí, sobrescribiría en silencio.
+1. Sobre un destino no vacío y sin `force`, `init()` lanza y el destino queda
+   exactamente igual a como estaba (el centinela intacto, nada más).
+2. `force=True` sobre ese mismo destino lo reemplaza: el centinela desaparece y
+   queda un vault operable.
+3. Sobre un destino vacío, `init()` siembra sin más: la negativa es
+   específicamente por contenido, no por que el directorio exista.
 
-El segundo simula que sí se confirma ("s"), que sí necesita una tty de
-verdad: `read -r r < /dev/tty` no lee de la entrada estándar, así que un
-`subprocess` con pipes no sirve para escribirle una respuesta. `pexpect`
-abre una pty y la deja como terminal de control del hijo, que es lo que
-el script necesita. No se espera a que la descarga real termine (no hay
-por qué depender de que la red funcione): basta con ver que imprime
-"bajando..." en vez de "cancelado" para saber que pasó la pregunta, y
-ahí se mata el proceso.
-
-El tercero prueba que `TUKU_FORCE=1` salta la pregunta entera: ni
-siquiera necesita una tty, porque el `if` que la dispara no se ejecuta.
-Mismo criterio que el segundo: se lee la primera línea de `stderr` y se
-mata el proceso apenas se confirma que fue "bajando...", sin esperar la
-descarga real.
-
-En el segundo y el tercero, "matar el proceso" tiene que matar el grupo
-entero (`os.killpg`), no solo el pid del shell: para cuando se los mata
-ya lanzaron `curl | tar` como su propia tubería, y una señal al shell no
-siempre alcanza a esos hijos ni llega a tiempo, lo que dejaba el test
-colgado esperando a que una descarga real terminara.
+Los tres comparten `playground/001-003-destino-no-vacio/`, cada uno lo vacía al
+empezar; la corrida completa lo deja con el vault que siembra el caso 3.
 
 Ejecutable directo: `python3 tests/escenarios/test_001_003_destino_no_vacio.py`.
 """
 
 from __future__ import annotations
 
-import contextlib
-import os
-import signal
-import subprocess
-import tempfile
+import sys
+from datetime import date
 from pathlib import Path
 
-import pexpect
+import pytest
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
-INSTALL_SH = RAIZ / "install.sh"
+sys.path.insert(0, str(RAIZ / "src"))
+sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
+
+from vault import preparar_playground  # noqa: E402
+
+from tuku.init import DestinoNoVacio, init  # noqa: E402
+
+SLUG = "001-003-destino-no-vacio"
+FECHA_FIJA = date(2026, 8, 11)
 
 
-def test_001_003_destino_no_vacio_pregunta_y_no_sobrescribe() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        destino = Path(tmp) / "vault"
-        destino.mkdir()
-        centinela = destino / "algo-que-ya-estaba.txt"
-        centinela.write_text("no tocar\n", encoding="utf-8")
-
-        resultado = subprocess.run(
-            ["sh", str(INSTALL_SH), str(destino)],
-            start_new_session=True,
-            stdin=subprocess.DEVNULL,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-        assert resultado.returncode != 0, (
-            f"debió cancelar, salió con {resultado.returncode}: {resultado.stderr}"
-        )
-        assert "Sobrescribir" in resultado.stderr, f"no preguntó: {resultado.stderr!r}"
-        assert "cancelado" in resultado.stderr, f"no confirmó cancelar: {resultado.stderr!r}"
-        assert list(destino.iterdir()) == [centinela], "el destino no quedó intacto"
-        assert centinela.read_text(encoding="utf-8") == "no tocar\n"
+def _con_centinela() -> tuple[Path, Path]:
+    destino = preparar_playground(SLUG)
+    destino.mkdir()
+    centinela = destino / "algo-que-ya-estaba.txt"
+    centinela.write_text("no tocar\n", encoding="utf-8")
+    return destino, centinela
 
 
-def test_001_003_destino_no_vacio_confirma_y_continua() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        destino = Path(tmp) / "vault"
-        destino.mkdir()
-        (destino / "algo-que-ya-estaba.txt").write_text("no tocar\n", encoding="utf-8")
+def test_001_003_destino_no_vacio_se_niega_y_no_toca_nada() -> None:
+    destino, centinela = _con_centinela()
 
-        hijo = pexpect.spawn(
-            "sh", [str(INSTALL_SH), str(destino)], timeout=10, encoding="utf-8"
-        )
-        try:
-            hijo.expect(r"Sobrescribir\? \[s/N\]")
-            hijo.sendline("s")
-            # Tras confirmar la sobrescritura, install.sh hace una segunda
-            # pregunta (el nombre del autor); se responde con Enter vacío, que
-            # es válido y no cancela.
-            hijo.expect("Nombre del autor")
-            hijo.sendline("")
-            indice = hijo.expect(["bajando", "cancelado"])
-            assert indice == 0, f"no continuó tras confirmar: {hijo.before!r}"
-        finally:
-            # SIGKILL solo a hijo.pid no basta: pexpect crea una sesión nueva
-            # (hijo.pid es el líder de grupo), pero install.sh ya lanzó a esa
-            # altura la tubería curl | tar como procesos propios. Matar el
-            # grupo entero evita dejarlos corriendo en segundo plano o, peor,
-            # que este `finally` se quede esperando a que el shell reaccione
-            # a una señal que a veces solo procesa al terminar el comando en
-            # curso.
-            with contextlib.suppress(ProcessLookupError):
-                os.killpg(hijo.pid, signal.SIGKILL)
-            hijo.close(force=True)
+    with pytest.raises(DestinoNoVacio):
+        init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ)
+
+    assert list(destino.iterdir()) == [centinela], "el destino no quedó intacto"
+    assert centinela.read_text(encoding="utf-8") == "no tocar\n"
 
 
-def test_001_003_destino_no_vacio_tuku_force_salta_la_pregunta() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        destino = Path(tmp) / "vault"
-        destino.mkdir()
-        (destino / "algo-que-ya-estaba.txt").write_text("no tocar\n", encoding="utf-8")
+def test_001_003_force_reemplaza_el_destino_no_vacio() -> None:
+    destino, centinela = _con_centinela()
 
-        proceso = subprocess.Popen(
-            ["sh", str(INSTALL_SH), str(destino)],
-            env={**os.environ, "TUKU_FORCE": "1"},
-            stdin=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            text=True,
-            start_new_session=True,
-        )
-        try:
-            primera_linea = proceso.stderr.readline()
-        finally:
-            # Matar solo proceso.pid no basta: es el shell, y para esa altura
-            # ya lanzó curl | tar como su propia tubería. SIGTERM al shell no
-            # siempre corta esos hijos, y algunos shells difieren la señal
-            # hasta que el comando en curso termina, lo que deja el `wait()`
-            # colgado esperando una descarga real. Con start_new_session=True
-            # el pid del proceso es también el del grupo: matar el grupo se
-            # lleva puesto todo.
-            with contextlib.suppress(ProcessLookupError):
-                os.killpg(proceso.pid, signal.SIGKILL)
-            proceso.wait(timeout=5)
-            proceso.stderr.close()
+    init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ, force=True)
 
-        assert "Sobrescribir" not in primera_linea, f"preguntó igual: {primera_linea!r}"
-        assert "bajando" in primera_linea, f"no continuó: {primera_linea!r}"
+    assert not centinela.exists(), "force no reemplazó el contenido previo"
+    assert (destino / "AHORA.md").is_file(), "force no dejó un vault operable"
+    assert "DD de mes" not in (destino / "AHORA.md").read_text(encoding="utf-8")
+
+
+def test_001_003_destino_vacio_se_siembra_sin_force() -> None:
+    destino = preparar_playground(SLUG)  # ni existe: preparar_playground lo vació
+
+    init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ)
+
+    assert (destino / "AHORA.md").is_file()
 
 
 if __name__ == "__main__":
-    test_001_003_destino_no_vacio_pregunta_y_no_sobrescribe()
-    test_001_003_destino_no_vacio_confirma_y_continua()
-    test_001_003_destino_no_vacio_tuku_force_salta_la_pregunta()
-    print("ok: install.sh pregunta, respeta la respuesta, y TUKU_FORCE=1 la salta")
+    test_001_003_destino_no_vacio_se_niega_y_no_toca_nada()
+    test_001_003_force_reemplaza_el_destino_no_vacio()
+    test_001_003_destino_vacio_se_siembra_sin_force()
+    print(f"ok: se niega sin force, force reemplaza, vacío siembra (playground/{SLUG}/)")

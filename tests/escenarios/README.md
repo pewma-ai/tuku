@@ -6,13 +6,13 @@ Son narrativos y no unitarios porque buena parte de TUKU depende de un agente y 
 
 Un escenario referencia `spec/` pero no lo reemplaza. Si un escenario contradice `spec/`, se corrige `spec/` (ver [`../../devel/epics.md`](../../devel/epics.md), "los epics mueven el diseño"), no el escenario.
 
-**Todo test que instale un vault lo deja en `playground/<XXX-YYY-slug>/`, la carpeta propia de ese escenario.** Es regla y no preferencia: el vault resultante existe para que el autor lo revise a mano, y un test que lo bota a un tempdir le quita esa revisión. El arnés instala ahí directo, no en un tempdir que se descarta, de modo que correr `uv run pytest tests/escenarios/` deja cada corrida a la vista para el `## Qué se mira a mano` del escenario. Se pisa cada vez que se vuelve a correr, y `playground/` está en `.gitignore`, así que nada de esto se versiona. El arnés borra y recrea **solo su propia subcarpeta**, nunca `playground/` completo ni ninguna otra carpeta dentro: las corridas manuales exploratorias que uno deje en `playground/` con otro nombre sobreviven a `uv run pytest`. El alcance de la regla es ese y no otro: un test que **no produce un vault** simplemente no cae bajo ella. El `001-003` prueba que `install.sh` se niega a sobrescribir y no llega a instalar nada, así que sus tempdirs son correctos.
+**Todo test que instale un vault lo deja en `playground/<XXX-YYY-slug>/`, la carpeta propia de ese escenario.** Es regla y no preferencia: el vault resultante existe para que el autor lo revise a mano, y un test que lo bota a un tempdir le quita esa revisión. El arnés instala ahí directo, no en un tempdir que se descarta, de modo que correr `uv run pytest tests/escenarios/` deja cada corrida a la vista para el `## Qué se mira a mano` del escenario. Se pisa cada vez que se vuelve a correr, y `playground/` está en `.gitignore`, así que nada de esto se versiona. El arnés borra y recrea **solo su propia subcarpeta**, nunca `playground/` completo ni ninguna otra carpeta dentro: las corridas manuales exploratorias que uno deje en `playground/` con otro nombre sobreviven a `uv run pytest`. El alcance de la regla es ese y no otro: un test que **no produce un vault** simplemente no cae bajo ella. El `001-003` (caso "se niega") y el `001-001` (que instala en un `HOME` de tempdir) no producen un vault revisable en `playground/`, así que no caen bajo la regla.
 
 No hay problema en que esto crezca a cientos de archivos chicos: son texto, cuestan casi nada.
 
 Esta suite se escribe desde cero: la del diseño anterior se borró entera.
 
-Los escenarios `001-00X` de más abajo describen el instalador por `curl` y están **en reescritura**: el epic 001 se reabrió el 2026-09-07 para el modelo `pipx` + `tuku init` (ver [`../../devel/epics.md`](../../devel/epics.md), "Epic 001 · Tests que necesita"). El índice se actualiza cuando esos cinco escenarios existan.
+Los cinco escenarios `001-00X` prueban el modelo `pipx` + `tuku init` (epic 001 reabierto el 2026-09-07, decisión 4 del epic 002). Salvo `001-001`, que instala de verdad y va marcado `red`, todos llaman a `tuku.init.init()` con `home=` apuntando al checkout, sin instalar nada.
 
 ## Convención de nombre
 
@@ -79,10 +79,11 @@ uv run pytest tests/escenarios/ -k 001_002  # un escenario
 
 | Escenario | Cubre | Notas |
 | --- | --- | --- |
-| [`001-001-instalacion-minima.md`](001-001-instalacion-minima.md) | Epic 001, fase 0 | El camino completo: `curl` contra GitHub |
-| [`001-002-instalacion-local.md`](001-002-instalacion-local.md) | Epic 001, fase 0 | El mismo mecanismo, sin red ni git, para iterar rápido |
-| [`001-003-destino-no-vacio.md`](001-003-destino-no-vacio.md) | Epic 001, fase 0 | `install.sh` no sobrescribe sin preguntar, salvo `TUKU_FORCE=1`; el único de los tres que prueba `install.sh` mismo, no `instalar()`. Usa `pexpect` para simular la respuesta a un prompt que lee `/dev/tty` |
-| [`001-004-instalador-pregunta-el-nombre.md`](001-004-instalador-pregunta-el-nombre.md) | Epic 001, fase 0 | La capa de identidad de punta a punta: se responde el nombre en el prompt de `install.sh` y queda en `LIBRO-DE-ESTILO.md`. Instala desde `TUKU_ORIGEN`, sin red, y es el único que deja completar la instalación |
+| [`001-001-instalacion-con-uv-tool.md`](001-001-instalacion-con-uv-tool.md) | Epic 001, fase 0 | El único que instala de verdad: `uv tool install` desde `git+...@devel`. Marcado `red`, fuera de la corrida por defecto |
+| [`001-002-init-siembra-el-estado-cero.md`](001-002-init-siembra-el-estado-cero.md) | Epic 001, fase 0 | La verificación byte a byte de `tuku init` contra `template/vanilla/` en vivo, con `home` local y sin red |
+| [`001-003-destino-no-vacio.md`](001-003-destino-no-vacio.md) | Epic 001, fase 0 | `init()` se niega a sembrar sobre contenido; `--force` reemplaza. Ahora es un flag, sin prompt ni pty |
+| [`001-004-init-author.md`](001-004-init-author.md) | Epic 001, fase 0 | La capa de identidad: `init(autor=...)` deja el nombre en `LIBRO-DE-ESTILO.md`; omitirlo o vaciarlo deja el vault operable |
+| [`001-005-init-no-toca-la-red.md`](001-005-init-no-toca-la-red.md) | Epic 001, fase 0 | Con el socket parchado para fallar, `tuku init` completa igual. Aísla la afirmación "offline" |
 | [`002-001-registro-en-su-dia.md`](002-001-registro-en-su-dia.md) | Epic 002, fase 1 | Primer paso de la cadena. Día correcto, orden cronológico, y el diff no toca `PENDIENTES.md` |
 | [`002-002-lint-de-registro.md`](002-002-lint-de-registro.md) | Epic 002, fase 1 | Cerrada estricta, abierta permisiva. El lint informa y no escribe |
 | [`002-003-abrir-pendiente.md`](002-003-abrir-pendiente.md) | Epic 002, fase 2 | Abrir es copiar el cuerpo literal. Lleva un `#REVISAR` sobre una ambigüedad de `spec/pendientes.md` |

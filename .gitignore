@@ -45,6 +45,9 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Árbol que el build copia dentro del paquete (ver setup.py). Fuente única: template/
+src/tuku/_home/
+
 # Python Virtual Environments
 .env
 .venv

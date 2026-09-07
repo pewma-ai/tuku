@@ -35,13 +35,19 @@ Cómo se relacionan estos cuatro: un epic da el número y la meta; un escenario 
 
 ## Instalar un vault
 
-Una línea, sin `git clone` y sin instalar ningún programa:
+TUKU se instala como paquete Python, sin PyPI, directo desde la rama `devel`. Deja el ejecutable `tuku` en el PATH y el árbol de TUKU en `~/.tuku`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- mi-vault
+uv tool install "git+https://github.com/pewma-ai/tuku.git@devel"   # o: pipx install "git+..."
 ```
 
-El procedimiento a mano equivalente está en [`template/README.md`](template/README.md), y debe seguir funcionando siempre: si el vault solo se puede crear ejecutando algo, se rompió el principio 1.
+Después, sembrar un vault en un directorio nuevo, offline:
+
+```bash
+tuku init mi-vault
+```
+
+`tuku init` se niega a sembrar sobre un directorio con contenido salvo `--force`, y `--author "..."` deja el nombre en `LIBRO-DE-ESTILO.md`. El procedimiento a mano equivalente está en [`template/README.md`](template/README.md), y debe seguir funcionando siempre: si el vault solo se puede crear ejecutando algo, se rompió el principio 1.
 
 ## Probar
 

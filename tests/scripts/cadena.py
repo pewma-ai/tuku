@@ -23,14 +23,14 @@ sys.path.insert(0, str(RAIZ_REPO / "tests" / "scripts"))
 
 from vault import preparar_playground  # noqa: E402
 
-from install_test_scenario import instalar  # noqa: E402
+from tuku.init import init  # noqa: E402
 
 
 def preparar_paso(slug: str, *, previo: str | None, desde: date) -> Path:
     """Deja el vault inicial de `slug` en `playground/<slug>/` y lo devuelve."""
     destino = preparar_playground(slug)
     if previo is None:
-        instalar("vanilla", destino, desde)
+        init(destino, variante="vanilla", desde=desde, home=RAIZ_REPO)
         return destino
 
     origen = RAIZ_REPO / "playground" / previo

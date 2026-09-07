@@ -19,8 +19,10 @@ tuku = "tuku.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# `_home/` lo llena el build (ver setup.py): es el árbol que `tuku init` copia
+# cuando TUKU se instaló por pipx / uv tool install y no hay checkout a la vista.
 [tool.setuptools.package-data]
-tuku = ["procesos/*.md", "templates/*", "migrations/*"]
+tuku = ["_home/**/*"]
 
 [project.optional-dependencies]
 dev = [
@@ -31,7 +33,6 @@ dev = [
   "PyYAML>=6",
   "types-PyYAML",
   "pre-commit>=3.8",
-  "pexpect>=4.9",
 ]
 
 # ---------------------------------------------------------------------------
@@ -47,8 +48,8 @@ addopts = [
   "--strict-markers",
   "--strict-config",
   "-ra",
-  # Por defecto NO se corren los tests que gastan tokens.
-  "-m", "not agentic",
+  # Por defecto NO se corren los tests que gastan tokens ni los que tocan la red.
+  "-m", "not agentic and not red",
 ]
 markers = [
   "spec: caso extraído de un bloque normativo de spec/ (nivel 1)",
@@ -56,6 +57,7 @@ markers = [
   "aceptacion: deriva de corpus/simulaciones/ (nivel 3)",
   "replay: reconstrucción con diff exactamente cero (nivel 4)",
   "agentic: invoca un modelo. Gasta tokens. Excluido salvo `-m agentic`",
+  "red: descarga o instala desde la red (p. ej. `uv tool install` desde git). Excluido salvo `-m red`",
   "lento: tarda más de un segundo",
 ]
 filterwarnings = ["error"]
