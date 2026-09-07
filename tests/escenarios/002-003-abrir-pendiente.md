@@ -1,12 +1,12 @@
 # Escenario · 002-003-abrir-pendiente
 
-**Cubre:** epic 002, fase 2. Punto 2 del epic, primera mitad: una entrada `**pendiente**` abre el pendiente sin que el autor toque `PENDIENTES.md`.
+**Cubre:** epic 002, fase 2. Punto 2 del epic, primera mitad: un registro `**pendiente**` abre el pendiente sin que el autor toque `PENDIENTES.md`.
 
 ## Estado inicial
 
-El que dejó [`002-002-lint-de-entrada`](002-002-lint-de-entrada.md).
+El que dejó [`002-002-lint-de-registro`](002-002-lint-de-registro.md).
 
-## Escenario: la entrada abre el pendiente y copia el cuerpo literal
+## Escenario: el registro abre el pendiente y copia el cuerpo literal
 
 Dado el estado anterior, con los cinco callouts de horizonte vacíos
 Cuando se inyecta `- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora`
@@ -29,14 +29,14 @@ Los cinco son permanentes para que la escalera se lea completa ([`spec/pendiente
 ## Escenario: abrir dos veces no duplica
 
 Dado el pendiente ya abierto
-Cuando se corre el janitor otra vez sobre la misma entrada
+Cuando se corre el janitor otra vez sobre el mismo registro
 Entonces el diff es vacío
 Y `^sin-fecha` sigue con un solo ítem
 
 ## Dónde queda un pendiente escrito en el día de hoy
 
 > [!question] Ambigüedad de `spec/`, no del escenario #REVISAR
-> [`spec/pendientes.md`](../../spec/pendientes.md) dice las dos cosas: su ejemplo manda un dictado de hoy a `^sin-fecha`, y su regla "escribir en un día es fecharlo" cubre **hoy o un día futuro**. El punto 3 del epic repite "actual o futuro". No pueden valer las dos para la entrada de las 14:20.
+> [`spec/pendientes.md`](../../spec/pendientes.md) dice las dos cosas: su ejemplo manda un dictado de hoy a `^sin-fecha`, y su regla "escribir en un día es fecharlo" cubre **hoy o un día futuro**. El punto 3 del epic repite "actual o futuro". No pueden valer las dos para el registro de las 14:20.
 >
 > Este escenario afirma `^sin-fecha`, que es el ejemplo explícito. Si se resuelve al revés, `^sin-fecha` se queda sin vía de entrada en todo el epic 002, y esa es la señal de que la ambigüedad importa. Se resuelve en `spec/` antes de implementar el paso. El caso sin ambigüedad, un día futuro, vive en [`002-005`](002-005-escribir-en-un-dia-fecha.md).
 

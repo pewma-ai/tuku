@@ -9,14 +9,14 @@ FIXTURE = "fixtures/002-010-dictado-del-dia-uno"
 
 FALTA = (
     "la decisión 3 del epic (arnés de agente y su aislamiento); "
-    f"el fixture {FIXTURE}/ (dictado.md y entradas.md); "
+    f"el fixture {FIXTURE}/ (dictado.md y registros.md); "
     "la marca de pytest que lo deja fuera de la corrida por defecto"
 )
 
 
-def test_002_010_el_agente_reproduce_las_entradas_congeladas() -> None:
+def test_002_010_el_agente_reproduce_los_registros_congelados() -> None:
     raise AssertionError(f"{SLUG}: sin implementar. Falta {FALTA}.")
 
 
 if __name__ == "__main__":
-    test_002_010_el_agente_reproduce_las_entradas_congeladas()
+    test_002_010_el_agente_reproduce_los_registros_congelados()

@@ -1,6 +1,6 @@
 # Escenario · 002-004-cerrar-pendiente
 
-**Cubre:** epic 002, fase 2. Punto 2 del epic, segunda mitad: una entrada `~~(Hecho)~~` cierra el pendiente. Más el cierre sin pareja, el error que el vault real cometía ([`lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 4).
+**Cubre:** epic 002, fase 2. Punto 2 del epic, segunda mitad: un registro `~~(Hecho)~~` cierra el pendiente. Más el cierre sin pareja, el error que el vault real cometía ([`lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 4).
 
 ## Estado inicial
 
@@ -12,7 +12,7 @@ Dado un pendiente abierto en `^sin-fecha` con cuerpo `avisar de los GGCC a la ad
 Cuando se inyecta `- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora`
 Entonces el ítem desaparece de `^sin-fecha`
 Y el callout `^sin-fecha` sigue existiendo, vacío
-Y la entrada de apertura de las 14:20 sigue escrita en el martes 11, sin tocar
+Y el registro de apertura de las 14:20 sigue escrito en el martes 11, sin tocar
 Y el diff toca `AHORA.md` y `PENDIENTES.md`, y nada más
 
 El cierre repite el texto del pendiente en vez de reescribirlo en pasado, y por eso el emparejamiento es literal y no semántico ([`spec/bitacora.md`](../../spec/bitacora.md)). El historial queda en la bitácora, no en `PENDIENTES.md`.
@@ -31,7 +31,7 @@ El caso negativo más importante del epic: con `PENDIENTES.md` como fuente de ve
 ## Escenario: cerrar dos veces no vuelve a mover
 
 Dado el pendiente ya cerrado
-Cuando se corre el janitor otra vez sobre la misma entrada
+Cuando se corre el janitor otra vez sobre el mismo registro
 Entonces el diff es vacío
 Y el segundo pase se reporta igual que el primer cierre sin pareja, porque ya no hay nada abierto que emparejar
 

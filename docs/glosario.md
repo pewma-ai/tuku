@@ -16,7 +16,7 @@
 
 | Archivo o carpeta | Qué guarda |
 |---|---|
-| `AHORA.md` | El ciclo en curso: las entradas del día, más plan y pendientes por transclusión. |
+| `AHORA.md` | El ciclo en curso: los registros del día, más plan y pendientes por transclusión. |
 | `bitacoras/` | Los ciclos ya cerrados, inmutables y autocontenidos. |
 | `PENDIENTES.md` | Todos los compromisos abiertos. Fuente de verdad, nunca derivado. |
 | `ambitos/` | El árbol de frentes de actividad de la vida del autor. |
@@ -36,19 +36,19 @@
 
 | Término | Qué es |
 |---|---|
-| **Entrada** | Una línea de bitácora: un hecho, con hora, ámbito y clasificación. La única forma de registrar algo. |
-| **Hecho** | La unidad de la entrada. Una sola frase dictada puede contener varios y produce varias entradas. |
+| **Registro** | Una línea de bitácora: un hecho, con hora, ámbito y clasificación. La única forma de registrar algo. |
+| **Hecho** | La unidad del registro. Una sola frase dictada puede contener varios y produce varios registros. |
 | **Ontología cerrada** | Las tres marcas de TUKU que disparan consecuencias deterministas: `**pendiente**`, `~~(Hecho)~~`, `**cadencia**`. El autor no las puede extender. |
 | **Ontología abierta** | Las clasificaciones del autor (`**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`). Sirven para leer y filtrar, ningún janitor actúa sobre ellas. Crece con el uso. |
-| **Clasificación** | El tipo abierto de una entrada, elegido del vocabulario del libro de estilo. |
-| **Consecuencia** | Lo que se aplica *después* de escribir la entrada, releyendo el texto: abrir un pendiente, enlazar, dar de alta una cadencia, proponer. |
+| **Clasificación** | El tipo abierto de un registro, elegido del vocabulario del libro de estilo. |
+| **Consecuencia** | Lo que se aplica *después* de escribir el registro, releyendo el texto: abrir un pendiente, enlazar, dar de alta una cadencia, proponer. |
 | **Propuesta** | Lo que el sistema sugiere y no ejecuta. Espera aprobación del autor y, si se rechaza, no deja rastro. |
 
 ## Pendientes y tiempo
 
 | Término | Qué es |
 |---|---|
-| **Pendiente** | Un compromiso abierto. Nace de una entrada `**pendiente**` y muere en una entrada `~~(Hecho)~~`. |
+| **Pendiente** | Un compromiso abierto. Nace de un registro `**pendiente**` y muere en un registro `~~(Hecho)~~`. |
 | **Horizonte** | El plazo al que está asignado un pendiente: sin fecha, este turno, próximo turno, fin de mes. |
 | **Escalera de horizontes** | El recorrido de un pendiente al concretarse: sin fecha, horizonte, fecha exacta, cerrado. |
 | **Atrasado** | Un pendiente cuya fecha ya pasó. Se mueve solo a `^atrasados` con su vencimiento estampado. |
@@ -67,7 +67,7 @@
 | Término | Qué es |
 |---|---|
 | **Ámbito** | Un frente de actividad con identidad propia. Es un directorio **con** página propia. |
-| **Categoría** | Un agrupador sin identidad propia. Es un directorio **sin** página propia, y ninguna entrada apunta a él. |
+| **Categoría** | Un agrupador sin identidad propia. Es un directorio **sin** página propia, y ningún registro apunta a él. |
 | **Actividad** | La hoja donde ocurren las cosas. Es un archivo `.md` en minúsculas. |
 | **Regla más cercana** | Ante dos reglas aplicables gana la del directorio más profundo, la que está más cerca del hecho. |
 | **Archivar** | Cerrar una rama del árbol. Es caro, porque hay que resolver pendientes, cadencias y enlaces viejos, así que el sistema propone y nunca lo hace solo. |

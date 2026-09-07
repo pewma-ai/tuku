@@ -26,7 +26,7 @@ Igual que las fases de implementación, se lee de lo que no depende de nada a lo
 | # | Documento | Qué especifica |
 | --- | --- | --- |
 | 1 | [flujo-informacion.md](flujo-informacion.md) | El marco: la frontera entre registrar y aplicar consecuencias, los cinco pasos, y la segunda vía de entrada (sin bitácora) |
-| 2 | [bitacora.md](bitacora.md) | La entrada única: formato de línea, ontología cerrada (`**pendiente**`, `~~(Hecho)~~`, `**cadencia**`) y abierta, reglas de redacción |
+| 2 | [bitacora.md](bitacora.md) | El registro: formato de línea, ontología cerrada (`**pendiente**`, `~~(Hecho)~~`, `**cadencia**`) y abierta, reglas de redacción |
 | 3 | [pendientes.md](pendientes.md) | `PENDIENTES.md`: callouts con ancla, escalera de horizontes, sincronía de transclusiones |
 | 4 | [ambitos.md](ambitos.md) | El árbol de ámbitos: los tres roles, qué carga cada directorio, resolución de reglas por cercanía, archivado |
 | 5 | [cadencias.md](cadencias.md) | `CADENCIAS.md`: ciclo de vida de una cadencia, el trigger que conoce el tipo de ciclo, idempotencia |
@@ -63,7 +63,7 @@ ambitos/                      # el árbol de la vida
     clientes/                 # sin página: es categoría
       AGENTS.md
       CADENCIAS.md
-      juanito_perez.md        # hoja: recibe entradas
+      juanito_perez.md        # hoja: recibe registros
 
 notas/                        # zettelkasten, formato libre
 
@@ -92,7 +92,7 @@ archivado/                    # ramas cerradas, enlaces vivos
 
 Y no hay nada más en el disco. **Todo lo que existe, el autor lo puede abrir y leer.** No hay carpeta de cache ni archivos de máquina.
 
-El contexto reciente y el vocabulario de ámbitos no son archivos: son la **salida de un janitor**, que se calcula cuando hace falta y se inyecta. Materializarlos solo agregaría copias que envejecen, porque una cola de bitácora queda vieja apenas se escribe la entrada siguiente. Calcularla en el momento es más simple y además más correcto.
+El contexto reciente y el vocabulario de ámbitos no son archivos: son la **salida de un janitor**, que se calcula cuando hace falta y se inyecta. Materializarlos solo agregaría copias que envejecen, porque una cola de bitácora queda vieja apenas se escribe el registro siguiente. Calcularla en el momento es más simple y además más correcto.
 
 Lo que sí se materializa, aunque sea generado, es lo que alguien mira o transcluye: `reportes/pendientes-por-actividad.md` lo transcluyen las páginas de actividad, y `reportes/cadencias.md` es donde el autor ve qué se le viene.
 

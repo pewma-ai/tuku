@@ -1,14 +1,14 @@
-"""Test del escenario 002-001-entrada-en-su-dia.
+"""Test del escenario 002-001-registro-en-su-dia.
 
-Escenario: 002-001-entrada-en-su-dia.md
+Escenario: 002-001-registro-en-su-dia.md
 
 Primer paso de la cadena del epic 002. Instala vanilla con --desde 2026-08-11,
-inyecta tres líneas fuera de orden bajo el día de hoy con jntr.entrada-insertar
-y afirma: caen en su día ordenadas por hora, la de las 18:40 no se reescribe,
+inyecta tres líneas fuera de orden bajo el día de hoy con jntr.registrar
+y afirma: caen en su día ordenados por hora, el de las 18:40 no se reescribe,
 los otros seis días siguen vacíos, PENDIENTES.md no se toca, y la línea sin
 ámbito ni clasificación queda escrita igual.
 
-Ejecutable directo: python3 tests/escenarios/test_002_001_entrada_en_su_dia.py
+Ejecutable directo: python3 tests/escenarios/test_002_001_registro_en_su_dia.py
 """
 
 from __future__ import annotations
@@ -23,9 +23,9 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
 from cadena import delta, instantanea, preparar_paso  # noqa: E402
 
-from jntr.entrada_insertar import insertar  # noqa: E402
+from jntr.registrar import registrar  # noqa: E402
 
-SLUG = "002-001-entrada-en-su-dia"
+SLUG = "002-001-registro-en-su-dia"
 PREVIO = None
 DESDE = date(2026, 8, 11)
 HOY = "## Martes 11 de agosto"
@@ -34,7 +34,7 @@ HOY = "## Martes 11 de agosto"
 #: cronológico). Escritas a mano acá, como los días de test_001_001: son la
 #: rebanada mínima que este paso necesita. El día uno completo, generado por
 #: un agente desde el corpus, vive en 002-010.
-ENTRADAS = [
+REGISTROS = [
     "- 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp",  # noqa: E501
     "- 09:12 - [[personal]] **señal**: la administradora responde los mensajes con varios días de atraso",  # noqa: E501
     "- 11:30 - hice la consulta presencial por el standing desk",
@@ -42,11 +42,11 @@ ENTRADAS = [
 ORDEN_ESPERADO = ["09:12", "11:30", "18:40"]
 
 
-def _sembrar_entradas() -> Path:
+def _sembrar_registros() -> Path:
     vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
     ahora = vault / "AHORA.md"
     ahora.write_text(
-        insertar(ahora.read_text(encoding="utf-8"), ENTRADAS, dia=HOY),
+        registrar(ahora.read_text(encoding="utf-8"), REGISTROS, dia=HOY),
         encoding="utf-8",
     )
     return vault
@@ -62,12 +62,12 @@ def _lineas_del_dia(ahora: str, encabezado: str) -> list[str]:
     return [linea for linea in lineas[ini + 1 : fin] if linea.startswith("- ")]
 
 
-def test_002_001_las_entradas_caen_en_su_dia_y_en_orden() -> None:
-    ahora = (_sembrar_entradas() / "AHORA.md").read_text(encoding="utf-8")
+def test_002_001_los_registros_caen_en_su_dia_y_en_orden() -> None:
+    ahora = (_sembrar_registros() / "AHORA.md").read_text(encoding="utf-8")
 
     deldia = _lineas_del_dia(ahora, HOY)
     assert [linea[2:7] for linea in deldia] == ORDEN_ESPERADO, deldia
-    assert ENTRADAS[0] in deldia, "la línea de las 18:40 no quedó verbatim"
+    assert REGISTROS[0] in deldia, "la línea de las 18:40 no quedó verbatim"
 
     lineas = ahora.splitlines()
     resto = lineas[lineas.index(HOY) + len(deldia) + 1 :]
@@ -79,19 +79,19 @@ def test_002_001_la_fase_1_no_toca_pendientes() -> None:
     antes = instantanea(vault)
     ahora = vault / "AHORA.md"
     ahora.write_text(
-        insertar(ahora.read_text(encoding="utf-8"), ENTRADAS, dia=HOY),
+        registrar(ahora.read_text(encoding="utf-8"), REGISTROS, dia=HOY),
         encoding="utf-8",
     )
     assert delta(antes, instantanea(vault)) == {"AHORA.md": "modificado"}
 
 
-def test_002_001_entrada_sin_ambito_ni_clasificacion_queda_escrita() -> None:
-    ahora = (_sembrar_entradas() / "AHORA.md").read_text(encoding="utf-8")
+def test_002_001_registro_sin_ambito_ni_clasificacion_queda_escrito() -> None:
+    ahora = (_sembrar_registros() / "AHORA.md").read_text(encoding="utf-8")
     assert "- 11:30 - hice la consulta presencial por el standing desk" in ahora
 
 
 if __name__ == "__main__":
-    test_002_001_las_entradas_caen_en_su_dia_y_en_orden()
+    test_002_001_los_registros_caen_en_su_dia_y_en_orden()
     test_002_001_la_fase_1_no_toca_pendientes()
-    test_002_001_entrada_sin_ambito_ni_clasificacion_queda_escrita()
+    test_002_001_registro_sin_ambito_ni_clasificacion_queda_escrito()
     print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")

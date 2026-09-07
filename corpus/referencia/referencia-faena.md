@@ -165,12 +165,12 @@ Lo que trae al sistema: escribe mucho y ordena poco, sus pendientes se arrastran
 # Parte 2: Tabla de Verdad (Ground Truth — Formato Bitácora TUKU)
 
 > [!tip] Ground Truth para benchmarking de modelos
-> La entrada canónica que corresponde a cada dictado de la Parte 1, según [`spec/bitacora.md`](../../spec/bitacora.md): `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`. Mide si un agente convierte habla desestructurada en entradas que se sostienen solas.
+> El registro canónico que corresponde a cada dictado de la Parte 1, según [`spec/bitacora.md`](../../spec/bitacora.md): `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`. Mide si un agente convierte habla desestructurada en registros que se sostienen solos.
 >
 > **Las horas no vienen del dictado**: se derivan de la jornada que el dictado describe. La clasificación abierta usa el vocabulario del autor, no uno que fije TUKU.
 
 > [!question] Pendiente de decisión #REVISAR
-> 52 `~~(Hecho)~~` contra 15 `**pendiente**`: la mayoría de los cierres no tiene pareja previa, nacen y se cierran el mismo día porque así fue dictado. [`spec/pendientes.md`](../../spec/pendientes.md) dice que `~~(Hecho)~~` cierra un pendiente preexistente. O el corpus abre el pendiente implícito en la misma entrada, o la invariante admite el cierre sin pareja. Lo decide el escenario `002-004`, no el corpus.
+> 52 `~~(Hecho)~~` contra 15 `**pendiente**`: la mayoría de los cierres no tiene pareja previa, nacen y se cierran el mismo día porque así fue dictado. [`spec/pendientes.md`](../../spec/pendientes.md) dice que `~~(Hecho)~~` cierra un pendiente preexistente. O el corpus abre el pendiente implícito en la mismo registro, o la invariante admite el cierre sin pareja. Lo decide el escenario `002-004`, no el corpus.
 
 ## Turno Faena (11 al 19 de Agosto de 2026)
 

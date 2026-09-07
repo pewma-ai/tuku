@@ -10,7 +10,7 @@ Registrar produce **una sola cosa**: texto escrito en la bitácora. Recién cuan
 
 Esa frontera parte el flujo en dos mitades con naturalezas distintas. Antes de ella hace falta juicio, porque hay que entender qué pasó. Después de ella no hace falta ninguno: todo lo que sigue es leer un texto que ya está formado.
 
-De ahí sale la regla de diseño más exigente de TUKU: **toda consecuencia tiene que ser derivable del texto de la entrada.** Si algo solo se puede hacer recordando lo que se dijo, entonces o a la entrada le falta información, o esa operación no pertenece a este flujo y hay que decirlo.
+De ahí sale la regla de diseño más exigente de TUKU: **toda consecuencia tiene que ser derivable del texto del registro.** Si algo solo se puede hacer recordando lo que se dijo, entonces o al registro le falta información, o esa operación no pertenece a este flujo y hay que decirlo.
 
 ## Qué entra
 
@@ -28,10 +28,10 @@ No entra solo la voz. Entran cuatro cosas y ninguna es opcional, porque una pers
 1. **Separar lo dirigido al sistema de lo que pasó.** "Recuérdame", "anota", "oye" son instrucciones a quien lleva la bitácora. No son parte del hecho y no se registran.
 2. **Partir en hechos.** Una sola frase puede contener varios: un cierre propio y la respuesta de un tercero son dos hechos distintos.
 3. **Situar cada hecho.** A qué ámbito pertenece, a qué hora ocurrió y de qué clase es.
-4. **Redactar y escribir** la entrada en `AHORA.md`, según las reglas de bitácora (`bitacora.md`). **Acá termina el registro.**
+4. **Redactar y escribir** el registro en `AHORA.md`, según las reglas de bitácora (`bitacora.md`). **Acá termina el registro.**
 5. **Releer lo escrito y aplicar las consecuencias.** Cada tipo tiene su archivo en `reglas/` y se carga solo cuando corresponde.
 
-El orden importa en dos puntos, y por razones distintas. Antes del paso 4, porque redactar sin haber desglosado produce una entrada por frase y la unidad es el hecho. Antes del paso 5, porque la fuente de la consecuencia es el texto, y si todavía no existe no hay de dónde leer.
+El orden importa en dos puntos, y por razones distintas. Antes del paso 4, porque redactar sin haber desglosado produce un registro por frase y la unidad es el hecho. Antes del paso 5, porque la fuente de la consecuencia es el texto, y si todavía no existe no hay de dónde leer.
 
 ## La segunda vía
 
@@ -43,12 +43,12 @@ Son dos puertas y una sola sala. Eso es lo que hace que la plataforma de pruebas
 %%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
 flowchart TD
     E["Lo dicho o escrito<br/>(lenguaje natural, sin estructura)"]
-    CTX["Contexto reciente<br/>(últimas entradas)"]
+    CTX["Contexto reciente<br/>(últimos registros)"]
     VOC["Vocabulario de ámbitos<br/>(desde los frontmatter)"]
     LE["Vocabularios abiertos<br/>(LIBRO-DE-ESTILO.md)"]
     I["(1) (2) Intención y desglose<br/>qué pasó, y cuántos hechos son"]
     S["(3) Situar cada hecho<br/>ámbito, hora, clase"]
-    ENT["(4) Entrada escrita en AHORA.md<br/>aquí termina el registro"]
+    ENT["(4) Registro escrito en AHORA.md<br/>aquí termina el registro"]
     J["Janitor invocado con argumentos<br/>(operaciones del sistema)"]
 
     subgraph CONS["(5) Consecuencias, leyendo lo escrito"]
@@ -89,13 +89,13 @@ Las cajas rosadas son las que necesitan juicio, y son las únicas. Todo lo verde
 | Consecuencia | Qué hace | Reglas | Janitors |
 | --- | --- | --- | --- |
 | Pendientes | Alta o baja en `PENDIENTES.md` | `reglas/pendientes.tuku.md` | `jntr.pendiente-abrir`, `jntr.pendiente-cerrar` |
-| Enlaces | Conecta la entrada con páginas que ya existen | `reglas/enlaces.tuku.md` | `jntr.paginas-index`, `jntr.menciones-enlazar` |
+| Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md` | `jntr.paginas-index`, `jntr.menciones-enlazar` |
 | Cadencias | Alta o cambio de una cadencia en su ámbito | `reglas/cadencias.tuku.md` | `jntr.cadencia-alta`, `jntr.cadencia-inyectar` |
 | Propuesta | Sugiere algo al autor y espera aprobación | `reglas/propuestas.tuku.md` | sin janitor, a propósito |
 
 La lista es **abierta** y va a crecer a medida que el uso la revele. Agregar una consecuencia es agregar un archivo en `reglas/`, no tocar el flujo. Esa es la prueba de que el corte está bien hecho.
 
-Un solo dictado puede producir varias entradas y varios cambios, porque cada hecho del desglose arrastra los suyos. **La propuesta es la única que no se ejecuta:** se muestra y espera. Es el principio 3 metido dentro del flujo, y es la razón de que no tenga janitor: una propuesta rechazada no escribe nada, así que no hay nada que limpiar.
+Un solo dictado puede producir varios registros y varios cambios, porque cada hecho del desglose arrastra los suyos. **La propuesta es la única que no se ejecuta:** se muestra y espera. Es el principio 3 metido dentro del flujo, y es la razón de que no tenga janitor: una propuesta rechazada no escribe nada, así que no hay nada que limpiar.
 
 ## No entra
 

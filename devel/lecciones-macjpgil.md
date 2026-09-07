@@ -10,15 +10,15 @@ Levantado el 2026-09-06, contra [`../../mac-jpgil`](../../mac-jpgil) en su estad
 
 2266 commits desde el 2026-03-18, 23 bitácoras de ciclo, 249 notas (38 de ellas de persona), 42 entidades vigentes en `org/` y 7 archivadas. Son casi seis meses de uso diario y no de un piloto, así que donde una regla está escrita tres veces en tres archivos distintos, lo razonable es leerlo como que se rompía tres veces.
 
-Lo que se miró: `AGENTS.md` de la raíz y los locales de `actividad/`, `notas/` y `org/`; los procesos de `procesos/` que tocan entrada, pendientes, ámbitos y notas; los janitors de `procesos/scripts/`; `org/_rules/`; y cuatro bitácoras reales de agosto y septiembre de 2026.
+Lo que se miró: `AGENTS.md` de la raíz y los locales de `actividad/`, `notas/` y `org/`; los procesos de `procesos/` que tocan registro, pendientes, ámbitos y notas; los janitors de `procesos/scripts/`; `org/_rules/`; y cuatro bitácoras reales de agosto y septiembre de 2026.
 
 ## Lo que aplica al epic 002
 
-### 1. La entrada real no lleva hora
+### 1. El registro real no lleva hora
 
-`spec/bitacora.md` fija `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`. En las cuatro bitácoras revisadas, sobre 235 entradas, prácticamente ninguna empieza con hora. La hora aparece **dentro del cuerpo** cuando el hecho la necesita ("Reunión con [una persona] (11:30) sobre gobernanza del grupo"), y en ningún otro caso.
+`spec/bitacora.md` fija `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`. En las cuatro bitácoras revisadas, sobre 235 registros, prácticamente ninguna empieza con hora. La hora aparece **dentro del cuerpo** cuando el hecho la necesita ("Reunión con [una persona] (11:30) sobre gobernanza del grupo"), y en ningún otro caso.
 
-`actividad/AGENTS.md` lo tiene resuelto de la única forma que se sostiene: orden estrictamente cronológico por hora del evento, y si no hay timestamp explícito, la entrada se agrega al final del día sin reordenar nada de lo ya escrito.
+`actividad/AGENTS.md` lo tiene resuelto de la única forma que se sostiene: orden estrictamente cronológico por hora del evento, y si no hay timestamp explícito, el registro se agrega al final del día sin reordenar nada de lo ya escrito.
 
 La spec manda y `- HH:MM -` sigue siendo el formato. Lo que esto aporta es un riesgo conocido para el experimento del epic: si el dictado real llega sin hora, la única hora que el janitor puede estampar es la de escritura y no la del hecho, que es información distinta. Si eso aparece en el epic, cambia [`../spec/bitacora.md`](../spec/bitacora.md) por el camino que `epics.md` ya define, y si no aparece, no cambia nada. La regla de inserción de mac-jpgil (sin timestamp, al final del día, sin reordenar) sirve como respuesta ya probada para ese caso.
 
@@ -38,7 +38,7 @@ TUKU usa `[[ambito]]` y se queda con `[[ambito]]`. Lo que la lección aporta es 
 
 ### 4. La invariante de `~~(Hecho)~~` es el caso negativo más importante
 
-Está escrita tres veces: en `actividad/AGENTS.md` (reglas y tabla de límites), en `pendientes-en-bitacora.MaC.md` como invariante formal, y en `tareas-pendientes.MaC.md` como límite. Dice siempre lo mismo: `~~(Hecho)~~` se genera si y solo si corresponde a un pendiente que **ya estaba registrado**. Una acción que ocurrió pero que nunca fue pendiente se registra como entrada narrativa normal.
+Está escrita tres veces: en `actividad/AGENTS.md` (reglas y tabla de límites), en `pendientes-en-bitacora.MaC.md` como invariante formal, y en `tareas-pendientes.MaC.md` como límite. Dice siempre lo mismo: `~~(Hecho)~~` se genera si y solo si corresponde a un pendiente que **ya estaba registrado**. Una acción que ocurrió pero que nunca fue pendiente se registra como registro narrativo normal.
 
 Que esté tres veces indica que el agente la rompía: convertía cualquier "ya hice X" en un cierre. En TUKU eso deja el sistema en un estado peor que en mac-jpgil, porque `PENDIENTES.md` es fuente de verdad y un cierre sin pareja no tiene qué borrar.
 
@@ -58,7 +58,7 @@ Confirma una tercera, más fina: la caja "Postergados" **se crea cuando llega la
 
 ### 7. Fechar es mover, y la unicidad ya está escrita como prohibición
 
-La tabla de `classify` en `tareas-pendientes.MaC.md` reparte por propiedades de la tarea, y cierra con un caso prohibido explícito: escribir una tarea fechada en el callout del día **y** en la caja semanal. El callout del día reemplaza la entrada de la caja.
+La tabla de `classify` en `tareas-pendientes.MaC.md` reparte por propiedades de la tarea, y cierra con un caso prohibido explícito: escribir una tarea fechada en el callout del día **y** en la caja semanal. El callout del día reemplaza el registro de la caja.
 
 Es la regla 1 de `spec/pendientes.md` (un pendiente en un solo callout) escrita como error observado. El punto 3 del epic 002 ("escribir en un día actual o futuro fecha el pendiente") tiene que probar que fecha moviendo y no copiando.
 
@@ -100,9 +100,9 @@ Un detalle que se pierde si no se anota: `summary` es obligatorio y **vacío es 
 
 ## Lo que se observó y no se trae todavía
 
-- **La consecuencia atada a vocabulario abierto.** `actividad/AGENTS.md` propaga una entrada a la página de la entidad en `org/` **si y solo si** lleva `**Hito:**`, `**Decisión:**` o `**Señal:**`. Eso es una consecuencia mecánica disparada por la ontología **abierta**, mientras que `spec/bitacora.md` reserva las consecuencias para la cerrada. Vale la spec; queda la pregunta de si el uso vuelve a pedir lo mismo. No pega en el epic 002 (en un vault vacío no hay a dónde propagar) y es una de las cosas a vigilar en el 003.
+- **La consecuencia atada a vocabulario abierto.** `actividad/AGENTS.md` propaga un registro a la página de la entidad en `org/` **si y solo si** lleva `**Hito:**`, `**Decisión:**` o `**Señal:**`. Eso es una consecuencia mecánica disparada por la ontología **abierta**, mientras que `spec/bitacora.md` reserva las consecuencias para la cerrada. Vale la spec; queda la pregunta de si el uso vuelve a pedir lo mismo. No pega en el epic 002 (en un vault vacío no hay a dónde propagar) y es una de las cosas a vigilar en el 003.
 - **El ciclo real del autor no es semanal ni de largo fijo.** Los archivos de `actividad/` alternan dos tipos de bloque (trabajo en terreno y descanso) con largos de 5 a 9 días, y `estrategia/Capacidad.md` describe el ritmo con detalle: día de viaje, disponibilidad parcial en los bordes del bloque, roles operativos que se asignan a última hora. Material del epic 004.
-- **Las cadencias reales ya están en formato tabla** en `estrategia/Cadencias.md`, con dieciséis entradas y cuatro clases de trigger: día exacto, rango, evento y reactivo. Tres caen el día 10 y hay rangos que cruzan el borde de mes, que es exactamente el banco de pruebas que pide la fase 4. Se trae en el epic 004, sin tocarlo antes.
+- **Las cadencias reales ya están en formato tabla** en `estrategia/Cadencias.md`, con dieciséis registros y cuatro clases de trigger: día exacto, rango, evento y reactivo. Tres caen el día 10 y hay rangos que cruzan el borde de mes, que es exactamente el banco de pruebas que pide la fase 4. Se trae en el epic 004, sin tocarlo antes.
 - **Capacidad con costo fijo por rol operativo**, cobrado por cada día que dura el rol, más el reparto bruto de la persona. `estrategia/Capacidad.md` es el caso real contra el que se valida la propuesta abierta de `spec/ambitos.md` sobre dónde vive el bruto. Epic 004.
 - **El archivado con cascada** existe y está escrito (`org/_rules/baja-entidades.md`, 7 entidades ya archivadas). Epic 003 o wishlist.
 - **`CONTEXTO-RECIENTE.md` arrastra los días sembrados vacíos** (`- ...`) dentro de la cola, así que el agente recibe agenda futura mezclada con actividad ocurrida. Ya estaba anotado en [`que_implementar.md`](que_implementar.md); queda confirmado en vivo, y afecta al paso 1 del flujo.
@@ -113,7 +113,7 @@ De las cinco decisiones que [`epics.md`](epics.md) pone antes de empezar el epic
 
 | Decisión | Qué aporta mac-jpgil |
 | --- | --- |
-| 1. Qué entradas componen el día uno | El corpus ya existe y la forma real de las entradas también, con la salvedad de las lecciones 1 y 2 |
+| 1. Qué registros componen el día uno | El corpus ya existe y la forma real de los registros también, con la salvedad de las lecciones 1 y 2 |
 | 2. Cómo se verifica lo que depende del agente | Nada directo: mac-jpgil no tiene suite, y esa ausencia es parte de por qué existe TUKU |
 | 3. Qué arnés de agente y cómo se aísla | Lección 10: subagente con contexto limpio, contrato de confirmación corta |
 | 4. Dónde vive el código y cómo se ejecuta | Lección 11 y 12: fuera del turno del agente, con contrato de estado |

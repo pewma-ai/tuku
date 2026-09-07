@@ -11,7 +11,7 @@ El que dejó [`002-008-crear-nota`](002-008-crear-nota.md). Último paso determi
 Dado el ámbito `depto-centro` creado y un pendiente de GGCC ya cerrado en el martes 11
 Cuando se inyecta
 `- 20:40 - [[depto-centro]] **señal**: la administradora respondió que este mes no pagará los GGCC, y se repite`
-Entonces la entrada queda escrita en el martes 11
+Entonces el registro queda escrito en el martes 11
 Y el sistema propone abrir un pendiente de recobro
 Y el diff contra el estado anterior es **exactamente** esa línea de `AHORA.md`
 Y `PENDIENTES.md`, `ambitos/` y `notas/` quedan byte a byte iguales
@@ -39,7 +39,7 @@ El escenario aprueba y revierte, para que [`002-010`](002-010-dictado-del-dia-un
 ## Escenario: la propuesta no se emite dos veces
 
 Dado la propuesta ya rechazada
-Cuando se vuelve a correr el flujo sobre la misma entrada
+Cuando se vuelve a correr el flujo sobre el mismo registro
 Entonces vuelve a proponerse, porque no hay estado que recuerde el rechazo
 Y el diff sigue vacío
 

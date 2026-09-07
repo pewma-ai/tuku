@@ -1,16 +1,16 @@
-# Escenario · 002-002-lint-de-entrada
+# Escenario · 002-002-lint-de-registro
 
-**Cubre:** epic 002, fase 1, criterio de salida. `jntr.entrada-lint`: ontología cerrada estricta, ontología abierta permisiva.
+**Cubre:** epic 002, fase 1, criterio de salida. `jntr.registro-lint`: ontología cerrada estricta, ontología abierta permisiva.
 
 ## Estado inicial
 
-El que dejó [`002-001-entrada-en-su-dia`](002-001-entrada-en-su-dia.md): tres entradas en el martes 11, `PENDIENTES.md` intacto.
+El que dejó [`002-001-registro-en-su-dia`](002-001-registro-en-su-dia.md): tres registros en el martes 11, `PENDIENTES.md` intacto.
 
 ## Escenario: un tipo abierto desconocido se reporta y se acepta
 
 Dado el estado anterior
 Cuando se inyecta `- 12:05 - [[personal]] **cachureo**: ordené los cables del escritorio`
-Entonces la entrada queda escrita en su día
+Entonces el registro queda escrito en su día
 Y el lint la reporta como tipo desconocido, para preguntar más adelante
 Y el reporte no es un error: el lint termina en estado de éxito
 
@@ -26,10 +26,10 @@ Y la línea queda escrita igual, porque un error del autor se reporta y nunca se
 
 Este es el caso que separa las dos ontologías: la misma zona de la línea, dos tratamientos.
 
-## Escenario: una entrada fuera del rango del ciclo se reporta
+## Escenario: un registro fuera del rango del ciclo se reporta
 
 Dado el mismo estado, con el ciclo abierto del 11 al 17 de agosto
-Cuando se inyecta una entrada fechada el 2026-08-25
+Cuando se inyecta un registro fechado el 2026-08-25
 Entonces el lint la reporta como fuera del rango del ciclo abierto
 Y no se inventa el día que falta
 

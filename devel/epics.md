@@ -12,7 +12,7 @@ El diseño lo dirige la experimentación, no al revés: `spec/` y `docs/` cambia
 
 ## Qué separa un epic del siguiente
 
-**El estado del vault con el que empieza**, no la primitiva que construye. Las fases de `que_implementar.md` cortan por primitiva (entrada, pendientes, ámbitos, cadencias, notas); los epics cortan por el estado inicial, y por eso un epic abarca partes de varias fases.
+**El estado del vault con el que empieza**, no la primitiva que construye. Las fases de `que_implementar.md` cortan por primitiva (registro, pendientes, ámbitos, cadencias, notas); los epics cortan por el estado inicial, y por eso un epic abarca partes de varias fases.
 
 El motivo es el criterio de entrega: "los pendientes funcionan" no es una experiencia que alguien pueda usar, "el día uno funciona" sí lo es. Y el propio `que_implementar.md` ya lo pedía sin nombrarlo, en su criterio de corte 2: si un estado inicial nuevo es lo que obliga a partir el trabajo, entonces el estado inicial es el eje.
 
@@ -23,7 +23,7 @@ La consecuencia práctica es que los epics 002 y 003 construyen **las mismas cap
 Vale entre epics y entre escenarios de un epic:
 
 1. **De lo determinista a lo agéntico.** Un tramo determinista corre mil veces gratis; uno agéntico cuesta y no repite resultado. El escenario con LLM va al final, nunca en la base de una cadena.
-2. **De lo simple a lo complejo.** Una primitiva antes que la combinación, un ámbito antes que un árbol, el mínimo de entradas antes que el volumen con ruido.
+2. **De lo simple a lo complejo.** Una primitiva antes que la combinación, un ámbito antes que un árbol, el mínimo de registros antes que el volumen con ruido.
 3. **Del happy path al caso borde.**
 
 Es la apuesta del proyecto: implementando en ese orden, la comprensión de TUKU emerge del uso en vez de decidirse por adelantado.
@@ -89,11 +89,11 @@ Los ejemplos salen de [`referencia-faena.md`](../corpus/referencia/referencia-fa
 
 Qué tiene que funcionar:
 
-1. **La entrada se reformatea sola.** El autor dicta y lo que queda escrito cumple las reglas de `docs/` y `spec/`: hora, ámbito, marca de la ontología cerrada, clasificación, cuerpo. En el día correcto y en orden cronológico.
-2. **Los pendientes se abren y se cierran solos.** Una entrada `**pendiente**` los abre, una `~~(Hecho)~~` los cierra, sin que el autor toque `PENDIENTES.md`.
+1. **El registro se reformatea sola.** El autor dicta y lo que queda escrito cumple las reglas de `docs/` y `spec/`: hora, ámbito, marca de la ontología cerrada, clasificación, cuerpo. En el día correcto y en orden cronológico.
+2. **Los pendientes se abren y se cierran solos.** Un registro `**pendiente**` los abre, una `~~(Hecho)~~` los cierra, sin que el autor toque `PENDIENTES.md`.
 3. **Escribir en un día actual o futuro fecha el pendiente.** Es la forma natural de agendar: el pendiente toma la fecha de ese día y se transcluye al inicio del día. No hace falta un comando aparte para fechar.
 4. **Crear un ámbito lo deja bien guardado y enlaza hacia atrás.** El árbol queda correcto y las menciones sueltas del ciclo en curso se convierten en enlaces, de forma retroactiva.
-5. **Crear una nota a petición.** El autor la pide, la nota se escribe, queda la entrada en la bitácora que deja constancia, y si lo pidió así, queda enlazada a su ámbito: *"una nota respecto al cliente X: cómo funciona la industria del papel reciclado en la Araucanía"*.
+5. **Crear una nota a petición.** El autor la pide, la nota se escribe, queda el registro en la bitácora que deja constancia, y si lo pidió así, queda enlazada a su ámbito: *"una nota respecto al cliente X: cómo funciona la industria del papel reciclado en la Araucanía"*.
 
 Cubre la fase 1 completa, la fase 2 completa, y **la versión mínima** de las fases 3 y 5.
 
@@ -101,7 +101,7 @@ Cubre la fase 1 completa, la fase 2 completa, y **la versión mínima** de las f
 
 Antes de empezar hay que decidir:
 
-1. Qué entradas componen el día uno, representativas, con las tres marcas de la ontología cerrada.
+1. Qué registros componen el día uno, representativas, con las tres marcas de la ontología cerrada.
 2. Cómo se verifica lo que depende del agente: byte a byte para las consecuencias, otro criterio para la redacción.
 3. Qué arnés de agente se usa y cómo se aísla para no gastar tokens por accidente.
 4. Dónde vive el código y cómo se ejecuta. Ya no se puede diferir.
@@ -170,7 +170,7 @@ No entra: ejecutar cualquier cosa sin aprobación.
 Lo que hay que hacer y no bloquea a nadie. No son epics: entran cuando duelan.
 
 - **Endurecimiento.** Los casos de error, la reconstrucción completa y la idempotencia medida sobre el sistema entero junto y no janitor por janitor. Era la fase 8, y no agrega capacidades: cierra huecos. La regla que la gobierna vale desde ya, aunque la fase no exista: **un error del autor nunca se rechaza, se reporta.**
-- **Probar la instalación con una persona ajena al diseño.** Que instale con el one-liner de `curl`, escriba una entrada leyendo solo `AGENTS.md`, y cuánto le toma.
+- **Probar la instalación con una persona ajena al diseño.** Que instale con el one-liner de `curl`, escriba un registro leyendo solo `AGENTS.md`, y cuánto le toma.
 - **Publicar el vault en web** con Quartz.
 - **Telegram como canal de captura móvil.**
 

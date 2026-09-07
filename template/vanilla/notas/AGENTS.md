@@ -6,4 +6,4 @@ Formato libre. Nombre de archivo en minúsculas.
 
 Algunas notas son sobre algo que se repite y conviene que sigan una plantilla. Esas declaran `tipo:` en su frontmatter, y los tipos disponibles están en `LIBRO-DE-ESTILO.md`.
 
-Para enlazar una nota desde una entrada de bitácora, usa `[[nombre-del-archivo]]`.
+Para enlazar una nota desde un registro de bitácora, usa `[[nombre-del-archivo]]`.

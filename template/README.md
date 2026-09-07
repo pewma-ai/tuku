@@ -22,7 +22,7 @@ Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2:
 | --- | --- |
 | `AGENTS.md` | Reglas de todo el repositorio |
 | `LIBRO-DE-ESTILO.md` | Reglas del autor sobre cómo se escribe |
-| `AHORA.md` | Los días del primer ciclo sembrados, sin entradas |
+| `AHORA.md` | Los días del primer ciclo sembrados, sin registros |
 | `PENDIENTES.md` | Los callouts de horizonte, vacíos |
 | `ambitos/AGENTS.md`, `ambitos/CADENCIAS.md` | Reglas y cadencias de toda la rama |
 | `ambitos/personal/` | La única rama inicial: `AGENTS.md`, `CADENCIAS.md`, `CAPACIDAD.md`, `personal.md` |

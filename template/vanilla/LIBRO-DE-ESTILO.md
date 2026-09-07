@@ -16,7 +16,7 @@ Las automatizaciones leen las tablas que siguen buscando estos encabezados exact
 
 ### Clasificaciones
 
-De qué clase es cada entrada. Nadie las valida en forma estricta: si se usa una que no está en la tabla, se acepta y se formaliza después.
+De qué clase es cada registro. Nadie las valida en forma estricta: si se usa una que no está en la tabla, se acepta y se formaliza después.
 
 | Clasificación | Qué significa |
 | --- | --- |
@@ -58,7 +58,7 @@ Empieza con uno. Los demás aparecen cuando algo se repite lo suficiente como pa
 
 Cuatro reglas de partida. Se cambian si la forma de escribir del autor es otra, salvo la última, de la que dependen las automatizaciones.
 
-1. **Se registra el hecho, no la conversación.** Fuera el rodeo y lo dirigido a quien escucha. Una sola frase puede dar varias entradas.
-2. **La entrada se sostiene sola.** Se va a leer en años, sin el resto del día. Las personas se nombran con su rol la primera vez y "el otro día" se convierte en una fecha.
+1. **Se registra el hecho, no la conversación.** Fuera el rodeo y lo dirigido a quien escucha. Una sola frase puede dar varios registros.
+2. **El registro se sostiene solo.** Se va a leer en años, sin el resto del día. Las personas se nombran con su rol la primera vez y "el otro día" se convierte en una fecha.
 3. **No se agrega lo que no se dijo.** Lo que un hecho sugiere se propone, no se da por hecho.
 4. **El pendiente va en infinitivo y su cierre repite el mismo texto.** De esto depende que cerrar un pendiente funcione sin que nadie tenga que interpretar nada.

@@ -4,7 +4,7 @@
 
 ## `AHORA.md`, el ciclo en curso
 
-Lo único canónico aquí son **las entradas**. El resto es vista y entra por transclusión.
+Lo único canónico aquí son **los registros**. El resto es vista y entra por transclusión.
 
 ```markdown
 ---
@@ -60,7 +60,7 @@ hasta: 2026-09-01
 | --- | --- | --- |
 | Plan | transclusión desde `planes/` | texto aplanado |
 | Pendientes del día | transclusión desde `PENDIENTES.md` | texto aplanado |
-| Entradas | canónicas | sin cambios |
+| Registros | canónicos | sin cambios |
 | Resumen | no existe | enlace a `reportes/` |
 
 Aplanar no contradice la fuente única. La fuente única evita que dos copias **vivas** diverjan, y al cerrar nada sigue vivo: lo que queda es un snapshot. Lo que sí se rompería es el principio 1, porque un archivo lleno de `![[...]]` no se lee con un editor básico ni dentro de veinte años.
@@ -86,7 +86,7 @@ Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
 
 En este orden:
 
-1. Generar el resumen en `reportes/`, que necesita el plan y las entradas todavía vivos → `jntr.ciclo-extracto` lo alimenta
+1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `jntr.ciclo-extracto` lo alimenta
 2. Aplanar el plan y los pendientes de cada día → `jntr.transclusiones-aplanar`
 3. Dejar el enlace al resumen → `jntr.ciclo-cerrar`
 4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` → `jntr.ciclo-cerrar`
@@ -162,7 +162,7 @@ Lo que sale de sumar no es un número de horas: es cuánto cabe en el ciclo, en 
 
 `Por qué` cumple aquí el mismo papel que `Historia` en una cadencia. Un costo fijo sin razón escrita es lo primero que el autor recorta cuando quiere que el ciclo le quepa, y es exactamente lo que no debe recortar.
 
-**La capacidad no se registra en la bitácora.** Declararla es escribir una regla, no ocurrió como hecho. Cambiarla sí es una decisión y el autor puede registrarla como tal, pero eso es una entrada más, no el mecanismo.
+**La capacidad no se registra en la bitácora.** Declararla es escribir una regla, no ocurrió como hecho. Cambiarla sí es una decisión y el autor puede registrarla como tal, pero eso es un registro más, no el mecanismo.
 
 Trae al plan:
 

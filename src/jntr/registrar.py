@@ -1,4 +1,4 @@
-"""jntr.entrada-insertar: coloca líneas de bitácora ya formadas en su día.
+"""jntr.registrar: coloca líneas de bitácora ya formadas en su día.
 
 Fase 1 de `devel/que_implementar.md`. No interpreta ni reformatea: recibe
 líneas que ya cumplen `spec/bitacora.md` y las inserta bajo el encabezado del
@@ -24,7 +24,7 @@ def _clave_hora(linea: str) -> tuple[int, int]:
     return int(m.group(1)), int(m.group(2))
 
 
-def insertar(ahora: str, lineas: list[str], *, dia: str) -> str:
+def registrar(ahora: str, lineas: list[str], *, dia: str) -> str:
     """Devuelve `AHORA.md` con `lineas` insertadas bajo el encabezado `dia`.
 
     `dia` es el encabezado del día, con o sin el `## ` inicial. Las líneas

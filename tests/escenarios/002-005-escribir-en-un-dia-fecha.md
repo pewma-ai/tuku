@@ -38,8 +38,8 @@ Y ninguno de los cinco desaparece por seguir vacío
 
 Dado el pendiente ya fechado
 Cuando se revisa `AHORA.md`
-Entonces la única línea nueva es la entrada `**pendiente**` que el autor escribió
-Y no hay ninguna entrada que narre que el pendiente cambió de callout
+Entonces la única línea nueva es el registro `**pendiente**` que el autor escribió
+Y no hay ningún registro que narre que el pendiente cambió de callout
 
 Mover un pendiente es un hecho del sistema, no de la vida del autor.
 

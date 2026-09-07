@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 SLUG = "002-003-abrir-pendiente"
-PREVIO = "002-002-lint-de-entrada"
+PREVIO = "002-002-lint-de-registro"
 CUERPO = "avisar de los GGCC a la administradora"
 
 FALTA = (

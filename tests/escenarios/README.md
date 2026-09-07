@@ -32,7 +32,7 @@ El epic 001 empezó con un fixture de `AHORA.md` y se eliminó por esto mismo: c
 
 Lo que un escenario inyecta sale de [`../../corpus/referencia/`](../../corpus/README.md), **generado por un agente LLM avanzado**, adaptado a lo que ese escenario prueba. Adaptado en dos ejes:
 
-1. **El tamaño es variable del test.** Probar una primitiva pide el mínimo: tres entradas si bastan tres. Probar si el agente o el janitor se distraen pide muchas, casi todas ruido. El mismo escenario puede tener las dos versiones.
+1. **El tamaño es variable del test.** Probar una primitiva pide el mínimo: tres registros si bastan tres. Probar si el agente o el janitor se distraen pide muchos, casi todos ruido. El mismo escenario puede tener las dos versiones.
 2. **El dominio se elige.** Un escenario de cadencias genera desde pyme, porque faena no declara ninguna.
 
 Copiar literal amarra el test a un texto que el corpus puede cambiar, y le entrega al agente el ejemplo que después se le pide reproducir.
@@ -81,8 +81,8 @@ uv run pytest tests/escenarios/ -k 001_002  # un escenario
 | [`001-002-instalacion-local.md`](001-002-instalacion-local.md) | Epic 001, fase 0 | El mismo mecanismo, sin red ni git, para iterar rápido |
 | [`001-003-destino-no-vacio.md`](001-003-destino-no-vacio.md) | Epic 001, fase 0 | `install.sh` no sobrescribe sin preguntar, salvo `TUKU_FORCE=1`; el único de los tres que prueba `install.sh` mismo, no `instalar()`. Usa `pexpect` para simular la respuesta a un prompt que lee `/dev/tty` |
 | [`001-004-instalador-pregunta-el-nombre.md`](001-004-instalador-pregunta-el-nombre.md) | Epic 001, fase 0 | La capa de identidad de punta a punta: se responde el nombre en el prompt de `install.sh` y queda en `LIBRO-DE-ESTILO.md`. Instala desde `TUKU_ORIGEN`, sin red, y es el único que deja completar la instalación |
-| [`002-001-entrada-en-su-dia.md`](002-001-entrada-en-su-dia.md) | Epic 002, fase 1 | Primer paso de la cadena. Día correcto, orden cronológico, y el diff no toca `PENDIENTES.md` |
-| [`002-002-lint-de-entrada.md`](002-002-lint-de-entrada.md) | Epic 002, fase 1 | Cerrada estricta, abierta permisiva. El lint informa y no escribe |
+| [`002-001-registro-en-su-dia.md`](002-001-registro-en-su-dia.md) | Epic 002, fase 1 | Primer paso de la cadena. Día correcto, orden cronológico, y el diff no toca `PENDIENTES.md` |
+| [`002-002-lint-de-registro.md`](002-002-lint-de-registro.md) | Epic 002, fase 1 | Cerrada estricta, abierta permisiva. El lint informa y no escribe |
 | [`002-003-abrir-pendiente.md`](002-003-abrir-pendiente.md) | Epic 002, fase 2 | Abrir es copiar el cuerpo literal. Lleva un `#REVISAR` sobre una ambigüedad de `spec/pendientes.md` |
 | [`002-004-cerrar-pendiente.md`](002-004-cerrar-pendiente.md) | Epic 002, fase 2 | Cerrar es borrar, y el cierre sin pareja se reporta sin inventar nada |
 | [`002-005-escribir-en-un-dia-fecha.md`](002-005-escribir-en-un-dia-fecha.md) | Epic 002, fase 2 | El punto 3 del epic: agendar es escribir donde corresponde. Fechar mueve, nunca copia |

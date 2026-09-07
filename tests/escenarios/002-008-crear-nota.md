@@ -22,9 +22,9 @@ Y el cuerpo es el que el agente redactó, tomado del fixture congelado
 
 Dado el mismo estado
 Cuando la nota se escribe
-Entonces hay una entrada nueva en el martes 11 que deja constancia de la nota creada
-Y esa entrada enlaza a la nota
-Y no hay ninguna otra entrada narrando el mecanismo
+Entonces hay un registro nuevo en el martes 11 que deja constancia de la nota creada
+Y ese registro enlaza a la nota
+Y no hay ningún otro registro narrando el mecanismo
 
 Crear la nota es un hecho de la vida del autor, que la pidió; mover un pendiente de escalón es del sistema. Por eso esta se registra y aquella no.
 
@@ -52,7 +52,7 @@ La **presencia** de la sección y del motivo se verifica sin juicio. Que el moti
 Dado la nota ya creada
 Cuando se repite la operación
 Entonces el diff es vacío
-Y no hay una segunda entrada de constancia en la bitácora
+Y no hay un segundo registro de constancia en la bitácora
 
 ## De dónde sale el contenido
 
@@ -67,5 +67,5 @@ uv run pytest tests/escenarios/ -k 002_008
 ## Qué se mira a mano
 
 - **Leer el motivo del "Ver además".** Ningún script lo juzga: si no responde para qué le sirve al lector hacer clic, está de relleno.
-- Que la entrada de constancia en la bitácora se lea como un hecho del día y no como un log de sistema.
+- Que el registro de constancia en la bitácora se lea como un hecho del día y no como un log de sistema.
 - Que la nota se sostenga sola dentro de un año, sin la conversación que la pidió.

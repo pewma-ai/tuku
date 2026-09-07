@@ -1,6 +1,6 @@
 # spec · ámbitos
 
-> El árbol donde aterriza cada entrada. Se justifica por el principio 7 de [`../docs/principios.md`](../docs/principios.md) (la regla más cercana prevalece).
+> El árbol donde aterriza cada registro. Se justifica por el principio 7 de [`../docs/principios.md`](../docs/principios.md) (la regla más cercana prevalece).
 
 ## Tres roles, no tres niveles
 
@@ -12,7 +12,7 @@ El árbol crece orgánicamente y la profundidad no está fijada. Lo que distingu
 | **Categoría** | Agrupador, sin identidad propia | Directorio **sin página propia** |
 | **Actividad** | La hoja, lo que efectivamente ocurre | Archivo `.md` en minúscula |
 
-Regla operativa y verificable por janitor: **las entradas apuntan a una actividad o a un ámbito, nunca a una categoría.** Una categoría no tiene de qué hablar, solo agrupa.
+Regla operativa y verificable por janitor: **los registros apuntan a una actividad o a un ámbito, nunca a una categoría.** Una categoría no tiene de qué hablar, solo agrupa.
 
 ## Qué carga cada directorio
 

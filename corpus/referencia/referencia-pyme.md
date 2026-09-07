@@ -155,7 +155,7 @@ Lo que trae al sistema: se le olvidan los seguimientos de cotización, que es ex
 # Parte 2: Tabla de Verdad (Ground Truth — Formato Bitácora)
 
 > [!tip] Ground Truth para benchmarking de modelos
-> Reproduce la entrada canónica que corresponde a cada dictado de la Parte 1, según `spec/bitacora.md`. Permite evaluar si un agente transforma habla desestructurada en entradas que se sostienen solas, con la marca correcta de la ontología cerrada (`**pendiente**`, `~~(Hecho)~~`, `**cadencia**`) y una clasificación abierta razonable.
+> Reproduce el registro canónico que corresponde a cada dictado de la Parte 1, según `spec/bitacora.md`. Permite evaluar si un agente transforma habla desestructurada en registros que se sostienen solos, con la marca correcta de la ontología cerrada (`**pendiente**`, `~~(Hecho)~~`, `**cadencia**`) y una clasificación abierta razonable.
 >
 > Tres cosas que este corpus pone a prueba y el de faena no: **la instrucción dirigida al oyente desaparece** ("nota mental que siempre se me olvida" no se registra, la cadencia sí); **el monto y el plazo son parte del hecho**, no adorno, porque de ellos dependen las consecuencias; y **una frase de negocio suele ser dos hechos**, la venta y su condición de pago.
 
@@ -523,14 +523,14 @@ Cada una vive en el `CADENCIAS.md` del ámbito donde aplica, según `spec/cadenc
 > [!warning] Lo que este corpus pone a prueba en las cadencias
 > **Dos son de evento y no de calendario** (seguimiento a dos días, reposición a tres meses) y una es de **ausencia** (ocho semanas sin actividad). Las tres nacieron acá de una frase de Andrea, no de una configuración, y las tres viven en el ámbito `clientes/` y no en cada cliente, porque aplican a todos.
 >
-> La de seguimiento a dos días es además la única que se puede **medir**: la entrada del domingo 23 dice que de tres cotizaciones seguidas, dos resultaron. Es el caso de prueba de si el sistema puede mostrarle a alguien que una regla suya sirve.
+> La de seguimiento a dos días es además la única que se puede **medir**: el registro del domingo 23 dice que de tres cotizaciones seguidas, dos resultaron. Es el caso de prueba de si el sistema puede mostrarle a alguien que una regla suya sirve.
 
-## 6. Procesos típicos que las entradas dejan ver
+## 6. Procesos típicos que los registros dejan ver
 
-No son primitivas de `spec/`: son la forma que toma el trabajo real y que las entradas deberían permitir reconstruir.
+No son primitivas de `spec/`: son la forma que toma el trabajo real y que los registros deberían permitir reconstruir.
 
 1. **Cotización.** Solicitud → cotización enviada → seguimiento a dos días → aprobación → despacho → factura a plazo → cobranza. Es donde está el margen y donde Andrea pierde ventas: cuatro instancias en estas dos semanas, en cuatro estados distintos a la vez.
 2. **Reposición de stock.** Quiebre detectado el lunes → pedido al proveedor → recepción → verificación contra lo pedido. Falla dos veces con el mismo proveedor, y la segunda falla es la que convierte un problema en un patrón.
 3. **Cierre tributario mensual.** Facturas y boletas del mes → contadora → F29 el día 12 → pago. Fecha impuesta, sin margen de negociación.
 4. **Encargo a profesional externo.** Disponibilidad → brief → entrega → corrección → boleta de honorarios con retención → pago. Aplica igual a la diseñadora, al fletero y a la asistente de bodega, con distinto tamaño.
-5. **Temporada de marzo.** Es el proceso más largo y el más caro de equivocar: se decide en agosto, se paga el anticipo en agosto, la mercadería llega en diciembre y se vende en marzo. Compite por el mismo flujo de caja que la operación corriente, y esa competencia aparece explícita en las entradas del 21 y 23 de agosto.
+5. **Temporada de marzo.** Es el proceso más largo y el más caro de equivocar: se decide en agosto, se paga el anticipo en agosto, la mercadería llega en diciembre y se vende en marzo. Compite por el mismo flujo de caja que la operación corriente, y esa competencia aparece explícita en los registros del 21 y 23 de agosto.

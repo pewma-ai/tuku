@@ -46,7 +46,7 @@ Tres campos son de máquina y dos son de persona:
 
 **Al especificar una cadencia nueva**, tres cosas:
 
-1. Se registra como entrada `**cadencia**` en la bitácora.
+1. Se registra como `**cadencia**` en la bitácora.
 2. Se escribe la cadencia en el ámbito que corresponde.
 3. Se verifica la bitácora actual y **se modifica si es necesario**, para incluir lo que la cadencia nueva emite en el día que corresponde del ciclo en curso.
 

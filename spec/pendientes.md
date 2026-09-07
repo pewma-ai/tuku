@@ -15,7 +15,7 @@ A cambio exige disciplina, y esa disciplina la sostiene el janitor, no la memori
   - Bitácora: `- 18:40 - [[arriendo-depto-centro]] ~~(Hecho)~~: avisar de los GGCC al arrendatario`
   - El janitor borra el ítem de `^sin-fecha`
 
-Los dos ganchos son deterministas: `**pendiente**` abre, `~~(Hecho)~~` cierra (ver `bitacora.md`). El cuerpo es el mismo en los tres lugares: la entrada que abre, el ítem en `PENDIENTES.md` y la entrada que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. Ninguna de las dos operaciones interpreta nada.
+Los dos ganchos son deterministas: `**pendiente**` abre, `~~(Hecho)~~` cierra (ver `bitacora.md`). El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. Ninguna de las dos operaciones interpreta nada.
 
 El archivo contiene solo lo abierto. El historial de lo cerrado vive en las bitácoras.
 
@@ -56,7 +56,7 @@ Cada pendiente está en exactamente un callout y baja de escalón a medida que s
 
 Con fecha exacta aparece bajo el día correspondiente de `AHORA.md` por transclusión del ancla, sin copiar.
 
-**Escribir en un día es fecharlo.** Una entrada `**pendiente**` escrita en el día de hoy o en uno futuro de `AHORA.md` abre el pendiente ya con la fecha de ese día, y queda transcluido al inicio de ese día. No hay un comando aparte para agendar: agendar es escribir donde corresponde, que es lo que alguien haría en una agenda de papel.
+**Escribir en un día es fecharlo.** Un registro `**pendiente**` escrito en el día de hoy o en uno futuro de `AHORA.md` abre el pendiente ya con la fecha de ese día, y queda transcluido al inicio de ese día. No hay un comando aparte para agendar: agendar es escribir donde corresponde, que es lo que alguien haría en una agenda de papel.
 
 Esto ataja el escalón: un pendiente puede nacer con fecha exacta sin pasar por `^sin-fecha` ni por un horizonte. La escalera describe cómo se concreta lo que nació difuso, no un camino obligatorio.
 

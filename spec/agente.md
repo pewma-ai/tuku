@@ -15,7 +15,7 @@ Si el arnés no sabe ejecutar comandos y solo lee archivos, hay que materializar
 
 ## Carga diferida de reglas
 
-Las reglas de cada consecuencia no viajan en el contexto base. Se abre `reglas/<consecuencia>.tuku.md` solo cuando el paso 3 del flujo (ver [`flujo-informacion.md`](flujo-informacion.md)) detectó que esa consecuencia aplica. Una entrada sin consecuencias termina en el paso 4 sin haber cargado nada extra.
+Las reglas de cada consecuencia no viajan en el contexto base. Se abre `reglas/<consecuencia>.tuku.md` solo cuando el paso 3 del flujo (ver [`flujo-informacion.md`](flujo-informacion.md)) detectó que esa consecuencia aplica. Un registro sin consecuencias termina en el paso 4 sin haber cargado nada extra.
 
 Esto es lo que hace que la lista de consecuencias pueda crecer sin encarecer cada sesión: se paga solo por la que se usa.
 
@@ -24,7 +24,7 @@ Esto es lo que hace que la lista de consecuencias pueda crecer sin encarecer cad
 | Paso | Naturaleza | Ejecutor |
 | --- | --- | --- |
 | 1 a 3, entender y situar | juicio | LLM |
-| 4, redactar la entrada | formato | LLM hoy, script cuando el formato se estabilice |
+| 4, redactar el registro | formato | LLM hoy, script cuando el formato se estabilice |
 | 5, aplicar consecuencias | mecánico en su mayoría | janitor |
 
 Como el cierre conserva el texto del pendiente sin reescribirlo, el paso 5 para pendientes es **enteramente determinista**: abrir es copiar el cuerpo, cerrar es encontrar ese mismo cuerpo y borrarlo. Ninguna de las dos necesita LLM. El juicio queda entero en los pasos 1 a 3.

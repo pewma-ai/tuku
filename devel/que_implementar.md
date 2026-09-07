@@ -13,7 +13,7 @@ El LLM aparece en los dos extremos y el medio es determinista, que es el princip
 | Fase | Nombre | Qué se puede hacer al terminarla | LLM | Fixture | Epic |
 | --- | --- | --- | --- | --- | --- |
 | 0 | El vault que se puede abrir | Empezar a escribir a mano | no | `vacio` | 001 |
-| 1 | La entrada | Dictar y que quede bien escrito | sí | `primer-dia` | 002 |
+| 1 | El registro | Dictar y que quede bien escrito | sí | `primer-dia` | 002 |
 | 2 | Pendientes | Que no se olvide nada | no | `ciclo-en-curso` | 002 |
 | 3 | El árbol de ámbitos | Que cada cosa tenga su lugar | no | `ciclo-en-curso` | 002 mínimo, 003 completo |
 | 4 | Cadencias | Que el sistema recuerde solo | no | `ciclo-en-curso` | 002 declara, 004 emite |
@@ -38,17 +38,17 @@ La numeración salta la 8 a propósito. **El endurecimiento pasó a la wishlist*
 
 Es la única fase cuyo criterio de salida **no es técnico**. Se verifica con una persona, no con un diff. Y es la fase que hace verdadero el principio 1: si el vault recién instalado no se puede operar a mano, ninguna fase posterior lo va a arreglar.
 
-### Fase 1. La entrada
+### Fase 1. El registro
 
 **Pregunta.** ¿El dictado se convierte en una línea de bitácora bien formada?
 
 **Se construye.** Inyección de contexto reciente y vocabulario, formateo a `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`, inserción en el día correcto y en orden cronológico, y lint.
 
-**Janitors.** `jntr.contexto-reciente`, `jntr.vocabulario-ambitos`, `jntr.entrada-insertar`, `jntr.entrada-lint`
+**Janitors.** `jntr.contexto-reciente`, `jntr.vocabulario-ambitos`, `jntr.registrar`, `jntr.registro-lint`
 
 **Sale cuando.** El corpus se reproduce con la ontología cerrada exacta, marca y posición, y con el ámbito correcto. La clasificación abierta se mide aparte y no bloquea la fase, porque es vocabulario del autor y no del sistema.
 
-**No entra.** Ninguna consecuencia. La entrada solo escribe en la bitácora. **Si en esta fase algo toca `PENDIENTES.md`, el corte está mal hecho.**
+**No entra.** Ninguna consecuencia. El registro solo escribe en la bitácora. **Si en esta fase algo toca `PENDIENTES.md`, el corte está mal hecho.**
 
 Esta fase es la que habilita todas las demás: a partir de acá, inyectar un caso de prueba es escribir una línea de texto.
 
@@ -68,13 +68,13 @@ Primera fase de inyección pura. Las transclusiones se pueden probar acá porque
 
 ### Fase 3. El árbol de ámbitos
 
-**Pregunta.** ¿Dónde aterriza cada entrada y qué regla manda?
+**Pregunta.** ¿Dónde aterriza cada registro y qué regla manda?
 
 **Se construye.** Los tres roles (ámbito, categoría, actividad), la creación, la obligatoriedad de `AGENTS.md` y `CADENCIAS.md`, la resolución de reglas por cercanía, el archivado y la reescritura de enlaces.
 
 **Janitors.** `jntr.ambito-crear`, `jntr.ambitos-lint`, `jntr.reglas-resolver`, `jntr.paginas-index`, `jntr.archivar`, `jntr.enlaces-reescribir`, `jntr.ambitos-inactivos`
 
-**Sale cuando.** Con un fixture de tres niveles se comprueba que la regla más cercana gana. Una entrada nunca apunta a una categoría. Archivar deja resolviendo los enlaces desde bitácoras ya cerradas.
+**Sale cuando.** Con un fixture de tres niveles se comprueba que la regla más cercana gana. Un registro nunca apunta a una categoría. Archivar deja resolviendo los enlaces desde bitácoras ya cerradas.
 
 **No entra.** La deliberación con el autor antes de archivar. Acá se implementa la mecánica; decidir que una rama se cierra no es código.
 
@@ -82,7 +82,7 @@ Primera fase de inyección pura. Las transclusiones se pueden probar acá porque
 
 **Pregunta.** ¿El sistema sabe recordar por su cuenta?
 
-**Se construye.** Alta desde una entrada, colecta desde el árbol, resolución del trigger (calendario más tipo de ciclo), inyección en el día que corresponde y el reporte del autor.
+**Se construye.** Alta desde un registro, colecta desde el árbol, resolución del trigger (calendario más tipo de ciclo), inyección en el día que corresponde y el reporte del autor.
 
 **Janitors.** `jntr.cadencia-alta`, `jntr.cadencias-colectar`, `jntr.cadencias-resolver`, `jntr.cadencia-inyectar`, `jntr.cadencias-reporte`
 
@@ -100,7 +100,7 @@ Primera fase con un banco de pruebas real y no inventado. **Si una cadencia del 
 
 **Janitors.** `jntr.menciones-enlazar`, `jntr.notas-index`, `jntr.notas-lint`, `jntr.enlaces-lint`
 
-**Sale cuando.** Crear una nota tipada y enlazarla desde una entrada es determinista. Todo `[[enlace]]` resuelve. El index se regenera igual dos veces.
+**Sale cuando.** Crear una nota tipada y enlazarla desde un registro es determinista. Todo `[[enlace]]` resuelve. El index se regenera igual dos veces.
 
 **No entra.** Destilar el histórico y proponer notas nuevas. Ambas son inferencia y van a la fase 9. Acá solo la mecánica del tejido.
 
@@ -174,11 +174,11 @@ El árbol de directorios completo, la convención de mayúsculas y dónde vive l
 
 ## Estrategia de pruebas
 
-Registrar una entrada produce **una sola cosa**: texto escrito en la bitácora. Todo lo demás, abrir un pendiente, cerrar otro, emitir cadencias, enlazar, proponer, ocurre **después**, leyendo lo que quedó escrito.
+Registrar un registro produce **una sola cosa**: texto escrito en la bitácora. Todo lo demás, abrir un pendiente, cerrar otro, emitir cadencias, enlazar, proponer, ocurre **después**, leyendo lo que quedó escrito.
 
 Eso parte el sistema en dos mitades con costos de prueba muy distintos.
 
-**La entrada.** Es lo único que necesita LLM: dictado a línea bien formada. Se prueba contra ground truth, comparando la salida con entradas ya redactadas.
+**El registro.** Es lo único que necesita LLM: dictado a línea bien formada. Se prueba contra ground truth, comparando la salida con registros ya redactados.
 
 **Todo lo demás.** Reacciona a la bitácora, así que no necesita LLM. Un script inyecta líneas y se observa qué hace el sistema. Determinista, repetible, sin tokens.
 
@@ -199,7 +199,7 @@ Las dos vías son scriptables y ninguna necesita LLM.
 
 ### Lo que esto le da a la tabla de fases
 
-- **Fase 1**: la entrada. Único punto con LLM y con ground truth.
+- **Fase 1**: el registro. Único punto con LLM y con ground truth.
 - **Fases intermedias**: todo lo que reacciona a lo escrito. Inyección, sin LLM.
 - **Fase 9**: inferencia semántica. Vuelve el LLM, y ya sin respuesta única.
 
@@ -207,9 +207,9 @@ El LLM aparece en los dos extremos y el medio es determinista. Es el principio 4
 
 ### El requisito que esto impone
 
-Para que la inyección funcione, **cada consecuencia tiene que ser derivable del texto de la entrada**. Si el contenido de una cadencia sale de la conversación y no de lo escrito, esa vía queda fuera de la plataforma de pruebas.
+Para que la inyección funcione, **cada consecuencia tiene que ser derivable del texto del registro**. Si el contenido de una cadencia sale de la conversación y no de lo escrito, esa vía queda fuera de la plataforma de pruebas.
 
-Es una prueba de diseño además de una de implementación. Si algo no se puede reconstruir desde la bitácora, entonces o a la entrada le falta información, o esa operación pertenece a la segunda vía y hay que decirlo.
+Es una prueba de diseño además de una de implementación. Si algo no se puede reconstruir desde la bitácora, entonces o al registro le falta información, o esa operación pertenece a la segunda vía y hay que decirlo.
 
 ### Cada prueba es una transición de estado
 
@@ -233,7 +233,7 @@ Importa más que los demás porque no es solo un fixture, es el producto. Alguie
 ```text
 AGENTS.md                 # dice dónde viven los janitors
 LIBRO-DE-ESTILO.md        # el que trae TUKU, con los vocabularios de partida
-AHORA.md                  # días sembrados, sin entradas
+AHORA.md                  # días sembrados, sin registros
 PENDIENTES.md             # los cinco callouts de horizonte, vacíos
 ambitos/
   AGENTS.md
@@ -257,7 +257,7 @@ Los estados siguientes no se escriben a mano, se generan reproduciendo operacion
 | Fixture | Cómo se llega | Qué habilita probar |
 | --- | --- | --- |
 | `vacio` | recién instalado | que se pueda empezar |
-| `primer-dia` | una entrada | la entrada y sus consecuencias |
+| `primer-dia` | un registro | el registro y sus consecuencias |
 | `ciclo-en-curso` | varios días, pendientes en varios escalones, cadencias vigentes | casi todo |
 | `ciclo-por-cerrar` | ciclo completo sin cerrar | el cierre |
 | `historico` | varios ciclos cerrados | archivado y enlaces viejos |
@@ -268,24 +268,24 @@ Generarlos por reproducción en vez de escribirlos tiene un efecto lateral útil
 
 De abajo hacia arriba: primero lo que no depende de nada, al final lo que compone todo lo anterior. **Abrir y cerrar un ciclo van al final a propósito**, porque tocan todas las primitivas y su orden interno importa.
 
-Casi ninguna prueba se sostiene sola: la mayoría necesita un janitor que inyecte contexto, busque información o corrija inconsistencias. Van anotados al lado con `→`. Los nombres son la entrada de `reglas/janitors.tuku.md`.
+Casi ninguna prueba se sostiene sola: la mayoría necesita un janitor que inyecte contexto, busque información o corrija inconsistencias. Van anotados al lado con `→`. Los nombres son el encabezado en `reglas/janitors.tuku.md`.
 
-### Entrada
+### Registro
 - Inyectar contexto reciente y vocabulario antes de interpretar nada → `jntr.contexto-reciente`, `jntr.vocabulario-ambitos`
-- Formatear la entrada. Ambito y clasificacion opcionales según el contexto.
+- Formatear el registro. Ambito y clasificacion opcionales según el contexto.
   `- HH:MM - [[ambito]] **clasificacion**: cuerpo`
 - La marca de la ontología cerrada va en la misma posición, antes de la clasificación:
   `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`
 - Inferir ámbitos según el texto → `jntr.vocabulario-ambitos`
-- Un dictado con varios hechos produce varias entradas
-- Insertar en el día correcto y en orden cronológico, sin reordenar lo ya escrito → `jntr.entrada-insertar`
-- Lint → `jntr.entrada-lint`
+- Un dictado con varios hechos produce varios registros
+- Insertar en el día correcto y en orden cronológico, sin reordenar lo ya escrito → `jntr.registrar`
+- Lint → `jntr.registro-lint`
 	- Ontología cerrada estricta, ontología abierta permisiva
 	- Un tipo desconocido se reporta para preguntar después, nunca se rechaza
 
 ### Pendientes
 - Abrir un pendiente desde la bitácora → `jntr.pendiente-abrir`
-	- Cae en `^sin-fecha`, con el cuerpo copiado literal de la entrada
+	- Cae en `^sin-fecha`, con el cuerpo copiado literal del registro
 - Cerrar un pendiente desde la bitácora → `jntr.pendiente-cerrar`
 	- Desaparece del callout donde esté, sin importar el escalón
 - Bajar de escalón → `jntr.pendiente-mover`
@@ -302,7 +302,7 @@ Casi ninguna prueba se sostiene sola: la mayoría necesita un janitor que inyect
 
 ### Cadencias
 - Especifica una cadencia
-	- Se registra como entrada `**cadencia**`
+	- Se registra como registro `**cadencia**`
 	- Se escribe la cadencia en el ámbito que corresponde → `jntr.cadencia-alta`
 	- Se verifica la bitácora actual y se modifica si es necesario, para incluir la nueva cadencia en el día que corresponde → `jntr.cadencia-inyectar`
 - El trigger conoce el tipo de ciclo, no solo el calendario → `jntr.cadencias-resolver`
@@ -318,7 +318,7 @@ Casi ninguna prueba se sostiene sola: la mayoría necesita un janitor que inyect
 - Todo directorio nace con `AGENTS.md` y `CADENCIAS.md`, aunque vacíos → `jntr.ambitos-lint`
 - Agregar reglas específicas por ámbito o categoría
 	- La más cercana prevalece → `jntr.reglas-resolver`
-- Una entrada nunca apunta a una categoría → `jntr.ambitos-lint`
+- Un registro nunca apunta a una categoría → `jntr.ambitos-lint`
 - Detectar ámbitos activos sin actividad hace mucho → `jntr.ambitos-inactivos`
 - Archivar una actividad (terminé el proyecto de streamlit) → `jntr.archivar`
 	- Caro.. requiere deliberación con el autor
@@ -327,7 +327,7 @@ Casi ninguna prueba se sostiene sola: la mayoría necesita un janitor que inyect
 	- Caro.. requiere deliberación con el autor
 
 ### Notas
-- Crear una nota y enlazarla desde una entrada
+- Crear una nota y enlazarla desde un registro
 - Destilar una nota tipada desde el histórico, en contexto aislado → `jntr.nota-destilar`
 - Convertir menciones sueltas en enlaces → `jntr.menciones-enlazar`
 - Mantener `index.md` desde los frontmatter, OKF compliant → `jntr.notas-index`
@@ -335,7 +335,7 @@ Casi ninguna prueba se sostiene sola: la mayoría necesita un janitor que inyect
 - "Ver además": presencia de la sección y de texto de motivo → `jntr.notas-lint`
 
 ### Enlaces y propuestas
-- Enlazar a páginas que ya existen, en el momento de escribir la entrada → `jntr.paginas-index`
+- Enlazar a páginas que ya existen, en el momento de escribir el registro → `jntr.paginas-index`
 - Una propuesta se muestra y espera aprobación, no se ejecuta sola
 - Rechazar una propuesta no deja rastro en las primitivas
 	- Sin janitor a propósito: una propuesta rechazada no escribe nada, así que no hay nada que limpiar
@@ -355,7 +355,7 @@ En este orden:
 ### Cerrar un ciclo
 En este orden:
 
-1. Generar el resumen en `reportes/`, que necesita el plan y las entradas todavía vivos → `jntr.ciclo-extracto` lo alimenta
+1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `jntr.ciclo-extracto` lo alimenta
 2. Aplanar el plan y los pendientes de cada día → `jntr.transclusiones-aplanar`
 3. Dejar el enlace al resumen → `jntr.ciclo-cerrar`
 4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` → `jntr.ciclo-cerrar`
@@ -415,7 +415,7 @@ En este orden:
 - Se cierra un pendiente que no está abierto, o se cierra dos veces → `jntr.pendientes-lint`
 - El dictado es ambiguo y no se puede situar
 - Una cadencia emite algo que ya está en el día → `jntr.cadencia-inyectar`
-- La entrada cae fuera del rango del ciclo abierto → `jntr.entrada-lint`
+- El registro cae fuera del rango del ciclo abierto → `jntr.registro-lint`
 
 ## Qué especifica cada primitiva
 
@@ -433,7 +433,7 @@ La división es en sí misma el dato más útil: lo que allá quedó como script
 
 | Script | Qué hace |
 | --- | --- |
-| `jntr.bitacora-tail.py` | Genera `CONTEXTO-RECIENTE.md` con las últimas N líneas de días y entradas de los últimos ciclos |
+| `jntr.bitacora-tail.py` | Genera `CONTEXTO-RECIENTE.md` con las últimas N líneas de días y registros de los últimos ciclos |
 | `jntr.tareas-pendientes.py` | Pendientes en cuatro modos: linter, scan, transfer, validate |
 | `jntr.org-categories-summary.py` | Vocabulario controlado de categorías desde el campo `keywords` del frontmatter de cada área |
 | `jntr.org-frontpage-update.py` | Regenera las front pages de cada ORG desde los frontmatters |

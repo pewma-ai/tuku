@@ -4,7 +4,7 @@
 
 ## Estado inicial
 
-El que dejó [`002-006-transclusiones-sincronizadas`](002-006-transclusiones-sincronizadas.md). El árbol tiene un solo ámbito, `personal`, el del estado cero. En el martes 11 hay escrita, desde [`002-001`](002-001-entrada-en-su-dia.md), una entrada que menciona el depto centro sin enlazarlo:
+El que dejó [`002-006-transclusiones-sincronizadas`](002-006-transclusiones-sincronizadas.md). El árbol tiene un solo ámbito, `personal`, el del estado cero. En el martes 11 hay escrito, desde [`002-001`](002-001-registro-en-su-dia.md), un registro que menciona el depto centro sin enlazarlo:
 
 ```text
 - 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp
@@ -28,7 +28,7 @@ Dado que en el martes 11 estaba escrito `del depto centro` sin enlazar
 Cuando se crea el ámbito `depto-centro`
 Entonces esa mención queda como `[[depto-centro]]` en `AHORA.md`
 Y el resto de la línea no se reescribe
-Y ninguna otra entrada del día cambia
+Y ningún otro registro del día cambia
 
 ## Escenario: el barrido retroactivo llega hasta `AHORA.md` y no más
 
@@ -39,13 +39,13 @@ Y no se crea ni se toca ningún archivo fuera de `ambitos/depto-centro/` y `AHOR
 
 Que los ciclos cerrados sean inmutables no se puede probar el día uno, porque no hay ninguno; se prueba en el epic 003. Acá se afirma lo que sí se puede.
 
-## Escenario: una entrada no puede apuntar a una categoría
+## Escenario: un registro no puede apuntar a una categoría
 
 Dado el ámbito `depto-centro` ya creado
 Cuando se crea el directorio `ambitos/depto-centro/gastos/` con sus dos archivos obligatorios y **sin** página propia
-Y se inyecta una entrada que apunta a `[[gastos]]`
+Y se inyecta un registro que apunta a `[[gastos]]`
 Entonces `jntr.ambitos-lint` lo reporta
-Y la entrada queda escrita igual, porque un error del autor se reporta y nunca se rechaza
+Y el registro queda escrito igual, porque un error del autor se reporta y nunca se rechaza
 
 Una categoría agrupa y no tiene de qué hablar. Es la única regla de los tres roles verificable sin un árbol profundo, y por eso entra en la versión mínima.
 

@@ -40,7 +40,7 @@ Cada nivel libera de carga al siguiente. Al implementar cualquier funcionalidad 
 
 Al autor le queda lo irreductible: gobernar, ratificar y decidir.
 
-El LLM se aísla en los dos extremos, la entrada (interpretar dictado y convertirlo en hecho estructurado) y la inferencia semántica (resúmenes, destilado y propuestas). Todo el medio es determinista.
+El LLM se aísla en los dos extremos, el registro (interpretar dictado y convertirlo en hecho estructurado) y la inferencia semántica (resúmenes, destilado y propuestas). Todo el medio es determinista.
 
 ### 5. Las reglas se escriben en prosa, en un solo lugar
 
