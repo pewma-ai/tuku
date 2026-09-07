@@ -36,13 +36,13 @@ Criterio de corte de la fase 1: si algo escribe en `PENDIENTES.md`, el corte est
 
 Dado el mismo estado
 Cuando se inyecta la línea de las 11:30, que no lleva `[[ambito]]` ni `**clasificacion**`
-Entonces queda escrita sin que el lint la marque
+Entonces `jntr.entrada-insertar` la deja escrita tal cual, sin marcarla
 
-Ámbito y clasificación son opcionales según el contexto ([`../../spec/bitacora.md`](../../spec/bitacora.md)).
+Ámbito y clasificación son opcionales según el contexto ([`spec/bitacora.md`](../../spec/bitacora.md)). Que además el lint no la marque se prueba en [`002-002`](002-002-lint-de-entrada.md), que arranca de este estado.
 
 ## De dónde salen las líneas
 
-De `fixtures/002-010-dictado-del-dia-uno/entradas.md`, salida congelada del agente producida por [`002-010`](002-010-dictado-del-dia-uno.md). Los nueve pasos deterministas la consumen.
+Las tres son constante del arnés (`ENTRADAS` en `test_002_001_entrada_en_su_dia.py`), como los días de `test_001_001`: la rebanada mínima que este paso necesita. El día uno completo, generado por un agente desde el corpus, vive en [`002-010`](002-010-dictado-del-dia-uno.md).
 
 ## Cómo se corre
 
