@@ -12,6 +12,8 @@ No hay problema en que esto crezca a cientos de archivos chicos: son texto, cues
 
 Esta suite se escribe desde cero: la del diseño anterior se borró entera.
 
+Los escenarios `001-00X` de más abajo describen el instalador por `curl` y están **en reescritura**: el epic 001 se reabrió el 2026-09-07 para el modelo `pipx` + `tuku init` (ver [`../../devel/epics.md`](../../devel/epics.md), "Epic 001 · Tests que necesita"). El índice se actualiza cuando esos cinco escenarios existan.
+
 ## Convención de nombre
 
 `XXX-YYY-slug`, donde `XXX` es el epic al que pertenece el escenario y `YYY` su orden dentro de ese epic, ambos con tres dígitos. Así `001-002-instalacion-local` es el segundo escenario del epic 001.

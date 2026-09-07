@@ -43,43 +43,60 @@ Actualizado el 2026-09-07.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
-| 001 | Un TUKU mínimo instalable | `vacio` | cerrado | nada, cerrado el 2026-09-06 |
+| 001 | Un TUKU mínimo instalable | `vacio` | reabierto | reabierto el 2026-09-07 por el cambio a `pipx` + `tuku init` (decisión 4 del epic 002); faltan los escenarios `001-00X` rehechos |
 | 002 | El día uno | `vacio` → `primer-dia` | sin empezar | desbloqueado, listo para empezar |
 | 003 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 002 |
 | 004 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 003 |
 | 005 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 004 |
 
-Lo hecho en el 001: `template/vanilla/` (el estado cero), `src/install_test_scenario.py` (mecanismo), `install.sh` (instalación de una línea, que pregunta antes de sobrescribir y pregunta el nombre del autor, y que con `TUKU_ORIGEN` instala desde un árbol local sin red), la capa de identidad del autor en `LIBRO-DE-ESTILO.md`, y los escenarios `001-001` a `001-004`. Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos y arnés en `../tests/escenarios/`, pasos compartidos en `../tests/scripts/`.
+Lo hecho en el 001, firme tras reabrirlo: `template/vanilla/` (el estado cero), la capa de identidad del autor en `LIBRO-DE-ESTILO.md` con el libro de estilo vanilla reescrito a tercera persona, y la poda y borrado de `docs/libro-de-estilo.md`. Lo que se rehace: el mecanismo de instalación (`src/install_test_scenario.py` e `install.sh` se reemplazan por `tuku init` bajo `src/tuku/`) y los escenarios `001-001` a `001-004`, más uno nuevo. Diario en [`iteraciones/`](iteraciones/README.md); casos narrativos y arnés en `../tests/escenarios/`, pasos compartidos en `../tests/scripts/`.
 
 Preparación previa, fuera de los epics: `spec/` y `docs/glosario.md` ordenan el vocabulario, [`que_implementar.md`](que_implementar.md) quedó reducido al plan de fases. Punto de partida, no diseño cerrado.
 
 ## Epic 001. Un TUKU mínimo instalable
 
-Que una persona nueva instale un vault en un directorio vacío y empiece a escribir el mismo día, sin configurar nada y sin saber qué es TUKU. Va primero porque obliga al repositorio a tener estructura, instalación y template, y nada más lo va a forzar. Cubre la fase 0.
+Que una persona nueva instale TUKU con un comando, siembre un vault en un directorio vacío y empiece a escribir el mismo día, sin configurar nada y sin saber qué es TUKU. Va primero porque obliga al repositorio a tener estructura, instalación y template, y nada más lo va a forzar. Cubre la fase 0.
+
+**Reabierto el 2026-09-07.** Se cerró el 2026-09-06 con un instalador de una línea (`curl | sh` sobre `install.sh`) que copiaba `template/vanilla/` a un destino. La decisión 4 del epic 002, resuelta el mismo día, cambió el modelo de distribución: TUKU pasa a instalarse como paquete Python y a sembrar vaults con `tuku init`. El entregable no cambia; el mecanismo sí, y con él los cuatro escenarios. Lo que el cierre anterior movió en el diseño (la poda de `docs/libro-de-estilo.md`) queda firme.
+
+El entregable: una persona corre `uv tool install git+https://github.com/pewma-ai/tuku.git@devel` (o `pipx install` con la misma URL), después `tuku init mi-vault`, y ya puede abrir `mi-vault/AHORA.md` y escribir. Sin PyPI, sin editar config, sin leer `spec/`.
 
 Decidido:
 
-1. El instalador es un template que se copia, no un CLI. El empaquetado se difiere a cuando haya janitors.
-2. `template/`, una carpeta por variante, hermanas y sin composición. `vanilla/` es la mínima.
-3. `reglas/config.tuku.md` declara zona horaria y tipo de ciclo, en prosa.
-4. El código vive en `src/` (raíz), no en `devel/VAULT/src/` (diseño anterior). Primer archivo: `src/install_test_scenario.py`.
-5. Escenarios narrativos (Dado/Cuando/Entonces): caso y arnés juntos en `tests/escenarios/`, pasos compartidos en `tests/scripts/`.
-6. Instalar es una línea de `curl` (`install.sh`), no `git clone`. Probado contra `pewma-ai/tuku@devel` real.
-7. Sobrescribir se pregunta en `install.sh`, salvo con `TUKU_FORCE=1`. `install_test_scenario.py` sobrescribe siempre.
-8. El estado cero se verifica byte a byte con fecha fija (`--desde 2026-08-11`, la del ground truth en `referencia-faena.md`), distinta de la que usa el autor real. Encontró un bug real: días etiquetados por posición, ya corregido.
-9. Capa de identidad mínima: el nombre del autor vive en `LIBRO-DE-ESTILO.md` (sección "El autor", al inicio del documento), `install.sh` lo pregunta al instalar y es opcional (Enter vacío deja el vault operable, principio 2). El libro de estilo vanilla se reescribió entero a tercera persona en la misma sesión. Lo cubre de punta a punta el escenario `001-004-instalador-pregunta-el-nombre`, que instala desde `TUKU_ORIGEN` (un árbol ya presente en disco, sin red) y responde el prompt del nombre.
+1. TUKU se distribuye como paquete Python instalable con `pipx` o `uv tool install` directo desde `git+https://github.com/pewma-ai/tuku.git@devel`. Sin PyPI. Lo fijó la decisión 4 del epic 002.
+2. Esa instalación deja el repositorio completo en `~/.tuku`: código, `template/`, `spec/`, `reglas/`, el árbol entero. `tuku init` siembra desde ahí.
+3. `tuku init [<dir>]` reemplaza a `install.sh` y a `src/install_test_scenario.py`. Copia `~/.tuku/template/<variante>` al destino (`vanilla` por defecto) y siembra `AHORA.md` con las fechas del primer ciclo. **Offline: no toca la red.** `install.sh` se borra, sin wrapper de reemplazo: `pipx install` ya es un comando y un wrapper solo reintroduce el `curl | sh` que este modelo elimina. La instalación "a mano" de `template/README.md` pasa a ser copiar `~/.tuku/template/vanilla/` sin más.
+4. `src/install_test_scenario.py` se reemplaza por la función `init` bajo `src/tuku/`. El CLI (`src/tuku/cli.py`, aún sin escribir) es una capa fina de argparse; la lógica es importable y los tests la llaman sin subprocesos, salvo el que prueba el propio `pipx install`.
+5. `tuku` resuelve la ubicación del repositorio con la variable de entorno `TUKU_HOME` (por defecto `~/.tuku`). Es el punto de override para instalaciones no estándar y para los tests, que la apuntan al checkout de trabajo y ejercen `tuku init` sin instalar nada.
+6. `template/`, una carpeta por variante, hermanas y sin composición. `vanilla/` es la mínima. Sin cambio respecto al cierre anterior.
+7. `reglas/config.tuku.md` declara zona horaria y tipo de ciclo, en prosa. Sin cambio.
+8. Sembrar en un directorio que ya tiene contenido se rechaza, salvo `tuku init --force`. Reemplaza al prompt por `/dev/tty` de `install.sh` y a su `TUKU_FORCE=1`: ahora es un flag, no una pregunta interactiva, porque el CLI no depende de una tty.
+9. El estado cero se verifica byte a byte con fecha fija (la del ground truth en `referencia-faena.md`, distinta de la que usa el autor real), contra `template/vanilla/` en vivo, nunca contra una copia congelada. El bug que este método encontró en el cierre anterior (días etiquetados por posición) sigue corregido.
+10. Capa de identidad mínima: el nombre del autor vive en `LIBRO-DE-ESTILO.md` (sección "El autor", al inicio del documento). `tuku init --author "..."` lo siembra; es opcional y vacío es válido (omitir el flag deja el vault operable, principio 2). El libro de estilo vanilla ya está en tercera persona desde el cierre anterior.
 
-**Decidido:** `docs/libro-de-estilo.md` se podó y se borró. Las ocho secciones que duplicaba a `spec/` desaparecieron con él; las tres filas de su matriz que no estaban cubiertas ([`ver además` y su motivo](../spec/notas.md), [el emparejamiento no literal al cerrar un pendiente](../spec/agente.md)) se migraron antes de borrar. El bug que destapó la migración: `spec/bitacora.md` citaba este documento de diseño como si fuera el `LIBRO-DE-ESTILO.md` que se instala en el vault del autor. Corregido.
+**Rescatado del CLI viejo de `devel/VAULT/`:** solo la forma. `tuku <noun> <verb>` en inglés como estructura de comandos, y `tuku init [<dir>]` como el verbo que siembra. Nada de su `core/`: su `init.py` sembraba un árbol de perfil distinto (`entradas/`, `tareas/`, `ciclos/`, `.tuku/config.yaml`, `.hermes/`) que este modelo no usa. El vault de TUKU se define por `template/vanilla/`, no por ese código.
 
-Lo que movió en el diseño, al cerrar: la poda de `docs/libro-de-estilo.md` que cuenta el párrafo anterior, y nada más. `reglas/config.tuku.md` estaba anotado como probable y no se movió: la identidad del autor terminó en `LIBRO-DE-ESTILO.md`. El criterio que los separó vale para la próxima vez que aparezca la duda: `config.tuku.md` guarda lo que necesitan las automatizaciones deterministas y no pueden adivinar (zona horaria, tipo de ciclo), y el libro de estilo guarda lo que gobierna cómo se escribe, que es lo que consume la redacción. `spec/` no se tocó en todo el epic: se evaluó agregar a `spec/bitacora.md` una línea sobre dónde vive la identidad del autor y se descartó, porque ese documento es el contrato del formato de entrada y difiere a `spec/agente.md` todo lo relativo a interpretar el dictado. Lo que sí se movió fue producto y no marco: `template/vanilla/`, con el libro de estilo reescrito a tercera persona y la sección "El autor" al inicio, y `template/README.md`.
+**Firme del cierre anterior:** `docs/libro-de-estilo.md` se podó y se borró; las ocho secciones que duplicaba a `spec/` desaparecieron con él y las tres filas de su matriz que no estaban cubiertas ([`ver además` y su motivo](../spec/notas.md), [el emparejamiento no literal al cerrar un pendiente](../spec/agente.md)) se migraron antes de borrar. El libro de estilo vanilla quedó reescrito a tercera persona con la sección "El autor" al inicio. El cambio de instalación no toca nada de esto.
 
-Decisión abierta que deja la capa de identidad: **dónde se especifica el comportamiento del agente** al dirigirse al autor (trato, registro, cómo lo nombra en conversación). Se implementó solo el nombre; el comportamiento queda sin resolver.
+Decisión abierta que sigue abierta: **dónde se especifica el comportamiento del agente** al dirigirse al autor (trato, registro, cómo lo nombra en conversación). Se implementó solo el nombre. La hereda el epic 002 (su decisión 5).
 
-Criterio de salida: instalar en vacío produce el estado cero de `template/README.md`; alguien que no sabe qué es TUKU escribe una línea en `AHORA.md` sin romper nada. El instalador puede preguntar el nombre del autor, y dejarlo en blanco no impide escribir. Se verifica con una persona, no con un diff. Y queda escrito qué movió en `spec/` o `docs/`.
+Criterio de salida: `uv tool install` desde `git+...@devel` deja `tuku` en el PATH y `~/.tuku` poblado con el árbol del repositorio; `tuku init` en un directorio vacío produce el estado cero de `template/README.md` sin tocar la red; alguien que no sabe qué es TUKU escribe una línea en `AHORA.md` sin romper nada. `tuku init --author` deja el nombre en `LIBRO-DE-ESTILO.md`, y omitirlo no impide escribir. Se verifica con una persona, no con un diff. Y queda escrito qué movió en `spec/` o `docs/`.
 
-Verificado el 2026-09-06. La prueba la hizo el autor sobre su propia instalación, revisando los vaults que la suite deja en `playground/`. El `## Qué se mira a mano` del escenario `001-001` pedía además una persona ajena al diseño, no el autor: eso no se hizo, no bloqueó el cierre y queda como tarea en la Wishlist.
+Pendiente de re-verificación: el cierre del 2026-09-06 lo probó el autor sobre la instalación por `curl`. El modelo nuevo se re-verifica igual, sobre `uv tool install` + `tuku init`. La tarea de la Wishlist (una persona ajena al diseño instala y opina) sigue pendiente y ahora prueba el camino nuevo.
 
 No entra: janitors, agentes, LLM. Tampoco el tipo de ciclo real de quien lo usa: arranca semanal y el tipo verdadero emerge después.
+
+### Tests que necesita
+
+Se rehacen los cuatro escenarios `001-00X` para el modelo nuevo y se agrega uno. Numeración estable: cada uno reemplaza al escenario viejo de su número, sin renumerar el resto. **Un solo test usa `pipx`/`uv tool install`**, el primero y con `--force`; el resto llama a la función `init` de `src/tuku/` con `TUKU_HOME` apuntando al checkout, sin instalar nada, y compara el árbol sembrado en vivo contra `template/<variante>/` como hace hoy `test_001_001`.
+
+- `001-001-instalacion-con-uv-tool` — `uv tool install --force` real desde `git+...@devel` deja `tuku` en el PATH y `~/.tuku` poblado con el árbol del repositorio. Reemplaza al viejo `001-001-instalacion-minima`, que instalaba por `curl`. — **usa pipx: sí**
+- `001-002-init-siembra-el-estado-cero` — `tuku init <dir>` produce byte a byte `template/vanilla/` más `AHORA.md` con las fechas resueltas, con `TUKU_HOME` local y sin red; es la verificación byte a byte que hoy hace `test_001_001`. Reemplaza al viejo `001-002-instalacion-local`. — **usa pipx: no**
+- `001-003-destino-no-vacio` — `tuku init` se niega a sembrar en un directorio que ya tiene contenido, y `tuku init --force` lo siembra igual. Reemplaza al viejo `001-003`, que probaba el prompt de `install.sh` con `pexpect`; ahora es un flag y no hace falta pty. — **usa pipx: no**
+- `001-004-init-author` — `tuku init --author "..."` deja el nombre en la sección "El autor" de `LIBRO-DE-ESTILO.md`, y omitir el flag (o pasarlo vacío) deja el vault operable sin nombre. Reemplaza al viejo `001-004-instalador-pregunta-el-nombre`. — **usa pipx: no**
+- `001-005-init-no-toca-la-red` — con el socket parchado para fallar, `tuku init` completa la siembra igual. Aísla la afirmación "offline" que `001-002` da por supuesta. Nuevo, no reemplaza a nadie. — **usa pipx: no**
+
+Marcador de pytest para `001-001`: hoy `pyproject.toml` tiene `lento`, que no basta porque ese test además necesita red y descarga un repositorio. Hace falta un marcador nuevo tipo `red` y que la corrida por defecto lo excluya igual que a `agentic` (`-m "not agentic and not red"`). Solo se enuncia; `pyproject.toml` no se toca en esta tarea.
 
 ## Epic 002. El día uno
 
