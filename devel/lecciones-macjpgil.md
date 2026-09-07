@@ -16,7 +16,7 @@ Lo que se miró: `AGENTS.md` de la raíz y los locales de `actividad/`, `notas/`
 
 ### 1. La entrada real no lleva hora
 
-`spec/bitacora.md` fija `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`. En las cuatro bitácoras revisadas, sobre 235 entradas, prácticamente ninguna empieza con hora. La hora aparece **dentro del cuerpo** cuando el hecho la necesita ("Reunión con Juan Francisco Troncoso (11:30) sobre gobernanza"), y en ningún otro caso.
+`spec/bitacora.md` fija `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`. En las cuatro bitácoras revisadas, sobre 235 entradas, prácticamente ninguna empieza con hora. La hora aparece **dentro del cuerpo** cuando el hecho la necesita ("Reunión con [una persona] (11:30) sobre gobernanza del grupo"), y en ningún otro caso.
 
 `actividad/AGENTS.md` lo tiene resuelto de la única forma que se sostiene: orden estrictamente cronológico por hora del evento, y si no hay timestamp explícito, la entrada se agrega al final del día sin reordenar nada de lo ya escrito.
 
@@ -24,7 +24,7 @@ La spec manda y `- HH:MM -` sigue siendo el formato. Lo que esto aporta es un ri
 
 ### 2. La marca de cierre va antes del ámbito, no después
 
-Real: `- ~~(Hecho)~~ [sw-responsible](path): ITS ticket cleanup de VLTI realizado durante la mañana.`
+Real (con los identificadores de trabajo cambiados): `- ~~(Hecho)~~ [un-ambito](path): limpieza de tickets pendientes realizada durante la mañana.`
 
 Spec: la marca de la ontología cerrada va después del ámbito, y eso es lo que vale.
 
@@ -32,7 +32,7 @@ Se anota porque el orden de mac-jpgil es el que el autor tiene incorporado de ta
 
 ### 3. Los enlaces reales son Markdown relativo, no wikilinks
 
-mac-jpgil escribe `[Faviola Molina](../notas/Faviola%20Molina%20-%20FMO.md)` y tiene un janitor dedicado (`jntr.obsidian-links-to-markdown.py`, con umbral de madurez de 5 minutos para no pisar lo que el autor está escribiendo) que convierte `[[...]]` a Markdown estándar. El motivo es de portabilidad: publicación web y lectura en GitHub, donde el wikilink no resuelve.
+mac-jpgil escribe `[Nombre Apellido](../notas/Nombre%20Apellido%20-%20NAP.md)` y tiene un janitor dedicado (`jntr.obsidian-links-to-markdown.py`, con umbral de madurez de 5 minutos para no pisar lo que el autor está escribiendo) que convierte `[[...]]` a Markdown estándar. El motivo es de portabilidad: publicación web y lectura en GitHub, donde el wikilink no resuelve.
 
 TUKU usa `[[ambito]]` y se queda con `[[ambito]]`. Lo que la lección aporta es que la forma del enlace es una decisión de publicación con costo diferido, y que la conversión ya está resuelta en una dirección si algún día se necesita. Deuda conocida, no descubrimiento pendiente.
 
@@ -101,7 +101,7 @@ Un detalle que se pierde si no se anota: `summary` es obligatorio y **vacío es 
 ## Lo que se observó y no se trae todavía
 
 - **La consecuencia atada a vocabulario abierto.** `actividad/AGENTS.md` propaga una entrada a la página de la entidad en `org/` **si y solo si** lleva `**Hito:**`, `**Decisión:**` o `**Señal:**`. Eso es una consecuencia mecánica disparada por la ontología **abierta**, mientras que `spec/bitacora.md` reserva las consecuencias para la cerrada. Vale la spec; queda la pregunta de si el uso vuelve a pedir lo mismo. No pega en el epic 002 (en un vault vacío no hay a dónde propagar) y es una de las cosas a vigilar en el 003.
-- **El ciclo real del autor no es semanal ni de largo fijo.** Los archivos de `actividad/` alternan `paranal` y `descanso` con largos de 5 a 9 días, y `estrategia/Capacidad.md` describe el ritmo con detalle (viaje martes de madrugada, disponible desde después de almuerzo, roles operativos que se asignan a última hora). Material del epic 004.
+- **El ciclo real del autor no es semanal ni de largo fijo.** Los archivos de `actividad/` alternan dos tipos de bloque (trabajo en terreno y descanso) con largos de 5 a 9 días, y `estrategia/Capacidad.md` describe el ritmo con detalle: día de viaje, disponibilidad parcial en los bordes del bloque, roles operativos que se asignan a última hora. Material del epic 004.
 - **Las cadencias reales ya están en formato tabla** en `estrategia/Cadencias.md`, con dieciséis entradas y cuatro clases de trigger: día exacto, rango, evento y reactivo. Tres caen el día 10 y hay rangos que cruzan el borde de mes, que es exactamente el banco de pruebas que pide la fase 4. Se trae en el epic 004, sin tocarlo antes.
 - **Capacidad con costo fijo por rol operativo**, cobrado por cada día que dura el rol, más el reparto bruto de la persona. `estrategia/Capacidad.md` es el caso real contra el que se valida la propuesta abierta de `spec/ambitos.md` sobre dónde vive el bruto. Epic 004.
 - **El archivado con cascada** existe y está escrito (`org/_rules/baja-entidades.md`, 7 entidades ya archivadas). Epic 003 o wishlist.
