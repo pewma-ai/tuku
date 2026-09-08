@@ -34,6 +34,7 @@ Dado que la petición dijo *"respecto al depto centro"*
 Cuando la nota se escribe
 Entonces la nota enlaza al ámbito `depto-centro`
 Y el enlace resuelve a una página que existe
+Y la constancia se propaga a `ambitos/depto-centro/depto-centro.md` bajo `## Esta semana` sin hora junto al registro previo
 
 Si la petición no hubiera nombrado un ámbito, la nota quedaría suelta y eso sería correcto.
 

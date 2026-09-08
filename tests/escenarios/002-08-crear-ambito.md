@@ -17,6 +17,7 @@ Cuando se crea el ámbito `depto-centro`
 Entonces existe el directorio `ambitos/depto-centro/`
 Y contiene `AGENTS.md` y `CADENCIAS.md`, aunque estén vacíos
 Y contiene su página propia `depto-centro.md`, en minúscula, que es lo que lo hace ámbito y no categoría
+Y `depto-centro.md` incluye la sección `## Esta semana` con la actividad retroactiva del ciclo sin hora y `## Actividad reciente` con el mes en curso
 Y `ambitos/personal/` no cambió en nada
 Y no se creó ningún `CAPACIDAD.md`, que es opcional en todas partes
 

@@ -95,7 +95,7 @@ Lo que se gana al propagar en vez de transcluir es que la vista no depende de qu
 
 ### La región del día
 
-Dentro de cada `## <día>` de `AHORA.md`, el comando es dueño de **lo que va entre el encabezado y el primer registro**. Ahí escribe los pendientes con fecha de ese día, y al regenerar reemplaza esa región entera.
+Dentro de cada `## <día>` de `AHORA.md`, el comando es dueño de **lo que va entre el encabezado y el primer registro**. Ahí escribe los pendientes con fecha de ese día dentro de un callout `> [!todo] Pendientes del día` (únicamente si ese día tiene pendientes en `PENDIENTES.md`), y al regenerar reemplaza esa región entera.
 
 No hay marca que la delimite, y es a propósito: los registros empiezan siempre por `- HH:MM - `, así que la frontera es estructura visible. Un comentario invisible se rompe al editar el archivo y nadie se entera.
 

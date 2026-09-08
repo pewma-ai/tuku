@@ -23,11 +23,11 @@ Y en orden 09:12, 11:30, 18:40, que no es el orden en que se inyectaron
 Y el de las 18:40 sigue escrito tal cual, sin reescribirse al insertar los otros dos
 Y el día final sigue con su marca de día vacío
 
-## Escenario: la fase 1 no toca ninguna consecuencia
+## Escenario: la fase 1 propaga hacia ámbitos y no toca PENDIENTES.md
 
 Dado el mismo estado
 Cuando se inyectan las tres líneas
-Entonces el diff contra el estado inicial toca `AHORA.md` y nada más
+Entonces el diff contra el estado inicial toca `AHORA.md` y `ambitos/personal/personal.md`
 Y `PENDIENTES.md` queda byte a byte igual al del vault recién instalado
 
 Criterio de corte de la fase 1: si algo escribe en `PENDIENTES.md`, el corte está mal hecho.

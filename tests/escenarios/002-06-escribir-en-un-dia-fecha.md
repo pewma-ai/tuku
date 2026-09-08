@@ -13,7 +13,11 @@ Cuando se inyecta, bajo `## Miércoles 12 de agosto`, la línea
 `- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo`
 Entonces la tabla de `PENDIENTES.md` gana una fila con `con fecha` y `2026-08-12`:
 `| con fecha | 2026-08-12 | [[personal]] | pagar la sesión con el psicólogo |`
-Y el miércoles 12 de `AHORA.md` recibe por propagación en su región del día:
+Y el miércoles 12 de `AHORA.md` recibe por propagación en su región del día el callout:
+```markdown
+> [!todo] Pendientes del día
+> - [[personal]] - pagar la sesión con el psicólogo
+```
 Y el pendiente **no** aparece en `esta semana` ni en ningún horizonte postergado del autor
 
 Nació con fecha exacta sin pasar por la escalera, que describe cómo se concreta lo que nació difuso y no es un camino obligatorio ([`spec/pendientes.md`](../../spec/pendientes.md)).

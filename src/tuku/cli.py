@@ -297,6 +297,8 @@ def _cmd_entry_add(args: argparse.Namespace) -> int:
         print(f"tuku entry add: {e}", file=sys.stderr)
         return RECHAZO
     ruta.write_text(texto, encoding="utf-8")
+    for a in scope.leer(args.vault):
+        scope.actualizar_pagina(args.vault, a.nombre)
     print(f"{len(args.line)} registro(s) en {dia.removeprefix('## ')}.")
     return EXITO
 
@@ -518,6 +520,7 @@ def _cmd_scope_create(args: argparse.Namespace) -> int:
             if n > 0:
                 ahora_path.write_text(texto, encoding="utf-8")
                 menciones = n
+            scope.actualizar_pagina(args.vault, args.name)
     if menciones > 0:
         print(f"ámbito creado en {directorio} ({menciones} mención(es) enlazada(s)).")
     else:
@@ -591,6 +594,8 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
             if constancia not in texto:
                 dia = args.day or _encabezado_de_hoy(hoy)
                 ahora_path.write_text(add(texto, [constancia], day=dia), encoding="utf-8")
+                if args.scope:
+                    scope.actualizar_pagina(args.vault, args.scope)
 
     print(f"nota creada en {ruta}.")
     return EXITO

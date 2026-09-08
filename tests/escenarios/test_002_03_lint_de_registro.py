@@ -70,7 +70,10 @@ def test_002_03_la_marca_mal_escrita_no_abre_ningun_pendiente() -> None:
     assert codigo_add == EXITO
     correr_cli(["entry", "lint", "--vault", str(vault)])
 
-    assert delta(antes, instantanea(vault)) == {"AHORA.md": "modificado"}
+    assert delta(antes, instantanea(vault)) == {
+        "AHORA.md": "modificado",
+        "ambitos/personal/personal.md": "modificado",
+    }
 
 
 def test_002_03_un_registro_fuera_del_ciclo_se_reporta() -> None:

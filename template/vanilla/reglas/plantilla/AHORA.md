@@ -4,7 +4,6 @@ status: draft
 from: AAAA-MM-DD
 to: AAAA-MM-DD
 ---
-
 # Actividad diaria
 
 ## Lunes DD de mes

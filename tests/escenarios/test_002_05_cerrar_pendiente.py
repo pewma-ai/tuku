@@ -68,11 +68,12 @@ def test_002_05_cerrar_borra_el_item_y_el_cierre_sin_pareja_se_reporta() -> None
     assert todo.CABECERA in pendientes, "se perdió la cabecera de la tabla"
     assert APERTURA in (vault / "AHORA.md").read_text(encoding="utf-8"), "se tocó la apertura"
 
-    # Al cerrar con el CLI, se propaga y PENDIENTES-AMBITOS.md pasa a SIN PENDIENTES
+    # Al cerrar con el CLI, se propaga y actualiza PENDIENTES-AMBITOS.md y personal.md
     assert delta(antes, instantanea(vault)) == {
         "AHORA.md": "modificado",
         "PENDIENTES.md": "modificado",
         "ambitos/PENDIENTES-AMBITOS.md": "modificado",
+        "ambitos/personal/personal.md": "modificado",
     }
 
 
@@ -93,7 +94,10 @@ def test_002_05_un_cierre_sin_pareja_no_inventa_nada() -> None:
     assert CIERRE_HUERFANO in (vault / "AHORA.md").read_text(encoding="utf-8"), (
         "la línea no quedó escrita: un error del autor se reporta, nunca se rechaza"
     )
-    assert delta(antes, instantanea(vault)) == {"AHORA.md": "modificado"}
+    assert delta(antes, instantanea(vault)) == {
+        "AHORA.md": "modificado",
+        "ambitos/personal/personal.md": "modificado",
+    }
 
 
 def test_002_05_cerrar_dos_veces_no_vuelve_a_mover() -> None:

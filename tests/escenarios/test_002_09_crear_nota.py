@@ -90,8 +90,21 @@ def test_002_09_la_nota_queda_escrita_enlazada_y_con_constancia() -> None:
 
     assert delta(antes, instantanea(vault)) == {
         "AHORA.md": "modificado",
+        f"ambitos/{AMBITO}/{AMBITO}.md": "modificado",
         f"notas/{ARCHIVO}": "nuevo",
     }
+
+    contenido_depto = (vault / "ambitos" / AMBITO / f"{AMBITO}.md").read_text(encoding="utf-8")
+    assert "## Esta semana" in contenido_depto
+    linea_boleta = (
+        "- le mandé la boleta de gastos comunes del depto-centro a la "
+        "administradora por WhatsApp"
+    )
+    assert linea_boleta in contenido_depto
+    assert (
+        f"- **nota**: escribí la nota [[{Path(ARCHIVO).stem}]]"
+        in contenido_depto
+    )
 
 
 def test_002_09_ver_ademas_existe_y_cada_enlace_lleva_motivo() -> None:

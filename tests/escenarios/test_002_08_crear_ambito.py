@@ -78,6 +78,19 @@ def test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras() -> No
     assert not scope.lint_transclusiones(vault)
     assert not scope.lint_callouts(vault)
 
+    contenido_depto = (directorio / f"{AMBITO}.md").read_text(encoding="utf-8")
+    assert "## Esta semana" in contenido_depto
+    assert "### Martes 11 de agosto" in contenido_depto
+    linea_esperada = (
+        "- le mandé la boleta de gastos comunes del depto-centro a la "
+        "administradora por WhatsApp"
+    )
+    assert linea_esperada in contenido_depto
+    assert "- 18:40 - " not in contenido_depto
+    assert "## Actividad reciente" in contenido_depto
+    assert "### Agosto 2026" in contenido_depto
+
+
 
 def test_002_08_el_resto_de_la_linea_no_se_reescribe() -> None:
     vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)

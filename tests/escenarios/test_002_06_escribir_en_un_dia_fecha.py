@@ -38,7 +38,7 @@ FECHA = "2026-08-12"
 CUERPO = "pagar la sesión con el psicólogo"
 REGISTRO = f"- 09:00 - [[personal]] **pendiente**: {CUERPO}"
 FILA = f"| con fecha | {FECHA} | [[personal]] | {CUERPO} |"
-LINEA_PROPAGADA = f"- [[personal]] - {CUERPO}"
+LINEA_PROPAGADA = f"> - [[personal]] - {CUERPO}"
 
 
 def _agendar(vault: Path) -> None:
@@ -75,13 +75,15 @@ def test_002_06_escribir_en_un_dia_futuro_fecha_el_pendiente() -> None:
     assert todo.cuerpos(pendientes, "esta semana") == [], "no debía pasar por la escalera"
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
+    assert "> [!todo] Pendientes del día" in ahora
     assert LINEA_PROPAGADA in ahora, "no se propagó la línea a la región del día"
 
-    # Propagó en AHORA.md y actualizó ambitos/PENDIENTES-AMBITOS.md
+    # Propagó en AHORA.md y actualizó ambitos/PENDIENTES-AMBITOS.md y personal.md
     assert delta(antes, instantanea(vault)) == {
         "AHORA.md": "modificado",
         "PENDIENTES.md": "modificado",
         "ambitos/PENDIENTES-AMBITOS.md": "modificado",
+        "ambitos/personal/personal.md": "modificado",
     }
 
 

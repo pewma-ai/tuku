@@ -61,12 +61,19 @@ def test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana() -> None:
     assert CUERPO in (vault / "AHORA.md").read_text(encoding="utf-8")
     assert todo.filas(pendientes)[0].cuando == "", "la fila no debe llevar fecha"
 
-    # tuku todo open abre y propaga las vistas, actualizando PENDIENTES-AMBITOS.md
+    # tuku todo open abre y propaga las vistas, actualizando PENDIENTES-AMBITOS.md y personal.md
     assert delta(antes, instantanea(vault)) == {
         "AHORA.md": "modificado",
         "PENDIENTES.md": "modificado",
         "ambitos/PENDIENTES-AMBITOS.md": "modificado",
+        "ambitos/personal/personal.md": "modificado",
     }
+
+    pag_personal = vault / "ambitos" / "personal" / "personal.md"
+    contenido_personal = pag_personal.read_text(encoding="utf-8")
+    assert "## Esta semana" in contenido_personal
+    assert "### Martes 11 de agosto" in contenido_personal
+    assert f"- **pendiente**: {CUERPO}" in contenido_personal
 
 
 def test_002_04_la_tabla_gana_una_fila_y_nada_mas() -> None:

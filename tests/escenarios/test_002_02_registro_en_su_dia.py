@@ -80,7 +80,18 @@ def test_002_02_la_fase_1_no_toca_pendientes() -> None:
         ["entry", "add", "--vault", str(vault), "--dia", HOY, *REGISTROS]
     )
     assert codigo == EXITO, err
-    assert delta(antes, instantanea(vault)) == {"AHORA.md": "modificado"}
+    assert delta(antes, instantanea(vault)) == {
+        "AHORA.md": "modificado",
+        "ambitos/personal/personal.md": "modificado",
+    }
+    personal = (vault / "ambitos" / "personal" / "personal.md").read_text(encoding="utf-8")
+    assert "## Esta semana" in personal
+    assert (
+        "- **señal**: la administradora responde los mensajes con varios días de atraso"
+        in personal
+    )
+    assert "[[personal]]" not in personal
+    assert "- 09:12 - " not in personal
 
 
 def test_002_02_registro_sin_ambito_ni_clasificacion_queda_escrito() -> None:

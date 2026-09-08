@@ -65,13 +65,19 @@ def linea_del_dia(fila: todo.Fila) -> str:
 
 
 def region_del_dia(filas: list[todo.Fila], dia: date) -> list[str]:
-    """Las líneas propagadas de un día: las filas cuyo `Cuándo` es esa fecha.
+    """Las líneas propagadas de un día: callout `[!todo] Pendientes del día` si hay pendientes.
 
     Una fila sin fecha no cae en ningún día: no tener fecha es el estado normal
     de un pendiente del ciclo en curso, no una fecha implícita de hoy.
     """
     marca = dia.isoformat()
-    return [linea_del_dia(f) for f in filas if f.cuando.strip() == marca]
+    items = [linea_del_dia(f) for f in filas if f.cuando.strip() == marca]
+    if not items:
+        return []
+    return [
+        "> [!todo] Pendientes del día",
+        *(f"> {item}" for item in items),
+    ]
 
 
 def _fin_de_seccion(lineas: list[str], ini: int) -> int:
@@ -106,8 +112,12 @@ def propagar_ahora(ahora: str, pendientes: str) -> str:
             (i for i in range(ini + 1, fin) if _REGISTRO.match(lineas[i])),
             fin,
         )
-        resto = lineas[corte:fin] or [""]
-        lineas[ini + 1 : fin] = [*region_del_dia(todas, fecha), *resto]
+        resto = lineas[corte:fin]
+        callout_lineas = region_del_dia(todas, fecha)
+        if callout_lineas:
+            lineas[ini + 1 : fin] = [*callout_lineas, "", *resto]
+        else:
+            lineas[ini + 1 : fin] = resto or [""]
 
     texto = "\n".join(lineas)
     return texto + "\n" if ahora.endswith("\n") and not texto.endswith("\n") else texto
@@ -186,6 +196,9 @@ def propagar(vault: Path) -> list[Path]:
         pag = a.directorio / f"{a.nombre}.md"
         texto_pag = pag.read_text(encoding="utf-8") if pag.is_file() else None
         disp_map[a.nombre] = display_name(a.nombre, texto_pag)
+        pag_mod = scope.actualizar_pagina(vault, a.nombre)
+        if pag_mod and pag_mod not in cambiados:
+            cambiados.append(pag_mod)
 
     ruta_ambitos = vault / ARCHIVO_AMBITOS
     documento = documento_ambitos(

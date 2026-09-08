@@ -54,7 +54,7 @@ def preparar_paso(slug: str, *, previo: str | None, desde: date) -> Path:
             f"el paso previo {previo!r} se preparó pero su playground/ no está. "
             f"Algo lo borró a mitad de la corrida."
         )
-    shutil.copytree(origen, destino)
+    shutil.copytree(origen, destino, dirs_exist_ok=True)
     _PREPARADOS.add(slug)
     return destino
 
@@ -62,7 +62,12 @@ def preparar_paso(slug: str, *, previo: str | None, desde: date) -> Path:
 def instantanea(raiz: Path) -> dict[str, bytes]:
     """El contenido de todos los archivos del vault, por ruta relativa."""
     return {
-        str(p.relative_to(raiz)): p.read_bytes() for p in sorted(raiz.rglob("*")) if p.is_file()
+        str(p.relative_to(raiz)): p.read_bytes()
+        for p in sorted(raiz.rglob("*"))
+        if p.is_file()
+        and not p.name.startswith(".")
+        and not p.name.endswith(".partial")
+        and not p.name.endswith(".tmp")
     }
 
 

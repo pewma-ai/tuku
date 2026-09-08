@@ -36,11 +36,17 @@ AHORA = (
 def test_region_del_dia_solo_lleva_los_de_esa_fecha() -> None:
     region = region_del_dia(filas(PENDIENTES), date(2026, 9, 8))
 
-    assert region == ["- [[personal]] - pagar la sesión con el psicólogo"]
+    assert region == [
+        "> [!todo] Pendientes del día",
+        "> - [[personal]] - pagar la sesión con el psicólogo",
+    ]
 
 
 def test_region_del_dia_sin_ambito_va_sin_enlace() -> None:
-    assert region_del_dia(filas(PENDIENTES), date(2026, 9, 9)) == ["- renovar el pasaporte"]
+    assert region_del_dia(filas(PENDIENTES), date(2026, 9, 9)) == [
+        "> [!todo] Pendientes del día",
+        "> - renovar el pasaporte",
+    ]
 
 
 def test_un_pendiente_sin_fecha_no_aparece_en_ningun_dia() -> None:
@@ -57,7 +63,7 @@ def test_la_region_se_reemplaza_entera_y_no_se_duplica() -> None:
     texto = propagar_ahora(viejo, PENDIENTES)
 
     assert "lo que ya no toca" not in texto
-    assert texto.count("- [[personal]] - pagar la sesión con el psicólogo") == 1
+    assert texto.count("> - [[personal]] - pagar la sesión con el psicólogo") == 1
     assert "- 09:12 - [[personal]] **nota**: cuerpo" in texto
 
 
@@ -65,8 +71,10 @@ def test_la_region_va_antes_del_primer_registro() -> None:
     lineas = propagar_ahora(AHORA, PENDIENTES).splitlines()
     i = lineas.index("## Martes 8 de septiembre")
 
-    assert lineas[i + 1] == "- [[personal]] - pagar la sesión con el psicólogo"
-    assert lineas[i + 2].startswith("- 09:12 - ")
+    assert lineas[i + 1] == "> [!todo] Pendientes del día"
+    assert lineas[i + 2] == "> - [[personal]] - pagar la sesión con el psicólogo"
+    assert lineas[i + 3] == ""
+    assert lineas[i + 4].startswith("- 09:12 - ")
 
 
 def test_propagar_dos_veces_no_cambia_nada() -> None:

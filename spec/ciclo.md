@@ -23,12 +23,17 @@ to: 2026-09-01
 # Actividad diaria
 
 ## Martes 25 de agosto
-- [[arriendo-depto-centro]] - avisar de los GGCC al arrendatario
+
+> [!todo] Pendientes del día
+> - [[arriendo-depto-centro]] - avisar de los GGCC al arrendatario
+
 - 09:12 - [[ambito]] **clasificacion**: cuerpo
 - 14:30 - [[ambito]] **clasificacion**: cuerpo
 
 ## Miércoles 26 de agosto
-- [[personal]] - pagar la sesión con el psicólogo
+
+> [!todo] Pendientes del día
+> - [[personal]] - pagar la sesión con el psicólogo
 ```
 
 Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku todo propagate`. Se distingue sin marca: los registros empiezan por `- HH:MM - `.

@@ -74,10 +74,11 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
     pagina = _pagina(directorio)
     if not pagina.exists():
         rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", directorio)
-        pagina.write_text(
-            f"---\ntype: Scope\nkeywords: [{valor}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n",
-            encoding="utf-8",
-        )
+        base = f"---\ntype: Scope\nkeywords: [{valor}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n"
+        ahora_file = vault / "AHORA.md"
+        ahora_texto = ahora_file.read_text(encoding="utf-8") if ahora_file.is_file() else ""
+        texto = actualizar_contenido_pagina(base, ahora_texto, valor)
+        pagina.write_text(texto, encoding="utf-8")
 
     if (vault / "PENDIENTES.md").is_file():
         from tuku import propagate
@@ -88,6 +89,108 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
 
 
 create = crear
+
+
+def extraer_actividad_ambito(ahora: str, nombre_ambito: str) -> dict[str, list[str]]:
+    """Extrae las líneas de bitácora vinculadas a `[[nombre_ambito]]`, agrupadas por día.
+
+    Omite la hora `- HH:MM - ` dejando `- cuerpo`.
+    Remueve auto-enlaces al propio ámbito:
+    - Si inicia con `[[nombre_ambito]] `, elimina el prefijo.
+    - Si aparece dentro del texto, retira los corchetes `[[...]]`.
+    El orden de días y de líneas dentro de cada día es el mismo de `AHORA.md`.
+    """
+    from tuku.ahora import dias
+
+    patron_enlace = f"[[{nombre_ambito}]]"
+    prefijo_enlace = re.compile(rf"^\[\[{re.escape(nombre_ambito)}\]\]\s*")
+    salida: dict[str, list[str]] = {}
+    lineas = ahora.splitlines()
+
+    lista_dias = dias(ahora)
+    for idx, (ini, encabezado, _) in enumerate(lista_dias):
+        fin = lista_dias[idx + 1][0] if idx + 1 < len(lista_dias) else len(lineas)
+        for i in range(ini + 1, fin):
+            if lineas[i].strip() == "---":
+                fin = i
+                break
+
+        lineas_dia: list[str] = []
+        for i in range(ini + 1, fin):
+            linea = lineas[i]
+            if patron_enlace in linea and (m := re.match(r"^- \d{2}:\d{2} - (.*)$", linea)):
+                cuerpo = prefijo_enlace.sub("", m.group(1))
+                cuerpo = cuerpo.replace(patron_enlace, nombre_ambito)
+                lineas_dia.append(f"- {cuerpo}")
+
+        if lineas_dia:
+            salida[encabezado] = lineas_dia
+
+    return salida
+
+
+def formatear_esta_semana(actividad: dict[str, list[str]]) -> str:
+    """Formatea la sección `## Esta semana` con los días y líneas sin hora."""
+    if not actividad:
+        return "## Esta semana"
+
+    bloques = ["## Esta semana"]
+    for encabezado, lineas in actividad.items():
+        sub = "### " + encabezado.removeprefix("## ").strip()
+        bloques.append(sub)
+        bloques.extend(lineas)
+
+    return "\n".join(bloques)
+
+
+def actualizar_contenido_pagina(
+    contenido_actual: str, ahora_texto: str, nombre_ambito: str
+) -> str:
+    """Actualiza o incorpora `## Esta semana` y `## Actividad reciente` en el ámbito."""
+    from datetime import date
+
+    from tuku.ahora import rango
+    from tuku.init import MESES
+
+    actividad = extraer_actividad_ambito(ahora_texto, nombre_ambito)
+    seccion_semana = formatear_esta_semana(actividad).strip()
+
+    limites = rango(ahora_texto) if ahora_texto else None
+    fecha_ref = limites[0] if limites else date.today()
+    mes_str = MESES[fecha_ref.month - 1].capitalize()
+    mes_anio = f"{mes_str} {fecha_ref.year}"
+
+    partes_semana = contenido_actual.split("## Esta semana", 1)
+    base = partes_semana[0].rstrip()
+
+    if "## Actividad reciente" in contenido_actual:
+        parte_reciente = contenido_actual.split("## Actividad reciente", 1)[1].rstrip()
+        if not parte_reciente.strip():
+            seccion_reciente = f"## Actividad reciente\n### {mes_anio}"
+        else:
+            seccion_reciente = f"## Actividad reciente{parte_reciente}"
+    else:
+        seccion_reciente = f"## Actividad reciente\n### {mes_anio}"
+
+    return f"{base}\n\n{seccion_semana}\n\n{seccion_reciente}\n"
+
+
+def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
+    """Regenera la actividad en la página del ámbito. Devuelve la ruta si cambió."""
+    directorio = vault / "ambitos" / nombre
+    pagina = _pagina(directorio)
+    if not pagina.is_file():
+        return None
+    ahora_path = vault / "AHORA.md"
+    if not ahora_path.is_file():
+        return None
+    ahora_texto = ahora_path.read_text(encoding="utf-8")
+    actual = pagina.read_text(encoding="utf-8")
+    nuevo = actualizar_contenido_pagina(actual, ahora_texto, nombre)
+    if nuevo != actual:
+        pagina.write_text(nuevo, encoding="utf-8")
+        return pagina
+    return None
 
 
 def _plantilla_obligatorio(archivo: str, nombre: str) -> str:
