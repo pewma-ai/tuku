@@ -40,7 +40,9 @@ Cada nivel libera de carga al siguiente. Al implementar cualquier funcionalidad 
 
 Al autor le queda lo irreductible: gobernar, ratificar y decidir.
 
-El LLM se aísla en los dos extremos, el registro (interpretar dictado y convertirlo en hecho estructurado) y la inferencia semántica (resúmenes, destilado y propuestas). Todo el medio es determinista.
+El LLM se aísla en los dos extremos, el registro (interpretar el dictado y decidir qué es cada hecho: cuántos son, sobre qué y de qué clase) y la inferencia semántica (resúmenes, destilado y propuestas). Todo el medio es determinista.
+
+**Decidir qué es un hecho y escribirlo son dos cosas, y solo la primera pide juicio.** Una vez decidido, darle su forma y ponerlo donde va es mecánico y baja un nivel. El límite se mueve hacia la izquierda cada vez que algo que parecía juicio resulta ser formato, y esa es la forma normal de progreso de este principio.
 
 ### 5. Las reglas se escriben en prosa, en un solo lugar
 

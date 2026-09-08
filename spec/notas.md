@@ -55,8 +55,8 @@ El tipo `persona` carga una regla que los demás no necesitan: **la nota describ
 
 El libro de estilo ya exige que las observaciones sobre el autor se redacten como descripción y nunca como norma. Sobre un tercero eso vale más, y se suma otra: se infiere lo que sirve para trabajar mejor con esa persona, no lo que sirve para juzgarla.
 
-La prueba es simple: **una inferencia que no se le podría mostrar a la persona no va escrita.** Verificarlo no es mecánico: lo hace el agente al redactar, con juicio ético, no un janitor.
+La prueba es simple: **una inferencia que no se le podría mostrar a la persona no va escrita.** Verificarlo no es mecánico: lo hace el agente al redactar, con juicio ético, no un comando.
 
 ## No entra
 
-- **Destilar el histórico y proponer notas nuevas por iniciativa propia**, sin que el uso ya lo haya sugerido. Eso es inferencia semántica, una fase posterior de implementación (ver [`../devel/que_implementar.md`](../devel/que_implementar.md)). Acá solo la mecánica del tejido: crear, tipar, enlazar, indexar.
+- **Destilar el histórico y proponer notas nuevas por iniciativa propia**, sin que el uso ya lo haya sugerido. Eso es inferencia semántica, una fase posterior de implementación (ver [`../devel/epics.md`](../devel/epics.md)). Acá solo la mecánica del tejido: crear, tipar, enlazar, indexar.

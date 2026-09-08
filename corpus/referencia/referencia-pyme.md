@@ -425,7 +425,7 @@ ambitos/
 
 Por horizonte, según la escalera de `spec/pendientes.md`.
 
-Los nombres de los horizontes son **vocabulario abierto**: salen de `### Horizontes` en el libro de estilo del autor, no de TUKU. Andrea no tiene turnos, tiene semanas, así que sus horizontes son `^esta-semana` y `^proxima-semana` donde el corpus de faena dice `^este-turno` y `^proximo-turno`. La escalera es la misma y el janitor no cambia: lo que cambia es cómo se llama cada escalón.
+Los nombres de los horizontes son **vocabulario abierto**: salen de `### Horizontes` en el libro de estilo del autor, no de TUKU. Andrea no tiene turnos, tiene semanas, así que sus horizontes son `^esta-semana` y `^proxima-semana` donde el corpus de faena dice `^este-turno` y `^proximo-turno`. La escalera es la misma y el comando no cambia: lo que cambia es cómo se llama cada escalón.
 
 * **Cerrados durante las dos semanas:**
   - `administracion`: pagar cotizaciones previsionales de Katia Fuenzalida en Previred.

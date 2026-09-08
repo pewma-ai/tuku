@@ -52,6 +52,6 @@ Todo lo demás que escribas entre `**` es vocabulario tuyo y está en `LIBRO-DE-
 
 ## Dónde vive el código
 
-Este vault no contiene código. Las automatizaciones (janitors) se instalan aparte, en `~/.tuku/janitors`, y cada una documenta cómo hacer a mano lo que ella hace.
+Este vault no contiene código. Las automatizaciones se instalan aparte, con el comando `tuku`, y cada una documenta cómo hacer a mano lo que ella hace.
 
 Si no están instaladas, el vault funciona igual. Cuesta más trabajo, y eso es todo.

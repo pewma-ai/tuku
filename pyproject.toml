@@ -58,6 +58,8 @@ markers = [
   "replay: reconstrucción con diff exactamente cero (nivel 4)",
   "agentic: invoca un modelo. Gasta tokens. Excluido salvo `-m agentic`",
   "red: descarga o instala desde la red (p. ej. `uv tool install` desde git). Excluido salvo `-m red`",
+  "unitario: test unitario en memoria, aislado del vault",
+  "unit: alias de unitario",
   "lento: tarda más de un segundo",
 ]
 filterwarnings = ["error"]

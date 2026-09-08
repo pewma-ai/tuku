@@ -53,7 +53,7 @@ Tres niveles, en este orden de importancia:
 **Las reglas están escritas en prosa.** Cómo se escribe y cómo se organiza todo vive en un texto que leen igual el autor y la máquina, y del que nacen los automatismos. No hay lógica de gestión escondida dentro del código.
 
 > [!question] Qué salió de esta sección y dónde debería quedar #REVISAR
-> Se quitaron por ser implementación, no brief: los nombres del conjunto canónico (viven en [`../spec/README.md`](../spec/README.md)), los términos "janitor", "transclusión", "secretario", "vault" y "estado cero" (glosario, specs y [`../template/README.md`](../template/README.md)), y la mención del libro de estilo como documento.
+> Se quitaron por ser implementación, no brief: los nombres del conjunto canónico (viven en [`../spec/README.md`](../spec/README.md)), los términos "comando", "transclusión", "secretario", "vault" y "estado cero" (glosario, specs y [`../template/README.md`](../template/README.md)), y la mención del libro de estilo como documento.
 > Se quitó también la lista de herramientas concretas: **Claude Code, Hermes, Antigravity, Obsidian, Telegram u otra mensajería, visualizadores web o CLI**. El repositorio no las nombra en ningún otro lugar, así que ese dato se pierde si no se reubica. Destino natural: [`../devel/entorno-devel.md`](../devel/entorno-devel.md) (lo que se usa hoy para desarrollar) o [`../spec/agente.md`](../spec/agente.md) (lo que se espera del canal). Decidir y mover.
 
 ### Qué ofrece

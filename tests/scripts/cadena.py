@@ -1,4 +1,4 @@
-"""Paso de cadena: prepara el vault inicial de un escenario 002-YYY y compara estados.
+"""Paso de cadena: prepara el vault inicial de un escenario 002-YY y compara estados.
 
 Los escenarios del epic 002 están encadenados (ver `../escenarios/README.md`):
 el estado inicial de un paso es el estado final del anterior. El primero

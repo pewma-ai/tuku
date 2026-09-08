@@ -2,18 +2,18 @@
 
 > `PENDIENTES.md` es fuente de verdad, nunca derivado. Se justifica por el principio 9 de [`../docs/principios.md`](../docs/principios.md), con la excepción declarada más abajo.
 
-Ningún pendiente vive fuera de este archivo. Todo lo demás que los muestre (`AHORA.md`, páginas de ámbito, `reportes/`) se genera desde aquí por transclusión o por janitor.
+Ningún pendiente vive fuera de este archivo. Todo lo demás que los muestre (`AHORA.md`, páginas de ámbito, `reportes/`) se deriva de aquí, por propagación o por transclusión.
 
-A cambio exige disciplina, y esa disciplina la sostiene el janitor, no la memoria del autor.
+A cambio exige disciplina, y esa disciplina la sostiene el comando, no la memoria del autor.
 
 ## La bitácora es el disparador, no el origen de los datos
 
 - Dictado: *"Recuérdame avisar de los GGCC al arrendatario"*
   - Bitácora: `- 09:12 - [[arriendo-depto-centro]] **pendiente**: avisar de los GGCC al arrendatario`
-  - El janitor escribe en `^sin-fecha`: `- [[arriendo-depto-centro]] - avisar de los GGCC al arrendatario`
+  - El comando agrega una fila bajo `sin fecha`: `| | [[arriendo-depto-centro]] | avisar de los GGCC al arrendatario |`
 - Dictado: *"Ya le recordé los GGCC al arrendatario"*
   - Bitácora: `- 18:40 - [[arriendo-depto-centro]] ~~(Hecho)~~: avisar de los GGCC al arrendatario`
-  - El janitor borra el ítem de `^sin-fecha`
+  - El comando borra esa fila
 
 Los dos ganchos son deterministas: `**pendiente**` abre, `~~(Hecho)~~` cierra (ver `bitacora.md`). El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. Ninguna de las dos operaciones interpreta nada.
 
@@ -21,69 +21,104 @@ El archivo contiene solo lo abierto. El historial de lo cerrado vive en las bit�
 
 ## Formato
 
-Un archivo, callouts con ancla. El título del callout es la fuente: el janitor lo parsea e infiere el horizonte. Si termina en fecha ISO es bucket de fecha; si no, es un horizonte con nombre tomado de `### Horizontes` en el libro de estilo.
+Un archivo, un encabezado por horizonte y una tabla debajo. Las columnas son las mismas en todos.
 
 ```text
-> [!TODO] pendientes atrasados ^atrasados
-> - [[ambito]] - cuerpo (vencía 2026-04-02)
+## atrasados
 
-> [!TODO] pendientes sin fecha ^sin-fecha
-> - [[ambito]] - cuerpo
+| Cuándo | Ámbito | Detalle |
+| --- | --- | --- |
+| 2026-04-02 | [[arriendo-depto-centro]] | avisar de los GGCC al arrendatario |
 
-> [!TODO] pendientes de esta semana ^esta-semana
-> - [[ambito]] - cuerpo
+## sin fecha
 
-> [!TODO] pendientes de la proxima semana ^proxima-semana
-> - [[ambito]] - cuerpo
+| Cuándo | Ámbito | Detalle |
+| --- | --- | --- |
+| | [[personal]] | comprar una maleta |
 
-> [!TODO] pendientes del 2026-04-02 ^2026-04-02
-> - [[ambito]] - cuerpo
+## esta semana
+
+| Cuándo | Ámbito | Detalle |
+| --- | --- | --- |
+
+## con fecha
+
+| Cuándo | Ámbito | Detalle |
+| --- | --- | --- |
+| 2026-08-14 | [[personal]] | pagar la sesión con el psicólogo |
 ```
 
-Los nombres de los tres horizontes del medio son del autor, no de TUKU: salen de `### Horizontes` en el libro de estilo, y el estado cero los siembra en semanas (`esta-semana`, `proxima-semana`, `fin-de-mes`) porque es el ritmo de casi todo el mundo. Un autor que trabaja por turnos los renombra ahí y en los anclas de `PENDIENTES.md`. `atrasados` y `sin-fecha` sí son de TUKU: no dependen de ningún ritmo.
+**Cuándo** lleva la fecha exacta cuando el pendiente la tiene y queda vacío cuando no. **Ámbito** es un enlace, o vacío si el pendiente todavía no aterrizó en ninguno. **Detalle** es el cuerpo, el mismo texto que el registro que lo abrió y que el que lo cierre.
 
-Los cinco callouts de horizonte son **permanentes**: existen siempre, aunque estén vacíos, y así la escalera se lee completa. Los callouts de fecha son **efímeros**: nacen cuando un pendiente recibe esa fecha y mueren cuando se va el último.
+Dentro de cada tabla las filas van ordenadas por `Cuándo`, y las que no tienen fecha después. El orden es determinista y la inserción es posicional: un pendiente nuevo no puede reordenar la tabla entera, o el diff del ciclo deja de leerse.
 
-El ítem es siempre `- [[ambito]] - cuerpo`. Toda la información temporal vive en el título del callout, nunca duplicada en el ítem.
+**Los seis encabezados son permanentes**: existen siempre, con su tabla vacía si hace falta, y así la escalera se lee completa de arriba abajo. Tres son de TUKU y no dependen de ningún ritmo (`atrasados`, `sin fecha`, `con fecha`); los tres del medio son del autor, salen de `### Horizontes` en el libro de estilo, y el estado cero los siembra en semanas (`esta semana`, `próxima semana`, `fin de mes`) porque es el ritmo de casi todo el mundo. Un autor que trabaja por turnos los renombra en el libro de estilo y acá.
 
-`^atrasados` es la única excepción: sus ítems vienen de fechas distintas, así que al moverlos ahí el vencimiento se perdería. El janitor lo estampa entre paréntesis porque es el único lugar donde esa fecha ya no se puede inferir.
+**No hay encabezados de fecha.** La fecha vive en la columna, no en la estructura, así que agendar no crea ni destruye secciones.
 
 ## Escalera de horizontes
 
-Cada pendiente está en exactamente un callout y baja de escalón a medida que se concreta:
+Cada pendiente está bajo exactamente un horizonte y baja de escalón a medida que se concreta:
 
-`sin-fecha` → `esta-semana` / `proxima-semana` / `fin-de-mes` → fecha exacta → cerrado
+`sin fecha` → `esta semana` / `próxima semana` / `fin de mes` → `con fecha` → cerrado
 
-Con fecha exacta aparece bajo el día correspondiente de `AHORA.md` por transclusión del ancla, sin copiar.
+Con fecha exacta pasa a `con fecha` y aparece bajo el día correspondiente de `AHORA.md`, propagado por un comando.
 
-**Escribir en un día es fecharlo.** Un registro `**pendiente**` escrito en el día de hoy o en uno futuro de `AHORA.md` abre el pendiente ya con la fecha de ese día, y queda transcluido al inicio de ese día. No hay un comando aparte para agendar: agendar es escribir donde corresponde, que es lo que alguien haría en una agenda de papel.
+**Escribir en un día futuro es fecharlo.** Un registro `**pendiente**` escrito bajo un día posterior a hoy en `AHORA.md` abre el pendiente ya con la fecha de ese día, y queda propagado al inicio de ese día. No hay un comando aparte para agendar: agendar es escribir donde corresponde, que es lo que alguien haría en una agenda de papel.
 
-Esto ataja el escalón: un pendiente puede nacer con fecha exacta sin pasar por `^sin-fecha` ni por un horizonte. La escalera describe cómo se concreta lo que nació difuso, no un camino obligatorio.
+**El día de hoy no fecha**, y va a `sin fecha`. Escribir bajo el día de hoy es el acto por defecto de registrar, no una decisión de agendar: el autor escribe ahí porque hoy es cuando habla. Si eso fechara, todo lo que mencionara quedaría venciendo hoy, que casi nunca es cierto, y `sin fecha` no tendría vía de entrada. Fechar queda como lo que es, un acto deliberado: escribirlo en el día en que toca.
 
-El movimiento de escalón **no se registra en la bitácora**: mover un pendiente no es un hecho de la vida del autor, es un hecho del sistema. El janitor lo hace por sí mismo (segunda vía, ver [`flujo-informacion.md`](flujo-informacion.md)).
+Esto ataja el escalón: un pendiente puede nacer en `con fecha` sin pasar por `sin fecha` ni por un horizonte del autor. La escalera describe cómo se concreta lo que nació difuso, no un camino obligatorio.
 
-## Sincronía de transclusiones
+El movimiento de escalón **no se registra en la bitácora**: mover un pendiente no es un hecho de la vida del autor, es un hecho del sistema. El comando lo hace por sí mismo (segunda vía, ver [`flujo-informacion.md`](flujo-informacion.md)).
 
-Solo las anclas de fecha pueden romperse. Las de horizonte son permanentes, así que sus transclusiones nunca quedan huérfanas y no necesitan vigilancia. Eso acota el problema a los callouts fechados, que aparecen y desaparecen con el uso.
+## Dónde se muestra, y cómo llega
 
-El janitor corre en cada escritura a `PENDIENTES.md` y arregla las dos direcciones:
+`PENDIENTES.md` **no se transcluye**. Sus pendientes están repartidos entre horizontes, así que ningún bloque contiguo contiene lo que una vista necesita, y una transclusión no sabe rebanar por otro eje.
 
-| Falla | Síntoma | Corrección |
+La regla general, que decide los dos casos con un solo criterio:
+
+> **Se transcluye cuando el origen ya agrupa contiguo lo que el destino muestra. Se propaga cuando no.**
+
+| Vista | Cómo llega | Por qué |
 | --- | --- | --- |
-| Transclusión sin callout | Caja de error en el día | Quitar la línea de transclusión |
-| Callout sin transclusión | El pendiente no aparece en su día | Agregar la línea bajo el día |
+| El día, en `AHORA.md` | Propagación | Los pendientes de un día están repartidos entre horizontes |
+| El ámbito, en su página | Transclusión desde `reportes/pendientes-por-ambito.md` | Ese archivo se genera agrupado por ámbito, así que cada grupo ya es contiguo |
 
-La segunda es la peligrosa. La primera se ve: hay una caja rota y alguien la arregla. La segunda es silenciosa, el pendiente simplemente no aparece en la agenda, y el autor se entera cuando ya venció.
+`tuku todo propagate` produce las dos. Es idempotente: correrlo dos veces da el mismo resultado, y sobre un vault cuadrado no cambia nada.
+
+Lo que se gana al propagar en vez de transcluir es que la vista no depende de que un ancla siga existiendo, que era la falla silenciosa de este archivo: un pendiente que existía y no aparecía en su día, y el autor se enteraba cuando ya había vencido. Lo que se pierde es que una copia sí puede quedar vieja. Se compra de vuelta barato, porque una vista derivada se verifica **re-derivando y comparando**, que es una función pura contra su salida.
+
+### La región del día
+
+Dentro de cada `## <día>` de `AHORA.md`, el comando es dueño de **lo que va entre el encabezado y el primer registro**. Ahí escribe los pendientes con fecha de ese día, y al regenerar reemplaza esa región entera.
+
+No hay marca que la delimite, y es a propósito: los registros empiezan siempre por `- HH:MM - `, así que la frontera es estructura visible. Un comentario invisible se rompe al editar el archivo y nadie se entera.
+
+**Consecuencia directa:** no se escribe prosa suelta bajo el encabezado de un día. Lo que quede ahí lo reemplaza la siguiente propagación.
+
+### El archivo por ámbito
+
+`reportes/pendientes-por-ambito.md` es generado y agrupa por ámbito, un encabezado por cada uno. La página de cada ámbito transcluye su sección:
+
+```markdown
+![[reportes/pendientes-por-ambito.md#depto-centro]]
+```
+
+Se transcluye por **encabezado y no por ancla de bloque**. El archivo lo genera TUKU, así que puede tener exactamente la estructura que la transclusión necesita, y un encabezado se explica solo al abrirlo.
+
+Esa transclusión es **permanente**, no de ciclo, así que no se aplana nunca. El aplanado de [`ciclo.md`](ciclo.md) es de las vistas del ciclo.
 
 ## Reglas
 
-1. Un pendiente está en un solo callout, siempre.
-2. Todo pendiente con fecha anterior a HOY se mueve a `^atrasados`, estampando su vencimiento.
-3. Al cerrar ciclo, lo que quede en el horizonte del ciclo en curso sin fecha rueda al mismo horizonte del ciclo nuevo. Solo lo fechado cae en `^atrasados`.
-4. El ítem **no lleva fecha**. El horizonte lo da el callout y la fecha de origen ya está en la bitácora. La antigüedad se saca del historial de git de `PENDIENTES.md`, que se versiona como fuente. Única excepción: `^atrasados`, ver arriba.
-5. HOY se evalúa en la zona horaria del autor. La VM hereda el TZ del laptop, así que no hay que convertir, pero sí declararlo en `reglas/` para que ningún janitor asuma UTC.
-6. **Ninguna transclusión apunta a un ancla que no existe.** Cada vez que un pendiente se crea, se mueve de escalón o se borra, un janitor revisa las transclusiones y las sincroniza. Una caja de error en `AHORA.md` es un defecto, no un estado válido.
+1. Un pendiente está en **una sola fila de `PENDIENTES.md`**, siempre. El alcance de la regla es este archivo: lo que aparece en un día o en la página de un ámbito es una vista derivada y no cuenta como segunda aparición. Sin esa distinción, la vista se confunde con el error que la regla prohíbe.
+2. Todo pendiente con fecha anterior a HOY pasa a `atrasados`. La fecha no se pierde al moverlo, porque vive en la columna y no en el encabezado.
+3. Al cerrar ciclo, lo que quede en el horizonte del ciclo en curso sin fecha rueda al mismo horizonte del ciclo nuevo. Solo lo fechado cae en `atrasados`.
+4. **La fecha vive en la columna `Cuándo` y en ningún otro lugar.** No se repite en el detalle ni se codifica en la estructura. La antigüedad se saca del historial de git de `PENDIENTES.md`, que se versiona como fuente.
+5. HOY se evalúa en la zona horaria del autor. La VM hereda el TZ del laptop, así que no hay que convertir, pero sí declararlo en `reglas/` para que ningún comando asuma UTC.
+6. **Las vistas se regeneran, no se reparan.** Todo lo que muestra un pendiente fuera de `PENDIENTES.md` se deriva de él. Si una vista discrepa de la fuente, la que está mal es la vista, y la corrección es volver a propagar. `tuku todo lint` lo detecta re-derivando y comparando.
 7. `PENDIENTES.md` se versiona como fuente. La reconstrucción desde bitácoras no lo regenera ni lo verifica. El conjunto canónico es `AHORA.md` + `bitacoras/` + `PENDIENTES.md` + `ambitos/` + `notas/`, y el principio 9 aplica solo a lo que queda fuera de esa lista.
+8. **Dentro de `AHORA.md` conviven las dos naturalezas**, y hay que saber cuál es cuál: los registros son canónicos y la región propagada de cada día es derivada. Es la única parte del conjunto canónico que se puede borrar y regenerar, y por eso está delimitada por estructura visible.
 
 ## No entra
 

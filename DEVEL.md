@@ -1,67 +1,100 @@
-# Desarrollo de TUKU
+# Desarrollo de TUKU: Método y Guía Operativa
 
-Índice del espacio de desarrollo. Este repositorio es el **software**; el libro del autor (su vault) vive en otro lado y es lo que TUKU instala y mantiene.
+Guía de trabajo para agentes y colaboradores. Este repositorio contiene el motor de TUKU en Python; el vault del autor vive en su propio directorio y es lo que el motor crea y asiste.
 
-Cada documento carga un solo tipo de información, y por eso acá no se repite ninguno: esto solo dice dónde está cada cosa.
+## Principios de trabajo con el autor
 
-## Por dónde empezar
-
-[`devel/epics.md`](devel/epics.md). Tiene el estado del trabajo, qué epic está en curso y qué falta para cerrarlo.
-
-## Por dónde terminar
-
-Regla de buena educación, para quien trabaje acá, persona o agente: **al cerrar una sesión de trabajo, deja el resumen del día en [`devel/iteraciones/AAAA-MM-DD.md`](devel/iteraciones/README.md)**, con qué se hizo, qué se decidió y qué queda pendiente.
-
-Cuesta dos minutos y es lo que permite que la siguiente sesión retome sin depender de que alguien se acuerde de la conversación. Una decisión que solo existe en un chat es una decisión perdida.
+- **Deliberar antes de escribir:** Separar el diseño de la ejecución. Durante discusiones conceptuales no se modifican archivos. La edición se realiza tras acordar la solución o por instrucción explícita.
+- **Entrada por voz y dictado:** Las instrucciones del autor suelen llegar por dictado (audio a texto), con frases entrecortadas o autocorrecciones. Se debe interpretar la intención de fondo directamente, sin exigir reformulaciones ni detenerse en la sintaxis hablada.
+- **Comunicación concisa y directa:** Respuestas breves, sin voseo, sin explicaciones obvias ni disculpas vacías. Reportar los cambios indicando el enlace al archivo y el resultado concreto. No repetir en el chat lo que ya quedó plasmado en el código o documento.
+- **Una sola fuente de verdad (cero duplicación):** La información vive en un solo lugar. Si un dato se necesita en dos sitios, se enlaza o se transcluye. Nunca se copian tablas normativas, códigos ni contratos entre documentos.
 
 ## Dónde vive cada cosa
 
 | Directorio | Qué contiene | Naturaleza |
 |---|---|---|
-| [`docs/`](docs/README.md) | El porqué: brief, principios, glosario, libro de estilo | Marco rector |
-| [`spec/`](spec/README.md) | Qué hace el sistema, un archivo por primitiva | Normativo, y provisional entre epics |
-| [`devel/`](devel/epics.md) | Cómo se construye: epics, plan de fases, entorno, diario | Plan |
-| [`template/`](template/README.md) | Estructuras iniciales en Markdown que se copian al vault | Producto |
-| `src/` | El código | Implementación |
-| [`corpus/`](corpus/README.md) | Dictado de referencia, real e imaginado: fuente de fechas y de ideas de proceso | Dato |
-| [`tests/`](tests/README.md) | El caso narrativo (Dado/Cuando/Entonces) y su arnés, uno junto al otro | Verificación |
-| `playground/` | Corridas desechables. Ignorado por git, se pisa al recrear | Descartable |
+| [`docs/`](docs/README.md) | Marco rector: brief, principios, glosario y libro de estilo | Fundacional |
+| [`spec/`](spec/README.md) | Especificación normativa de primitivas y contratos del sistema | Normativo |
+| [`devel/`](devel/epics.md) | Plan de construcción: epics, fases, entorno y diario de iteraciones | Planificación |
+| [`template/`](template/README.md) | Estructuras Markdown iniciales que se siembran en un nuevo vault | Producto |
+| [`src/`](src/) | Código fuente del paquete Python `tuku` | Implementación |
+| [`corpus/`](corpus/README.md) | Dictados de referencia reales y ficticios para pruebas de proceso | Datos |
+| [`tests/`](tests/README.md) | Capa unitaria en memoria y escenarios encadenados sobre el vault | Verificación |
+| `playground/` | Entornos de prueba efímeros generados por los tests (ignorado por git) | Descartable |
 
-Dentro de `devel/`: [`epics.md`](devel/epics.md) es el estado, [`que_implementar.md`](devel/que_implementar.md) el plan de fases y su justificación, [`iteraciones/`](devel/iteraciones/README.md) el diario por día, [`entorno-devel.md`](devel/entorno-devel.md) el entorno.
+Jerarquía de precedencia: Dentro de un epic, [`spec/`](spec/README.md) manda sobre el código. Entre epics, los experimentos y el uso mandan sobre [`spec/`](spec/README.md). [`devel/epics.md`](devel/epics.md) es la única fuente de verdad sobre el orden y estado de implementación.
 
-Cómo se relacionan estos cuatro: un epic da el número y la meta; un escenario lo cubre y, si necesita dictado o fechas reales, las toma de `corpus/`; el escenario y el test que lo verifica viven juntos en `tests/escenarios/`; lo que produce correrlo queda en `playground/`, que se pisa cada vez.
+## El ciclo de desarrollo e iteraciones
 
-`devel/VAULT/` es **historia**: el diseño y el código anteriores a la reescritura de agosto de 2026. No es base para nada nuevo. Se rescata algo puntual solo cuando un epic lo necesita.
+1. **Unidad de entrega y cortes:** Los epics cortan por **estado del vault** (`vacio`, `primer-dia`, `ciclo-en-curso`, etc.) y las fases técnicas cortan por **primitiva** interna ([`devel/epics.md`](devel/epics.md)). Se construye siempre de lo determinista a lo agéntico, de lo simple a lo complejo, y del caso feliz a los casos borde.
+2. **Escalera de fixtures e idempotencia:** En los escenarios de vault, el estado final de un paso es el estado inicial del siguiente. Los tests comparan el `diff` exacto entre instantáneas en `playground/`. Toda operación sobre el vault debe ser idempotente: una segunda corrida debe arrojar un delta vacío.
+3. **Registro obligatorio de iteración:** Toda sesión de trabajo inicia leyendo la última iteración y finaliza actualizando [`devel/iteraciones/AAAA-MM-DD.md`](devel/iteraciones/README.md). Se registran las tareas completadas, las decisiones tomadas con su justificación, los pendientes detectados y el estado de la suite de pruebas. Las decisiones que quedan en el chat se pierden.
 
-## Instalar un vault
+## Reglas de implementación (`src/`)
 
-TUKU se instala como paquete Python, sin PyPI, directo desde la rama `devel`. Deja el ejecutable `tuku` en el PATH y el árbol de TUKU en `~/.tuku`:
+- **Principio 1 (soberanía y offline):** Todo comando de TUKU opera localmente sobre archivos Markdown y debe tener su equivalente ejecutable "A mano" documentado. Si una función solo es operable mediante el software, viola el principio 1.
+- **Contrato de CLI ([`spec/cli.md`](spec/cli.md)):** Códigos de salida fijos (`0` éxito, `1` rechazo justificado, `2` reservado para sintaxis de `argparse`). Toda salida de error o rechazo debe nombrar explícitamente el defecto y la acción correctiva sugerida. Una sola salida en prosa humana (sin flags como `--json`).
+- **Centralización de lecturas:** Ningún comando lee archivos de configuración o reglas por su cuenta. Toda lectura de `config.tuku.md`, `LIBRO-DE-ESTILO.md`, plantillas u otros elementos de configuración se delega a [`src/tuku/config.py`](src/tuku/config.py).
+- **Transparencia en Markdown:** No usar comentarios HTML para almacenar metadatos o estados ocultos. Los datos legibles por máquinas viven en secciones declaradas (pares clave-valor en negrita o tablas formales).
 
-```bash
-uv tool install "git+https://github.com/pewma-ai/tuku.git@devel"   # o: pipx install "git+..."
-```
+## Verificación y pruebas (`tests/`)
 
-Después, sembrar un vault en un directorio nuevo, offline:
+La suite separa las pruebas puras de lógica interna de la evolución de integración del vault:
 
-```bash
-tuku init mi-vault
-```
+| Capa | Ubicación | Propósito |
+|---|---|---|
+| **Unitarios** | [`tests/unitarios/`](tests/unitarios/README.md) | Funciones puras, parsers y lógica interna en memoria. Ultra-rápidos (~0,05s). |
+| **Escenarios** | [`tests/escenarios/`](tests/escenarios/README.md) | Pruebas narrativas Gherkin (`Dado / Cuando / Entonces`) encadenadas en `playground/`. |
 
-`tuku init` se niega a sembrar sobre un directorio con contenido salvo `--force`, y `--author "..."` deja el nombre en `LIBRO-DE-ESTILO.md`. El procedimiento a mano equivalente está en [`template/README.md`](template/README.md), y debe seguir funcionando siempre: si el vault solo se puede crear ejecutando algo, se rompió el principio 1.
+### Cobertura de tests unitarios
 
-## Probar
+Toda función pura de parsing, formateo de texto, expresiones regulares o validación que opere en memoria (sin tocar disco ni red) debe contar con tests unitarios en [`tests/unitarios/`](tests/unitarios/README.md).
+- Debe cubrir: caso nominal, entradas vacías y entradas malformadas.
+- Los escenarios en [`tests/escenarios/`](tests/escenarios/README.md) se reservan para verificar la evolución del vault y la experiencia del usuario, no para agotar combinaciones de sintaxis interna.
+- **Invariante de rendimiento:** La suite unitaria (`uv run pytest --unittests`) debe ejecutarse en menos de **0,2 segundos** y con cero I/O de disco. Es la única capa de tests que se fuerza en el hook de pre-commit.
 
-Los escenarios son narrativos (Dado/Cuando/Entonces), no unitarios, porque buena parte del sistema depende de un agente y no da un resultado único. El caso y su arnés viven juntos en `tests/escenarios/`, y lo que solo se puede juzgar leyendo queda escrito en el propio escenario bajo "Qué se mira a mano".
+### Modos de ejecución
 
-```bash
-uv run pytest tests/escenarios/            # todo
-uv run pytest tests/escenarios/ -k 001      # un epic
-```
+- **Toda la suite determinista (por defecto):**
+  ```bash
+  uv run pytest
+  ```
+- **Solo tests unitarios:**
+  ```bash
+  uv run pytest --unittests         # o: uv run pytest --unit
+  uv run pytest tests/unitarios/    # o por ruta
+  ```
+- **Escenarios de un epic específico:**
+  ```bash
+  uv run pytest tests/escenarios/ -k 002
+  ```
+- **Un escenario individual:**
+  ```bash
+  uv run pytest tests/escenarios/ -k 002_04
+  ```
+- **Tests con modelo LLM (agénticos):** Requieren tokens y no son deterministas. Excluidos por defecto.
+  ```bash
+  uv run pytest -m agentic
+  ```
+- **Instalación real desde la red:** Verifican descargas directas desde git con socket real. Excluidos por defecto.
+  ```bash
+  uv run pytest -m red
+  ```
 
-Determinista, sin depender de un agente. `tests/` se construye solo desde los epics: la suite del diseño anterior se borró entera en vez de arrastrarla a medio migrar.
+## Entorno e higiene técnica
 
-## Entorno
-
-Python 3.14 con `uv`. Higiene con `ruff` y `mypy`, y las tres invariantes de determinismo, en [`devel/entorno-devel.md`](devel/entorno-devel.md).
-
-Los janitors se especifican en prosa dentro del vault del autor (`reglas/janitors.tuku.md`) y su código se instala aparte, en `~/.tuku/janitors`. La especificación sobrevive, la implementación se reemplaza.
+- **Entorno:** Python 3.14 gestionado mediante `uv`. Detalles de determinismo en [`devel/entorno-devel.md`](devel/entorno-devel.md).
+- **Linters y tipado estricto:** Todo cambio debe mantener limpios:
+  ```bash
+  uv run ruff check .
+  uv run mypy src tests
+  ```
+- **Hook de pre-commit:** Ejecuta `ruff`, `mypy` y los tests unitarios (`uv run pytest --unittests`) antes de cada commit. Se activa con:
+  ```bash
+  uv run pre-commit install
+  ```
+- **Instalación del paquete en desarrollo:**
+  ```bash
+  uv tool install "git+https://github.com/pewma-ai/tuku.git@devel"
+  tuku init mi-vault
+  ```

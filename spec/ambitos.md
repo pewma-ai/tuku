@@ -12,7 +12,7 @@ El árbol crece orgánicamente y la profundidad no está fijada. Lo que distingu
 | **Categoría** | Agrupador, sin identidad propia | Directorio **sin página propia** |
 | **Actividad** | La hoja, lo que efectivamente ocurre | Archivo `.md` en minúscula |
 
-Regla operativa y verificable por janitor: **los registros apuntan a una actividad o a un ámbito, nunca a una categoría.** Una categoría no tiene de qué hablar, solo agrupa.
+Regla operativa y verificable por comando: **los registros apuntan a una actividad o a un ámbito, nunca a una categoría.** Una categoría no tiene de qué hablar, solo agrupa.
 
 ## Qué carga cada directorio
 
@@ -32,7 +32,7 @@ ambitos/
         └── juanito_perez.md  <- actividad
 ```
 
-Obligatorios aunque estén vacíos. El costo son dos archivos por carpeta. La ganancia es que ningún janitor tiene que manejar el caso "no existe", y el autor siempre sabe dónde escribir una regla sin preguntar.
+Obligatorios aunque estén vacíos. El costo son dos archivos por carpeta. La ganancia es que ningún comando tiene que manejar el caso "no existe", y el autor siempre sabe dónde escribir una regla sin preguntar.
 
 En ambos, **la más cercana prevalece**.
 

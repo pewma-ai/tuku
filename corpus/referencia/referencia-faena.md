@@ -42,7 +42,7 @@ Lo que trae al sistema: escribe mucho y ordena poco, sus pendientes se arrastran
 
 ### Miércoles 12 de Agosto
 
-* "Eliminé el filtro de madurez de 5 minutos del janitor de git en modo automático."
+* "Eliminé el filtro de madurez de 5 minutos del comando de git en modo automático."
 * "Revisamos con Fabina Méndez el diccionario de MetricDB para la tesis de Javier Castro. Por confidencialidad no se le pueden entregar los manuales directos, así que acordamos hablar con Carla Fuentes para armar presentaciones resumen integrando varios documentos."
 * "Le presenté a Fabina el marco de trabajo de casos de uso con Azure LLM y dejé creada la nota formal con las pautas de gobernanza para emitir API keys."
 * "Proyecto del paper técnico archivado."
@@ -170,7 +170,7 @@ Lo que trae al sistema: escribe mucho y ordena poco, sus pendientes se arrastran
 > **Las horas no vienen del dictado**: se derivan de la jornada que el dictado describe. La clasificación abierta usa el vocabulario del autor, no uno que fije TUKU.
 
 > [!question] Pendiente de decisión #REVISAR
-> 52 `~~(Hecho)~~` contra 15 `**pendiente**`: la mayoría de los cierres no tiene pareja previa, nacen y se cierran el mismo día porque así fue dictado. [`spec/pendientes.md`](../../spec/pendientes.md) dice que `~~(Hecho)~~` cierra un pendiente preexistente. O el corpus abre el pendiente implícito en la mismo registro, o la invariante admite el cierre sin pareja. Lo decide el escenario `002-004`, no el corpus.
+> 52 `~~(Hecho)~~` contra 15 `**pendiente**`: la mayoría de los cierres no tiene pareja previa, nacen y se cierran el mismo día porque así fue dictado. [`spec/pendientes.md`](../../spec/pendientes.md) dice que `~~(Hecho)~~` cierra un pendiente preexistente. O el corpus abre el pendiente implícito en la mismo registro, o la invariante admite el cierre sin pareja. Lo decide el escenario `002-04`, no el corpus.
 
 ## Turno Faena (11 al 19 de Agosto de 2026)
 
@@ -204,7 +204,7 @@ Lo que trae al sistema: escribe mucho y ordena poco, sus pendientes se arrastran
 > [!tldr]
 > Jornada centrada en IA y cierre de pendientes. Con Fabina Méndez se revisa el diccionario de MetricDB para la tesis, con presentaciones resumen como salida ante la restricción de confidencialidad, y se presenta el marco Azure LLM dejando creada la nota de gobernanza de llaves. Reunión con Casa Matriz por la versión 2 de la plataforma, con la IA aportada como prioridad. En lo operativo, paper archivado y gastos personales regularizados.
 
-- 08:40 - [[mac-personal]] ~~(Hecho)~~: eliminar el filtro de madurez de cinco minutos del janitor de git en modo automático
+- 08:40 - [[mac-personal]] ~~(Hecho)~~: eliminar el filtro de madurez de cinco minutos del comando de git en modo automático
 - 10:15 - [[tesis-javier-castro]] ~~(Hecho)~~: conversar el diccionario de MetricDB con Fabina Méndez el miércoles 12 de agosto
 - 10:30 - [[tesis-javier-castro]] **fricción**: por confidencialidad no se pueden entregar los manuales directos a Javier Castro
 - 10:35 - [[tesis-javier-castro]] **decisión**: hablar con Carla Fuentes para armar presentaciones resumen que integren varios manuales, en vez de entregar los manuales
@@ -412,7 +412,7 @@ Lo que trae al sistema: escribe mucho y ordena poco, sus pendientes se arrastran
 > Esta sección describe el estado documental y relacional completo del repositorio que un sistema agéntico debe ser capaz de inferir, actualizar o reconstruir a partir de los inputs de actividad anteriores.
 
 > [!question] Pendiente de traducción #REVISAR
-> **Esta Parte 3 sigue en la estructura de `mac-jpgil`**: `org/<Organización>/VIGENTES/`, sin los `AGENTS.md` ni `CADENCIAS.md` que exige [`spec/ambitos.md`](../../spec/ambitos.md). El equivalente traducido está en la Parte 3 de [`referencia-pyme.md`](referencia-pyme.md). Traducirla es trabajo del epic 003, el que necesita el estado poblado: hacerlo ahora sería inventar la jerarquía sin un test que la fuerce. Mientras tanto los `[[ambito]]` de la Parte 2 usan nombre corto, único en este corpus.
+> **Esta Parte 3 sigue en la estructura de `mac-jpgil`**: `org/<Organización>/VIGENTES/`, sin los `AGENTS.md` ni `CADENCIAS.md` que exige [`spec/ambitos.md`](../../spec/ambitos.md). El equivalente traducido está en la Parte 3 de [`referencia-pyme.md`](referencia-pyme.md). Traducirla es trabajo del epic 004, el que necesita el estado poblado: hacerlo ahora sería inventar la jerarquía sin un test que la fuerce. Mientras tanto los `[[ambito]]` de la Parte 2 usan nombre corto, único en este corpus.
 
 ## 1. Árbol de Organizaciones y Áreas (ORG)
 

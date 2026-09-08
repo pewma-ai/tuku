@@ -25,7 +25,7 @@ Para instalarlo a mano, sin `curl`, ver [`template/README.md`](template/README.m
 Son archivos Markdown y nada más: se leen con cualquier editor, viajan en un pendrive, siguen siendo legibles cuando esta herramienta ya no exista.
 
 - El autor dicta lo que hizo y un agente lo escribe en la bitácora.
-- Janitors deterministas leen esa bitácora para abrir y cerrar pendientes, sembrar cadencias y mantener índices.
+- Comandos deterministas leen esa bitácora para abrir y cerrar pendientes, sembrar cadencias y mantener índices.
 - Todo lo que importa queda en texto plano, no en la memoria de un modelo, y el sistema entero se puede operar a mano.
 
 ## Autor

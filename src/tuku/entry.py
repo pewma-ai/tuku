@@ -1,6 +1,6 @@
 """tuku entry add: coloca líneas de bitácora ya formadas en su día.
 
-Fase 1 de `devel/que_implementar.md`. No interpreta ni reformatea: recibe
+Fase 1 de `devel/epics.md`. No interpreta ni reformatea: recibe
 líneas que ya cumplen `spec/bitacora.md` y las inserta bajo el encabezado del
 día indicado, ordenadas por hora, sin reescribir ninguna que ya estuviera.
 
@@ -38,7 +38,27 @@ def add(ahora: str, lineas: list[str], *, dia: str) -> str:
     try:
         ini = next(i for i, linea in enumerate(src) if linea.strip() == encabezado)
     except StopIteration:
-        raise ValueError(f"no existe el encabezado {encabezado!r} en AHORA.md") from None
+        from tuku.ahora import fecha_del_dia, rango
+        limites = rango(ahora)
+        if limites is not None:
+            desde, hasta = limites
+            f_nueva = fecha_del_dia(encabezado, desde, hasta)
+            if f_nueva is not None and desde <= f_nueva <= hasta:
+                insert_idx = len(src)
+                for i, linea in enumerate(src):
+                    if linea.startswith("## "):
+                        f_existente = fecha_del_dia(linea, desde, hasta)
+                        if f_existente is not None and f_existente > f_nueva:
+                            insert_idx = i
+                            break
+                src = [*src[:insert_idx], encabezado, "", *src[insert_idx:]]
+                ini = insert_idx
+            else:
+                msg = f"el día {encabezado!r} cae fuera del ciclo abierto en AHORA.md"
+                raise ValueError(msg) from None
+        else:
+            raise ValueError(f"no existe el encabezado {encabezado!r} en AHORA.md") from None
+
 
     fin = next(
         (i for i in range(ini + 1, len(src)) if src[i].startswith("## ")),

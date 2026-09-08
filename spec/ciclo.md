@@ -4,7 +4,7 @@
 
 ## `AHORA.md`, el ciclo en curso
 
-Lo único canónico aquí son **los registros**. El resto es vista y entra por transclusión.
+Lo único canónico aquí son **los registros**. El resto es vista, y entra de dos maneras distintas: el plan por transclusión, los pendientes del día por propagación ([`pendientes.md`](pendientes.md), "dónde se muestra y cómo llega").
 
 ```markdown
 ---
@@ -20,13 +20,15 @@ hasta: 2026-09-01
 # Actividad diaria
 
 ## Martes 25 de agosto
-![[PENDIENTES.md#^2026-08-25]]
+- [[arriendo-depto-centro]] - avisar de los GGCC al arrendatario
 - 09:12 - [[ambito]] **clasificacion**: cuerpo
 - 14:30 - [[ambito]] **clasificacion**: cuerpo
 
 ## Miércoles 26 de agosto
-![[PENDIENTES.md#^2026-08-26]]
+- [[personal]] - pagar la sesión con el psicólogo
 ```
+
+Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku todo propagate`. Se distingue sin marca: los registros empiezan por `- HH:MM - `.
 
 **No tiene resumen.** El resumen se genera al cerrar, así que no existe mientras el ciclo está abierto.
 
@@ -59,15 +61,17 @@ hasta: 2026-09-01
 | Bloque | Abierto | Cerrado |
 | --- | --- | --- |
 | Plan | transclusión desde `planes/` | texto aplanado |
-| Pendientes del día | transclusión desde `PENDIENTES.md` | texto aplanado |
+| Pendientes del día | propagados desde `PENDIENTES.md` | ya son texto, no cambian |
 | Registros | canónicos | sin cambios |
 | Resumen | no existe | enlace a `reportes/` |
 
 Aplanar no contradice la fuente única. La fuente única evita que dos copias **vivas** diverjan, y al cerrar nada sigue vivo: lo que queda es un snapshot. Lo que sí se rompería es el principio 1, porque un archivo lleno de `![[...]]` no se lee con un editor básico ni dentro de veinte años.
 
+Los pendientes del día ya no necesitan aplanarse, y esa es una simplificación que trajo la propagación: llegaron como texto, así que al cerrar el ciclo no hay nada que hacer con ellos. Lo único que se aplana es el plan.
+
 El resumen es la excepción y va como enlace: es un documento de decisión completo, demasiado grande para copiarlo, y un enlace markdown sí se lee en texto plano.
 
-**Durante el ciclo, transclusión. Al cerrarlo, texto. El resumen, siempre enlace.**
+**El plan, transclusión mientras el ciclo vive y texto al cerrarlo. Los pendientes, texto desde el principio. El resumen, siempre enlace.**
 
 ## Abrir un ciclo
 
@@ -78,7 +82,7 @@ En este orden:
 3. Rodar y promover pendientes: `este-turno` sin fecha rueda, `proximo-turno` promueve → `todo promote`
 4. Colectar cadencias desde el árbol y emitir lo que corresponda → `cadence collect`, `cadence resolve`, `cadence inject`
 5. Generar el plan en `planes/` y transcluirlo → `capacity calc` lo alimenta, leyendo los `CAPACIDAD.md` del árbol
-6. Transcluir los pendientes de cada día → `transclusion sync`
+6. Propagar los pendientes a cada día → `todo propagate`
 
 Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
 
@@ -87,7 +91,7 @@ Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
 En este orden:
 
 1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `cycle extract` lo alimenta
-2. Aplanar el plan y los pendientes de cada día → `transclusion flatten`
+2. Aplanar el plan → `transclusion flatten`
 3. Dejar el enlace al resumen → `cycle close`
 4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` → `cycle close`
 5. Dejar `AHORA.md` limpio para el ciclo siguiente → `cycle close`
@@ -154,7 +158,7 @@ Dos campos son de máquina, uno es de persona:
 | `media jornada` | Queda la mitad utilizable |
 | `un rato` | Descuenta, pero el día sigue siendo un día |
 
-Cerrado porque es lo que permite que el janitor sume sin interpretar, y corto porque un quinto escalón obliga al autor a deliberar sobre la diferencia entre dos etiquetas parecidas, que es exactamente el trabajo que el sistema le está quitando. Las variantes de redacción (*"casi entero"*, *"casi completo"*) las normaliza el linter, igual que hace con las clasificaciones.
+Cerrado porque es lo que permite que el comando sume sin interpretar, y corto porque un quinto escalón obliga al autor a deliberar sobre la diferencia entre dos etiquetas parecidas, que es exactamente el trabajo que el sistema le está quitando. Las variantes de redacción (*"casi entero"*, *"casi completo"*) las normaliza el linter, igual que hace con las clasificaciones.
 
 Lo que sale de sumar no es un número de horas: es cuánto cabe en el ciclo, en la misma escala. El plan se dimensiona contra eso.
 
@@ -191,4 +195,4 @@ El veredicto sale de comparar plan contra ejecución, no de resumir la actividad
 ## No entra
 
 - **Juzgar la calidad de la prosa** del plan o el resumen.
-- **Decidir el tipo de ciclo real de quien lo usa.** El estado cero arranca en semanal y el tipo verdadero emerge después; esa regla de arranque vive en [`../devel/que_implementar.md`](../devel/que_implementar.md) (estrategia de pruebas, estado cero).
+- **Decidir el tipo de ciclo real de quien lo usa.** El estado cero arranca en semanal y el tipo verdadero emerge después; esa regla de arranque vive en [`../devel/epics.md`](../devel/epics.md) (estrategia de pruebas, estado cero).

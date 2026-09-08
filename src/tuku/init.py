@@ -49,6 +49,10 @@ class TukuHomeInvalido(Exception):
     """No se encontró un árbol de TUKU con `template/` en ninguna ubicación."""
 
 
+class MarcadorAutorFaltante(Exception):
+    """No se encontró el marcador del autor en LIBRO-DE-ESTILO.md."""
+
+
 def _tiene_template(p: Path) -> bool:
     return (p / "template").is_dir()
 
@@ -109,18 +113,31 @@ def lunes_de_esta_semana(hoy: date) -> date:
 def _sembrar_ahora(contenido: str, desde: date) -> str:
     """Reemplaza los placeholders de `AHORA.md` por fechas reales.
 
-    No interpreta el archivo como YAML ni como Markdown: reemplaza texto literal.
-    Si el template cambia de forma, esta función se actualiza con él.
+    Soporta plantillas con día inicial y final, y plantillas completas de 7 días.
     """
     hasta = desde + timedelta(days=6)
+    dia_inicio = f"## {DIAS[desde.weekday()]} {desde.day} de {MESES[desde.month - 1]}"
+    dia_fin = f"## {DIAS[hasta.weekday()]} {hasta.day} de {MESES[hasta.month - 1]}"
+
     contenido = contenido.replace("desde: AAAA-MM-DD", f"desde: {desde.isoformat()}")
     contenido = contenido.replace("hasta: AAAA-MM-DD", f"hasta: {hasta.isoformat()}")
-    for i in range(7):
-        fecha = desde + timedelta(days=i)
-        placeholder = f"## {DIAS[i]} DD de mes"
-        real = f"## {DIAS[fecha.weekday()]} {fecha.day} de {MESES[fecha.month - 1]}"
-        contenido = contenido.replace(placeholder, real)
+
+    solo_extremos = (
+        "## Lunes DD de mes" in contenido
+        and "## Domingo DD de mes" in contenido
+        and "## Martes DD de mes" not in contenido
+    )
+    if solo_extremos:
+        contenido = contenido.replace("## Lunes DD de mes", dia_inicio)
+        contenido = contenido.replace("## Domingo DD de mes", dia_fin)
+    else:
+        for i in range(7):
+            fecha = desde + timedelta(days=i)
+            placeholder = f"## {DIAS[i]} DD de mes"
+            real = f"## {DIAS[fecha.weekday()]} {fecha.day} de {MESES[fecha.month - 1]}"
+            contenido = contenido.replace(placeholder, real)
     return contenido
+
 
 
 def _sembrar_autor(destino: Path, autor: str) -> None:
@@ -138,9 +155,9 @@ def _sembrar_autor(destino: Path, autor: str) -> None:
             lineas[i] = f"{_MARCADOR_AUTOR} {autor}{fin}"
             libro.write_text("".join(lineas), encoding="utf-8")
             return
-    raise RuntimeError(
-        f"no se encontró la línea '{_MARCADOR_AUTOR}' en {libro}: el template "
-        "cambió el marcador del nombre del autor y esta función no lo sabe."
+    raise MarcadorAutorFaltante(
+        f"no se encontró la línea '{_MARCADOR_AUTOR}' en {libro}: "
+        "agrégalo en la sección '## El autor'."
     )
 
 
@@ -180,10 +197,16 @@ def init(
 
     desde = desde or lunes_de_esta_semana(date.today())
     ahora = destino / "AHORA.md"
-    if ahora.exists():
+    plantilla_ahora = destino / "reglas" / "plantilla" / "AHORA.md"
+    if plantilla_ahora.is_file():
+        ahora.write_text(
+            _sembrar_ahora(plantilla_ahora.read_text(encoding="utf-8"), desde), encoding="utf-8"
+        )
+    elif ahora.exists():
         ahora.write_text(
             _sembrar_ahora(ahora.read_text(encoding="utf-8"), desde), encoding="utf-8"
         )
+
 
     if autor and autor.strip():
         _sembrar_autor(destino, autor.strip())

@@ -6,7 +6,7 @@ Vive **donde aplica**: en el ámbito o subdirectorio al que pertenece. Una caden
 
 Poner el alcance en la carpeta evita declararlo dentro de cada cadencia. El árbol ya lo dice.
 
-Un janitor recorre el árbol y colecta las cadencias vigentes del autor en una vista única. Esa vista es **derivada**: la fuente son los archivos por ámbito.
+Un comando recorre el árbol y colecta las cadencias vigentes del autor en una vista única. Esa vista es **derivada**: la fuente son los archivos por ámbito.
 
 ## Formato de `CADENCIAS.md`
 
@@ -52,7 +52,7 @@ Tres campos son de máquina y dos son de persona:
 
 ## Un solo destino de emisión
 
-Una cadencia emite un **pendiente con fecha**, y aparece en el día correspondiente de `AHORA.md` por la transclusión que ya existe (ver [`pendientes.md`](pendientes.md)). No hay un segundo destino de emisión distinto de los pendientes.
+Una cadencia emite un **pendiente con fecha**, y aparece en el día correspondiente de `AHORA.md` por la propagación que ya existe (ver [`pendientes.md`](pendientes.md)). No hay un segundo destino de emisión distinto de los pendientes.
 
 ## El trigger no es solo calendario
 
@@ -68,5 +68,5 @@ Dos trampas conocidas: los rangos que cruzan el borde de mes (*"entre el 31 y el
 
 ## No entra
 
-- **Inferir cadencias implícitas del histórico.** Eso es inferencia semántica y pertenece a una fase posterior de implementación (ver [`../devel/que_implementar.md`](../devel/que_implementar.md)), no al modelo aquí especificado.
-- **Las alertas sobre pendientes críticos.** Sigue abierto si son un janitor propio o una forma de implementar una cadencia.
+- **Inferir cadencias implícitas del histórico.** Eso es inferencia semántica y pertenece a una fase posterior de implementación (ver [`../devel/epics.md`](../devel/epics.md)), no al modelo aquí especificado.
+- **Las alertas sobre pendientes críticos.** Sigue abierto si son un comando propio o una forma de implementar una cadencia.

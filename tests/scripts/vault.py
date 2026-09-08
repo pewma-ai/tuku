@@ -93,6 +93,11 @@ def placeholders_sin_sustituir(raiz: Path) -> list[str]:
     """
     encontrados = []
     for archivo in sorted(p for p in raiz.rglob("*.md") if p.is_file()):
+        try:
+            archivo.relative_to(raiz / "reglas" / "plantilla")
+            continue
+        except ValueError:
+            pass
         texto = archivo.read_text(encoding="utf-8")
         for numero, linea in _fuera_de_bloques_de_codigo(texto):
             for marca in PLACEHOLDERS:
@@ -104,13 +109,13 @@ def placeholders_sin_sustituir(raiz: Path) -> list[str]:
 def ahora_sembrado(template_variante: Path, *, desde: str, hasta: str, dias: list[str]) -> str:
     """El `AHORA.md` que se espera tras instalar, derivado del template real.
 
-    `dias` son los siete encabezados ya resueltos, en el orden en que deben
-    quedar, escritos a mano por el escenario. Son lo único que este módulo no
-    puede derivar sin repetir la lógica que se está probando: el mapeo de cada
-    fecha a su nombre de día es justamente donde apareció el bug que encontró
-    el escenario 001-001.
+    `dias` son los encabezados ya resueltos (2 para día inicial y final, o 7
+    para plantilla semanal completa).
     """
-    plantilla = (template_variante / "AHORA.md").read_text(encoding="utf-8")
+    plantilla_path = template_variante / "reglas" / "plantilla" / "AHORA.md"
+    if not plantilla_path.is_file():
+        plantilla_path = template_variante / "AHORA.md"
+    plantilla = plantilla_path.read_text(encoding="utf-8")
     esperado = plantilla.replace("desde: AAAA-MM-DD", f"desde: {desde}")
     esperado = esperado.replace("hasta: AAAA-MM-DD", f"hasta: {hasta}")
 
@@ -128,3 +133,4 @@ def ahora_sembrado(template_variante: Path, *, desde: str, hasta: str, dias: lis
             )
         esperado = esperado.replace(placeholder, real)
     return esperado
+

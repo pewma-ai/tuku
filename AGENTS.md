@@ -5,3 +5,5 @@
 ## Markdown
 - Sin saltos manuales en párrafos
 - Enlaza cuando se pueda
+## Desarrollo
+- Antes de cualquier tarea de desarrollo, leer [`DEVEL.md`](DEVEL.md)

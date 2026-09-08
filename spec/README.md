@@ -6,7 +6,7 @@
 > [!question] Referencia rota #REVISAR
 > Esta nota citaba "el contrato en `../devel/README.md`", archivo que no existe en el repositorio. No hay ningún documento que hoy desarrolle ese contrato; decidir si se escribe o si la frase se borra.
 
-Este directorio reemplaza al contenido normativo que antes vivía mezclado dentro de [`../devel/que_implementar.md`](../devel/que_implementar.md). Ese archivo sigue existiendo, pero ahora responde solo "en qué orden se implementa"; lo que responde "qué hace el sistema" vive aquí.
+Este directorio reemplaza al contenido normativo que antes vivía mezclado dentro del plan de fases. La especificación de "qué hace el sistema" vive aquí; el orden y estado de implementación vive en [`../devel/epics.md`](../devel/epics.md).
 
 ## Normativo no quiere decir definitivo
 
@@ -27,12 +27,13 @@ Igual que las fases de implementación, se lee de lo que no depende de nada a lo
 | --- | --- | --- |
 | 1 | [flujo-informacion.md](flujo-informacion.md) | El marco: la frontera entre registrar y aplicar consecuencias, los cinco pasos, y la segunda vía de entrada (sin bitácora) |
 | 2 | [bitacora.md](bitacora.md) | El registro: formato de línea, ontología cerrada (`**pendiente**`, `~~(Hecho)~~`, `**cadencia**`) y abierta, reglas de redacción |
-| 3 | [pendientes.md](pendientes.md) | `PENDIENTES.md`: callouts con ancla, escalera de horizontes, sincronía de transclusiones |
+| 3 | [pendientes.md](pendientes.md) | `PENDIENTES.md`: tablas por horizonte, escalera, y cómo llega cada vista (propagación y transclusión) |
 | 4 | [ambitos.md](ambitos.md) | El árbol de ámbitos: los tres roles, qué carga cada directorio, resolución de reglas por cercanía, archivado |
 | 5 | [cadencias.md](cadencias.md) | `CADENCIAS.md`: ciclo de vida de una cadencia, el trigger que conoce el tipo de ciclo, idempotencia |
 | 6 | [notas.md](notas.md) | El zettelkasten, las notas tipadas y el procedimiento de destilado |
 | 7 | [ciclo.md](ciclo.md) | `AHORA.md`, apertura y cierre, qué se aplana y qué queda siempre como enlace |
-| 8 | [agente.md](agente.md) | Lo que cambia cuando el ejecutor es un agente de IA y no una persona con el flujo a mano |
+| 8 | [cli.md](cli.md) | El contrato del comando `tuku`: qué garantiza, códigos de salida, forma de la salida. Independiente de quién invoque |
+| 9 | [agente.md](agente.md) | Lo que cambia cuando el ejecutor es un agente de IA y no una persona con el flujo a mano |
 
 ## Árbol de directorios
 
@@ -72,7 +73,7 @@ reglas/                       # una regla por consecuencia
   enlaces.tuku.md
   cadencias.tuku.md
   propuestas.tuku.md
-  janitors.tuku.md            # qué hace cada janitor
+  comandos.tuku.md            # qué hace cada comando
   config.tuku.md              # zona horaria, tipos de ciclo
   tipos/                      # una por tipo de nota
     persona.tuku.md
@@ -82,7 +83,7 @@ planes/                       # un plan por ciclo
 
 reportes/                     # generados, el autor los lee
   resumen-2026-08-25-turno.md
-  pendientes-por-actividad.md
+  pendientes-por-ambito.md
   cadencias.md                # todas, colectadas del árbol
 
 archivado/                    # ramas cerradas, enlaces vivos
@@ -92,39 +93,39 @@ archivado/                    # ramas cerradas, enlaces vivos
 
 Y no hay nada más en el disco. **Todo lo que existe, el autor lo puede abrir y leer.** No hay carpeta de cache ni archivos de máquina.
 
-El contexto reciente y el vocabulario de ámbitos no son archivos: son la **salida de un janitor**, que se calcula cuando hace falta y se inyecta. Materializarlos solo agregaría copias que envejecen, porque una cola de bitácora queda vieja apenas se escribe el registro siguiente. Calcularla en el momento es más simple y además más correcto.
+El contexto reciente y el vocabulario de ámbitos no son archivos: son la **salida de un comando**, que se calcula cuando hace falta y se inyecta. Materializarlos solo agregaría copias que envejecen, porque una cola de bitácora queda vieja apenas se escribe el registro siguiente. Calcularla en el momento es más simple y además más correcto.
 
-Lo que sí se materializa, aunque sea generado, es lo que alguien mira o transcluye: `reportes/pendientes-por-actividad.md` lo transcluyen las páginas de actividad, y `reportes/cadencias.md` es donde el autor ve qué se le viene.
+Lo que sí se materializa, aunque sea generado, es lo que alguien mira o transcluye: `reportes/pendientes-por-ambito.md` lo transcluyen las páginas de ámbito, y `reportes/cadencias.md` es donde el autor ve qué se le viene.
 
-## Dónde viven los janitors
+## Dónde viven los comandos
 
-La **especificación** vive en el repositorio del autor: `reglas/janitors.tuku.md` describe en prosa qué debe hacer cada janitor, para que alguien pueda implementarlo en el futuro aunque el código de hoy ya no exista.
+La **especificación** vive en el repositorio del autor: `reglas/comandos.tuku.md` describe en prosa qué debe hacer cada comando, para que alguien pueda implementarlo en el futuro aunque el código de hoy ya no exista.
 
-El **código** vive fuera, instalado, en `~/.tuku/janitors`. El `AGENTS.md` de la raíz lo declara, así que quien opere el libro lo encuentra en el primer archivo que abre.
+El **código** vive fuera del vault, en el paquete `tuku` que instala `pipx` o `uv tool install` (epic 001 de [`../devel/epics.md`](../devel/epics.md)). En el vault no hay código. El `AGENTS.md` de la raíz lo declara, así que quien opere el libro lo encuentra en el primer archivo que abre.
 
 La división es la de siempre: **la especificación sobrevive, la implementación se reemplaza.** Un script de 2026 no va a correr en 2046, pero la descripción de lo que hacía sí se va a leer. Y así el repositorio del autor no se vuelve una copia del código de TUKU que después diverge por su cuenta.
 
-El nombre canónico de cada janitor es su comando `tuku <noun> <verb>`, y ese es el encabezado con que se especifica. Cada janitor se especifica igual:
+El nombre canónico de cada comando es su invocación, `tuku <noun> <verb>`, y ese es el encabezado con que se especifica. Cada uno se especifica igual:
 
 ```markdown
 ## todo overdue
 
-**Qué hace:** mueve a `^atrasados` los pendientes con fecha anterior a HOY, estampando el vencimiento.
+**Qué hace:** mueve a `atrasados` los pendientes con fecha anterior a HOY.
 **Cuándo:** a diario.
 **Lee:** `PENDIENTES.md`
 **Escribe:** `PENDIENTES.md`
 **Regla:** pendientes.tuku.md, vencimiento
-**A mano:** mover el ítem al callout `^atrasados` y anotar entre paréntesis la fecha en que vencía.
+**A mano:** mover la fila a la tabla de `atrasados`. La fecha viaja con ella, en su columna.
 ```
 
-El campo **A mano** no es cortesía documental, es lo que sostiene el principio 1. Si un janitor no se puede ejecutar, el trabajo se hace igual, solo que cuesta más. Un janitor sin ese campo es una dependencia disfrazada.
+El campo **A mano** no es cortesía documental, es lo que sostiene el principio 1. Si un comando no se puede ejecutar, el trabajo se hace igual, solo que cuesta más. Un comando sin ese campo es una dependencia disfrazada.
 
 ## Qué está fuera de alcance
 
 Cada spec declara su propio "no entra" en la sección correspondiente. A nivel de directorio:
 
-- **Los janitors reales, en código.** Este directorio especifica su contrato (qué leen, qué escriben, el campo "A mano"); la implementación vive fuera del repositorio del autor, en `~/.tuku/janitors`, y su plan de construcción vive en [`../devel/que_implementar.md`](../devel/que_implementar.md).
-- **El orden de implementación y la estrategia de pruebas.** Eso es [`../devel/que_implementar.md`](../devel/que_implementar.md), no este directorio: aquí se especifica qué hace el sistema, no en qué fase se construye ni cómo se verifica.
+- **Los comandos reales, en código.** Este directorio especifica su contrato (qué leen, qué escriben, el campo "A mano", y en [cli.md](cli.md) lo que vale para todos); la implementación vive fuera del vault, en el paquete que instala `pipx`, y su plan de construcción vive en [`../devel/epics.md`](../devel/epics.md).
+- **El orden de implementación y la estrategia de pruebas.** Eso es [`../devel/epics.md`](../devel/epics.md), no este directorio: aquí se especifica qué hace el sistema, no en qué fase se construye ni cómo se verifica.
 - **La deliberación con el autor** (archivar una rama, aprobar una propuesta). Se especifica la mecánica que la rodea, nunca el criterio para decidir.
 
 ## Decidido
@@ -134,4 +135,4 @@ Cada spec declara su propio "no entra" en la sección correspondiente. A nivel d
 ## Decisiones abiertas
 
 - Si el ciclo es una primitiva propia o se compone sobre bitácora, pendientes y notas. Hoy [`../docs/principios.md`](../docs/principios.md) lo lista entre las primitivas pero lo describe como composición temporal.
-- Qué declara `reglas/config.tuku.md` y con qué formato. El árbol lo nombra (zona horaria, tipos de ciclo) pero nada lo especifica todavía.
+- Qué declara `reglas/config.tuku.md` y con qué formato. El árbol lo nombra (zona horaria, tipos de ciclo) pero nada lo especifica todavía. **Resuelto en parte:** el archivo separa una sección de datos, que es lo único que leen las automatizaciones, de la prosa que la explica; los documentos que necesiten mostrar esos datos los transcluyen desde ahí en vez de duplicarlos, y ningún dato nuevo destinado a una automatización se agrega al libro de estilo (ver [bitacora.md](bitacora.md), "dónde vive cada una"). Queda por fijar el formato exacto de esa sección y el ancla que se transcluye, y lo decide el primer epic que necesite leer un campo de ahí.

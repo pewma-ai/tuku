@@ -1,0 +1,57 @@
+# Escenario · 003-02-propuesta-no-escribe
+
+**Cubre:** epic 003. El principio 3 en test: la propuesta se muestra y espera, y rechazarla no deja rastro. Es la prueba dura del epic 006 anticipada barato, sobre la única consecuencia que a propósito no tiene comando.
+
+## Estado inicial
+
+El que dejó [`002-08-crear-nota`](002-08-crear-nota.md). Con el agente en el circuito, que es lo único que vuelve significativa esta prueba: una propuesta escrita a mano no demuestra que el agente proponga en vez de escribir.
+
+## Escenario: el hecho se registra y lo que sugiere se propone
+
+Dado el ámbito `depto-centro` creado y un pendiente de GGCC ya cerrado en el martes 11
+Cuando se inyecta
+`- 20:40 - [[depto-centro]] **señal**: la administradora respondió que este mes no pagará los GGCC, y se repite`
+Entonces el registro queda escrito en el martes 11
+Y el sistema propone abrir un pendiente de recobro
+Y el diff contra el estado anterior es **exactamente** esa línea de `AHORA.md`
+Y `PENDIENTES.md`, `ambitos/` y `notas/` quedan byte a byte iguales
+
+El impago recurrente pide un pendiente, pero el autor no lo pidió: no se agrega lo que no se dijo ([`spec/bitacora.md`](../../spec/bitacora.md)).
+
+## Escenario: rechazar la propuesta no deja rastro en ninguna primitiva
+
+Dado la propuesta emitida y no aprobada
+Cuando el autor la rechaza
+Entonces el diff contra el estado que había antes de rechazarla es vacío
+Y no queda registro del rechazo en ninguna primitiva
+
+Una propuesta rechazada no escribe nada, así que no hay nada que limpiar: por eso es la única consecuencia sin comando ([`spec/flujo-informacion.md`](../../spec/flujo-informacion.md)).
+
+## Escenario: aprobarla sí escribe, y por la vía normal
+
+Dado la misma propuesta
+Cuando el autor la aprueba
+Entonces se abre el pendiente igual que en [`002-03`](002-03-abrir-pendiente.md), en `^sin-fecha`
+Y el resultado es indistinguible de haberlo dictado
+
+El escenario aprueba y revierte, para que [`003-01`](003-01-dictado-del-dia-uno.md) herede el estado del rechazo: el día uno del corpus termina sin ese pendiente.
+
+## Escenario: la propuesta no se emite dos veces
+
+Dado la propuesta ya rechazada
+Cuando se vuelve a correr el flujo sobre el mismo registro
+Entonces vuelve a proponerse, porque no hay estado que recuerde el rechazo
+Y el diff sigue vacío
+
+Que insista es correcto mientras no escriba. Si molesta, la solución es memoria de rechazos: un cambio de diseño, no un defecto de este paso.
+
+## Cómo se corre
+
+```bash
+uv run pytest tests/escenarios/ -k 003_02
+```
+
+## Qué se mira a mano
+
+- **El estado final, contra el criterio de salida del epic:** pendientes abiertos, un ámbito nuevo y una nota enlazada, sin que el autor haya abierto `PENDIENTES.md` ni `ambitos/` a mano. Este playground es el artefacto que cierra el epic 002.
+- Cómo se ve la propuesta cuando aparece: si no se distingue de una afirmación, el principio 3 está roto en la superficie aunque el diff esté limpio.

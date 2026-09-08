@@ -21,6 +21,12 @@ Todo lo demás son ejemplos.
 
 Ámbito y clasificación son opcionales según el contexto. La marca de la ontología cerrada va en la misma posición, antes de la clasificación abierta.
 
+### De dónde sale la hora
+
+**La hora no viene del dictado**: se deriva de la jornada que el dictado describe, y eso es juicio de quien registra, no lectura mecánica (ver [`../corpus/referencia/referencia-faena.md`](../corpus/referencia/referencia-faena.md), Parte 2).
+
+Cuando no se puede derivar, el valor por defecto es **la hora actual**, en la zona horaria de `reglas/config.tuku.md`. Nunca se deja en blanco ni se elige una hora plausible: o se deriva del dictado, o es ahora. Es el único campo del registro con valor por defecto, y por eso está declarado acá y no queda a criterio del comando (ver [cli.md](cli.md)).
+
 ## Ejemplos
 
 **La instrucción no se registra.** Dictado: *"Recuérdame avisar de los GGCC al arrendatario"*
@@ -56,15 +62,15 @@ El cierre propio y la respuesta del tercero son hechos distintos.
 
 En el mismo registro conviven dos vocabularios de naturaleza distinta. No hay que confundirlos aunque compartan aspecto.
 
-**Cerrada, de TUKU.** `**pendiente**`, `~~(Hecho)~~` y `**cadencia**`. Son **mecánicos**: cada marca es la señal de una consecuencia determinista, y el janitor actúa sobre ella sin interpretar.
+**Cerrada, de TUKU.** `**pendiente**`, `~~(Hecho)~~` y `**cadencia**`. Son **mecánicos**: cada marca es la señal de una consecuencia determinista, y el comando actúa sobre ella sin interpretar.
 
 Cerrada significa **cerrada para el autor**. No crece con el uso ni la puede extender quien lleva la bitácora. Sí crece cuando el diseño de TUKU incorpora una consecuencia nueva, y eso es una decisión de diseño, no de uso. Hoy son tres.
 
 El costo que la mantiene honesta: la lista vive en el código del linter, así que agrandarla es un cambio de versión de TUKU, no una anotación en un documento.
 
-**Abierta, del autor.** `**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`. Son **semánticos**: ningún janitor actúa sobre ellos. Sirven para leer, filtrar y destilar. Si el autor usa un tipo nuevo se acepta, y en un ciclo posterior se le pregunta qué significa para formalizarlo.
+**Abierta, del autor.** `**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`. Son **semánticos**: ningún comando actúa sobre ellos. Sirven para leer, filtrar y destilar. Si el autor usa un tipo nuevo se acepta, y en un ciclo posterior se le pregunta qué significa para formalizarlo.
 
-**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos viven en el `LIBRO-DE-ESTILO.md` del vault del autor (semilla en [`../template/vanilla/LIBRO-DE-ESTILO.md`](../template/vanilla/LIBRO-DE-ESTILO.md)), cada uno bajo su propio encabezado, y de ahí los lee el janitor:
+**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos viven en el `LIBRO-DE-ESTILO.md` del vault del autor (semilla en [`../template/vanilla/LIBRO-DE-ESTILO.md`](../template/vanilla/LIBRO-DE-ESTILO.md)), cada uno bajo su propio encabezado, y de ahí los lee el comando:
 
 | Vocabulario abierto | Encabezado en el libro de estilo |
 | --- | --- |
@@ -72,7 +78,11 @@ El costo que la mantiene honesta: la lista vive en el código del linter, así q
 | Horizontes de pendientes | `### Horizontes` |
 | Tipos de nota | `### Tipos de nota` |
 
-Formalizar un tipo nuevo es agregar una fila bajo el encabezado que corresponda, en un documento en prosa que el autor lee y escribe. No hay segunda copia en ninguna parte, así que **los encabezados son contrato**: renombrarlos rompe al janitor.
+Formalizar un tipo nuevo es agregar una fila bajo el encabezado que corresponda, en un documento en prosa que el autor lee y escribe. No hay segunda copia en ninguna parte, así que **los encabezados son contrato**: renombrarlos rompe al comando.
+
+Ese contrato es el que hay y **no crece**. Los tres vocabularios viven en el libro de estilo porque son estilo: lo que el autor elige para escribir. Cualquier **dato nuevo que una automatización necesite** no se agrega aquí, va a la sección de datos de `reglas/config.tuku.md`, y el libro de estilo lo transcluye si el autor necesita verlo mientras escribe. Así el dato tiene un solo lugar donde se edita y el libro de estilo sigue leyéndose como prosa.
+
+Lo que no se hace nunca es marcar el libro de estilo con comentarios HTML o marcas invisibles para que una automatización encuentre algo. Un documento en prosa con contrato invisible se rompe al editarlo y nadie se entera. Si hay que leerlo, se lee su estructura visible, y la ausencia del encabezado es un error ruidoso.
 
 Consecuencia directa para el linter: `tuku entry lint` valida la ontología cerrada de forma **estricta** y la abierta de forma **permisiva**. Un tipo desconocido se reporta para preguntar más adelante, nunca se rechaza como error. Un linter que rechaza vocabulario nuevo impide que la organización emerja, que es justo lo que el diseño busca.
 
@@ -82,7 +92,7 @@ Consecuencia directa para el linter: `tuku entry lint` valida la ontología cerr
 - HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo
 ```
 
-Que compartan zona no las mezcla: se distinguen por su forma. `~~(Hecho)~~` y `**pendiente**` son literales fijos que el janitor reconoce sin ambigüedad, y todo lo demás en esa zona es vocabulario del autor y se trata como abierto. Un cierre puede entonces ser además `**Hito**` sin que ninguna de las dos ontologías pierda su lugar.
+Que compartan zona no las mezcla: se distinguen por su forma. `~~(Hecho)~~` y `**pendiente**` son literales fijos que el comando reconoce sin ambigüedad, y todo lo demás en esa zona es vocabulario del autor y se trata como abierto. Un cierre puede entonces ser además `**Hito**` sin que ninguna de las dos ontologías pierda su lugar.
 
 ## Los dos ganchos deterministas
 
