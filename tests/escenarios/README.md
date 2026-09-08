@@ -104,14 +104,14 @@ Una línea que empieza con `tuku` se ejecuta **en proceso** (`cli.main`): es rá
 
 El texto no lleva `TUKU_HOME=`, ni rutas de `playground/`, ni banderas que solo existen para el test. Escribe `tuku init mi-vault --date 2026-08-11` y nada más. Lo que el test necesita lo pone el runner alrededor: ejecuta con el directorio de trabajo en `playground/<slug>/`, así que `mi-vault` cae dentro del repo y queda a la vista para el `## Qué se mira a mano`, y apunta `TUKU_HOME` al checkout, así que la siembra copia de `template/` sin instalar nada.
 
-Un `.md` con varios `## Escenario:` reparte un subdirectorio por escenario (`playground/001-03-destino-no-vacio/force-siembra-igual/`). Si los tres casos del `001-03` compartieran carpeta solo sobreviviría el último, y no habría nada que mirar a mano de los otros dos.
+Un `.md` con varios `## Escenario:` reparte un subdirectorio por escenario (`playground/001-03-destino-no-vacio/force-siembra-igual/`), y el nombre sale del título recortado a treinta caracteres por palabra completa, porque esa ruta se escribe a mano en los `cp -r` de la cadena. Dos escenarios de un mismo `.md` que colisionen en esos treinta caracteres empiezan igual, y lo que hay que arreglar es el título. Si los tres casos del `001-03` compartieran carpeta solo sobreviviría el último, y no habría nada que mirar a mano de los otros dos.
 
 ### La cadena se hereda con un `cp`, a la vista
 
 El estado inicial de un paso es el estado final del anterior, y eso se escribe en el `## Estado inicial`, que hace de *Background*: sus comandos corren antes de cada escenario del archivo.
 
 ```bash
-cp -r ../../002-01-abrir-ciclo/crear-ahora-md-a-partir-de-la-plantilla-cuando-no-existe/mi-vault .
+cp -r ../../002-01-abrir-ciclo/crear-ahora-md-a-partir-de-la/mi-vault .
 ```
 
 Antes la herencia vivía escondida en una constante `PREVIO` del arnés. Ahora se lee en el escenario. Si el paso previo no corrió, el error lo dice con esas palabras en vez de un `cp: No such file`.

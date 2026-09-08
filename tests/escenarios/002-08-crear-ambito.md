@@ -11,7 +11,7 @@ El que dejó [`002-06-escribir-en-un-dia-fecha`](002-06-escribir-en-un-dia-fecha
 ```
 
 ```bash
-cp -r ../../002-06-escribir-en-un-dia-fecha/escribir-un-pendiente-en-un-dia-futuro-lo-fecha/mi-vault .
+cp -r ../../002-06-escribir-en-un-dia-fecha/escribir-un-pendiente-en-un/mi-vault .
 ```
 
 ## Escenario: crear un ámbito deja el árbol correcto

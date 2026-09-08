@@ -25,8 +25,6 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 
   El agente quedó detenido y deshabilitado (`launchctl bootout` más `disable`), y **no se vuelve a activar**: es una decisión del autor, tomada tras meses de incidentes con la sincronización a Drive, no una medida temporal mientras se buscaba la causa. El plist sigue en `~/Library/LaunchAgents/com.jgil.sync-obsidian-gdrive.plist` por si se quiere borrar a mano.
 
-  Queda pendiente **limpiar de Google Drive los vaults de prueba** que se subieron durante meses de corridas.
-
 - **Quitar el andamiaje defensivo que se puso mientras se buscaba la causa.** Con el sincronizador fuera, sobran los reintentos y las verificaciones que hoy tiene [`tests/scripts/vault.py`](tests/scripts/vault.py) y [`tests/scripts/gherkin.py`](tests/scripts/gherkin.py): el borrado con reintentos (`_borrar`), el apartado por renombre (`_apartar`), el barrido de apartadas con su `atexit`, y la insistencia de `_verificar_limpio`. Ninguno resolvió nada y todos oscurecen el código. Conviene medir sin ellos antes de borrarlos: si la suite aguanta 40 corridas limpias, se van.
 
 - **Retirar [`tests/scripts/cadena.py`](tests/scripts/cadena.py).** Los epics 001 y 002 están migrados enteros: todos sus escenarios toman los comandos del `.md` mediante [`tests/scripts/gherkin.py`](tests/scripts/gherkin.py), y ya ningún arnés usa `preparar_paso`. El módulo queda sin consumidores, salvo `instantanea` y `delta`, que se reexportan desde `vault`. Se borra cuando el epic 003 confirme que no lo necesita.

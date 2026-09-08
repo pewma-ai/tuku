@@ -168,9 +168,27 @@ class Corrida:
         return calzan[0]
 
 
+#: Largo máximo del nombre de carpeta de un escenario. Corto a propósito: la
+#: ruta aparece escrita a mano en los `cp -r` con que un paso hereda del
+#: anterior, y una ruta larga ahí no se lee. Treinta caracteres bastan porque
+#: los títulos se eligen para distinguirse temprano, no por casualidad: si dos
+#: escenarios de un mismo `.md` colisionan, es que empiezan igual y hay que
+#: renombrar uno.
+_LARGO_SLUG = 30
+
+
 def slugificar(texto: str) -> str:
+    """El nombre de carpeta de un escenario, derivado de su título.
+
+    Corta por palabra completa, nunca a mitad: `crear-ahora-md-a-partir-de-la`
+    y no `crear-ahora-md-a-partir-de-la-p`.
+    """
     plano = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode()
-    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", plano.lower())).strip("-")[:60]
+    limpio = re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", plano.lower())).strip("-")
+    if len(limpio) <= _LARGO_SLUG:
+        return limpio
+    corte = limpio[: _LARGO_SLUG + 1].rfind("-")
+    return (limpio[:corte] if corte > 0 else limpio[:_LARGO_SLUG]).strip("-")
 
 
 def leer_escenarios(slug: str) -> list[Escenario]:

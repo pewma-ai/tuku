@@ -7,7 +7,7 @@
 El que dejó [`002-04-abrir-pendiente`](002-04-abrir-pendiente.md): un ítem en la tabla con horizonte `esta semana`.
 
 ```bash
-cp -r ../../002-04-abrir-pendiente/el-registro-abre-el-pendiente-y-copia-el-cuerpo-literal/mi-vault .
+cp -r ../../002-04-abrir-pendiente/el-registro-abre-el-pendiente/mi-vault .
 ```
 
 ## Escenario: el cierre repite el texto y borra el ítem

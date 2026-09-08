@@ -7,7 +7,7 @@
 El que dejó [`002-03-lint-de-registro`](002-03-lint-de-registro.md).
 
 ```bash
-cp -r ../../002-03-lint-de-registro/un-tipo-abierto-desconocido-se-reporta-y-se-acepta/mi-vault .
+cp -r ../../002-03-lint-de-registro/un-tipo-abierto-desconocido-se/mi-vault .
 ```
 
 

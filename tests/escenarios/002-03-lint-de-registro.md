@@ -7,7 +7,7 @@
 El que dejó [`002-02-registro-en-su-dia`](002-02-registro-en-su-dia.md): tres registros en el martes 11, `PENDIENTES.md` intacto.
 
 ```bash
-cp -r ../../002-02-registro-en-su-dia/tres-registros-caen-en-el-dia-de-hoy-ordenados-por-hora/mi-vault .
+cp -r ../../002-02-registro-en-su-dia/tres-registros-caen-en-el-dia/mi-vault .
 ```
 
 

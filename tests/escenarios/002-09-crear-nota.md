@@ -7,7 +7,7 @@
 El que dejó [`002-08-crear-ambito`](002-08-crear-ambito.md): existe el ámbito `depto-centro` y `notas/` está vacío. El cuerpo de la nota es salida de agente y viene congelado como fixture, porque no hay un original vivo contra el cual compararlo.
 
 ```bash
-cp -r ../../002-08-crear-ambito/crear-un-ambito-deja-el-arbol-correcto/mi-vault .
+cp -r ../../002-08-crear-ambito/crear-un-ambito-deja-el-arbol/mi-vault .
 cp ../../../tests/escenarios/fixtures/002-09-crear-nota/cuerpo-nota.md .
 ```
 

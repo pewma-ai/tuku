@@ -7,7 +7,7 @@
 El que dejó [`002-05-cerrar-pendiente`](002-05-cerrar-pendiente.md): la tabla de pendientes vacía con su cabecera intacta.
 
 ```bash
-cp -r ../../002-05-cerrar-pendiente/el-cierre-repite-el-texto-y-borra-el-item/mi-vault .
+cp -r ../../002-05-cerrar-pendiente/el-cierre-repite-el-texto-y/mi-vault .
 ```
 
 ## Escenario: escribir un pendiente en un día futuro lo fecha

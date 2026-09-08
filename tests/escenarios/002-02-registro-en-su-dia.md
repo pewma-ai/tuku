@@ -7,7 +7,7 @@
 El que dejó [`002-01-abrir-ciclo`](002-01-abrir-ciclo.md): `AHORA.md` abierto con día inicial y día final del 11 al 17 de agosto de 2026. HOY es el martes 11.
 
 ```bash
-cp -r ../../002-01-abrir-ciclo/crear-ahora-md-a-partir-de-la-plantilla-cuando-no-existe/mi-vault .
+cp -r ../../002-01-abrir-ciclo/crear-ahora-md-a-partir-de-la/mi-vault .
 ```
 
 La cadena queda a la vista: el estado inicial de un paso es el estado final del anterior, y acá se copia con un comando en vez de reconstruirse. Si el paso previo no corrió, la copia falla diciéndolo.
