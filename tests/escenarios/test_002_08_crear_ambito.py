@@ -68,7 +68,15 @@ def test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras() -> No
     tocados = set(delta(antes, instantanea(vault)))
     esperados = {"AHORA.md", *(f"ambitos/{AMBITO}/{a}" for a in scope.OBLIGATORIOS)}
     esperados.add(f"ambitos/{AMBITO}/{AMBITO}.md")
+    esperados.add("ambitos/PENDIENTES-AMBITOS.md")
     assert tocados == esperados, tocados
+
+    p_ambitos = vault / "ambitos" / "PENDIENTES-AMBITOS.md"
+    pendientes_ambitos = p_ambitos.read_text(encoding="utf-8")
+    assert f"> [!todo] Pendientes en **Depto Centro** ^{AMBITO}" in pendientes_ambitos
+    assert "> SIN PENDIENTES" in pendientes_ambitos
+    assert not scope.lint_transclusiones(vault)
+    assert not scope.lint_callouts(vault)
 
 
 def test_002_08_el_resto_de_la_linea_no_se_reescribe() -> None:

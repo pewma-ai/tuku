@@ -120,7 +120,7 @@ def display_name(nombre: str, pagina_texto: str | None = None) -> str:
             if linea.startswith("# "):
                 tit = linea.removeprefix("# ").strip()
                 tit = re.sub(r"^(?:Ambito|Ámbito):\s*", "", tit, flags=re.IGNORECASE).strip()
-                if tit:
+                if tit and tit != nombre:
                     return tit
     return nombre.replace("-", " ").title()
 

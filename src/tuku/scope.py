@@ -78,6 +78,12 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
             f"---\ntype: Scope\nkeywords: [{valor}]\n---\n\n# {valor}\n\n![[{rel}#^{valor}]]\n",
             encoding="utf-8",
         )
+
+    if (vault / "PENDIENTES.md").is_file():
+        from tuku import propagate
+
+        propagate.propagar(vault)
+
     return directorio
 
 
