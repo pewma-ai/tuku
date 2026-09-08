@@ -3,10 +3,10 @@
 Escenario: 001-05-init-no-toca-la-red.md
 
 Aísla la afirmación "offline" que `001-02` da por supuesta. Con el módulo
-`socket` parchado para que cualquier intento de abrir un socket falle, `init()`
-completa la siembra igual: es copia de archivos y nada más.
+`socket` parchado para que cualquier intento de abrir un socket falle, el
+comando `tuku init` completa la siembra igual: es copia de archivos y nada más.
 
-No basta con no ver tráfico; el test lo fuerza. Si algún día `init()` (o algo
+No basta con no ver tráfico; el test lo fuerza. Si algún día el comando (o algo
 que importe) intenta resolver un nombre, abrir una conexión o consultar la red,
 `RedBloqueada` sube y el test falla señalando exactamente eso.
 
@@ -26,9 +26,10 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from vault import placeholders_sin_sustituir, preparar_playground  # noqa: E402
+import gherkin  # noqa: E402
+from vault import placeholders_sin_sustituir  # noqa: E402
 
-from tuku.init import init  # noqa: E402
+from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "001-05-init-no-toca-la-red"
 FECHA_FIJA = date(2026, 8, 11)
@@ -59,11 +60,11 @@ def _sin_red() -> Iterator[None]:
 
 
 def test_001_05_init_completa_con_la_red_bloqueada() -> None:
-    destino = preparar_playground(SLUG)
-
     with _sin_red():
-        init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ)
+        corrida = gherkin.correr(SLUG, "completa con la red bloqueada")
 
+    assert corrida.codigo == EXITO, corrida.stderr
+    destino = corrida.ruta("mi-vault")
     assert (destino / "AHORA.md").is_file(), "init no sembró el vault con la red bloqueada"
     assert "DD de mes" not in (destino / "AHORA.md").read_text(encoding="utf-8")
     assert not placeholders_sin_sustituir(destino), "quedaron placeholders vivos"
@@ -71,4 +72,7 @@ def test_001_05_init_completa_con_la_red_bloqueada() -> None:
 
 if __name__ == "__main__":
     test_001_05_init_completa_con_la_red_bloqueada()
-    print(f"ok: init() completó la siembra con socket bloqueado (queda en playground/{SLUG}/)")
+    print(
+        f"ok: tuku init completó la siembra con socket bloqueado "
+        f"(queda en playground/{SLUG}/)"
+    )

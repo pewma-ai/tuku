@@ -6,11 +6,21 @@
 
 El que dejó [`002-03-lint-de-registro`](002-03-lint-de-registro.md).
 
+```bash
+cp -r ../../002-03-lint-de-registro/un-tipo-abierto-desconocido-se-reporta-y-se-acepta/mi-vault .
+```
+
 
 ## Escenario: el registro abre el pendiente y copia el cuerpo literal
 
 Dado el estado anterior, con la tabla de pendientes vacía
-Cuando se inyecta `- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora`
+Cuando se escribe el registro y se abre su pendiente
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+tuku todo open --vault mi-vault "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+```
+
 Entonces la tabla contiene `| esta semana |  | [[personal]] | avisar de los GGCC a la administradora |`
 Y el cuerpo es el mismo texto en los dos lugares, carácter por carácter
 Y la columna `Cuándo` queda vacía, porque el pendiente todavía no tiene fecha
@@ -22,6 +32,12 @@ Abrir es copiar: el comando no interpreta, y por eso este paso no necesita LLM (
 
 Dado el mismo estado
 Cuando se abre el pendiente
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+tuku todo open --vault mi-vault "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+```
+
 Entonces la tabla tiene exactamente una fila
 Y su cabecera sigue intacta
 Y no aparece ningún horizonte que el registro no haya pedido
@@ -31,7 +47,18 @@ El archivo es una sola tabla y el horizonte es una columna, así que la escalera
 ## Escenario: abrir dos veces no duplica
 
 Dado el pendiente ya abierto
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+tuku todo open --vault mi-vault "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+```
+
 Cuando se corre el comando otra vez sobre el mismo registro
+
+```bash
+tuku todo open --vault mi-vault "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+```
+
 Entonces el diff es vacío
 Y la tabla sigue con una sola fila
 
@@ -44,6 +71,8 @@ Con horizonte `esta semana` (el horizonte del ciclo en curso), y ya no es ambigu
 ```bash
 uv run pytest tests/escenarios/ -k 002_04
 ```
+
+Cada escenario deja su vault en `playground/002-04-abrir-pendiente/<escenario>/mi-vault/`.
 
 ## Qué se mira a mano
 

@@ -5,14 +5,19 @@
 ## Escenario: `tuku init` completa con la red bloqueada
 
 Dado el módulo `socket` parchado para que abrir un socket, conectar o resolver un nombre lance
-Cuando se llama a `init(destino, variante="vanilla", home=RAIZ)`
+Cuando se corre
+
+```bash
+tuku init mi-vault --variant vanilla --date 2026-08-11
+```
+
 Entonces la siembra completa igual: `AHORA.md` con las fechas resueltas y sin placeholders
 
 ## Por qué existe, si `001-02` ya siembra sin red
 
-`001-02` no ve tráfico, pero no lo impide: si mañana `init()` (o algo que importe) intentara resolver un nombre o abrir una conexión, `001-02` seguiría pasando. Este lo fuerza: con `socket.socket`, `socket.create_connection` y `socket.getaddrinfo` parchados para lanzar `RedBloqueada`, cualquier intento sube y el test falla señalando exactamente eso.
+`001-02` no ve tráfico, pero no lo impide: si mañana `tuku init` (o algo que importe) intentara resolver un nombre o abrir una conexión, `001-02` seguiría pasando. Este lo fuerza: con `socket.socket`, `socket.create_connection` y `socket.getaddrinfo` parchados para lanzar `RedBloqueada`, cualquier intento sube y el test falla señalando exactamente eso.
 
-Es barato porque `init()` es copia de archivos: no hay nada que la red pueda aportar. El test convierte esa propiedad en una afirmación con garante.
+Es barato porque la siembra es copia de archivos: no hay nada que la red pueda aportar. El test convierte esa propiedad en una afirmación con garante.
 
 ## Cómo se corre
 
@@ -20,7 +25,7 @@ Es barato porque `init()` es copia de archivos: no hay nada que la red pueda apo
 uv run pytest tests/escenarios/ -k 001_05
 ```
 
-Deja el vault en `playground/001-05-init-no-toca-la-red/`.
+Deja el vault en `playground/001-05-init-no-toca-la-red/mi-vault/`.
 
 ## Qué se mira a mano
 

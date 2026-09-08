@@ -19,6 +19,21 @@ Una persona corre `uv tool install git+https://github.com/pewma-ai/tuku.git@deve
 9. El estado cero se verifica byte a byte con fecha fija (la del ground truth en `referencia-faena.md`), contra `template/vanilla/` en vivo, nunca contra una copia congelada.
 10. Capa de identidad mínima: el nombre del autor vive en `LIBRO-DE-ESTILO.md` (sección "El autor", al inicio del documento). `tuku init --author "..."` lo siembra; es opcional y vacío es válido (omitir el flag deja el vault operable).
 
+## Escenario: preparar el ambiente del epic
+
+Dado el `playground/` como lo dejó la corrida anterior
+Cuando se corre
+
+```bash
+rm -rf 001-*
+```
+
+Entonces no queda ningún resultado del epic 001, y cada escenario siembra sobre limpio
+
+Es el único borrado del epic, y por eso vive acá y no en cada paso. Antes cada arnés borraba su propia carpeta antes de usarla: con varios tests por escenario eso daba más de cien borrados por corrida, y esa pelea con el sistema de archivos hacía fallar tests que no tenían nada que ver. Un `rm` por epic y por corrida, al principio, cuando nadie más está escribiendo.
+
+El patrón es el prefijo del epic, así que `playground/001-*` es territorio de la suite: una carpeta tuya que empiece con `001-` se borra. Las exploratorias con cualquier otro nombre sobreviven.
+
 ## Criterio de salida
 
 `uv tool install` desde `git+...@devel` deja `tuku` en el PATH y `~/.tuku` poblado con el árbol del repositorio; `tuku init` en un directorio vacío produce el estado cero de `template/README.md` sin tocar la red; alguien que no sabe qué es TUKU escribe una línea en `AHORA.md` sin romper nada. `tuku init --author` deja el nombre en `LIBRO-DE-ESTILO.md`, y omitirlo no impide escribir. Se verifica con una persona, no con un diff.

@@ -1,54 +1,41 @@
-"""Test del escenario 002-02-registro-en-su-dia.
+"""Tests del escenario 002-02-registro-en-su-dia.
 
 Escenario: 002-02-registro-en-su-dia.md
 
-Segundo paso de la cadena del epic 002. Hereda de 002-01-abrir-ciclo, inyecta
-tres líneas fuera de orden bajo el día de hoy con tuku entry add y afirma: caen
-en su día ordenados por hora, el de las 18:40 no se reescribe, los demás días
-siguen vacíos, PENDIENTES.md no se toca, y la línea sin ámbito ni clasificación
-queda escrita igual.
+Segundo paso de la cadena, punto 1 del epic: el registro queda en el día
+correcto y en orden cronológico, aunque llegue desordenado.
 
-Ejecutable directo: python3 tests/escenarios/test_002_02_registro_en_su_dia.py
+Los comandos y las tres líneas de registro salen del `.md`, que es la fuente
+ejecutable, incluida la copia del estado que dejó `002-01`. Este arnés afirma
+sobre lo que quedó.
+
+El criterio de corte de la fase 1 es el delta: si algo escribe en
+`PENDIENTES.md`, el corte está mal hecho.
+
+Ejecutable directo: `python3 tests/escenarios/test_002_02_registro_en_su_dia.py`
 """
 
 from __future__ import annotations
 
 import sys
-from datetime import date
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from cadena import correr_cli, delta, instantanea, preparar_paso  # noqa: E402
+import gherkin  # noqa: E402
 
 from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "002-02-registro-en-su-dia"
-PREVIO = "002-01-abrir-ciclo"
-DESDE = date(2026, 8, 11)
 HOY = "## Martes 11 de agosto"
-
-#: Las tres líneas del escenario, en el orden en que se inyectan (no el
-#: cronológico). Escritas a mano acá, como los días de test_001_01: son la
-#: rebanada mínima que este paso necesita. El día uno completo, generado por
-#: un agente desde el corpus, vive en 003-01.
-REGISTROS = [
-    "- 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp",  # noqa: E501
-    "- 09:12 - [[personal]] **señal**: la administradora responde los mensajes con varios días de atraso",  # noqa: E501
-    "- 11:30 - hice la consulta presencial por el standing desk",
-]
 ORDEN_ESPERADO = ["09:12", "11:30", "18:40"]
-
-
-def _sembrar_registros() -> Path:
-    vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
-    codigo, _, err = correr_cli(
-        ["entry", "add", "--vault", str(vault), "--dia", HOY, *REGISTROS]
-    )
-    assert codigo == EXITO, err
-    return vault
+LINEA_1840 = (
+    "- 18:40 - le mandé la boleta de gastos comunes del depto centro "
+    "a la administradora por WhatsApp"
+)
+LINEA_1130 = "- 11:30 - hice la consulta presencial por el standing desk"
 
 
 def _lineas_del_dia(ahora: str, encabezado: str) -> list[str]:
@@ -62,11 +49,13 @@ def _lineas_del_dia(ahora: str, encabezado: str) -> list[str]:
 
 
 def test_002_02_los_registros_caen_en_su_dia_y_en_orden() -> None:
-    ahora = (_sembrar_registros() / "AHORA.md").read_text(encoding="utf-8")
+    corrida = gherkin.correr(SLUG, "tres registros caen en el día de hoy")
+    assert corrida.codigo == EXITO, corrida.stderr
 
+    ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
     deldia = _lineas_del_dia(ahora, HOY)
     assert [linea[2:7] for linea in deldia] == ORDEN_ESPERADO, deldia
-    assert REGISTROS[0] in deldia, "la línea de las 18:40 no quedó verbatim"
+    assert LINEA_1840 in deldia, "la línea de las 18:40 no quedó verbatim"
 
     lineas = ahora.splitlines()
     resto = lineas[lineas.index(HOY) + len(deldia) + 1 :]
@@ -74,17 +63,16 @@ def test_002_02_los_registros_caen_en_su_dia_y_en_orden() -> None:
 
 
 def test_002_02_la_fase_1_no_toca_pendientes() -> None:
-    vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
-    antes = instantanea(vault)
-    codigo, _, err = correr_cli(
-        ["entry", "add", "--vault", str(vault), "--dia", HOY, *REGISTROS]
-    )
-    assert codigo == EXITO, err
-    assert delta(antes, instantanea(vault)) == {
+    corrida = gherkin.correr(SLUG, "no toca PENDIENTES.md")
+    assert corrida.codigo == EXITO, corrida.stderr
+    assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
         "ambitos/personal/personal.md": "modificado",
     }
-    personal = (vault / "ambitos" / "personal" / "personal.md").read_text(encoding="utf-8")
+
+    personal = corrida.ruta("mi-vault", "ambitos", "personal", "personal.md").read_text(
+        encoding="utf-8"
+    )
     assert "## Esta semana" in personal
     assert (
         "- **señal**: la administradora responde los mensajes con varios días de atraso"
@@ -95,8 +83,11 @@ def test_002_02_la_fase_1_no_toca_pendientes() -> None:
 
 
 def test_002_02_registro_sin_ambito_ni_clasificacion_queda_escrito() -> None:
-    ahora = (_sembrar_registros() / "AHORA.md").read_text(encoding="utf-8")
-    assert "- 11:30 - hice la consulta presencial por el standing desk" in ahora
+    corrida = gherkin.correr(SLUG, "sin ámbito y sin clasificación es válido")
+    assert corrida.codigo == EXITO, corrida.stderr
+
+    ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
+    assert LINEA_1130 in ahora
 
 
 if __name__ == "__main__":

@@ -1,59 +1,48 @@
-"""Test del escenario 002-04-abrir-pendiente.
+"""Tests del escenario 002-04-abrir-pendiente.
 
 Escenario: 002-04-abrir-pendiente.md
 
-Tercer paso de la cadena. Hereda el vault de 002-02 e inyecta un registro
-`**pendiente**` bajo el día de hoy: la tabla gana una fila con horizonte
-`sin fecha`, el detalle literal y `Cuándo` vacío, y abrir dos veces no duplica.
+Punto 2 del epic, primera mitad: un registro `**pendiente**` abre el pendiente
+sin que el autor toque `PENDIENTES.md`. Abrir es copiar el cuerpo literal: el
+comando no interpreta, y por eso este paso no necesita LLM.
 
-Escrito bajo el día de HOY va a `sin fecha` y no a `con fecha`:
-`spec/pendientes.md` dice que solo fecha escribir bajo un día futuro.
+Los comandos salen del `.md`, incluida la copia del estado que dejó `002-03`.
 
-Ejecutable directo: python3 tests/escenarios/test_002_04_abrir_pendiente.py
+Ejecutable directo: `python3 tests/escenarios/test_002_04_abrir_pendiente.py`
 """
 
 from __future__ import annotations
 
 import sys
-from datetime import date
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from cadena import correr_cli, delta, instantanea, preparar_paso  # noqa: E402
+import gherkin  # noqa: E402
 
 from tuku import todo  # noqa: E402
 from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "002-04-abrir-pendiente"
-PREVIO = "002-03-lint-de-registro"
-DESDE = date(2026, 8, 11)
-HOY = "## Martes 11 de agosto"
-
 CUERPO = "avisar de los GGCC a la administradora"
-REGISTRO = f"- 14:20 - [[personal]] **pendiente**: {CUERPO}"
 FILA = f"| esta semana |  | [[personal]] | {CUERPO} |"
 
-
-def _abrir(vault: Path) -> None:
-    """Escribe el registro y aplica su consecuencia mediante el CLI."""
-    cod_add, _, err_add = correr_cli(
-        ["entry", "add", "--vault", str(vault), "--dia", HOY, REGISTRO]
-    )
-    assert cod_add == EXITO, err_add
-
-    cod_open, _, err_open = correr_cli(
-        ["todo", "open", "--vault", str(vault), REGISTRO]
-    )
-    assert cod_open == EXITO, err_open
+#: Lo que toca abrir un pendiente: la bitácora, la tabla y las dos vistas
+#: derivadas que `tuku todo open` regenera al propagar.
+DELTA_DE_ABRIR = {
+    "AHORA.md": "modificado",
+    "PENDIENTES.md": "modificado",
+    "ambitos/PENDIENTES-AMBITOS.md": "modificado",
+    "ambitos/personal/personal.md": "modificado",
+}
 
 
 def test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana() -> None:
-    vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
-    antes = instantanea(vault)
-    _abrir(vault)
+    corrida = gherkin.correr(SLUG, "abre el pendiente y copia el cuerpo literal")
+    assert corrida.codigo == EXITO, corrida.stderr
+    vault = corrida.ruta("mi-vault")
 
     pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
     assert FILA in pendientes, pendientes
@@ -61,25 +50,17 @@ def test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana() -> None:
     assert CUERPO in (vault / "AHORA.md").read_text(encoding="utf-8")
     assert todo.filas(pendientes)[0].cuando == "", "la fila no debe llevar fecha"
 
-    # tuku todo open abre y propaga las vistas, actualizando PENDIENTES-AMBITOS.md y personal.md
-    assert delta(antes, instantanea(vault)) == {
-        "AHORA.md": "modificado",
-        "PENDIENTES.md": "modificado",
-        "ambitos/PENDIENTES-AMBITOS.md": "modificado",
-        "ambitos/personal/personal.md": "modificado",
-    }
+    assert corrida.delta_de("mi-vault") == DELTA_DE_ABRIR
 
-    pag_personal = vault / "ambitos" / "personal" / "personal.md"
-    contenido_personal = pag_personal.read_text(encoding="utf-8")
-    assert "## Esta semana" in contenido_personal
-    assert "### Martes 11 de agosto" in contenido_personal
-    assert f"- **pendiente**: {CUERPO}" in contenido_personal
+    personal = (vault / "ambitos" / "personal" / "personal.md").read_text(encoding="utf-8")
+    assert "## Esta semana" in personal
+    assert "### Martes 11 de agosto" in personal
+    assert f"- **pendiente**: {CUERPO}" in personal
 
 
 def test_002_04_la_tabla_gana_una_fila_y_nada_mas() -> None:
-    vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
-    _abrir(vault)
-    pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
+    corrida = gherkin.correr(SLUG, "la tabla gana una fila y nada más")
+    pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
 
     assert todo.horizontes(pendientes) == ["esta semana"], "apareció un horizonte de más"
     assert len(todo.filas(pendientes)) == 1, "la tabla tiene más de una fila"
@@ -87,18 +68,12 @@ def test_002_04_la_tabla_gana_una_fila_y_nada_mas() -> None:
 
 
 def test_002_04_abrir_dos_veces_no_duplica() -> None:
-    vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
-    _abrir(vault)
-    despues_del_primero = instantanea(vault)
+    corrida = gherkin.correr(SLUG, "abrir dos veces no duplica")
+    assert corrida.codigo == EXITO, corrida.stderr
 
-    cod_open, _, err_open = correr_cli(
-        ["todo", "open", "--vault", str(vault), REGISTRO]
-    )
-    assert cod_open == EXITO, err_open
-
-    assert delta(despues_del_primero, instantanea(vault)) == {}, "el segundo pase escribió"
-    pendientes_segundo = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    assert todo.cuerpos(pendientes_segundo, "esta semana") == [CUERPO]
+    assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
+    pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
+    assert todo.cuerpos(pendientes, "esta semana") == [CUERPO]
 
 
 if __name__ == "__main__":

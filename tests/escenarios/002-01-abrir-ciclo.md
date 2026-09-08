@@ -4,12 +4,26 @@
 
 ## Estado inicial
 
-Un vault recién sembrado por `tuku init`.
+Un vault recién sembrado por `tuku init`. Es el primer paso del epic, así que no hereda de nadie.
+
+```bash
+tuku init mi-vault --date 2026-08-11
+```
 
 ## Escenario: crear AHORA.md a partir de la plantilla cuando no existe
 
 Dado un vault sin `AHORA.md` abierto
-Cuando se invoca `tuku cycle open --fecha 2026-08-11`
+
+```bash
+rm mi-vault/AHORA.md
+```
+
+Cuando se corre
+
+```bash
+tuku cycle open --vault mi-vault --fecha 2026-08-11
+```
+
 Entonces nace `AHORA.md` a partir de `reglas/plantilla/AHORA.md`
 Y tiene `desde: 2026-08-10` y `hasta: 2026-08-16` (la semana completa que contiene el 11 de agosto)
 Y contiene todos los días de la semana, desde `## Lunes 10 de agosto` hasta `## Domingo 16 de agosto`
@@ -18,7 +32,18 @@ Y ningún placeholder (`AAAA-MM-DD`, `DD de mes`) sobrevive fuera de bloques de 
 ## Escenario: verificar AHORA.md existente sin modificarlo (idempotencia)
 
 Dado el vault con `AHORA.md` abierto que cubre la fecha deseada
-Cuando se invoca nuevamente `tuku cycle open --fecha 2026-08-11`
+
+```bash
+rm mi-vault/AHORA.md
+tuku cycle open --vault mi-vault --fecha 2026-08-11
+```
+
+Cuando se corre de nuevo
+
+```bash
+tuku cycle open --vault mi-vault --fecha 2026-08-11
+```
+
 Entonces el comando informa que ya cubre la fecha
 Y el diff contra el estado anterior es vacío
 
@@ -32,7 +57,7 @@ Y el diff contra el estado anterior es vacío
 uv run pytest tests/escenarios/ -k 002_01
 ```
 
-Deja el vault en `playground/002-01-abrir-ciclo/`.
+Cada escenario deja su vault en `playground/002-01-abrir-ciclo/<escenario>/mi-vault/`. El del primero es el estado inicial del paso siguiente.
 
 ## Qué se mira a mano
 

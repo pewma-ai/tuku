@@ -18,7 +18,9 @@ Fecha fija 2026-08-11, la misma de `001-02`, para que el vault resultante sea
 comparable con `diff -r` contra el de ese escenario (salvo `LIBRO-DE-ESTILO.md`,
 que acá lleva el nombre).
 
-El caso con nombre deja el vault en `playground/001-04-init-author/`.
+El caso con nombre deja el vault en
+`playground/001-04-init-author/<escenario>/mi-vault/`; el segundo escenario deja
+los dos suyos al lado, `sin-nombre/` y `en-blanco/`.
 
 Ejecutable directo: `python3 tests/escenarios/test_001_04_init_author.py`
 """
@@ -33,9 +35,10 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from vault import placeholders_sin_sustituir, preparar_playground  # noqa: E402
+import gherkin  # noqa: E402
+from vault import placeholders_sin_sustituir  # noqa: E402
 
-from tuku.init import init  # noqa: E402
+from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "001-04-init-author"
 FECHA_FIJA = date(2026, 8, 11)
@@ -43,9 +46,15 @@ AUTOR = "ARTURO PEREZ-REVERTE (Arturo)"
 MARCADOR = "**Nombre del autor:**"
 
 
+def _linea_del_autor(vault: Path) -> str:
+    libro = (vault / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
+    return next(ln for ln in libro.splitlines() if ln.lstrip().startswith(MARCADOR))
+
+
 def test_001_04_init_author_escribe_el_nombre_en_el_libro_de_estilo() -> None:
-    destino = preparar_playground(SLUG)
-    init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ, autor=AUTOR)
+    corrida = gherkin.correr(SLUG, "el nombre del autor queda en el libro de estilo")
+    assert corrida.codigo == EXITO, corrida.stderr
+    destino = corrida.ruta("mi-vault")
 
     libro = (destino / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
     assert f"{MARCADOR} {AUTOR}" in libro, f"el nombre no llegó al libro: {libro[:400]!r}"
@@ -56,29 +65,20 @@ def test_001_04_init_author_escribe_el_nombre_en_el_libro_de_estilo() -> None:
     assert not placeholders_sin_sustituir(destino), "quedaron placeholders vivos"
 
 
-def test_001_04_sin_autor_el_vault_queda_operable_sin_nombre() -> None:
-    destino = preparar_playground(SLUG + "-sin-nombre")
-    init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ)
+def test_001_04_sin_autor_o_en_blanco_el_vault_queda_operable_sin_nombre() -> None:
+    corrida = gherkin.correr(SLUG, "omitir el nombre deja el vault operable")
+    assert corrida.codigo == EXITO, corrida.stderr
 
-    libro = (destino / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
-    linea = next(ln for ln in libro.splitlines() if ln.lstrip().startswith(MARCADOR))
-    assert linea.startswith(f"{MARCADOR} por declarar"), (
-        f"la línea del autor se tocó sin pasar autor: {linea!r}"
-    )
-    assert (destino / "AHORA.md").is_file(), "sin autor, el vault igual debe quedar operable"
-
-
-def test_001_04_autor_vacio_equivale_a_no_pasarlo() -> None:
-    destino = preparar_playground(SLUG + "-vacio")
-    init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ, autor="   ")
-
-    libro = (destino / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
-    assert "por declarar" in libro, "un autor en blanco no debería tocar el marcador"
-    assert (destino / "AHORA.md").is_file()
+    for nombre in ("sin-nombre", "en-blanco"):
+        vault = corrida.ruta(nombre)
+        linea = _linea_del_autor(vault)
+        assert linea.startswith(f"{MARCADOR} por declarar"), (
+            f"la línea del autor se tocó en {nombre}: {linea!r}"
+        )
+        assert (vault / "AHORA.md").is_file(), f"{nombre} no quedó operable"
 
 
 if __name__ == "__main__":
     test_001_04_init_author_escribe_el_nombre_en_el_libro_de_estilo()
-    test_001_04_sin_autor_el_vault_queda_operable_sin_nombre()
-    test_001_04_autor_vacio_equivale_a_no_pasarlo()
+    test_001_04_sin_autor_o_en_blanco_el_vault_queda_operable_sin_nombre()
     print(f"ok: --author escribe el nombre; omitirlo deja el vault operable ({SLUG})")

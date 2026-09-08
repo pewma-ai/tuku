@@ -1,108 +1,76 @@
-"""Test del escenario 002-03-lint-de-registro.
+"""Tests del escenario 002-03-lint-de-registro.
 
 Escenario: 002-03-lint-de-registro.md
 
-Tercer paso de la cadena. Hereda el vault de 002-02 y ejerce `tuku entry lint`:
-la ontología cerrada se valida estricta (`**Pendiente**` es error y no abre
-nada), la abierta permisiva (un tipo desconocido es pregunta, no error), un
-registro fuera del ciclo se reporta sin inventar el día, y el lint no escribe.
+Criterio de salida de la fase 1: `tuku entry lint` valida estricta la ontología
+cerrada y permisiva la abierta. La misma zona de la línea, dos tratamientos.
 
-El caso fuera de rango se arma sobre el texto y no sobre el vault: `lint()` es
-una función pura, y el arnés no escribe en el vault fuera del fixture inicial.
+Los comandos salen del `.md`, incluida la copia del estado que dejó `002-02`.
+Todo pasa por el CLI, también el caso del día fuera del ciclo: antes se armaba
+el texto en memoria y se llamaba a `lint()` directo, lo que dejaba sin probar
+que el comando lo reporte igual.
 
-Ejecutable directo: python3 tests/escenarios/test_002_03_lint_de_registro.py
+Ejecutable directo: `python3 tests/escenarios/test_002_03_lint_de_registro.py`
 """
 
 from __future__ import annotations
 
 import sys
-from datetime import date
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from cadena import correr_cli, delta, instantanea, preparar_paso  # noqa: E402
+import gherkin  # noqa: E402
 
 from tuku.cli import EXITO, RECHAZO  # noqa: E402
-from tuku.lint import lint  # noqa: E402
 
 SLUG = "002-03-lint-de-registro"
-PREVIO = "002-02-registro-en-su-dia"
-DESDE = date(2026, 8, 11)
-HOY = "## Martes 11 de agosto"
-
 DESCONOCIDO = "- 12:05 - [[personal]] **cachureo**: ordené los cables del escritorio"
 MAL_ESCRITA = "- 13:00 - [[personal]] **Pendiente**: comprar una maleta"
-FUERA_DE_RANGO = "- 08:00 - [[personal]] **progreso**: revisé la bodega"
-
-
-def _vault() -> Path:
-    return preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
 
 
 def test_002_03_cerrada_estricta_abierta_permisiva() -> None:
-    vault = _vault()
-    codigo_add, _, _ = correr_cli(
-        ["entry", "add", "--vault", str(vault), "--dia", HOY, DESCONOCIDO, MAL_ESCRITA]
-    )
-    assert codigo_add == EXITO
+    corrida = gherkin.correr(SLUG, "un tipo abierto desconocido se reporta y se acepta")
 
-    texto = (vault / "AHORA.md").read_text(encoding="utf-8")
+    texto = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
     assert DESCONOCIDO in texto, "el tipo desconocido no quedó escrito"
-    assert MAL_ESCRITA in texto, "la marca mal escrita no quedó escrito: el lint no rechaza"
+    assert MAL_ESCRITA in texto, "la marca mal escrita no quedó escrita: el lint no rechaza"
 
-    codigo_lint, salida, _ = correr_cli(["entry", "lint", "--vault", str(vault)])
-    # La ontología cerrada mal escrita produce error -> código RECHAZO
-    assert codigo_lint == RECHAZO
-    assert "cachureo" in salida, "la pregunta de vocabulario no salió en el reporte"
-    assert "**Pendiente**" in salida, "el error de ontología cerrada no salió en el reporte"
-    assert "**pendiente**" in salida, "el error no dice cómo corregirse"
+    lint = corrida.de("entry lint")
+    assert lint.codigo == RECHAZO, "la ontología cerrada mal escrita debía dar rechazo"
+    assert "cachureo" in lint.stdout, "la pregunta de vocabulario no salió en el reporte"
+    assert "**Pendiente**" in lint.stdout, "el error de ontología cerrada no salió"
+    assert "**pendiente**" in lint.stdout, "el error no dice cómo corregirse"
 
 
 def test_002_03_la_marca_mal_escrita_no_abre_ningun_pendiente() -> None:
-    vault = _vault()
-    antes = instantanea(vault)
-    codigo_add, _, _ = correr_cli(
-        ["entry", "add", "--vault", str(vault), "--dia", HOY, MAL_ESCRITA]
-    )
-    assert codigo_add == EXITO
-    correr_cli(["entry", "lint", "--vault", str(vault)])
+    corrida = gherkin.correr(SLUG, "la ontología cerrada se valida estricta")
 
-    assert delta(antes, instantanea(vault)) == {
+    assert corrida.de("entry add").codigo == EXITO, "la línea debía quedar escrita igual"
+    assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
         "ambitos/personal/personal.md": "modificado",
-    }
+    }, "`**Pendiente**` no es `**pendiente**`: no se abre ningún pendiente"
 
 
 def test_002_03_un_registro_fuera_del_ciclo_se_reporta() -> None:
-    vault = _vault()
-    texto = (vault / "AHORA.md").read_text(encoding="utf-8")
-    fuera = f"{texto}\n## Martes 25 de agosto\n\n{FUERA_DE_RANGO}\n"
+    corrida = gherkin.correr(SLUG, "un registro fuera del rango del ciclo se reporta")
 
-    # lint() es función pura sobre texto para verificar que no inventa días
-    libro = (vault / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
-    from tuku import vocab
-
-    abiertos = [t for terminos in vocab.leer(libro).values() for t in terminos]
-    hallazgos = lint(fuera, abiertos=abiertos)
-    fuera_de_rango = [h for h in hallazgos if "fuera del ciclo" in h.defecto]
-
-    assert len(fuera_de_rango) == 1, [str(h) for h in hallazgos]
-    assert "2026-08-25" in fuera_de_rango[0].defecto
-    assert "## Miércoles 19 de agosto" not in fuera, "el lint no inventa los días que faltan"
+    assert "2026-08-25" in corrida.stdout, (
+        f"no reportó el día fuera del ciclo: {corrida.stdout}"
+    )
+    ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
+    assert "## Miércoles 19 de agosto" not in ahora, "el lint inventó los días que faltan"
 
 
 def test_002_03_el_lint_no_escribe_y_es_idempotente() -> None:
-    vault = _vault()
-    antes = instantanea(vault)
+    corrida = gherkin.correr(SLUG, "el lint no escribe en el vault")
 
-    _, primero, _ = correr_cli(["entry", "lint", "--vault", str(vault)])
-    _, segundo, _ = correr_cli(["entry", "lint", "--vault", str(vault)])
-
-    assert delta(antes, instantanea(vault)) == {}, "el lint escribió en el vault"
-    assert primero == segundo, "dos corridas del lint dan reportes distintos"
+    assert corrida.delta_de("mi-vault") == {}, "el lint escribió en el vault"
+    primero, segundo = corrida.resultados[-2], corrida.resultados[-1]
+    assert primero.stdout == segundo.stdout, "dos corridas del lint dan reportes distintos"
 
 
 if __name__ == "__main__":

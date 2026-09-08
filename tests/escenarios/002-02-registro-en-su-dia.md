@@ -6,16 +6,20 @@
 
 El que dejó [`002-01-abrir-ciclo`](002-01-abrir-ciclo.md): `AHORA.md` abierto con día inicial y día final del 11 al 17 de agosto de 2026. HOY es el martes 11.
 
+```bash
+cp -r ../../002-01-abrir-ciclo/crear-ahora-md-a-partir-de-la-plantilla-cuando-no-existe/mi-vault .
+```
+
+La cadena queda a la vista: el estado inicial de un paso es el estado final del anterior, y acá se copia con un comando en vez de reconstruirse. Si el paso previo no corrió, la copia falla diciéndolo.
+
 ## Escenario: tres registros caen en el día de hoy, ordenados por hora
 
 Dado un vault con el ciclo abierto, con HOY en el martes 11 de agosto
 Y ningún registro escrito todavía
-Cuando se inyectan estas tres líneas, en este orden:
+Cuando se corren estas tres líneas, en este orden
 
-```text
-- 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp
-- 09:12 - [[personal]] **señal**: la administradora responde los mensajes con varios días de atraso
-- 11:30 - hice la consulta presencial por el standing desk
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp" "- 09:12 - [[personal]] **señal**: la administradora responde los mensajes con varios días de atraso" "- 11:30 - hice la consulta presencial por el standing desk"
 ```
 
 Entonces los tres quedan bajo `## Martes 11 de agosto`
@@ -26,7 +30,12 @@ Y el día final sigue con su marca de día vacío
 ## Escenario: la fase 1 propaga hacia ámbitos y no toca PENDIENTES.md
 
 Dado el mismo estado
-Cuando se inyectan las tres líneas
+Cuando se corren las tres líneas
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp" "- 09:12 - [[personal]] **señal**: la administradora responde los mensajes con varios días de atraso" "- 11:30 - hice la consulta presencial por el standing desk"
+```
+
 Entonces el diff contra el estado inicial toca `AHORA.md` y `ambitos/personal/personal.md`
 Y `PENDIENTES.md` queda byte a byte igual al del vault recién instalado
 
@@ -35,14 +44,19 @@ Criterio de corte de la fase 1: si algo escribe en `PENDIENTES.md`, el corte est
 ## Escenario: el registro sin ámbito y sin clasificación es válido
 
 Dado el mismo estado
-Cuando se inyecta la línea de las 11:30, que no lleva `[[ambito]]` ni `**clasificacion**`
+Cuando se corre solo la línea de las 11:30, que no lleva `[[ambito]]` ni `**clasificacion**`
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 11:30 - hice la consulta presencial por el standing desk"
+```
+
 Entonces `tuku entry add` lo deja escrito tal cual, sin marcarlo
 
 Ámbito y clasificación son opcionales según el contexto ([`spec/bitacora.md`](../../spec/bitacora.md)). Que además el lint no lo marque se prueba en [`002-03`](002-03-lint-de-registro.md), que arranca de este estado.
 
 ## De dónde salen las líneas
 
-Las tres son constante del arnés (`REGISTROS` en `test_002_02_registro_en_su_dia.py`), como los días de `test_001_01`: la rebanada mínima que este paso necesita. El día uno completo, generado por un agente desde el corpus, vive en [`003-01`](003-01-dictado-del-dia-uno.md).
+Las tres están escritas acá, en los comandos: son la rebanada mínima que este paso necesita, y el arnés ya no las repite. El día uno completo, generado por un agente desde el corpus, vive en [`003-01`](003-01-dictado-del-dia-uno.md).
 
 ## Cómo se corre
 
@@ -50,7 +64,7 @@ Las tres son constante del arnés (`REGISTROS` en `test_002_02_registro_en_su_di
 uv run pytest tests/escenarios/ -k 002_02
 ```
 
-Deja el vault en `playground/002-02-registro-en-su-dia/`, estado inicial del paso siguiente.
+Cada escenario deja su vault en `playground/002-02-registro-en-su-dia/<escenario>/mi-vault/`. El del primero es el estado inicial del paso siguiente.
 
 
 ## Qué se mira a mano

@@ -10,10 +10,12 @@ aplicándole las siete fechas que este escenario fija a mano. Un cambio en el
 template no obliga a regenerar nada; un cambio en la lógica de sembrado sigue
 rompiendo el test.
 
-`home` apunta al checkout de trabajo (`RAIZ`), así que `init()` copia de
-`RAIZ/template/vanilla/` sin tocar `~/.tuku` ni la red. Es el camino que la
-decisión 4 del epic 002 reserva para todo test salvo el `001-01`: llamar a la
-función importable, sin instalar nada.
+El comando no se escribe acá: sale del `.md`, que es la fuente ejecutable
+(`tests/scripts/gherkin.py`). Este arnés solo afirma sobre lo que ese comando
+dejó. El runner corre `tuku init` en proceso con `TUKU_HOME` en el checkout de
+trabajo, así que la siembra copia de `template/vanilla/` sin tocar `~/.tuku` ni
+la red: el camino que la decisión 4 del epic 002 reserva para todo test salvo
+el `001-01`.
 
 Tres afirmaciones, y las tres fallan por separado:
 
@@ -26,7 +28,7 @@ La tercera cubre el crecimiento del template: si un archivo nuevo de
 `template/vanilla/` trae `DD de mes` y `init()` no lo sustituye, las otras dos
 pasan en silencio y esta no.
 
-La corrida deja el vault en `playground/001-02-init-siembra-el-estado-cero/`
+La corrida deja el vault en `playground/001-02-init-siembra-el-estado-cero/mi-vault/`
 (git-ignored, se pisa en cada corrida), a la vista para el `## Qué se mira a
 mano` del escenario.
 
@@ -49,15 +51,17 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
+import gherkin  # noqa: E402
 from vault import (  # noqa: E402
     ahora_sembrado,
     diff_recursivo,
     placeholders_sin_sustituir,
-    preparar_playground,
 )
 
+from tuku.cli import EXITO  # noqa: E402
 from tuku.config import parsear_config_md  # noqa: E402
-from tuku.init import init  # noqa: E402
+
+SLUG = "001-02-init-siembra-el-estado-cero"
 
 FECHA_FIJA = date(2026, 8, 11)
 TEMPLATE_VANILLA = RAIZ / "template" / "vanilla"
@@ -79,8 +83,9 @@ DIAS = [
 
 
 def test_001_02_init_siembra_el_estado_cero_byte_a_byte() -> None:
-    destino = preparar_playground("001-02-init-siembra-el-estado-cero")
-    init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ)
+    corrida = gherkin.correr(SLUG, "produce el estado cero")
+    assert corrida.codigo == EXITO, corrida.stderr
+    destino = corrida.ruta("mi-vault")
 
     # Los dos archivos que la instalación resuelve: el ciclo y la zona horaria.
     # El resto tiene que ser idéntico al template, byte a byte.

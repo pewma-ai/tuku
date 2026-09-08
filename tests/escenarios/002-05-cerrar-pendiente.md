@@ -6,10 +6,20 @@
 
 El que dejó [`002-04-abrir-pendiente`](002-04-abrir-pendiente.md): un ítem en la tabla con horizonte `esta semana`.
 
+```bash
+cp -r ../../002-04-abrir-pendiente/el-registro-abre-el-pendiente-y-copia-el-cuerpo-literal/mi-vault .
+```
+
 ## Escenario: el cierre repite el texto y borra el ítem
 
 Dado un pendiente abierto en `esta semana` con cuerpo `avisar de los GGCC a la administradora`
-Cuando se inyecta `- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora`
+Cuando se escribe el cierre y se aplica
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+tuku todo close --vault mi-vault "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+```
+
 Entonces la fila desaparece de la tabla de `PENDIENTES.md`
 Y la tabla queda vacía, con su cabecera intacta
 Y el registro de apertura de las 14:20 sigue escrito en el martes 11, sin tocar
@@ -19,8 +29,20 @@ El cierre repite el texto del pendiente en vez de reescribirlo en pasado, y por 
 
 ## Escenario: un cierre sin pendiente abierto se reporta, no se inventa nada
 
-Dado que nunca se abrió ningún pendiente con el cuerpo `comprar una maleta`
-Cuando se inyecta `- 19:10 - [[personal]] ~~(Hecho)~~: comprar una maleta`
+Dado que nunca se abrió ningún pendiente con el cuerpo `comprar una maleta`, y el de los GGCC ya se cerró
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+tuku todo close --vault mi-vault "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+```
+
+Cuando se escribe el cierre huérfano y se aplica
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 19:10 - [[personal]] ~~(Hecho)~~: comprar una maleta"
+tuku todo close --vault mi-vault "- 19:10 - [[personal]] ~~(Hecho)~~: comprar una maleta"
+```
+
 Entonces el comando lo reporta como cierre sin pareja
 Y `PENDIENTES.md` queda byte a byte igual que antes de la inyección
 Y no se crea el pendiente que falta, ni se borra ningún otro ítem
@@ -31,7 +53,18 @@ El caso negativo más importante del epic: con `PENDIENTES.md` como fuente de ve
 ## Escenario: cerrar dos veces no vuelve a mover
 
 Dado el pendiente ya cerrado
+
+```bash
+tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+tuku todo close --vault mi-vault "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+```
+
 Cuando se corre el comando otra vez sobre el mismo registro
+
+```bash
+tuku todo close --vault mi-vault "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+```
+
 Entonces el diff es vacío
 Y el segundo pase se reporta igual que el primer cierre sin pareja, porque ya no hay nada abierto que emparejar
 
@@ -46,6 +79,8 @@ El cierre **no literal**, cuando el dictado no repite el texto palabra por palab
 ```bash
 uv run pytest tests/escenarios/ -k 002_05
 ```
+
+Cada escenario deja su vault en `playground/002-05-cerrar-pendiente/<escenario>/mi-vault/`.
 
 ## Qué se mira a mano
 

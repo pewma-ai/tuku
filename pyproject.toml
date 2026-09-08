@@ -40,6 +40,15 @@ dev = [
 #
 # `--strict-markers` es deliberado: un marcador mal escrito (`@pytest.mark.agente`
 # en vez de `agentic`) haría que el test se saltara en silencio. Con esto, falla.
+#
+# **El orden de los tests importa y no se debe aleatorizar.** Los escenarios de un
+# epic son una cadena: el estado inicial de un paso es el estado final del
+# anterior (`tests/escenarios/README.md`), y el `002-02` copia el vault que dejó
+# el `002-01`. El orden alfabético de recolección de pytest es justo el que la
+# cadena necesita, y por eso acá no se fija nada: ya es correcto por defecto. Lo
+# que no hay que hacer es instalar un aleatorizador (`pytest-randomly`) ni
+# paralelizar por test (`pytest-xdist`) sin antes hacer que cada paso sepa
+# reconstruir la cadena desde el principio.
 # ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
 minversion = "8.0"

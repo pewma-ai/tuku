@@ -17,6 +17,21 @@ El fixture es el día completo, los registros de la Parte 2 tal como están, no 
 
 Cubre la fase 1 completa, la fase 2 completa, y la versión mínima de las fases 3 y 5.
 
+## Escenario: preparar el ambiente del epic
+
+Dado el `playground/` como lo dejó la corrida anterior
+Cuando se corre
+
+```bash
+rm -rf 002-*
+```
+
+Entonces no queda ningún resultado del epic 002, y la cadena arranca sobre limpio
+
+Es el único borrado del epic, y por eso vive acá y no en cada paso. Antes cada arnés borraba su propia carpeta antes de usarla, y con varios tests por escenario eso daba más de cien borrados por corrida: una pelea con el sistema de archivos que hacía fallar tests que no tenían nada que ver.
+
+El patrón es el prefijo del epic, así que `playground/002-*` es territorio de la suite: una carpeta tuya que empiece con `002-` se borra. Las exploratorias con cualquier otro nombre sobreviven.
+
 ## Qué se verifica
 
 Dos superficies:
