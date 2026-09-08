@@ -24,21 +24,23 @@ def _clave_hora(linea: str) -> tuple[int, int]:
     return int(m.group(1)), int(m.group(2))
 
 
-def add(ahora: str, lineas: list[str], *, dia: str) -> str:
-    """Devuelve `AHORA.md` con `lineas` insertadas bajo el encabezado `dia`.
+def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
+    """Devuelve `AHORA.md` con `lineas` insertadas bajo el encabezado `day` o `dia`.
 
-    `dia` es el encabezado del día, con o sin el `## ` inicial. Las líneas
+    `day`/`dia` es el encabezado del día, con o sin el `## ` inicial. Las líneas
     nuevas se copian tal cual llegan; el orden final es por hora, y en empate
     las que ya estaban van antes que las nuevas (sort estable). Ninguna otra
     sección del archivo se toca.
     """
-    encabezado = dia if dia.startswith("## ") else f"## {dia}"
+    valor_dia = day or dia
+    encabezado = valor_dia if valor_dia.startswith("## ") else f"## {valor_dia}"
     src = ahora.splitlines()
 
     try:
         ini = next(i for i, linea in enumerate(src) if linea.strip() == encabezado)
     except StopIteration:
         from tuku.ahora import fecha_del_dia, rango
+
         limites = rango(ahora)
         if limites is not None:
             desde, hasta = limites
@@ -54,14 +56,27 @@ def add(ahora: str, lineas: list[str], *, dia: str) -> str:
                 src = [*src[:insert_idx], encabezado, "", *src[insert_idx:]]
                 ini = insert_idx
             else:
-                msg = f"el día {encabezado!r} cae fuera del ciclo abierto en AHORA.md"
+                msg = (
+                    f"el día {encabezado!r} cae fuera del ciclo abierto "
+                    f"({desde.isoformat()} a {hasta.isoformat()}). Si el registro es "
+                    f"de este ciclo, corrige la fecha; si empezó uno nuevo, cierra "
+                    f"este antes: mueve AHORA.md a bitacoras/bitacora-"
+                    f"{desde.isoformat()}-{hasta.isoformat()}.md y corre "
+                    f"`tuku cycle open`."
+                )
                 raise ValueError(msg) from None
         else:
             raise ValueError(f"no existe el encabezado {encabezado!r} en AHORA.md") from None
 
-
+    # La sección del día termina en el siguiente día o en el `---` que cierra el
+    # ciclo. Sin ese segundo corte, escribir en el último día se lleva por delante
+    # la marca de fin de ciclo, que no es una línea de registro y se descartaría.
     fin = next(
-        (i for i in range(ini + 1, len(src)) if src[i].startswith("## ")),
+        (
+            i
+            for i in range(ini + 1, len(src))
+            if src[i].startswith("## ") or src[i].strip() == "---"
+        ),
         len(src),
     )
     previas = [linea for linea in src[ini + 1 : fin] if _HORA.match(linea)]

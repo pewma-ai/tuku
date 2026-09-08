@@ -15,7 +15,8 @@ from pathlib import Path
 from tuku import vocab
 from tuku.init import resolver_home
 
-_PAR_CLAVE_VALOR = re.compile(r"^\*\*([^:]+):\*\*\s*(.+)$")
+#: Fila de la tabla de configuración: `| `Campo` | `Valor` |`.
+_FILA_CONFIG = re.compile(r"^\|\s*`([^`]+)`\s*\|\s*`?([^`|]*?)`?\s*\|")
 _MARCADOR_AUTOR = "**Nombre del autor:**"
 
 
@@ -58,11 +59,14 @@ class Configuracion:
 
 
 def parsear_config_md(texto: str) -> dict[str, str]:
-    """Parsea pares `**Clave:** Valor` de la sección de datos de config.tuku.md."""
+    """Los campos de la tabla de `config.tuku.md`.
+
+    Se leen solo las filas cuyo primer campo va entre backticks, así el
+    encabezado y los callouts quedan fuera sin tener que reconocerlos.
+    """
     pares: dict[str, str] = {}
     for linea in texto.splitlines():
-        m = _PAR_CLAVE_VALOR.match(linea.strip())
-        if m:
+        if m := _FILA_CONFIG.match(linea.strip()):
             pares[m.group(1).strip()] = m.group(2).strip()
     return pares
 
@@ -105,8 +109,8 @@ def leer_config(
         ruta_config = vault / "reglas" / "config.tuku.md"
         texto_config = ruta_config.read_text(encoding="utf-8") if ruta_config.is_file() else ""
     datos = parsear_config_md(texto_config)
-    zona_horaria = datos.get("Zona horaria", "America/Santiago")
-    tipo_ciclo = datos.get("Tipo de ciclo", "semanal")
+    zona_horaria = datos.get("TZ", "America/Santiago")
+    tipo_ciclo = datos.get("cycle_type", "semanal")
 
     # 2. LIBRO-DE-ESTILO.md
     if texto_libro is None:

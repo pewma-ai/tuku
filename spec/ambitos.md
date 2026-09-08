@@ -34,7 +34,7 @@ ambitos/
 
 Obligatorios aunque estén vacíos. El costo son dos archivos por carpeta. La ganancia es que ningún comando tiene que manejar el caso "no existe", y el autor siempre sabe dónde escribir una regla sin preguntar.
 
-En ambos, **la más cercana prevalece**.
+**`AGENTS.md` prevalece, `CADENCIAS.md` se acumula.** Una regla escrita más adentro afina la de arriba sin repetirla, que es el principio 7. Una cadencia no afina nada: es algo que vuelve, y que `trabajo/turnos/` declare la suya no cancela la de `trabajo/`. Estar más adentro acota a quién le toca, no a qué se hereda.
 
 ## `CAPACIDAD.md`, el tercero y el opcional
 
@@ -42,19 +42,34 @@ Un ámbito puede declarar lo que cuesta sostenerlo, en un `CAPACIDAD.md` propio.
 
 **Es opcional en todas partes, incluida `ambitos/personal/`.** Deseable donde ayude, como muchas cadencias: TUKU se opera sin ninguno de los dos. El estado cero siembra uno en `ambitos/personal/`, sin datos: dice que todavía no se declaró nada y por qué conviene, igual que hace con `CADENCIAS.md` de esa rama. Sin `CAPACIDAD.md` el plan se propone igual, solo que sin contraste de cuánto cabe, y el autor hace ese contraste en su cabeza como lo hacía antes. Degrada, no rompe. Es la misma relación que con las cadencias: sin ellas el sistema registra, con ellas además anticipa.
 
-Se aparta de los otros dos en dos cosas:
+Cómo se comparan los tres archivos por directorio:
 
-| | `AGENTS.md`, `CADENCIAS.md` | `CAPACIDAD.md` |
-| --- | --- | --- |
-| Presencia | Obligatorio en cada directorio, aunque vacío | Solo donde hay algo que declarar |
-| Combinación | La más cercana prevalece | Se acumulan: el bruto menos la suma de los costos |
+| | `AGENTS.md` | `CADENCIAS.md` | `CAPACIDAD.md` |
+| --- | --- | --- | --- |
+| Presencia | Obligatorio en cada directorio, aunque vacío | Obligatorio en cada directorio, aunque vacío | Solo donde hay algo que declarar |
+| Combinación | La más cercana prevalece | Se acumulan | Se acumulan: el bruto menos la suma de los costos |
 
-**Se acumula en vez de prevalecer** porque no es una regla, es una cantidad. Que `trabajo/` declare un costo no anula el que declaró `trabajo/turnos/`: los dos consumen del mismo día. Es la única pieza del árbol que se lee sumando en lugar de eligiendo la más cercana.
+**Se acumula en vez de prevalecer** porque no es una regla, es una cantidad. Que `trabajo/` declare un costo no anula el que declaró `trabajo/turnos/`: los dos consumen del mismo día. Lo mismo vale para las cadencias por el mismo motivo, y por eso **solo `AGENTS.md` prevalece**: es el único de los tres que es una regla.
 
 **Si se declara un bruto, va en `ambitos/personal/`**, porque el bruto es uno solo: el tiempo de la persona no se reparte por ámbito, se gasta en ellos. Un ámbito sin `CAPACIDAD.md` no cobra costo fijo, que es el caso por defecto. Y sin bruto declarado en ninguna parte, no hay dimensionamiento: los costos fijos quedan como advertencias sueltas en el plan, sin nada de qué restarse.
 
 > [!question] Propuesta de diseño, no decisión tomada #REVISAR
 > El reparto bruto en `personal/` más costos fijos acumulables en el resto es propuesta mía, derivada de lo que ya dice `ciclo.md`. La alternativa sería que cada ámbito declare su capacidad asignada y el total sea la suma, que es más simétrico pero obliga al autor a repartir por adelantado, antes de saber en qué se le va el ciclo.
+
+## Transclusión de pendientes
+
+Toda página de ámbito debe transcluir sus pendientes desde `PENDIENTES-AMBITOS.md` usando ruta relativa y ancla de bloque:
+
+```markdown
+![[../PENDIENTES-AMBITOS.md#^personal]]
+```
+
+`tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito.
+
+El comando `tuku scope lint` (y `tuku doctor`) verifica estructuralmente:
+1. Que ningún registro en `AHORA.md` apunte a una categoría.
+2. Que toda página de ámbito del árbol contenga la transclusión a su bloque en `PENDIENTES-AMBITOS.md`.
+3. Que en `ambitos/PENDIENTES-AMBITOS.md` exista el callout con su ancla `^<ambito>` correspondiente a cada ámbito del árbol.
 
 ## Convención de mayúsculas
 

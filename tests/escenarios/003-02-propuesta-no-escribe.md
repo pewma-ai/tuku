@@ -31,7 +31,7 @@ Una propuesta rechazada no escribe nada, así que no hay nada que limpiar: por e
 
 Dado la misma propuesta
 Cuando el autor la aprueba
-Entonces se abre el pendiente igual que en [`002-03`](002-03-abrir-pendiente.md), en `^sin-fecha`
+Entonces se abre el pendiente igual que en [`002-04`](002-04-abrir-pendiente.md), en el horizonte del ciclo (`esta semana`)
 Y el resultado es indistinguible de haberlo dictado
 
 El escenario aprueba y revierte, para que [`003-01`](003-01-dictado-del-dia-uno.md) herede el estado del rechazo: el día uno del corpus termina sin ese pendiente.

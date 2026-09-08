@@ -25,7 +25,7 @@ Todo lo demás son ejemplos.
 
 **La hora no viene del dictado**: se deriva de la jornada que el dictado describe, y eso es juicio de quien registra, no lectura mecánica (ver [`../corpus/referencia/referencia-faena.md`](../corpus/referencia/referencia-faena.md), Parte 2).
 
-Cuando no se puede derivar, el valor por defecto es **la hora actual**, en la zona horaria de `reglas/config.tuku.md`. Nunca se deja en blanco ni se elige una hora plausible: o se deriva del dictado, o es ahora. Es el único campo del registro con valor por defecto, y por eso está declarado acá y no queda a criterio del comando (ver [cli.md](cli.md)).
+Cuando no se puede derivar, el valor por defecto es **la hora actual**, en la zona horaria que declara `TZ` en `reglas/config.tuku.md`. Nunca se deja en blanco ni se elige una hora plausible: o se deriva del dictado, o es ahora. Es el único campo del registro con valor por defecto, y por eso está declarado acá y no queda a criterio del comando (ver [cli.md](cli.md)).
 
 ## Ejemplos
 

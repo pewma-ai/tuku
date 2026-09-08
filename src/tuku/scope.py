@@ -26,6 +26,7 @@ lee, y además `AHORA.md`.
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -55,28 +56,32 @@ def keywords(pagina: str) -> list[str]:
     return [k.strip() for k in m.group("lista").split(",") if k.strip()]
 
 
-def crear(vault: Path, nombre: str) -> Path:
-    """Crea el ámbito `nombre` bajo `ambitos/`. Idempotente.
+def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
+    """Crea el ámbito `name`/`nombre` bajo `ambitos/`. Idempotente.
 
     Si ya existe no toca nada: `spec/ambitos.md` no admite dos ámbitos con el
     mismo nombre, y volver a crearlo no es un error del autor.
     """
-    directorio = vault / "ambitos" / nombre
+    valor = name or nombre
+    directorio = vault / "ambitos" / valor
     directorio.mkdir(parents=True, exist_ok=True)
 
     for archivo in OBLIGATORIOS:
         ruta = directorio / archivo
         if not ruta.exists():
-            ruta.write_text(_plantilla_obligatorio(archivo, nombre), encoding="utf-8")
+            ruta.write_text(_plantilla_obligatorio(archivo, valor), encoding="utf-8")
 
     pagina = _pagina(directorio)
     if not pagina.exists():
-        # Lo mínimo que `vocab show` y `link backfill` necesitan. Sin secciones
-        # sugeridas: la organización emerge del uso, no de una plantilla.
+        rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", directorio)
         pagina.write_text(
-            f"---\nkeywords: [{nombre}]\n---\n\n# {nombre}\n", encoding="utf-8"
+            f"---\ntype: Scope\nkeywords: [{valor}]\n---\n\n# {valor}\n\n![[{rel}#^{valor}]]\n",
+            encoding="utf-8",
         )
     return directorio
+
+
+create = crear
 
 
 def _plantilla_obligatorio(archivo: str, nombre: str) -> str:
@@ -117,12 +122,10 @@ def categorias(vault: Path) -> list[str]:
     raiz = vault / "ambitos"
     if not raiz.is_dir():
         return []
-    return sorted(
-        d.name for d in raiz.rglob("*") if d.is_dir() and not _pagina(d).is_file()
-    )
+    return sorted(d.name for d in raiz.rglob("*") if d.is_dir() and not _pagina(d).is_file())
 
 
-def lint(ahora: str, *, categorias: list[str]) -> list[str]:
+def lint_categorias(ahora: str, *, categorias: list[str]) -> list[str]:
     """Registros que apuntan a una categoría. No escribe nada."""
     hallazgos = []
     for n, linea in enumerate(ahora.splitlines(), start=1):
@@ -134,4 +137,68 @@ def lint(ahora: str, *, categorias: list[str]) -> list[str]:
                     f"no puede apuntar a una. Apúntalo al ámbito o a la actividad que "
                     f"corresponda, o dale a {destino} su página propia para volverlo ámbito."
                 )
+    return hallazgos
+
+
+def lint_transclusiones(vault: Path) -> list[str]:
+    """Comprueba que todas las páginas de ámbito transcluyan sus pendientes."""
+    hallazgos = []
+    for a in leer(vault):
+        pagina = a.directorio / f"{a.nombre}.md"
+        contenido = pagina.read_text(encoding="utf-8")
+        patron = rf"!\[\[[^\]]*PENDIENTES-AMBITOS(?:\.md)?#\^{re.escape(a.nombre)}\]\]"
+        if not re.search(patron, contenido):
+            rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", a.directorio)
+            ruta_rel = pagina.relative_to(vault)
+            hallazgos.append(
+                f"{ruta_rel}: error: falta la transclusión a PENDIENTES-AMBITOS.md "
+                f"(esperada: '![[{rel}#^{a.nombre}]]')."
+            )
+    return hallazgos
+
+
+def lint_callouts(vault: Path) -> list[str]:
+    """Comprueba que en PENDIENTES-AMBITOS.md exista un callout por cada ámbito."""
+    archivo = vault / "ambitos" / "PENDIENTES-AMBITOS.md"
+    if not archivo.is_file():
+        return [
+            "ambitos/PENDIENTES-AMBITOS.md: error: falta el archivo. "
+            "Corre 'tuku todo propagate' para generarlo."
+        ]
+    contenido = archivo.read_text(encoding="utf-8")
+    hallazgos = []
+    for a in leer(vault):
+        patron = rf">\s*\[!todo\].*\^{re.escape(a.nombre)}(?:\s|$)"
+        if not re.search(patron, contenido):
+            hallazgos.append(
+                f"ambitos/PENDIENTES-AMBITOS.md: error: falta el callout para el ámbito "
+                f"'{a.nombre}' (esperado: '^{a.nombre}'). Corre 'tuku todo propagate'."
+            )
+    return hallazgos
+
+
+def lint(
+    vault_o_ahora: Path | str,
+    *,
+    categorias: list[str] | None = None,
+) -> list[str]:
+    """Linter del árbol de ámbitos.
+
+    Si recibe un Path (vault), revisa registros contra categorías, transclusiones
+    en páginas de ámbito y callouts en PENDIENTES-AMBITOS.md. Si recibe str, revisa
+    registros contra categorías.
+    """
+    if isinstance(vault_o_ahora, str):
+        return lint_categorias(vault_o_ahora, categorias=categorias or [])
+
+    vault = vault_o_ahora
+    hallazgos: list[str] = []
+    ahora_path = vault / "AHORA.md"
+    if ahora_path.is_file():
+        cats = categorias if categorias is not None else globals()["categorias"](vault)
+        hallazgos.extend(
+            lint_categorias(ahora_path.read_text(encoding="utf-8"), categorias=cats)
+        )
+    hallazgos.extend(lint_transclusiones(vault))
+    hallazgos.extend(lint_callouts(vault))
     return hallazgos

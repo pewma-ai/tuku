@@ -21,9 +21,9 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from cadena import delta, instantanea, preparar_paso  # noqa: E402
+from cadena import correr_cli, delta, instantanea, preparar_paso  # noqa: E402
 
-from tuku.entry import add  # noqa: E402
+from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "002-02-registro-en-su-dia"
 PREVIO = "002-01-abrir-ciclo"
@@ -44,11 +44,10 @@ ORDEN_ESPERADO = ["09:12", "11:30", "18:40"]
 
 def _sembrar_registros() -> Path:
     vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
-    ahora = vault / "AHORA.md"
-    ahora.write_text(
-        add(ahora.read_text(encoding="utf-8"), REGISTROS, dia=HOY),
-        encoding="utf-8",
+    codigo, _, err = correr_cli(
+        ["entry", "add", "--vault", str(vault), "--dia", HOY, *REGISTROS]
     )
+    assert codigo == EXITO, err
     return vault
 
 
@@ -77,11 +76,10 @@ def test_002_02_los_registros_caen_en_su_dia_y_en_orden() -> None:
 def test_002_02_la_fase_1_no_toca_pendientes() -> None:
     vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
     antes = instantanea(vault)
-    ahora = vault / "AHORA.md"
-    ahora.write_text(
-        add(ahora.read_text(encoding="utf-8"), REGISTROS, dia=HOY),
-        encoding="utf-8",
+    codigo, _, err = correr_cli(
+        ["entry", "add", "--vault", str(vault), "--dia", HOY, *REGISTROS]
     )
+    assert codigo == EXITO, err
     assert delta(antes, instantanea(vault)) == {"AHORA.md": "modificado"}
 
 

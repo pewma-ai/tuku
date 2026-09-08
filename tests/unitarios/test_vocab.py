@@ -33,10 +33,6 @@ def test_leer_vocabularios_extrae_terminos_correctamente() -> None:
 
 
 def test_leer_vocabulario_incompleto_lanza_excepcion() -> None:
-    libro = (
-        "# Libro de estilo incompleto\n\n"
-        "### Clasificaciones\n"
-        "| `reunión` | Descripción |\n"
-    )
+    libro = "# Libro de estilo incompleto\n\n### Clasificaciones\n| `reunión` | Descripción |\n"
     with pytest.raises(VocabularioIncompleto, match="Horizontes"):
         leer(libro)

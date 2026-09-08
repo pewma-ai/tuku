@@ -4,16 +4,16 @@
 
 ## Estado inicial
 
-El que dejó [`002-04-abrir-pendiente`](002-04-abrir-pendiente.md): un ítem en `^sin-fecha`.
+El que dejó [`002-04-abrir-pendiente`](002-04-abrir-pendiente.md): un ítem en la tabla con horizonte `esta semana`.
 
 ## Escenario: el cierre repite el texto y borra el ítem
 
-Dado un pendiente abierto en `^sin-fecha` con cuerpo `avisar de los GGCC a la administradora`
+Dado un pendiente abierto en `esta semana` con cuerpo `avisar de los GGCC a la administradora`
 Cuando se inyecta `- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora`
-Entonces el ítem desaparece de `^sin-fecha`
-Y el callout `^sin-fecha` sigue existiendo, vacío
+Entonces la fila desaparece de la tabla de `PENDIENTES.md`
+Y la tabla queda vacía, con su cabecera intacta
 Y el registro de apertura de las 14:20 sigue escrito en el martes 11, sin tocar
-Y el diff toca `AHORA.md` y `PENDIENTES.md`, y nada más
+Y el diff toca `AHORA.md`, `PENDIENTES.md` y `ambitos/PENDIENTES-AMBITOS.md`
 
 El cierre repite el texto del pendiente en vez de reescribirlo en pasado, y por eso el emparejamiento es literal y no semántico ([`spec/bitacora.md`](../../spec/bitacora.md)). El historial queda en la bitácora, no en `PENDIENTES.md`.
 

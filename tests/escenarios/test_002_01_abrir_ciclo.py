@@ -42,8 +42,8 @@ def test_002_01_crea_ahora_desde_plantilla_si_no_existe() -> None:
     assert delta(antes, instantanea(vault)) == {"AHORA.md": "nuevo"}
 
     texto = ahora.read_text(encoding="utf-8")
-    assert "desde: 2026-08-10" in texto
-    assert "hasta: 2026-08-16" in texto
+    assert "from: 2026-08-10" in texto
+    assert "to: 2026-08-16" in texto
     assert "## Lunes 10 de agosto" in texto
     assert "## Martes 11 de agosto" in texto
     assert "## Miércoles 12 de agosto" in texto

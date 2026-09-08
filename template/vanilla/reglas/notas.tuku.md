@@ -1,3 +1,7 @@
+---
+type: Config
+---
+
 # Notas
 
 Qué pasa cuando el autor pide una nota.

@@ -53,7 +53,6 @@ class Hallazgo:
         return f"AHORA.md:{self.linea}: {marca}: {self.defecto}. {self.correccion}"
 
 
-
 def lint(ahora: str, *, abiertos: list[str]) -> list[Hallazgo]:
     """Los hallazgos de `AHORA.md`, en orden de aparición. No modifica nada."""
     hallazgos: list[Hallazgo] = []

@@ -23,13 +23,13 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from cadena import delta, instantanea, preparar_paso  # noqa: E402
+from cadena import correr_cli, delta, instantanea, preparar_paso  # noqa: E402
 
-from tuku import link, scope  # noqa: E402
-from tuku.entry import add  # noqa: E402
+from tuku import scope  # noqa: E402
+from tuku.cli import EXITO, RECHAZO  # noqa: E402
 
 SLUG = "002-08-crear-ambito"
-PREVIO = "002-07-transclusiones-sincronizadas"
+PREVIO = "002-06-escribir-en-un-dia-fecha"
 DESDE = date(2026, 8, 11)
 HOY = "## Martes 11 de agosto"
 
@@ -40,14 +40,8 @@ ENLAZADO = f"del [[{AMBITO}]]"
 
 def _crear(vault: Path) -> None:
     """Crea el ámbito y enlaza hacia atrás, que es lo que hace el punto 4."""
-    scope.crear(vault, AMBITO)
-    pagina = (vault / "ambitos" / AMBITO / f"{AMBITO}.md").read_text(encoding="utf-8")
-
-    ahora = vault / "AHORA.md"
-    texto, _ = link.backfill(
-        ahora.read_text(encoding="utf-8"), ambito=AMBITO, keywords=scope.keywords(pagina)
-    )
-    ahora.write_text(texto, encoding="utf-8")
+    codigo, _, err = correr_cli(["scope", "create", AMBITO, "--vault", str(vault)])
+    assert codigo == EXITO, err
 
 
 def test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras() -> None:
@@ -61,6 +55,9 @@ def test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras() -> No
     for archivo in (*scope.OBLIGATORIOS, f"{AMBITO}.md"):
         assert (directorio / archivo).is_file(), f"falta {archivo}"
     assert not (directorio / "CAPACIDAD.md").exists(), "CAPACIDAD.md es opcional"
+    assert "![[../PENDIENTES-AMBITOS.md#^depto-centro]]" in (
+        directorio / f"{AMBITO}.md"
+    ).read_text(encoding="utf-8"), "falta transclusión de pendientes en página de ámbito"
 
     assert instantanea(vault / "ambitos" / "personal") == personal_antes, "cambió personal/"
 
@@ -97,15 +94,15 @@ def test_002_08_un_registro_no_puede_apuntar_a_una_categoria() -> None:
         (categoria / archivo).write_text("", encoding="utf-8")
 
     registro = "- 20:00 - [[gastos]] **progreso**: revisé el detalle del mes"
-    ahora = vault / "AHORA.md"
-    ahora.write_text(
-        add(ahora.read_text(encoding="utf-8"), [registro], dia=HOY), encoding="utf-8"
+    codigo, _, err = correr_cli(
+        ["entry", "add", "--vault", str(vault), "--day", HOY, registro]
     )
+    assert codigo == EXITO, err
 
-    texto = ahora.read_text(encoding="utf-8")
-    hallazgos = scope.lint(texto, categorias=scope.categorias(vault))
-    assert len(hallazgos) == 1, hallazgos
-    assert "gastos" in hallazgos[0] and "categoría" in hallazgos[0]
+    texto = (vault / "AHORA.md").read_text(encoding="utf-8")
+    codigo, salida, err = correr_cli(["scope", "lint", "--vault", str(vault)])
+    assert codigo == RECHAZO, salida
+    assert "gastos" in salida and "categoría" in salida, salida
     assert registro in texto, "el registro no quedó escrito: se reporta, nunca se rechaza"
 
 

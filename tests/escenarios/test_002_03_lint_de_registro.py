@@ -23,11 +23,10 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from cadena import delta, instantanea, preparar_paso  # noqa: E402
+from cadena import correr_cli, delta, instantanea, preparar_paso  # noqa: E402
 
-from tuku import vocab  # noqa: E402
-from tuku.entry import add  # noqa: E402
-from tuku.lint import ERROR, PREGUNTA, formatear, lint  # noqa: E402
+from tuku.cli import EXITO, RECHAZO  # noqa: E402
+from tuku.lint import lint  # noqa: E402
 
 SLUG = "002-03-lint-de-registro"
 PREVIO = "002-02-registro-en-su-dia"
@@ -43,42 +42,33 @@ def _vault() -> Path:
     return preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
 
 
-def _abiertos(vault: Path) -> list[str]:
-    libro = (vault / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
-    return [t for terminos in vocab.leer(libro).values() for t in terminos]
-
-
 def test_002_03_cerrada_estricta_abierta_permisiva() -> None:
     vault = _vault()
-    ruta = vault / "AHORA.md"
-    ruta.write_text(
-        add(ruta.read_text(encoding="utf-8"), [DESCONOCIDO, MAL_ESCRITA], dia=HOY),
-        encoding="utf-8",
+    codigo_add, _, _ = correr_cli(
+        ["entry", "add", "--vault", str(vault), "--dia", HOY, DESCONOCIDO, MAL_ESCRITA]
     )
-    texto = ruta.read_text(encoding="utf-8")
-    hallazgos = lint(texto, abiertos=_abiertos(vault))
+    assert codigo_add == EXITO
 
+    texto = (vault / "AHORA.md").read_text(encoding="utf-8")
     assert DESCONOCIDO in texto, "el tipo desconocido no quedó escrito"
-    assert MAL_ESCRITA in texto, "la marca mal escrita no quedó escrita: el lint no rechaza"
+    assert MAL_ESCRITA in texto, "la marca mal escrita no quedó escrito: el lint no rechaza"
 
-    preguntas = [h for h in hallazgos if h.grado == PREGUNTA]
-    assert len(preguntas) == 1, [str(h) for h in hallazgos]
-    assert "cachureo" in preguntas[0].defecto
-
-    errores = [h for h in hallazgos if h.grado == ERROR]
-    assert len(errores) == 1, [str(h) for h in errores]
-    assert "**Pendiente**" in errores[0].defecto
-    assert "**pendiente**" in errores[0].correccion, "el error no dice cómo corregirse"
+    codigo_lint, salida, _ = correr_cli(["entry", "lint", "--vault", str(vault)])
+    # La ontología cerrada mal escrita produce error -> código RECHAZO
+    assert codigo_lint == RECHAZO
+    assert "cachureo" in salida, "la pregunta de vocabulario no salió en el reporte"
+    assert "**Pendiente**" in salida, "el error de ontología cerrada no salió en el reporte"
+    assert "**pendiente**" in salida, "el error no dice cómo corregirse"
 
 
 def test_002_03_la_marca_mal_escrita_no_abre_ningun_pendiente() -> None:
     vault = _vault()
     antes = instantanea(vault)
-    ruta = vault / "AHORA.md"
-    ruta.write_text(
-        add(ruta.read_text(encoding="utf-8"), [MAL_ESCRITA], dia=HOY), encoding="utf-8"
+    codigo_add, _, _ = correr_cli(
+        ["entry", "add", "--vault", str(vault), "--dia", HOY, MAL_ESCRITA]
     )
-    lint(ruta.read_text(encoding="utf-8"), abiertos=_abiertos(vault))
+    assert codigo_add == EXITO
+    correr_cli(["entry", "lint", "--vault", str(vault)])
 
     assert delta(antes, instantanea(vault)) == {"AHORA.md": "modificado"}
 
@@ -88,7 +78,12 @@ def test_002_03_un_registro_fuera_del_ciclo_se_reporta() -> None:
     texto = (vault / "AHORA.md").read_text(encoding="utf-8")
     fuera = f"{texto}\n## Martes 25 de agosto\n\n{FUERA_DE_RANGO}\n"
 
-    hallazgos = lint(fuera, abiertos=_abiertos(vault))
+    # lint() es función pura sobre texto para verificar que no inventa días
+    libro = (vault / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
+    from tuku import vocab
+
+    abiertos = [t for terminos in vocab.leer(libro).values() for t in terminos]
+    hallazgos = lint(fuera, abiertos=abiertos)
     fuera_de_rango = [h for h in hallazgos if "fuera del ciclo" in h.defecto]
 
     assert len(fuera_de_rango) == 1, [str(h) for h in hallazgos]
@@ -98,12 +93,10 @@ def test_002_03_un_registro_fuera_del_ciclo_se_reporta() -> None:
 
 def test_002_03_el_lint_no_escribe_y_es_idempotente() -> None:
     vault = _vault()
-    abiertos = _abiertos(vault)
     antes = instantanea(vault)
 
-    texto = (vault / "AHORA.md").read_text(encoding="utf-8")
-    primero = formatear(lint(texto, abiertos=abiertos))
-    segundo = formatear(lint(texto, abiertos=abiertos))
+    _, primero, _ = correr_cli(["entry", "lint", "--vault", str(vault)])
+    _, segundo, _ = correr_cli(["entry", "lint", "--vault", str(vault)])
 
     assert delta(antes, instantanea(vault)) == {}, "el lint escribió en el vault"
     assert primero == segundo, "dos corridas del lint dan reportes distintos"

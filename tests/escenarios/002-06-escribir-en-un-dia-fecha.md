@@ -4,51 +4,51 @@
 
 ## Estado inicial
 
-El que dejó [`002-05-cerrar-pendiente`](002-05-cerrar-pendiente.md): los cinco horizontes existen y están vacíos.
+El que dejó [`002-05-cerrar-pendiente`](002-05-cerrar-pendiente.md): la tabla de pendientes vacía con su cabecera intacta.
 
 ## Escenario: escribir un pendiente en un día futuro lo fecha
 
 Dado el ciclo abierto del 11 al 17 de agosto, con HOY en el martes 11
 Cuando se inyecta, bajo `## Miércoles 12 de agosto`, la línea
 `- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo`
-Entonces nace el callout de fecha `^2026-08-12` en `PENDIENTES.md`
-Y contiene `- [[personal]] - pagar la sesión con el psicólogo`
-Y el miércoles 12 de `AHORA.md` abre con la transclusión de ese ancla
-Y el pendiente **no** aparece en `^sin-fecha` ni en ningún horizonte con nombre
+Entonces la tabla de `PENDIENTES.md` gana una fila con `con fecha` y `2026-08-12`:
+`| con fecha | 2026-08-12 | [[personal]] | pagar la sesión con el psicólogo |`
+Y el miércoles 12 de `AHORA.md` recibe por propagación en su región del día:
+Y el pendiente **no** aparece en `esta semana` ni en ningún horizonte postergado del autor
 
 Nació con fecha exacta sin pasar por la escalera, que describe cómo se concreta lo que nació difuso y no es un camino obligatorio ([`spec/pendientes.md`](../../spec/pendientes.md)).
 
 ## Escenario: fechar mueve, nunca copia
 
 Dado el mismo estado
-Cuando se termina la inyección
-Entonces el pendiente está en exactamente un callout
+Cuando se termina la inyección y propagación
+Entonces el pendiente está en exactamente una fila de `PENDIENTES.md`
 Y `tuku todo lint` no encuentra ninguna aparición duplicada
 
-Regla 1 de `spec/pendientes.md`, y el error que el vault real tuvo que prohibir por escrito: la misma tarea en el callout del día y en la caja de la semana ([`lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 7).
+Regla 1 de `spec/pendientes.md`, y el error que el vault real tuvo que prohibir por escrito: la misma tarea en dos filas ([`lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 7).
 
-## Escenario: el callout de fecha es efímero, el de horizonte no
+## Escenario: la fecha vive en la columna Cuándo
 
-Dado que `^2026-08-12` no existía antes de esta inyección
+Dado que la tabla no tenía pendientes con fecha antes de esta inyección
 Cuando nace
-Entonces nace por debajo de los cinco horizontes permanentes, sin desplazarlos
-Y ninguno de los cinco desaparece por seguir vacío
+Entonces entra como fila con columna `Cuándo` = `2026-08-12` y horizonte `con fecha`
+Y no se crean callouts ni encabezados en `PENDIENTES.md`
 
 ## Escenario: el movimiento de escalón no se registra en la bitácora
 
 Dado el pendiente ya fechado
 Cuando se revisa `AHORA.md`
-Entonces la única línea nueva es el registro `**pendiente**` que el autor escribió
-Y no hay ningún registro que narre que el pendiente cambió de callout
+Entonces la única línea de registro nueva es el registro `**pendiente**` que el autor escribió
+Y no hay ningún registro que narre que el pendiente cambió de escalón
 
 Mover un pendiente es un hecho del sistema, no de la vida del autor.
 
-## Escenario: inyectar dos veces no duplica el callout ni la transclusión
+## Escenario: inyectar dos veces no duplica la fila ni la propagación
 
-Dado el pendiente ya fechado y transcluido
+Dado el pendiente ya fechado y propagado
 Cuando se corre el comando otra vez
 Entonces el diff es vacío
-Y hay un solo callout `^2026-08-12` y una sola línea de transclusión en el miércoles
+Y hay una sola fila en `PENDIENTES.md` y una sola línea propagada en el miércoles
 
 ## Cómo se corre
 
@@ -58,5 +58,6 @@ uv run pytest tests/escenarios/ -k 002_06
 
 ## Qué se mira a mano
 
-- **Abrirlo en Obsidian**, que es donde esto se verifica: el miércoles 12 muestra el pendiente transcluido, no una caja de error ni el texto crudo del embed.
-- Que agendar se haya sentido como escribir en una agenda de papel. Si el autor tuvo que pensar en callouts o anclas, el punto 3 del epic no está cumplido.
+- **Abrirlo en Obsidian**, que es donde esto se verifica: el miércoles 12 muestra el pendiente en la región del día antes del primer registro.
+- Que agendar se haya sentido como escribir en una agenda de papel. Si el autor tuvo que pensar en columnas o comandos especiales, el punto 3 del epic no está cumplido.
+

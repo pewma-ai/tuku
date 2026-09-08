@@ -49,7 +49,7 @@ addopts = [
   "--strict-config",
   "-ra",
   # Por defecto NO se corren los tests que gastan tokens ni los que tocan la red.
-  "-m", "not agentic and not red",
+  "-m", "not agentic and not red and not pendiente",
 ]
 markers = [
   "spec: caso extraído de un bloque normativo de spec/ (nivel 1)",
@@ -60,6 +60,7 @@ markers = [
   "red: descarga o instala desde la red (p. ej. `uv tool install` desde git). Excluido salvo `-m red`",
   "unitario: test unitario en memoria, aislado del vault",
   "unit: alias de unitario",
+  "pendiente: escenario de un epic sin empezar. Falla a propósito. Excluido salvo `-m pendiente`",
   "lento: tarda más de un segundo",
 ]
 filterwarnings = ["error"]

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 SLUG = "003-01-dictado-del-dia-uno"
 PREVIO = None  # corre sobre el fixture `vacio`, no sobre el estado heredado
 DESDE = "2026-08-11"
@@ -14,6 +16,7 @@ FALTA = (
 )
 
 
+@pytest.mark.pendiente
 def test_003_01_el_agente_reproduce_los_registros_congelados() -> None:
     raise AssertionError(f"{SLUG}: sin implementar. Falta {FALTA}.")
 

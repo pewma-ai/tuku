@@ -2,6 +2,8 @@
 
 Un escenario es una historia en formato Dado/Cuando/Entonces con su arnés al lado: `001-01-instalacion-minima.md` es el caso, `test_001_01_instalacion_minima.py` lo ejecuta.
 
+**Los escenarios son pruebas de extremo a extremo (E2E) de cara al usuario.** Los tests unitarios prueban módulos y funciones puras de forma aislada; los tests de escenario **deben usar siempre el comando `tuku`** (la superficie CLI mediante `main(argv)` o proceso), nunca llamadas directas a funciones internas. Solo ejecutando el comando completo se garantizan sus efectos colaterales reales (propagación de vistas, creación de archivos, reporte de errores y códigos de salida).
+
 Son narrativos y no unitarios porque buena parte de TUKU depende de un agente y no da un resultado único. Lo que se puede verificar con un `assert` vive en el `.py`; lo que solo se puede juzgar leyendo el resultado queda escrito en el `.md` bajo "Qué se mira a mano", y no se finge que un test lo cubre.
 
 Un escenario referencia `spec/` pero no lo reemplaza. Si un escenario contradice `spec/`, se corrige `spec/` (ver [`../../devel/epics.md`](../../devel/epics.md), "los epics mueven el diseño"), no el escenario.
@@ -94,7 +96,6 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`002-04-abrir-pendiente.md`](002-04-abrir-pendiente.md) | Epic 002, fase 2 | Abrir es copiar el cuerpo literal. Lleva un `#REVISAR` sobre una ambigüedad de `spec/pendientes.md` |
 | [`002-05-cerrar-pendiente.md`](002-05-cerrar-pendiente.md) | Epic 002, fase 2 | Cerrar es borrar, y el cierre sin pareja se reporta sin inventar nada |
 | [`002-06-escribir-en-un-dia-fecha.md`](002-06-escribir-en-un-dia-fecha.md) | Epic 002, fase 2 | El punto 3 del epic: agendar es escribir donde corresponde. Fechar mueve, nunca copia |
-| [`002-07-transclusiones-sincronizadas.md`](002-07-transclusiones-sincronizadas.md) | Epic 002, fase 2 | Las dos direcciones de falla, por la segunda vía. La silenciosa es la que justifica el comando |
 | [`002-08-crear-ambito.md`](002-08-crear-ambito.md) | Epic 002, fase 3 mínima | El árbol correcto y el enlazado retroactivo, que acá llega solo hasta `AHORA.md` |
 | [`002-09-crear-nota.md`](002-09-crear-nota.md) | Epic 002, fase 5 mínima | Obliga a agregar la consecuencia "nota" a `spec/flujo-informacion.md` |
 | [`002-10-cli-superficie.md`](002-10-cli-superficie.md) | Epic 002 | Fuera de la cadena: nouns y verbs en `-h`, códigos de salida, y el barrido de que todo error nombre la corrección |

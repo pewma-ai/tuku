@@ -27,7 +27,7 @@ Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2:
 | `ambitos/AGENTS.md`, `ambitos/CADENCIAS.md` | Reglas y cadencias de toda la rama |
 | `ambitos/personal/` | La única rama inicial: `AGENTS.md`, `CADENCIAS.md`, `CAPACIDAD.md`, `personal.md` |
 | `notas/AGENTS.md` | Reglas del zettelkasten |
-| `reglas/config.tuku.md` | Zona horaria y tipo de ciclo, en prosa |
+| `reglas/config.tuku.md` | `TZ`, `cycle_type` y `tuku_template`, en una tabla |
 
 La tabla es la referencia, no un inventario cerrado: lo que importa es que cualquier cosa que se agregue supone algo sobre el autor y hay que justificarlo.
 

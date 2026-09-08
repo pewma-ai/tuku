@@ -1,11 +1,11 @@
 """Lectura de `AHORA.md`: el rango del ciclo y los encabezados de día.
 
-Lo comparten `tuku entry lint` y `tuku transclusion sync`, que necesitan lo
+Lo comparten `tuku entry lint` y `tuku cycle lint`, que necesitan lo
 mismo: saber qué día es cada `## <día>` y si cae dentro del ciclo abierto.
 
 El encabezado no lleva año a propósito (`## Martes 11 de agosto` se lee mejor),
 así que el año sale del rango del frontmatter. Por eso todo aquí depende de que
-`desde` y `hasta` estén resueltos: en un vault recién sembrado lo están.
+`from` y `to` estén resueltos: en un vault recién sembrado lo están.
 
 **Qué lee y escribe:** lee `AHORA.md`. No escribe.
 """
@@ -18,18 +18,18 @@ from datetime import date
 from tuku.init import MESES
 
 _DIA = re.compile(r"^## \w+ (\d{1,2}) de (\w+)")
-_CAMPO = re.compile(r"^(desde|hasta):\s*(\d{4}-\d{2}-\d{2})\s*$")
+_CAMPO = re.compile(r"^(from|to):\s*(\d{4}-\d{2}-\d{2})\s*$")
 
 
 def rango(ahora: str) -> tuple[date, date] | None:
-    """`desde` y `hasta` del frontmatter, o `None` si siguen siendo placeholders."""
+    """`from` y `to` del frontmatter OKF, o `None` si siguen siendo placeholders."""
     campos: dict[str, date] = {}
     for linea in ahora.splitlines()[:10]:
         if m := _CAMPO.match(linea.strip()):
             campos[m.group(1)] = date.fromisoformat(m.group(2))
-    if "desde" not in campos or "hasta" not in campos:
+    if "from" not in campos or "to" not in campos:
         return None
-    return campos["desde"], campos["hasta"]
+    return campos["from"], campos["to"]
 
 
 def fecha_del_dia(encabezado: str, desde: date, hasta: date) -> date | None:

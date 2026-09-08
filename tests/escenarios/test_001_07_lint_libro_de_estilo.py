@@ -64,7 +64,8 @@ def test_001_07_falta_marcador_de_autor() -> None:
     vault = _vault()
     ruta = vault / "LIBRO-DE-ESTILO.md"
     lineas = [
-        lin for lin in ruta.read_text(encoding="utf-8").splitlines()
+        lin
+        for lin in ruta.read_text(encoding="utf-8").splitlines()
         if "**Nombre del autor:**" not in lin
     ]
     ruta.write_text("\n".join(lineas) + "\n", encoding="utf-8")
@@ -89,7 +90,8 @@ def test_001_07_falta_encabezado_de_contrato() -> None:
         vault = _vault()
         ruta = vault / "LIBRO-DE-ESTILO.md"
         lineas = [
-            lin for lin in ruta.read_text(encoding="utf-8").splitlines()
+            lin
+            for lin in ruta.read_text(encoding="utf-8").splitlines()
             if lin.strip() != encabezado
         ]
         ruta.write_text("\n".join(lineas) + "\n", encoding="utf-8")

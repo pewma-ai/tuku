@@ -34,8 +34,18 @@ _HOME_EMPAQUETADO = _PAQUETE / "_home"
 #: a propósito. Nada en `spec/` obliga a que un ciclo semanal empiece en lunes.
 DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 MESES = [
-    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
 ]
 
 _MARCADOR_AUTOR = "**Nombre del autor:**"
@@ -106,6 +116,55 @@ def resolver_home(home: Path | str | None = None) -> Path:
     )
 
 
+#: Lo que la plantilla deja para que la instalación ponga la zona real.
+_PLACEHOLDER_TZ = "TZ-DEL-SISTEMA"
+
+#: Cuando el sistema no dice cuál es su zona. No es una elección: es lo único
+#: que no miente. El autor la corrige en `reglas/config.tuku.md`.
+TZ_FALLBACK = "UTC"
+
+
+def tz_del_sistema() -> str:
+    """El nombre IANA de la zona horaria de esta máquina, o `TZ_FALLBACK`.
+
+    Se lee del entorno y del sistema de archivos, sin dependencias externas:
+    `TZ` si está puesta, el destino del symlink `/etc/localtime` (macOS y la
+    mayoría de los Linux) y `/etc/timezone` (Debian). `datetime.astimezone()`
+    no sirve, porque da la abreviatura local (`CLT`) y no el nombre IANA.
+    """
+    entorno = os.environ.get("TZ", "").strip()
+    if entorno:
+        return entorno
+
+    localtime = Path("/etc/localtime")
+    if localtime.is_symlink():
+        partes = localtime.resolve().parts
+        if "zoneinfo" in partes:
+            corte = len(partes) - 1 - partes[::-1].index("zoneinfo")
+            zona = "/".join(partes[corte + 1 :])
+            if zona:
+                return zona
+
+    debian = Path("/etc/timezone")
+    if debian.is_file():
+        zona = debian.read_text(encoding="utf-8").strip()
+        if zona:
+            return zona
+
+    return TZ_FALLBACK
+
+
+def _sembrar_tz(destino: Path) -> None:
+    """Pone la zona horaria de esta máquina en `reglas/config.tuku.md`."""
+    config = destino / "reglas" / "config.tuku.md"
+    if not config.is_file():
+        return
+    contenido = config.read_text(encoding="utf-8")
+    if _PLACEHOLDER_TZ not in contenido:
+        return
+    config.write_text(contenido.replace(_PLACEHOLDER_TZ, tz_del_sistema()), encoding="utf-8")
+
+
 def lunes_de_esta_semana(hoy: date) -> date:
     return hoy - timedelta(days=hoy.weekday())
 
@@ -119,8 +178,8 @@ def _sembrar_ahora(contenido: str, desde: date) -> str:
     dia_inicio = f"## {DIAS[desde.weekday()]} {desde.day} de {MESES[desde.month - 1]}"
     dia_fin = f"## {DIAS[hasta.weekday()]} {hasta.day} de {MESES[hasta.month - 1]}"
 
-    contenido = contenido.replace("desde: AAAA-MM-DD", f"desde: {desde.isoformat()}")
-    contenido = contenido.replace("hasta: AAAA-MM-DD", f"hasta: {hasta.isoformat()}")
+    contenido = contenido.replace("from: AAAA-MM-DD", f"from: {desde.isoformat()}")
+    contenido = contenido.replace("to: AAAA-MM-DD", f"to: {hasta.isoformat()}")
 
     solo_extremos = (
         "## Lunes DD de mes" in contenido
@@ -137,7 +196,6 @@ def _sembrar_ahora(contenido: str, desde: date) -> str:
             real = f"## {DIAS[fecha.weekday()]} {fecha.day} de {MESES[fecha.month - 1]}"
             contenido = contenido.replace(placeholder, real)
     return contenido
-
 
 
 def _sembrar_autor(destino: Path, autor: str) -> None:
@@ -164,32 +222,35 @@ def _sembrar_autor(destino: Path, autor: str) -> None:
 def init(
     destino: Path | str,
     *,
-    variante: str = "vanilla",
+    variant: str = "vanilla",
+    variante: str | None = None,
+    author: str | None = None,
     autor: str | None = None,
     desde: date | None = None,
     force: bool = False,
     home: Path | str | None = None,
 ) -> Path:
-    """Siembra un vault de la `variante` en `destino` y devuelve su ruta.
+    """Siembra un vault de la `variant` en `destino` y devuelve su ruta.
 
     Sembrar en un directorio que ya tiene contenido se rechaza con
     `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. `desde` fija
-    el primer día del ciclo (por defecto, el lunes de esta semana). `autor`, si
+    el primer día del ciclo (por defecto, el lunes de esta semana). `author`, si
     se pasa y no viene vacío, se escribe en `LIBRO-DE-ESTILO.md`.
     """
+    valor_variante = variante if variante is not None else variant
+    valor_autor = autor if autor is not None else author
     destino = Path(destino).expanduser()
     home_dir = resolver_home(home)
-    variante_dir = home_dir / "template" / variante
+    variante_dir = home_dir / "template" / valor_variante
     if not variante_dir.is_dir():
         raise TukuHomeInvalido(
-            f"no existe la variante {variante!r} en {home_dir / 'template'}"
+            f"no existe la variante {valor_variante!r} en {home_dir / 'template'}"
         )
 
     if destino.exists() and any(destino.iterdir()):
         if not force:
             raise DestinoNoVacio(
-                f"{destino} ya tiene contenido. Usa `tuku init --force` para "
-                "reemplazarlo."
+                f"{destino} ya tiene contenido. Usa `tuku init --force` para reemplazarlo."
             )
         shutil.rmtree(destino)
 
@@ -207,8 +268,9 @@ def init(
             _sembrar_ahora(ahora.read_text(encoding="utf-8"), desde), encoding="utf-8"
         )
 
+    _sembrar_tz(destino)
 
-    if autor and autor.strip():
-        _sembrar_autor(destino, autor.strip())
+    if valor_autor and valor_autor.strip():
+        _sembrar_autor(destino, valor_autor.strip())
 
     return destino

@@ -55,7 +55,7 @@ def preparar_playground(slug: str) -> Path:
 #: Marcas que el template deja para que el instalador las sustituya. Ninguna
 #: puede sobrevivir a una instalación: si sobrevive, el instalador no conoce
 #: un placeholder que el template sí usa.
-PLACEHOLDERS = ("AAAA-MM-DD", "DD de mes")
+PLACEHOLDERS = ("AAAA-MM-DD", "DD de mes", "TZ-DEL-SISTEMA")
 
 
 def diff_recursivo(a: Path, b: Path, *, ignorar: frozenset[str] = frozenset()) -> list[str]:
@@ -116,11 +116,17 @@ def ahora_sembrado(template_variante: Path, *, desde: str, hasta: str, dias: lis
     if not plantilla_path.is_file():
         plantilla_path = template_variante / "AHORA.md"
     plantilla = plantilla_path.read_text(encoding="utf-8")
-    esperado = plantilla.replace("desde: AAAA-MM-DD", f"desde: {desde}")
-    esperado = esperado.replace("hasta: AAAA-MM-DD", f"hasta: {hasta}")
+    esperado = plantilla.replace("from: AAAA-MM-DD", f"from: {desde}")
+    esperado = esperado.replace("to: AAAA-MM-DD", f"to: {hasta}")
 
     posiciones = [
-        "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo",
     ]
     if len(dias) != len(posiciones):
         raise ValueError(f"se esperaban {len(posiciones)} días, llegaron {len(dias)}")
@@ -133,4 +139,3 @@ def ahora_sembrado(template_variante: Path, *, desde: str, hasta: str, dias: lis
             )
         esperado = esperado.replace(placeholder, real)
     return esperado
-

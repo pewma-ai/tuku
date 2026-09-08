@@ -1,7 +1,8 @@
 ---
-ciclo: semanal
-desde: AAAA-MM-DD
-hasta: AAAA-MM-DD
+type: Logbook
+status: draft
+from: AAAA-MM-DD
+to: AAAA-MM-DD
 ---
 
 # Actividad diaria

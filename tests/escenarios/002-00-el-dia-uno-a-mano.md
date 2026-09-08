@@ -11,7 +11,7 @@ El fixture es el día completo, los registros de la Parte 2 tal como están, no 
 1. **El ciclo se abre desde la plantilla.** Si no existe `AHORA.md` para la fecha, se crea a partir de `reglas/plantilla/AHORA.md` con la semana completa (lunes a domingo). Si ya existe, no se sobreescribe.
 2. **El registro queda bien puesto.** Dados los campos de un hecho (hora, ámbito, marca de la ontología cerrada, clasificación, cuerpo), lo que queda escrito cumple las reglas de `docs/` y `spec/`, en el día correcto y en orden cronológico.
 3. **Los pendientes se abren y se cierran solos.** Un registro `**pendiente**` los abre, una `~~(Hecho)~~` los cierra, sin que el autor toque `PENDIENTES.md`. Un cierre sin pendiente abierto correspondiente escribe el registro igual, informa que no había pareja y no inventa ninguna.
-4. **Escribir en un día actual o futuro fecha el pendiente.** El pendiente toma la fecha de ese día y se transcluye al inicio del día.
+4. **Escribir en un día futuro fecha el pendiente.** El pendiente toma la fecha de ese día y queda propagado al inicio del día.
 5. **Crear un ámbito lo deja bien guardado y enlaza hacia atrás.** El árbol queda correcto y las menciones sueltas del ciclo en curso se convierten en enlaces, de forma retroactiva.
 6. **Crear una nota a petición.** El autor la pide, la nota se escribe, queda el registro en la bitácora que deja constancia, y si lo pidió así, queda enlazada a su ámbito.
 
@@ -30,7 +30,7 @@ Dos superficies:
 
 - **La consecuencia "nota":** se agregó a la tabla de [`spec/flujo-informacion.md`](../../spec/flujo-informacion.md) con su regla [`template/vanilla/reglas/notas.tuku.md`](../../template/vanilla/reglas/notas.tuku.md).
 - **`~~(Hecho)~~` sin preexistente:** el comando informa y no rechaza ni inventa el pendiente.
-- **El día de hoy no fecha:** escribir bajo hoy va a `^sin-fecha`; solo un día futuro fecha.
+- **El día de hoy no fecha:** escribir bajo hoy entra al horizonte del ciclo en curso (`esta semana`); solo un día futuro fecha (`con fecha`).
 - **`cycle open`:** calcula semana de lunes a domingo e instancia plantilla.
 
 ## Criterio de salida
@@ -51,7 +51,6 @@ Nada que dependa de un LLM (Epic 003). Tampoco ciclos, cadencias, inferencia, ni
 - [`002-04-abrir-pendiente.md`](002-04-abrir-pendiente.md) — Apertura automática de pendiente en `PENDIENTES.md`.
 - [`002-05-cerrar-pendiente.md`](002-05-cerrar-pendiente.md) — Cierre automático con `~~(Hecho)~~` y reporte de no emparejados.
 - [`002-06-escribir-en-un-dia-fecha.md`](002-06-escribir-en-un-dia-fecha.md) — Fechado automático al escribir en día específico.
-- [`002-07-transclusiones-sincronizadas.md`](002-07-transclusiones-sincronizadas.md) — Sincronización bidireccional de transclusiones.
 - [`002-08-crear-ambito.md`](002-08-crear-ambito.md) — Creación de ámbito y enlazado retroactivo.
 - [`002-09-crear-nota.md`](002-09-crear-nota.md) — Creación de nota enlazada a ámbito y bitácora.
 

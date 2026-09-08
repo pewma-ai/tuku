@@ -40,39 +40,61 @@ def slug(titulo: str) -> str:
 def crear(
     vault: Path,
     *,
-    titulo: str,
-    cuerpo: str,
+    title: str = "",
+    titulo: str = "",
+    body: str = "",
+    cuerpo: str = "",
+    scope: str | None = None,
     ambito: str | None = None,
-    hoy: date,
+    today: date | None = None,
+    hoy: date | None = None,
 ) -> Path:
     """Escribe la nota en `notas/` y devuelve su ruta. Idempotente.
 
     Si el archivo ya existe no lo toca: repetir la operación no duplica ni
     reescribe lo que el autor pueda haber editado a mano.
     """
-    ruta = vault / "notas" / f"{slug(titulo)}.md"
+    valor_titulo = title or titulo
+    valor_cuerpo = body or cuerpo
+    valor_scope = scope if scope is not None else ambito
+    valor_fecha = today or hoy or date.today()
+
+    ruta = vault / "notas" / f"{slug(valor_titulo)}.md"
     if ruta.exists():
         return ruta
 
     ver_ademas = ""
-    if ambito is not None:
+    if valor_scope is not None:
         ver_ademas = (
             f"\n{VER_ADEMAS}\n\n"
-            f"* [[{ambito}]] — el ámbito al que pertenece lo que esta nota explica.\n"
+            f"* [[{valor_scope}]] — el ámbito al que pertenece lo que esta nota explica.\n"
         )
 
     ruta.parent.mkdir(parents=True, exist_ok=True)
-    ruta.write_text(
-        f"---\ncreated: {hoy.isoformat()}\n---\n\n# {titulo}\n\n{cuerpo.strip()}\n{ver_ademas}",
-        encoding="utf-8",
+    contenido = (
+        f"---\ncreated: {valor_fecha.isoformat()}\n---\n\n"
+        f"# {valor_titulo}\n\n{valor_cuerpo.strip()}\n{ver_ademas}"
     )
+    ruta.write_text(contenido, encoding="utf-8")
     return ruta
 
 
-def registro_de_constancia(nota: Path, *, hora: str, ambito: str | None) -> str:
+create = crear
+
+
+def registro_de_constancia(
+    nota: Path,
+    *,
+    time: str = "",
+    hora: str = "",
+    scope: str | None = None,
+    ambito: str | None = None,
+) -> str:
     """La línea de bitácora que deja constancia de la nota creada."""
-    prefijo = f"[[{ambito}]] " if ambito else ""
-    return f"- {hora} - {prefijo}**nota**: escribí la nota [[{nota.stem}]]"
+    valor_hora = time or hora
+    valor_scope = scope if scope is not None else ambito
+    prefijo = f"[[{valor_scope}]] " if valor_scope else ""
+    return f"- {valor_hora} - {prefijo}**nota**: escribí la nota [[{nota.stem}]]"
 
 
 def lint(nota: str) -> list[str]:

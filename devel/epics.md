@@ -127,11 +127,7 @@ El agente deja de responder y empieza a observar: infiere ámbitos y notas tipad
 
 ## Wishlist
 
-Lo que hay que hacer y no bloquea a nadie:
-- **Endurecimiento:** casos de error, reconstrucción completa (`tuku rebuild`) e idempotencia global sobre el sistema entero. Un error del autor nunca se rechaza, se reporta.
-- **Prueba con usuario ajeno:** verificar instalación y primer registro leyendo solo `AGENTS.md`.
-- **Publicación web:** visor estático con Quartz.
-- **Captura móvil:** integración ligera por Telegram.
+Lo que hay que hacer y no bloquea a nadie vive en [`TODO.md`](../TODO.md).
 
 ## Apéndice: referencia de mac-jpgil
 

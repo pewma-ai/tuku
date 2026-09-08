@@ -17,19 +17,23 @@ from tuku.config import (
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 
 
-def test_parsear_config_md_extrae_pares_clave_valor() -> None:
+def test_parsear_config_md_lee_la_tabla() -> None:
     texto = (
         "# Configuración\n\n"
         "Prosa explicativa que no debe interferir.\n\n"
-        "**Zona horaria:** America/Santiago\n"
-        "**Tipo de ciclo:** semanal\n"
-        "**Campo extra:** valor personalizado\n\n"
+        "> [!info] Un callout tampoco interfiere\n"
+        "> Ni siquiera si menciona `TZ`.\n\n"
+        "| Campo | Valor |\n"
+        "| --- | --- |\n"
+        "| `TZ` | `America/Santiago` |\n"
+        "| `cycle_type` | `semanal` |\n"
+        "| `Campo extra` | valor personalizado |\n\n"
         "## Otra sección\n"
     )
     datos = parsear_config_md(texto)
     assert datos == {
-        "Zona horaria": "America/Santiago",
-        "Tipo de ciclo": "semanal",
+        "TZ": "America/Santiago",
+        "cycle_type": "semanal",
         "Campo extra": "valor personalizado",
     }
 
@@ -51,7 +55,8 @@ def test_leer_config_sobre_template_vanilla() -> None:
     cfg = leer_config(vanilla)
 
     assert cfg.vault == vanilla
-    assert cfg.zona_horaria == "America/Santiago"
+    # En el template la zona es el placeholder; `tuku init` la sustituye al sembrar.
+    assert cfg.zona_horaria == "TZ-DEL-SISTEMA"
     assert cfg.tipo_ciclo == "semanal"
     assert cfg.autor is None
 
@@ -69,7 +74,9 @@ def test_leer_config_sobre_template_vanilla() -> None:
 
 
 def test_leer_config_en_memoria_sin_disco(tmp_path: Path) -> None:
-    texto_cfg = "**Zona horaria:** UTC\n**Tipo de ciclo:** mensual\n"
+    texto_cfg = (
+        "| Campo | Valor |\n| --- | --- |\n| `TZ` | `UTC` |\n| `cycle_type` | `mensual` |\n"
+    )
     texto_libro = (
         "## El autor\n\n"
         "**Nombre del autor:** Test Bot\n\n"

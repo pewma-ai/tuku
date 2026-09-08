@@ -1,3 +1,7 @@
+---
+type: Capacity
+---
+
 # Capacidad de personal
 
 Lo que rinde un día tuyo, y lo que se va antes de que puedas planificar nada.

@@ -56,6 +56,7 @@ from vault import (  # noqa: E402
     preparar_playground,
 )
 
+from tuku.config import parsear_config_md  # noqa: E402
 from tuku.init import init  # noqa: E402
 
 FECHA_FIJA = date(2026, 8, 11)
@@ -77,17 +78,23 @@ DIAS = [
 ]
 
 
-
 def test_001_02_init_siembra_el_estado_cero_byte_a_byte() -> None:
     destino = preparar_playground("001-02-init-siembra-el-estado-cero")
     init(destino, variante="vanilla", desde=FECHA_FIJA, home=RAIZ)
 
-    diferencias = diff_recursivo(destino, TEMPLATE_VANILLA, ignorar=frozenset({"AHORA.md"}))
+    # Los dos archivos que la instalación resuelve: el ciclo y la zona horaria.
+    # El resto tiene que ser idéntico al template, byte a byte.
+    resueltos = frozenset({"AHORA.md", "config.tuku.md"})
+    diferencias = diff_recursivo(destino, TEMPLATE_VANILLA, ignorar=resueltos)
     assert not diferencias, f"difiere de template/vanilla/: {diferencias}"
 
     obtenido = (destino / "AHORA.md").read_text(encoding="utf-8")
     esperado = ahora_sembrado(TEMPLATE_VANILLA, desde=DESDE, hasta=HASTA, dias=DIAS)
     assert obtenido == esperado, "AHORA.md no quedó como el template con las fechas resueltas"
+
+    config = (destino / "reglas" / "config.tuku.md").read_text(encoding="utf-8")
+    zona = parsear_config_md(config)["TZ"]
+    assert zona and zona != "TZ-DEL-SISTEMA", "la zona horaria del sistema no se sembró"
 
     vivos = placeholders_sin_sustituir(destino)
     assert not vivos, f"quedaron placeholders sin sustituir: {vivos}"

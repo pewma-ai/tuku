@@ -21,6 +21,7 @@ Ejecutable directo: python3 tests/escenarios/test_002_09_crear_nota.py
 from __future__ import annotations
 
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -28,10 +29,10 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
-from cadena import delta, instantanea, preparar_paso  # noqa: E402
+from cadena import correr_cli, delta, instantanea, preparar_paso  # noqa: E402
 
 from tuku import note  # noqa: E402
-from tuku.entry import add  # noqa: E402
+from tuku.cli import EXITO, RECHAZO  # noqa: E402
 
 SLUG = "002-09-crear-nota"
 PREVIO = "002-08-crear-ambito"
@@ -48,19 +49,27 @@ FIXTURE = Path(__file__).parent / "fixtures" / SLUG / "cuerpo-nota.md"
 
 def _crear(vault: Path) -> Path:
     """El flujo del punto 5: escribir la nota y dejar constancia en la bitácora."""
-    ruta = note.crear(
-        vault,
-        titulo=TITULO,
-        cuerpo=FIXTURE.read_text(encoding="utf-8"),
-        ambito=AMBITO,
-        hoy=DESDE,
+    codigo, _, err = correr_cli(
+        [
+            "note",
+            "create",
+            TITULO,
+            "--body-file",
+            str(FIXTURE),
+            "--scope",
+            AMBITO,
+            "--today",
+            DESDE.isoformat(),
+            "--time",
+            HORA,
+            "--day",
+            HOY,
+            "--vault",
+            str(vault),
+        ]
     )
-    constancia = note.registro_de_constancia(ruta, hora=HORA, ambito=AMBITO)
-    ahora = vault / "AHORA.md"
-    texto = ahora.read_text(encoding="utf-8")
-    if constancia not in texto:
-        ahora.write_text(add(texto, [constancia], dia=HOY), encoding="utf-8")
-    return ruta
+    assert codigo == EXITO, err
+    return vault / "notas" / ARCHIVO
 
 
 def test_002_09_la_nota_queda_escrita_enlazada_y_con_constancia() -> None:
@@ -87,19 +96,31 @@ def test_002_09_la_nota_queda_escrita_enlazada_y_con_constancia() -> None:
 
 def test_002_09_ver_ademas_existe_y_cada_enlace_lleva_motivo() -> None:
     vault = preparar_paso(SLUG, previo=PREVIO, desde=DESDE)
-    contenido = _crear(vault).read_text(encoding="utf-8")
+    ruta = _crear(vault)
+    contenido = ruta.read_text(encoding="utf-8")
 
     assert note.VER_ADEMAS in contenido
-    assert note.lint(contenido) == [], "el lint encontró hallazgos"
+    codigo, salida, err = correr_cli(["note", "lint", str(ruta)])
+    assert codigo == EXITO, err
+    assert "sin hallazgos" in salida
 
 
 def test_002_09_el_lint_reporta_un_enlace_sin_motivo() -> None:
-    sin_motivo = f"# Nota\n\ncuerpo\n\n{note.VER_ADEMAS}\n\n* [[depto-centro]]\n"
-    hallazgos = note.lint(sin_motivo)
+    with tempfile.TemporaryDirectory() as tmp:
+        sin_motivo = Path(tmp) / "sin-motivo.md"
+        sin_motivo.write_text(
+            f"# Nota\n\ncuerpo\n\n{note.VER_ADEMAS}\n\n* [[depto-centro]]\n",
+            encoding="utf-8",
+        )
+        codigo, salida, _ = correr_cli(["note", "lint", str(sin_motivo)])
+        assert codigo == RECHAZO
+        assert "para qué conecta" in salida
 
-    assert len(hallazgos) == 1, hallazgos
-    assert "para qué conecta" in hallazgos[0]
-    assert note.lint("# Nota\n\ncuerpo\n")[0].startswith("error: falta la sección")
+        sin_seccion = Path(tmp) / "sin-seccion.md"
+        sin_seccion.write_text("# Nota\n\ncuerpo\n", encoding="utf-8")
+        codigo, salida, _ = correr_cli(["note", "lint", str(sin_seccion)])
+        assert codigo == RECHAZO
+        assert "falta la sección" in salida
 
 
 def test_002_09_crear_dos_veces_no_duplica() -> None:

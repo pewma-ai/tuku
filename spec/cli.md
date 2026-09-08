@@ -41,6 +41,8 @@ Un comando que no puede determinar algo **no lo adivina y no escribe a medias**.
 
 De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa y nunca escribe. Verificar y corregir son operaciones distintas, y mezclarlas quita la oportunidad de revisar.
 
+**Ningún comando de verificación repara.** Vale para los `lint` y para `tuku doctor`, que los agrega y revisa además lo que ninguno cubre. Ante un hallazgo, el doctor nombra la copia original del template con la que comparar y para ahí. Copiar sobre el vault del autor es consecuencia mayor, y quien decide es él.
+
 ## No entra
 
 - Qué comandos existen y qué hace cada uno. Eso lo especifica la spec de la primitiva que el comando toca: el registro en [bitacora.md](bitacora.md), los pendientes en [pendientes.md](pendientes.md), el ciclo en [ciclo.md](ciclo.md).

@@ -36,17 +36,24 @@ def _patron(keyword: str) -> re.Pattern[str]:
     return re.compile(rf"(?<![\w-]){cuerpo}(?![\w-])", re.IGNORECASE)
 
 
-def backfill(texto: str, *, ambito: str, keywords: list[str]) -> tuple[str, int]:
-    """Enlaza las menciones de `keywords` a `[[ambito]]`. Devuelve texto y cuántas.
+def backfill(
+    texto: str,
+    *,
+    scope: str = "",
+    ambito: str = "",
+    keywords: list[str],
+) -> tuple[str, int]:
+    """Enlaza las menciones de `keywords` a `[[scope]]`. Devuelve texto y cuántas.
 
     Idempotente: lo que ya está enlazado no se vuelve a enlazar, porque los
     tramos dentro de `[[...]]` no se tocan.
     """
+    valor_scope = scope or ambito
     patrones = [_patron(k) for k in keywords if k.strip()]
     if not patrones:
         return texto, 0
 
-    enlace = f"[[{ambito}]]"
+    enlace = f"[[{valor_scope}]]"
     cambios = 0
 
     # El texto se parte en tramos libres separados por los enlaces que ya están.

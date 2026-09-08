@@ -24,3 +24,10 @@ repos:
         language: system
         pass_filenames: false
         types: [python]
+
+      - id: home-empaquetado
+        name: regenera src/tuku/_home desde template/
+        entry: uv run python -m tuku._pack
+        language: system
+        pass_filenames: false
+        files: ^template/

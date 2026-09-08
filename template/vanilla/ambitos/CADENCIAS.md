@@ -1,47 +1,55 @@
-# Cadencias de todos los ámbitos
+---
+type: Cadence
+---
 
-Lo que se repite sin importar el frente de actividad. Una cadencia por encabezado `##`.
+# Cadencias del ciclo
 
-Formato de cada una:
+Abrir y cerrar la semana. Si tu ritmo no es de lunes a viernes más un fin de semana, cambia el `Cuándo` más abajo.
 
-```markdown
-## Nombre de la cadencia
 
-**Cuándo:** día exacto 10, mensual
-**Emite:** pendiente con fecha
-**Texto:** el cuerpo literal del pendiente que se va a crear
+> [!info] Ver cómo se escribe una cadencia en el [LIBRO DE ESTILO](../LIBRO-DE-ESTILO.md#Cadencias).
+
+## Apertura de la semana
+
+**Cuándo:** lunes, semanal
+**Emite:** `AHORA.md`, el ciclo en curso
 
 ### Procedimiento
-Cómo se hace, con el detalle que haga falta.
+El lunes, `AHORA.md` tiene su frontmatter con las fechas del ciclo y los días vacíos. El callout `esta-semana` de `PENDIENTES.md` contiene lo comprometido para estos días y nada más.
+
+Después cada día tiene sus registros en orden de hora. Llenarlo no es una cadencia, es el uso normal del sistema.
+
+> [!NOTE] Comandos
+> `tuku cycle open`
+>
+> Abre el ciclo o verifica el que ya está abierto. Es idempotente: correrlo dos veces no duplica nada. Con `--fecha` abre un ciclo que no empieza hoy.
+>
+> `tuku entry add "- HH:MM - [[ambito]] **clasificacion**: cuerpo"`
+> `tuku todo open "<la línea del registro>" --ancla esta-semana`
+> `tuku todo close "<la línea del registro>"`
+>
+> El primero escribe el registro en el día que corresponde. Los otros dos aplican su consecuencia sobre `PENDIENTES.md`, siempre después de que la línea ya esté escrita.
 
 ### Historia
-- AAAA-MM-DD: qué se aprendió y por qué la cadencia quedó así.
-```
-
-La mayoría de las cadencias pertenecen a un ámbito concreto y van en el `CADENCIAS.md` de esa carpeta. Acá quedan solo las que no dependen de ningún frente: las del ciclo mismo.
-
-Vienen dos sembradas, porque el ciclo de partida es la semana y la semana tiene dos ritmos distintos, no uno. Bórralas si no te sirven.
+- Sembrada al instalar. El día que no se registra no se recupera después.
 
 ## Cierre de la semana
 
-**Cuándo:** domingo, semanal
-**Emite:** pendiente con fecha
-**Texto:** cerrar la semana: revisar lo hecho, mover lo que quedó abierto y mirar la semana que viene
+**Cuándo:** viernes, semanal
+**Emite:** `bitacoras/bitacora-<desde>-<hasta>.md`, el ciclo cerrado
 
 ### Procedimiento
-Leer la bitácora de los siete días. Lo que quedó en `esta-semana` sin hacer se decide de nuevo: pasa a `proxima-semana`, recibe fecha, o se cierra porque ya no importa. Un pendiente que rueda tres semanas seguidas casi nunca es un pendiente.
+El viernes, la semana está en `bitacoras/bitacora-<desde>-<hasta>.md` y ya no se toca. `esta-semana` queda vacío: lo que no se hizo está en `proxima-semana`, tiene fecha, o está cerrado porque ya no importa. Los tres `lint` no reportan nada.
+
+Un pendiente que rueda tres semanas seguidas casi nunca es un pendiente. Y lo que no quede escrito el viernes se pierde: el lunes ya no está el contexto.
+
+> [!NOTE] Comandos
+> `tuku todo propagate`
+> `tuku cycle lint`
+> `tuku todo lint`
+> `tuku entry lint`
+>
+> El primero regenera la vista de cada día desde `PENDIENTES.md`. Los tres `lint` revisan y reportan, no escriben: `cycle` la estructura del archivo, `todo` los pendientes, `entry` los registros. Lo que salga se arregla antes de archivar.
 
 ### Historia
 - Sembrada al instalar. Es la única cadencia sin la cual el resto del sistema se llena y no se vacía.
-
-## Fin de semana
-
-**Cuándo:** viernes, semanal
-**Emite:** pendiente con fecha
-**Texto:** dejar por escrito lo que no se hace hasta el lunes
-
-### Procedimiento
-El fin de semana no es la semana con menos trabajo: es otro ritmo, con otra gente y otras obligaciones. Lo que quede sin escribir el viernes se pierde, porque el lunes ya no está el contexto.
-
-### Historia
-- Sembrada al instalar. Existe para que el corte entre semana y fin de semana quede registrado en vez de ser un vacío en la bitácora.

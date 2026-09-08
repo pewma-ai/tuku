@@ -4,7 +4,7 @@
 
 ## Estado inicial
 
-El que dejó [`002-07-transclusiones-sincronizadas`](002-07-transclusiones-sincronizadas.md). El árbol tiene un solo ámbito, `personal`, el del estado cero. En el martes 11 hay escrito, desde [`002-02`](002-02-registro-en-su-dia.md), un registro que menciona el depto centro sin enlazarlo:
+El que dejó [`002-06-escribir-en-un-dia-fecha`](002-06-escribir-en-un-dia-fecha.md). El árbol tiene un solo ámbito, `personal`, el del estado cero. En el martes 11 hay escrito, desde [`002-02`](002-02-registro-en-su-dia.md), un registro que menciona el depto centro sin enlazarlo:
 
 ```text
 - 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp

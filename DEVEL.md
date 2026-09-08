@@ -43,14 +43,14 @@ La suite separa las pruebas puras de lógica interna de la evolución de integra
 
 | Capa | Ubicación | Propósito |
 |---|---|---|
-| **Unitarios** | [`tests/unitarios/`](tests/unitarios/README.md) | Funciones puras, parsers y lógica interna en memoria. Ultra-rápidos (~0,05s). |
-| **Escenarios** | [`tests/escenarios/`](tests/escenarios/README.md) | Pruebas narrativas Gherkin (`Dado / Cuando / Entonces`) encadenadas en `playground/`. |
+| **Unitarios** | [`tests/unitarios/`](tests/unitarios/README.md) | Funciones puras, parsers y lógica interna en memoria. Aislados, ultra-rápidos (~0,05s). |
+| **Escenarios** | [`tests/escenarios/`](tests/escenarios/README.md) | Pruebas E2E narrativas Gherkin (`Dado / Cuando / Entonces`) encadenadas en `playground/`. Evalúan el comportamiento de cara al usuario invocando el comando `tuku` (CLI), nunca funciones internas. |
 
 ### Cobertura de tests unitarios
 
 Toda función pura de parsing, formateo de texto, expresiones regulares o validación que opere en memoria (sin tocar disco ni red) debe contar con tests unitarios en [`tests/unitarios/`](tests/unitarios/README.md).
 - Debe cubrir: caso nominal, entradas vacías y entradas malformadas.
-- Los escenarios en [`tests/escenarios/`](tests/escenarios/README.md) se reservan para verificar la evolución del vault y la experiencia del usuario, no para agotar combinaciones de sintaxis interna.
+- Los tests unitarios prueban componentes aislados. Los escenarios en [`tests/escenarios/`](tests/escenarios/README.md) son pruebas end-to-end (E2E): **deben usar siempre el comando `tuku`** (CLI o `main(argv)`) para evaluar el comportamiento exacto de cara al usuario, verificar efectos colaterales completos y evitar divergencias silenciosas.
 - **Invariante de rendimiento:** La suite unitaria (`uv run pytest --unittests`) debe ejecutarse en menos de **0,2 segundos** y con cero I/O de disco. Es la única capa de tests que se fuerza en el hook de pre-commit.
 
 ### Modos de ejecución

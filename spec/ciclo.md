@@ -6,11 +6,14 @@
 
 Lo único canónico aquí son **los registros**. El resto es vista, y entra de dos maneras distintas: el plan por transclusión, los pendientes del día por propagación ([`pendientes.md`](pendientes.md), "dónde se muestra y cómo llega").
 
+El frontmatter es OKF, con los campos en inglés porque son superficie de máquina (ver [`README.md`](README.md), "el frontmatter"). `AHORA.md` y una bitácora cerrada llevan **el mismo `type`**, `Logbook`: los separa `status`, que es `draft` mientras el ciclo está abierto y `stable` cuando se archiva y deja de tocarse. `from` y `to` son el rango que cubre, y son lo que dice dónde termina el ciclo: no hay ninguna marca en el cuerpo que lo repita.
+
 ```markdown
 ---
-ciclo: turno
-desde: 2026-08-25
-hasta: 2026-09-01
+type: Logbook
+status: draft
+from: 2026-08-25
+to: 2026-09-01
 ---
 
 # Plan
@@ -36,9 +39,10 @@ Lo que va entre el encabezado del día y el primer registro es la **región prop
 
 ```markdown
 ---
-ciclo: turno
-desde: 2026-08-25
-hasta: 2026-09-01
+type: Logbook
+status: draft
+from: 2026-08-25
+to: 2026-09-01
 ---
 
 # Plan
@@ -77,14 +81,24 @@ El resumen es la excepción y va como enlace: es un documento de decisión compl
 
 En este orden:
 
-1. Crear `AHORA.md` con frontmatter (`ciclo`, `desde`, `hasta`) → `cycle open`
-2. Sembrar los días con `## Día, DD de MM` → `cycle open`
-3. Rodar y promover pendientes: `este-turno` sin fecha rueda, `proximo-turno` promueve → `todo promote`
+1. Instanciar `reglas/plantilla/AHORA.md`, con `from` y `to` del ciclo y `status: draft` → `cycle open`
+2. Sembrar los días con `## Día DD de mes` → `cycle open`
+3. Rodar y promover pendientes: lo del horizonte del ciclo en curso que no tenga fecha rueda al del ciclo nuevo, y el horizonte siguiente promueve → `todo promote`
 4. Colectar cadencias desde el árbol y emitir lo que corresponda → `cadence collect`, `cadence resolve`, `cadence inject`
 5. Generar el plan en `planes/` y transcluirlo → `capacity calc` lo alimenta, leyendo los `CAPACIDAD.md` del árbol
 6. Propagar los pendientes a cada día → `todo propagate`
 
 Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
+
+### La estructura del ciclo sale de una plantilla
+
+`cycle open` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. La plantilla es del autor y vive en su vault, así que cambiar el ritmo del ciclo, o qué secciones trae un ciclo recién abierto, se hace editándola y no tocando el comando.
+
+### Un ciclo abierto con registros no se pisa
+
+Abrir un ciclo cuya fecha cae fuera del que ya está abierto **se rechaza** si ese ciclo tiene registros escritos. Archivar es una consecuencia mayor y nadie la aprobó (principio 3 de [`../docs/principios.md`](../docs/principios.md)): sobreescribir `AHORA.md` haría desaparecer registros sin dejar rastro en `bitacoras/`. El rechazo nombra el archivo destino con las fechas ya calculadas, para que cerrarlo sea copiar la línea.
+
+Un ciclo abierto **sin registros sí se regenera**, porque no hay nada que perder. Y ante una fecha de otra semana se falla en vez de archivar solo, porque el caso frecuente es un dedazo y no el lunes nuevo: fallar es barato y deshacer un cierre no.
 
 ## Cerrar un ciclo
 
@@ -93,10 +107,12 @@ En este orden:
 1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `cycle extract` lo alimenta
 2. Aplanar el plan → `transclusion flatten`
 3. Dejar el enlace al resumen → `cycle close`
-4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` → `cycle close`
+4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` y pasar el frontmatter a `status: stable` → `cycle close`
 5. Dejar `AHORA.md` limpio para el ciclo siguiente → `cycle close`
 
 **El orden importa**: aplanar antes de generar el resumen lo deja sin de dónde leer.
+
+`status: stable` es lo que declara que el archivo dejó de tocarse. Mientras siga en `draft` es un ciclo abierto viviendo en el lugar equivocado, y eso lo reporta `tuku cycle lint`.
 
 Idempotencia: cerrar dos veces no vuelve a mover ni a duplicar.
 

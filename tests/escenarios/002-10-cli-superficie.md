@@ -11,7 +11,7 @@ Entonces sale con 0 y el texto nombra `init`, `entry`, `vocab`, `cycle` y `style
 
 Cuando se llama a `main(["entry", "-h"])`, `main(["vocab", "-h"])`, `main(["cycle", "-h"])` y `main(["style", "-h"])`
 Entonces salen con 0, el primero nombra `add` y `lint`, el segundo `show`, el tercero `open`, el cuarto `lint`
-Y `main(["entry", "add", "-h"])` nombra `linea`, `--vault` y `--dia`
+Y `main(["entry", "add", "-h"])` nombra `line`, `--vault` y `--day`
 
 ## Escenario: un noun sin verb es error de uso
 

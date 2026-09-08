@@ -56,7 +56,17 @@ def _vault_sembrado() -> Iterator[Path]:
 def test_002_10_tuku_h_nombra_los_nouns_del_epic() -> None:
     codigo, salida, _ = _correr(["-h"])
     assert codigo == EXITO
-    for noun in ("init", "entry", "vocab", "cycle", "style"):
+    for noun in (
+        "init",
+        "entry",
+        "vocab",
+        "cycle",
+        "style",
+        "todo",
+        "scope",
+        "link",
+        "note",
+    ):
         assert noun in salida, f"`tuku -h` no nombra {noun}"
 
 
@@ -77,9 +87,25 @@ def test_002_10_cada_noun_lista_sus_verbs() -> None:
     assert codigo == EXITO
     assert "lint" in salida, salida
 
+    codigo, salida, _ = _correr(["todo", "-h"])
+    assert codigo == EXITO
+    assert "open" in salida and "close" in salida and "lint" in salida, salida
+
+    codigo, salida, _ = _correr(["scope", "-h"])
+    assert codigo == EXITO
+    assert "create" in salida and "lint" in salida, salida
+
+    codigo, salida, _ = _correr(["link", "-h"])
+    assert codigo == EXITO
+    assert "backfill" in salida, salida
+
+    codigo, salida, _ = _correr(["note", "-h"])
+    assert codigo == EXITO
+    assert "create" in salida and "lint" in salida, salida
+
     codigo, salida, _ = _correr(["entry", "add", "-h"])
     assert codigo == EXITO
-    for pieza in ("linea", "--vault", "--dia"):
+    for pieza in ("line", "--vault", "--day"):
         assert pieza in salida, f"`tuku entry add -h` no nombra {pieza}"
 
 
@@ -116,9 +142,7 @@ def test_002_10_un_directorio_que_no_es_vault_dice_que_hacer() -> None:
 def test_002_10_todo_hallazgo_nombra_la_correccion() -> None:
     with _vault_sembrado() as vault:
         dia = _primer_dia(vault)
-        _correr(
-            ["entry", "add", "--vault", str(vault), "--dia", dia, MAL_ESCRITA, DESCONOCIDO]
-        )
+        _correr(["entry", "add", "--vault", str(vault), "--dia", dia, MAL_ESCRITA, DESCONOCIDO])
         ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
 
     hallazgos = lint(ahora, abiertos=["progreso"])
