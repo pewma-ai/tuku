@@ -22,6 +22,9 @@ inmutables y no se tocan.
 from __future__ import annotations
 
 import re
+from pathlib import Path
+
+from tuku.resultado import Resultado
 
 #: Un enlace ya escrito. El texto se parte por acá para no enlazar dentro.
 _ENLACE = re.compile(r"\[\[[^\]]*\]\]")
@@ -80,3 +83,25 @@ def _enlazar(tramo: str, patrones: list[re.Pattern[str]], enlace: str) -> tuple[
         tramo, n = patron.subn(enlace, tramo)
         cambios += n
     return tramo, cambios
+
+
+def backfill_en_vault(vault: Path, ambito: str) -> Resultado:
+    """Convierte en enlaces las menciones sueltas del ámbito en `AHORA.md`."""
+    from tuku import scope
+    from tuku.config import archivo_vault
+
+    ahora_file = archivo_vault(vault, "AHORA.md")
+    pagina = vault / "ambitos" / ambito / f"{ambito}.md"
+    if not pagina.is_file():
+        return Resultado.rechazo(
+            f"no existe el ámbito {ambito!r} o falta su página {pagina.name}. "
+            f"Créalo primero con 'tuku scope create'."
+        )
+    texto, n = backfill(
+        ahora_file.read_text(encoding="utf-8"),
+        scope=ambito,
+        keywords=scope.keywords(pagina.read_text(encoding="utf-8")),
+    )
+    if n > 0:
+        ahora_file.write_text(texto, encoding="utf-8")
+    return Resultado.hecho(f"{n} mención(es) enlazada(s).")

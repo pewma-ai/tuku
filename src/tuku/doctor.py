@@ -26,6 +26,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from tuku.resultado import Resultado
+
 #: Los campos de `config.tuku.md` sin los cuales los comandos no pueden operar.
 CAMPOS_REQUERIDOS = ("TZ", "cycle_type", "tuku_template")
 
@@ -259,3 +261,96 @@ def formatear(revisiones: list[Revision], *, fuente: Path | None = None) -> str:
             "`TUKU_HOME`, ni un checkout. Reinstala TUKU para recuperarlo."
         )
     return "\n".join(lineas)
+
+
+def revisar_vault(vault: Path) -> Resultado:
+    """Corre todos los lint sobre el vault y revisa lo que ninguno cubre.
+
+    **Ninguna revisión que falle detiene al resto.** Un archivo que falta es
+    justo lo que el doctor existe para encontrar, así que aquí nada se lee con
+    `archivo_vault`: eso aborta el comando con el vault a medio revisar, y el
+    autor se queda sin el resto del diagnóstico.
+
+    Ante hallazgos nombra el template original que `resolver_home` encuentra,
+    para reparar comparando. Nunca copia: verificar y corregir son operaciones
+    distintas.
+    """
+    from tuku import cyclelint, scope, style, todo
+    from tuku.config import leer_config
+    from tuku.lint import ERROR
+    from tuku.lint import formatear as formatear_registros
+    from tuku.lint import lint as lint_registros
+
+    def leer(nombre: str) -> str | None:
+        return archivo_opcional(vault, nombre)
+
+    types_md = leer("reglas/types.md")
+    revisiones = [
+        revisar_config(leer("reglas/config.tuku.md")),
+        revisar_tipos(types_md),
+        revisar_archivos(vault),
+        revisar_frontmatter(
+            vault, tipos_validos=tipos_declarados(types_md) if types_md else []
+        ),
+    ]
+
+    ahora = leer("AHORA.md")
+    if ahora is None:
+        revisiones.append(ausente("cycle", "AHORA.md"))
+        revisiones.append(ausente("entry", "AHORA.md"))
+    else:
+        h_cycle = cyclelint.lint(ahora)
+        revisiones.append(Revision("cycle", cyclelint.formatear(h_cycle), not h_cycle))
+
+        h_entry = lint_registros(ahora, abiertos=leer_config(vault).vocabularios_abiertos())
+        revisiones.append(
+            Revision(
+                "entry",
+                formatear_registros(h_entry),
+                not any(h.grado == ERROR for h in h_entry),
+            )
+        )
+
+    pendientes = leer("PENDIENTES.md")
+    if pendientes is None:
+        revisiones.append(ausente("todo", "PENDIENTES.md"))
+    else:
+        duplicados = todo.duplicados(pendientes)
+        revisiones.append(
+            Revision(
+                "todo",
+                "todo lint: sin hallazgos."
+                if not duplicados
+                else "\n".join([*duplicados, f"todo lint: {len(duplicados)} error(es)."]),
+                not duplicados,
+            )
+        )
+
+    libro = leer("LIBRO-DE-ESTILO.md")
+    if libro is None:
+        revisiones.append(ausente("style", "LIBRO-DE-ESTILO.md"))
+    else:
+        h_style = style.lint(libro)
+        revisiones.append(
+            Revision(
+                "style",
+                style.formatear(h_style),
+                not any(h.grado == ERROR for h in h_style),
+            )
+        )
+
+    h_scope = scope.lint(vault)
+    revisiones.append(
+        Revision(
+            "scope",
+            "scope lint: sin hallazgos."
+            if not h_scope
+            else "\n".join([*h_scope, f"scope lint: {len(h_scope)} error(es)."]),
+            not h_scope,
+        )
+    )
+
+    mensaje = formatear(revisiones, fuente=fuente_de_referencia())
+    if all(r.sano for r in revisiones):
+        return Resultado.hecho(mensaje)
+    return Resultado.rechazo(mensaje, error=False)

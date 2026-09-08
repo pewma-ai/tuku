@@ -12,6 +12,9 @@ lo que separa esto de marcar el documento con marcas invisibles.
 from __future__ import annotations
 
 import re
+from pathlib import Path
+
+from tuku.resultado import Resultado
 
 #: Encabezado de contrato por vocabulario. Cambiar uno rompe la lectura, y por
 #: eso el libro de estilo lo dice en su propia prosa.
@@ -64,3 +67,10 @@ def formatear(vocabularios: dict[str, list[str]]) -> str:
         for nombre, terminos in vocabularios.items()
     ]
     return "\n".join(bloques)
+
+
+def mostrar_del_vault(vault: Path) -> Resultado:
+    """Los vocabularios que el autor declaró en su libro de estilo."""
+    from tuku.config import leer_config
+
+    return Resultado.hecho(formatear(leer_config(vault).vocabularios))

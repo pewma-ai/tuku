@@ -25,6 +25,8 @@ import unicodedata
 from datetime import date
 from pathlib import Path
 
+from tuku.resultado import Resultado
+
 VER_ADEMAS = "## Ver además"
 
 #: Un enlace de la sección "Ver además": markdown o wikilink, y lo que sigue.
@@ -119,3 +121,69 @@ def lint(nota: str) -> list[str]:
                 f"Agrega el motivo después del enlace, en una frase."
             )
     return hallazgos
+
+
+def crear_con_constancia(
+    vault: Path,
+    *,
+    title: str,
+    body: str,
+    scope: str | None = None,
+    today: date | None = None,
+    time: str | None = None,
+    day: str | None = None,
+    record: bool = True,
+) -> Resultado:
+    """Escribe la nota y deja constancia en la bitácora. Idempotente.
+
+    Crear una nota es un hecho de la vida del autor, que la pidió, así que se
+    registra; mover un pendiente de escalón es del sistema y no se registra. Esa
+    es la línea, y por eso la constancia va acá y no en un comando aparte.
+
+    Repetir la operación no duplica nada: la nota no se reescribe si ya existe, y
+    la constancia solo se añade si no estaba. `record=False` la omite.
+    """
+    from datetime import datetime
+
+    from tuku import scope as scope_mod
+    from tuku.ahora import encabezado_de
+    from tuku.entry import add
+
+    hoy = today or date.today()
+    hora = time or datetime.now().strftime("%H:%M")
+    ruta = crear(vault, title=title, body=body, scope=scope, today=hoy)
+
+    if record:
+        ahora_path = vault / "AHORA.md"
+        if ahora_path.is_file():
+            constancia = registro_de_constancia(ruta, time=hora, scope=scope)
+            texto = ahora_path.read_text(encoding="utf-8")
+            if constancia not in texto:
+                encabezado = day or encabezado_de(hoy)
+                ahora_path.write_text(
+                    add(texto, [constancia], day=encabezado), encoding="utf-8"
+                )
+                if scope:
+                    scope_mod.actualizar_pagina(vault, scope)
+
+    return Resultado.hecho(f"nota creada en {ruta}.")
+
+
+def lint_del_vault(vault: Path, archivo: Path | None = None) -> Resultado:
+    """Revisa una nota, o todas las de `notas/` si no se nombra ninguna."""
+    rutas = [archivo] if archivo is not None else []
+    if archivo is None:
+        dir_notas = vault / "notas"
+        if dir_notas.is_dir():
+            rutas = sorted(dir_notas.glob("*.md"))
+    if not rutas:
+        return Resultado.hecho("sin notas que revisar.")
+
+    hallazgos = [
+        f"{ruta.name}: {error}"
+        for ruta in rutas
+        for error in lint(ruta.read_text(encoding="utf-8"))
+    ]
+    if not hallazgos:
+        return Resultado.hecho("sin hallazgos.")
+    return Resultado.rechazo("\n".join(hallazgos), error=False)

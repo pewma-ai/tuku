@@ -12,22 +12,18 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 
-from tuku import link, note, scope, style, todo, vocab
-from tuku.config import VaultInvalido, archivo_vault, leer_config
-from tuku.entry import add
+from tuku import entry, link, note, scope, style, todo, vocab
+from tuku.config import VaultInvalido
 from tuku.init import (
-    DIAS,
-    MESES,
     DestinoNoVacio,
     MarcadorAutorFaltante,
     TukuHomeInvalido,
     init,
 )
-from tuku.lint import ERROR, formatear, lint
-from tuku.propagate import propagar
+from tuku.resultado import Resultado
 
 #: Códigos de salida. Son contrato con quien invoca, persona o agente, y están
 #: fijados en `spec/cli.md`. El 2 queda reservado a argparse, que lo emite ante
@@ -38,17 +34,6 @@ EXITO = 0
 RECHAZO = 1  # el comando entendió y se negó por el estado del vault
 USO = 2  # reservado a argparse
 ENTORNO = 3  # la instalación de TUKU no está donde debería
-
-_archivo = archivo_vault
-
-
-def _encabezado_de_hoy(hoy: date) -> str:
-    return f"## {DIAS[hoy.weekday()]} {hoy.day} de {MESES[hoy.month - 1]}"
-
-
-def _vocabulario_abierto(vault: Path) -> list[str]:
-    return leer_config(vault).vocabularios_abiertos()
-
 
 def _construir_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -279,6 +264,22 @@ def _construir_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _traducir(r: Resultado, prefijo: str) -> int:
+    """Escribe lo que dejó una operación y devuelve su código de salida.
+
+    Es toda la lógica que le queda al CLI después de despachar: un rechazo por el
+    estado del vault va a `stderr` con el nombre del comando delante, y todo lo
+    demás a `stdout`. Los lint son el caso intermedio, y por eso `Resultado`
+    lleva `error` aparte de `ok`: reportan hallazgos por `stdout` y aun así
+    salen con `RECHAZO`.
+    """
+    if r.error:
+        print(f"{prefijo}: {r.mensaje}", file=sys.stderr)
+    else:
+        print(r.mensaje)
+    return EXITO if r.ok else RECHAZO
+
+
 def _cmd_init(args: argparse.Namespace) -> int:
     try:
         destino = init(
@@ -288,10 +289,7 @@ def _cmd_init(args: argparse.Namespace) -> int:
             desde=args.date,
             force=args.force,
         )
-    except DestinoNoVacio as e:
-        print(f"tuku init: {e}", file=sys.stderr)
-        return RECHAZO
-    except MarcadorAutorFaltante as e:
+    except (DestinoNoVacio, MarcadorAutorFaltante) as e:
         print(f"tuku init: {e}", file=sys.stderr)
         return RECHAZO
     except TukuHomeInvalido as e:
@@ -304,345 +302,124 @@ def _cmd_init(args: argparse.Namespace) -> int:
 
 
 def _cmd_entry_add(args: argparse.Namespace) -> int:
-    ruta = _archivo(args.vault, "AHORA.md")
-    dia = args.day if args.day is not None else _encabezado_de_hoy(date.today())
-    try:
-        texto = add(ruta.read_text(encoding="utf-8"), list(args.line), day=dia)
-    except ValueError as e:
-        print(f"tuku entry add: {e}", file=sys.stderr)
-        return RECHAZO
-    ruta.write_text(texto, encoding="utf-8")
-    for a in scope.leer(args.vault):
-        scope.actualizar_pagina(args.vault, a.nombre)
-    print(f"{len(args.line)} registro(s) en {dia.removeprefix('## ')}.")
-    return EXITO
+    return _traducir(
+        entry.add_al_vault(args.vault, list(args.line), day=args.day), "tuku entry add"
+    )
 
 
 def _cmd_entry_lint(args: argparse.Namespace) -> int:
-    ahora = _archivo(args.vault, "AHORA.md").read_text(encoding="utf-8")
-    hallazgos = lint(ahora, abiertos=_vocabulario_abierto(args.vault))
-    print(formatear(hallazgos))
-    return RECHAZO if any(h.grado == ERROR for h in hallazgos) else EXITO
-
-
-def _marca_o_rechazo(linea: str, esperada: str, verbo: str) -> todo.Marca | None:
-    marca = todo.parsear(linea)
-    if marca is None or marca.marca != esperada:
-        print(
-            f"tuku todo {verbo}: la línea no lleva {esperada}. "
-            f"Escríbela exactamente así, o usa el otro verbo.",
-            file=sys.stderr,
-        )
-        return None
-    return marca
+    return _traducir(entry.lint_del_vault(args.vault), "tuku entry lint")
 
 
 def _cmd_todo_open(args: argparse.Namespace) -> int:
-    marca = _marca_o_rechazo(args.line, todo.ABRE, "open")
-    if marca is None:
-        return RECHAZO
-    ruta = _archivo(args.vault, "PENDIENTES.md")
-    ruta.write_text(
-        todo.abrir(
-            ruta.read_text(encoding="utf-8"),
-            marca,
+    return _traducir(
+        todo.abrir_en_vault(
+            args.vault,
+            args.line,
             horizon=args.horizon,
             when=args.when,
+            propagate=not args.no_propagate,
         ),
-        encoding="utf-8",
+        "tuku todo open",
     )
-    print(f"pendiente abierto en «{args.horizon}»: {marca.cuerpo}")
-    # Propagar es parte de abrir: si la vista quedara para un segundo comando,
-    # el pendiente existiría sin aparecer en su día, que es la falla silenciosa
-    # que `spec/pendientes.md` persigue. `--no-propagate` es la escotilla del
-    # lote, que propaga una sola vez al final.
-    if not args.no_propagate:
-        propagar(args.vault)
-    return EXITO
-
-
-def _cmd_todo_propagate(args: argparse.Namespace) -> int:
-    cambiados = propagar(args.vault)
-    if not cambiados:
-        print("todo propagate: las vistas ya estaban al día.")
-        return EXITO
-    print("\n".join(f"regenerado: {ruta}" for ruta in cambiados))
-    return EXITO
 
 
 def _cmd_todo_close(args: argparse.Namespace) -> int:
-    marca = _marca_o_rechazo(args.line, todo.CIERRA, "close")
-    if marca is None:
-        return RECHAZO
-    ruta = _archivo(args.vault, "PENDIENTES.md")
-    texto, hubo_pareja = todo.cerrar(ruta.read_text(encoding="utf-8"), marca)
-    if not hubo_pareja:
-        # El registro queda escrito y PENDIENTES.md intacto: un cierre sin pareja
-        # es el caso normal del día uno, no un fallo del autor (`devel/epics.md`).
-        print(
-            f"todo close: no había ningún pendiente abierto con el cuerpo "
-            f"{marca.cuerpo!r}, así que no se borró nada. El registro queda escrito. "
-            f"Si esperabas cerrarlo, revisa que el texto coincida palabra por palabra."
-        )
-        return EXITO
-    ruta.write_text(texto, encoding="utf-8")
-    print(f"pendiente cerrado: {marca.cuerpo}")
-    if not args.no_propagate:
-        propagar(args.vault)
-    return EXITO
+    return _traducir(
+        todo.cerrar_en_vault(args.vault, args.line, propagate=not args.no_propagate),
+        "todo close",
+    )
+
+
+def _cmd_todo_propagate(args: argparse.Namespace) -> int:
+    return _traducir(todo.propagar_vistas(args.vault), "todo propagate")
 
 
 def _cmd_todo_lint(args: argparse.Namespace) -> int:
-    pendientes = _archivo(args.vault, "PENDIENTES.md").read_text(encoding="utf-8")
-    duplicados = todo.duplicados(pendientes)
-    if not duplicados:
-        print("todo lint: sin hallazgos.")
-        return EXITO
-    for cuerpo in duplicados:
-        print(
-            f"PENDIENTES.md: error: {cuerpo!r} aparece en más de una fila. "
-            f"Déjalo en una sola: un pendiente está en exactamente un horizonte."
-        )
-    print(f"todo lint: {len(duplicados)} error(es).")
-    return RECHAZO
+    return _traducir(todo.lint_del_vault(args.vault), "todo lint")
 
 
 def _cmd_vocab_show(args: argparse.Namespace) -> int:
-    cfg = leer_config(args.vault)
-    print(vocab.formatear(cfg.vocabularios))
-    return EXITO
+    return _traducir(vocab.mostrar_del_vault(args.vault), "tuku vocab show")
 
 
 def _cmd_style_lint(args: argparse.Namespace) -> int:
-    libro = _archivo(args.vault, "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
-    hallazgos = style.lint(libro)
-    print(style.formatear(hallazgos))
-    return RECHAZO if any(h.grado == ERROR for h in hallazgos) else EXITO
+    return _traducir(style.lint_del_vault(args.vault), "tuku style lint")
 
 
 def _cmd_cycle_open(args: argparse.Namespace) -> int:
-    from tuku.cycle import CicloEnCurso, open_cycle
+    from tuku import cycle
 
-    try:
-        ahora_path, creado = open_cycle(args.vault, args.date)
-    except CicloEnCurso as e:
-        print(f"tuku cycle open: {e}", file=sys.stderr)
-        return RECHAZO
-    if creado:
-        print(f"ciclo abierto en {ahora_path}.")
-    else:
-        print("AHORA.md ya cubre la fecha requerida.")
-    return EXITO
+    return _traducir(cycle.abrir_en_vault(args.vault, args.date), "tuku cycle open")
 
 
 def _cmd_cycle_lint(args: argparse.Namespace) -> int:
     from tuku import cyclelint
 
-    ahora = _archivo(args.vault, "AHORA.md").read_text(encoding="utf-8")
-    hallazgos = cyclelint.lint(ahora)
-    print(cyclelint.formatear(hallazgos))
-    return RECHAZO if hallazgos else EXITO
+    return _traducir(cyclelint.lint_del_vault(args.vault), "tuku cycle lint")
 
 
 def _cmd_doctor(args: argparse.Namespace) -> int:
-    """Diagnostica el vault entero. Ninguna revisión que falle detiene al resto.
+    from tuku import doctor
 
-    Un archivo que falta es justo lo que el doctor existe para encontrar, así que
-    aquí nada se lee con `_archivo`: eso aborta el comando con el vault a medio
-    revisar, y el autor se queda sin el resto del diagnóstico.
-    """
-    from tuku import cyclelint, doctor, scope, style
-
-    def leer(nombre: str) -> str | None:
-        return doctor.archivo_opcional(args.vault, nombre)
-
-    types_md = leer("reglas/types.md")
-    revisiones = [
-        doctor.revisar_config(leer("reglas/config.tuku.md")),
-        doctor.revisar_tipos(types_md),
-        doctor.revisar_archivos(args.vault),
-        doctor.revisar_frontmatter(
-            args.vault,
-            tipos_validos=doctor.tipos_declarados(types_md) if types_md else [],
-        ),
-    ]
-
-    ahora = leer("AHORA.md")
-    if ahora is None:
-        revisiones.append(doctor.ausente("cycle", "AHORA.md"))
-        revisiones.append(doctor.ausente("entry", "AHORA.md"))
-    else:
-        h_cycle = cyclelint.lint(ahora)
-        revisiones.append(doctor.Revision("cycle", cyclelint.formatear(h_cycle), not h_cycle))
-
-        h_entry = lint(ahora, abiertos=_vocabulario_abierto(args.vault))
-        revisiones.append(
-            doctor.Revision(
-                "entry", formatear(h_entry), not any(h.grado == ERROR for h in h_entry)
-            )
-        )
-
-    pendientes = leer("PENDIENTES.md")
-    if pendientes is None:
-        revisiones.append(doctor.ausente("todo", "PENDIENTES.md"))
-    else:
-        duplicados = todo.duplicados(pendientes)
-        salida_todo = (
-            "todo lint: sin hallazgos."
-            if not duplicados
-            else "\n".join([*duplicados, f"todo lint: {len(duplicados)} error(es)."])
-        )
-        revisiones.append(doctor.Revision("todo", salida_todo, not duplicados))
-
-    libro = leer("LIBRO-DE-ESTILO.md")
-    if libro is None:
-        revisiones.append(doctor.ausente("style", "LIBRO-DE-ESTILO.md"))
-    else:
-        h_style = style.lint(libro)
-        revisiones.append(
-            doctor.Revision(
-                "style",
-                style.formatear(h_style),
-                not any(h.grado == ERROR for h in h_style),
-            )
-        )
-
-    h_scope = scope.lint(args.vault)
-    salida_scope = (
-        "scope lint: sin hallazgos."
-        if not h_scope
-        else "\n".join([*h_scope, f"scope lint: {len(h_scope)} error(es)."])
-    )
-    revisiones.append(doctor.Revision("scope", salida_scope, not h_scope))
-
-    print(doctor.formatear(revisiones, fuente=doctor.fuente_de_referencia()))
-    return EXITO if all(r.sano for r in revisiones) else RECHAZO
+    return _traducir(doctor.revisar_vault(args.vault), "tuku doctor")
 
 
 def _cmd_scope_create(args: argparse.Namespace) -> int:
-    directorio = scope.crear(args.vault, args.name)
-    ahora_path = args.vault / "AHORA.md"
-    menciones = 0
-    if ahora_path.is_file():
-        pagina_path = directorio / f"{args.name}.md"
-        if pagina_path.is_file():
-            kws = scope.keywords(pagina_path.read_text(encoding="utf-8"))
-            texto, n = link.backfill(
-                ahora_path.read_text(encoding="utf-8"),
-                scope=args.name,
-                keywords=kws,
-            )
-            if n > 0:
-                ahora_path.write_text(texto, encoding="utf-8")
-                menciones = n
-            scope.actualizar_pagina(args.vault, args.name)
-    if menciones > 0:
-        print(f"ámbito creado en {directorio} ({menciones} mención(es) enlazada(s)).")
-    else:
-        print(f"ámbito creado en {directorio}.")
-    return EXITO
+    return _traducir(scope.crear_con_enlazado(args.vault, args.name), "tuku scope create")
 
 
 def _cmd_scope_lint(args: argparse.Namespace) -> int:
-    hallazgos = scope.lint(args.vault)
-    if not hallazgos:
-        print("scope lint: sin hallazgos.")
-        return EXITO
-    for h in hallazgos:
-        print(h)
-    return RECHAZO
+    return _traducir(scope.lint_del_vault(args.vault), "scope lint")
 
 
 def _cmd_link_backfill(args: argparse.Namespace) -> int:
-    ahora_file = _archivo(args.vault, "AHORA.md")
-    pagina = args.vault / "ambitos" / args.scope / f"{args.scope}.md"
-    if not pagina.is_file():
-        print(
-            f"tuku link backfill: no existe el ámbito {args.scope!r} "
-            f"o falta su página {pagina.name}. Créalo primero con 'tuku scope create'.",
-            file=sys.stderr,
-        )
-        return RECHAZO
-    kws = scope.keywords(pagina.read_text(encoding="utf-8"))
-    texto, n = link.backfill(
-        ahora_file.read_text(encoding="utf-8"),
-        scope=args.scope,
-        keywords=kws,
+    return _traducir(
+        link.backfill_en_vault(args.vault, args.scope), "tuku link backfill"
     )
-    if n > 0:
-        ahora_file.write_text(texto, encoding="utf-8")
-    print(f"link backfill: {n} mención(es) enlazada(s).")
-    return EXITO
 
 
 def _cmd_note_create(args: argparse.Namespace) -> int:
-    cuerpo = ""
-    if args.body_file is not None:
-        cuerpo = args.body_file.read_text(encoding="utf-8")
-    elif args.body is not None:
-        cuerpo = args.body
-    elif not sys.stdin.isatty():
-        cuerpo = sys.stdin.read()
-    else:
+    cuerpo = _cuerpo_de_la_nota(args)
+    if cuerpo is None:
         print(
             "tuku note create: falta el cuerpo de la nota. "
             "Pasa --body, --body-file o escribe por stdin.",
             file=sys.stderr,
         )
         return RECHAZO
-
-    hoy = args.today or date.today()
-    hora = args.time or datetime.now().strftime("%H:%M")
-    ruta = note.crear(
-        args.vault,
-        title=args.title,
-        body=cuerpo,
-        scope=args.scope,
-        today=hoy,
+    return _traducir(
+        note.crear_con_constancia(
+            args.vault,
+            title=args.title,
+            body=cuerpo,
+            scope=args.scope,
+            today=args.today,
+            time=args.time,
+            day=args.day,
+            record=not args.no_record,
+        ),
+        "tuku note create",
     )
 
-    if not args.no_record:
-        ahora_path = args.vault / "AHORA.md"
-        if ahora_path.is_file():
-            constancia = note.registro_de_constancia(ruta, time=hora, scope=args.scope)
-            texto = ahora_path.read_text(encoding="utf-8")
-            if constancia not in texto:
-                dia = args.day or _encabezado_de_hoy(hoy)
-                ahora_path.write_text(add(texto, [constancia], day=dia), encoding="utf-8")
-                if args.scope:
-                    scope.actualizar_pagina(args.vault, args.scope)
 
-    print(f"nota creada en {ruta}.")
-    return EXITO
+def _cuerpo_de_la_nota(args: argparse.Namespace) -> str | None:
+    """De dónde sale el cuerpo: un archivo, la línea de comandos o `stdin`.
+
+    Se queda en el CLI porque es una decisión sobre cómo llegó el texto, no
+    sobre qué hace TUKU con él.
+    """
+    if args.body_file is not None:
+        return str(args.body_file.read_text(encoding="utf-8"))
+    if args.body is not None:
+        return str(args.body)
+    if not sys.stdin.isatty():
+        return sys.stdin.read()
+    return None
 
 
 def _cmd_note_lint(args: argparse.Namespace) -> int:
-    rutas: list[Path] = []
-    if args.file is not None:
-        rutas.append(args.file)
-    else:
-        dir_notas = args.vault / "notas"
-        if dir_notas.is_dir():
-            rutas.extend(sorted(dir_notas.glob("*.md")))
-
-    if not rutas:
-        print("note lint: sin notas que revisar.")
-        return EXITO
-
-    todos_hallazgos: list[str] = []
-    for ruta in rutas:
-        contenido = ruta.read_text(encoding="utf-8")
-        h = note.lint(contenido)
-        for error in h:
-            todos_hallazgos.append(f"{ruta.name}: {error}")
-
-    if not todos_hallazgos:
-        print("note lint: sin hallazgos.")
-        return EXITO
-
-    for hallazgo in todos_hallazgos:
-        print(hallazgo)
-    return RECHAZO
+    return _traducir(note.lint_del_vault(args.vault, args.file), "note lint")
 
 
 _COMANDOS = {

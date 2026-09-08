@@ -11,6 +11,8 @@ A diferencia de [`../escenarios/`](../escenarios/README.md) (que verifica flujos
 
 Se ejecutan en milisegundos, sin efectos colaterales en disco ni dependencias externas.
 
+**Qué prueba esta capa, ahora que el código tiene tres.** El núcleo puro es lo que se afirma acá: `entry.add`, `todo.abrir`, `note.lint`, `link.backfill`, `ahora.encabezado_de`. Los casos de uso (`add_al_vault`, `crear_con_constancia`, `abrir_en_vault`) leen y escriben archivos, así que no caben bajo la invariante de cero I/O y quedan para [`../escenarios/`](../escenarios/README.md), que además verifica sus efectos completos sobre el vault. Si una regla no se puede probar acá, casi siempre es porque está en la capa equivocada: la lógica va en el núcleo, y el caso de uso solo la conecta con el disco.
+
 ## Cómo correrlos
 
 Se autoejecutan al correr la suite completa:

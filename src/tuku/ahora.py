@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 from datetime import date
 
-from tuku.init import MESES
+from tuku.init import DIAS, MESES
 
 _DIA = re.compile(r"^## \w+ (\d{1,2}) de (\w+)")
 _CAMPO = re.compile(r"^(from|to):\s*(\d{4}-\d{2}-\d{2})\s*$")
@@ -65,3 +65,13 @@ def dias(ahora: str) -> list[tuple[int, str, date | None]]:
         fecha = fecha_del_dia(linea, *limites) if limites is not None else None
         salida.append((i, linea, fecha))
     return salida
+
+
+def encabezado_de(fecha: date) -> str:
+    """El encabezado con que un día se escribe en `AHORA.md`.
+
+    Vivía en `cli.py`, que lo necesitaba para saber bajo qué día cae un registro
+    sin `--day`. Es la forma canónica de un día del ciclo, no una decisión de la
+    interfaz.
+    """
+    return f"## {DIAS[fecha.weekday()]} {fecha.day} de {MESES[fecha.month - 1]}"

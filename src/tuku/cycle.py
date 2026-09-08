@@ -19,6 +19,7 @@ from pathlib import Path
 from tuku.ahora import rango
 from tuku.config import resolver_plantilla_ahora
 from tuku.init import DIAS, MESES
+from tuku.resultado import Resultado
 
 #: Una línea de registro: `- HH:MM - ...`.
 _REGISTRO = re.compile(r"^- \d{2}:\d{2} - ")
@@ -97,3 +98,14 @@ def open_cycle(vault: Path, fecha: date | None = None) -> tuple[Path, bool]:
     contenido = sembrar_ahora(plantilla, desde)
     ahora_path.write_text(contenido, encoding="utf-8")
     return ahora_path, True
+
+
+def abrir_en_vault(vault: Path, fecha: date | None = None) -> Resultado:
+    """Abre el ciclo en `AHORA.md`, o confirma que ya cubre la fecha."""
+    try:
+        ahora_path, creado = open_cycle(vault, fecha)
+    except CicloEnCurso as e:
+        return Resultado.rechazo(str(e))
+    if creado:
+        return Resultado.hecho(f"ciclo abierto en {ahora_path}.")
+    return Resultado.hecho("AHORA.md ya cubre la fecha requerida.")

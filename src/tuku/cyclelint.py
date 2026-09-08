@@ -19,8 +19,10 @@ operaciones distintas (`spec/cli.md`).
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from tuku import ahora as _ahora
+from tuku.resultado import Resultado
 
 #: Lo que un ciclo declara en su frontmatter. `Logbook` porque `AHORA.md` y una
 #: bitácora cerrada son el mismo tipo de archivo (ver `reglas/types.md`).
@@ -132,3 +134,15 @@ def formatear(hallazgos: list[Hallazgo]) -> str:
     if not hallazgos:
         return "cycle lint: sin hallazgos."
     return "\n".join([*(str(h) for h in hallazgos), f"cycle lint: {len(hallazgos)} error(es)."])
+
+
+def lint_del_vault(vault: Path) -> Resultado:
+    """Revisa la estructura de `AHORA.md` y reporta; no escribe."""
+    from tuku.config import archivo_vault
+
+    ahora = archivo_vault(vault, "AHORA.md").read_text(encoding="utf-8")
+    hallazgos = lint(ahora)
+    mensaje = formatear(hallazgos)
+    if hallazgos:
+        return Resultado.rechazo(mensaje, error=False)
+    return Resultado.hecho(mensaje)

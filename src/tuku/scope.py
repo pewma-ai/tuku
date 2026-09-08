@@ -31,6 +31,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from tuku.resultado import Resultado
+
 _KEYWORDS = re.compile(r"^keywords:\s*\[(?P<lista>[^\]]*)\]\s*$", re.M)
 _ENLACE = re.compile(r"\[\[(?P<destino>[^\]|#]+)")
 
@@ -311,3 +313,42 @@ def lint(
     hallazgos.extend(lint_transclusiones(vault))
     hallazgos.extend(lint_callouts(vault))
     return hallazgos
+
+
+def crear_con_enlazado(vault: Path, nombre: str) -> Resultado:
+    """Crea el ámbito y convierte en enlaces las menciones sueltas que ya había.
+
+    El enlazado retroactivo es parte de crear, no un segundo paso: un ámbito que
+    nace sin recoger lo que el autor ya había escrito sobre él deja la mitad del
+    trabajo hecha y nadie se entera.
+    """
+    from tuku import link
+
+    directorio = crear(vault, nombre)
+    ahora_path = vault / "AHORA.md"
+    menciones = 0
+    pagina_path = directorio / f"{nombre}.md"
+    if ahora_path.is_file() and pagina_path.is_file():
+        texto, n = link.backfill(
+            ahora_path.read_text(encoding="utf-8"),
+            scope=nombre,
+            keywords=keywords(pagina_path.read_text(encoding="utf-8")),
+        )
+        if n > 0:
+            ahora_path.write_text(texto, encoding="utf-8")
+            menciones = n
+        actualizar_pagina(vault, nombre)
+
+    if menciones > 0:
+        return Resultado.hecho(
+            f"ámbito creado en {directorio} ({menciones} mención(es) enlazada(s))."
+        )
+    return Resultado.hecho(f"ámbito creado en {directorio}.")
+
+
+def lint_del_vault(vault: Path) -> Resultado:
+    """Revisa el árbol de ámbitos y reporta; no escribe."""
+    hallazgos = lint(vault)
+    if not hallazgos:
+        return Resultado.hecho("sin hallazgos.")
+    return Resultado.rechazo("\n".join(hallazgos), error=False)

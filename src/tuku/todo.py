@@ -31,6 +31,9 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass
+from pathlib import Path
+
+from tuku.resultado import Resultado
 
 ABRE = "**pendiente**"
 CIERRA = "~~(Hecho)~~"
@@ -270,3 +273,100 @@ def cerrar(pendientes: str, marca: Marca) -> tuple[str, bool]:
             texto = "\n".join(restantes)
             return (texto + "\n" if pendientes.endswith("\n") else texto), True
     return pendientes, False
+
+
+def _marca_de(linea: str, esperada: str, verbo: str) -> tuple[Marca | None, Resultado | None]:
+    """La marca de la línea, o el rechazo que explica por qué no sirve."""
+    marca = parsear(linea)
+    if marca is None or marca.marca != esperada:
+        return None, Resultado.rechazo(
+            f"la línea no lleva {esperada}. Escríbela exactamente así, o usa el otro verbo."
+        )
+    return marca, None
+
+
+def abrir_en_vault(
+    vault: Path,
+    linea: str,
+    *,
+    horizon: str = ESTA_SEMANA,
+    when: str = "",
+    propagate: bool = True,
+) -> Resultado:
+    """Abre el pendiente de un registro `**pendiente**` y propaga las vistas.
+
+    Propagar es parte de abrir: si la vista quedara para un segundo comando, el
+    pendiente existiría sin aparecer en su día, que es la falla silenciosa que
+    `spec/pendientes.md` persigue. `propagate=False` es la escotilla del lote,
+    que propaga una sola vez al final.
+    """
+    from tuku.config import archivo_vault
+    from tuku.propagate import propagar
+
+    marca, rechazo = _marca_de(linea, ABRE, "open")
+    if marca is None:
+        return rechazo  # type: ignore[return-value]
+
+    ruta = archivo_vault(vault, "PENDIENTES.md")
+    ruta.write_text(
+        abrir(ruta.read_text(encoding="utf-8"), marca, horizon=horizon, when=when),
+        encoding="utf-8",
+    )
+    if propagate:
+        propagar(vault)
+    return Resultado.hecho(f"pendiente abierto en «{horizon}»: {marca.cuerpo}")
+
+
+def cerrar_en_vault(vault: Path, linea: str, *, propagate: bool = True) -> Resultado:
+    """Cierra el pendiente de un registro `~~(Hecho)~~`.
+
+    Un cierre sin pareja **no es un fallo**: es el caso normal del día uno
+    (`devel/epics.md`). Se reporta, el registro queda escrito y `PENDIENTES.md`
+    no se toca, porque inventar el pendiente que falta dejaría el archivo
+    mintiendo.
+    """
+    from tuku.config import archivo_vault
+    from tuku.propagate import propagar
+
+    marca, rechazo = _marca_de(linea, CIERRA, "close")
+    if marca is None:
+        return rechazo  # type: ignore[return-value]
+
+    ruta = archivo_vault(vault, "PENDIENTES.md")
+    texto, hubo_pareja = cerrar(ruta.read_text(encoding="utf-8"), marca)
+    if not hubo_pareja:
+        return Resultado.hecho(
+            f"no había ningún pendiente abierto con el cuerpo {marca.cuerpo!r}, "
+            f"así que no se borró nada. El registro queda escrito. Si esperabas "
+            f"cerrarlo, revisa que el texto coincida palabra por palabra."
+        )
+    ruta.write_text(texto, encoding="utf-8")
+    if propagate:
+        propagar(vault)
+    return Resultado.hecho(f"pendiente cerrado: {marca.cuerpo}")
+
+
+def propagar_vistas(vault: Path) -> Resultado:
+    """Regenera las vistas derivadas de `PENDIENTES.md`."""
+    from tuku.propagate import propagar
+
+    cambiados = propagar(vault)
+    if not cambiados:
+        return Resultado.hecho("las vistas ya estaban al día.")
+    return Resultado.hecho("\n".join(f"regenerado: {ruta}" for ruta in cambiados))
+
+
+def lint_del_vault(vault: Path) -> Resultado:
+    """Revisa los pendientes y reporta; no escribe."""
+    from tuku.config import archivo_vault
+
+    pendientes = archivo_vault(vault, "PENDIENTES.md").read_text(encoding="utf-8")
+    repetidos = duplicados(pendientes)
+    if not repetidos:
+        return Resultado.hecho("sin hallazgos.")
+    lineas = [
+        f"PENDIENTES.md: error: {cuerpo!r} aparece en más de una fila. "
+        f"Déjalo en una sola: un pendiente está en exactamente un horizonte."
+        for cuerpo in repetidos
+    ]
+    return Resultado.rechazo("\n".join([*lineas, f"{len(repetidos)} error(es)."]), error=False)
