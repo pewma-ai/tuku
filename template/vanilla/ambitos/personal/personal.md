@@ -2,7 +2,6 @@
 type: Scope
 keywords: [personal]
 ---
-
 # personal
 
 Todo lo que no es trabajo, mientras no valga la pena separarlo.

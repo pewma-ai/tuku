@@ -75,7 +75,7 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
     if not pagina.exists():
         rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", directorio)
         pagina.write_text(
-            f"---\ntype: Scope\nkeywords: [{valor}]\n---\n\n# {valor}\n\n![[{rel}#^{valor}]]\n",
+            f"---\ntype: Scope\nkeywords: [{valor}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n",
             encoding="utf-8",
         )
 
