@@ -28,28 +28,74 @@ from pathlib import Path
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 
 
+PLAYGROUND = RAIZ_REPO / "playground"
+
+
+def preparar_dir(destino: Path) -> Path:
+    """Deja `destino` existente y vacío, dentro de `playground/`.
+
+    Todo arnés que produce un vault lo deja acá, nunca en un tempdir: así correr
+    la suite deja el resultado a la vista para el `## Qué se mira a mano` del
+    escenario. Es regla, no preferencia (`../escenarios/README.md`).
+
+    Casi nunca hay nada que borrar: el `XXX-00` de cada epic limpia
+    `playground/XXX-*` una vez por sesión, antes de que nada escriba, y desde ahí
+    los escenarios solo crean.
+
+    Solo se toca lo que está dentro de `playground/`, nunca la raíz.
+    """
+    destino = destino.resolve()
+    try:
+        rel = destino.relative_to(PLAYGROUND.resolve())
+    except ValueError:
+        raise ValueError(f"{destino} está fuera de playground/, no se toca") from None
+    if str(rel) in (".", ""):
+        raise ValueError("playground/ entero no se borra, solo la carpeta de un escenario")
+
+    if destino.exists():
+        shutil.rmtree(destino)
+    destino.mkdir(parents=True)
+    return destino
+
+
 def preparar_playground(slug: str) -> Path:
-    """Directorio de playground para un escenario, recién vaciado.
+    """`preparar_dir` para la carpeta propia de un escenario, por su slug.
 
-    Todo arnés que instale un vault lo hace aquí, nunca en un tempdir: así
-    correr la suite deja el resultado a la vista para el `## Qué se mira a
-    mano` del escenario. Es regla, no preferencia (`../escenarios/README.md`).
-    Se pisa en cada corrida, y `playground/` está en `.gitignore`, así que
-    nada de esto se versiona.
-
-    El arnés pisa **solo la carpeta de su propio escenario**,
-    `playground/<slug>/`, nunca `playground/` completo ni ninguna otra carpeta
-    dentro. El usuario tiene corridas manuales exploratorias en `playground/`
-    con otros nombres: esas sobreviven a cualquier corrida de la suite. El
-    `rmtree` es siempre sobre `playground/<slug>`, y el guard de abajo hace
-    imposible que `slug` apunte a la raíz o se escape del subdirectorio.
+    Dispara antes la limpieza del epic, igual que hace el runner de escenarios:
+    si no, un arnés que llega por esta vía se salta el `XXX-00` y su carpeta
+    sobrevive de la corrida anterior.
     """
     if not slug or "/" in slug or slug in (".", ".."):
         raise ValueError(f"slug de playground inválido: {slug!r}")
-    destino = RAIZ_REPO / "playground" / slug
-    if destino.exists():
-        shutil.rmtree(destino)
-    return destino
+    import gherkin  # tardío: gherkin importa este módulo
+
+    gherkin.preparar_epic(gherkin.epic_de(slug))
+    return preparar_dir(PLAYGROUND / slug)
+
+
+def instantanea(raiz: Path) -> dict[str, bytes]:
+    """El contenido de todos los archivos del vault, por ruta relativa."""
+    return {
+        str(p.relative_to(raiz)): p.read_bytes()
+        for p in sorted(raiz.rglob("*"))
+        if p.is_file()
+        and not p.name.startswith(".")
+        and not p.name.endswith(".partial")
+        and not p.name.endswith(".tmp")
+    }
+
+
+def delta(antes: dict[str, bytes], despues: dict[str, bytes]) -> dict[str, str]:
+    """Rutas que cambiaron entre dos instantáneas: 'nuevo', 'borrado' o 'modificado'."""
+    cambios: dict[str, str] = {}
+    for ruta in antes.keys() | despues.keys():
+        anterior, posterior = antes.get(ruta), despues.get(ruta)
+        if anterior == posterior:
+            continue
+        cambios[ruta] = (
+            "nuevo" if anterior is None else "borrado" if posterior is None else "modificado"
+        )
+    return cambios
 
 
 #: Marcas que el template deja para que el instalador las sustituya. Ninguna

@@ -80,6 +80,15 @@ def _construir_parser() -> argparse.ArgumentParser:
         help="nombre del autor para LIBRO-DE-ESTILO.md; opcional",
     )
     init_p.add_argument(
+        "--date",
+        "--fecha",
+        "--desde",
+        dest="date",
+        default=None,
+        type=date.fromisoformat,
+        help="primer día del ciclo sembrado (AAAA-MM-DD); por defecto, el lunes de esta semana",
+    )
+    init_p.add_argument(
         "--force",
         action="store_true",
         help="reemplaza el destino aunque ya tenga contenido",
@@ -272,7 +281,13 @@ def _construir_parser() -> argparse.ArgumentParser:
 
 def _cmd_init(args: argparse.Namespace) -> int:
     try:
-        destino = init(args.dir, variant=args.variant, author=args.author, force=args.force)
+        destino = init(
+            args.dir,
+            variant=args.variant,
+            author=args.author,
+            desde=args.date,
+            force=args.force,
+        )
     except DestinoNoVacio as e:
         print(f"tuku init: {e}", file=sys.stderr)
         return RECHAZO

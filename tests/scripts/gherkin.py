@@ -1,0 +1,445 @@
+"""Corre un escenario leyendo su `.md`: el texto es la fuente ejecutable.
+
+El comando de un escenario se escribía dos veces, en prosa en el `.md` y en
+Python en el arnés, y las dos copias divergían en silencio. Acá el `.md` manda:
+este módulo parsea sus bloques `bash` y los ejecuta. El arnés queda con lo único
+que el texto no puede expresar, las aserciones sobre el resultado.
+
+**El escenario se lee como lo que hace una persona.** No lleva `TUKU_HOME=`, ni
+rutas de `playground/`, ni banderas que solo existen para el test: escribe
+`tuku init mi-vault --date 2026-08-11` y nada más. Lo que el test necesita lo
+pone el runner alrededor:
+
+- el directorio de trabajo es `playground/<slug>/`, así que `mi-vault` cae
+  dentro del repo, a la vista para el `## Qué se mira a mano`;
+- `TUKU_HOME` apunta al checkout, así que la siembra copia de `template/` sin
+  instalar nada ni tocar la red.
+
+Un `.md` con varios `## Escenario:` reparte un subdirectorio por escenario, para
+que los tres resultados del `001-03` se puedan mirar juntos en vez de pisarse.
+
+Una línea que empieza con `tuku` se ejecuta **en proceso** (`cli.main`): es
+rápida, comparte intérprete con el test y por eso el `001-05` puede parchar
+`socket` alrededor de la llamada. Cualquier otra línea va por `bash`, que es
+como entran `mkdir`, `grep` o `diff -r` sin caso especial.
+
+Un fence ```agente``` no se ejecuta: marca el escenario como agéntico y lo deja
+fuera de la corrida por defecto. Es provisorio. Cuando el epic 003 exponga un
+comando para eso, el fence se vuelve un `bash` normal y esta convención muere.
+"""
+
+from __future__ import annotations
+
+import io
+import os
+import re
+import shlex
+import subprocess
+import sys
+import unicodedata
+from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import dataclass, field
+from pathlib import Path
+
+RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(RAIZ_REPO / "src"))
+
+sys.path.insert(0, str(RAIZ_REPO / "tests" / "scripts"))
+
+import vault  # noqa: E402
+
+ESCENARIOS = RAIZ_REPO / "tests" / "escenarios"
+
+#: Las palabras que abren un paso. `Y` y `Pero` continúan el paso anterior y
+#: heredan su tipo, como en cualquier Gherkin.
+_PALABRAS = ("Dado", "Cuando", "Entonces", "Y", "Pero")
+_PASO = re.compile(rf"^({'|'.join(_PALABRAS)})\b(.*)$")
+_FENCE = re.compile(r"^```(\w*)\s*$")
+_TITULO = re.compile(r"^##\s+Escenario:\s*(.+?)\s*$")
+
+#: El encabezado que hace de `Background`: sus comandos corren antes de cada
+#: escenario del archivo. Es donde un paso de la cadena declara de qué estado
+#: parte, con el `cp -r` del paso anterior a la vista.
+_FONDO = "## Estado inicial"
+
+
+class EscenarioNoEncontrado(LookupError):
+    """El `.md` no tiene un `## Escenario:` con ese título."""
+
+
+class PasoFallido(AssertionError):
+    """Un comando de `Dado` o `Entonces` falló, y sin él el escenario no prueba nada."""
+
+
+@dataclass
+class Paso:
+    """Un paso del escenario y los comandos que lleva colgando."""
+
+    tipo: str  # Dado, Cuando o Entonces, ya resuelto para Y y Pero
+    texto: str
+    comandos: list[str] = field(default_factory=list)
+    agente: list[str] = field(default_factory=list)
+
+
+@dataclass
+class Escenario:
+    """Un `## Escenario:` del `.md`, con sus pasos en orden."""
+
+    slug: str
+    titulo: str
+    pasos: list[Paso]
+    fondo: list[Paso] = field(default_factory=list)
+
+    @property
+    def todos_los_pasos(self) -> list[Paso]:
+        """El `## Estado inicial` del archivo y después los pasos propios."""
+        return [*self.fondo, *self.pasos]
+
+    @property
+    def es_agentico(self) -> bool:
+        return any(p.agente for p in self.pasos)
+
+
+@dataclass
+class Resultado:
+    """Lo que dejó un comando del escenario."""
+
+    comando: str
+    codigo: int
+    stdout: str
+    stderr: str
+
+
+@dataclass
+class Corrida:
+    """Lo que dejó correr un escenario: dónde, y qué dijo cada comando."""
+
+    escenario: Escenario
+    dir: Path  #: el directorio de trabajo, dentro de `playground/`
+    codigo: int  #: el del último `Cuando`, que es el caso corriente
+    stdout: str
+    stderr: str
+    resultados: list[Resultado] = field(default_factory=list)
+    antes: dict[str, bytes] = field(default_factory=dict)
+    despues: dict[str, bytes] = field(default_factory=dict)
+
+    @property
+    def delta(self) -> dict[str, str]:
+        """Qué cambió entre el estado que dejaron los `Dado` y el final.
+
+        El `README.md` de escenarios lo pide así: el assert es el diff entre dos
+        estados, no una comparación de árbol completo. Así se ven los efectos
+        colaterales que un assert por archivo no mira, y la idempotencia sale
+        gratis, porque el segundo pase de una operación tiene que dar vacío.
+        """
+        return vault.delta(self.antes, self.despues)
+
+    def delta_de(self, sub: str) -> dict[str, str]:
+        """El `delta` acotado a un subdirectorio, con las rutas relativas a él.
+
+        Un escenario puede tener más de un vault en su directorio de trabajo, y
+        lo que afirma es qué cambió dentro de uno.
+        """
+        prefijo = f"{sub}/"
+        return {
+            ruta[len(prefijo) :]: cambio
+            for ruta, cambio in self.delta.items()
+            if ruta.startswith(prefijo)
+        }
+
+    def ruta(self, *partes: str) -> Path:
+        """Una ruta relativa al directorio de trabajo del escenario."""
+        return self.dir.joinpath(*partes)
+
+    def de(self, fragmento: str) -> Resultado:
+        """El resultado del comando que contiene `fragmento`. Falla si no hay uno solo.
+
+        Para escenarios que corren el mismo comando sobre varios vaults: el
+        arnés pide el que le interesa por un trozo de su texto, sin repetirlo
+        entero ni depender del orden.
+        """
+        calzan = [r for r in self.resultados if fragmento in r.comando]
+        if len(calzan) != 1:
+            corridos = [r.comando for r in self.resultados]
+            raise EscenarioNoEncontrado(
+                f"{fragmento!r} calza con {len(calzan)} comandos de "
+                f"{self.escenario.slug}. Se corrieron: {corridos}"
+            )
+        return calzan[0]
+
+
+def slugificar(texto: str) -> str:
+    plano = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode()
+    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", plano.lower())).strip("-")[:60]
+
+
+def leer_escenarios(slug: str) -> list[Escenario]:
+    """Los `## Escenario:` del `.md`, en el orden en que están escritos."""
+    ruta = ESCENARIOS / f"{slug}.md"
+    if not ruta.is_file():
+        raise FileNotFoundError(f"no existe el escenario {ruta}")
+
+    escenarios: list[Escenario] = []
+    pasos: list[Paso] = []
+    fondo: list[Paso] = []
+    titulo: str | None = None
+    en_fondo = False
+    tipo = "Dado"
+    lenguaje: str | None = None
+
+    for linea in ruta.read_text(encoding="utf-8").splitlines():
+        fence = _FENCE.match(linea)
+        if fence:
+            lenguaje = None if lenguaje is not None else fence.group(1)
+            continue
+        if lenguaje is not None:
+            # Dentro de un fence: solo cuentan los que el escenario ejecuta, y
+            # solo si cuelgan de un paso. Un bloque suelto es documentación.
+            cuerpo = linea.strip()
+            if en_fondo and not fondo:
+                # El `## Estado inicial` es prosa: sus comandos no cuelgan de
+                # ningún `Dado`, así que se les da uno implícito.
+                fondo.append(Paso(tipo="Dado", texto="el estado inicial del escenario"))
+            destino_pasos = fondo if en_fondo else pasos
+            if destino_pasos and cuerpo and not cuerpo.startswith("#"):
+                if lenguaje == "bash":
+                    destino_pasos[-1].comandos.append(cuerpo)
+                elif lenguaje == "agente":
+                    destino_pasos[-1].agente.append(cuerpo)
+            continue
+
+        if linea.startswith("#"):
+            # Cualquier encabezado cierra el escenario en curso. Sin esto, los
+            # bloques de "## Cómo se corre" se leerían como pasos suyos.
+            if titulo is not None:
+                escenarios.append(Escenario(slug, titulo, pasos, fondo))
+            titulo, pasos, tipo = None, [], "Dado"
+            en_fondo = linea.strip() == _FONDO
+            encabezado = _TITULO.match(linea)
+            if encabezado:
+                titulo = encabezado.group(1)
+            continue
+
+        paso = _PASO.match(linea.strip())
+        if paso and (titulo is not None or en_fondo):
+            palabra, resto = paso.group(1), paso.group(2).strip()
+            if palabra not in ("Y", "Pero"):
+                tipo = palabra
+            (fondo if en_fondo else pasos).append(Paso(tipo=tipo, texto=resto))
+
+    if titulo is not None:
+        escenarios.append(Escenario(slug, titulo, pasos, fondo))
+    return escenarios
+
+
+def buscar(slug: str, titulo: str) -> Escenario:
+    """El escenario cuyo título contiene `titulo`. Falla si no hay uno solo."""
+    candidatos = [e for e in leer_escenarios(slug) if titulo.lower() in e.titulo.lower()]
+    if not candidatos:
+        disponibles = [e.titulo for e in leer_escenarios(slug)]
+        raise EscenarioNoEncontrado(
+            f"{slug}: ningún escenario dice {titulo!r}. Hay: {disponibles}"
+        )
+    if len(candidatos) > 1:
+        raise EscenarioNoEncontrado(
+            f"{slug}: {titulo!r} calza con varios: {[e.titulo for e in candidatos]}"
+        )
+    return candidatos[0]
+
+
+#: Los epics ya preparados en esta sesión de pytest.
+_PREPARADOS: set[str] = set()
+
+#: Lo que dejó cada escenario ya corrido en esta sesión, por slug y título.
+#: Un escenario se corre **una vez**: varios tests pueden afirmar cosas
+#: distintas sobre el mismo, y volver a ejecutarlo sería rehacer el mismo
+#: trabajo y pisar el resultado que el autor va a mirar a mano.
+_CORRIDAS: dict[tuple[str, str], Corrida] = {}
+
+
+def epic_de(slug: str) -> str:
+    """Los tres dígitos con los que abre el nombre de un escenario."""
+    return slug.split("-", 1)[0]
+
+
+def _escenario_de_preparacion(epic: str) -> Escenario | None:
+    """El `## Escenario:` del `XXX-00`, que limpia el playground del epic."""
+    candidatos = sorted(ESCENARIOS.glob(f"{epic}-00-*.md"))
+    if not candidatos:
+        return None
+    escenarios = leer_escenarios(candidatos[0].stem)
+    return escenarios[0] if escenarios else None
+
+
+def preparar_epic(epic: str) -> None:
+    """Corre el `XXX-00` del epic, una vez por sesión, antes de que nada escriba.
+
+    Es el único borrado del epic. Cada arnés borraba antes su propia carpeta, y
+    con varios tests por escenario eso daba más de cien borrados por corrida:
+    una pelea con el sistema de archivos que hacía fallar tests ajenos. Ahora se
+    limpia una vez, al principio, y desde ahí cada escenario solo crea.
+
+    Se dispara sola al preparar el primer directorio del epic, así que correr un
+    escenario suelto con `-k` limpia igual que la corrida completa.
+
+    """
+    if epic in _PREPARADOS:
+        return
+    escenario = _escenario_de_preparacion(epic)
+    if escenario is None:
+        _PREPARADOS.add(epic)
+        return
+
+    vault.PLAYGROUND.mkdir(parents=True, exist_ok=True)
+    for paso in escenario.pasos:
+        for comando in paso.comandos:
+            codigo, _, error = _correr_bash(comando, vault.PLAYGROUND)
+            if codigo != 0:
+                raise PasoFallido(
+                    f"{escenario.slug}: la preparación del epic {epic} falló en "
+                    f"`{comando}`: salió {codigo}. {error.strip()}"
+                )
+    _PREPARADOS.add(epic)
+
+
+def _preparar_dir(escenario: Escenario) -> Path:
+    """El directorio de trabajo del escenario: `playground/<slug>/<escenario>/`.
+
+    Cada escenario recibe el suyo, siempre, aunque el `.md` tenga uno solo. Por
+    dos razones: si los tres casos del `001-03` compartieran carpeta solo
+    sobreviviría el último, y no habría nada que mirar a mano de los otros dos;
+    y la profundidad tiene que ser la misma en todos, porque un paso de la
+    cadena hereda del anterior con un `cp -r ../../<paso previo>/...` escrito en
+    el `.md`.
+
+    No borra: de eso se encargó `preparar_epic` una sola vez. Si la carpeta ya
+    existe pese a la limpieza, es que dos escenarios distintos reclaman el mismo
+    nombre, y eso se dice en vez de pisarlo en silencio.
+    """
+    preparar_epic(epic_de(escenario.slug))
+    destino = vault.PLAYGROUND / escenario.slug / slugificar(escenario.titulo)
+    if destino.exists():
+        raise PasoFallido(
+            f"{destino.relative_to(vault.PLAYGROUND)} ya existe después de limpiar el "
+            f"epic. O dos escenarios reclaman la misma carpeta, o algo externo a la "
+            f"suite escribe en playground/ (un sincronizador, un indexador, un editor "
+            f"con el repositorio abierto): eso ya pasó una vez, y está contado en "
+            f"TODO.md."
+        )
+    destino.mkdir(parents=True)
+    return destino
+
+
+def _separar_entorno(partes: list[str]) -> tuple[dict[str, str], list[str]]:
+    """Las asignaciones `VAR=valor` que preceden al comando, y el comando.
+
+    `TUKU_HOME=roto tuku init mi-vault` es lo que una persona escribiría para
+    probar una instalación rota, así que el escenario lo escribe así y el runner
+    lo entiende.
+    """
+    entorno: dict[str, str] = {}
+    while partes and "=" in partes[0] and not partes[0].startswith("="):
+        nombre, _, valor = partes[0].partition("=")
+        if not nombre.replace("_", "").isalnum():
+            break
+        entorno[nombre] = valor
+        partes = partes[1:]
+    return entorno, partes
+
+
+def _correr_tuku(argv: list[str], entorno: dict[str, str]) -> tuple[int, str, str]:
+    from tuku.cli import main
+
+    previos = {k: os.environ.get(k) for k in entorno}
+    os.environ.update(entorno)
+    out, err = io.StringIO(), io.StringIO()
+    try:
+        with redirect_stdout(out), redirect_stderr(err):
+            try:
+                codigo = main(argv)
+            except SystemExit as e:
+                codigo = e.code if isinstance(e.code, int) else 1
+    finally:
+        for k, v in previos.items():
+            if v is None:
+                del os.environ[k]
+            else:
+                os.environ[k] = v
+    return codigo, out.getvalue(), err.getvalue()
+
+
+def _correr_bash(comando: str, dir: Path) -> tuple[int, str, str]:
+    p = subprocess.run(
+        ["bash", "-c", comando], cwd=dir, capture_output=True, text=True, check=False
+    )
+    return p.returncode, p.stdout, p.stderr
+
+
+def correr(slug: str, titulo: str) -> Corrida:
+    """Ejecuta un escenario del `.md` y devuelve lo que dejó.
+
+    Se ejecutan los `Dado` y `Cuando`; los `Entonces` solo cuando llevan comando,
+    porque ahí el comando **es** la aserción. Un `Dado` o un `Entonces` que falla
+    aborta: el `Cuando` no probaría lo que el escenario dice. Un `Cuando` que
+    falla no aborta, porque hay escenarios cuyo tema es justamente el rechazo.
+    """
+    escenario = buscar(slug, titulo)
+    en_cache = _CORRIDAS.get((slug, escenario.titulo))
+    if en_cache is not None:
+        return en_cache
+    dir = _preparar_dir(escenario)
+
+    codigo, salida, error = 0, "", ""
+    resultados: list[Resultado] = []
+    antes: dict[str, bytes] = {}
+    previo_home, previo_cwd = os.environ.get("TUKU_HOME"), Path.cwd()
+    os.environ["TUKU_HOME"] = str(RAIZ_REPO)
+    os.chdir(dir)
+    try:
+        for paso in escenario.todos_los_pasos:
+            if paso.tipo == "Cuando" and not antes:
+                # El estado del que parte la acción: todo lo anterior es `Dado`.
+                antes = vault.instantanea(dir)
+            if paso.agente:
+                raise PasoFallido(
+                    f"{slug}: el paso {paso.texto!r} es agéntico y todavía no hay arnés "
+                    f"que lo corra. Márcalo `agentic` y déjalo fuera de la corrida."
+                )
+            for comando in paso.comandos:
+                entorno, partes = _separar_entorno(shlex.split(comando))
+                if partes and partes[0] == "tuku":
+                    codigo, salida, error = _correr_tuku(partes[1:], entorno)
+                else:
+                    codigo, salida, error = _correr_bash(comando, dir)
+                resultados.append(Resultado(comando, codigo, salida, error))
+                if codigo != 0 and paso.tipo != "Cuando":
+                    pista = ""
+                    if comando.startswith("cp -r ../"):
+                        pista = (
+                            " Este paso hereda el estado del anterior, y el anterior no "
+                            "corrió: corre la cadena entera (`uv run pytest "
+                            "tests/escenarios/`) o el paso previo antes que este."
+                        )
+                    raise PasoFallido(
+                        f"{slug}: falló un comando de '{paso.tipo} {paso.texto}': "
+                        f"`{comando}` salió {codigo}. {error.strip()}{pista}"
+                    )
+    finally:
+        os.chdir(previo_cwd)
+        if previo_home is None:
+            del os.environ["TUKU_HOME"]
+        else:
+            os.environ["TUKU_HOME"] = previo_home
+
+    corrida = Corrida(
+        escenario=escenario,
+        dir=dir,
+        codigo=codigo,
+        stdout=salida,
+        stderr=error,
+        resultados=resultados,
+        antes=antes,
+        despues=vault.instantanea(dir),
+    )
+    _CORRIDAS[(slug, escenario.titulo)] = corrida
+    return corrida
