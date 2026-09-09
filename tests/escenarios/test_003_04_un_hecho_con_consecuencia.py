@@ -2,10 +2,9 @@
 
 Escenario: 003-04-un-hecho-con-consecuencia.md
 
-El escenario central del epic: el primero que no se resuelve con una sola
-llamada. `tuku entry add` escribe el registro y `tuku todo open` abre el
-pendiente, y un agente que hace la primera y olvida la segunda deja los dos
-archivos bien formados y el vault a medias.
+El escenario central del epic: lo que el agente decide acá no es qué comando
+correr, sino si el hecho deja algo abierto. De esa sola decisión depende que el
+pendiente exista, porque `tuku entry add` aplica lo que la marca declara.
 
 Gemelo determinista: `002-04-abrir-pendiente`.
 

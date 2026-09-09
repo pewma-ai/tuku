@@ -23,4 +23,4 @@ Abre [`referencia-pyme.md`](../../corpus/referencia/referencia-pyme.md), Parte 2
 
 No busques que sean idénticos: no lo van a ser, y no importa. Mira si coinciden las horas, los frentes, y las palabras entre asteriscos. La redacción del texto es tuya y puede cambiar.
 
-Si algo no calza, anótalo. Eso que anotaste es exactamente lo que las pruebas automáticas del proyecto verifican en cada cambio, con [otro día y otra persona](../../corpus/referencia/referencia-faena.md).
+Si algo no calza, anótalo. Eso que anotaste es exactamente lo que las pruebas automáticas del proyecto verifican en cada cambio, con [otro día y otra persona](../../tests/escenarios/fixtures/003-dictado/martes-11.md).

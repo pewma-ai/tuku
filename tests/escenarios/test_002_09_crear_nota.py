@@ -116,10 +116,64 @@ def test_002_09_crear_dos_veces_no_duplica() -> None:
     assert ahora.count(f"[[{NOMBRE}]]") == 1, "hay dos registros de constancia"
 
 
+def test_002_09_una_nota_sin_cuerpo_se_rechaza() -> None:
+    """Un cuerpo en blanco es lo mismo que ninguno, venga de donde venga."""
+    corrida = gherkin.correr(SLUG, "una nota sin cuerpo se rechaza")
+
+    assert corrida.codigo == RECHAZO, corrida.stdout
+    assert "falta el cuerpo" in corrida.stderr + corrida.stdout
+    assert not list(corrida.ruta("mi-vault", "notas").glob("una-nota-sin-cuerpo*"))
+
+
+def test_002_09_el_cuerpo_no_se_busca_en_stdin_sin_que_lo_pidan() -> None:
+    """`stdin` se lee solo con `--body-file -`, nunca por olfato.
+
+    Un `stdin` que no es terminal no significa que traiga datos: significa que no
+    es una terminal, que es el caso de todo pipe abierto. Leerlo por su cuenta
+    colgaba el comando para siempre contra un pipe abierto y vacío.
+
+    Se afirma sin subproceso, poniendo un `stdin` que estalla si alguien lo toca:
+    el cuelgue no se puede reproducir en la suite sin arriesgar colgarla.
+    """
+    import argparse
+    import sys as _sys
+
+    from tuku import cli
+
+    class StdinQueNadieDebeLeer:
+        def isatty(self) -> bool:
+            return False
+
+        def read(self) -> str:
+            raise AssertionError("leyó stdin sin que se lo pidieran: acá se colgaba")
+
+    args = argparse.Namespace(body=None, body_file=None)
+    previo = _sys.stdin
+    _sys.stdin = StdinQueNadieDebeLeer()
+    try:
+        assert cli._cuerpo_de_la_nota(args) is None
+    finally:
+        _sys.stdin = previo
+
+
+def test_002_09_si_la_constancia_no_cabe_no_se_escribe_nada() -> None:
+    """Todo o nada: antes la nota quedaba escrita y el rechazo era un traceback."""
+    corrida = gherkin.correr(SLUG, "si la constancia no cabe")
+
+    assert corrida.codigo == RECHAZO, corrida.stdout
+    salida = corrida.stderr + corrida.stdout
+    assert "fuera del ciclo abierto" in salida, salida
+    assert "Traceback" not in salida, salida
+    assert not list(corrida.ruta("mi-vault", "notas").glob("una-nota-de-otro-ciclo*"))
+
+
 if __name__ == "__main__":
     test_002_09_la_nota_queda_escrita_enlazada_y_con_constancia()
     test_002_09_ver_ademas_existe_y_cada_enlace_lleva_motivo()
     test_002_09_la_nota_recien_creada_deja_el_vault_sano()
     test_002_09_el_lint_reporta_un_enlace_sin_motivo()
     test_002_09_crear_dos_veces_no_duplica()
-    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")
+    test_002_09_una_nota_sin_cuerpo_se_rechaza()
+    test_002_09_el_cuerpo_no_se_busca_en_stdin_sin_que_lo_pidan()
+    test_002_09_si_la_constancia_no_cabe_no_se_escribe_nada()
+    print(f"ok: 8 afirmaciones (queda en playground/{SLUG}/)")

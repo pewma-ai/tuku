@@ -140,6 +140,38 @@ Entonces cada una se rechaza nombrando su defecto: el enlace que no dice para qu
 
 Es el reverso del escenario anterior: allá se afirma que la nota bien escrita pasa, acá que las dos formas de escribirla mal se reportan.
 
+## Escenario: una nota sin cuerpo se rechaza
+
+Dado el vault de la cadena
+Cuando se pide una nota cuyo cuerpo viene en blanco
+
+```bash
+tuku note create "una nota sin cuerpo" --body "" --vault mi-vault
+```
+
+Entonces se rechaza diciendo que falta el cuerpo
+Y no queda ningún archivo nuevo en `notas/`
+
+El comando ya rechazaba la falta de `--body`, pero no un `--body` vacío. Una nota vacía no es una nota.
+
+Y detrás había algo peor: sin `--body`, el comando leía `stdin` cuando `isatty()` daba falso. Eso no dice que haya datos, dice que no es una terminal, que es el caso de todo pipe abierto. Contra un pipe abierto y vacío, el comando **se colgaba esperando para siempre**, y quien lo lanzaba lo daba por corriendo. Ahora `stdin` se lee solo cuando se pide, con `--body-file -`.
+
+Lo destapó el [`003-06`](003-06-el-dia-completo.md) en dos corridas seguidas: en la primera el agente creó la nota vacía, lo notó y volvió a crearla con cuerpo; en la segunda el comando se colgó, y el agente abandonó el turno a la mitad diciendo que esperaba a que terminara.
+
+## Escenario: si la constancia no cabe, no se escribe nada
+
+Dado el vault de la cadena, con el ciclo del 10 al 16 de agosto abierto
+Cuando se pide una nota fechada fuera de ese ciclo
+
+```bash
+tuku note create "una nota de otro ciclo" --body "da igual" --day 2026-09-01 --vault mi-vault
+```
+
+Entonces se rechaza nombrando el ciclo abierto y cómo corregirlo
+Y `notas/` no gana el archivo
+
+Crear la nota y dejar constancia es un solo hecho, así que es todo o nada. Antes la nota se escribía primero y el rechazo de la constancia salía como traceback de Python: el vault quedaba con una nota que nada registraba. Es el mismo principio que las consecuencias de `tuku entry add`, y el mismo modo de falla.
+
 ## De dónde sale el contenido
 
 Del fixture `fixtures/002-09-crear-nota/`: el texto de la nota es salida de agente y se congela, porque no hay un original vivo contra el cual compararlo. Todo lo que este escenario prueba (dónde queda el archivo, la constancia, el enlace, el lint) es determinista.

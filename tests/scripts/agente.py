@@ -59,9 +59,12 @@ ARNESES: dict[str, dict[str, list[str]]] = {
     "claude": {"aislar": [], "prompt": ["-p", "{prompt}"], "modelo": ["--model", "{modelo}"]},
 }
 
-#: Cuánto se espera un turno antes de darlo por colgado. Un dictado del día
-#: completo tarda; uno de una frase, no. Se ajusta con `TUKU_AGENTE_TIMEOUT`.
-TIMEOUT = 300
+#: Cuánto se espera un turno antes de darlo por colgado. Un tope contra el
+#: cuelgue, no un presupuesto: un turno de una frase termina en medio minuto y
+#: no le cuesta nada que el techo esté alto. El del día completo del `003-06`
+#: son once frases y ronda los cinco minutos, así que 300 lo dejaba al filo. Se
+#: ajusta con `TUKU_AGENTE_TIMEOUT`.
+TIMEOUT = 600
 
 
 #: Los comandos que tocan el vault. Los demás (`lint`, `doctor`, `vocab show`,

@@ -264,7 +264,7 @@ def _construir_parser() -> argparse.ArgumentParser:
         dest="body_file",
         default=None,
         type=Path,
-        help="archivo con el cuerpo de la nota",
+        help="archivo con el cuerpo de la nota; `-` lo lee de stdin",
     )
     note_create_p.add_argument(
         "--scope",
@@ -443,7 +443,7 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
     if cuerpo is None:
         print(
             "tuku note create: falta el cuerpo de la nota. "
-            "Pasa --body, --body-file o escribe por stdin.",
+            "Pasa --body, o --body-file con un archivo (`-` lee de stdin).",
             file=sys.stderr,
         )
         return RECHAZO
@@ -462,18 +462,32 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
 
 
 def _cuerpo_de_la_nota(args: argparse.Namespace) -> str | None:
-    """De dónde sale el cuerpo: un archivo, la línea de comandos o `stdin`.
+    """De dónde sale el cuerpo: la línea de comandos, o un archivo (`-` es `stdin`).
 
     Se queda en el CLI porque es una decisión sobre cómo llegó el texto, no
     sobre qué hace TUKU con él.
+
+    **`stdin` se lee solo cuando lo piden.** Antes, la ausencia de `--body` con
+    un `stdin` que no fuera terminal se tomaba como "el cuerpo viene por ahí", y
+    eso está mal: `isatty()` en falso no dice que haya datos, dice que no es una
+    terminal, que es el caso de todo pipe abierto. Contra un pipe vacío el
+    comando se colgaba esperando para siempre, y quien lo lanzaba lo daba por
+    corriendo. Le pasó a un agente en el `003-06`, que abandonó el turno a la
+    mitad.
+
+    Un cuerpo en blanco es lo mismo que ninguno: una nota vacía no es una nota.
     """
     if args.body_file is not None:
-        return str(args.body_file.read_text(encoding="utf-8"))
-    if args.body is not None:
-        return str(args.body)
-    if not sys.stdin.isatty():
-        return sys.stdin.read()
-    return None
+        crudo = (
+            sys.stdin.read()
+            if str(args.body_file) == "-"
+            else str(args.body_file.read_text(encoding="utf-8"))
+        )
+    elif args.body is not None:
+        crudo = str(args.body)
+    else:
+        return None
+    return crudo if crudo.strip() else None
 
 
 def _cmd_note_lint(args: argparse.Namespace) -> int:

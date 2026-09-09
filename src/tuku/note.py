@@ -147,6 +147,12 @@ def crear_con_constancia(
 
     Repetir la operación no duplica nada: la nota no se reescribe si ya existe, y
     la constancia solo se añade si no estaba. `record=False` la omite.
+
+    **Nada se escribe hasta que todo cabe.** La constancia se compone y se prueba
+    contra `AHORA.md` en memoria antes de tocar el disco, porque si el día cae
+    fuera del ciclo abierto la operación se rechaza entera. Escribir la nota
+    primero dejaba el vault a medias, con una nota que nada registra, y el
+    rechazo salía como traceback.
     """
     from datetime import datetime
 
@@ -156,20 +162,24 @@ def crear_con_constancia(
 
     hoy = day or date.today()
     hora = hour or datetime.now().strftime("%H:%M")
-    ruta = crear(vault, title=title, body=body, scope=scope, today=hoy)
+    ruta = vault / "notas" / f"{slug(title)}.md"
 
-    if record:
-        ahora_path = vault / "AHORA.md"
-        if ahora_path.is_file():
-            constancia = registro_de_constancia(ruta, time=hora, scope=scope)
-            texto = ahora_path.read_text(encoding="utf-8")
-            if constancia not in texto:
-                encabezado = encabezado_de(hoy)
-                ahora_path.write_text(
-                    add(texto, [constancia], day=encabezado), encoding="utf-8"
-                )
-                if scope:
-                    scope_mod.actualizar_pagina(vault, scope)
+    ahora_path = vault / "AHORA.md"
+    pendiente: str | None = None
+    if record and ahora_path.is_file():
+        texto = ahora_path.read_text(encoding="utf-8")
+        constancia = registro_de_constancia(ruta, time=hora, scope=scope)
+        if constancia not in texto:
+            try:
+                pendiente = add(texto, [constancia], day=encabezado_de(hoy))
+            except ValueError as e:
+                return Resultado.rechazo(str(e))
+
+    crear(vault, title=title, body=body, scope=scope, today=hoy)
+    if pendiente is not None:
+        ahora_path.write_text(pendiente, encoding="utf-8")
+        if scope:
+            scope_mod.actualizar_pagina(vault, scope)
 
     return Resultado.hecho(f"nota creada en {ruta}.")
 
