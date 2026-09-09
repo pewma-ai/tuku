@@ -34,9 +34,19 @@ Estas reglas valen para cualquiera que opere el vault, sea una persona o un agen
 
 Casi todo entra por la primera fila. Las tres primeras son el mismo comando y solo cambia la marca, que es lo único que hay que decidir.
 
+Al abrir un pendiente, su horizonte sale de `### Horizontes` en `LIBRO-DE-ESTILO.md`, que es del autor y puede llamarse como él quiera. Por defecto es el primero, el del ciclo en curso.
+
 **Las dos líneas van juntas.** `tuku entry add` escribe el registro y nada más: es `tuku todo open` el que abre el pendiente en `PENDIENTES.md`, y `tuku todo close` el que lo cierra. Un registro con marca cuyo comando de consecuencia no se corrió deja el vault a medias, y no hay nada que lo detecte después salvo `tuku doctor`.
 
 Si el autor nombra un proceso del vault, no hay nada que decidir: lee ese archivo y ejecútalo. Si lo que pide no encaja en ninguna fila, lista lo que hay antes de suponer, y si sigue sin encajar, pregunta.
+
+## El ámbito
+
+Cada registro dice a qué frente pertenece, entre corchetes dobles y antes de la marca:
+
+`- 14:20 - [[personal]] **pendiente**: avisar de los gastos comunes a la administradora`
+
+Usa uno que exista en `ambitos/`. Si ninguno calza, es `personal`, que siempre está. Y si el autor nombra un frente que todavía no existe, escríbelo en el cuerpo en palabras y sigue: el día que se cree, las menciones anteriores se vuelven enlaces solas.
 
 ## Las tres marcas
 

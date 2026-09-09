@@ -40,11 +40,13 @@ Los plazos a los que puede estar asignado un pendiente dentro de la tabla de `PE
 
 | Horizonte | Qué agrupa |
 | --- | --- |
-| `esta-semana` | Lo comprometido para la semana en curso. |
-| `proxima-semana` | Lo que va a la semana siguiente. |
-| `fin-de-mes` | Lo que debe estar antes de que termine el mes. |
+| `esta semana` | Lo comprometido para la semana en curso. |
+| `próxima semana` | Lo que va a la semana siguiente. |
+| `fin de mes` | Lo que debe estar antes de que termine el mes. |
 
-Un pendiente nace por defecto en el ciclo en curso (`esta-semana`), o se posterga a un escalón siguiente. Cuando tiene un día exacto asignado, pasa a `con-fecha`, que es un horizonte del sistema.
+Un pendiente nace por defecto en el ciclo en curso (`esta semana`), o se posterga a un escalón siguiente. Cuando tiene un día exacto asignado, pasa a `con fecha`, que es un horizonte del sistema.
+
+Se escriben tal como van en la columna **Horizonte** de `PENDIENTES.md`, con espacios: es el mismo texto en los dos sitios, y el comando también acepta la forma con guion (`esta-semana`).
 
 Estos tres nombres son del autor: si el ritmo no es la semana sino el turno, la quincena o la temporada, se renombran en esta tabla y el sistema sigue funcionando igual. La escalera es la que importa, no cómo se llame cada escalón.
 

@@ -192,3 +192,43 @@ def test_canonico_normaliza_lo_que_el_autor_escribe() -> None:
 def test_canonico_deja_pasar_un_horizonte_propio_del_autor() -> None:
     """La escalera es del autor: un horizonte que no está en ESCALERA no se rechaza."""
     assert todo.canonico("algún día") == "algún día"
+
+
+def test_escalera_de_pone_con_fecha_al_final() -> None:
+    """`con fecha` es del sistema y va último, lo declare o no el libro de estilo."""
+    assert todo.escalera_de(["esta quincena", "próxima quincena"]) == (
+        "esta quincena",
+        "próxima quincena",
+        "con fecha",
+    )
+    assert todo.escalera_de(["esta semana", "con fecha"]) == ("esta semana", "con fecha")
+
+
+def test_escalera_de_sin_horizontes_declarados_cae_en_la_del_template() -> None:
+    assert todo.escalera_de([]) == todo.ESCALERA
+
+
+def test_un_horizonte_renombrado_por_el_autor_ordena_como_el_primero() -> None:
+    """La promesa del libro de estilo: renombrar los escalones no rompe el orden.
+
+    Antes el orden salía de una constante, así que `esta quincena` no estaba en
+    la escalera y su fila caía al final de la tabla, detrás de `con fecha`. El
+    libro de estilo prometía justo lo contrario: "se renombran en esta tabla y el
+    sistema sigue funcionando igual".
+    """
+    escalera = todo.escalera_de(["esta quincena", "fin de temporada"])
+    tabla = todo.abrir(
+        VACIA,
+        todo.Marca("**pendiente**", "[[personal]]", "pagar la patente"),
+        horizon="con fecha",
+        when="2026-08-20",
+        escalera=escalera,
+    )
+    tabla = todo.abrir(
+        tabla,
+        todo.Marca("**pendiente**", "[[personal]]", "llamar al fletero"),
+        horizon="esta quincena",
+        escalera=escalera,
+    )
+    filas = todo.filas(tabla)
+    assert [f.horizonte for f in filas] == ["esta quincena", "con fecha"]

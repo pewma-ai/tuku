@@ -61,12 +61,12 @@ def test_leer_config_sobre_template_vanilla() -> None:
     assert cfg.autor is None
 
     assert "progreso" in cfg.clasificaciones
-    assert "esta-semana" in cfg.horizontes
+    assert "esta semana" in cfg.horizontes
     assert "persona" in cfg.tipos_nota
 
     abiertos = cfg.vocabularios_abiertos()
     assert "progreso" in abiertos
-    assert "esta-semana" in abiertos
+    assert "esta semana" in abiertos
     assert "persona" in abiertos
 
     assert "## Lunes DD de mes" in cfg.plantilla_ahora

@@ -15,7 +15,7 @@ Abrir y cerrar la semana. Si tu ritmo no es de lunes a viernes más un fin de se
 **Emite:** `AHORA.md`, el ciclo en curso
 
 ### Procedimiento
-El lunes, `AHORA.md` tiene su frontmatter con las fechas del ciclo y los días vacíos. El callout `esta-semana` de `PENDIENTES.md` contiene lo comprometido para estos días y nada más.
+El lunes, `AHORA.md` tiene su frontmatter con las fechas del ciclo y los días vacíos. La tabla de `PENDIENTES.md` tiene bajo `esta semana` lo comprometido para estos días y nada más.
 
 Después cada día tiene sus registros en orden de hora. Llenarlo no es una cadencia, es el uso normal del sistema.
 
@@ -25,7 +25,7 @@ Después cada día tiene sus registros en orden de hora. Llenarlo no es una cade
 > Abre el ciclo o verifica el que ya está abierto. Es idempotente: correrlo dos veces no duplica nada. Con `--fecha` abre un ciclo que no empieza hoy.
 >
 > `tuku entry add "- HH:MM - [[ambito]] **clasificacion**: cuerpo"`
-> `tuku todo open "<la línea del registro>" --ancla esta-semana`
+> `tuku todo open "<la línea del registro>" --horizonte "esta semana"`
 > `tuku todo close "<la línea del registro>"`
 >
 > El primero escribe el registro en el día que corresponde. Los otros dos aplican su consecuencia sobre `PENDIENTES.md`, siempre después de que la línea ya esté escrita.

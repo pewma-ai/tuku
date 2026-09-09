@@ -59,7 +59,11 @@ _ENLACE = re.compile(r"^\[\[(?P<ambito>[^\]\n]+)\]\]$")
 
 CABECERA = "| Horizonte | Cuándo | Ámbito | Detalle |"
 
-#: La escalera, en orden: tres del autor más 'con fecha' del sistema (spec/pendientes.md).
+#: La escalera del template vanilla, y solo el punto de partida: los escalones
+#: son del autor y salen de `### Horizontes` en su libro de estilo
+#: (`spec/pendientes.md`). Quien opera sobre un vault pasa la del autor con
+#: `escalera_de`; esta queda como el valor por defecto de las funciones puras,
+#: que no leen disco.
 ESCALERA = (
     "esta semana",
     "próxima semana",
@@ -105,10 +109,22 @@ def slug(nombre: str) -> str:
     return re.sub(r"\s+", "-", plano)
 
 
-def canonico(horizonte: str) -> str:
+def escalera_de(horizontes: list[str] | tuple[str, ...]) -> tuple[str, ...]:
+    """La escalera del autor: sus escalones más `con fecha`, que es del sistema.
+
+    Si el libro de estilo no declara ninguno, queda la del template. El autor que
+    renombra sus horizontes ("esta quincena", "este turno") tiene que seguir
+    obteniendo el mismo orden en la tabla, y eso es lo que esta función sostiene:
+    antes el orden salía de una constante y un escalón renombrado caía al final.
+    """
+    propios = tuple(h for h in horizontes if slug(h) != slug(CON_FECHA))
+    return (*propios, CON_FECHA) if propios else ESCALERA
+
+
+def canonico(horizonte: str, escalera: tuple[str, ...] = ESCALERA) -> str:
     """El horizonte tal como se escribe en la tabla, aceptando `proxima-semana`."""
     buscado = slug(horizonte)
-    for nombre in ESCALERA:
+    for nombre in escalera:
         if slug(nombre) == buscado:
             return nombre
     return horizonte.strip()
@@ -180,13 +196,13 @@ def cuerpos(pendientes: str, horizonte: str | None = None) -> list[str]:
     return [f.cuerpo for f in filas(pendientes, horizonte)]
 
 
-def _clave(fila: Fila) -> tuple[int, str]:
+def _clave(fila: Fila, escalera: tuple[str, ...] = ESCALERA) -> tuple[int, str]:
     """Por dónde va la fila: escalón de la escalera, y dentro por fecha.
 
     Un horizonte que no está en la escalera va al final, y las filas sin fecha
     después de las fechadas del mismo escalón.
     """
-    escalones = [slug(n) for n in ESCALERA]
+    escalones = [slug(n) for n in escalera]
     propio = slug(fila.horizonte)
     orden = escalones.index(propio) if propio in escalones else len(escalones)
     return orden, fila.cuando or "9999-99-99"
@@ -200,6 +216,7 @@ def abrir(
     horizonte: str | None = None,
     when: str = "",
     cuando: str | None = None,
+    escalera: tuple[str, ...] = ESCALERA,
 ) -> str:
     """Copia el cuerpo del registro como fila. Idempotente.
 
@@ -212,7 +229,7 @@ def abrir(
     dest_horizon = horizonte if horizonte is not None else horizon
     dest_when = cuando if cuando is not None else when
     fila = Fila(
-        horizonte=canonico(dest_horizon),
+        horizonte=canonico(dest_horizon, escalera),
         cuando=dest_when.strip(),
         ambito=marca.ambito,
         cuerpo=marca.cuerpo,
@@ -224,9 +241,9 @@ def abrir(
     if fila in existentes:
         return pendientes
 
-    clave = _clave(fila)
+    clave = _clave(fila, escalera)
     desplazamiento = next(
-        (i for i, f in enumerate(existentes) if _clave(f) > clave), len(existentes)
+        (i for i, f in enumerate(existentes) if _clave(f, escalera) > clave), len(existentes)
     )
     corte = ini + desplazamiento
     nuevas = [*lineas[:corte], fila.linea(), *lineas[corte:]]
@@ -300,16 +317,24 @@ def abrir_en_vault(
     `spec/pendientes.md` persigue. `propagate=False` es la escotilla del lote,
     que propaga una sola vez al final.
     """
-    from tuku.config import archivo_vault
+    from tuku.config import archivo_vault, leer_config
     from tuku.propagate import propagar
 
     marca, rechazo = _marca_de(linea, ABRE, "open")
     if marca is None:
         return rechazo  # type: ignore[return-value]
 
+    escalera = escalera_de(leer_config(vault).horizontes)
+    horizon = canonico(horizon, escalera)
     ruta = archivo_vault(vault, "PENDIENTES.md")
     ruta.write_text(
-        abrir(ruta.read_text(encoding="utf-8"), marca, horizon=horizon, when=when),
+        abrir(
+            ruta.read_text(encoding="utf-8"),
+            marca,
+            horizon=horizon,
+            when=when,
+            escalera=escalera,
+        ),
         encoding="utf-8",
     )
     if propagate:
