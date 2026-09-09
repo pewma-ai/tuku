@@ -134,21 +134,21 @@ Se dispara sola la primera vez que un test del epic pide una carpeta, así que c
 
 ### Los pasos agénticos
 
-Lo que hace un agente no es un comando y no debe parecerlo, así que lleva su propio fence:
+Lo que le dices a un agente no es un comando y no debe parecerlo, así que lleva su propio fence:
 
 ````markdown
-Cuando el agente procesa el dictado
+Cuando el autor dicta
 
 ```agente
-entrada: fixtures/003-dictado/martes-11.md
-tarea: los cinco pasos del flujo
-emite: comandos tuku
+A las dos y veinte, hay que avisarle de los gastos comunes a la administradora.
 ```
 ````
 
-El runner no lo ejecuta: reconocerlo marca el escenario como agéntico y lo deja fuera de la corrida por defecto, sin que nadie tenga que acordarse de poner la marca. Lo que el agente emite son bloques `bash`, así que el resto del escenario sigue en el mismo lenguaje.
+Adentro va habla del autor, sin nombrar comandos, marcas ni archivos: un turno que explique lo que el `AGENTS.md` del vault ya dice deja de probar el vault y pasa a probar el prompt.
 
-Nace con fecha de vencimiento: cuando el epic 003 exponga un comando para invocar al agente, este fence se vuelve un `bash` normal y la convención especial desaparece.
+Lo corre [`../scripts/agente.py`](../scripts/README.md) dentro de `mi-vault/`, con un `tuku` al frente del `PATH` que anota `argv` y delega en el real, así que lo que queda no es lo que el agente dijo sino lo que ejecutó: `corrida.turno.traza`. Reconocer el fence marca además el escenario como agéntico y lo deja fuera de la corrida por defecto, sin que nadie tenga que acordarse de poner la marca.
+
+**No hay ni va a haber un comando de TUKU que abra un modelo.** El agente invoca a `tuku`, nunca al revés; esto es instrumento de pruebas y no vive en el vault de nadie.
 
 ## Cómo correr
 
@@ -183,6 +183,7 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`002-09-crear-nota.md`](002-09-crear-nota.md) | Epic 002, fase 5 mínima | Obliga a agregar la consecuencia "nota" a `spec/flujo-informacion.md` |
 | [`002-10-cli-superficie.md`](002-10-cli-superficie.md) | Epic 002 | Fuera de la cadena, siembra su propio vault: nouns y verbs en `-h`, códigos de salida, y el barrido de que todo error nombre la corrección |
 | [`003-00-el-dia-uno-dictado.md`](003-00-el-dia-uno-dictado.md) | Epic 003 | La escalera de menos a más para probar con un agente en el medio, y los seis escenarios que la suben |
+| [`003-01-el-vault-dice-a-donde-va.md`](003-01-el-vault-dice-a-donde-va.md) | Epic 003 | `tuku doctor` verifica que la tabla de despacho del `AGENTS.md` no nombre comandos que no existen. Sin agente |
 
 ## Escenarios encadenados, desde el epic 002
 

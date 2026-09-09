@@ -362,7 +362,7 @@ def _cmd_cycle_lint(args: argparse.Namespace) -> int:
 def _cmd_doctor(args: argparse.Namespace) -> int:
     from tuku import doctor
 
-    return _traducir(doctor.revisar_vault(args.vault), "tuku doctor")
+    return _traducir(doctor.revisar_vault(args.vault, comandos=comandos()), "tuku doctor")
 
 
 def _cmd_scope_create(args: argparse.Namespace) -> int:
@@ -441,6 +441,18 @@ _COMANDOS = {
     ("note", "create"): _cmd_note_create,
     ("note", "lint"): _cmd_note_lint,
 }
+
+
+def comandos() -> frozenset[str]:
+    """Todo lo invocable, como `"entry add"` o `"doctor"`.
+
+    Sale del parser y no de una lista escrita aparte: una lista se desincroniza
+    en silencio, y lo que `tuku doctor` afirma con esto es justamente que un
+    documento del vault no nombre un comando que no existe.
+    """
+    return frozenset(
+        noun if verb is None else f"{noun} {verb}" for noun, verb in _COMANDOS
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

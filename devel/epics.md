@@ -83,7 +83,7 @@ Actualizado el 2026-09-09.
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | reabierto, mecanismo hecho | `tuku init` implementado y los siete `001-0X` en verde; falta re-verificación con persona sobre `uv tool install` + `tuku init` |
 | 002 | El día uno, a mano | `vacio` → `primer-dia` | por cerrar | diez escenarios deterministas en verde (`002-01` a `002-10`). Falta revisión a mano de `playground/002-09-crear-nota/` contra criterio de salida |
-| 003 | El día uno, dictado | `vacio` → `primer-dia` | sin empezar | desbloqueado. Replica el 002 con entrada en lenguaje natural, en un turno |
+| 003 | El día uno, dictado | `vacio` → `primer-dia` | en curso | `003-01` en verde (sin agente) y el arnés listo. Faltan los cinco escenarios agénticos |
 | 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 004 |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |

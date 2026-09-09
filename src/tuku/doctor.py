@@ -36,6 +36,11 @@ TIPOS_REQUERIDOS = ("Logbook", "Pending", "Scope", "Note", "Cadence", "Config", 
 
 _FILA = re.compile(r"^\|\s*`([^`]+)`\s*\|")
 
+#: Lo que en un documento del vault se lee como una invocación: algo entre
+#: backticks que empieza por `tuku`. Se mira el archivo entero y no solo la
+#: tabla, porque la prosa que rodea la tabla también nombra comandos.
+_INVOCACION = re.compile(r"`tuku ([a-z]+(?: [a-z]+)?)`")
+
 #: El `type` del frontmatter. Solo se mira el bloque de arriba del archivo.
 _TYPE = re.compile(r"^type:\s*(.+?)\s*$", re.MULTILINE)
 
@@ -118,6 +123,59 @@ def revisar_tipos(types_md: str | None) -> Revision:
         )
 
     return Revision("types", f"types: {len(declarados)} tipos declarados.", True)
+
+
+def comandos_de_despacho(agents_md: str) -> list[str]:
+    """Los comandos que el `AGENTS.md` del vault nombra, sin repetir y en orden."""
+    vistos: list[str] = []
+    for m in _INVOCACION.finditer(agents_md):
+        if m.group(1) not in vistos:
+            vistos.append(m.group(1))
+    return vistos
+
+
+def revisar_despacho(agents_md: str | None, comandos: frozenset[str]) -> Revision:
+    """Verifica que la tabla de despacho no nombre comandos que no existen.
+
+    Es la revisión más barata del epic 003 y la que más sostiene: el `AGENTS.md`
+    es lo único que hace que un agente cualquiera opere el vault igual, y si
+    nombra un comando que no existe, ningún agente lo arregla. Un modelo que
+    encuentra `tuku entry create` en la tabla lo va a correr, va a recibir un
+    error de uso, y va a improvisar: casi siempre editando el archivo a mano,
+    que es lo único que el vault prohíbe.
+
+    Al revés no se afirma nada. Que el CLI tenga comandos que la tabla no nombra
+    es lo normal: la tabla enruta lo que el autor dice, no documenta la
+    superficie (`spec/despacho.md`).
+    """
+    if agents_md is None:
+        return Revision(
+            "despacho",
+            "AGENTS.md: error: falta el archivo. Es lo que le dice a un agente a "
+            "dónde va cada cosa; sin él, cada arnés opera el vault a su manera.",
+            False,
+        )
+
+    nombrados = comandos_de_despacho(agents_md)
+    if not nombrados:
+        return Revision(
+            "despacho",
+            "AGENTS.md: error: no nombra ningún comando. La tabla de despacho es "
+            "lo que traduce lo que el autor dice a una invocación de `tuku`.",
+            False,
+        )
+
+    faltan = [c for c in nombrados if c not in comandos]
+    if faltan:
+        lista = ", ".join(f"`tuku {c}`" for c in faltan)
+        return Revision(
+            "despacho",
+            f"AGENTS.md: error: nombra comandos que no existen: {lista}. "
+            f"Corrige la tabla, o agrega el comando al CLI si es el que falta.",
+            False,
+        )
+
+    return Revision("despacho", f"despacho: {len(nombrados)} comandos, todos existen.", True)
 
 
 def tipo_declarado(texto: str) -> str | None:
@@ -263,7 +321,7 @@ def formatear(revisiones: list[Revision], *, fuente: Path | None = None) -> str:
     return "\n".join(lineas)
 
 
-def revisar_vault(vault: Path) -> Resultado:
+def revisar_vault(vault: Path, *, comandos: frozenset[str] | None = None) -> Resultado:
     """Corre todos los lint sobre el vault y revisa lo que ninguno cubre.
 
     **Ninguna revisión que falle detiene al resto.** Un archivo que falta es
@@ -293,6 +351,8 @@ def revisar_vault(vault: Path) -> Resultado:
             vault, tipos_validos=tipos_declarados(types_md) if types_md else []
         ),
     ]
+    if comandos is not None:
+        revisiones.append(revisar_despacho(leer("AGENTS.md"), comandos))
 
     ahora = leer("AHORA.md")
     if ahora is None:
