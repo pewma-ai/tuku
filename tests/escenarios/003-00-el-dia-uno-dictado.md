@@ -26,6 +26,7 @@ El LLM está en el medio y no repite resultado, así que el orden de construcci�
 | 4 | Agente que ejecuta un hecho con consecuencia | un turno |
 | 5 | Agente contra los casos negativos | un turno |
 | 6 | Agente contra el día completo | un turno largo |
+| 7 | Agente contra lo que no debe hacer sin preguntar | un turno |
 
 **Qué se compara**, de lo barato a lo caro:
 
@@ -98,7 +99,7 @@ Hasta el 2026-09-09 esto era un `rm -rf 003-*` al empezar el epic, y eso borraba
 
 ## Cómo se corre
 
-El primer escenario es determinista y entra en la corrida por defecto. Los otros cinco gastan tokens y se piden explícitos:
+El primer escenario es determinista y entra en la corrida por defecto. Los otros seis gastan tokens y se piden explícitos:
 
 ```bash
 uv run pytest tests/escenarios/ -k 003_01
@@ -134,7 +135,9 @@ El arnés lo corre dentro de `mi-vault/`, con un `tuku` al frente del `PATH` que
 
 ## Criterio de salida
 
-Dictar el día uno del corpus produce un vault equivalente al que el epic 002 produjo a mano: los campos de la ontología cerrada idénticos, las mismas consecuencias aplicadas, y ningún efecto que el dictado no haya pedido.
+Dictar el día uno produce un vault equivalente al que el epic 002 produjo a mano: los campos de la ontología cerrada idénticos, las mismas consecuencias aplicadas, y ningún efecto que el dictado no haya pedido. Y donde el vault manda consultar, el agente consulta en vez de elegir por su cuenta.
+
+"Equivalente" no es "idéntico", y el [`003-06`](003-06-el-dia-completo.md) dedica una sección a las tres diferencias y a por qué todas tienen la misma causa: el 002 escribió a mano casos que probaban el comando, no el día.
 
 ## No entra
 
@@ -144,7 +147,7 @@ Dictar el día uno del corpus produce un vault equivalente al que el epic 002 pr
 
 ## Escenarios del epic
 
-Los cinco últimos gastan tokens y van marcados `agentic`.
+Los seis últimos gastan tokens y van marcados `agentic`.
 
 1. `003-01` El vault dice a dónde va cada cosa. Sin agente: el `AGENTS.md` está sembrado y `tuku doctor` confirma que cada comando que nombra existe.
 2. `003-02` El agente lee el vault. Un turno que responde qué comando usaría, sin ejecutar nada. El diff es vacío por construcción.
@@ -152,3 +155,4 @@ Los cinco últimos gastan tokens y van marcados `agentic`.
 4. `003-04` Un hecho con consecuencia. El pendiente se abre en `PENDIENTES.md`, que es donde el agente tiene que acordarse de la segunda llamada.
 5. `003-05` Lo que no se registra y lo que no se inventa. "Recuérdame" desaparece del registro, un cierre sin pareja se reporta sin inventar el pendiente, y ningún archivo se edita a mano.
 6. `003-06` El día completo. El dictado entero del martes 11 contra el vault que dejó el epic 002.
+7. `003-07` Lo que no hace sin preguntar. La tabla de Límites: ante dos lecturas posibles no elige, y lo que la tabla manda consultar lo consulta.
