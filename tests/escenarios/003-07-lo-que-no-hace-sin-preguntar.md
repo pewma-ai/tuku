@@ -70,7 +70,7 @@ Así que se afirma lo mínimo verificable, que la respuesta contiene una pregunt
 
 ## Qué se mira a mano
 
-`turno-1.md`, y sobre todo **qué preguntó**. Si listó los dos pendientes y pidió elegir, el `AGENTS.md` está funcionando. Si preguntó en general ("¿a qué te refieres?") sin mirar la tabla, el vault le dio igual y eso se va a notar en el epic 004.
+El archivo del turno en `playground/`, y sobre todo **qué preguntó**. Si listó los dos pendientes y pidió elegir, el `AGENTS.md` está funcionando. Si preguntó en general ("¿a qué te refieres?") sin mirar la tabla, el vault le dio igual y eso se va a notar en el epic 004.
 
 Vale la pena mirar también si preguntó las dos cosas o solo una. Renombrar una carpeta es más visiblemente arriesgado que cerrar un pendiente, y un agente que solo consulta lo primero está midiendo el riesgo por su cuenta en vez de leer la tabla.
 

@@ -52,7 +52,7 @@ La afirmación de las consecuencias sigue siendo la que da nombre al escenario, 
 
 ## Qué se mira a mano
 
-`turno-1.md`. Si el agente corrió además un `tuku todo open`, el vault queda igual de bien (el comando es idempotente) pero está siguiendo un mapa viejo: vale la pena mirar qué se lo sugirió.
+El archivo del turno en `playground/`. Si el agente corrió además un `tuku todo open`, el vault queda igual de bien (el comando es idempotente) pero está siguiendo un mapa viejo: vale la pena mirar qué se lo sugirió.
 
 ## Cómo se corre
 

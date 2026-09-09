@@ -437,27 +437,32 @@ def _dejar_a_la_vista(turno: agente.Turno, dir: Path) -> None:
     afirmar; lo demás (si explicó el mecanismo en vez de decir qué quedó escrito,
     si preguntó algo que los registros ya respondían) solo se juzga leyéndolo.
 
-    El nombre lleva **arnés, fecha y escenario**, y por eso las corridas se
-    acumulan en vez de pisarse. Un `turno-1.md` fijo perdía la corrida anterior
-    en cuanto se repetía el escenario, que es justo cuando más falta hace
-    compararlas: el `003-06` necesitó cuatro para estabilizarse y las tres
-    primeras eran la evidencia de por qué. Con el arnés en el nombre, además,
-    dos arneses sobre el mismo escenario quedan uno al lado del otro.
+    Va en la **raíz** de `playground/`, no en la carpeta del escenario, porque
+    esa carpeta se borra entera al empezar cada corrida. Ahí el archivo moriría
+    con ella y el nombre acumulativo no serviría de nada.
+
+    El nombre lleva **arnés, fecha y escenario**, y así las corridas se acumulan
+    en vez de pisarse. Eso importa justo cuando un escenario cuesta repetirlo:
+    el `003-06` necesitó cuatro corridas para estabilizarse y las tres primeras
+    eran la evidencia de por qué. Con el arnés delante, además, dos arneses
+    sobre el mismo escenario quedan uno al lado del otro al listar el directorio.
+
+    Nada de esto se versiona ni hace falta conservarlo: `playground/` está
+    ignorado entero, y lo que se pierda se vuelve a generar corriendo de nuevo.
     """
     arnes = agente.configurado().nombre
     cuando = datetime.now().strftime("%Y-%m-%d-%H%M%S")
     comandos = "\n".join(turno.comandos) or "(ninguno)"
     bloques = [
-        f"# {arnes} · {dir.name} · {cuando}",
+        f"# {arnes} · {dir.parent.name} · {dir.name} · {cuando}",
         f"## Lo que dijo el autor\n\n{turno.prompt}",
         f"## Lo que respondió el agente\n\n{turno.stdout.strip()}",
         f"## Lo que ejecutó\n\n{comandos}",
     ]
     if turno.conversacion.strip():
         bloques.append(f"## La sesión entera\n\n{turno.conversacion.strip()}")
-    (dir / f"{arnes}.{cuando}.{dir.name}.txt").write_text(
-        "\n\n".join(bloques) + "\n", encoding="utf-8"
-    )
+    salida = vault.PLAYGROUND / f"{arnes}.{cuando}.{dir.parent.name}.txt"
+    salida.write_text("\n\n".join(bloques) + "\n", encoding="utf-8")
 
 
 def correr(slug: str, titulo: str) -> Corrida:

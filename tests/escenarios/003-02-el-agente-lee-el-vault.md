@@ -43,7 +43,7 @@ La tercera es el punto entero del escenario. Un agente que responde "lo anoto en
 
 ## Qué se mira a mano
 
-La respuesta completa queda en `turno-1.md`, al lado del vault, con lo que el autor dijo y lo que el agente ejecutó. Un turno no repite resultado, así que eso es la única evidencia que va a existir de esa corrida.
+La respuesta completa queda en `playground/<arnés>.<fecha>.003-02-el-agente-lee-el-vault.txt`, con lo que el autor dijo y lo que el agente ejecutó. Un turno no repite resultado, así que eso es la única evidencia que va a existir de esa corrida.
 
 Léela una vez. Si explica el mecanismo en vez de decir qué quedaría escrito, eso es un hallazgo sobre el `AGENTS.md` y no sobre este escenario: la sección de estilo pide justamente lo contrario.
 

@@ -49,7 +49,7 @@ La afirmación del delta es la que más delgada parece y la que más cubre, y su
 
 ## Qué se mira a mano
 
-`turno-1.md`, al lado del vault: qué clasificación eligió y cómo redactó el cuerpo. Una redacción que se aleja mucho del dictado es información sobre el libro de estilo.
+El archivo del turno en `playground/`: qué clasificación eligió y cómo redactó el cuerpo. Una redacción que se aleja mucho del dictado es información sobre el libro de estilo.
 
 ## Cómo se corre
 

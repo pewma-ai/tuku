@@ -55,7 +55,7 @@ Las tres frases van juntas a propósito. Por separado, un agente que no escribe 
 
 ## Qué se mira a mano
 
-`turno-1.md`, sobre todo la respuesta a la pregunta. Si la contestó mirando `PENDIENTES.md`, bien. Si la contestó de memoria a partir de la conversación, el vault le dio igual y eso se va a notar en el epic 004.
+El archivo del turno en `playground/`, sobre todo la respuesta a la pregunta. Si la contestó mirando `PENDIENTES.md`, bien. Si la contestó de memoria a partir de la conversación, el vault le dio igual y eso se va a notar en el epic 004.
 
 ## Cómo se corre
 

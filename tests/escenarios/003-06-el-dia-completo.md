@@ -95,7 +95,7 @@ La abreviatura es aparte y no es un defecto de ninguno de los dos: el 002 escrib
 
 ## Qué se mira a mano
 
-`turno-1.md`, que es el único escenario del epic donde vale la pena leerlo entero.
+El archivo del turno en `playground/`, que es el único escenario del epic donde vale la pena leerlo entero.
 
 - **Las clasificaciones abiertas de los ocho registros.** Once frases seguidas obligan al agente a elegir vocabulario, y lo que repita es candidato a entrar al `LIBRO-DE-ESTILO.md`.
 - **Si narró el mecanismo.** Un resumen de once comandos es donde más tienta.
