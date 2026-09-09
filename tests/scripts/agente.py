@@ -127,6 +127,26 @@ ESCRIBEN = (
 )
 
 
+#: Lo que el runner de pruebas deja en el entorno y el agente no debe heredar.
+#: El agente corre dentro del vault como en la vida real, y en la vida real
+#: nadie lo lanza desde dentro de un `uv run pytest`. Un entorno de Python
+#: ajeno le cambia dónde importa y dónde escribe: con estas puestas, `hermes`
+#: dejó de guardar la sesión del turno, y el arnés se quedó sin la evidencia
+#: que sabía dar. Es la misma doctrina que `aislar`, aplicada al entorno.
+DEL_RUNNER = frozenset(
+    {"VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP", "PYTEST_CURRENT_TEST"}
+)
+
+
+def _path_sin_venv() -> str:
+    """El `PATH` sin el `bin/` del entorno virtual que corre la suite."""
+    venv = os.environ.get("VIRTUAL_ENV")
+    partes = os.environ.get("PATH", "").split(os.pathsep)
+    if venv:
+        partes = [x for x in partes if not x.startswith(f"{venv}{os.sep}")]
+    return os.pathsep.join(partes)
+
+
 class ArnesNoDisponible(RuntimeError):
     """No hay con qué correr el turno. El escenario se salta, no falla."""
 
@@ -256,7 +276,12 @@ def disponible() -> bool:
 #: El shim. Anota `argv` y el directorio desde donde se llamó, y delega en el
 #: `tuku` del checkout. Importa `main` en vez de reinvocar un ejecutable para no
 #: depender de que TUKU esté instalado en la máquina que corre la suite.
-_SHIM = """#!/usr/bin/env python3
+#:
+#: **El intérprete va escrito, no buscado.** Con `#!/usr/bin/env python3` el shim
+#: dependía de que el `python3` del `PATH` fuera el de la suite, y dejó de serlo
+#: en cuanto el arnés empezó a limpiarle el entorno al agente: el shim reventaba
+#: sin dependencias y el agente, con razón, se iba a buscar otro `tuku`.
+_SHIM = """#!{python}
 import json, os, sys
 sys.path.insert(0, {src!r})
 anotacion = {{"argv": sys.argv[1:], "cwd": os.getcwd()}}
@@ -270,7 +295,9 @@ sys.exit(main(sys.argv[1:]))
 def _sembrar_shim(dir: Path) -> Path:
     """Deja un `tuku` ejecutable en `dir` y devuelve el archivo de traza."""
     shim = dir / "tuku"
-    shim.write_text(_SHIM.format(src=str(RAIZ_REPO / "src")), encoding="utf-8")
+    shim.write_text(
+        _SHIM.format(python=sys.executable, src=str(RAIZ_REPO / "src")), encoding="utf-8"
+    )
     shim.chmod(0o755)
     return dir / "traza.jsonl"
 
@@ -321,8 +348,8 @@ def turno(vault: Path, prompt: str, timeout: int | None = None) -> Turno:
         bin = Path(tmp)
         traza = _sembrar_shim(bin)
         entorno = {
-            **os.environ,
-            "PATH": f"{bin}{os.pathsep}{os.environ.get('PATH', '')}",
+            **{k: v for k, v in os.environ.items() if k not in DEL_RUNNER},
+            "PATH": f"{bin}{os.pathsep}{_path_sin_venv()}",
             "TUKU_TRAZA": str(traza),
             "TUKU_HOME": str(RAIZ_REPO),
         }

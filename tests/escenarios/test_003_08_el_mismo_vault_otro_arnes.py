@@ -115,23 +115,25 @@ def test_003_08_el_delta_es_el_del_gemelo_determinista() -> None:
 
 @pytest.mark.agentic
 @sin_arnes
-def test_003_08_la_sesion_entera_queda_escrita() -> None:
-    """Este arnés sabe entregar el camino, no solo la conclusión.
+def test_003_08_el_turno_queda_escrito_para_leerlo_a_mano() -> None:
+    """La evidencia de la corrida queda en disco, y con lo que hace falta leer.
 
-    No afirma nada sobre su contenido: es evidencia para leer a mano, al lado
-    del turno del `003-03`. Lo que se afirma es que quedó, porque un arnés que
-    deja de exportar su sesión lo hace en silencio.
+    Un turno no repite resultado, así que el archivo es lo único que va a
+    existir de esta corrida. Se afirma su estructura y no su contenido: lo que
+    el agente diga se juzga leyéndolo, al lado del turno del `003-03`.
+
+    La conversación intermedia sería mejor evidencia que la respuesta final, y
+    el arnés la pide (`sesion` en `ARNESES`), pero `hermes` no persiste la
+    sesión de un turno lanzado así y no se afirma sobre ella: una aserción que
+    depende de que el arnés colabore verifica al arnés, no al vault.
     """
     corrida = _corrida()
-    sesion = corrida.turno.conversacion.strip()
-    assert sesion, "el arnés no entregó la sesión del turno"
-    # La primera versión solo pedía que no estuviera vacía, y pasó en verde con
-    # un `(el export salió 1)` dentro: el mensaje de fallo también es texto. La
-    # sesión trae el prompt del autor; un error del exportador, no.
-    assert not sesion.startswith("("), f"el arnés no pudo exportar la sesión: {sesion}"
-    assert "administradora" in sesion, f"la sesión no contiene el turno:\n{sesion[:400]}"
-    escritos = list(corrida.dir.glob(f"{ARNES}.*.txt"))
-    assert escritos, f"no quedó el archivo del turno en {corrida.dir}"
+    escritos = list(corrida.dir.parent.glob(f"{ARNES}.*.txt"))
+    assert escritos, f"no quedó el archivo del turno en {corrida.dir.parent}"
+    escrito = escritos[-1].read_text(encoding="utf-8")
+    assert corrida.turno.prompt.strip() in escrito, "el archivo no trae lo que se dictó"
+    for titulo in ("Lo que respondió el agente", "Lo que ejecutó"):
+        assert titulo in escrito, f"al archivo del turno le falta «{titulo}»"
 
 
 if __name__ == "__main__":
@@ -142,5 +144,5 @@ if __name__ == "__main__":
     test_003_08_la_traduccion_es_la_misma_que_con_el_otro_arnes()
     test_003_08_el_registro_queda_igual_de_bien_puesto()
     test_003_08_el_delta_es_el_del_gemelo_determinista()
-    test_003_08_la_sesion_entera_queda_escrita()
+    test_003_08_el_turno_queda_escrito_para_leerlo_a_mano()
     print(f"ok: el vault manda igual sobre {ARNES}")

@@ -48,11 +48,11 @@ Y ningún archivo se editó a mano
 
 ## Qué se mira a mano
 
-El archivo del turno, comparado **lado a lado** con el del `003-03`. Quedan los dos en `playground/`, con el arnés en el nombre, así que se leen juntos.
+El archivo del turno, comparado **lado a lado** con el del `003-03`. Cada corrida deja el suyo en `playground/<escenario>/<arnés>.<fecha>.txt`, así que las corridas se acumulan y dos arneses quedan uno junto al otro.
 
 Lo interesante no es si acertaron, que lo afirma el `.py`. Es **en qué se diferencian**: qué exploró cada uno antes de escribir, si uno leyó el `AGENTS.md` y el otro no lo necesitó, si uno pidió ayuda del comando y el otro adivinó bien. Ahí está lo que el documento no dice y cada arnés está supliendo por su cuenta, que es lo que hay que escribirle.
 
-Este arnés además entrega la sesión entera y no solo su respuesta final, así que en su archivo se ve el camino, no la conclusión.
+Lo que se afirma del archivo es su estructura, nunca lo que el agente diga: eso se juzga leyéndolo.
 
 ## Por qué un solo hecho y no el día completo
 

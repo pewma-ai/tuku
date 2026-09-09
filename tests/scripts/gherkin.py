@@ -437,15 +437,16 @@ def _dejar_a_la_vista(turno: agente.Turno, dir: Path) -> None:
     afirmar; lo demás (si explicó el mecanismo en vez de decir qué quedó escrito,
     si preguntó algo que los registros ya respondían) solo se juzga leyéndolo.
 
-    Va en la **raíz** de `playground/`, no en la carpeta del escenario, porque
-    esa carpeta se borra entera al empezar cada corrida. Ahí el archivo moriría
-    con ella y el nombre acumulativo no serviría de nada.
+    Va en `playground/<escenario>/`, un nivel por encima del directorio de
+    trabajo. Ese nivel es el correcto por dos razones: agrupa las corridas del
+    escenario, y **sobrevive**, porque lo que se borra al empezar una corrida es
+    la carpeta del título, no la del escenario.
 
-    El nombre lleva **arnés, fecha y escenario**, y así las corridas se acumulan
-    en vez de pisarse. Eso importa justo cuando un escenario cuesta repetirlo:
-    el `003-06` necesitó cuatro corridas para estabilizarse y las tres primeras
+    El nombre lleva **arnés y fecha**, así que las corridas se acumulan en vez
+    de pisarse. Eso importa justo cuando un escenario cuesta repetirlo: el
+    `003-06` necesitó cuatro corridas para estabilizarse y las tres primeras
     eran la evidencia de por qué. Con el arnés delante, además, dos arneses
-    sobre el mismo escenario quedan uno al lado del otro al listar el directorio.
+    sobre el mismo escenario quedan uno al lado del otro al listar.
 
     Nada de esto se versiona ni hace falta conservarlo: `playground/` está
     ignorado entero, y lo que se pierda se vuelve a generar corriendo de nuevo.
@@ -461,8 +462,41 @@ def _dejar_a_la_vista(turno: agente.Turno, dir: Path) -> None:
     ]
     if turno.conversacion.strip():
         bloques.append(f"## La sesión entera\n\n{turno.conversacion.strip()}")
-    salida = vault.PLAYGROUND / f"{arnes}.{cuando}.{dir.parent.name}.txt"
+    salida = dir.parent / f"{arnes}.{cuando}.txt"
     salida.write_text("\n\n".join(bloques) + "\n", encoding="utf-8")
+
+
+def _exigir_que_la_traza_explique(
+    escenario: Escenario,
+    turnos: list[agente.Turno],
+    antes: dict[str, bytes],
+    despues: dict[str, bytes],
+) -> None:
+    """Un vault que cambió sin que la traza lo explique invalida el escenario.
+
+    La traza sale de un `tuku` puesto al frente del `PATH`, y eso se puede
+    evadir sin querer: un arnés que ejecuta por **shell de login** relee el
+    perfil del usuario, que vuelve a anteponer su `~/.local/bin`, y ahí gana el
+    `tuku` instalado. Le pasó a `hermes`: encontró un `tuku` viejo, lo descartó
+    con buen criterio y se fue al del checkout, dejando la traza en blanco.
+
+    Sin esta comprobación el escenario falla igual, pero mintiendo: dice "la
+    traducción fue []" como si el agente no hubiera hecho nada, cuando hizo lo
+    correcto y el instrumento no miraba. Son dos defectos muy distintos y el
+    mensaje tiene que decir cuál es.
+    """
+    if not turnos or any(t.traza for t in turnos):
+        return
+    cambios = vault.delta(antes, despues)
+    if not cambios:
+        return
+    raise PasoFallido(
+        f"{escenario.slug}: el vault cambió y la traza está vacía, así que el "
+        f"agente no pasó por el shim y no hay evidencia de qué ejecutó. "
+        f"Cambió: {sorted(cambios)}. Suele ser un `tuku` instalado que le gana "
+        f"al shim en un shell de login: revisa `command -v tuku` dentro de uno "
+        f"(`bash -lc 'command -v tuku'`)."
+    )
 
 
 def correr(slug: str, titulo: str) -> Corrida:
@@ -519,6 +553,7 @@ def correr(slug: str, titulo: str) -> Corrida:
         else:
             os.environ["TUKU_HOME"] = previo_home
 
+    _exigir_que_la_traza_explique(escenario, turnos, antes, vault.instantanea(dir))
     corrida = Corrida(
         escenario=escenario,
         dir=dir,

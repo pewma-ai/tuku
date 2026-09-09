@@ -32,11 +32,13 @@ Estas reglas valen para cualquiera que opere el vault, sea una persona o un agen
 | empieza el ciclo | la semana en `AHORA.md` | `tuku cycle open` |
 | pregunta, delibera o pide investigar | nada que escribir | ninguno |
 
+**Cuando el autor cuenta algo, ejecuta el comando de su fila.** Contarlo es pedirlo: no preguntes qué quiere que hagas con lo que acaba de contarte, ni ofrezcas alternativas. Esta tabla ya respondió esa pregunta.
+
 Casi todo entra por la primera fila. Las tres primeras son el mismo comando y solo cambia la marca, que es lo único que hay que decidir.
 
 **Un registro es un comando, y sus consecuencias son parte de escribirlo.** `tuku entry add` deja la línea en `AHORA.md`, actualiza las páginas de ámbito y, si la línea lleva marca, aplica lo que esa marca declara: `**pendiente**` abre el pendiente en `PENDIENTES.md` y `~~(Hecho)~~` lo cierra. No hay una segunda llamada que recordar.
 
-Le pasas los campos, no la línea; el formato lo arma él:
+Le pasas los campos, no la línea; el formato lo arma él. El autor dice *"a las dos y veinte, hay que avisarle de los gastos comunes a la administradora"* y eso es, entero:
 
 ```
 tuku entry add --day 2026-08-11 --hour 14:20 --scope personal \
@@ -78,7 +80,7 @@ Todo lo demás que se escriba entre `**` es vocabulario del autor y vive en `LIB
 
 ## Si eres un agente
 
-- Propón, no ratifiques. Nada se escribe ni se archiva sin aprobación del autor.
+- Un hecho dictado ya viene aprobado: escríbelo. Lo que necesita aprobación es lo que el autor **no** pidió, y eso está en Límites.
 - Registra el hecho, no la conversación. "Recuérdame" y "anota" van dirigidos a ti, no son parte de lo ocurrido.
 - Un hecho, un comando. Si te descubres corriendo dos para un mismo hecho, revisa la tabla: casi siempre el segundo ya lo hizo el primero.
 - No preguntes lo que los últimos registros ya responden.
