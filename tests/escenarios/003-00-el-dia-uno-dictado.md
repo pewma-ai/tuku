@@ -90,18 +90,11 @@ No sale de [`referencia-faena.md`](../../corpus/referencia/referencia-faena.md),
 
 Las horas van dichas como las diría una persona ("a las dos y veinte"), porque el vault del 002 las tiene exactas y sin ellas la comparación no podría serlo. Lo que se prueba es la traducción, no la adivinación.
 
-## Escenario: preparar el ambiente del epic
+## Dónde queda cada corrida
 
-Dado el `playground/` como lo dejó la corrida anterior
-Cuando se corre
+Cada escenario escribe en `playground/003-<escenario>/` y limpia esa carpeta antes de usarla. Solo esa.
 
-```bash
-rm -rf 003-*
-```
-
-Entonces no queda ningún resultado del epic 003, y la cadena arranca sobre limpio
-
-Mismo patrón que el 002: `playground/003-*` es territorio de la suite y una carpeta exploratoria con otro nombre sobrevive.
+Hasta el 2026-09-09 esto era un `rm -rf 003-*` al empezar el epic, y eso borraba también el resultado de los escenarios que la corrida no iba a regenerar. En un epic determinista da igual, porque todo se rehace en dos segundos; en uno agéntico se lleva por delante turnos que costaron tokens y que no se repiten. Una carpeta tuya que empiece con `003-` sobrevive salvo que le pongas el nombre exacto de un escenario.
 
 ## Cómo se corre
 

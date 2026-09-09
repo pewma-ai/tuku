@@ -34,6 +34,7 @@ import io
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import unicodedata
@@ -307,14 +308,8 @@ def _escenario_de_preparacion(epic: str) -> Escenario | None:
 def preparar_epic(epic: str) -> None:
     """Corre el `XXX-00` del epic, una vez por sesión, antes de que nada escriba.
 
-    Es el único borrado del epic. Cada arnés borraba antes su propia carpeta, y
-    con varios tests por escenario eso daba más de cien borrados por corrida:
-    una pelea con el sistema de archivos que hacía fallar tests ajenos. Ahora se
-    limpia una vez, al principio, y desde ahí cada escenario solo crea.
-
     Se dispara sola al preparar el primer directorio del epic, así que correr un
-    escenario suelto con `-k` limpia igual que la corrida completa.
-
+    escenario suelto con `-k` prepara igual que la corrida completa.
     """
     if epic in _PREPARADOS:
         return
@@ -352,13 +347,14 @@ def _preparar_dir(escenario: Escenario) -> Path:
     preparar_epic(epic_de(escenario.slug))
     destino = vault.PLAYGROUND / escenario.slug / slugificar(escenario.titulo)
     if destino.exists():
-        raise PasoFallido(
-            f"{destino.relative_to(vault.PLAYGROUND)} ya existe después de limpiar el "
-            f"epic. O dos escenarios reclaman la misma carpeta, o algo externo a la "
-            f"suite escribe en playground/ (un sincronizador, un indexador, un editor "
-            f"con el repositorio abierto): eso ya pasó una vez, y está contado en "
-            f"TODO.md."
-        )
+        # Cada escenario limpia lo suyo, y solo lo suyo. Antes el `XXX-00` del
+        # epic borraba `playground/XXX-*` entero, y eso destruía el resultado de
+        # los escenarios que esta corrida no iba a regenerar: un `uv run pytest`
+        # normal se llevaba por delante los turnos agénticos del epic 003, que
+        # cuestan tokens y no se repiten. La pelea con el sistema de archivos que
+        # motivó aquel borrado único ya no aplica: una corrida cachea el
+        # escenario, así que esto es un borrado por escenario y no por test.
+        shutil.rmtree(destino)
     destino.mkdir(parents=True)
     return destino
 
