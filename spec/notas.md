@@ -8,7 +8,9 @@ Una nota vale mientras la idea conserve sentido y no pertenece a un momento.
 
 Algunas notas no son libres: son sobre algo que se repite en la bitácora y que merece página propia. Una persona, un cliente, un sistema, una reunión recurrente.
 
-**"Persona" no es una entidad del diseño.** Serlo la volvería un caso especial, y en cuanto apareciera el segundo concepto inferido habría que abrir otro. El concepto general es la **nota tipada**: una nota que declara `tipo:` en su frontmatter y que por eso tiene plantilla y procedimiento de destilado.
+**`subtype` no es `type`.** Toda nota lleva `type: Note`, el campo OKF de lista cerrada que [`README.md`](README.md) exige en cualquier archivo que guarde conocimiento. `subtype` es lo que subdivide ese `Note`: de lista abierta, en minúscula, y solo lo declaran las notas tipadas. Conviven en el mismo frontmatter y ninguno reemplaza al otro. Va en inglés como todos los nombres de campo, que son superficie de máquina.
+
+**"Persona" no es una entidad del diseño.** Serlo la volvería un caso especial, y en cuanto apareciera el segundo concepto inferido habría que abrir otro. El concepto general es la **nota tipada**: una nota que declara `subtype` en su frontmatter y que por eso tiene plantilla y procedimiento de destilado.
 
 La lista de tipos es **abierta**, igual que las clasificaciones y los horizontes (ver [`bitacora.md`](bitacora.md)). Vive en `LIBRO-DE-ESTILO.md` bajo `### Tipos de nota` y crece cuando el uso revela uno nuevo. Cada tipo tiene su archivo en `reglas/tipos/`.
 

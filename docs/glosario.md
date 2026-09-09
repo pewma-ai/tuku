@@ -78,7 +78,7 @@
 | Término | Qué es |
 |---|---|
 | **Nota libre** | Zettelkasten puro: una idea que vale mientras conserve sentido, sin pertenecer a un momento. |
-| **Nota tipada** | Una nota sobre algo recurrente que declara `tipo:` en su frontmatter y por eso tiene plantilla y procedimiento. |
+| **Nota tipada** | Una nota sobre algo recurrente que declara `subtype` en su frontmatter y por eso tiene plantilla y procedimiento. |
 | **Destilar** | Barrer el histórico en contexto aislado para escribir una nota tipada a partir de lo ya registrado. |
 
 ## Quién ejecuta
