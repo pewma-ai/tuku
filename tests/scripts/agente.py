@@ -43,9 +43,16 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 #: de su administradora de verdad, y dos de los tres tests pasaron igual, porque
 #: un agente que mira otro vault tampoco toca este. Sin aislamiento, el epic mide
 #: la configuración de la máquina y no el `AGENTS.md` que dice medir.
+#:
+#: Ahí va también lo que deja al agente **ejecutar**. En modo headless no hay a
+#: quién pedirle permiso, así que el arnés auto-aprueba dentro de un sandbox. Es
+#: deliberado y tiene su precio: se auto-aprueba toda herramienta, no solo `tuku`.
+#: A cambio, la suite no depende de la configuración de la máquina, que es lo que
+#: pide el `003-00`, y el agente opera sobre un vault desechable de `playground/`.
+#: Si un arnés ofreciera una regla acotada a un solo ejecutable, ese es el cambio.
 ARNESES: dict[str, dict[str, list[str]]] = {
     "agy": {
-        "aislar": ["--new-project"],
+        "aislar": ["--new-project", "--sandbox", "--dangerously-skip-permissions"],
         "prompt": ["-p", "{prompt}"],
         "modelo": ["--model", "{modelo}"],
     },
@@ -94,9 +101,19 @@ class Turno:
         return [shlex.join(["tuku", *argv]) for argv in self.traza]
 
     def invocaciones_de(self, *verbo: str) -> list[list[str]]:
-        """Las invocaciones que empiezan con ese noun y verb, p. ej. `("entry", "add")`."""
+        """Las invocaciones que empiezan con ese noun y verb, p. ej. `("entry", "add")`.
+
+        **Las de ayuda no cuentan.** Un agente que no conoce un comando corre
+        `tuku entry add --help` antes de usarlo, y eso es exactamente lo que
+        debería hacer: no escribe nada y evita inventarse una opción. Contarlas
+        haría fallar al agente prudente y pasar al que adivina.
+        """
         largo = len(verbo)
-        return [argv for argv in self.traza if tuple(argv[:largo]) == verbo]
+        return [
+            argv
+            for argv in self.traza
+            if tuple(argv[:largo]) == verbo and not ({"-h", "--help"} & set(argv))
+        ]
 
     @property
     def escribio_a_mano(self) -> bool:

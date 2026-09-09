@@ -184,6 +184,8 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`002-10-cli-superficie.md`](002-10-cli-superficie.md) | Epic 002 | Fuera de la cadena, siembra su propio vault: nouns y verbs en `-h`, códigos de salida, y el barrido de que todo error nombre la corrección |
 | [`003-00-el-dia-uno-dictado.md`](003-00-el-dia-uno-dictado.md) | Epic 003 | La escalera de menos a más para probar con un agente en el medio, y los seis escenarios que la suben |
 | [`003-01-el-vault-dice-a-donde-va.md`](003-01-el-vault-dice-a-donde-va.md) | Epic 003 | `tuku doctor` verifica que la tabla de despacho del `AGENTS.md` no nombre comandos que no existen. Sin agente |
+| [`003-02-el-agente-lee-el-vault.md`](003-02-el-agente-lee-el-vault.md) | Epic 003 | El autor pregunta, el agente responde y el vault no cambia. Primer turno |
+| [`003-03-un-hecho-un-comando.md`](003-03-un-hecho-un-comando.md) | Epic 003 | Un hecho sin consecuencia: una línea, un `tuku entry add`, nada más |
 
 ## Escenarios encadenados, desde el epic 002
 
