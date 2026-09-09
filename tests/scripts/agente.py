@@ -35,9 +35,21 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 #:
 #: Verificado contra `agy` real: `agy -p "..."` deja la respuesta en stdout y sale
 #: 0. Su `--conversation` es lo que sostiene una sesión, y por eso no aparece acá.
+#:
+#: **`aislar` no es opcional y no es cosmético.** Un arnés moderno resuelve un
+#: "proyecto" a partir de la máquina y no del `cwd`, así que un turno lanzado
+#: dentro del vault de prueba puede contestar sobre el vault real del autor. Pasó:
+#: el primer turno del `003-02` respondió con rutas de `mac-jpgil` y con el nombre
+#: de su administradora de verdad, y dos de los tres tests pasaron igual, porque
+#: un agente que mira otro vault tampoco toca este. Sin aislamiento, el epic mide
+#: la configuración de la máquina y no el `AGENTS.md` que dice medir.
 ARNESES: dict[str, dict[str, list[str]]] = {
-    "agy": {"prompt": ["-p", "{prompt}"], "modelo": ["--model", "{modelo}"]},
-    "claude": {"prompt": ["-p", "{prompt}"], "modelo": ["--model", "{modelo}"]},
+    "agy": {
+        "aislar": ["--new-project"],
+        "prompt": ["-p", "{prompt}"],
+        "modelo": ["--model", "{modelo}"],
+    },
+    "claude": {"aislar": [], "prompt": ["-p", "{prompt}"], "modelo": ["--model", "{modelo}"]},
 }
 
 #: Cuánto se espera un turno antes de darlo por colgado. Un dictado del día
@@ -59,7 +71,7 @@ class Arnes:
 
     def argv(self, prompt: str) -> list[str]:
         plantilla = ARNESES[self.nombre]
-        partes = [self.ejecutable]
+        partes = [self.ejecutable, *plantilla["aislar"]]
         if self.modelo:
             partes += [a.format(modelo=self.modelo) for a in plantilla["modelo"]]
         partes += [a.format(prompt=prompt) for a in plantilla["prompt"]]

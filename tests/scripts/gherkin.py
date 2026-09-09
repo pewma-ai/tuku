@@ -424,11 +424,30 @@ def _correr_agente(paso: Paso, dir: Path) -> agente.Turno:
             f"tiene que haberlo sembrado en su `## Estado inicial`."
         )
     turno = agente.turno(vault, prompt)
+    _dejar_a_la_vista(turno, dir)
     if turno.codigo != 0:
         raise PasoFallido(
             f"el turno de {paso.texto!r} salió {turno.codigo}: {turno.stderr.strip()}"
         )
     return turno
+
+
+def _dejar_a_la_vista(turno: agente.Turno, dir: Path) -> None:
+    """Escribe el turno al lado del vault, para el `## Qué se mira a mano`.
+
+    Un turno no repite resultado, así que lo que quedó de esta corrida es la
+    única evidencia que va a existir de ella. El `.py` afirma lo que se puede
+    afirmar; lo demás (si explicó el mecanismo en vez de decir qué quedó escrito,
+    si preguntó algo que los registros ya respondían) solo se juzga leyéndolo.
+    """
+    n = len(list(dir.glob("turno-*.md"))) + 1
+    comandos = "\n".join(turno.comandos) or "(ninguno)"
+    (dir / f"turno-{n}.md").write_text(
+        f"# Turno {n}\n\n## Lo que dijo el autor\n\n{turno.prompt}\n\n"
+        f"## Lo que respondió el agente\n\n{turno.stdout.strip()}\n\n"
+        f"## Lo que ejecutó\n\n```bash\n{comandos}\n```\n",
+        encoding="utf-8",
+    )
 
 
 def correr(slug: str, titulo: str) -> Corrida:
