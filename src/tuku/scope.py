@@ -68,10 +68,13 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
     directorio = vault / "ambitos" / valor
     directorio.mkdir(parents=True, exist_ok=True)
 
+    libro = os.path.relpath(vault / "LIBRO-DE-ESTILO.md", directorio)
     for archivo in OBLIGATORIOS:
         ruta = directorio / archivo
         if not ruta.exists():
-            ruta.write_text(_plantilla_obligatorio(archivo, valor), encoding="utf-8")
+            ruta.write_text(
+                _plantilla_obligatorio(archivo, valor, libro=libro), encoding="utf-8"
+            )
 
     pagina = _pagina(directorio)
     if not pagina.exists():
@@ -195,7 +198,14 @@ def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
     return None
 
 
-def _plantilla_obligatorio(archivo: str, nombre: str) -> str:
+def _plantilla_obligatorio(archivo: str, nombre: str, *, libro: str) -> str:
+    """El contenido inicial de un archivo obligatorio, igual al que siembra `init`.
+
+    Un ámbito creado por comando es indistinguible de uno sembrado por
+    `tuku init`, y eso incluye el frontmatter: `CADENCIAS.md` es un `Cadence`
+    como cualquier otro, y sin su `type` el `doctor` reporta un archivo que TUKU
+    acaba de escribir.
+    """
     if archivo == "AGENTS.md":
         return (
             f"# Reglas de {nombre}\n\n"
@@ -203,9 +213,10 @@ def _plantilla_obligatorio(archivo: str, nombre: str) -> str:
             "Puede quedar vacío.\n"
         )
     return (
+        "---\ntype: Cadence\n---\n\n"
         f"# Cadencias de {nombre}\n\n"
-        "Lo que se repite en este ámbito con un ritmo propio.\n\n"
-        "Puede quedar vacío.\n"
+        "Lo que se repite dentro de este ámbito. Todavía no hay ninguna.\n\n"
+        f"Cómo se escribe una cadencia: [libro de estilo]({libro}#Cadencias).\n"
     )
 
 

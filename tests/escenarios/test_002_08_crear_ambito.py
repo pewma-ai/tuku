@@ -85,6 +85,12 @@ def test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras() -> No
     assert "## Actividad reciente" in pagina
     assert "### Agosto 2026" in pagina
 
+    cadencias = (directorio / "CADENCIAS.md").read_text(encoding="utf-8")
+    sembrado = (vault / "ambitos" / "personal" / "CADENCIAS.md").read_text(encoding="utf-8")
+    assert cadencias == sembrado.replace("personal", AMBITO), (
+        "el ámbito creado por comando no es equivalente al que siembra `tuku init`"
+    )
+
 
 def test_002_08_el_resto_de_la_linea_no_se_reescribe() -> None:
     corrida = gherkin.correr(SLUG, "las menciones sueltas del ciclo en curso pasan a enlace")
@@ -111,6 +117,21 @@ def test_002_08_un_registro_no_puede_apuntar_a_una_categoria() -> None:
     )
 
 
+def test_002_08_el_ambito_recien_creado_deja_el_vault_sano() -> None:
+    """El doctor sobre lo que TUKU acaba de escribir.
+
+    Un `CADENCIAS.md` sin `type` hacía que el doctor reportara un archivo que el
+    propio comando había escrito, y ninguna afirmación del escenario lo notaba.
+    Va sobre un vault recién sembrado porque el de la cadena arrastra, a
+    propósito desde el `002-03`, un registro que el doctor reporta con razón.
+    """
+    corrida = gherkin.correr(SLUG, "el ámbito recién creado deja el vault sano")
+
+    doctor = corrida.de("tuku doctor")
+    assert doctor.codigo == EXITO, doctor.stdout
+    assert "el vault está sano" in doctor.stdout, doctor.stdout
+
+
 def test_002_08_crear_dos_veces_no_hace_nada() -> None:
     corrida = gherkin.correr(SLUG, "crear dos veces el mismo ámbito no hace nada")
     assert corrida.codigo == EXITO, corrida.stderr
@@ -124,5 +145,6 @@ if __name__ == "__main__":
     test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras()
     test_002_08_el_resto_de_la_linea_no_se_reescribe()
     test_002_08_un_registro_no_puede_apuntar_a_una_categoria()
+    test_002_08_el_ambito_recien_creado_deja_el_vault_sano()
     test_002_08_crear_dos_veces_no_hace_nada()
-    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")
