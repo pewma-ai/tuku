@@ -31,3 +31,5 @@ Abre `AGENTS.md`. Son las instrucciones que va a leer tu agente. Léelas tú tam
 No le expliques qué es TUKU ni le pegues instrucciones. Ya está todo ahí.
 
 Si tienes que explicárselo para que funcione, el defecto es del vault y no tuyo. Anótalo: eso es justo lo que este tutorial sirve para encontrar.
+
+Siguiente: [2. El primer registro](02-el-primer-registro.md).

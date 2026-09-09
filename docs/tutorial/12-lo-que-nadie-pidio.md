@@ -26,3 +26,5 @@ Rechaza lo que te proponga, todo.
 Busca el rastro de lo que rechazaste. No debería haber ninguno: ni una nota, ni una marca, ni un archivo que diga que esto ya se preguntó.
 
 Un sistema que anota tus rechazos empieza a tenerte fichada, y la próxima vez que te proponga algo vas a estar contestándole a tu expediente. Aquí lo que rechazaste no ocurrió ([principio 3](../principios.md)).
+
+Siguiente: [Conclusión](99-conclusion.md).

@@ -21,3 +21,5 @@ Dos líneas, dos horas, el mismo día.
 Fíjate en la palabra entre asteriscos de cada una. No es la misma, y ninguna de las dos la dijiste tú.
 
 Esa palabra es lo único que tu agente tuvo que decidir. Todo el resto de la línea es mecánico.
+
+Siguiente: [3. Lo que queda por hacer](03-lo-que-queda-por-hacer.md).

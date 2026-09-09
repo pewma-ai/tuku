@@ -16,3 +16,5 @@ Hay una línea nueva. Pregúntate por qué, si lo que acabas de guardar no es de
 Lo que sabes de don Rodolfo no tiene fecha y va a seguir siendo verdad en marzo. Pero haberlo escrito sí ocurrió hoy, a esta hora, y eso es parte de tu día.
 
 El día guarda lo que pasó. La nota guarda lo que sabes. Que sean dos cosas es el motivo de que puedas leer la nota en marzo sin releer agosto entero.
+
+Siguiente: [7. Revisar](07-revisar.md).

@@ -29,3 +29,5 @@ Lo que buscas es que **no haya cambiado nada todavía**. Ni la primera idea, ni 
 Una línea, no cuatro. Lo que decidiste al final, no el camino para llegar ahí.
 
 Un secretario que archiva mientras hablas no es un secretario ([principio 3](../principios.md)). Y si te archivó la idea que descartaste, mañana vas a leer tu propia semana y vas a creer algo que nunca decidiste.
+
+Siguiente: [10. Una semana después](10-una-semana-despues.md).

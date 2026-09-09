@@ -24,3 +24,5 @@ Ni preguntó ni adivinó: lo leyó, porque lo escribiste tú la semana pasada.
 Aquí hay dos Paulas posibles, o ninguna clara.
 
 Lo que buscas es que **pregunte**. Con una semana de historia, callarse y elegir la más reciente es la respuesta cómoda y es la peor: te deja un registro falso que nadie va a revisar nunca.
+
+Siguiente: [11. Cerrar la semana](11-cerrar-la-semana.md).

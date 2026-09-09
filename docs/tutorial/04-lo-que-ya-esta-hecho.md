@@ -23,3 +23,5 @@ Eso está hecho, pero nunca estuvo pendiente. No hay nada que cerrar.
 Lo que quieres ver es que no pasó ninguna de las dos cosas, y que el registro se escribió igual en `AHORA.md`.
 
 Un sistema que inventa el pendiente para poder cerrarlo te está mintiendo sobre tu propio pasado. Este prefiere avisarte y seguir.
+
+Siguiente: [5. Un frente nuevo](05-un-frente-nuevo.md).

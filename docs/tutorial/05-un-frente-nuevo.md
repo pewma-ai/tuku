@@ -18,3 +18,5 @@ A los registros que ya habías escrito, arriba, los de hace veinte minutos.
 Alguno cambió solo. Búscalo: nombraba a Los Robles en texto corriente y ahora lo nombra como enlace. Nadie reescribió esa línea a mano, y las que no hablaban de Los Robles quedaron intactas.
 
 Esto es lo que quiere decir que [la organización emerge del uso](../principios.md): escribes primero y ordenas cuando sabes cómo, y lo que ya habías escrito se pone al día solo. Al revés, tendrías que haber sabido el lunes cuáles iban a ser tus frentes en diciembre.
+
+Siguiente: [6. Algo que no es de hoy](06-algo-que-no-es-de-hoy.md).

@@ -19,3 +19,5 @@ Que sea el mismo no es pereza. Es lo que te deja cerrarlo después diciendo lo m
 Busca la palabra "recuérdame". No está.
 
 Lo que quedó escrito es lo que pasó, no la instrucción que le diste a tu agente. Él sabe que "recuérdame" va dirigido a él y que no es parte de tu día.
+
+Siguiente: [4. Lo que ya está hecho](04-lo-que-ya-esta-hecho.md).

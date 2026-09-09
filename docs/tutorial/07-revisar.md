@@ -26,3 +26,5 @@ Los dos archivos quedaron impecables por separado: `PENDIENTES.md` es una tabla 
 Pregúntale ahora a tu agente por qué a él sus instrucciones le prohíben hacer exactamente lo que acabas de hacer.
 
 Deshaz el borrón antes de seguir, o vuelve a decirle a tu agente lo que borraste.
+
+Siguiente: [8. El día completo](08-el-dia-completo.md).
