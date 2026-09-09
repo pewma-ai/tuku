@@ -178,6 +178,36 @@ def revisar_despacho(agents_md: str | None, comandos: frozenset[str]) -> Revisio
     return Revision("despacho", f"despacho: {len(nombrados)} comandos, todos existen.", True)
 
 
+def revisar_consecuencias(ahora: str | None, pendientes: str | None) -> Revision:
+    """Cruza las marcas de la bitácora con la tabla de pendientes.
+
+    Es lo único que detecta el modo de falla más caro del sistema: `tuku entry
+    add` escribe el registro y nada más, así que un `**pendiente**` cuyo
+    `tuku todo open` no se corrió deja un archivo bien formado al que le falta la
+    mitad. Leyendo cualquiera de los dos archivos por separado no se ve nada.
+
+    Le pasa a quien edita a mano lo que tiene comando, y a un agente que se
+    olvida de la segunda llamada. El `AGENTS.md` del vault ya prometía que el
+    doctor lo encuentra; hasta ahora no lo hacía.
+    """
+    from tuku import todo
+
+    if ahora is None or pendientes is None:
+        return ausente("consecuencias", "AHORA.md" if ahora is None else "PENDIENTES.md")
+
+    faltan = todo.sin_consecuencia(ahora, pendientes)
+    if not faltan:
+        salida = "consecuencias: las marcas y la tabla concuerdan."
+        return Revision("consecuencias", salida, True)
+
+    lineas = [
+        f"AHORA.md: error: {c.cuerpo!r} lleva {c.marca} y la tabla no lo refleja. "
+        f"Corre `{c.comando} \"<la línea del registro>\"`."
+        for c in faltan
+    ]
+    return Revision("consecuencias", "\n".join(lineas), False)
+
+
 def tipo_declarado(texto: str) -> str | None:
     """El `type` del frontmatter de un archivo, o `None` si no lo tiene.
 
@@ -353,6 +383,7 @@ def revisar_vault(vault: Path, *, comandos: frozenset[str] | None = None) -> Res
     ]
     if comandos is not None:
         revisiones.append(revisar_despacho(leer("AGENTS.md"), comandos))
+    revisiones.append(revisar_consecuencias(leer("AHORA.md"), leer("PENDIENTES.md")))
 
     ahora = leer("AHORA.md")
     if ahora is None:

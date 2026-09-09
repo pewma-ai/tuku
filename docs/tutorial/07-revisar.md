@@ -10,7 +10,7 @@ tuku doctor
 
 Es corta y no toca nada. Solo mira y te cuenta.
 
-En algún lado va a decir "pregunta", al lado de una palabra tuya. No es un error: es una palabra que tú usaste, que el sistema no conocía, que aceptó igual, y sobre la que te pide que le digas qué significa cuando lo tengas claro.
+Si en algún lado dice "pregunta" al lado de una palabra tuya, no es un error: es una palabra que tú usaste, que el sistema no conocía, que aceptó igual, y sobre la que te pide que le digas qué significa cuando lo tengas claro.
 
 Ese es el trato completo. El vocabulario lo pones tú y el sistema aprende, nunca al revés. No hay una lista de categorías permitidas que tengas que estudiar.
 
@@ -19,6 +19,10 @@ Ese es el trato completo. El vocabulario lo pones tú y el sistema aprende, nunc
 
 Corre el doctor de nuevo y mira si se dio cuenta.
 
-Después pregúntale a tu agente por qué a él sus instrucciones le prohíben hacer exactamente eso que acabas de hacer. La respuesta explica todo el diseño: un archivo editado a mano queda perfecto por fuera y le faltan las consecuencias por dentro, y eso no deja ninguna señal.
+Fíjate en qué archivo te nombra. No es el que tocaste.
+
+Los dos archivos quedaron impecables por separado: `PENDIENTES.md` es una tabla bien formada a la que le falta una fila que nadie sabe que faltaba, y `AHORA.md` ni se enteró. El defecto no está en ninguno de los dos, está entre ellos, y por eso hace falta un comando que los cruce.
+
+Pregúntale ahora a tu agente por qué a él sus instrucciones le prohíben hacer exactamente lo que acabas de hacer.
 
 Deshaz el borrón antes de seguir, o vuelve a decirle a tu agente lo que borraste.

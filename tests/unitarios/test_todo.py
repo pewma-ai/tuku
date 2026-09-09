@@ -232,3 +232,43 @@ def test_un_horizonte_renombrado_por_el_autor_ordena_como_el_primero() -> None:
     )
     filas = todo.filas(tabla)
     assert [f.horizonte for f in filas] == ["esta quincena", "con fecha"]
+
+
+# --- marcas sin su consecuencia --------------------------------------------
+
+AHORA_CON_MARCAS = (
+    "## Martes 11 de agosto\n"
+    "- 10:25 - [[personal]] **pendiente**: enviar la cotización a Los Robles\n"
+    "- 11:00 - [[personal]] **pendiente**: llamar al banco\n"
+    "- 12:00 - [[personal]] ~~(Hecho)~~: llamar al banco\n"
+)
+
+
+def _tabla(*cuerpos: str) -> str:
+    filas = "".join(f"| esta semana |  | [[personal]] | {c} |\n" for c in cuerpos)
+    return f"{todo.CABECERA}\n| --- | --- | --- | --- |\n{filas}"
+
+
+def test_sin_consecuencia_encuentra_el_pendiente_que_nunca_se_abrio() -> None:
+    faltan = todo.sin_consecuencia(AHORA_CON_MARCAS, _tabla())
+    assert [(c.cuerpo, c.comando) for c in faltan] == [
+        ("enviar la cotización a Los Robles", "tuku todo open")
+    ]
+
+
+def test_abrir_y_cerrar_el_mismo_ciclo_no_deja_fila_y_esta_bien() -> None:
+    """`llamar al banco` se abre y se cierra el mismo día: la tabla queda sin él."""
+    tabla = _tabla("enviar la cotización a Los Robles")
+    assert todo.sin_consecuencia(AHORA_CON_MARCAS, tabla) == []
+
+
+def test_sin_consecuencia_encuentra_el_cierre_que_nunca_se_aplico() -> None:
+    faltan = todo.sin_consecuencia(
+        AHORA_CON_MARCAS, _tabla("enviar la cotización a Los Robles", "llamar al banco")
+    )
+    assert [(c.cuerpo, c.comando) for c in faltan] == [("llamar al banco", "tuku todo close")]
+
+
+def test_un_pendiente_arrastrado_de_otro_ciclo_no_se_reporta() -> None:
+    """Está en la tabla sin marca en `AHORA.md` porque viene de un ciclo anterior."""
+    assert todo.sin_consecuencia("## Martes 11 de agosto\n", _tabla("pagar la patente")) == []

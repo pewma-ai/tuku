@@ -260,6 +260,52 @@ def horizontes(pendientes: str) -> list[str]:
     return vistos
 
 
+@dataclass(frozen=True)
+class ConsecuenciaPendiente:
+    """Una marca de la bitácora cuyo comando de consecuencia nunca se corrió."""
+
+    cuerpo: str
+    marca: str
+
+    @property
+    def comando(self) -> str:
+        return "tuku todo open" if self.marca == ABRE else "tuku todo close"
+
+
+def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]:
+    """Las marcas del ciclo en curso que la tabla no refleja.
+
+    Es el modo de falla más caro del sistema y el único que no deja señal:
+    `tuku entry add` escribe el registro y nada más, así que un `**pendiente**`
+    cuyo `tuku todo open` no se corrió deja un archivo perfectamente bien formado
+    al que le falta la mitad. Nada lo delata al leerlo; solo cruzando los dos
+    archivos aparece.
+
+    Dos casos, y ninguno mira `bitacoras/`: un pendiente que viene arrastrado de
+    un ciclo anterior está en la tabla sin marca en `AHORA.md`, y eso es correcto.
+
+    1. Un `**pendiente**` que no está en la tabla, salvo que el mismo ciclo lo
+       cierre después: abrir y cerrar el mismo día no deja fila, y está bien.
+    2. Un `~~(Hecho)~~` cuyo cuerpo sigue en la tabla.
+    """
+    marcas = [m for linea in ahora.splitlines() if (m := parsear(linea))]
+    abiertos = [m.cuerpo for m in marcas if m.marca == ABRE]
+    cerrados = {m.cuerpo for m in marcas if m.marca == CIERRA}
+    en_tabla = set(cuerpos(pendientes))
+
+    faltan = [
+        ConsecuenciaPendiente(c, ABRE)
+        for c in dict.fromkeys(abiertos)
+        if c not in en_tabla and c not in cerrados
+    ]
+    faltan += [
+        ConsecuenciaPendiente(m.cuerpo, CIERRA)
+        for m in marcas
+        if m.marca == CIERRA and m.cuerpo in en_tabla
+    ]
+    return faltan
+
+
 def duplicados(pendientes: str) -> list[str]:
     """Detalles que aparecen en más de una fila. Regla 1 de `spec/pendientes.md`.
 
