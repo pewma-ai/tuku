@@ -81,3 +81,19 @@ if __name__ == "__main__":
     test_002_04_la_tabla_gana_una_fila_y_nada_mas()
     test_002_04_abrir_dos_veces_no_duplica()
     print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
+
+
+def test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla() -> None:
+    """Lo que distingue "abrió" de "escribió algo parecido".
+
+    `tuku entry add` deja el registro y nada más, así que un `**pendiente**` cuyo
+    `tuku todo open` no se corrió deja los dos archivos bien formados y el vault
+    a medias, sin que ninguno lo delate por separado. Es lo que `tuku doctor`
+    revisa desde el 2026-09-09, y lo que este paso existe para no permitir.
+    """
+    vault = gherkin.correr(SLUG, "abre el pendiente y copia el cuerpo literal").ruta("mi-vault")
+    faltan = todo.sin_consecuencia(
+        (vault / "AHORA.md").read_text(encoding="utf-8"),
+        (vault / "PENDIENTES.md").read_text(encoding="utf-8"),
+    )
+    assert faltan == [], f"quedaron marcas sin su consecuencia: {faltan}"

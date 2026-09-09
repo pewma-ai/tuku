@@ -89,3 +89,16 @@ if __name__ == "__main__":
     test_002_05_un_cierre_sin_pareja_no_inventa_nada()
     test_002_05_cerrar_dos_veces_no_vuelve_a_mover()
     print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
+
+
+def test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora() -> None:
+    """El gemelo del cierre: un `~~(Hecho)~~` cuyo cuerpo sigue en la tabla es un
+    cierre que se escribió y nunca se aplicó, y por separado los dos archivos se
+    ven bien. Lo revisa `tuku doctor` desde el 2026-09-09.
+    """
+    vault = gherkin.correr(SLUG, "el cierre repite el texto").ruta("mi-vault")
+    faltan = todo.sin_consecuencia(
+        (vault / "AHORA.md").read_text(encoding="utf-8"),
+        (vault / "PENDIENTES.md").read_text(encoding="utf-8"),
+    )
+    assert faltan == [], f"quedaron marcas sin su consecuencia: {faltan}"

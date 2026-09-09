@@ -24,6 +24,7 @@ Entonces la fila desaparece de la tabla de `PENDIENTES.md`
 Y la tabla queda vacía, con su cabecera intacta
 Y el registro de apertura de las 14:20 sigue escrito en el martes 11, sin tocar
 Y el diff toca `AHORA.md`, `PENDIENTES.md` y `ambitos/PENDIENTES-AMBITOS.md`
+Y el cierre queda aplicado: `tuku doctor` no reporta ninguna consecuencia pendiente
 
 El cierre repite el texto del pendiente en vez de reescribirlo en pasado, y por eso el emparejamiento es literal y no semántico ([`spec/bitacora.md`](../../spec/bitacora.md)). El historial queda en la bitácora, no en `PENDIENTES.md`.
 

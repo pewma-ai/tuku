@@ -25,8 +25,11 @@ Entonces la tabla contiene `| esta semana |  | [[personal]] | avisar de los GGCC
 Y el cuerpo es el mismo texto en los dos lugares, carácter por carácter
 Y la columna `Cuándo` queda vacía, porque el pendiente todavía no tiene fecha
 Y el diff contra el estado anterior toca `AHORA.md`, `PENDIENTES.md` y `ambitos/PENDIENTES-AMBITOS.md`
+Y la marca del registro queda reflejada en la tabla: `tuku doctor` no reporta ninguna consecuencia sin aplicar
 
 Abrir es copiar: el comando no interpreta, y por eso este paso no necesita LLM ([`spec/agente.md`](../../spec/agente.md)).
+
+La última afirmación es la que distingue "abrió" de "escribió algo parecido". `tuku entry add` deja el registro y nada más, así que un `**pendiente**` cuyo `tuku todo open` no se corrió deja los dos archivos bien formados y el vault a medias, sin que ninguno de los dos lo delate por separado. Es el defecto que este paso existe para no permitir, y hasta el 2026-09-09 nada lo afirmaba.
 
 ## Escenario: la tabla gana una fila y nada más
 
