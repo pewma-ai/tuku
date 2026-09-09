@@ -37,7 +37,7 @@ Fíjate en la palabra entre asteriscos de cada una. No es la misma, y ninguna de
 
 Una sola frase dejó dos líneas en la bitácora: el hecho ocurrido y el compromiso contraído.
 
-Solo una de las dos llegó a `PENDIENTES.md`. Compara el texto de las dos versiones: es idéntico palabra por palabra. Que sea el mismo no es pereza: es lo que te permite cerrarlo después diciendo lo mismo que dijiste al abrirlo.
+Solo una de las dos llegó a `PENDIENTES.md`. Compara el texto de las dos versiones: es idéntico palabra por palabra. Un hecho, un comando: al asentar el registro con su compromiso, la fila en `PENDIENTES.md` se abre sola por [consecuencia](../glosario.md#lo-que-se-escribe).
 
 > [!tip] Ahora prueba esto
 > Recuérdame que la Emilia tiene reunión de apoderados el jueves a las siete.
@@ -57,7 +57,7 @@ Busca la palabra "recuérdame". No está. Lo que quedó escrito es el hecho y su
 
 En `PENDIENTES.md` la fila desapareció.
 
-En `AHORA.md` quedó la constancia de cierre con `~~(Hecho)~~` y la hora exacta en que lo informaste. Nada desaparece sin dejar constancia en la bitácora.
+En `AHORA.md` quedó la constancia de cierre con `~~(Hecho)~~` y la hora exacta en que lo informaste. El mismo comando que asienta el hecho retira el compromiso de la tabla. Nada desaparece sin dejar constancia en la bitácora.
 
 ### Trata de romperlo
 
@@ -99,6 +99,24 @@ No todo lo que sabes ocurrió a una hora fija de hoy.
 En `notas/` apareció la ficha enlazada al cliente. En `AHORA.md` quedó la constancia temporal de haberla creado hoy.
 
 El día guarda lo que pasó; la nota guarda lo que sabes. Separar ambos ejes ([principio 6](../principios.md)) te permite consultar la ficha en marzo sin tener que releer agosto completo.
+
+---
+
+## Cuando quedó mal dicho
+
+Dictaste rápido y quedó escrito algo que no era. Corregirlo también se dicta.
+
+> [!tip] Dile a tu agente
+> La reunión de apoderados de la Emilia no era a las siete, es a las seis y media. Y al frente ponle Liceo Los Robles, que cambiaron de categoría.
+
+Lo que buscas: que el registro **y** el pendiente digan lo mismo. Un registro corregido y una fila sin corregir dejan un pendiente que ya no puedes cerrar, porque cerrarlo es repetir su texto. Por eso corregir es un solo comando y no dos.
+
+Con el [ámbito](../glosario.md#el-árbol-de-ámbitos) pasa lo mismo pero en más sitios: la carpeta, su página y cada mención en tu bitácora. Míralo en `ambitos/` y en `AHORA.md`: no queda ni un `[[colegio-los-robles]]`.
+
+> [!tip] Pídele algo que no tenga comando
+> Fusiona Liceo Los Robles y personal en un solo frente.
+
+Eso no lo hace ningún comando, y tu agente puede resolverlo igual, a mano. Lo que debe hacer primero es **decirte en una frase qué entendió** —en tus palabras, no en jerga— y esperar tu confirmación. Si se pone a trabajar sin decirte qué va a hacer, o si contesta con tecnicismos, eso es lo que hay que arreglar.
 
 ---
 

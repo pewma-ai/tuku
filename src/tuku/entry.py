@@ -200,3 +200,70 @@ def lint_del_vault(vault: Path) -> Resultado:
     if any(h.grado == ERROR for h in hallazgos):
         return Resultado.rechazo(mensaje, error=False)
     return Resultado.hecho(mensaje)
+
+
+def corregir_en_vault(
+    vault: Path, *, body: str, day: date | None = None, hour: str = ""
+) -> Resultado:
+    """Corrige el cuerpo de un registro ya escrito, y lo que ese cuerpo sostiene.
+
+    El caso de uso de `tuku entry rename`. Existe porque un registro no es solo
+    su línea: si llevaba `**pendiente**`, su cuerpo es también la fila de
+    `PENDIENTES.md`, y las dos tienen que decir lo mismo carácter por carácter o
+    el pendiente deja de poder cerrarse repitiendo su texto.
+
+    Corregir a mano es exactamente donde eso se rompe, porque la línea está a la
+    vista y la fila no.
+
+    La hora y el ámbito no se tocan: los fija `tuku entry add`, y cambiarlos acá
+    sería reescribir un hecho en vez de corregir cómo quedó dicho.
+    """
+    from tuku import ahora as ahora_mod
+    from tuku import propagate, rename, todo
+
+    ahora_path = vault / "AHORA.md"
+    if not ahora_path.is_file():
+        return Resultado.rechazo(
+            f"no encuentro AHORA.md en {vault}. "
+            f"¿Es un vault de TUKU?"
+        )
+    cuerpo = body.strip()
+    if not cuerpo:
+        return Resultado.rechazo(
+            "falta el cuerpo corregido. Pasa --body con el texto nuevo."
+        )
+
+    texto = ahora_path.read_text(encoding="utf-8")
+    encabezado = ahora_mod.encabezado_de(day or date.today())
+    previo = rename.cuerpo_del_registro(texto, encabezado, hour)
+    if previo is None:
+        return Resultado.rechazo(
+            f"no hay ningún registro a las {hour} en "
+            f"'{encabezado}'. Mira AHORA.md y confirma el día y la hora."
+        )
+    if previo == cuerpo:
+        return Resultado.hecho("el registro ya decía eso: nada que corregir.")
+
+    salida, _ = rename.corregir_registro(texto, encabezado, hour, cuerpo)
+    ahora_path.write_text(salida, encoding="utf-8")
+
+    # La fila del pendiente lleva el mismo texto que el registro, sin la marca.
+    # Si el cuerpo viejo estaba en la tabla, la corrección va también ahí.
+    filas = 0
+    pendientes_path = vault / "PENDIENTES.md"
+    if pendientes_path.is_file():
+        tabla = pendientes_path.read_text(encoding="utf-8")
+        # La tabla guarda el cuerpo sin la marca, y quien sabe separarlos es
+        # `todo.parsear`, que trabaja sobre la línea entera: se la compone.
+        marca_previa = todo.parsear(f"- {hour} - {previo}")
+        marca_nueva = todo.parsear(f"- {hour} - {cuerpo}")
+        if marca_previa is not None and marca_nueva is not None:
+            viejo_en_tabla = marca_previa.cuerpo.strip()
+            if viejo_en_tabla and viejo_en_tabla in tabla:
+                tabla = tabla.replace(viejo_en_tabla, marca_nueva.cuerpo.strip())
+                pendientes_path.write_text(tabla, encoding="utf-8")
+                filas = 1
+        propagate.propagar(vault)
+
+    detalle = " y su fila en PENDIENTES.md" if filas else ""
+    return Resultado.hecho(f"registro de las {hour} corregido{detalle}.")

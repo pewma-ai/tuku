@@ -28,6 +28,7 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
 import agente  # noqa: E402
 import gherkin  # noqa: E402
+import vault  # noqa: E402
 
 from tuku import todo  # noqa: E402
 
@@ -74,8 +75,15 @@ _AMBITO = re.compile(r"^- \d\d:\d\d - \[\[([^\]]+)\]\]")
 
 
 def _ambito_de(linea: str) -> str | None:
+    """El ámbito con que abre la línea, comparable.
+
+    Se normaliza porque el autor dicta hablando ("el depto centro") y no dice
+    con qué carácter se unen las palabras: `Depto Centro`, `depto_centro` y
+    `depto-centro` son el mismo frente, y exigir una de las tres mediría cómo
+    el agente eligió escribirlo. Nombrar **otro** frente sigue fallando.
+    """
     m = _AMBITO.match(linea)
-    return m.group(1) if m else None
+    return vault.nombre_comparable(m.group(1)) if m else None
 
 
 def _registros(dia: str) -> dict[str, str]:
@@ -105,11 +113,17 @@ def test_003_06_la_traduccion_es_la_del_dia_completo() -> None:
     lo cerrado solo si el agente los corrió en ese orden.
     """
     turno = gherkin.correr(SLUG, TITULO).turno
-    contados = {verbo: turno.traduccion.count(verbo) for verbo in TRADUCCION}
+    # Sin los intentos: un comando rechazado y repetido con lo que le faltaba es
+    # un hecho escrito al segundo intento, no dos hechos. Contarlos haría fallar
+    # justo al agente que se corrige.
+    hechos = turno.traduccion_sin_reintentos
+    contados = {verbo: hechos.count(verbo) for verbo in TRADUCCION}
     assert contados == TRADUCCION, "la traza dice:\n" + "\n".join(turno.comandos)
-    assert len(turno.traduccion) == sum(TRADUCCION.values()), (
-        f"corrió comandos que escriben y no estaban en el dictado: {turno.traduccion}"
+    assert len(hechos) == sum(TRADUCCION.values()), (
+        f"corrió comandos que escriben y no estaban en el dictado: {hechos}"
     )
+    if turno.reintentos:
+        print(f"reintentos (no fallan): {turno.reintentos}")
 
 
 @pytest.mark.agentic
@@ -120,7 +134,8 @@ def test_003_06_cada_registro_del_martes_calza_con_la_tabla_de_verdad() -> None:
     assert sorted(registros) == sorted(MARTES_11), (
         "las horas del martes no son las del dictado:\n" + "\n".join(registros.values())
     )
-    for hora, (ambito, marca) in MARTES_11.items():
+    for hora, (ambito_esperado, marca) in MARTES_11.items():
+        ambito = vault.nombre_comparable(ambito_esperado)
         linea = registros[hora]
         assert _ambito_de(linea) == ambito, f"las {hora} van en [[{ambito}]]: {linea}"
         puestas = [m for m in (todo.ABRE, todo.CIERRA) if m in linea]

@@ -202,3 +202,54 @@ def lint_del_vault(vault: Path, archivo: Path | None = None) -> Resultado:
     if not hallazgos:
         return Resultado.hecho("sin hallazgos.")
     return Resultado.rechazo("\n".join(hallazgos), error=False)
+
+
+def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
+    """Renombra una nota y arregla lo que la enlazaba.
+
+    El caso de uso de `tuku note rename`. Una nota se nombra en tres lugares a
+    la vez: el archivo, su `# título` y cada `[[enlace]]` que la menciona, entre
+    ellos la constancia que dejó el día que se creó. Renombrar solo el archivo
+    rompe los enlaces sin decirlo.
+
+    `viejo` y `nuevo` son títulos: el archivo sale del `slug` de cada uno, igual
+    que al crearla, así que el autor nombra la nota como la nombra siempre.
+    """
+    from tuku import rename
+
+    if not nuevo.strip():
+        return Resultado.rechazo(
+            "falta el título nuevo. Pasa el nombre que quieres darle."
+        )
+    origen = vault / "notas" / f"{slug(viejo)}.md"
+    destino = vault / "notas" / f"{slug(nuevo)}.md"
+    if not origen.is_file():
+        return Resultado.rechazo(
+            f"no existe la nota {viejo!r} en notas/. "
+            f"Mira notas/ y confirma el título."
+        )
+    if origen == destino:
+        return Resultado.hecho(f"la nota ya se llama {nuevo!r}: nada que hacer.")
+    if destino.exists():
+        return Resultado.rechazo(
+            f"ya existe una nota {nuevo!r}. "
+            f"Elige otro título, o funde las dos a mano y borra la que sobre."
+        )
+
+    origen.rename(destino)
+    destino.write_text(
+        rename.renombrar_titulo(destino.read_text(encoding="utf-8"), nuevo.strip()),
+        encoding="utf-8",
+    )
+
+    # Los enlaces apuntan al nombre del archivo, no al título: `[[slug]]`.
+    enlaces = 0
+    for ruta in sorted(vault.rglob("*.md")):
+        texto = ruta.read_text(encoding="utf-8")
+        salida, n = rename.renombrar_enlaces(texto, origen.stem, destino.stem)
+        if n:
+            enlaces += n
+            ruta.write_text(salida, encoding="utf-8")
+
+    detalle = f" ({enlaces} enlace(s) actualizado(s))" if enlaces else ""
+    return Resultado.hecho(f"nota {viejo!r} renombrada a {nuevo!r}{detalle}.")

@@ -32,7 +32,9 @@ from __future__ import annotations
 
 import filecmp
 import os
+import re
 import shutil
+import unicodedata
 from pathlib import Path
 
 #: Raíz del repo. `tests/scripts/` cuelga tres niveles bajo la raíz.
@@ -264,3 +266,30 @@ def ahora_sembrado(template_variante: Path, *, desde: str, hasta: str, dias: lis
             )
         esperado = esperado.replace(placeholder, real)
     return esperado
+
+
+#: Lo que separa palabras cuando alguien nombra un ámbito hablando: espacios,
+#: guiones bajos, y los guiones que ya usa el vault.
+_SEPARADORES = re.compile(r"[\s_-]+")
+
+
+def nombre_comparable(valor: str) -> str:
+    """El nombre de un ámbito o una nota, reducido a lo que de verdad lo identifica.
+
+    Minúsculas, sin acentos, y los separadores unificados: `Depto Centro`,
+    `depto_centro` y `depto-centro` son el mismo frente. Un test que compare las
+    cadenas tal cual mide cómo el agente eligió escribir el nombre, y eso no es
+    lo que ningún escenario dice medir: el autor lo dictó hablando ("el depto
+    centro"), sin decir con qué carácter se unen las palabras.
+
+    Lo que sí sigue fallando es nombrar otro frente. La tolerancia es de forma,
+    no de identidad.
+    """
+    plano = unicodedata.normalize("NFKD", valor.strip().lower())
+    sin_acentos = "".join(c for c in plano if not unicodedata.combining(c))
+    return _SEPARADORES.sub("-", sin_acentos).strip("-")
+
+
+def mismo_nombre(uno: str, otro: str) -> bool:
+    """Si dos nombres se refieren a lo mismo, ignorando cómo se escribieron."""
+    return nombre_comparable(uno) == nombre_comparable(otro)

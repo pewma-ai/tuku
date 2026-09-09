@@ -183,6 +183,37 @@ PERFIL = "tuku"
 TIMEOUT = 600
 
 
+#: Cómo se identifica **el hecho** sobre el que actúa una invocación, para
+#: distinguir dos hechos de un hecho intentado dos veces. Un agente que corre
+#: `note create "T"` sin cuerpo, lo ve rechazado y vuelve con `--body`, no
+#: escribió dos notas: escribió una, al segundo intento. Contar eso como un
+#: comando de más hace fallar al agente que se corrige, que es exactamente el
+#: que uno quiere.
+#:
+#: El sujeto sale de lo que no cambia entre los dos intentos: el argumento
+#: posicional (el título de una nota, el nombre de un ámbito) o el par día y
+#: hora que ubica un registro. Dos invocaciones del mismo verbo sobre el mismo
+#: sujeto, **seguidas**, son un intento y su corrección. Separadas por otro
+#: comando, no: ahí el agente ya siguió adelante y volver es otra cosa.
+_UBICAN = ("--day", "--dia", "--hour", "--hora")
+
+
+def _sujeto(argv: list[str]) -> tuple[str, ...]:
+    """Qué hecho toca esta invocación: el verbo, más lo que lo identifica."""
+    verbo = tuple(x for x in argv[:2] if not x.startswith("-"))
+    posicionales = tuple(
+        x
+        for i, x in enumerate(argv[len(verbo) :])
+        if not x.startswith("-") and not (i and argv[len(verbo) + i - 1].startswith("-"))
+    )
+    ubicacion = tuple(
+        f"{bandera}={argv[i + 1]}"
+        for i, bandera in enumerate(argv)
+        if bandera in _UBICAN and i + 1 < len(argv)
+    )
+    return verbo + posicionales + ubicacion
+
+
 #: Los comandos que tocan el vault. Los demás (`lint`, `doctor`, `vocab show`,
 #: y cualquiera con `--help`) leen, y un agente que los corre antes de escribir
 #: hace lo correcto: mira la ayuda para no inventarse una opción, y se verifica
@@ -328,14 +359,22 @@ class Turno:
     def traduccion_sin_reintentos(self) -> list[str]:
         """La traducción con las repeticiones idénticas colapsadas.
 
-        Lo que el dictado exigía, mirado sin el ruido del arnés. Los escenarios
-        que comparan contra el vault del 002 usan esta; el que quiera afirmar
-        que no hubo reintentos lo dice aparte, con `reintentos`.
+        Lo que el dictado exigía, mirado sin el ruido del arnés. Colapsa los
+        intentos consecutivos sobre **el mismo hecho**, no solo las llamadas
+        idénticas: un `note create` rechazado por faltarle el cuerpo y su
+        repetición con `--body` son una nota, escrita al segundo intento.
+
+        Los escenarios que comparan contra el vault del 002 usan esta; el que
+        quiera afirmar que no hubo reintentos lo dice aparte, con `reintentos`.
         """
         vistos: list[list[str]] = []
         for argv in self.traza:
-            if not vistos or vistos[-1] != argv:
+            if not vistos or _sujeto(vistos[-1]) != _sujeto(argv):
                 vistos.append(argv)
+            else:
+                # Mismo hecho, otra vez: se queda el último intento, que es el
+                # que quedó escrito.
+                vistos[-1] = argv
         return Turno(prompt="", codigo=0, stdout="", stderr="", traza=vistos).traduccion
 
     @property

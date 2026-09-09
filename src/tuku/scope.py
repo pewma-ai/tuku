@@ -357,6 +357,74 @@ def crear_con_enlazado(vault: Path, nombre: str) -> Resultado:
     return Resultado.hecho(f"ámbito creado en {directorio}.")
 
 
+def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
+    """Renombra un ámbito y arregla todo lo que lo nombraba.
+
+    Un ámbito no es una carpeta: es una carpeta, una página, un ancla de
+    transclusión, las cabeceras de sus archivos obligatorios y cada `[[enlace]]`
+    del vault que apunta a él. Renombrar a mano cualquiera de esas piezas por
+    separado deja el resto colgando, y el vault no avisa hasta que algo hace
+    falta.
+
+    **Se rechaza antes de tocar nada.** Un renombrado a medias es peor que uno
+    que no ocurrió: deja al autor con dos ámbitos incompletos y sin saber cuál
+    es el bueno.
+    """
+    from tuku import propagate, rename
+
+    if not nuevo or "/" in nuevo or nuevo in (".", ".."):
+        return Resultado.rechazo(
+            f"{nuevo!r} no sirve de nombre de ámbito. "
+            f"Usa un nombre sin barras, como el de una carpeta."
+        )
+    origen = vault / "ambitos" / viejo
+    destino = vault / "ambitos" / nuevo
+    if not origen.is_dir():
+        return Resultado.rechazo(
+            f"no existe el ámbito {viejo!r}. Míralos en ambitos/."
+        )
+    if viejo == nuevo:
+        return Resultado.hecho(f"el ámbito ya se llama {nuevo!r}: nada que hacer.")
+    if destino.exists():
+        return Resultado.rechazo(
+            f"ya existe un ámbito {nuevo!r}. "
+            f"Dos ámbitos no pueden llamarse igual: elige otro nombre, o mueve "
+            f"a mano lo que quieras conservar de {viejo!r} y bórralo después."
+        )
+
+    origen.rename(destino)
+    pagina_vieja = destino / f"{viejo}.md"
+    if pagina_vieja.is_file():
+        pagina_vieja.rename(destino / f"{nuevo}.md")
+
+    # El nombre viejo vive en las cabeceras de los archivos del ámbito, en su
+    # `keywords`, en el ancla que transcluye sus pendientes y en los enlaces de
+    # todo el vault. Se recorre el vault entero una vez y se escribe solo lo que
+    # cambió, que es lo que hace la operación idempotente.
+    enlaces = 0
+    for ruta in sorted(vault.rglob("*.md")):
+        texto = ruta.read_text(encoding="utf-8")
+        salida, n = rename.renombrar_enlaces(texto, viejo, nuevo)
+        enlaces += n
+        salida, _ = rename.renombrar_ancla(salida, viejo, nuevo)
+        salida = salida.replace(f"keywords: [{viejo}]", f"keywords: [{nuevo}]")
+        if ruta.parent == destino:
+            salida = salida.replace(f"de {viejo}", f"de {nuevo}")
+            if ruta.name == f"{nuevo}.md":
+                salida = rename.renombrar_titulo(salida, nuevo)
+        if salida != texto:
+            ruta.write_text(salida, encoding="utf-8")
+
+    # El callout de `PENDIENTES-AMBITOS.md` lleva el nombre legible del ámbito,
+    # y quien sabe componerlo es la propagación: se regenera en vez de parchear.
+    if (vault / "PENDIENTES.md").is_file():
+        propagate.propagar(vault)
+    actualizar_pagina(vault, nuevo)
+
+    detalle = f" ({enlaces} enlace(s) actualizado(s))" if enlaces else ""
+    return Resultado.hecho(f"ámbito {viejo!r} renombrado a {nuevo!r}{detalle}.")
+
+
 def lint_del_vault(vault: Path) -> Resultado:
     """Revisa el árbol de ámbitos y reporta; no escribe."""
     hallazgos = lint(vault)

@@ -82,8 +82,8 @@ Actualizado el 2026-09-09.
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | reabierto, mecanismo hecho | `tuku init` implementado y los siete `001-0X` en verde; falta re-verificación con persona sobre `uv tool install` + `tuku init` |
-| 002 | El día uno, a mano | `vacio` → `primer-dia` | por cerrar | diez escenarios deterministas en verde (`002-01` a `002-10`). Falta revisión a mano de `playground/002-09-crear-nota/` contra criterio de salida |
-| 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | siete escenarios en verde (`003-01` a `003-07`). Falta revisión a mano de los turnos de `playground/003-0*/` contra criterio de salida |
+| 002 | El día uno, a mano | `vacio` → `primer-dia` | por cerrar | once escenarios deterministas en verde (`002-01` a `002-11`). Falta revisión a mano de `playground/002-09-crear-nota/` contra criterio de salida |
+| 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | siete escenarios en verde (`003-01` a `003-07`), con modelo barato y esfuerzo bajo. El `003-08` (segundo arnés) queda pendiente. Falta revisión a mano de los turnos de `playground/003-0*/` contra criterio de salida |
 | 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 004 |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |

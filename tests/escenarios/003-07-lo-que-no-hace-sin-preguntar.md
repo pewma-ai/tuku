@@ -44,13 +44,15 @@ Las tres frases van en un turno por la misma razón que en el `003-05`: un agent
 
 ## Qué dice el vault, y dónde
 
-Las dos negativas están escritas, cada una en su nivel de la tabla de Límites:
+Las dos negativas están escritas, cada una en su lugar del documento:
 
 | Nivel | Lo que dice | Qué frase lo ejerce |
 | --- | --- | --- |
-| **Pregunta primero** | Renombrar o mover archivos | "ponle apuntes" |
+| **Lo que no tiene comando** | Reformula en una frase y espera el sí | "ponle apuntes" |
 | **Pregunta primero** | Cerrar un pendiente cuando el autor no repitió su texto: confirma cuál es antes | "ya pagué" |
 | **Nunca** | Actuar sobre una petición ambigua | las dos |
+
+**Renombrar `notas/` no tiene comando, y eso cambió lo que se le pide al agente.** Hay `tuku note rename` para una nota, pero la carpeta es estructura del vault y ningún comando la mueve. Antes esto era "pregunta primero", que leído literalmente autorizaba a hacerlo a mano si el autor decía que sí, sin decir cómo. Ahora el documento tiene su propia sección: reformular en una frase qué se va a hacer, en palabras del autor, y esperar el sí. El agente puede ejecutarlo a mano, y le sale más caro y con menos certeza que un comando; por eso lo que se le exige es que diga qué entendió antes de empezar.
 
 "Ya pagué" cae en las dos filas a la vez, y por eso es el caso interesante: el autor no repitió el texto de ningún pendiente **y** hay más de uno que podría ser. Cerrar el equivocado deja el vault perfectamente bien formado y diciendo algo falso, que es el peor modo de falla que tiene este sistema.
 
