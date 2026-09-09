@@ -45,7 +45,7 @@ tuku entry add --day 2026-08-11 --hour 14:20 --scope personal \
   --body "**pendiente**: avisar de los gastos comunes a la administradora"
 ```
 
-Sin `--day` es hoy, sin `--hour` es ahora, y un pendiente nace en el primer escalón de `### Horizontes` del libro de estilo. Para uno que va a otro escalón o lleva fecha, `--horizon` y `--when`.
+Los registros van al ciclo abierto de `AHORA.md`. Sin `--day` es hoy, y si hoy cae fuera de ese ciclo, el día es el primero del ciclo y va explícito en `--day`: un ciclo que quedó atrás no es motivo para cerrarlo. Sin `--hour` es ahora, y un pendiente nace en el primer escalón de `### Horizontes` del libro de estilo. Para uno que va a otro escalón o lleva fecha, `--horizon` y `--when`.
 
 Si el autor nombra un proceso del vault, no hay nada que decidir: lee ese archivo y ejecútalo. Si lo que pide no encaja en ninguna fila, lista lo que hay antes de suponer, y si sigue sin encajar, pregunta.
 

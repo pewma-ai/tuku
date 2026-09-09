@@ -12,15 +12,26 @@ a mano por el test. Así un cambio en el template no obliga a regenerar nada,
 y un cambio en la lógica de sembrado sigue rompiendo el test, que es lo que
 debe hacer.
 
-`preparar_playground()` da el directorio donde cada arnés instala: todo test
-que produce un vault lo deja en `../../playground/<slug>/` (git-ignored) y
-nunca en un tempdir que se descarta, para que correr la suite deje el
-resultado a la vista del autor.
+`preparar_playground()` da el directorio donde cada arnés instala. Ese
+directorio **no está en el repo**, y esa es la corrección más importante que
+tiene este módulo: un vault de prueba dentro del checkout hereda el árbol de
+arriba (los `AGENTS.md` del repo, el `.git`), y un agente moderno resuelve su
+proyecto por repositorio y no por `cwd`. Con el vault dentro, el epic 003 medía
+la configuración de la máquina y no el `AGENTS.md` del vault: `agy --sandbox`
+ejecutaba el comando correcto y el vault quedaba sin cambios, porque sus
+escrituras al árbol del repo no sobrevivían al turno. Lo que se corre vive en
+`BANCO`, bajo `/tmp`, sin nada heredable por encima.
+
+Lo que el autor mira sí vive en el repo: al terminar, `archivar()` copia el
+resultado a `playground/<slug>/`, que sigue git-ignored. Correr en un lado y
+analizar en otro son dos necesidades distintas y hasta ahora estaban confundidas
+en un solo directorio.
 """
 
 from __future__ import annotations
 
 import filecmp
+import os
 import shutil
 from pathlib import Path
 
@@ -28,7 +39,75 @@ from pathlib import Path
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 
 
-PLAYGROUND = RAIZ_REPO / "playground"
+#: Donde el autor analiza. Git-ignored, dentro del repo, y **no** es donde se
+#: corre: acá se copia el resultado al terminar cada escenario.
+ARCHIVO = RAIZ_REPO / "playground"
+
+#: Donde se corre. Fuera del checkout, para que ningún vault de prueba herede el
+#: árbol del repo. Es una ruta estable y no un `mktemp -d` por corrida, porque
+#: la cadena de un epic hereda el estado del paso anterior con un `cp -r` escrito
+#: en el `.md`, y esa herencia tiene que sobrevivir entre tests. Se cambia con
+#: `TUKU_BANCO`.
+BANCO = Path(os.environ.get("TUKU_BANCO", "/tmp/tuku-banco"))
+
+#: Lo que, puesto por encima del vault, contamina un turno agéntico.
+HEREDABLE = ("AGENTS.md", "CLAUDE.md", ".git")
+
+#: Compatibilidad: el resto del arnés todavía dice `PLAYGROUND` para "donde se
+#: corre". Lo que cambió es a dónde apunta.
+PLAYGROUND = BANCO
+
+
+def exigir_banco_limpio(dir: Path = BANCO) -> None:
+    """Falla si algo heredable cuelga por encima del banco.
+
+    El aislamiento del epic 003 no es una bandera del arnés: es una propiedad de
+    dónde corre el turno, y por eso se comprueba en vez de suponerse. Un
+    `AGENTS.md` olvidado en `/tmp` haría pasar o fallar escenarios por una razón
+    que ningún `.md` menciona.
+    """
+    for arriba in [dir, *dir.parents]:
+        for nombre in HEREDABLE:
+            if (arriba / nombre).exists():
+                raise RuntimeError(
+                    f"el banco de pruebas no está aislado: {arriba / nombre} cuelga "
+                    f"por encima de {dir}. Un turno agéntico lo heredaría."
+                )
+
+
+def enlazar_fixtures(dir: Path = BANCO) -> None:
+    """Deja `tests -> <repo>/tests` en la raíz del banco.
+
+    Un escenario copia su fixture con `cp ../../tests/escenarios/fixtures/...`,
+    que es lo que una persona escribiría parada en el directorio de trabajo. Esa
+    ruta apuntaba al checkout porque el banco estaba dentro; con el banco fuera,
+    el enlace la mantiene válida sin que el `.md` tenga que saber dónde corre.
+
+    Es un hermano del vault, no un ancestro: no cambia qué proyecto resuelve el
+    agente, que es lo que `exigir_banco_limpio()` protege.
+    """
+    dir.mkdir(parents=True, exist_ok=True)
+    enlace = dir / "tests"
+    if not enlace.exists():
+        enlace.symlink_to(RAIZ_REPO / "tests")
+
+
+def archivar(slug: str) -> Path | None:
+    """Copia lo que quedó de `slug` en el banco al `playground/` del repo.
+
+    Se llama al terminar el escenario, no durante: lo que se archiva es el
+    resultado, y el turno no se repite, así que esta copia es la única evidencia
+    que va a existir de la corrida.
+    """
+    origen = BANCO / slug
+    if not origen.is_dir():
+        return None
+    destino = ARCHIVO / slug
+    if destino.exists():
+        shutil.rmtree(destino)
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(origen, destino)
+    return destino
 
 
 def preparar_dir(destino: Path) -> Path:

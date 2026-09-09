@@ -291,6 +291,13 @@ _PREPARADOS: set[str] = set()
 #: trabajo y pisar el resultado que el autor va a mirar a mano.
 _CORRIDAS: dict[tuple[str, str], Corrida] = {}
 
+#: Los escenarios que ya fallaron, con su fallo. Un escenario se corre **una
+#: vez por sesión, falle o no**: sin esto, un escenario que aborta antes de
+#: cachear se vuelve a correr entero en cada test que lo pide, y en un epic
+#: agéntico eso es un turno de modelo por test. El `003-08` con hermes daba
+#: cuatro turnos de tres minutos para reportar cuatro veces el mismo fallo.
+_FALLIDAS: dict[tuple[str, str], Exception] = {}
+
 
 def epic_de(slug: str) -> str:
     """Los tres dígitos con los que abre el nombre de un escenario."""
@@ -345,6 +352,8 @@ def _preparar_dir(escenario: Escenario) -> Path:
     existe pese a la limpieza, es que dos escenarios distintos reclaman el mismo
     nombre, y eso se dice en vez de pisarlo en silencio.
     """
+    vault.exigir_banco_limpio()
+    vault.enlazar_fixtures()
     preparar_epic(epic_de(escenario.slug))
     destino = vault.PLAYGROUND / escenario.slug / slugificar(escenario.titulo)
     if destino.exists():
@@ -508,9 +517,13 @@ def correr(slug: str, titulo: str) -> Corrida:
     falla no aborta, porque hay escenarios cuyo tema es justamente el rechazo.
     """
     escenario = buscar(slug, titulo)
-    en_cache = _CORRIDAS.get((slug, escenario.titulo))
+    clave = (slug, escenario.titulo)
+    en_cache = _CORRIDAS.get(clave)
     if en_cache is not None:
         return en_cache
+    fallo = _FALLIDAS.get(clave)
+    if fallo is not None:
+        raise fallo
     dir = _preparar_dir(escenario)
 
     codigo, salida, error = 0, "", ""
@@ -546,6 +559,12 @@ def correr(slug: str, titulo: str) -> Corrida:
                         f"{slug}: falló un comando de '{paso.tipo} {paso.texto}': "
                         f"`{comando}` salió {codigo}. {error.strip()}{pista}"
                     )
+    except Exception as e:
+        # Un paso que falla también consume el turno: se cachea igual, y la
+        # evidencia se archiva igual.
+        _FALLIDAS[clave] = e
+        vault.archivar(escenario.slug)
+        raise
     finally:
         os.chdir(previo_cwd)
         if previo_home is None:
@@ -553,7 +572,17 @@ def correr(slug: str, titulo: str) -> Corrida:
         else:
             os.environ["TUKU_HOME"] = previo_home
 
-    _exigir_que_la_traza_explique(escenario, turnos, antes, vault.instantanea(dir))
+    # El escenario corre fuera del repo y el autor lee dentro: la copia cierra
+    # esa distancia. Va en `finally` porque el turno que hay que mirar es
+    # justamente el del escenario que falló, y antes se perdía: la comprobación
+    # de la traza aborta, y con ella se iba la única evidencia de la corrida.
+    try:
+        _exigir_que_la_traza_explique(escenario, turnos, antes, vault.instantanea(dir))
+    except Exception as e:
+        _FALLIDAS[clave] = e
+        raise
+    finally:
+        vault.archivar(escenario.slug)
     corrida = Corrida(
         escenario=escenario,
         dir=dir,

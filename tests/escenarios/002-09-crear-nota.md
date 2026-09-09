@@ -8,7 +8,7 @@ El que dejó [`002-08-crear-ambito`](002-08-crear-ambito.md): existe el ámbito 
 
 ```bash
 cp -r ../../002-08-crear-ambito/crear-un-ambito-deja-el-arbol/mi-vault .
-cp ../../../tests/escenarios/fixtures/002-09-crear-nota/cuerpo-nota.md .
+cp ../../tests/escenarios/fixtures/002-09-crear-nota/cuerpo-nota.md .
 ```
 
 ## La consecuencia "nota" todavía no está en la spec

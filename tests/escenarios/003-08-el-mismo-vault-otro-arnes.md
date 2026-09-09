@@ -2,6 +2,8 @@
 
 **Cubre:** epic 003, la afirmación que le da sentido a todo lo demás. Gemelo: el [`003-03`](003-03-un-hecho-un-comando.md), el mismo dictado con el otro arnés.
 
+**Desactivado desde el 2026-09-09**, por decisión del autor: corre con `-m pendiente`. El arnés de hermes no está resuelto y el escenario falla por eso, no por el `AGENTS.md` que dice medir. Mientras siga así el epic tiene un solo arnés, y esa es justamente la parte de su entregable que queda sin evidencia.
+
 El entregable del epic no es que `agy` opere un vault. Es que **el `AGENTS.md` del vault haga que cualquier agente lo opere igual** ([`spec/despacho.md`](../../spec/despacho.md)). Con un solo arnés esa frase no se puede sostener: todo lo verde hasta acá es compatible con que el documento no diga nada y `agy` acierte por su cuenta.
 
 Este escenario cambia el arnés y deja todo lo demás igual. Si el resultado es el mismo, la causa es el vault.

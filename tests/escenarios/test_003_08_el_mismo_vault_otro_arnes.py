@@ -29,6 +29,16 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 import agente  # noqa: E402
 import gherkin  # noqa: E402
 
+#: **Desactivado a propósito, por decisión del autor del 2026-09-09.** El arnés
+#: de hermes no está resuelto y el escenario falla por eso, no por el
+#: `AGENTS.md` que dice medir. Se revisa aparte; hasta entonces vale más un
+#: escenario declarado pendiente que uno rojo cuya causa ya se conoce.
+#:
+#: Se corre con `-m pendiente`. Lo que queda sin cubrir mientras tanto está
+#: dicho en el `.md`: con un solo arnés, todo lo verde del epic es compatible
+#: con que el documento no diga nada y `agy` acierte por su cuenta.
+pytestmark = pytest.mark.pendiente
+
 from tuku import todo  # noqa: E402
 
 SLUG = "003-08-el-mismo-vault-otro-arnes"

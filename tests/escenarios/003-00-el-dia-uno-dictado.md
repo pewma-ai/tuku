@@ -18,12 +18,16 @@ Dos cosas, y la segunda tardó en reconocerse como tal.
 
 Cada punto salió de una corrida donde el instrumento midió otra cosa, no de una lista escrita de antemano.
 
-1. **Aísla al agente de la máquina.** Sin eso el epic mide la configuración del equipo. El primer turno del `003-02` contestó sobre el vault real del autor y dos de tres tests pasaron igual.
+1. **Aísla al agente de la máquina.** Sin eso el epic mide la configuración del equipo. El primer turno del `003-02` contestó sobre el vault real del autor y dos de tres tests pasaron igual. No basta con pedírselo por bandera: el vault de prueba tiene que estar **fuera del checkout**, porque un agente resuelve su proyecto por repositorio y no por `cwd`. Con el vault dentro, `agy --sandbox` ejecutaba el comando correcto y el vault quedaba sin cambios, y eso se leía como un agente que falla.
 2. **Aísla al agente de quien lo lanza.** El agente corre dentro del vault como en la vida real, y en la vida real nadie lo lanza desde dentro de un `uv run pytest`. El entorno de Python del runner le cambia dónde importa y dónde escribe.
 3. **No depende del `PATH` para lo suyo.** El shim lleva su intérprete escrito. Con `#!/usr/bin/env python3` dependía de que el `PATH` fuera el de la suite, y dejó de serlo en cuanto se aplicó el punto anterior.
 4. **Detecta su propia ceguera.** Un vault que cambió con la traza vacía es un agente que no pasó por el shim, y eso se dice así. Sin esa comprobación el escenario falla igual pero mintiendo: dice que el agente no hizo nada, cuando hizo lo correcto y el instrumento no miraba.
 5. **Deja evidencia que sobrevive y se acumula.** Un turno no repite resultado. La corrida que se pisa no se recupera, y las que costaron tokens son justamente las que hay que comparar entre sí.
 6. **Se cambia de arnés sin tocar un test.** Es lo que hace verificable la afirmación del entregable: con un solo arnés, todo lo verde es compatible con que el `AGENTS.md` no diga nada y ese arnés acierte por su cuenta ([`003-08`](003-08-el-mismo-vault-otro-arnes.md)).
+
+7. **Se comprueba a sí mismo, y gratis.** Las propiedades anteriores son verificables sin invocar ningún modelo, y [`../test_arnes.py`](../test_arnes.py) las verifica: que el banco esté fuera del repo y sin nada heredable encima, que un `tuku` invocado como lo invoca el agente escriba y persista, y que ningún arnés declare un aislamiento vacío. Cuando la cadena falla entera, eso dice en un segundo si el problema es el instrumento o el `AGENTS.md`.
+
+Correr y analizar son dos lugares distintos. Se corre en `/tmp/tuku-banco/`, aislado; al terminar cada escenario, el resultado se copia a `playground/<slug>/` del repo, que es donde el autor los compara. Confundirlos en un solo directorio fue lo que rompió el punto 1.
 
 El dictado y la comparación sí son instrumento de este epic y de ninguno más.
 

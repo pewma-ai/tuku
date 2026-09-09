@@ -76,11 +76,63 @@ _EXPORTA_HERMES = [
     "-",
 ]
 
+#: Lo que se antepone al dictado en los arneses que **no descubren solos** el
+#: documento del vault. Claude Code busca `CLAUDE.md` y no `AGENTS.md`, y quien
+#: se lo cubre en la máquina del autor es un hook de su configuración, que es
+#: justamente lo que `aislar` apaga.
+#:
+#: **Dice dónde mirar, no qué dice.** Esa es la línea, y es la que separa esto
+#: de un prompt de test que invalida el escenario: el contenido sigue saliendo
+#: entero del vault, y un `AGENTS.md` que no alcance sigue haciendo fallar al
+#: turno. Es además lo que una persona escribe de verdad la primera vez que
+#: abre un agente dentro de un vault.
+#:
+#: Que un arnés lo necesite y otro no es una asimetría real y por eso está
+#: declarada acá y no escondida en el prompt del escenario.
+PREAMBULO = "Lee AGENTS.md antes de nada y opera este directorio según lo que diga. "
+
+
+#: Con cuánto esfuerzo piensa el agente, cuando el arnés sabe pedirlo, y con qué
+#: modelo cuando el escenario no nombra ninguno.
+#:
+#: **El default es lo barato y lo mínimo, y eso es una afirmación del epic, no un
+#: ahorro.** El comportamiento que el `AGENTS.md` describe es simple: leer una
+#: tabla de despacho y ejecutar la fila que corresponde. Un documento que solo
+#: funciona con el modelo más caro pensando al máximo no cumple lo que promete,
+#: porque lo que estaría resolviendo el turno es el modelo y no el vault. Correr
+#: barato es la forma de que el resultado sea atribuible al documento.
+#:
+#: Se suben con `TUKU_AGENTE_MODELO` y `TUKU_AGENTE_ESFUERZO` cuando lo que se
+#: quiere medir es justamente el techo.
+ESFUERZO = "low"
+
+#: Cómo se le pregunta a un arnés cuál es su modelo más barato. **No va
+#: hardcodeado**: un identificador escrito acá envejece con el primer modelo
+#: nuevo, y entonces el epic corre con lo que había el día que alguien lo
+#: escribió. El CLI sabe qué modelos tiene hoy, así que se le pregunta.
+#:
+#: Dos formas, según lo que el arnés ofrezca. Si sabe listarlos, se lee la
+#: lista. Si no, se le pregunta al agente en un turno de una línea, que es lo
+#: que uno haría a mano. La respuesta se cachea por sesión: es configuración
+#: del instrumento, no parte de ningún escenario.
+DIME_TU_MODELO = (
+    "¿Cuál es el identificador exacto del modelo más barato y rápido que puedo "
+    "pasarle a --model en este CLI? Responde solo el identificador, sin ninguna "
+    "otra palabra."
+)
+
+#: Lo que delata a un modelo barato en una lista de identificadores.
+BARATOS = ("haiku", "flash", "mini", "lite", "small")
+
+_MODELOS: dict[str, str | None] = {}
+
 ARNESES: dict[str, dict[str, list[str]]] = {
     "agy": {
         "aislar": ["--new-project", "--sandbox", "--dangerously-skip-permissions"],
         "prompt": ["-p", "{prompt}"],
         "modelo": ["--model", "{modelo}"],
+        "esfuerzo": ["--effort", "{esfuerzo}"],
+        "listar": ["models"],
     },
     "hermes": {
         "aislar": ["-p", "{perfil}", "chat", "--oneshot", "--quiet", "--yolo"],
@@ -88,8 +140,29 @@ ARNESES: dict[str, dict[str, list[str]]] = {
         "modelo": ["-m", "{modelo}"],
         "sesion": _EXPORTA_HERMES,
     },
-    "claude": {"aislar": [], "prompt": ["-p", "{prompt}"], "modelo": ["--model", "{modelo}"]},
+    "claude": {
+        "aislar": [
+            "--setting-sources",
+            "",
+            "--strict-mcp-config",
+            "--dangerously-skip-permissions",
+        ],
+        "prompt": ["-p", "{prompt}"],
+        "modelo": ["--model", "{modelo}"],
+        "esfuerzo": ["--effort", "{esfuerzo}"],
+        "preambulo": [PREAMBULO],
+    },
 }
+
+#: Cómo se aísla `claude`, que es el caso que costó y el que fijó la regla.
+#: `--setting-sources` sin fuentes ignora la configuración de usuario, de
+#: proyecto y local; `--strict-mcp-config` deja fuera los servidores MCP de la
+#: máquina. Lo que eso apaga de paso es el hook que carga los `AGENTS.md`, y por
+#: eso el arnés lleva `preambulo`: el documento entra por el vault, no por la
+#: configuración del autor.
+#:
+#: `--restricted` haría casi todo esto de una vez y no sirve: quita Bash, y sin
+#: Bash el agente no puede ejecutar `tuku`, que es lo único que el epic mira.
 
 #: El perfil por defecto de los arneses que tienen perfiles. En `hermes` un
 #: perfil es una instalación aparte, con su propia configuración, su base de
@@ -167,13 +240,18 @@ class Arnes:
     ejecutable: str
     modelo: str | None
     perfil: str = PERFIL
+    esfuerzo: str = ESFUERZO
 
     def argv(self, prompt: str) -> list[str]:
         plantilla = ARNESES[self.nombre]
         partes = [self.ejecutable, *(a.format(perfil=self.perfil) for a in plantilla["aislar"])]
-        if self.modelo:
-            partes += [a.format(modelo=self.modelo) for a in plantilla["modelo"]]
-        partes += [a.format(prompt=prompt) for a in plantilla["prompt"]]
+        modelo = self.modelo or modelo_barato(self.nombre, self.ejecutable)
+        if modelo:
+            partes += [a.format(modelo=modelo) for a in plantilla["modelo"]]
+        if self.esfuerzo and "esfuerzo" in plantilla:
+            partes += [a.format(esfuerzo=self.esfuerzo) for a in plantilla["esfuerzo"]]
+        dictado = "".join(plantilla.get("preambulo", [])) + prompt
+        partes += [a.format(prompt=dictado) for a in plantilla["prompt"]]
         return partes
 
 
@@ -271,6 +349,48 @@ class Turno:
         raise NotImplementedError("lo afirma el escenario con su delta, no el arnés")
 
 
+def modelo_barato(nombre: str, ejecutable: str) -> str | None:
+    """El identificador más barato que el arnés diga tener, o `None`.
+
+    `None` es una respuesta válida y significa "corre con tu default": vale más
+    eso que inventarse un identificador que el CLI va a rechazar.
+    """
+    if nombre in _MODELOS:
+        return _MODELOS[nombre]
+    plantilla = ARNESES[nombre]
+    hallado: str | None = None
+    if "listar" in plantilla:
+        salida = subprocess.run(
+            [ejecutable, *plantilla["listar"]], capture_output=True, text=True, timeout=60
+        )
+        ids = [x.split()[0] for x in salida.stdout.splitlines() if x.split()]
+        baratos = [x for x in ids if any(b in x.lower() for b in BARATOS)]
+        # Algunos arneses codifican el esfuerzo en el propio identificador
+        # (`gemini-3.8-flash-low`), y ahí la lista viene de mayor a menor: sin
+        # esta preferencia se elige el más caro de la familia más barata.
+        hallado = next(
+            (x for x in baratos if x.lower().endswith(f"-{ESFUERZO}")),
+            next(iter(baratos), None),
+        )
+    else:
+        salida = subprocess.run(
+            [
+                ejecutable,
+                *plantilla["aislar"],
+                *[a.format(prompt=DIME_TU_MODELO) for a in plantilla["prompt"]],
+            ],
+            capture_output=True,
+            text=True,
+            timeout=180,
+        )
+        respuesta = salida.stdout.strip().splitlines()
+        hallado = respuesta[-1].strip() if respuesta else None
+        if hallado and (" " in hallado or len(hallado) > 60):
+            hallado = None  # contestó una frase: no es un identificador
+    _MODELOS[nombre] = hallado
+    return hallado
+
+
 def configurado() -> Arnes:
     """El arnés que dice el entorno, con `agy` por defecto.
 
@@ -289,6 +409,7 @@ def configurado() -> Arnes:
         ejecutable=os.environ.get("TUKU_AGENTE_BIN", nombre),
         modelo=os.environ.get("TUKU_AGENTE_MODELO"),
         perfil=os.environ.get("TUKU_AGENTE_PERFIL", PERFIL),
+        esfuerzo=os.environ.get("TUKU_AGENTE_ESFUERZO", ESFUERZO),
     )
 
 
