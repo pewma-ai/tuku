@@ -55,6 +55,12 @@ def crear(
 
     Si el archivo ya existe no lo toca: repetir la operación no duplica ni
     reescribe lo que el autor pueda haber editado a mano.
+
+    El frontmatter lleva `type: Note`, que `reglas/types.md` asigna a todo lo de
+    `notas/` y `spec/README.md` exige en cualquier archivo que guarde
+    conocimiento. Es distinto de `subtype`, la lista abierta que subdivide ese
+    `Note` en las notas tipadas (`spec/notas.md`): solo lo declaran algunas, y
+    TUKU todavía no lo escribe.
     """
     valor_titulo = title or titulo
     valor_cuerpo = body or cuerpo
@@ -74,7 +80,7 @@ def crear(
 
     ruta.parent.mkdir(parents=True, exist_ok=True)
     contenido = (
-        f"---\ncreated: {valor_fecha.isoformat()}\n---\n\n"
+        f"---\ntype: Note\ncreated: {valor_fecha.isoformat()}\n---\n\n"
         f"# {valor_titulo}\n\n{valor_cuerpo.strip()}\n{ver_ademas}"
     )
     ruta.write_text(contenido, encoding="utf-8")

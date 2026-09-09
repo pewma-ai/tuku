@@ -29,6 +29,7 @@ Y contiene su página propia `depto-centro.md`, en minúscula, que es lo que lo 
 Y `depto-centro.md` incluye la sección `## Esta semana` con la actividad retroactiva del ciclo sin hora y `## Actividad reciente` con el mes en curso
 Y `ambitos/personal/` no cambió en nada
 Y no se creó ningún `CAPACIDAD.md`, que es opcional en todas partes
+Y el `CADENCIAS.md` creado es el mismo que siembra `tuku init`, frontmatter incluido
 
 Los dos archivos obligatorios se cobran acá para que ningún comando tenga que manejar el caso "no existe" ([`spec/ambitos.md`](../../spec/ambitos.md)).
 
@@ -81,6 +82,30 @@ Entonces `tuku scope lint` lo reporta
 Y el registro queda escrito igual, porque un error del autor se reporta y nunca se rechaza
 
 Una categoría agrupa y no tiene de qué hablar. Es la única regla de los tres roles verificable sin un árbol profundo, y por eso entra en la versión mínima.
+
+## Escenario: el ámbito recién creado deja el vault sano
+
+Este parte de un vault recién sembrado y no del que viene rodando por la cadena: el `002-03` dejó ahí a propósito un registro con `**Pendiente**` mal escrito, y el `doctor` lo reporta con razón. Lo que se afirma acá es lo otro, que TUKU no se reporta a sí mismo.
+
+Dado un vault recién sembrado
+
+```bash
+tuku init vault-limpio --date 2026-08-11
+```
+
+Cuando se crea un ámbito
+
+```bash
+tuku scope create depto-centro --vault vault-limpio
+```
+
+Entonces `tuku doctor` dice que el vault está sano
+
+```bash
+tuku doctor --vault vault-limpio
+```
+
+Un ámbito creado por comando es indistinguible de uno sembrado por `tuku init`, y eso incluye el frontmatter: `CADENCIAS.md` es un `Cadence`, y sin su `type` el doctor reportaba un archivo que TUKU acababa de escribir.
 
 ## Escenario: crear dos veces el mismo ámbito no hace nada
 

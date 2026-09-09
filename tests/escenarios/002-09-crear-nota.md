@@ -25,7 +25,7 @@ tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" 
 ```
 
 Entonces existe `notas/gastos-comunes-en-copropiedad.md`
-Y su frontmatter trae `created` con la fecha de hoy
+Y su frontmatter trae `type: Note` y `created` con la fecha de hoy
 Y el cuerpo es el que el agente redactó, tomado del fixture congelado
 
 ## Escenario: queda constancia en la bitácora
@@ -94,6 +94,31 @@ tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" 
 
 Entonces el diff es vacío
 Y no hay un segundo registro de constancia en la bitácora
+
+## Escenario: la nota recién creada deja el vault sano
+
+Este parte de un vault recién sembrado y no del que viene rodando por la cadena: el `002-03` dejó ahí a propósito un registro con `**Pendiente**` mal escrito, y el `doctor` lo reporta con razón. Lo que se afirma acá es lo otro, que TUKU no se reporta a sí mismo.
+
+Dado un vault recién sembrado con su ámbito
+
+```bash
+tuku init vault-limpio --date 2026-08-11
+tuku scope create depto-centro --vault vault-limpio
+```
+
+Cuando se escribe la nota
+
+```bash
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --today 2026-08-11 --time 21:15 --day "## Martes 11 de agosto" --vault vault-limpio
+```
+
+Entonces `tuku doctor` dice que el vault está sano
+
+```bash
+tuku doctor --vault vault-limpio
+```
+
+Una nota es un archivo que guarda conocimiento, así que declara `type: Note` como cualquier otro ([`spec/README.md`](../../spec/README.md)). El `subtype` de las notas tipadas es otra clave, de lista abierta, y no la escribe este comando.
 
 ## Escenario: el lint reporta un enlace sin motivo y una sección que falta
 
