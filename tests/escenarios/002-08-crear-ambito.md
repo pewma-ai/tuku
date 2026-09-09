@@ -74,7 +74,7 @@ touch mi-vault/ambitos/depto-centro/gastos/AGENTS.md mi-vault/ambitos/depto-cent
 Cuando se escribe un registro que apunta a `[[gastos]]`, y se revisa
 
 ```bash
-tuku entry add --vault mi-vault --day "## Martes 11 de agosto" "- 20:00 - [[gastos]] **progreso**: revisé el detalle del mes"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 20:00 --scope gastos --body "**progreso**: revisé el detalle del mes"
 tuku scope lint --vault mi-vault
 ```
 

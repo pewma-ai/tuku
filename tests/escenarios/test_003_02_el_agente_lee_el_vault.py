@@ -29,21 +29,6 @@ import gherkin  # noqa: E402
 SLUG = "003-02-el-agente-lee-el-vault"
 TITULO = "el agente dice qué haría"
 
-#: Los verbos que tocan el vault. Los demás (`lint`, `doctor`, `vocab show`) leen,
-#: y correrlos para mirar antes de responder es legítimo: lo que este escenario
-#: afirma es el diff, no la abstinencia.
-ESCRIBEN = (
-    ("init",),
-    ("entry", "add"),
-    ("todo", "open"),
-    ("todo", "close"),
-    ("todo", "propagate"),
-    ("cycle", "open"),
-    ("scope", "create"),
-    ("note", "create"),
-    ("link", "backfill"),
-)
-
 sin_arnes = pytest.mark.skipif(
     not agente.disponible(), reason=agente.motivo_no_disponible() or ""
 )
@@ -58,10 +43,12 @@ def test_003_02_preguntar_no_cambia_el_vault() -> None:
 
 @pytest.mark.agentic
 @sin_arnes
-def test_003_02_no_ejecuto_ningun_comando_que_escriba() -> None:
+def test_003_02_la_traduccion_esta_vacia() -> None:
+    """Una pregunta no se traduce en ningún comando, que es lo que dice el `.md`."""
     turno = gherkin.correr(SLUG, TITULO).turno
-    escrituras = [c for verbo in ESCRIBEN for c in turno.invocaciones_de(*verbo)]
-    assert not escrituras, f"el autor pidió no hacerlo todavía y ejecutó: {escrituras}"
+    assert turno.traduccion == [], (
+        f"el autor pidió no hacerlo todavía y ejecutó: {turno.comandos}"
+    )
 
 
 @pytest.mark.agentic
@@ -84,6 +71,6 @@ if __name__ == "__main__":
         print(f"saltado: {agente.motivo_no_disponible()}")
         raise SystemExit(0)
     test_003_02_preguntar_no_cambia_el_vault()
-    test_003_02_no_ejecuto_ningun_comando_que_escriba()
+    test_003_02_la_traduccion_esta_vacia()
     test_003_02_la_respuesta_nombra_los_dos_destinos()
     print("ok: el agente leyó el vault y no lo tocó")

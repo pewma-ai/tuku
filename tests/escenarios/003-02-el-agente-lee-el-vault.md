@@ -23,7 +23,13 @@ Cuando el autor pregunta antes de dictar
 Si te digo que hay que avisarle de los gastos comunes a la administradora, ¿qué anotarías y en qué archivo? No lo hagas todavía, quiero ver primero.
 ```
 
-Entonces el vault queda exactamente igual que antes del turno
+Entonces esa frase no se traduce en ningún comando
+
+```text
+(ninguno)
+```
+
+Y el vault queda exactamente igual que antes del turno
 Y el agente no ejecutó ningún comando que escriba
 Y su respuesta nombra los dos destinos: el registro va a `AHORA.md` y su consecuencia a `PENDIENTES.md`
 

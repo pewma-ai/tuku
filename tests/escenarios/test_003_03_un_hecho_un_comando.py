@@ -66,11 +66,15 @@ def test_003_03_el_registro_queda_en_su_dia_y_a_su_hora() -> None:
 
 @pytest.mark.agentic
 @sin_arnes
-def test_003_03_llego_por_un_comando_y_no_por_una_edicion() -> None:
+def test_003_03_la_traduccion_es_un_solo_comando() -> None:
+    """La traducción que el `.md` muestra: un `entry add` y nada más.
+
+    Uno, y no dos: es lo que separa este escenario del `003-04`. Y que exista es
+    lo que separa "lo escribió con un comando" de "editó el archivo a mano", que
+    dejaría el vault igual de bien y sería el fallo más caro del sistema.
+    """
     turno = gherkin.correr(SLUG, TITULO).turno
-    assert len(turno.invocaciones_de("entry", "add")) == 1, (
-        f"un hecho es un `tuku entry add`, y la traza dice: {turno.comandos}"
-    )
+    assert turno.traduccion == ["entry add"], f"la traza dice: {turno.comandos}"
 
 
 @pytest.mark.agentic
@@ -98,7 +102,7 @@ if __name__ == "__main__":
         print(f"saltado: {agente.motivo_no_disponible()}")
         raise SystemExit(0)
     test_003_03_el_registro_queda_en_su_dia_y_a_su_hora()
-    test_003_03_llego_por_un_comando_y_no_por_una_edicion()
+    test_003_03_la_traduccion_es_un_solo_comando()
     test_003_03_no_invento_una_consecuencia()
     test_003_03_solo_cambio_la_bitacora()
     print("ok: un hecho, un comando, una línea")

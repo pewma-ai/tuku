@@ -13,7 +13,7 @@ que le toca por hora.
 from __future__ import annotations
 
 import re
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from tuku.resultado import Resultado
@@ -30,6 +30,8 @@ def _clave_hora(linea: str) -> tuple[int, int]:
 
 def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     """Devuelve `AHORA.md` con `lineas` insertadas bajo el encabezado `day` o `dia`.
+
+    Idempotente: una línea que ya está bajo ese día no se vuelve a escribir.
 
     `day`/`dia` es el encabezado del día, con o sin el `## ` inicial. Las líneas
     nuevas se copian tal cual llegan; el orden final es por hora, y en empate
@@ -84,7 +86,10 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
         len(src),
     )
     previas = [linea for linea in src[ini + 1 : fin] if _HORA.match(linea)]
-    nuevas = [linea.rstrip("\n") for linea in lineas]
+    # Idempotencia (principio 9, y `DEVEL.md`): una línea idéntica bajo el mismo
+    # día es el mismo registro escrito dos veces, no dos hechos. Dos hechos de
+    # verdad difieren en algo, aunque sea la hora.
+    nuevas = [x for linea in lineas if (x := linea.rstrip("\n")) not in previas]
 
     ordenadas = sorted([*previas, *nuevas], key=_clave_hora)
     seccion = [encabezado, *ordenadas, ""]
@@ -95,33 +100,87 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     return texto
 
 
-def add_al_vault(
-    vault: Path, lineas: list[str], *, day: str | None = None, hoy: date | None = None
-) -> Resultado:
-    """Escribe los registros en su día y actualiza las páginas de ámbito.
+def componer(*, hora: str, scope: str | None, body: str) -> str:
+    """La línea de bitácora a partir de sus campos.
 
-    El caso de uso completo de `tuku entry add`, con las dos consecuencias que
-    tiene escribir un registro: queda en `AHORA.md` y las páginas de ámbito
-    reflejan lo que se escribió. Que la propagación sea parte de escribir, y no
-    un segundo comando, es lo que evita que el vault quede a medias.
-
-    Sin `day`, el día es el de hoy en la forma canónica de `ahora.encabezado_de`.
+    `- HH:MM - [[ambito]] **marca**: cuerpo`. Componerla es mecánico: la hora, el
+    guion, el orden de los campos y los corchetes del ámbito son formato, y no
+    hay razón para pedírselos a quien dicta. Lo único que es juicio es la marca,
+    y esa viaja dentro de `body`.
     """
-    from tuku import scope
+    ambito = ""
+    if scope:
+        ambito = f"[[{scope.strip().strip('[]')}]] "
+    return f"- {hora} - {ambito}{body.strip()}"
+
+
+def add_al_vault(
+    vault: Path,
+    *,
+    body: str,
+    scope: str | None = None,
+    day: date | None = None,
+    hour: str | None = None,
+    horizon: str | None = None,
+    when: str = "",
+) -> Resultado:
+    """Escribe un registro y aplica todo lo que ese registro implica.
+
+    El caso de uso completo de `tuku entry add`. Escribir un registro tiene
+    consecuencias y todas son parte de escribirlo: queda en `AHORA.md`, las
+    páginas de ámbito lo reflejan, y si lleva una marca de la ontología cerrada
+    se aplica lo que esa marca declara: `**pendiente**` abre el pendiente y
+    `~~(Hecho)~~` lo cierra.
+
+    Que las consecuencias sean parte de escribir, y no un segundo comando, es lo
+    que evita que el vault quede a medias. Durante un tiempo esto valió solo para
+    la propagación y no para los pendientes, y esa asimetría era el modo de falla
+    más caro del sistema: un archivo bien formado al que le faltaba la mitad, sin
+    nada que lo delatara. `tuku todo open` y `close` siguen existiendo para
+    corregir a mano, no para completar lo que este comando dejó a medias.
+
+    Recibe los campos, no la línea: el encabezado `## Martes 11 de agosto` se
+    calcula desde `2026-08-11`, y la línea se compone. Un registro por llamada.
+
+    Sin `day` es hoy; sin `hour`, ahora.
+    """
+    from tuku import scope as ambitos
     from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
     ruta = archivo_vault(vault, "AHORA.md")
-    dia = day if day is not None else encabezado_de(hoy or date.today())
+    dia = encabezado_de(day or date.today())
+    linea = componer(hora=hour or datetime.now().strftime("%H:%M"), scope=scope, body=body)
     try:
-        texto = add(ruta.read_text(encoding="utf-8"), lineas, day=dia)
+        texto = add(ruta.read_text(encoding="utf-8"), [linea], day=dia)
     except ValueError as e:
         return Resultado.rechazo(str(e))
 
     ruta.write_text(texto, encoding="utf-8")
-    for ambito in scope.leer(vault):
-        scope.actualizar_pagina(vault, ambito.nombre)
-    return Resultado.hecho(f"{len(lineas)} registro(s) en {dia.removeprefix('## ')}.")
+
+    from tuku import todo
+
+    hecho = [f"{linea}", f"en {dia.removeprefix('## ')}."]
+    marca = todo.parsear(linea)
+    if marca is not None and marca.marca == todo.ABRE:
+        consecuencia = todo.abrir_en_vault(
+            vault,
+            body=marca.cuerpo,
+            scope=scope,
+            horizon=horizon or todo.ESTA_SEMANA,
+            when=when,
+            propagate=False,
+        )
+        hecho.append(consecuencia.mensaje)
+    elif marca is not None and marca.marca == todo.CIERRA:
+        hecho.append(todo.cerrar_en_vault(vault, body=marca.cuerpo, propagate=False).mensaje)
+
+    for ambito in ambitos.leer(vault):
+        ambitos.actualizar_pagina(vault, ambito.nombre)
+    from tuku.propagate import propagar
+
+    propagar(vault)
+    return Resultado.hecho("\n".join(hecho))
 
 
 def lint_del_vault(vault: Path) -> Resultado:

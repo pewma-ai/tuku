@@ -29,7 +29,7 @@ tuku entry add -h
 ```
 
 Entonces todas salen con 0 y cada una nombra sus verbs: `entry` los suyos `add` y `lint`, `vocab` su `show`, `cycle` su `open`, `style` su `lint`, `todo` sus `open`, `close` y `lint`, `scope` sus `create` y `lint`, `link` su `backfill`, `note` sus `create` y `lint`
-Y `tuku entry add -h` nombra `line`, `--vault` y `--day`
+Y `tuku entry add -h` nombra `--body`, `--scope`, `--day` y `--hour`, que son los campos de un registro
 
 ## Escenario: un noun sin verb es error de uso
 
@@ -47,14 +47,14 @@ Dado un vault donde primero se escribe solo un tipo abierto desconocido
 
 ```bash
 tuku init mi-vault --date 2026-08-11
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 12:05 - [[personal]] **cachureo**: ordené los cables"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 12:05 --scope personal --body "**cachureo**: ordené los cables"
 tuku entry lint --vault mi-vault
 ```
 
 Cuando además se escribe la marca cerrada mal escrita, y se revisa
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 13:00 - [[personal]] **Pendiente**: comprar una maleta"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:00 --scope personal --body "**Pendiente**: comprar una maleta"
 tuku entry lint --vault mi-vault
 ```
 

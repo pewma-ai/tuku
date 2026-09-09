@@ -16,8 +16,7 @@ Dado un pendiente abierto en `esta semana` con cuerpo `avisar de los GGCC a la a
 Cuando se escribe el cierre y se aplica
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
-tuku todo close --vault mi-vault "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 19:05 --scope personal --body "~~(Hecho)~~: avisar de los GGCC a la administradora"
 ```
 
 Entonces la fila desaparece de la tabla de `PENDIENTES.md`
@@ -33,15 +32,13 @@ El cierre repite el texto del pendiente en vez de reescribirlo en pasado, y por 
 Dado que nunca se abrió ningún pendiente con el cuerpo `comprar una maleta`, y el de los GGCC ya se cerró
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
-tuku todo close --vault mi-vault "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 19:05 --scope personal --body "~~(Hecho)~~: avisar de los GGCC a la administradora"
 ```
 
 Cuando se escribe el cierre huérfano y se aplica
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 19:10 - [[personal]] ~~(Hecho)~~: comprar una maleta"
-tuku todo close --vault mi-vault "- 19:10 - [[personal]] ~~(Hecho)~~: comprar una maleta"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 19:10 --scope personal --body "~~(Hecho)~~: comprar una maleta"
 ```
 
 Entonces el comando lo reporta como cierre sin pareja
@@ -56,14 +53,13 @@ El caso negativo más importante del epic: con `PENDIENTES.md` como fuente de ve
 Dado el pendiente ya cerrado
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
-tuku todo close --vault mi-vault "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 19:05 --scope personal --body "~~(Hecho)~~: avisar de los GGCC a la administradora"
 ```
 
 Cuando se corre el comando otra vez sobre el mismo registro
 
 ```bash
-tuku todo close --vault mi-vault "- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 19:05 --scope personal --body "~~(Hecho)~~: avisar de los GGCC a la administradora"
 ```
 
 Entonces el diff es vacío

@@ -338,25 +338,20 @@ def cerrar(pendientes: str, marca: Marca) -> tuple[str, bool]:
     return pendientes, False
 
 
-def _marca_de(linea: str, esperada: str, verbo: str) -> tuple[Marca | None, Resultado | None]:
-    """La marca de la línea, o el rechazo que explica por qué no sirve."""
-    marca = parsear(linea)
-    if marca is None or marca.marca != esperada:
-        return None, Resultado.rechazo(
-            f"la línea no lleva {esperada}. Escríbela exactamente así, o usa el otro verbo."
-        )
-    return marca, None
-
-
 def abrir_en_vault(
     vault: Path,
-    linea: str,
     *,
+    body: str,
+    scope: str | None = None,
     horizon: str = ESTA_SEMANA,
     when: str = "",
     propagate: bool = True,
 ) -> Resultado:
-    """Abre el pendiente de un registro `**pendiente**` y propaga las vistas.
+    """Abre un pendiente y propaga las vistas.
+
+    Recibe los campos, no la línea del registro: abrir **es** el pendiente, y la
+    marca la lleva implícita el verbo. Normalmente lo llama `tuku entry add` al
+    ver un `**pendiente**`; a mano sirve para corregir uno que quedó mal.
 
     Propagar es parte de abrir: si la vista quedara para un segundo comando, el
     pendiente existiría sin aparecer en su día, que es la falla silenciosa que
@@ -366,10 +361,7 @@ def abrir_en_vault(
     from tuku.config import archivo_vault, leer_config
     from tuku.propagate import propagar
 
-    marca, rechazo = _marca_de(linea, ABRE, "open")
-    if marca is None:
-        return rechazo  # type: ignore[return-value]
-
+    marca = Marca(ABRE, scope.strip().strip("[]") if scope else None, body.strip())
     escalera = escalera_de(leer_config(vault).horizontes)
     horizon = canonico(horizon, escalera)
     ruta = archivo_vault(vault, "PENDIENTES.md")
@@ -388,8 +380,8 @@ def abrir_en_vault(
     return Resultado.hecho(f"pendiente abierto en «{horizon}»: {marca.cuerpo}")
 
 
-def cerrar_en_vault(vault: Path, linea: str, *, propagate: bool = True) -> Resultado:
-    """Cierra el pendiente de un registro `~~(Hecho)~~`.
+def cerrar_en_vault(vault: Path, *, body: str, propagate: bool = True) -> Resultado:
+    """Cierra un pendiente por su cuerpo.
 
     Un cierre sin pareja **no es un fallo**: es el caso normal del día uno
     (`devel/epics.md`). Se reporta, el registro queda escrito y `PENDIENTES.md`
@@ -399,10 +391,7 @@ def cerrar_en_vault(vault: Path, linea: str, *, propagate: bool = True) -> Resul
     from tuku.config import archivo_vault
     from tuku.propagate import propagar
 
-    marca, rechazo = _marca_de(linea, CIERRA, "close")
-    if marca is None:
-        return rechazo  # type: ignore[return-value]
-
+    marca = Marca(CIERRA, None, body.strip())
     ruta = archivo_vault(vault, "PENDIENTES.md")
     texto, hubo_pareja = cerrar(ruta.read_text(encoding="utf-8"), marca)
     if not hubo_pareja:

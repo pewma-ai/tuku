@@ -4,7 +4,9 @@
 
 El escenario central del epic. Todo lo anterior se podía resolver con una sola llamada; este no.
 
-`tuku entry add` escribe el registro y nada más. Es `tuku todo open` el que abre el pendiente. Un agente que hace la primera y se olvida de la segunda deja los dos archivos bien formados y el vault a medias, y hasta hace poco nada lo detectaba: el `AGENTS.md` del vault dedica un párrafo entero a esto porque es el modo de falla más caro que tiene el sistema.
+Lo que el agente decide acá no es qué comando correr, que es el mismo del escenario anterior: es **si el hecho deja algo abierto**. De esa sola decisión depende que el pendiente exista o no, porque `tuku entry add` aplica lo que la marca declara.
+
+Este escenario se escribió cuando abrir el pendiente era un segundo comando y el agente tenía que acordarse de él. Esa asimetría se corrigió el 2026-09-09: las consecuencias son parte de escribir, igual que la propagación de ámbitos. Lo que queda por probar es más fino y más interesante, porque es el único juicio que no se puede automatizar.
 
 ## Estado inicial
 
@@ -23,23 +25,34 @@ Cuando el autor dicta algo que queda por hacer
 A las dos y veinte, hay que avisarle de los gastos comunes a la administradora.
 ```
 
-Entonces queda un registro a las 14:20 con la marca `**pendiente**`
+Entonces esa frase se traduce en un solo comando
+
+```text
+tuku entry add --day 2026-08-11 --hour 14:20 --scope personal \
+  --body "**pendiente**: <el cuerpo>"
+```
+
+Y queda un registro a las 14:20 con la marca `**pendiente**`
 Y la tabla de `PENDIENTES.md` gana una fila con el mismo cuerpo, carácter por carácter
 Y la fila entra en el primer escalón de la escalera del autor, que es el del ciclo en curso
 Y no queda ninguna marca sin su consecuencia: la bitácora y la tabla dicen lo mismo
 Y el delta es el mismo que deja el gemelo determinista
 
-La cuarta es la que da nombre al escenario. Las otras tres pueden cumplirse a medias y esa no: o el agente hizo las dos llamadas, o no las hizo.
+Lo único que el agente decide es la marca, y de ella se sigue todo lo demás: `**pendiente**` hace que `tuku entry add` abra el pendiente en `PENDIENTES.md` además de escribir la línea. El cuerpo lo redacta él; la hora, el día, el ámbito y el formato salen de la frase.
+
+Ese bloque no es ilustración: el test compara contra él la secuencia de comandos que el agente ejecutó de verdad. Los de lectura no cuentan, así que mirar la ayuda antes de escribir o correr `tuku doctor` al terminar no lo rompe.
+
+La afirmación de las consecuencias sigue siendo la que da nombre al escenario, aunque ya no dependa de que el agente recuerde nada: hoy verifica que el comando cumple lo que promete, y protege el día que alguien vuelva a separarlos.
 
 ## Qué hace fallar y qué solo se reporta
 
-**Falla:** que falte la marca, que falte la fila, que el cuerpo de la fila no sea el del registro, que el horizonte no salga de la escalera del autor, o que algo del vault haya cambiado por fuera de `tuku`.
+**Falla:** que la traducción sea otra (otro comando, o uno de más), que falte la marca, que falte la fila, que el cuerpo de la fila no sea el del registro, que el horizonte no salga de la escalera del autor, o que algo del vault haya cambiado por fuera de `tuku`.
 
 **Se reporta:** cómo redacte el cuerpo. El vault del 002 dice "avisar de los GGCC a la administradora" y el dictado dice "gastos comunes"; que el agente abrevie o no es suyo. Lo que sí se exige es que el registro y la fila digan **lo mismo**, porque de eso depende poder cerrarlo después repitiendo el texto.
 
 ## Qué se mira a mano
 
-`turno-1.md`. En particular el orden: el `AGENTS.md` pide escribir primero el registro y aplicar la consecuencia después, releyendo lo escrito y no lo conversado. Si la traza muestra el `todo open` antes del `entry add`, el vault igual queda bien hoy, pero el agente está trabajando desde la conversación y eso se rompe en cuanto haya deliberación de por medio (epic 004).
+`turno-1.md`. Si el agente corrió además un `tuku todo open`, el vault queda igual de bien (el comando es idempotente) pero está siguiendo un mapa viejo: vale la pena mirar qué se lo sugirió.
 
 ## Cómo se corre
 

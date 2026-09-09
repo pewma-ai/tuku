@@ -64,6 +64,23 @@ ARNESES: dict[str, dict[str, list[str]]] = {
 TIMEOUT = 300
 
 
+#: Los comandos que tocan el vault. Los demás (`lint`, `doctor`, `vocab show`,
+#: y cualquiera con `--help`) leen, y un agente que los corre antes de escribir
+#: hace lo correcto: mira la ayuda para no inventarse una opción, y se verifica
+#: al terminar. La traducción de un dictado es la secuencia de los que escriben.
+ESCRIBEN = (
+    ("init",),
+    ("entry", "add"),
+    ("todo", "open"),
+    ("todo", "close"),
+    ("todo", "propagate"),
+    ("cycle", "open"),
+    ("scope", "create"),
+    ("note", "create"),
+    ("link", "backfill"),
+)
+
+
 class ArnesNoDisponible(RuntimeError):
     """No hay con qué correr el turno. El escenario se salta, no falla."""
 
@@ -114,6 +131,29 @@ class Turno:
             for argv in self.traza
             if tuple(argv[:largo]) == verbo and not ({"-h", "--help"} & set(argv))
         ]
+
+    @property
+    def traduccion(self) -> list[str]:
+        """La traducción del dictado: los comandos que escriben, en orden.
+
+        Es la primera de las tres evidencias del epic 003 y la única que dice
+        **cómo** llegó el agente al resultado. Dos agentes pueden dejar el mismo
+        vault por caminos distintos, y uno de los dos estar mal: escribir el
+        registro antes que su consecuencia no es un detalle de estilo, es lo que
+        hace que la consecuencia se aplique releyendo lo escrito.
+
+        Deja fuera lo que solo lee. Un `tuku entry add --help` antes de usarlo, o
+        un `tuku doctor` al terminar, no son parte de la traducción.
+        """
+        secuencia: list[str] = []
+        for argv in self.traza:
+            if {"-h", "--help"} & set(argv):
+                continue
+            for verbo in ESCRIBEN:
+                if tuple(argv[: len(verbo)]) == verbo:
+                    secuencia.append(" ".join(verbo))
+                    break
+        return secuencia
 
     @property
     def escribio_a_mano(self) -> bool:

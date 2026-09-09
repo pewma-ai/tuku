@@ -19,7 +19,9 @@ Y ningún registro escrito todavía
 Cuando se corren estas tres líneas, en este orden
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp" "- 09:12 - [[personal]] **señal**: la administradora responde los mensajes con varios días de atraso" "- 11:30 - hice la consulta presencial por el standing desk"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 18:40 --body "le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 09:12 --scope personal --body "**señal**: la administradora responde los mensajes con varios días de atraso"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 11:30 --body "hice la consulta presencial por el standing desk"
 ```
 
 Entonces los tres quedan bajo `## Martes 11 de agosto`
@@ -33,7 +35,9 @@ Dado el mismo estado
 Cuando se corren las tres líneas
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 18:40 - le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp" "- 09:12 - [[personal]] **señal**: la administradora responde los mensajes con varios días de atraso" "- 11:30 - hice la consulta presencial por el standing desk"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 18:40 --body "le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 09:12 --scope personal --body "**señal**: la administradora responde los mensajes con varios días de atraso"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 11:30 --body "hice la consulta presencial por el standing desk"
 ```
 
 Entonces el diff contra el estado inicial toca `AHORA.md` y `ambitos/personal/personal.md`
@@ -47,7 +51,7 @@ Dado el mismo estado
 Cuando se corre solo la línea de las 11:30, que no lleva `[[ambito]]` ni `**clasificacion**`
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 11:30 - hice la consulta presencial por el standing desk"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 11:30 --body "hice la consulta presencial por el standing desk"
 ```
 
 Entonces `tuku entry add` lo deja escrito tal cual, sin marcarlo

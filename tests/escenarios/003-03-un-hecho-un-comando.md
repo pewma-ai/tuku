@@ -23,12 +23,21 @@ Cuando el autor dicta un hecho suelto
 A las nueve y doce me di cuenta de que la administradora responde los mensajes con varios días de atraso.
 ```
 
-Entonces queda un registro a las 09:12 bajo el día de hoy, y su cuerpo dice de qué se trata
+Entonces esa frase se traduce en un solo comando
+
+```text
+tuku entry add --day 2026-08-11 --hour 09:12 --scope personal \
+  --body "**<clasificación>**: <el cuerpo>"
+```
+
+Y queda un registro a las 09:12 bajo el día de hoy, y su cuerpo dice de qué se trata
 Y llegó por una invocación de `tuku entry add`, no por una edición del archivo
 Y no se abrió ningún pendiente, porque el autor no dejó nada por hacer
 Y el delta es el mismo que deja el gemelo determinista: `AHORA.md` y la vista del ámbito
 
-La cuarta afirmación es la que más delgada parece y la que más cubre, y su valor exacto no se supone: se copia del [`002-02`](002-02-registro-en-su-dia.md), que ya lo dejó fijado. `tuku entry add` regenera la vista del ámbito además de escribir la bitácora. Cualquier otra cosa en el delta la hizo el agente sin que nadie se la pidiera.
+Uno, y no dos: es lo que separa este escenario del [`003-04`](003-04-un-hecho-con-consecuencia.md). El autor contó algo que ocurrió y no dejó nada por hacer, así que no hay consecuencia que aplicar. La clasificación va entre asteriscos porque es vocabulario suyo y no se exige cuál.
+
+La afirmación del delta es la que más delgada parece y la que más cubre, y su valor exacto no se supone: se copia del [`002-02`](002-02-registro-en-su-dia.md), que ya lo dejó fijado. `tuku entry add` regenera la vista del ámbito además de escribir la bitácora. Cualquier otra cosa en el delta la hizo el agente sin que nadie se la pidiera.
 
 ## Qué hace fallar y qué solo se reporta
 

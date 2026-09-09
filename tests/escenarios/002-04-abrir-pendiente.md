@@ -17,8 +17,7 @@ Dado el estado anterior, con la tabla de pendientes vacía
 Cuando se escribe el registro y se abre su pendiente
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
-tuku todo open --vault mi-vault "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "**pendiente**: avisar de los GGCC a la administradora"
 ```
 
 Entonces la tabla contiene `| esta semana |  | [[personal]] | avisar de los GGCC a la administradora |`
@@ -37,8 +36,7 @@ Dado el mismo estado
 Cuando se abre el pendiente
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
-tuku todo open --vault mi-vault "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "**pendiente**: avisar de los GGCC a la administradora"
 ```
 
 Entonces la tabla tiene exactamente una fila
@@ -52,14 +50,13 @@ El archivo es una sola tabla y el horizonte es una columna, así que la escalera
 Dado el pendiente ya abierto
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
-tuku todo open --vault mi-vault "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "**pendiente**: avisar de los GGCC a la administradora"
 ```
 
 Cuando se corre el comando otra vez sobre el mismo registro
 
 ```bash
-tuku todo open --vault mi-vault "- 14:20 - [[personal]] **pendiente**: avisar de los GGCC a la administradora"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "**pendiente**: avisar de los GGCC a la administradora"
 ```
 
 Entonces el diff es vacío

@@ -33,7 +33,7 @@ TITULO = "lo que queda por hacer"
 DIA = "## Martes 11 de agosto"
 
 #: Lo que toca abrir un pendiente, copiado del gemelo (`002-04`): la bitácora, la
-#: tabla y las dos vistas derivadas que `tuku todo open` regenera al propagar.
+#: tabla y las dos vistas derivadas que se regeneran al propagar.
 DELTA_DE_ABRIR = {
     "AHORA.md": "modificado",
     "PENDIENTES.md": "modificado",
@@ -52,6 +52,19 @@ def _registro_pendiente(corrida: gherkin.Corrida) -> str:
     marcados = [x for x in dia.splitlines() if x.startswith("- 14:20 ")]
     assert len(marcados) == 1, f"un registro a las 14:20, y hay {len(marcados)}:\n{dia}"
     return marcados[0]
+
+
+@pytest.mark.agentic
+@sin_arnes
+def test_003_04_la_traduccion_es_un_solo_comando() -> None:
+    """La traducción que el `.md` muestra: el mismo comando del escenario anterior.
+
+    Lo que cambia no es la llamada sino la marca, y de ella se sigue el
+    pendiente. Un `todo open` de más no rompe el vault, porque es idempotente,
+    pero delata a un agente que sigue un mapa viejo.
+    """
+    turno = gherkin.correr(SLUG, TITULO).turno
+    assert turno.traduccion == ["entry add"], f"la traza dice: {turno.comandos}"
 
 
 @pytest.mark.agentic
@@ -117,6 +130,7 @@ if __name__ == "__main__":
     if not agente.disponible():
         print(f"saltado: {agente.motivo_no_disponible()}")
         raise SystemExit(0)
+    test_003_04_la_traduccion_es_un_solo_comando()
     test_003_04_el_registro_lleva_la_marca_de_lo_que_queda_abierto()
     test_003_04_la_fila_repite_el_cuerpo_del_registro()
     test_003_04_la_fila_entra_en_el_escalon_del_ciclo_en_curso()

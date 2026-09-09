@@ -16,13 +16,13 @@ cp -r ../../002-02-registro-en-su-dia/tres-registros-caen-en-el-dia/mi-vault .
 Dado el estado anterior, más una marca de la ontología cerrada mal escrita
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 13:00 - [[personal]] **Pendiente**: comprar una maleta"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:00 --scope personal --body "**Pendiente**: comprar una maleta"
 ```
 
 Cuando se escribe un tipo abierto que nadie declaró, y se revisa
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 12:05 - [[personal]] **cachureo**: ordené los cables del escritorio"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 12:05 --scope personal --body "**cachureo**: ordené los cables del escritorio"
 tuku entry lint --vault mi-vault
 ```
 
@@ -38,7 +38,7 @@ Dado el mismo estado
 Cuando se escribe con la marca mal escrita, y se revisa
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Martes 11 de agosto" "- 13:00 - [[personal]] **Pendiente**: comprar una maleta"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:00 --scope personal --body "**Pendiente**: comprar una maleta"
 tuku entry lint --vault mi-vault
 ```
 

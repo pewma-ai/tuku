@@ -67,7 +67,7 @@ def test_002_10_cada_noun_lista_sus_verbs() -> None:
             assert verb in ayuda.stdout, f"`tuku {noun} -h` no nombra {verb}"
 
     add = corrida.de("entry add -h")
-    for pieza in ("line", "--vault", "--day"):
+    for pieza in ("--body", "--scope", "--day", "--hour"):
         assert pieza in add.stdout, f"`tuku entry add -h` no nombra {pieza}"
 
 

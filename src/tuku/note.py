@@ -135,9 +135,8 @@ def crear_con_constancia(
     title: str,
     body: str,
     scope: str | None = None,
-    today: date | None = None,
-    time: str | None = None,
-    day: str | None = None,
+    day: date | None = None,
+    hour: str | None = None,
     record: bool = True,
 ) -> Resultado:
     """Escribe la nota y deja constancia en la bitácora. Idempotente.
@@ -155,8 +154,8 @@ def crear_con_constancia(
     from tuku.ahora import encabezado_de
     from tuku.entry import add
 
-    hoy = today or date.today()
-    hora = time or datetime.now().strftime("%H:%M")
+    hoy = day or date.today()
+    hora = hour or datetime.now().strftime("%H:%M")
     ruta = crear(vault, title=title, body=body, scope=scope, today=hoy)
 
     if record:
@@ -165,7 +164,7 @@ def crear_con_constancia(
             constancia = registro_de_constancia(ruta, time=hora, scope=scope)
             texto = ahora_path.read_text(encoding="utf-8")
             if constancia not in texto:
-                encabezado = day or encabezado_de(hoy)
+                encabezado = encabezado_de(hoy)
                 ahora_path.write_text(
                     add(texto, [constancia], day=encabezado), encoding="utf-8"
                 )

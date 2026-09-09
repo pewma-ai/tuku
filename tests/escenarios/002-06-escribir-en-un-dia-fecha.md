@@ -16,8 +16,7 @@ Dado el ciclo abierto del 11 al 17 de agosto, con HOY en el martes 11
 Cuando se escribe el registro bajo el miércoles 12 y se abre con esa fecha
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Miércoles 12 de agosto" "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
-tuku todo open --vault mi-vault --horizonte "con fecha" --when 2026-08-12 "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
+tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --horizon "con fecha" --when 2026-08-12 --body "**pendiente**: pagar la sesión con el psicólogo"
 ```
 
 Entonces la tabla de `PENDIENTES.md` gana una fila con `con fecha` y `2026-08-12`:
@@ -37,8 +36,7 @@ Dado el mismo estado
 Cuando se termina de escribir y propagar
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Miércoles 12 de agosto" "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
-tuku todo open --vault mi-vault --horizonte "con fecha" --when 2026-08-12 "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
+tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --horizon "con fecha" --when 2026-08-12 --body "**pendiente**: pagar la sesión con el psicólogo"
 ```
 
 Entonces el pendiente está en exactamente una fila de `PENDIENTES.md`
@@ -52,8 +50,7 @@ Dado que la tabla no tenía pendientes con fecha antes
 Cuando nace
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Miércoles 12 de agosto" "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
-tuku todo open --vault mi-vault --horizonte "con fecha" --when 2026-08-12 "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
+tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --horizon "con fecha" --when 2026-08-12 --body "**pendiente**: pagar la sesión con el psicólogo"
 ```
 
 Entonces entra como fila con columna `Cuándo` = `2026-08-12` y horizonte `con fecha`
@@ -65,8 +62,7 @@ Dado el ciclo abierto, antes de agendar nada
 Cuando se agenda el pendiente
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Miércoles 12 de agosto" "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
-tuku todo open --vault mi-vault --horizonte "con fecha" --when 2026-08-12 "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
+tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --horizon "con fecha" --when 2026-08-12 --body "**pendiente**: pagar la sesión con el psicólogo"
 ```
 
 Entonces la única línea de registro nueva es el registro `**pendiente**` que el autor escribió
@@ -79,14 +75,13 @@ Mover un pendiente es un hecho del sistema, no de la vida del autor.
 Dado el pendiente ya fechado y propagado
 
 ```bash
-tuku entry add --vault mi-vault --dia "## Miércoles 12 de agosto" "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
-tuku todo open --vault mi-vault --horizonte "con fecha" --when 2026-08-12 "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
+tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --horizon "con fecha" --when 2026-08-12 --body "**pendiente**: pagar la sesión con el psicólogo"
 ```
 
 Cuando se corre el comando otra vez
 
 ```bash
-tuku todo open --vault mi-vault --horizonte "con fecha" --when 2026-08-12 "- 09:00 - [[personal]] **pendiente**: pagar la sesión con el psicólogo"
+tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --horizon "con fecha" --when 2026-08-12 --body "**pendiente**: pagar la sesión con el psicólogo"
 ```
 
 Entonces el diff es vacío

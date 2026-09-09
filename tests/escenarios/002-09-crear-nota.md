@@ -21,7 +21,7 @@ Dado el ámbito `depto-centro` ya creado
 Cuando el autor pide *"una nota respecto al depto centro: cómo funciona el cobro de gastos comunes en una copropiedad"*
 
 ```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --today 2026-08-11 --time 21:15 --day "## Martes 11 de agosto" --vault mi-vault
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
 
 Entonces existe `notas/gastos-comunes-en-copropiedad.md`
@@ -34,7 +34,7 @@ Dado el mismo estado
 Cuando la nota se escribe
 
 ```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --today 2026-08-11 --time 21:15 --day "## Martes 11 de agosto" --vault mi-vault
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
 
 Entonces hay un registro nuevo en el martes 11 que deja constancia de la nota creada
@@ -49,7 +49,7 @@ Dado que la petición dijo *"respecto al depto centro"*
 Cuando la nota se escribe
 
 ```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --today 2026-08-11 --time 21:15 --day "## Martes 11 de agosto" --vault mi-vault
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
 
 Entonces la nota enlaza al ámbito `depto-centro`
@@ -63,7 +63,7 @@ Si la petición no hubiera nombrado un ámbito, la nota quedaría suelta y eso s
 Dado la nota ya escrita
 
 ```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --today 2026-08-11 --time 21:15 --day "## Martes 11 de agosto" --vault mi-vault
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
 
 Cuando se revisa
@@ -83,13 +83,13 @@ La **presencia** de la sección y del motivo se verifica sin juicio. Que el moti
 Dado la nota ya creada
 
 ```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --today 2026-08-11 --time 21:15 --day "## Martes 11 de agosto" --vault mi-vault
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
 
 Cuando se repite la operación
 
 ```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --today 2026-08-11 --time 21:15 --day "## Martes 11 de agosto" --vault mi-vault
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
 
 Entonces el diff es vacío
@@ -109,7 +109,7 @@ tuku scope create depto-centro --vault vault-limpio
 Cuando se escribe la nota
 
 ```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --today 2026-08-11 --time 21:15 --day "## Martes 11 de agosto" --vault vault-limpio
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault vault-limpio
 ```
 
 Entonces `tuku doctor` dice que el vault está sano

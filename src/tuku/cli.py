@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import date
+from datetime import date, time
 from pathlib import Path
 
 from tuku import entry, link, note, scope, style, todo, vocab
@@ -34,6 +34,22 @@ EXITO = 0
 RECHAZO = 1  # el comando entendió y se negó por el estado del vault
 USO = 2  # reservado a argparse
 ENTORNO = 3  # la instalación de TUKU no está donde debería
+
+def _fecha(valor: str) -> date:
+    """AAAA-MM-DD, o un error de uso que dice qué se esperaba."""
+    try:
+        return date.fromisoformat(valor)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{valor!r} no es una fecha AAAA-MM-DD") from None
+
+
+def _hora(valor: str) -> str:
+    """HH:MM, normalizada a dos dígitos."""
+    try:
+        return time.fromisoformat(valor).strftime("%H:%M")
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{valor!r} no es una hora HH:MM") from None
+
 
 def _construir_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -82,15 +98,47 @@ def _construir_parser() -> argparse.ArgumentParser:
     entry_p = sub.add_parser("entry", help="registros de la bitácora")
     entry_v = entry_p.add_subparsers(dest="verb", required=True)
 
-    add_p = entry_v.add_parser("add", help="escribe registros ya formados en su día")
-    add_p.add_argument("line", nargs="+", help="línea de registro, '- HH:MM - ...'")
+    add_p = entry_v.add_parser("add", help="escribe un registro en la bitácora")
     add_p.add_argument("--vault", default=".", type=Path, help="vault destino")
+    add_p.add_argument(
+        "--body",
+        "--cuerpo",
+        dest="body",
+        required=True,
+        help="la marca y el cuerpo: '**pendiente**: avisar de los gastos comunes'",
+    )
+    add_p.add_argument(
+        "--scope", "--ambito", dest="scope", default=None, help="ámbito, sin corchetes"
+    )
     add_p.add_argument(
         "--day",
         "--dia",
         dest="day",
         default=None,
-        help="encabezado del día (por defecto, el de hoy)",
+        type=_fecha,
+        help="día del registro (AAAA-MM-DD); por defecto, hoy",
+    )
+    add_p.add_argument(
+        "--hour",
+        "--hora",
+        dest="hour",
+        default=None,
+        type=_hora,
+        help="hora del registro (HH:MM); por defecto, ahora",
+    )
+    add_p.add_argument(
+        "--horizon",
+        "--horizonte",
+        dest="horizon",
+        default=None,
+        help="para un **pendiente**: el escalón donde nace; por defecto, el del ciclo",
+    )
+    add_p.add_argument(
+        "--when",
+        "--cuando",
+        dest="when",
+        default="",
+        help="para un **pendiente**: su fecha (AAAA-MM-DD), si la tiene",
     )
 
     lint_p = entry_v.add_parser("lint", help="revisa los registros y reporta; no escribe")
@@ -107,7 +155,9 @@ def _construir_parser() -> argparse.ArgumentParser:
         ("close", "cierra el pendiente de un registro ~~(Hecho)~~"),
     ):
         p = todo_v.add_parser(verbo, help=ayuda)
-        p.add_argument("line", help="la línea del registro que lleva la marca")
+        p.add_argument(
+            "--body", "--cuerpo", dest="body", required=True, help="el texto del pendiente"
+        )
         p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
         p.add_argument(
             "--no-propagate",
@@ -115,6 +165,9 @@ def _construir_parser() -> argparse.ArgumentParser:
             help="no regenera las vistas derivadas; para el lote, que propaga al final",
         )
         if verbo == "open":
+            p.add_argument(
+                "--scope", "--ambito", dest="scope", default=None, help="ámbito, sin corchetes"
+            )
             p.add_argument(
                 "--horizon",
                 "--horizonte",
@@ -124,6 +177,8 @@ def _construir_parser() -> argparse.ArgumentParser:
             )
             p.add_argument(
                 "--when",
+                "--cuando",
+                dest="when",
                 default="",
                 help="fecha del pendiente, AAAA-MM-DD; vacío si no la tiene",
             )
@@ -219,26 +274,20 @@ def _construir_parser() -> argparse.ArgumentParser:
         help="ámbito al que pertenece la nota",
     )
     note_create_p.add_argument(
-        "--today",
-        "--hoy",
-        dest="today",
-        default=None,
-        type=date.fromisoformat,
-        help="fecha de creación (AAAA-MM-DD); por defecto, hoy",
-    )
-    note_create_p.add_argument(
-        "--time",
-        "--hora",
-        dest="time",
-        default=None,
-        help="hora para el registro de constancia (HH:MM); por defecto, la actual",
-    )
-    note_create_p.add_argument(
         "--day",
         "--dia",
         dest="day",
+        type=_fecha,
         default=None,
-        help="encabezado del día en AHORA.md para la constancia",
+        help="día de la nota y de su constancia (AAAA-MM-DD); por defecto, hoy",
+    )
+    note_create_p.add_argument(
+        "--hour",
+        "--hora",
+        dest="hour",
+        type=_hora,
+        default=None,
+        help="hora de la constancia (HH:MM); por defecto, ahora",
     )
     note_create_p.add_argument(
         "--no-record",
@@ -303,7 +352,16 @@ def _cmd_init(args: argparse.Namespace) -> int:
 
 def _cmd_entry_add(args: argparse.Namespace) -> int:
     return _traducir(
-        entry.add_al_vault(args.vault, list(args.line), day=args.day), "tuku entry add"
+        entry.add_al_vault(
+            args.vault,
+            body=args.body,
+            scope=args.scope,
+            day=args.day,
+            hour=args.hour,
+            horizon=args.horizon,
+            when=args.when,
+        ),
+        "tuku entry add",
     )
 
 
@@ -315,7 +373,8 @@ def _cmd_todo_open(args: argparse.Namespace) -> int:
     return _traducir(
         todo.abrir_en_vault(
             args.vault,
-            args.line,
+            body=args.body,
+            scope=args.scope,
             horizon=args.horizon,
             when=args.when,
             propagate=not args.no_propagate,
@@ -326,7 +385,7 @@ def _cmd_todo_open(args: argparse.Namespace) -> int:
 
 def _cmd_todo_close(args: argparse.Namespace) -> int:
     return _traducir(
-        todo.cerrar_en_vault(args.vault, args.line, propagate=not args.no_propagate),
+        todo.cerrar_en_vault(args.vault, body=args.body, propagate=not args.no_propagate),
         "todo close",
     )
 
@@ -394,9 +453,8 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
             title=args.title,
             body=cuerpo,
             scope=args.scope,
-            today=args.today,
-            time=args.time,
             day=args.day,
+            hour=args.hour,
             record=not args.no_record,
         ),
         "tuku note create",
