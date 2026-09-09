@@ -1,6 +1,8 @@
 # spec · agente
 
 > Todo lo de las demás specs es independiente de quién ejecute. Esto no: son las reglas para cuando el ejecutor es un agente de IA. Si cambia el arnés o el modelo, esta spec cambia y las demás no.
+>
+> Acá está **cómo se comporta** el agente. A dónde va lo que el autor dice, antes de todo esto, es [despacho.md](despacho.md).
 
 ## Qué se inyecta y cuándo
 
@@ -13,19 +15,15 @@ Ninguno de los dos es un archivo: son la salida de un comando que se ejecuta en 
 
 Si el arnés no sabe ejecutar comandos y solo lee archivos, hay que materializarlos, y ahí reaparece el problema de que envejecen. Eso es limitación del arnés, no del diseño, y por eso vive en esta spec y no en [`flujo-informacion.md`](flujo-informacion.md).
 
-## Carga diferida de reglas
-
-Las reglas de cada consecuencia no viajan en el contexto base. Se abre `reglas/<consecuencia>.tuku.md` solo cuando el paso 3 del flujo (ver [`flujo-informacion.md`](flujo-informacion.md)) detectó que esa consecuencia aplica. Un registro sin consecuencias termina en el paso 4 sin haber cargado nada extra.
-
-Esto es lo que hace que la lista de consecuencias pueda crecer sin encarecer cada sesión: se paga solo por la que se usa.
-
 ## El agente compila intención en comandos
 
 Lo que el agente produce no son archivos, son **llamadas a `tuku`**. Recibe la intención del autor en lenguaje natural y la traduce a una secuencia de comandos; la ejecución la hace el comando, que es determinista y está especificado en [cli.md](cli.md).
 
 Eso confina el no determinismo a **elegir** la llamada, nunca a ejecutarla. Un modelo distinto elige distinto, pero ninguno puede producir un vault mal formado, porque no escribe: el que escribe es el comando, y el comando conoce el formato. El agente pasa a ser reemplazable sin que el vault dependa de cuál se usó.
 
-**El agente no necesita el vault en contexto.** No carga `AHORA.md` para saber en qué día va un registro, no memoriza la forma de los encabezados de día, no arrastra las reglas de cómo un pendiente llega a su día ni a su ámbito ([pendientes.md](pendientes.md)). Todo eso lo sabe el comando. Lo que el agente carga es lo que necesita para **decidir**, no para escribir: el contexto reciente y el vocabulario del autor, que es justo lo que la sección anterior inyecta.
+**El agente no necesita el vault en contexto.** No carga `AHORA.md` para saber en qué día va un registro, no memoriza la forma de los encabezados ni las reglas de cómo un pendiente llega a su ámbito ([pendientes.md](pendientes.md)). Todo eso lo sabe el comando. Lo que el agente carga es lo que necesita para **decidir**, no para escribir, que es justo lo que la sección anterior inyecta.
+
+De ahí también la prohibición: **editar a mano un archivo que tiene comando** deja el archivo bien formado y ninguna consecuencia aplicada, y es el modo de falla más caro del sistema porque no deja señal. Cómo se enuncia esa prohibición en el vault es [despacho.md](despacho.md).
 
 Esto solo se sostiene si la salida del comando alcanza. Ahorrar contexto sin salida diagnóstica es operar a ciegas: la regla de [cli.md](cli.md) de que todo error nombre el defecto y la corrección es la que paga este ahorro. Las dos cosas se diseñan juntas o ninguna funciona.
 

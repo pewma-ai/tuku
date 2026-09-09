@@ -34,6 +34,7 @@ Igual que las fases de implementación, se lee de lo que no depende de nada a lo
 | 7 | [ciclo.md](ciclo.md) | `AHORA.md`, su frontmatter, apertura y cierre, qué se aplana y qué queda siempre como enlace |
 | 8 | [cli.md](cli.md) | El contrato del comando `tuku`: qué garantiza, códigos de salida, forma de la salida. Independiente de quién invoque |
 | 9 | [agente.md](agente.md) | Lo que cambia cuando el ejecutor es un agente de IA y no una persona con el flujo a mano |
+| 10 | [despacho.md](despacho.md) | El `AGENTS.md` de la raíz: a dónde va lo que el autor dice, la tabla de despacho y la cascada por directorio |
 
 ## Árbol de directorios
 
@@ -157,5 +158,5 @@ Cada spec declara su propio "no entra" en la sección correspondiente. A nivel d
 
 ## Decisiones abiertas
 
-- **Cómo se especifica una cadencia que se gatilla por un evento y no por una fecha.** El caso que lo destapó es el cierre del ciclo: la cadencia sembrada dice `Cuándo: viernes, semanal`, pero lo que la gatilla es que el ciclo termine, y el viernes deja de significar nada si el ciclo pasa a ser quincenal. La fecha es un síntoma del evento. La propuesta sobre la mesa es que `Cuándo` acepte dos gramáticas distinguidas por la primera palabra (todo lo que empieza con `al ` es evento, lo demás es calendario), que los eventos sean vocabulario cerrado en un `reglas/eventos.md` verificable por `tuku doctor`, porque cada evento es código que mira el vault, y que un evento que dura varios días emita una sola vez reusando la idempotencia del pendiente en vez de llevar un registro de eventos vistos. Queda por decidir, y lo decide el epic 005, que es donde entran las cadencias.
+- **Cómo se especifica una cadencia que se gatilla por un evento y no por una fecha.** El caso que lo destapó es el cierre del ciclo: la cadencia sembrada dice `Cuándo: viernes, semanal`, pero lo que la gatilla es que el ciclo termine, y el viernes deja de significar nada si el ciclo pasa a ser quincenal. La fecha es un síntoma del evento. La propuesta sobre la mesa es que `Cuándo` acepte dos gramáticas distinguidas por la primera palabra (todo lo que empieza con `al ` es evento, lo demás es calendario), que los eventos sean vocabulario cerrado en un `reglas/eventos.md` verificable por `tuku doctor`, porque cada evento es código que mira el vault, y que un evento que dura varios días emita una sola vez reusando la idempotencia del pendiente en vez de llevar un registro de eventos vistos. Queda por decidir, y lo decide el epic 006, que es donde entran las cadencias.
 - Si el ciclo es una primitiva propia o se compone sobre bitácora, pendientes y notas. Hoy [`../docs/principios.md`](../docs/principios.md) lo lista entre las primitivas pero lo describe como composición temporal.

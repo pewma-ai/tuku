@@ -7,3 +7,4 @@ El porqué: marco conceptual y principios del software. Qué hace el sistema viv
 | [`brief.md`](brief.md) | Qué es, para quién |
 | [`principios.md`](principios.md) | Principios de diseño, conjunto canónico |
 | [`glosario.md`](glosario.md) | Vocabulario de TUKU, una línea por término |
+| [`tutorial/`](tutorial/README.md) | Recorrido guiado, un capítulo por capacidad. Los últimos son promesa y guían su epic |

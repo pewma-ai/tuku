@@ -140,7 +140,7 @@ Lo que hace un agente no es un comando y no debe parecerlo, así que lleva su pr
 Cuando el agente procesa el dictado
 
 ```agente
-entrada: fixtures/003-01-dictado-del-dia-uno/dictado.md
+entrada: fixtures/003-dictado/martes-11.md
 tarea: los cinco pasos del flujo
 emite: comandos tuku
 ```
@@ -182,9 +182,7 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`002-08-crear-ambito.md`](002-08-crear-ambito.md) | Epic 002, fase 3 mínima | El árbol correcto y el enlazado retroactivo, que acá llega solo hasta `AHORA.md` |
 | [`002-09-crear-nota.md`](002-09-crear-nota.md) | Epic 002, fase 5 mínima | Obliga a agregar la consecuencia "nota" a `spec/flujo-informacion.md` |
 | [`002-10-cli-superficie.md`](002-10-cli-superficie.md) | Epic 002 | Fuera de la cadena, siembra su propio vault: nouns y verbs en `-h`, códigos de salida, y el barrido de que todo error nombre la corrección |
-| [`003-00-el-dia-uno-dictado.md`](003-00-el-dia-uno-dictado.md) | Epic 003 | Descripción general, compilación de dictado a comandos y decisiones previas del Epic 003 |
-| [`003-01-dictado-del-dia-uno.md`](003-01-dictado-del-dia-uno.md) | Epic 003 | El agente compila el dictado en llamadas `tuku`. Gasta tokens, fuera de la corrida por defecto |
-| [`003-02-propuesta-no-escribe.md`](003-02-propuesta-no-escribe.md) | Epic 003 | El principio 3 con el agente en el circuito: propone y no escribe, y rechazarla no deja rastro |
+| [`003-00-el-dia-uno-dictado.md`](003-00-el-dia-uno-dictado.md) | Epic 003 | La escalera de menos a más para probar con un agente en el medio, y los seis escenarios que la suben |
 
 ## Escenarios encadenados, desde el epic 002
 

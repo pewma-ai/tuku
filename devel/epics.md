@@ -11,23 +11,25 @@ El orden de trabajo es siempre el mismo:
 2. **De lo simple a lo complejo:** una primitiva antes que la combinación, un ámbito antes que un árbol, el mínimo de registros antes que el volumen con ruido.
 3. **Del caso feliz al caso borde.**
 
+Un epic se abre escribiendo dos cosas a la vez, antes de implementar nada: sus escenarios en [`tests/escenarios/`](../tests/escenarios/README.md) y su capítulo del [tutorial](../docs/tutorial/README.md). Los escenarios dicen qué se verifica; el capítulo dice qué se le promete a quien va a usarlo, y esa promesa es la que guía el epic. Así se abrió el 003, y el capítulo sirve además de prueba a mano mientras los escenarios agénticos todavía no corren.
+
 ## Epics y Fases: dos cortes perpendiculares
 
 Las fases cortan **por primitiva** (registro, pendientes, ámbitos, cadencias, notas); los epics cortan **por el estado inicial del vault**. El motivo es el criterio de entrega: "los pendientes funcionan" no es una experiencia que alguien pueda usar; "el día uno funciona" sí lo es.
 
-Un epic puede abarcar varias fases (el 002 hace la versión mínima de las fases 3 y 5, y el 004 las completa contra un vault poblado), fundir una fase con LLM y una sin él (el 005 junta la 6 y la 7), o una fase puede partirse entre dos epics (la fase 1 la construye el epic 002 a mano y el 003 dictado).
+Un epic puede abarcar varias fases (el 002 hace la versión mínima de las fases 3 y 5, y el 005 las completa contra un vault poblado), fundir una fase con LLM y una sin él (el 006 junta la 6 y la 7), o una fase puede partirse entre varios epics (la fase 1 la construye el 002 a mano, el 003 dictada y el 004 conversada).
 
 | Fase | Nombre | Qué se puede hacer al terminarla | LLM | Fixture | Epic |
 | --- | --- | --- | --- | --- | --- |
 | 0 | El vault que se puede abrir | Empezar a escribir a mano | no | `vacio` | 001 |
-| 1 | El registro | Dictar y que quede bien escrito | parcial | `primer-dia` | 002 a mano, 003 dictado |
+| 1 | El registro | Dictar y que quede bien escrito | parcial | `primer-dia` | 002 a mano, 003 dictado, 004 conversado |
 | 2 | Pendientes | Que no se olvide nada | no | `ciclo-en-curso` | 002 |
-| 3 | El árbol de ámbitos | Que cada cosa tenga su lugar | no | `ciclo-en-curso` | 002 mínimo, 004 completo |
-| 4 | Cadencias | Que el sistema recuerde solo | no | `ciclo-en-curso` | 005 |
-| 5 | Notas y enlaces | Que el tejido se mantenga | no | `ciclo-en-curso` | 002 mínimo, 004 completo |
-| 6 | El ciclo | Abrir y cerrar sin perder nada | no | `ciclo-por-cerrar` | 005 |
-| 7 | Plan y resumen | Que la propuesta valga la pena leerla | sí | `ciclo-por-cerrar` | 005 |
-| 9 | Inferencia semántica | Que note cosas que nadie pidió | sí | `historico` | 006 |
+| 3 | El árbol de ámbitos | Que cada cosa tenga su lugar | no | `ciclo-en-curso` | 002 mínimo, 005 completo |
+| 4 | Cadencias | Que el sistema recuerde solo | no | `ciclo-en-curso` | 006 |
+| 5 | Notas y enlaces | Que el tejido se mantenga | no | `ciclo-en-curso` | 002 mínimo, 005 completo |
+| 6 | El ciclo | Abrir y cerrar sin perder nada | no | `ciclo-por-cerrar` | 006 |
+| 7 | Plan y resumen | Que la propuesta valga la pena leerla | sí | `ciclo-por-cerrar` | 006 |
+| 9 | Inferencia semántica | Que note cosas que nadie pidió | sí | `historico` | 007 |
 
 La numeración salta la fase 8 porque el endurecimiento pasó a la Wishlist: no agrega capacidades, cierra huecos.
 
@@ -65,9 +67,9 @@ Toda prueba afirma el diff (`delta`) entre el estado inicial y el resultante, nu
 | --- | --- | --- |
 | `vacio` | recién instalado con `tuku init` | que se pueda empezar (Epic 001) |
 | `primer-dia` | un registro inyectado en su día | el registro y consecuencias inmediatas (Epics 002 y 003) |
-| `ciclo-en-curso` | varios días, pendientes en escalones, cadencias vigentes | casi todo el tejido (Epic 004) |
-| `ciclo-por-cerrar` | ciclo completo sin cerrar | el cierre y apertura de ciclo (Epic 005) |
-| `historico` | varios ciclos cerrados | archivado, enlaces antiguos e inferencia (Epic 006) |
+| `ciclo-en-curso` | varios días, pendientes en escalones, cadencias vigentes | casi todo el tejido (Epic 005) |
+| `ciclo-por-cerrar` | ciclo completo sin cerrar | el cierre y apertura de ciclo (Epic 006) |
+| `historico` | varios ciclos cerrados | archivado, enlaces antiguos e inferencia (Epic 007) |
 
 ### Superficie del CLI
 
@@ -75,16 +77,17 @@ Todo epic que añada comandos fija su superficie en un escenario propio: `tuku -
 
 ## Estado de los Epics
 
-Actualizado el 2026-09-07.
+Actualizado el 2026-09-09.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | reabierto, mecanismo hecho | `tuku init` implementado y los siete `001-0X` en verde; falta re-verificación con persona sobre `uv tool install` + `tuku init` |
 | 002 | El día uno, a mano | `vacio` → `primer-dia` | por cerrar | diez escenarios deterministas en verde (`002-01` a `002-10`). Falta revisión a mano de `playground/002-09-crear-nota/` contra criterio de salida |
-| 003 | El día uno, dictado | `vacio` → `primer-dia` | sin empezar | desbloqueado. Replica el 002 con entrada en lenguaje natural |
-| 004 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 003 |
-| 005 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 004 |
-| 006 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 005 |
+| 003 | El día uno, dictado | `vacio` → `primer-dia` | sin empezar | desbloqueado. Replica el 002 con entrada en lenguaje natural, en un turno |
+| 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
+| 005 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 004 |
+| 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
+| 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
 
 ## Epic 001. Un TUKU mínimo instalable
 
@@ -102,24 +105,35 @@ Alguien instala TUKU y empieza a usarlo el mismo día sobre un vault vacío. Tod
 
 ## Epic 003. El día uno, dictado
 
-El mismo día uno del epic 002 con la misma entrada de [`referencia-faena.md`](../corpus/referencia/referencia-faena.md), pero dictada en lenguaje natural. El agente compila el dictado en llamadas `tuku` en vez de escribir archivos, reproduciendo el vault del 002.
+El mismo día uno del epic 002, dictado en lenguaje natural en vez de invocado a mano. El agente compila el dictado en llamadas `tuku` en vez de escribir archivos, reproduciendo el vault del 002.
 
-- **Entregable:** agente LLM que infiere campos y emite comandos deterministas; vault resultante idéntico al producido a mano.
-- **Detalle completo:** [`../tests/escenarios/003-00-el-dia-uno-dictado.md`](../tests/escenarios/003-00-el-dia-uno-dictado.md). Desbloqueado para comenzar; stubs `003-01` y `003-02` creados.
+Replica, y nada más. Un turno, un dictado, el mismo vault de salida. La conversación de ida y vuelta es el epic 004, y meterla acá haría que un fallo pudiera venir de dos sitios a la vez.
 
-## Epic 004. El día ciento cincuenta
+- **Entregable:** el `AGENTS.md` del vault que hace que cualquier arnés opere igual ([`../spec/despacho.md`](../spec/despacho.md)), y la evidencia de que con él un agente vivo reproduce el día uno.
+- **Detalle completo:** [`../tests/escenarios/003-00-el-dia-uno-dictado.md`](../tests/escenarios/003-00-el-dia-uno-dictado.md).
+
+## Epic 004. La conversación
+
+El autor deja de dictar y conversa: el agente delibera, pregunta, cambia de rumbo a media sesión y solo al final ejecuta. Es donde los `AGENTS.md` del vault se refinan contra fricción real, y donde se construye el conductor que sostiene una sesión de varios turnos con un adaptador por arnés.
+
+Se prueba con dos agentes, uno del lado del autor y otro del lado de TUKU. No agrega fixture: sigue siendo el día uno.
+
+- **Entregable:** conductor de sesión multi-turno reutilizable, límites del vault verificables como diff vacío, y los `AGENTS.md` corregidos por lo que la conversación rompa.
+- **Criterio de salida:** una conversación en que el autor se contradice y rectifica deja el vault en el estado que pidió al final, y ninguna prohibición de la tabla de límites se rompe en el camino.
+
+## Epic 005. El día ciento cincuenta
 
 Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumulado (ámbitos poblados, notas escritas, historial de pendientes). Segunda vuelta de capacidades donde aparecen enlaces automáticos desde el primer día, autoasignación de pendientes, notas con "Ver además" y versiones completas de ámbitos y destilados. Cubre fases 3 y 5 completas, y resto de la 4.
 
 - **Criterio de salida:** inyectar un ciclo de `mac-jpgil` sobre un vault poblado produce enlaces, asignación a ámbitos y notas tejidas sin intervención.
 
-## Epic 005. Abrir y cerrar el ciclo
+## Epic 006. Abrir y cerrar el ciclo
 
 Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo valga la pena leerlo. Las cadencias entran acá porque emiten en la apertura del ciclo. Cubre fases 6 y 7, más lo restante de la 4. La mecánica determinista (abrir, promover pendientes, aplanar transclusiones, archivar) se prueba con archivos inyectados antes de conectar el LLM para plan y resumen.
 
 - **Criterio de salida:** abrir dos veces no duplica; cerrar dos veces no vuelve a mover; prueba que falla a propósito si se aplana antes del resumen. Plan calcula capacidad contra lo declarado.
 
-## Epic 006. Que note lo que nadie pidió
+## Epic 007. Que note lo que nadie pidió
 
 El agente deja de responder y empieza a observar: infiere ámbitos y notas tipadas desde el histórico, detecta recurrencias que nadie declaró como cadencia y propone sin ejecutar. Cubre fase 9.
 

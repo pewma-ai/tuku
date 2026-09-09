@@ -46,6 +46,7 @@ sys.path.insert(0, str(RAIZ_REPO / "src"))
 
 sys.path.insert(0, str(RAIZ_REPO / "tests" / "scripts"))
 
+import agente  # noqa: E402
 import vault  # noqa: E402
 
 ESCENARIOS = RAIZ_REPO / "tests" / "escenarios"
@@ -122,6 +123,20 @@ class Corrida:
     resultados: list[Resultado] = field(default_factory=list)
     antes: dict[str, bytes] = field(default_factory=dict)
     despues: dict[str, bytes] = field(default_factory=dict)
+    turnos: list[agente.Turno] = field(default_factory=list)
+
+    @property
+    def turno(self) -> agente.Turno:
+        """El único turno del escenario. Falla si hay otro número.
+
+        El epic 003 es de un turno por escenario a propósito: con dos, un fallo
+        podría venir de dos sitios. La conversación es el epic 004.
+        """
+        if len(self.turnos) != 1:
+            raise EscenarioNoEncontrado(
+                f"{self.escenario.slug} tiene {len(self.turnos)} turnos de agente, no uno"
+            )
+        return self.turnos[0]
 
     @property
     def delta(self) -> dict[str, str]:
@@ -393,6 +408,29 @@ def _correr_bash(comando: str, dir: Path) -> tuple[int, str, str]:
     return p.returncode, p.stdout, p.stderr
 
 
+#: Dónde corre el agente. Dentro del vault, que es como se opera en la vida
+#: real: lee su `AGENTS.md` porque está ahí, no porque el prompt se lo pegue.
+VAULT_DEL_ESCENARIO = "mi-vault"
+
+
+def _correr_agente(paso: Paso, dir: Path) -> agente.Turno:
+    """El turno que el paso lleva en su bloque ```agente```."""
+    prompt = "\n".join(paso.agente)
+    vault = dir / VAULT_DEL_ESCENARIO
+    if not vault.is_dir():
+        raise PasoFallido(
+            f"el paso {paso.texto!r} es agéntico y no hay un {VAULT_DEL_ESCENARIO}/ "
+            f"en {dir}. El agente corre dentro del vault, así que el escenario "
+            f"tiene que haberlo sembrado en su `## Estado inicial`."
+        )
+    turno = agente.turno(vault, prompt)
+    if turno.codigo != 0:
+        raise PasoFallido(
+            f"el turno de {paso.texto!r} salió {turno.codigo}: {turno.stderr.strip()}"
+        )
+    return turno
+
+
 def correr(slug: str, titulo: str) -> Corrida:
     """Ejecuta un escenario del `.md` y devuelve lo que dejó.
 
@@ -409,6 +447,7 @@ def correr(slug: str, titulo: str) -> Corrida:
 
     codigo, salida, error = 0, "", ""
     resultados: list[Resultado] = []
+    turnos: list[agente.Turno] = []
     antes: dict[str, bytes] = {}
     previo_home, previo_cwd = os.environ.get("TUKU_HOME"), Path.cwd()
     os.environ["TUKU_HOME"] = str(RAIZ_REPO)
@@ -419,10 +458,7 @@ def correr(slug: str, titulo: str) -> Corrida:
                 # El estado del que parte la acción: todo lo anterior es `Dado`.
                 antes = vault.instantanea(dir)
             if paso.agente:
-                raise PasoFallido(
-                    f"{slug}: el paso {paso.texto!r} es agéntico y todavía no hay arnés "
-                    f"que lo corra. Márcalo `agentic` y déjalo fuera de la corrida."
-                )
+                turnos.append(_correr_agente(paso, dir))
             for comando in paso.comandos:
                 entorno, partes = _separar_entorno(shlex.split(comando))
                 if partes and partes[0] == "tuku":
@@ -458,6 +494,7 @@ def correr(slug: str, titulo: str) -> Corrida:
         resultados=resultados,
         antes=antes,
         despues=vault.instantanea(dir),
+        turnos=turnos,
     )
     _CORRIDAS[(slug, escenario.titulo)] = corrida
     return corrida

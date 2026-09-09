@@ -58,7 +58,7 @@ Entonces el barrido retroactivo de menciones alcanza `AHORA.md` y nada más
 Y `ambitos/PENDIENTES-AMBITOS.md` se actualiza con el callout correspondiente al nuevo ámbito
 Y no se crea ni se toca ningún archivo fuera de `ambitos/depto-centro/`, `ambitos/PENDIENTES-AMBITOS.md` y `AHORA.md`
 
-Que los ciclos cerrados sean inmutables no se puede probar el día uno, porque no hay ninguno; se prueba en el epic 004. Acá se afirma lo que sí se puede.
+Que los ciclos cerrados sean inmutables no se puede probar el día uno, porque no hay ninguno; se prueba en el epic 005. Acá se afirma lo que sí se puede.
 
 ## Escenario: un registro no puede apuntar a una categoría
 

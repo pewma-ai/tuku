@@ -117,7 +117,7 @@ Es el reverso del escenario anterior: allá se afirma que la nota bien escrita p
 
 ## De dónde sale el contenido
 
-Del fixture `fixtures/003-01-dictado-del-dia-uno/`: el texto de la nota es salida de agente. Todo lo que este escenario prueba (dónde queda el archivo, la constancia, el enlace, el lint) es determinista.
+Del fixture `fixtures/002-09-crear-nota/`: el texto de la nota es salida de agente y se congela, porque no hay un original vivo contra el cual compararlo. Todo lo que este escenario prueba (dónde queda el archivo, la constancia, el enlace, el lint) es determinista.
 
 ## Cómo se corre
 

@@ -56,7 +56,7 @@ Entonces `tuku entry add` lo deja escrito tal cual, sin marcarlo
 
 ## De dónde salen las líneas
 
-Las tres están escritas acá, en los comandos: son la rebanada mínima que este paso necesita, y el arnés ya no las repite. El día uno completo, generado por un agente desde el corpus, vive en [`003-01`](003-01-dictado-del-dia-uno.md).
+Las tres están escritas acá, en los comandos: son la rebanada mínima que este paso necesita, y el arnés ya no las repite. El día uno completo, dictado a un agente, vive en `003-06` ([`003-00`](003-00-el-dia-uno-dictado.md)).
 
 ## Cómo se corre
 

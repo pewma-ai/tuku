@@ -1,10 +1,10 @@
 # Lecciones de mac-jpgil
 
-> Qué resolvió ya el vault real del autor, y qué de eso sirve para el epic en curso. No es una especificación ni un inventario: [`epics.md`](epics.md) manda que el material se traiga **epic por epic, nunca por adelantado**, así que esto separa lo que el epic 002 puede usar hoy de lo que solo se anota para no perderlo.
+> Qué resolvió ya el vault real del autor, y qué de eso sirve para el epic en curso. No es una especificación ni un inventario: [`epics.md`](epics.md) manda que el material se traiga **epic por epic, nunca por adelantado**, así que hay una sección por epic y una final con lo que solo se anota para no perderlo.
 >
 > **Este repositorio manda.** `mac-jpgil` es lo que le funcionó al autor, y TUKU es el rediseño deliberado de eso, así que donde los dos difieren no hay contradicción que arbitrar: vale [`../spec/`](../spec/README.md). Lo de acá son lecciones y nada más. Una diferencia observada solo mueve la spec por el camino que ya define `epics.md`, cuando el experimento del epic la obliga, nunca porque el vault real lo haga distinto.
 
-Levantado el 2026-09-06, contra [`../../mac-jpgil`](../../mac-jpgil) en su estado de ese día.
+Levantado en dos pasadas contra [`../../mac-jpgil`](../../mac-jpgil): el 2026-09-06 para el epic 002, y el 2026-09-09 para el 003, que mira los mismos archivos con otra pregunta.
 
 ## De qué tamaño es la evidencia
 
@@ -68,7 +68,7 @@ Es la regla 1 de `spec/pendientes.md` (un pendiente en un solo callout) escrita 
 
 Para el epic 002 esto no se trae entero, y es correcto que no: sobre un vault vacío no hay historia que barrer, y el epic declara la versión mínima. Lo que sí se trae es que el alta deja constancia en la bitácora (el paso 5), porque eso sí ocurre el día uno y es la misma exigencia que el punto 5 del epic le pone a la nota.
 
-El paso 7 es del epic 004, y ahí conviene contrastarlo con `spec/ambitos.md`, que hoy limita el enlazado retroactivo a `AHORA.md` y deja enriquecer el pasado como operación deliberada del autor. Los dos son compatibles si se lee que en mac-jpgil ese barrido ocurre porque el autor pidió el alta, que es exactamente la petición explícita que la spec exige.
+El paso 7 es del epic 005, y ahí conviene contrastarlo con `spec/ambitos.md`, que hoy limita el enlazado retroactivo a `AHORA.md` y deja enriquecer el pasado como operación deliberada del autor. Los dos son compatibles si se lee que en mac-jpgil ese barrido ocurre porque el autor pidió el alta, que es exactamente la petición explícita que la spec exige.
 
 ### 9. El parentesco vive en el frontmatter, no en el árbol
 
@@ -98,13 +98,73 @@ Es el reparto de `spec/agente.md` ya operativo: el script decide qué falta, el 
 
 Un detalle que se pierde si no se anota: `summary` es obligatorio y **vacío es un estado válido y declarado** (la nota es un stub de menos de diez líneas). Un campo obligatorio con estado vacío legítimo es lo que evita que el linter mienta.
 
+## Lo que aplica al epic 003
+
+La segunda pasada mira los mismos archivos preguntando otra cosa: no qué formato tiene el vault, sino **qué le exige el vault a un agente que entra a operarlo**. Es la pregunta del epic 003 y la que contesta [`../spec/despacho.md`](../spec/despacho.md).
+
+### 13. El dispatcher de la raíz cabe en treinta líneas
+
+`AGENTS.md` de la raíz tiene 30 líneas y sostiene seis meses de uso diario sobre 2266 commits. Su estructura completa es: identidad en una línea, estilo en una línea, despacho en tres reglas, cuándo escribir en el log, y una tabla de límites. Nada más.
+
+Todo lo demás se carga por cercanía. `actividad/AGENTS.md` tiene rol, convenciones, reglas de inserción, routing y límites propios, y la raíz no dice ni una palabra sobre el formato de un registro.
+
+Es la evidencia más fuerte a favor del enrutador corto: el documento que se lee en toda sesión no creció en seis meses, y lo que creció fue lo que se carga al llegar.
+
+### 14. El despacho tiene dos ejes y aparecieron en momentos distintos
+
+El primer eje es de dominio: bitácora inline, todo lo demás a subproceso. El segundo lo agregó el autor el 2026-08-12 y está fechado en el archivo: **cualquier tarea que modifique archivos corre como subproceso**, para que el chat conteste de inmediato y la ejecución quede atrás.
+
+Que el segundo eje llegue tres meses después, con fecha y con justificación de latencia, dice que no es un requisito de diseño sino una respuesta a presión de uso. TUKU no lo necesita el día uno, y por eso [`../spec/despacho.md`](../spec/despacho.md) lo deja anotado y fuera. Si reaparece, será en el epic 004, que es el primero con sesiones lo bastante largas para sentir la latencia.
+
+### 15. El despacho necesita una regla de recursión, y es justo el caso del test
+
+`AGENTS.md` lleva una excepción explícita: si la sesión fue lanzada como subproceso headless por el CLI del agente (`agy -p "Ejecuta ..."`), **tú eres el subproceso**, ejecuta directo, no leas la tabla de despacho y no lances otro.
+
+Sin esa cláusula el despacho se llama a sí mismo. Importa para el epic 003 más que para el producto: el conductor de pruebas lanza al agente por CLI, que es exactamente esa situación, así que la regla no es una curiosidad de `mac-jpgil` sino la condición para que el agente bajo prueba haga lo que se le pide en vez de re-despacharse.
+
+### 16. El fallback del dispatcher es listar el directorio, no adivinar
+
+Cuando ningún trigger empareja, la regla es correr `ls procesos/*.MaC.md` y ver si algún nombre de proceso coincide con lo que el autor pidió. Si tampoco, preguntar.
+
+Con eso la tabla deja de tener que ser exhaustiva, que es lo que la hace envejecer mal. Es el mismo mecanismo de la lección 10 (el vocabulario se **genera** con un comando y no se materializa) aplicado al despacho, y es la respuesta ya probada al escape por proceso nombrado de [`../spec/despacho.md`](../spec/despacho.md).
+
+### 17. Los triggers son literales del autor, no categorías del sistema
+
+La tabla dispara con `"recuérdame"`, `"comitea"`, `"crea nota sobre"`, `"qué tengo pendiente"`, `"IDEA-..."`. Ninguna fila se llama por el nombre de la primitiva.
+
+Es lo que hace que el despacho funcione con dictado y no con comandos disfrazados. La tabla de [`../spec/despacho.md`](../spec/despacho.md) tiene que hablar así o no dispara: una fila que dice "cuando el autor requiera crear una entidad de ámbito" no la activa nadie hablando.
+
+### 18. Los límites se escriben como tabla de dos niveles, y son el caso negativo
+
+Tanto la raíz como `actividad/AGENTS.md` cierran con la misma tabla: **Ask first** y **Never**, en dos columnas, sin prosa. Renombrar archivos, tocar cualquier `AGENTS.md`, cerrar una semana, escribir fuera de los directorios permitidos.
+
+Un límite escrito así es una afirmación verificable sobre el vault después de la sesión: se le pide al agente algo que cae en `Never` y se comprueba que el diff quedó vacío. El epic 003 lo usa para los casos negativos del dictado, y el 004 lo convierte en su criterio de salida, porque una conversación larga tiene muchas más ocasiones de romper una prohibición que un turno suelto.
+
+### 19. Ahí donde `mac-jpgil` escribe archivos, TUKU escribe comandos
+
+La diferencia central entre los dos sistemas está justo en el documento que este epic entrega. `AGENTS.md` de `mac-jpgil` no nombra un solo comando para la bitácora: el agente abre el archivo del día y escribe la línea. Funciona porque las reglas de formato están en `actividad/AGENTS.md` y el agente las lee.
+
+TUKU eligió lo contrario, y por buenas razones ([`../spec/agente.md`](../spec/agente.md)): quien escribe es el comando, que conoce el formato y aplica las consecuencias. Pero eso solo se sostiene si el `AGENTS.md` del vault lo dice, y hoy no lo dice. Un agente que lea el template actual hará lo natural, que es lo que hace `mac-jpgil`: editar `AHORA.md` a mano. Quedaría un archivo bien formado y ninguna consecuencia aplicada, que es el modo de falla más caro porque no deja señal.
+
+La lección 11 explica por qué esto no se arregla pidiéndolo con más énfasis. Ahí el post-write hook se olvidaba igual escrito en mayúsculas, y la solución fue sacarlo del turno del agente. Acá la salida equivalente ya está tomada: no hay hook que recordar, porque la consecuencia viaja dentro del mismo comando que escribe.
+
+## Qué hay que decidir en el epic 003, con lo que aporta esto
+
+| Decisión | Qué aporta mac-jpgil |
+| --- | --- |
+| Qué exige el `AGENTS.md` del vault y cuánto mide | Lecciones 13, 17 y 18: enrutador corto, triggers en el habla del autor, límites en tabla de dos niveles |
+| Cómo se reparte entre la raíz y las ramas | Lección 13: la raíz no explica ningún dominio, y el dominio se explica entero en su directorio |
+| Qué pasa con lo que la tabla no cubre | Lección 16: listar el directorio y preguntar, nunca adivinar |
+| Cómo se conduce al agente sin que se re-despache | Lección 15: la cláusula de recursión, que es la situación normal de todo test que lo lance por CLI |
+| Qué se afirma sobre lo que el agente no hizo | Lección 18: los límites como afirmaciones sobre el diff, no sobre la prosa |
+
 ## Lo que se observó y no se trae todavía
 
 - **La consecuencia atada a vocabulario abierto.** `actividad/AGENTS.md` propaga un registro a la página de la entidad en `org/` **si y solo si** lleva `**Hito:**`, `**Decisión:**` o `**Señal:**`. Eso es una consecuencia mecánica disparada por la ontología **abierta**, mientras que `spec/bitacora.md` reserva las consecuencias para la cerrada. Vale la spec; queda la pregunta de si el uso vuelve a pedir lo mismo. No pega en el epic 002 (en un vault vacío no hay a dónde propagar) y es una de las cosas a vigilar en el 004.
-- **El ciclo real del autor no es semanal ni de largo fijo.** Los archivos de `actividad/` alternan dos tipos de bloque (trabajo en terreno y descanso) con largos de 5 a 9 días, y `estrategia/Capacidad.md` describe el ritmo con detalle: día de viaje, disponibilidad parcial en los bordes del bloque, roles operativos que se asignan a última hora. Material del epic 005.
-- **Las cadencias reales ya están en formato tabla** en `estrategia/Cadencias.md`, con dieciséis registros y cuatro clases de trigger: día exacto, rango, evento y reactivo. Tres caen el día 10 y hay rangos que cruzan el borde de mes, que es exactamente el banco de pruebas que pide la fase 4. Se trae en el epic 005, sin tocarlo antes.
-- **Capacidad con costo fijo por rol operativo**, cobrado por cada día que dura el rol, más el reparto bruto de la persona. `estrategia/Capacidad.md` es el caso real contra el que se valida la propuesta abierta de `spec/ambitos.md` sobre dónde vive el bruto. Epic 005.
-- **El archivado con cascada** existe y está escrito (`org/_rules/baja-entidades.md`, 7 entidades ya archivadas). Epic 004 o wishlist.
+- **El ciclo real del autor no es semanal ni de largo fijo.** Los archivos de `actividad/` alternan dos tipos de bloque (trabajo en terreno y descanso) con largos de 5 a 9 días, y `estrategia/Capacidad.md` describe el ritmo con detalle: día de viaje, disponibilidad parcial en los bordes del bloque, roles operativos que se asignan a última hora. Material del epic 006.
+- **Las cadencias reales ya están en formato tabla** en `estrategia/Cadencias.md`, con dieciséis registros y cuatro clases de trigger: día exacto, rango, evento y reactivo. Tres caen el día 10 y hay rangos que cruzan el borde de mes, que es exactamente el banco de pruebas que pide la fase 4. Se trae en el epic 006, sin tocarlo antes.
+- **Capacidad con costo fijo por rol operativo**, cobrado por cada día que dura el rol, más el reparto bruto de la persona. `estrategia/Capacidad.md` es el caso real contra el que se valida la propuesta abierta de `spec/ambitos.md` sobre dónde vive el bruto. Epic 006.
+- **El archivado con cascada** existe y está escrito (`org/_rules/baja-entidades.md`, 7 entidades ya archivadas). Epic 005 o wishlist.
 - **`CONTEXTO-RECIENTE.md` arrastra los días sembrados vacíos** (`- ...`) dentro de la cola, así que el agente recibe agenda futura mezclada con actividad ocurrida. Ya estaba anotado en [`epics.md`](epics.md); queda confirmado en vivo, y afecta al paso 1 del flujo.
 
 ## Qué hay que decidir en el epic 002, con lo que aporta esto

@@ -72,7 +72,7 @@ El segundo pase de un cierre correcto es, por construcción, un cierre sin parej
 
 ## Lo que este escenario deja fuera
 
-El cierre **no literal**, cuando el dictado no repite el texto palabra por palabra: deja de ser paso 5 y pasa a juicio del agente ([`spec/agente.md`](../../spec/agente.md)), que ante la duda confirma. Entra en [`003-01`](003-01-dictado-del-dia-uno.md).
+El cierre **no literal**, cuando el dictado no repite el texto palabra por palabra: deja de ser paso 5 y pasa a juicio del agente ([`spec/agente.md`](../../spec/agente.md)), que ante la duda confirma. Entra en `003-05`, entre los casos negativos del dictado ([`003-00`](003-00-el-dia-uno-dictado.md)).
 
 ## Cómo se corre
 
