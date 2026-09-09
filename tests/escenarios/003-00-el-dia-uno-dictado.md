@@ -8,9 +8,24 @@ Un turno por escenario. El autor dicta y el agente ejecuta. La conversación de 
 
 ## Qué entrega el epic
 
-El [`AGENTS.md`](../../template/vanilla/AGENTS.md) que `tuku init` siembra en cada vault. Es el documento que hace que un agente cualquiera opere el vault de la misma forma, y lo que este epic prueba es si funciona ([`spec/despacho.md`](../../spec/despacho.md)).
+Dos cosas, y la segunda tardó en reconocerse como tal.
 
-El resto (el dictado, el arnés, la comparación) es instrumento para medirlo.
+**El [`AGENTS.md`](../../template/vanilla/AGENTS.md) que `tuku init` siembra en cada vault.** Es el documento que hace que un agente cualquiera opere el vault de la misma forma, y lo que este epic prueba es si funciona ([`spec/despacho.md`](../../spec/despacho.md)).
+
+**Y el método para probarlo.** El arnés no es andamiaje que se tira al cerrar el epic: es lo que permite que el 004, el 005 y los que vengan afirmen algo sobre un agente en vez de mirarlo funcionar. Un método frágil no da un resultado dudoso, da un resultado *falso*, y este epic ya coleccionó cuatro pruebas de eso.
+
+### Qué tiene que cumplir el método
+
+Cada punto salió de una corrida donde el instrumento midió otra cosa, no de una lista escrita de antemano.
+
+1. **Aísla al agente de la máquina.** Sin eso el epic mide la configuración del equipo. El primer turno del `003-02` contestó sobre el vault real del autor y dos de tres tests pasaron igual.
+2. **Aísla al agente de quien lo lanza.** El agente corre dentro del vault como en la vida real, y en la vida real nadie lo lanza desde dentro de un `uv run pytest`. El entorno de Python del runner le cambia dónde importa y dónde escribe.
+3. **No depende del `PATH` para lo suyo.** El shim lleva su intérprete escrito. Con `#!/usr/bin/env python3` dependía de que el `PATH` fuera el de la suite, y dejó de serlo en cuanto se aplicó el punto anterior.
+4. **Detecta su propia ceguera.** Un vault que cambió con la traza vacía es un agente que no pasó por el shim, y eso se dice así. Sin esa comprobación el escenario falla igual pero mintiendo: dice que el agente no hizo nada, cuando hizo lo correcto y el instrumento no miraba.
+5. **Deja evidencia que sobrevive y se acumula.** Un turno no repite resultado. La corrida que se pisa no se recupera, y las que costaron tokens son justamente las que hay que comparar entre sí.
+6. **Se cambia de arnés sin tocar un test.** Es lo que hace verificable la afirmación del entregable: con un solo arnés, todo lo verde es compatible con que el `AGENTS.md` no diga nada y ese arnés acierte por su cuenta ([`003-08`](003-08-el-mismo-vault-otro-arnes.md)).
+
+El dictado y la comparación sí son instrumento de este epic y de ninguno más.
 
 ## La escalera: de menos a más
 

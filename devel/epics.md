@@ -109,7 +109,7 @@ El mismo día uno del epic 002, dictado en lenguaje natural en vez de invocado a
 
 Replica, y nada más. Un turno, un dictado, el mismo vault de salida. La conversación de ida y vuelta es el epic 004, y meterla acá haría que un fallo pudiera venir de dos sitios a la vez.
 
-- **Entregable:** el `AGENTS.md` del vault que hace que cualquier arnés opere igual ([`../spec/despacho.md`](../spec/despacho.md)), y la evidencia de que con él un agente vivo reproduce el día uno.
+- **Entregable:** el `AGENTS.md` del vault que hace que cualquier arnés opere igual ([`../spec/despacho.md`](../spec/despacho.md)), la evidencia de que con él un agente vivo reproduce el día uno, y **el método para probarlo**. El arnés no es andamiaje de este epic: es lo que permite que el 004 y los siguientes afirmen algo sobre un agente en vez de mirarlo funcionar, y un método frágil no da un resultado dudoso, da uno falso.
 - **Detalle completo:** [`../tests/escenarios/003-00-el-dia-uno-dictado.md`](../tests/escenarios/003-00-el-dia-uno-dictado.md).
 
 ## Epic 004. La conversación
