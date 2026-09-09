@@ -40,6 +40,7 @@ import sys
 import unicodedata
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -435,14 +436,27 @@ def _dejar_a_la_vista(turno: agente.Turno, dir: Path) -> None:
     única evidencia que va a existir de ella. El `.py` afirma lo que se puede
     afirmar; lo demás (si explicó el mecanismo en vez de decir qué quedó escrito,
     si preguntó algo que los registros ya respondían) solo se juzga leyéndolo.
+
+    El nombre lleva **arnés, fecha y escenario**, y por eso las corridas se
+    acumulan en vez de pisarse. Un `turno-1.md` fijo perdía la corrida anterior
+    en cuanto se repetía el escenario, que es justo cuando más falta hace
+    compararlas: el `003-06` necesitó cuatro para estabilizarse y las tres
+    primeras eran la evidencia de por qué. Con el arnés en el nombre, además,
+    dos arneses sobre el mismo escenario quedan uno al lado del otro.
     """
-    n = len(list(dir.glob("turno-*.md"))) + 1
+    arnes = agente.configurado().nombre
+    cuando = datetime.now().strftime("%Y-%m-%d-%H%M%S")
     comandos = "\n".join(turno.comandos) or "(ninguno)"
-    (dir / f"turno-{n}.md").write_text(
-        f"# Turno {n}\n\n## Lo que dijo el autor\n\n{turno.prompt}\n\n"
-        f"## Lo que respondió el agente\n\n{turno.stdout.strip()}\n\n"
-        f"## Lo que ejecutó\n\n```bash\n{comandos}\n```\n",
-        encoding="utf-8",
+    bloques = [
+        f"# {arnes} · {dir.name} · {cuando}",
+        f"## Lo que dijo el autor\n\n{turno.prompt}",
+        f"## Lo que respondió el agente\n\n{turno.stdout.strip()}",
+        f"## Lo que ejecutó\n\n{comandos}",
+    ]
+    if turno.conversacion.strip():
+        bloques.append(f"## La sesión entera\n\n{turno.conversacion.strip()}")
+    (dir / f"{arnes}.{cuando}.{dir.name}.txt").write_text(
+        "\n\n".join(bloques) + "\n", encoding="utf-8"
     )
 
 

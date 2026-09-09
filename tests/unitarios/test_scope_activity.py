@@ -1,4 +1,4 @@
-"""Tests unitarios para la propagación de actividad desde AHORA.md hacia ámbitos."""
+"""Tests unitarios para funciones puras de ámbitos (actividad, keywords, categorías)."""
 
 from __future__ import annotations
 
@@ -82,3 +82,32 @@ def test_actualizar_contenido_pagina_preserva_resumen_previo() -> None:
     assert "### Julio 2026" in res
     assert "- Resumen generado por LLM que debe conservarse intacto." in res
     assert "### Martes 11 de agosto" in res
+
+
+def test_keywords_extrae_lista_correctamente() -> None:
+    pagina = (
+        "---\ntype: Scope\nkeywords: [depto-centro, depto centro, departamento]\n"
+        "---\n# Titulo\n"
+    )
+    assert scope.keywords(pagina) == ["depto-centro", "depto centro", "departamento"]
+
+
+def test_keywords_vacia_o_sin_declarar() -> None:
+    assert scope.keywords("---\ntype: Scope\nkeywords: []\n---\n") == []
+    assert scope.keywords("---\ntype: Scope\n---\n") == []
+    assert scope.keywords("") == []
+
+
+def test_formatear_esta_semana_vacia_devuelve_solo_encabezado() -> None:
+    assert scope.formatear_esta_semana({}) == "## Esta semana"
+
+
+def test_lint_categorias_en_memoria() -> None:
+    texto = "- 10:00 - [[clientes]] reunión con cliente\n- 11:00 - [[personal]] compras\n"
+    hallazgos = scope.lint_categorias(texto, categorias=["clientes"])
+    assert len(hallazgos) == 1
+    assert "[[clientes]] es una categoría" in hallazgos[0]
+    assert "no puede apuntar a una" in hallazgos[0]
+
+    sin_categorias = scope.lint_categorias(texto, categorias=[])
+    assert sin_categorias == []

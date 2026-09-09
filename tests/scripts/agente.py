@@ -50,14 +50,57 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 #: A cambio, la suite no depende de la configuración de la máquina, que es lo que
 #: pide el `003-00`, y el agente opera sobre un vault desechable de `playground/`.
 #: Si un arnés ofreciera una regla acotada a un solo ejecutable, ese es el cambio.
+#:
+#: `sesion` es opcional y dice cómo pedirle al arnés **la conversación entera**,
+#: no solo el texto final. Lo que un turno devuelve por stdout es su conclusión;
+#: lo que hizo para llegar ahí (qué leyó, qué se preguntó, qué descartó) explica
+#: los fallos que la traza y el diff no explican. El arnés que no sepa entregarla
+#: omite la clave y el turno queda con lo que haya, que es lo que pasa con `agy`.
+#: Cómo se le pide a `hermes` la sesión del turno. Su base de sesiones es por
+#: perfil, y el perfil de las pruebas solo tiene las de las pruebas, así que
+#: filtrar por el `cwd` del escenario devuelve exactamente sus turnos.
+#:
+#: Por esto el turno va por `chat --oneshot` y no por el `-z` de una línea, que
+#: es más limpio de invocar y **no deja rastro**: ni sesión, ni log, ni nada que
+#: exportar después. El precio es que `-Q` antepone su `session_id:` al stdout.
+_EXPORTA_HERMES = [
+    "-p",
+    "{perfil}",
+    "sessions",
+    "export",
+    "--format",
+    "jsonl",
+    "--cwd",
+    "{cwd}",
+    "--yes",
+    "-",
+]
+
 ARNESES: dict[str, dict[str, list[str]]] = {
     "agy": {
         "aislar": ["--new-project", "--sandbox", "--dangerously-skip-permissions"],
         "prompt": ["-p", "{prompt}"],
         "modelo": ["--model", "{modelo}"],
     },
+    "hermes": {
+        "aislar": ["-p", "{perfil}", "chat", "--oneshot", "--quiet", "--yolo"],
+        "prompt": ["-q", "{prompt}"],
+        "modelo": ["-m", "{modelo}"],
+        "sesion": _EXPORTA_HERMES,
+    },
     "claude": {"aislar": [], "prompt": ["-p", "{prompt}"], "modelo": ["--model", "{modelo}"]},
 }
+
+#: El perfil por defecto de los arneses que tienen perfiles. En `hermes` un
+#: perfil es una instalación aparte, con su propia configuración, su base de
+#: sesiones y su `SOUL.md`, y `-p` la elige por invocación.
+#:
+#: **Va vacío a propósito.** El epic 003 afirma que el `AGENTS.md` del vault
+#: basta para que cualquier agente opere igual, así que un perfil que sepa de
+#: TUKU (una skill, una instrucción en su `SOUL.md`) invalida el escenario por
+#: la misma puerta que un prompt de test que explique lo que el vault ya dice.
+#: Si un turno acierta, tiene que ser atribuible al vault y a nada más.
+PERFIL = "tuku"
 
 #: Cuánto se espera un turno antes de darlo por colgado. Un tope contra el
 #: cuelgue, no un presupuesto: un turno de una frase termina en medio minuto y
@@ -95,10 +138,11 @@ class Arnes:
     nombre: str
     ejecutable: str
     modelo: str | None
+    perfil: str = PERFIL
 
     def argv(self, prompt: str) -> list[str]:
         plantilla = ARNESES[self.nombre]
-        partes = [self.ejecutable, *plantilla["aislar"]]
+        partes = [self.ejecutable, *(a.format(perfil=self.perfil) for a in plantilla["aislar"])]
         if self.modelo:
             partes += [a.format(modelo=self.modelo) for a in plantilla["modelo"]]
         partes += [a.format(prompt=prompt) for a in plantilla["prompt"]]
@@ -114,6 +158,7 @@ class Turno:
     stdout: str
     stderr: str
     traza: list[list[str]] = field(default_factory=list)
+    conversacion: str = ""  #: los turnos intermedios, si el arnés sabe darlos
 
     @property
     def comandos(self) -> list[str]:
@@ -170,7 +215,11 @@ class Turno:
 
 
 def configurado() -> Arnes:
-    """El arnés que dice el entorno, con `agy` por defecto."""
+    """El arnés que dice el entorno, con `agy` por defecto.
+
+    `TUKU_AGENTE` elige cuál, `TUKU_AGENTE_BIN` el ejecutable, `TUKU_AGENTE_MODELO`
+    el modelo y `TUKU_AGENTE_PERFIL` el perfil, donde el arnés tenga perfiles.
+    """
     nombre = os.environ.get("TUKU_AGENTE", "agy")
     if nombre not in ARNESES:
         conocidos = ", ".join(sorted(ARNESES))
@@ -182,6 +231,7 @@ def configurado() -> Arnes:
         nombre=nombre,
         ejecutable=os.environ.get("TUKU_AGENTE_BIN", nombre),
         modelo=os.environ.get("TUKU_AGENTE_MODELO"),
+        perfil=os.environ.get("TUKU_AGENTE_PERFIL", PERFIL),
     )
 
 
@@ -232,6 +282,29 @@ def _leer_traza(traza: Path) -> list[list[str]]:
     return [json.loads(linea)["argv"] for linea in lineas if linea.strip()]
 
 
+def _conversacion(arnes: Arnes, vault: Path, entorno: dict[str, str]) -> str:
+    """Lo que el agente fue diciendo durante el turno, si el arnés sabe darlo.
+
+    Nunca hace fallar un turno. Es evidencia para leer a mano, no una aserción:
+    un arnés que no exporte su sesión, o que cambie el formato, deja el archivo
+    con lo que haya y el escenario sigue afirmando sobre la traza y el diff.
+    """
+    export = ARNESES[arnes.nombre].get("sesion")
+    if not export:
+        return ""
+    argv = [
+        arnes.ejecutable,
+        *(a.format(perfil=arnes.perfil, cwd=str(vault)) for a in export),
+    ]
+    try:
+        p = subprocess.run(
+            argv, env=entorno, capture_output=True, text=True, timeout=60, check=False
+        )
+    except (subprocess.TimeoutExpired, OSError) as e:
+        return f"(no se pudo exportar la sesión: {e})"
+    return p.stdout if p.returncode == 0 else f"(el export salió {p.returncode})\n{p.stderr}"
+
+
 def turno(vault: Path, prompt: str, timeout: int | None = None) -> Turno:
     """Un turno del agente dentro de `vault`, con la traza de lo que ejecutó.
 
@@ -278,6 +351,7 @@ def turno(vault: Path, prompt: str, timeout: int | None = None) -> Turno:
             stdout=p.stdout,
             stderr=p.stderr,
             traza=_leer_traza(traza),
+            conversacion=_conversacion(arnes, vault, entorno),
         )
 
 

@@ -62,3 +62,29 @@ def test_cuenta_todas_las_menciones_que_enlaza() -> None:
 
 def test_un_texto_vacio_se_devuelve_igual() -> None:
     assert link.backfill("", scope="x", keywords=["y"]) == ("", 0)
+
+
+def test_backfill_con_parametro_ambito() -> None:
+    linea = "- 10:00 - reunión con el cliente\n"
+    texto, n = link.backfill(linea, ambito="clientes", keywords=["cliente"])
+    assert n == 1
+    assert "[[clientes]]" in texto
+
+
+def test_keyword_vacia_o_espacios_no_enlaza_nada() -> None:
+    linea = "- 10:00 - texto cualquiera\n"
+    texto, n = link.backfill(linea, scope="algo", keywords=["", "   ", "--"])
+    assert n == 0
+    assert texto == linea
+
+
+def test_patron_trata_guiones_y_espacios_como_equivalentes() -> None:
+    linea1 = "- 10:00 - tema depto-centro importante\n"
+    texto1, n1 = link.backfill(linea1, scope="depto-centro", keywords=["depto centro"])
+    assert n1 == 1
+    assert "[[depto-centro]]" in texto1
+
+    linea2 = "- 10:00 - tema depto centro importante\n"
+    texto2, n2 = link.backfill(linea2, scope="depto-centro", keywords=["depto-centro"])
+    assert n2 == 1
+    assert "[[depto-centro]]" in texto2
