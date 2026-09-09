@@ -11,6 +11,18 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 
 - **Cómo se llama el subtipo de una nota tipada.** [`spec/notas.md`](spec/notas.md) dice que una nota tipada declara `tipo:` en su frontmatter, y con OKF el campo `type` ya está tomado y vale `Note` para todas. El subtipo (persona, lugar, concepto) necesita otro nombre, en inglés como el resto del frontmatter, y la lista sigue siendo abierta y viviendo en `### Tipos de nota` del libro de estilo. Es una decisión de diseño, no una corrección de redacción: lo decide el epic que escriba la primera nota tipada.
 
+## Reglas del vault
+
+- **Validar el `AGENTS.md` adelgazado contra un agente vivo.** El refactor del 2026-09-09 bajó de la raíz todo lo que dice *cómo* se escribe un registro: los campos de `tuku entry add`, el día y la hora, `--when` y `--horizon` pasaron a [`template/vanilla/reglas/bitacora.tuku.md`](template/vanilla/reglas/bitacora.tuku.md), y la elección de ámbito a [`template/vanilla/ambitos/AGENTS.md`](template/vanilla/ambitos/AGENTS.md). La raíz volvió a enrutar y nada más.
+
+  Lo que hay que medir es una sola cosa, y no es la longitud: **si la regla que se carga tarde llega a tiempo**. Con `ambitos/AGENTS.md` el agente entra al directorio y lo lee; con `reglas/bitacora.tuku.md` no hay un "entrar" equivalente, así que la raíz tiene que mandar a leerlo antes de la primera llamada a `entry add` y eso puede no ocurrir. Los dos párrafos que bajaron son justamente los que se escribieron porque dos agentes distintos fallaron sin ellos, así que un refactor que los aleje demasiado reintroduce esos fallos.
+
+  Se mide con la cadena del epic 003, que ya distingue el modelo que alcanza del que no. Es un experimento con resultado esperado, no una revisión de redacción: si falla, la regla vuelve a subir y queda escrito que la cascada tiene un piso.
+
+- **El mínimo viable es Deepseek v4.1 Flash.** Ese es el suelo contra el que se valida: si el `AGENTS.md` no funciona con él, no funciona. Cualquier cosa más tonta que eso **no se ha probado que no falle, ni se va a probar**. No es un límite provisional a la espera de más presupuesto: es hasta dónde llega la promesa del vault, y por debajo de ahí el problema deja de ser del `AGENTS.md`.
+
+  Tiene consecuencia de diseño y por eso está escrito acá y no en un comentario: una regla que solo obedece un modelo caro no es una regla del vault, es una que se aprovecha de que el modelo adivina. Cuando algo falle con el mínimo, la primera hipótesis es que la regla está mal escrita, no que el modelo es corto.
+
 ## Sistema
 
 - **Endurecimiento:** casos de error, reconstrucción completa (`tuku rebuild`) e idempotencia global sobre el sistema entero. Un error del autor nunca se rechaza, se reporta. Era la fase 8 y no agrega capacidades, cierra huecos.

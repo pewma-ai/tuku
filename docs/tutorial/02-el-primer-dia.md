@@ -2,8 +2,6 @@
 
 > Tu primer día de trabajo dictado al agente. Pasas de una bitácora en blanco a frentes, pendientes, notas y revisión sin tocar la estructura a mano.
 
-Corresponde a lo que entrega el [Epic 003: El día uno, dictado](../../devel/epics.md#epic-003-el-dia-uno-dictado).
-
 ---
 
 ## El primer registro
@@ -153,8 +151,6 @@ Ahora prueba un dictado continuo, tal como hablarías al final de la jornada:
 ### Mira `AHORA.md` y `PENDIENTES.md`
 
 Las cuatro frases se desglosaron en sus respectivos hechos independientes, asignando ámbitos, horas y compromisos abiertos.
-
-Puedes contrastar el resultado con [`referencia-pyme.md`](../../corpus/referencia/referencia-pyme.md) (Parte 2, miércoles 12), el texto de referencia escrito originalmente a mano.
 
 ---
 

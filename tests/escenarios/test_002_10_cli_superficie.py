@@ -18,9 +18,9 @@ siguiente.
 Ejecutable directo: `python3 tests/escenarios/test_002_10_cli_superficie.py`
 """
 
-from __future__ import annotations
-
+import io
 import sys
+from contextlib import redirect_stdout
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
@@ -29,7 +29,7 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
 import gherkin  # noqa: E402
 
-from tuku.cli import ENTORNO, EXITO, RECHAZO, USO  # noqa: E402
+from tuku.cli import ENTORNO, EXITO, RECHAZO, USO, comandos, main  # noqa: E402
 from tuku.lint import lint  # noqa: E402
 
 SLUG = "002-10-cli-superficie"
@@ -39,21 +39,21 @@ DIA = "## Martes 11 de agosto"
 
 #: Cada noun del CLI con los verbs que su ayuda tiene que nombrar.
 VERBS = {
-    "entry": ("add", "lint"),
+    "entry": ("add", "rename", "lint"),
     "vocab": ("show",),
-    "cycle": ("open",),
+    "cycle": ("open", "lint"),
     "style": ("lint",),
     "todo": ("open", "close", "lint"),
-    "scope": ("create", "lint"),
+    "scope": ("create", "rename", "lint"),
     "link": ("backfill",),
-    "note": ("create", "lint"),
+    "note": ("create", "rename", "lint"),
 }
 
 
 def test_002_10_tuku_h_nombra_los_nouns_del_epic() -> None:
     corrida = gherkin.correr(SLUG, "nombra los nouns del epic")
     assert corrida.codigo == EXITO, corrida.stderr
-    for noun in ("init", *VERBS):
+    for noun in ("init", "doctor", "rebuild", *VERBS):
         assert noun in corrida.stdout, f"`tuku -h` no nombra {noun}"
 
 
@@ -69,6 +69,31 @@ def test_002_10_cada_noun_lista_sus_verbs() -> None:
     add = corrida.de("entry add -h")
     for pieza in ("--body", "--scope", "--day", "--hour"):
         assert pieza in add.stdout, f"`tuku entry add -h` no nombra {pieza}"
+
+    rename = corrida.de("entry rename -h")
+    for pieza in ("--body", "--day", "--hour"):
+        assert pieza in rename.stdout, f"`tuku entry rename -h` no nombra {pieza}"
+
+
+def test_002_10_cada_comando_dice_como_se_hace_lo_mismo_a_mano() -> None:
+    patrones_vault = (".md", "ambitos/", "notas/", "reglas/", "template/")
+    patrones_codigo = ("def ", "import ", "module", "function", "class ")
+
+    for cmd in sorted(comandos()):
+        buf = io.StringIO()
+        try:
+            with redirect_stdout(buf):
+                main([*cmd.split(), "-h"])
+        except SystemExit:
+            pass
+        salida = buf.getvalue().strip()
+        assert "A mano:" in salida, f"`tuku {cmd} -h` no tiene el campo 'A mano':\n{salida}"
+        assert any(ext in salida for ext in patrones_vault), (
+            f"`tuku {cmd} -h` no nombra archivos del vault:\n{salida}"
+        )
+        assert not any(tecnico in salida for tecnico in patrones_codigo), (
+            f"`tuku {cmd} -h` usa jerga técnica de código:\n{salida}"
+        )
 
 
 def test_002_10_un_noun_sin_verb_es_error_de_uso() -> None:
@@ -135,6 +160,7 @@ def test_002_10_los_codigos_son_distintos() -> None:
 if __name__ == "__main__":
     test_002_10_tuku_h_nombra_los_nouns_del_epic()
     test_002_10_cada_noun_lista_sus_verbs()
+    test_002_10_cada_comando_dice_como_se_hace_lo_mismo_a_mano()
     test_002_10_un_noun_sin_verb_es_error_de_uso()
     test_002_10_el_lint_sale_con_rechazo_solo_ante_la_ontologia_cerrada()
     test_002_10_un_directorio_que_no_es_vault_dice_que_hacer()

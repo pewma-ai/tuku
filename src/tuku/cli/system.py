@@ -75,10 +75,23 @@ def _crear_cmd_doctor(comandos_fn: Callable[[], frozenset[str]]) -> Handler:
     return _cmd_doctor
 
 
+def _cmd_rebuild(args: argparse.Namespace) -> int:
+    from tuku import rebuild
+
+    return traducir(rebuild.reconstruir(args.vault), "tuku rebuild")
+
+
 def registrar(
     sub: Subparsers, comandos_fn: Callable[[], frozenset[str]]
 ) -> dict[tuple[str, str | None], Handler]:
-    init_p = sub.add_parser("init", help="siembra un vault nuevo en un directorio")
+    init_p = sub.add_parser(
+        "init",
+        help="siembra un vault nuevo en un directorio",
+        epilog=(
+            "A mano: copiar la carpeta `template/vanilla` al directorio destino "
+            "y reemplazar las fechas en `AHORA.md`."
+        ),
+    )
     init_p.add_argument(
         "dir",
         nargs="?",
@@ -117,7 +130,14 @@ def registrar(
 
     cycle_p = sub.add_parser("cycle", help="gestión del ciclo en AHORA.md")
     cycle_v = cycle_p.add_subparsers(dest="verb", required=True)
-    open_p = cycle_v.add_parser("open", help="abre o verifica el ciclo en AHORA.md")
+    open_p = cycle_v.add_parser(
+        "open",
+        help="abre o verifica el ciclo en AHORA.md",
+        epilog=(
+            "A mano: copiar `reglas/plantilla/AHORA.md` a la raíz como `AHORA.md` "
+            "sustituyendo las fechas de los siete días de la semana."
+        ),
+    )
     open_p.add_argument("--vault", default=".", type=Path, help="vault a verificar o abrir")
     open_p.add_argument(
         "--date",
@@ -130,23 +150,58 @@ def registrar(
     )
 
     cycle_lint_p = cycle_v.add_parser(
-        "lint", help="revisa la estructura de AHORA.md y reporta; no escribe"
+        "lint",
+        help="revisa la estructura de AHORA.md y reporta; no escribe",
+        epilog=(
+            "A mano: abrir `AHORA.md` y verificar que los encabezados de día tengan "
+            "fechas consecutivas y formato válido."
+        ),
     )
     cycle_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
 
     doctor_p = sub.add_parser(
-        "doctor", help="corre todos los lint y revisa las tablas de contrato"
+        "doctor",
+        help="corre todos los lint y revisa las tablas de contrato",
+        epilog=(
+            "A mano: revisar `AHORA.md` y `PENDIENTES.md` verificando que cada pendiente "
+            "abierto tenga su fila en la tabla y que cada mención a un ámbito exista "
+            "en `ambitos/`."
+        ),
     )
     doctor_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
 
+    rebuild_p = sub.add_parser(
+        "rebuild",
+        help="reconstruye los archivos y vistas derivadas del vault",
+        epilog=(
+            "A mano: en `ambitos/PENDIENTES-AMBITOS.md` escribir un callout por cada "
+            "carpeta en `ambitos/` listando sus pendientes desde `PENDIENTES.md`."
+        ),
+    )
+    rebuild_p.add_argument("--vault", default=".", type=Path, help="vault a reconstruir")
+
     vocab_p = sub.add_parser("vocab", help="vocabularios abiertos del autor")
     vocab_v = vocab_p.add_subparsers(dest="verb", required=True)
-    show_p = vocab_v.add_parser("show", help="muestra los vocabularios del libro de estilo")
+    show_p = vocab_v.add_parser(
+        "show",
+        help="muestra los vocabularios del libro de estilo",
+        epilog=(
+            "A mano: abrir `LIBRO-DE-ESTILO.md` y leer los vocabularios definidos "
+            "en la sección de vocabulario."
+        ),
+    )
     show_p.add_argument("--vault", default=".", type=Path, help="vault a leer")
 
     style_p = sub.add_parser("style", help="libro de estilo y contratos de autor")
     style_v = style_p.add_subparsers(dest="verb", required=True)
-    style_lint_p = style_v.add_parser("lint", help="revisa contratos en LIBRO-DE-ESTILO.md")
+    style_lint_p = style_v.add_parser(
+        "lint",
+        help="revisa contratos en LIBRO-DE-ESTILO.md",
+        epilog=(
+            "A mano: abrir `LIBRO-DE-ESTILO.md` y verificar que el formato de títulos, "
+            "reglas y listas cumpla las convenciones de Markdown."
+        ),
+    )
     style_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
 
     return {
@@ -154,6 +209,7 @@ def registrar(
         ("cycle", "open"): _cmd_cycle_open,
         ("cycle", "lint"): _cmd_cycle_lint,
         ("doctor", None): _crear_cmd_doctor(comandos_fn),
+        ("rebuild", None): _cmd_rebuild,
         ("vocab", "show"): _cmd_vocab_show,
         ("style", "lint"): _cmd_style_lint,
     }

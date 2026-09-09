@@ -1,7 +1,6 @@
 # 5. Cerrar la semana
 
 > [!warning] Todavía no funciona
-> Llega con el [Epic 006](../../devel/epics.md#epic-006-abrir-y-cerrar-el-ciclo).
 
 Antes de cerrar el ciclo, entrégale una regla recurrente:
 

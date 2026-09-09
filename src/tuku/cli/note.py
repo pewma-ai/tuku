@@ -56,7 +56,12 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     note_v = note_p.add_subparsers(dest="verb", required=True)
 
     note_create_p = note_v.add_parser(
-        "create", help="crea una nota y deja constancia en la bitácora"
+        "create",
+        help="crea una nota y deja constancia en la bitácora",
+        epilog=(
+            "A mano: crear el archivo en `notas/<slug>.md` con sus metadatos y cuerpo, "
+            "y registrar en `AHORA.md` la constancia de creación."
+        ),
     )
     note_create_p.add_argument("title", help="título de la nota")
     note_create_p.add_argument(
@@ -103,14 +108,24 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     note_create_p.add_argument("--vault", default=".", type=Path, help="vault destino")
 
     note_rename_p = note_v.add_parser(
-        "rename", help="renombra una nota y arregla lo que la enlazaba"
+        "rename",
+        help="renombra una nota y arregla lo que la enlazaba",
+        epilog=(
+            "A mano: renombrar el archivo en `notas/` y actualizar los enlaces "
+            "`[[nota]]` en la bitácora."
+        ),
     )
     note_rename_p.add_argument("title", help="título actual de la nota")
     note_rename_p.add_argument("nuevo", help="título nuevo")
     note_rename_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
 
     note_lint_p = note_v.add_parser(
-        "lint", help="revisa que la nota tenga 'Ver además' y motivos"
+        "lint",
+        help="revisa que la nota tenga 'Ver además' y motivos",
+        epilog=(
+            "A mano: abrir la nota en `notas/` y verificar su sección 'Ver además' "
+            "y motivos de enlace."
+        ),
     )
     note_lint_p.add_argument(
         "file",

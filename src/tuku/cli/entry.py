@@ -41,7 +41,14 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     entry_p = sub.add_parser("entry", help="registros de la bitácora")
     entry_v = entry_p.add_subparsers(dest="verb", required=True)
 
-    add_p = entry_v.add_parser("add", help="escribe un registro en la bitácora")
+    add_p = entry_v.add_parser(
+        "add",
+        help="escribe un registro en la bitácora",
+        epilog=(
+            "A mano: abrir `AHORA.md`, buscar el día correspondiente y agregar una línea "
+            "bajo la sección con formato `- HH:MM - [[ambito]] **marca**: cuerpo`."
+        ),
+    )
     add_p.add_argument("--vault", default=".", type=Path, help="vault destino")
     add_p.add_argument(
         "--body",
@@ -85,7 +92,13 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     )
 
     rename_p = entry_v.add_parser(
-        "rename", help="corrige el cuerpo de un registro ya escrito"
+        "rename",
+        help="corrige el cuerpo de un registro ya escrito",
+        epilog=(
+            "A mano: abrir `AHORA.md`, ubicar el registro por su hora y editar su texto. "
+            "Si era un pendiente, buscar la fila en `PENDIENTES.md` y actualizarla para "
+            "que coincida palabra por palabra."
+        ),
     )
     rename_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
     rename_p.add_argument(
@@ -107,7 +120,14 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "--hour", "--hora", dest="hour", required=True, help="hora del registro (HH:MM)"
     )
 
-    lint_p = entry_v.add_parser("lint", help="revisa los registros y reporta; no escribe")
+    lint_p = entry_v.add_parser(
+        "lint",
+        help="revisa los registros y reporta; no escribe",
+        epilog=(
+            "A mano: abrir `AHORA.md` y revisar que cada registro empiece con "
+            "`- HH:MM - ` y use marcas válidas."
+        ),
+    )
     lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
 
     return {

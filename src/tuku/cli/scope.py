@@ -33,26 +33,49 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     scope_p = sub.add_parser("scope", help="árbol de ámbitos y categorías")
     scope_v = scope_p.add_subparsers(dest="verb", required=True)
 
-    scope_create_p = scope_v.add_parser("create", help="crea un ámbito bajo ambitos/")
+    scope_create_p = scope_v.add_parser(
+        "create",
+        help="crea un ámbito bajo ambitos/",
+        epilog=(
+            "A mano: crear la carpeta en `ambitos/<nombre>/` con su página `<nombre>.md`, "
+            "`AGENTS.md` y `CADENCIAS.md`."
+        ),
+    )
     scope_create_p.add_argument("name", help="nombre del ámbito")
     scope_create_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
 
     scope_rename_p = scope_v.add_parser(
-        "rename", help="renombra un ámbito y arregla lo que lo enlazaba"
+        "rename",
+        help="renombra un ámbito y arregla lo que lo enlazaba",
+        epilog=(
+            "A mano: renombrar la carpeta en `ambitos/` y su archivo `.md`, actualizar "
+            "las cabeceras internas y reemplazar todos los `[[nombre-viejo]]` en `AHORA.md`, "
+            "`PENDIENTES.md` y demás archivos por `[[nombre-nuevo]]`."
+        ),
     )
     scope_rename_p.add_argument("name", help="nombre actual del ámbito")
     scope_rename_p.add_argument("nuevo", help="nombre nuevo")
     scope_rename_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
 
     scope_lint_p = scope_v.add_parser(
-        "lint", help="revisa que ningún registro apunte a una categoría"
+        "lint",
+        help="revisa que ningún registro apunte a una categoría",
+        epilog=(
+            "A mano: revisar `ambitos/` verificando que cada carpeta tenga su página "
+            "y que todos los enlaces en la bitácora apunten a ámbitos existentes."
+        ),
     )
     scope_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
 
     link_p = sub.add_parser("link", help="enlazado y menciones")
     link_v = link_p.add_subparsers(dest="verb", required=True)
     link_backfill_p = link_v.add_parser(
-        "backfill", help="convierte menciones sueltas en enlaces hacia atrás"
+        "backfill",
+        help="convierte menciones sueltas en enlaces hacia atrás",
+        epilog=(
+            "A mano: buscar en `AHORA.md` las menciones en texto plano del ámbito "
+            "y envolverlas entre corchetes dobles `[[nombre]]`."
+        ),
     )
     link_backfill_p.add_argument(
         "--scope",

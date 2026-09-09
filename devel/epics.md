@@ -82,7 +82,7 @@ Actualizado el 2026-09-09.
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | reabierto, mecanismo hecho | `tuku init` implementado y los siete `001-0X` en verde; falta re-verificación con persona sobre `uv tool install` + `tuku init` |
-| 002 | El día uno, a mano | `vacio` → `primer-dia` | por cerrar | once escenarios deterministas en verde (`002-01` a `002-11`). Falta revisión a mano de `playground/002-09-crear-nota/` contra criterio de salida |
+| 002 | El día uno, a mano | `vacio` → `primer-dia` | por cerrar | doce escenarios deterministas en verde (`002-01` a `002-12`, con `002-10` completo). Falta revisión a mano de `playground/002-09-crear-nota/` contra criterio de salida |
 | 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | siete escenarios en verde (`003-01` a `003-07`), con modelo barato y esfuerzo bajo. El `003-08` (segundo arnés) queda pendiente. Falta revisión a mano de los turnos de `playground/003-0*/` contra criterio de salida |
 | 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 004 |
@@ -101,7 +101,7 @@ Que una persona nueva instale TUKU con un comando, siembre un vault en un direct
 Alguien instala TUKU y empieza a usarlo el mismo día sobre un vault vacío. Todo lo que hace lo hace invocando `tuku` a mano: cada cosa que necesita la crea al escribirla. Cubre las fases 1 y 2 completas, y la versión mínima de las fases 3 y 5.
 
 - **Entregable:** ciclo abierto con plantilla completa, registros cronológicos, pendientes que abren y cierran, fechado automático, ámbito creado con enlaces retroactivos y nota creada a petición.
-- **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). Los diez escenarios (`002-01` a `002-09` en cadena más `002-10` fuera de ella) están en verde.
+- **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). Doce escenarios en verde (`002-01` a `002-09`, `002-11` y `002-12` en cadena, más `002-10` fuera de ella). Se salda el principio 9 mediante `tuku rebuild`.
 
 ## Epic 003. El día uno, dictado
 

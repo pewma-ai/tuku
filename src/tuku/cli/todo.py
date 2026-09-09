@@ -42,14 +42,25 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     todo_p = sub.add_parser("todo", help="pendientes de PENDIENTES.md")
     todo_v = todo_p.add_subparsers(dest="verb", required=True)
 
-    for verbo, ayuda in (
+    for verbo, ayuda, epilogo in (
         (
             "open",
             "abre el pendiente de un registro **pendiente** y propaga las vistas",
+            (
+                "A mano: abrir `PENDIENTES.md` y agregar una fila a la tabla con el ámbito, "
+                "cuerpo y plazo."
+            ),
         ),
-        ("close", "cierra el pendiente de un registro ~~(Hecho)~~"),
+        (
+            "close",
+            "cierra el pendiente de un registro ~~(Hecho)~~",
+            (
+                "A mano: abrir `PENDIENTES.md` y eliminar la fila correspondiente; en "
+                "`AHORA.md` agregar la constancia de cierre con `~~(Hecho)~~`."
+            ),
+        ),
     ):
-        p = todo_v.add_parser(verbo, help=ayuda)
+        p = todo_v.add_parser(verbo, help=ayuda, epilog=epilogo)
         p.add_argument(
             "--body", "--cuerpo", dest="body", required=True, help="el texto del pendiente"
         )
@@ -79,11 +90,23 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             )
 
     todo_prop = todo_v.add_parser(
-        "propagate", help="regenera las vistas derivadas de PENDIENTES.md"
+        "propagate",
+        help="regenera las vistas derivadas de PENDIENTES.md",
+        epilog=(
+            "A mano: bajo cada día de `AHORA.md` copiar los pendientes con esa fecha, "
+            "y en `ambitos/PENDIENTES-AMBITOS.md` escribir un callout por ámbito."
+        ),
     )
     todo_prop.add_argument("--vault", default=".", type=Path, help="vault a modificar")
 
-    todo_lint = todo_v.add_parser("lint", help="revisa los pendientes y reporta; no escribe")
+    todo_lint = todo_v.add_parser(
+        "lint",
+        help="revisa los pendientes y reporta; no escribe",
+        epilog=(
+            "A mano: abrir `PENDIENTES.md` y verificar que las columnas de la tabla "
+            "estén completas y alineadas."
+        ),
+    )
     todo_lint.add_argument("--vault", default=".", type=Path, help="vault a revisar")
 
     return {

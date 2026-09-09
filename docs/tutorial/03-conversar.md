@@ -1,7 +1,7 @@
 # 3. Conversar
 
 > [!warning] Todavía no funciona
-> Llega con el [Epic 004](../../devel/epics.md#epic-004-la-conversacion). Puedes probarlo igual: lo que salga mal ahora es lo que ese epic tiene que resolver.
+> Puedes probarlo igual: lo que salga mal ahora es lo que está pendiente de resolver.
 
 Hasta aquí dictaste: dijiste algo que ya había pasado y se escribió. Conversar es distinto: ocurre cuando todavía no sabes con certeza qué decidir, cuando cambias de opinión en el camino o cuando una urgencia interrumpe lo que estabas pensando.
 

@@ -59,7 +59,9 @@ Nada que dependa de un LLM (Epic 003). Tampoco ciclos, cadencias, inferencia, ni
 - [`002-06-escribir-en-un-dia-fecha.md`](002-06-escribir-en-un-dia-fecha.md) — Fechado automático al escribir en día específico.
 - [`002-08-crear-ambito.md`](002-08-crear-ambito.md) — Creación de ámbito y enlazado retroactivo.
 - [`002-09-crear-nota.md`](002-09-crear-nota.md) — Creación de nota enlazada a ámbito y bitácora.
+- [`002-11-renombrar.md`](002-11-renombrar.md) — Corregir lo ya escrito sin dejar nada apuntando al nombre viejo.
+- [`002-12-reconstruir-lo-derivado.md`](002-12-reconstruir-lo-derivado.md) — Borrar lo derivado y regenerarlo devuelve lo mismo (principio 9).
 
 ### Fuera de la cadena
 
-- [`002-10-cli-superficie.md`](002-10-cli-superficie.md) — Superficie completa del CLI (`-h`, códigos y correcciones).
+- [`002-10-cli-superficie.md`](002-10-cli-superficie.md) — Superficie completa del CLI (`-h`, códigos, correcciones y el campo "A mano").

@@ -1,7 +1,6 @@
 # 6. Lo que nadie pidió
 
 > [!warning] Todavía no funciona
-> Llega con el [Epic 007](../../devel/epics.md#epic-007-que-note-lo-que-nadie-pidio).
 
 Este capítulo es el único que no requiere pedir nada.
 

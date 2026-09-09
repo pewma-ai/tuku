@@ -1,6 +1,6 @@
 # Escenario · 002-10-cli-superficie
 
-**Cubre:** epic 002. La convención "la ayuda del CLI se prueba en cada epic" de [`../../devel/epics.md`](../../devel/epics.md), y la regla transversal de [`../../spec/cli.md`](../../spec/cli.md) de que toda salida de error nombre el defecto y la corrección.
+**Cubre:** epic 002. La convención "la ayuda del CLI se prueba en cada epic" de [`../../devel/epics.md`](../../devel/epics.md), la regla transversal de [`../../spec/cli.md`](../../spec/cli.md) de que toda salida de error nombre el defecto y la corrección, y el criterio transversal del campo "A mano": ningún comando entra sin declarar cómo se hace lo mismo sin él.
 
 ## Escenario: `tuku -h` nombra los nouns del epic
 
@@ -10,7 +10,7 @@ Cuando se corre
 tuku -h
 ```
 
-Entonces sale con 0 y el texto nombra `init`, `entry`, `vocab`, `cycle`, `style`, `todo`, `scope`, `link` y `note`
+Entonces sale con 0 y el texto nombra `init`, `cycle`, `doctor`, `rebuild`, `vocab`, `style`, `entry`, `todo`, `scope`, `link` y `note`
 
 ## Escenario: cada noun lista sus verbs
 
@@ -26,10 +26,12 @@ tuku scope -h
 tuku link -h
 tuku note -h
 tuku entry add -h
+tuku entry rename -h
 ```
 
-Entonces todas salen con 0 y cada una nombra sus verbs: `entry` los suyos `add` y `lint`, `vocab` su `show`, `cycle` su `open`, `style` su `lint`, `todo` sus `open`, `close` y `lint`, `scope` sus `create` y `lint`, `link` su `backfill`, `note` sus `create` y `lint`
+Entonces todas salen con 0 y cada una nombra sus verbs: `entry` los suyos `add`, `rename` y `lint`, `vocab` su `show`, `cycle` su `open`, `style` su `lint`, `todo` sus `open`, `close` y `lint`, `scope` sus `create`, `rename` y `lint`, `link` su `backfill`, `note` sus `create`, `rename` y `lint`
 Y `tuku entry add -h` nombra `--body`, `--scope`, `--day` y `--hour`, que son los campos de un registro
+Y `tuku entry rename -h` nombra `--day`, `--hour` y `--body`: el registro se ubica por cuándo ocurrió, no por un identificador que el autor no tiene
 
 ## Escenario: un noun sin verb es error de uso
 
@@ -86,6 +88,19 @@ Entonces ninguno tiene la corrección vacía
 
 Es la regla de [`../../spec/cli.md`](../../spec/cli.md) convertida en barrido: se afirma una vez para todos los hallazgos en vez de repetirla en cada escenario, y crece sola cuando el epic agrega comandos.
 
+## Escenario: cada comando dice cómo se hace lo mismo a mano
+
+Dado el conjunto de comandos que el CLI expone, cada hoja del árbol de `-h`
+Cuando se lee la ayuda de cada uno
+Entonces ninguna termina sin decir cómo se consigue el mismo resultado sin `tuku`
+Y lo que dice nombra archivos y párrafos del vault, no funciones ni módulos: le habla a quien tiene un editor de texto abierto y nada más
+
+El campo "A mano" es lo que sostiene el principio 1 ([`../../docs/principios.md`](../../docs/principios.md)): la automatización existe para absorber esfuerzo mecánico, nunca para volverlo obligatorio, y una que no declara su equivalente manual es una dependencia disfrazada. El horizonte del vault es veinte años y el de este programa no.
+
+Va en la ayuda del propio comando y no en la spec por dónde se lee: quien lo necesita está en el terminal, quizás sin el repositorio a mano, y quizás no sea una persona. Una tabla en otro documento se desincroniza el día que entra un comando nuevo; el epílogo del comando entra con él o no entra.
+
+Se afirma como barrido y no comando por comando por la misma razón que el escenario anterior: recorre lo que `-h` declara, así que un verb nuevo sin su campo rompe este escenario sin que nadie agregue una línea acá. Los tres `rename` entraron después de escribirse esta regla y son el primer caso que tuvo que cumplirla.
+
 ## Por qué existe
 
 La ayuda y los códigos son superficie pública, y son la mitad del entregable del epic que los escenarios de la cadena no miran: la cadena verifica el vault, este verifica el comando.
@@ -104,3 +119,4 @@ Cada escenario deja lo suyo en `playground/002-10-cli-superficie/<escenario>/`.
 
 - Correr `uv run tuku entry lint` sobre un vault con errores y leer el reporte: que se distinga de un vistazo cuál hallazgo exige acción y cuál es una pregunta.
 - Que el mensaje del tipo desconocido no suene a reto, sino a pregunta sobre vocabulario del autor.
+- Leer los campos "A mano" de corrido y seguir uno con un editor de texto y el vault delante, sin ejecutar nada. Que el campo exista lo verifica el barrido; que la instrucción alcance para hacer el trabajo solo se sabe haciéndolo. `tuku scope rename` es el que más cuesta y el que más conviene probar así.

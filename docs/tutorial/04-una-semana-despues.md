@@ -1,7 +1,6 @@
 # 4. Una semana después
 
 > [!warning] Todavía no funciona
-> Llega con el [Epic 005](../../devel/epics.md#epic-005-el-dia-ciento-cincuenta).
 
 Todo lo anterior ocurrió sobre un vault vacío, donde no había margen de confusión. Con semanas de uso el desafío cambia: existe un acumulado histórico.
 
