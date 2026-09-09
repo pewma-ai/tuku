@@ -134,7 +134,15 @@ ESCRIBEN = (
 #: dejó de guardar la sesión del turno, y el arnés se quedó sin la evidencia
 #: que sabía dar. Es la misma doctrina que `aislar`, aplicada al entorno.
 DEL_RUNNER = frozenset(
-    {"VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP", "PYTEST_CURRENT_TEST"}
+    {
+        "VIRTUAL_ENV",
+        "PYTHONPATH",
+        "PYTHONHOME",
+        "PYTHONSTARTUP",
+        "PYTEST_CURRENT_TEST",
+        "UV",
+        "UV_RUN_RECURSION_DEPTH",
+    }
 )
 
 
@@ -222,6 +230,35 @@ class Turno:
                     secuencia.append(" ".join(verbo))
                     break
         return secuencia
+
+    @property
+    def reintentos(self) -> list[str]:
+        """Las invocaciones idénticas y seguidas: la misma llamada, repetida.
+
+        No son dos hechos. Todo lo que escribe en TUKU es idempotente, así que
+        la segunda no cambia el vault; es el arnés reintentando algo que ya
+        había ocurrido. Un comando **distinto** de más sí es un defecto, y por
+        eso se separan en vez de contarse juntos.
+        """
+        return [
+            shlex.join(["tuku", *argv])
+            for previa, argv in zip(self.traza, self.traza[1:], strict=False)
+            if previa == argv
+        ]
+
+    @property
+    def traduccion_sin_reintentos(self) -> list[str]:
+        """La traducción con las repeticiones idénticas colapsadas.
+
+        Lo que el dictado exigía, mirado sin el ruido del arnés. Los escenarios
+        que comparan contra el vault del 002 usan esta; el que quiera afirmar
+        que no hubo reintentos lo dice aparte, con `reintentos`.
+        """
+        vistos: list[list[str]] = []
+        for argv in self.traza:
+            if not vistos or vistos[-1] != argv:
+                vistos.append(argv)
+        return Turno(prompt="", codigo=0, stdout="", stderr="", traza=vistos).traduccion
 
     @property
     def escribio_a_mano(self) -> bool:
