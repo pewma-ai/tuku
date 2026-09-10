@@ -170,10 +170,15 @@ def add_al_vault(
             horizon=horizon or todo.ESTA_SEMANA,
             when=when,
             propagate=False,
+            record=False,
         )
         hecho.append(consecuencia.mensaje)
     elif marca is not None and marca.marca == todo.CIERRA:
-        hecho.append(todo.cerrar_en_vault(vault, body=marca.cuerpo, propagate=False).mensaje)
+        hecho.append(
+            todo.cerrar_en_vault(
+                vault, body=marca.cuerpo, propagate=False, record=False
+            ).mensaje
+        )
 
     for ambito in ambitos.leer(vault):
         ambitos.actualizar_pagina(vault, ambito.nombre)

@@ -45,37 +45,45 @@ Copiar literal amarra el test a un texto que el corpus puede cambiar, y le entre
 
 Solo la **salida de un agente** que otros escenarios consumen: no hay original vivo contra el cual comparar. El dictado de entrada no, que se genera.
 
-## Convención de formato
+## Convención de formato BDD
+
+Cada archivo `.md` de escenario se redacta bajo un estándar Behavior-Driven Development (BDD) conciso, sin grasa narrativa y con trazabilidad estricta:
 
 ```markdown
-# Escenario · <nombre>
+# XXX-YY · <Nombre del comportamiento>
 
-**Cubre:** qué fase o epic valida.
+> **Principio:** [P...](../../docs/principios.md) · **Brief:** [Sección](../../docs/brief.md) · **Spec:** [spec/...](../../spec/README.md) · **Origen:** [lección](../../devel/lecciones-macjpgil.md)
+
+<Una sola frase clara que resume qué problema resuelve al autor o qué fricción elimina>.
+
+## Estado inicial
+
+```bash
+<comandos que preparan el estado inicial o cp -r de herencia>
+```
 
 ## Escenario: <lo que se está probando>
 
-Dado <estado inicial>
-
+Dado <precondición del vault>
 ```bash
-<comandos que lo preparan, si los hay>
+<comandos de precondición, si aplica>
 ```
-
-Cuando se corre
-
+Cuando <acción o comando ejecutado>
 ```bash
-<el comando exacto>
+<el comando tuku exacto>
+```
+Entonces <resultado observable en el vault o salida>
+Y <aserciones adicionales o idempotencia>
+
+## Aceptación humana (en Obsidian)
+
+- <Qué debe verificar una persona leyendo directamente el archivo en Obsidian para asegurar legibilidad a 20 años y naturalidad del flujo>.
 ```
 
-Entonces <lo que debería ser cierto>
-
-## Cómo se corre
-
-Comando para reproducirlo en `playground/`.
-
-## Qué se mira a mano
-
-Lo que ningún script puede verificar todavía, y hay que juzgar leyendo el resultado.
-```
+**Reglas de estilo en escenarios:**
+- **Sin grasa narrativa:** No incluir bloques de *"Por qué existe"*, *"De dónde salen las líneas"* ni comandos de ayuda de *"Cómo se corre"* con pytest (el runner corre automáticamente).
+- **Trazabilidad obligatoria:** Todo escenario debe enlazar explícitamente a los principios, al brief y a las especificaciones.
+- **Aceptación humana declarada:** Declarar qué se inspecciona con ojos humanos en Obsidian para validar que el Markdown resultante es limpio, natural y legible.
 
 ## El `.md` es la fuente ejecutable
 

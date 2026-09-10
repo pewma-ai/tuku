@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from pathlib import Path
 
 from tuku import todo as core_todo
@@ -10,6 +11,7 @@ from tuku.cli.helpers import Handler, Subparsers, traducir
 
 
 def _cmd_todo_open(args: argparse.Namespace) -> int:
+    day = date.fromisoformat(args.day) if args.day else None
     return traducir(
         core_todo.abrir_en_vault(
             args.vault,
@@ -18,14 +20,24 @@ def _cmd_todo_open(args: argparse.Namespace) -> int:
             horizon=args.horizon,
             when=args.when,
             propagate=not args.no_propagate,
+            day=day,
+            hour=args.hour,
         ),
         "tuku todo open",
     )
 
 
 def _cmd_todo_close(args: argparse.Namespace) -> int:
+    day = date.fromisoformat(args.day) if args.day else None
     return traducir(
-        core_todo.cerrar_en_vault(args.vault, body=args.body, propagate=not args.no_propagate),
+        core_todo.cerrar_en_vault(
+            args.vault,
+            body=args.body,
+            propagate=not args.no_propagate,
+            day=day,
+            hour=args.hour,
+            scope=args.scope,
+        ),
         "todo close",
     )
 
@@ -70,6 +82,12 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             action="store_true",
             help="no regenera las vistas derivadas; para el lote, que propaga al final",
         )
+        p.add_argument(
+            "--day", "--dia", dest="day", default=None, help="día de registro, AAAA-MM-DD"
+        )
+        p.add_argument(
+            "--hour", "--hora", dest="hour", default=None, help="hora en que se registra, HH:MM"
+        )
         if verbo == "open":
             p.add_argument(
                 "--scope", "--ambito", dest="scope", default=None, help="ámbito, sin corchetes"
@@ -87,6 +105,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                 dest="when",
                 default="",
                 help="fecha del pendiente, AAAA-MM-DD; vacío si no la tiene",
+            )
+        elif verbo == "close":
+            p.add_argument(
+                "--scope", "--ambito", dest="scope", default=None, help="ámbito, sin corchetes"
             )
 
     todo_prop = todo_v.add_parser(

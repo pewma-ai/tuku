@@ -38,10 +38,20 @@ import shutil
 import subprocess
 import sys
 import unicodedata
-from contextlib import redirect_stderr, redirect_stdout
+from collections.abc import Iterator
+from contextlib import (
+    ExitStack,
+    contextmanager,
+    redirect_stderr,
+    redirect_stdout,
+    suppress,
+)
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date as real_date
+from datetime import datetime as real_datetime
 from pathlib import Path
+from typing import Any
+from unittest.mock import patch
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ_REPO / "src"))
@@ -386,14 +396,63 @@ def _separar_entorno(partes: list[str]) -> tuple[dict[str, str], list[str]]:
     return entorno, partes
 
 
+@contextmanager
+def _congelar_tiempo(tuku_now: str | None) -> Iterator[None]:
+    """Congela deterministamente date.today() y datetime.now() en tuku para tests."""
+    if not tuku_now:
+        yield
+        return
+
+    val = tuku_now.strip().replace(" ", "T")
+    if "T" in val:
+        partes = val.split("T")
+        fecha_parte = partes[0]
+        hora_parte = partes[1]
+        if len(hora_parte.split(":")) == 2:
+            hora_parte += ":00"
+        dt = real_datetime.fromisoformat(f"{fecha_parte}T{hora_parte}")
+    else:
+        dt = real_datetime.fromisoformat(f"{val}T00:00:00")
+    d = dt.date()
+
+    class FakeDate(real_date):
+        @classmethod
+        def today(cls) -> Any:
+            return d
+
+    class FakeDatetime(real_datetime):
+        @classmethod
+        def now(cls, tz: Any = None) -> Any:
+            if tz is not None:
+                return dt.astimezone(tz) if dt.tzinfo else dt.replace(tzinfo=tz)
+            return dt
+
+    modulos = [
+        "tuku.entry",
+        "tuku.todo",
+        "tuku.note",
+        "tuku.cycle",
+        "tuku.init",
+        "tuku.scope",
+    ]
+    with ExitStack() as stack:
+        for mod in modulos:
+            with suppress(AttributeError, ModuleNotFoundError):
+                stack.enter_context(patch(f"{mod}.date", FakeDate))
+            with suppress(AttributeError, ModuleNotFoundError):
+                stack.enter_context(patch(f"{mod}.datetime", FakeDatetime))
+        yield
+
+
 def _correr_tuku(argv: list[str], entorno: dict[str, str]) -> tuple[int, str, str]:
     from tuku.cli import main
 
     previos = {k: os.environ.get(k) for k in entorno}
     os.environ.update(entorno)
     out, err = io.StringIO(), io.StringIO()
+    tuku_now = entorno.get("TUKU_NOW")
     try:
-        with redirect_stdout(out), redirect_stderr(err):
+        with _congelar_tiempo(tuku_now), redirect_stdout(out), redirect_stderr(err):
             try:
                 codigo = main(argv)
             except SystemExit as e:
@@ -461,7 +520,7 @@ def _dejar_a_la_vista(turno: agente.Turno, dir: Path) -> None:
     ignorado entero, y lo que se pierda se vuelve a generar corriendo de nuevo.
     """
     arnes = agente.configurado().nombre
-    cuando = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+    cuando = real_datetime.now().strftime("%Y-%m-%d-%H%M%S")
     comandos = "\n".join(turno.comandos) or "(ninguno)"
     bloques = [
         f"# {arnes} · {dir.parent.name} · {dir.name} · {cuando}",

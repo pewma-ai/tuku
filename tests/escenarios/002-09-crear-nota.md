@@ -1,191 +1,126 @@
-# Escenario · 002-09-crear-nota
+# 002-09 · Creación de notas y enlaces
 
-**Cubre:** epic 002, punto 5, fase 5 en su **versión mínima**: crear una nota a petición y enlazarla. Notas tipadas con plantilla y destilado del histórico no entran.
+> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P4 (determinismo)](../../docs/principios.md#L33), [P7 (enlaces conectan)](../../docs/principios.md#L63) · **Brief:** [Eje deliberación y red zettelkasten](../../docs/brief.md#L27) · **Spec:** [`spec/notas.md`](../../spec/notas.md)
+
+Crear una nota mediante `tuku note create` genera el archivo con frontmatter OKF (`type: Note`), estampa la constancia cronológica en la bitácora `AHORA.md` y exige que todo enlace saliente declare su motivo en `## Ver además`. La operación es atómica: si la constancia no cabe en el ciclo, la nota no se crea.
 
 ## Estado inicial
-
-El que dejó [`002-08-crear-ambito`](002-08-crear-ambito.md): existe el ámbito `depto-centro` y `notas/` está vacío. El cuerpo de la nota es salida de agente y viene congelado como fixture, porque no hay un original vivo contra el cual compararlo.
 
 ```bash
 cp -r ../../002-08-crear-ambito/crear-un-ambito-deja-el-arbol/mi-vault .
 cp ../../tests/escenarios/fixtures/002-09-crear-nota/cuerpo-nota.md .
 ```
 
-## La consecuencia "nota" todavía no está en la spec
-
-La tabla de consecuencias de [`spec/flujo-informacion.md`](../../spec/flujo-informacion.md) tiene pendientes, enlaces, cadencias y propuesta. La nota no está y el punto 5 la exige. Como la spec declara la lista abierta y agregar una consecuencia es agregar un archivo en `reglas/`, este escenario obliga a escribir `reglas/notas.tuku.md` y la fila que falta. Es lo primero que el epic 002 mueve en el diseño, previsto en `epics.md` antes de empezar.
-
 ## Escenario: la nota se escribe donde corresponde
 
-Dado el ámbito `depto-centro` ya creado
-Cuando el autor pide *"una nota respecto al depto centro: cómo funciona el cobro de gastos comunes en una copropiedad"*
-
+Dado el ámbito `depto-centro` creado y `notas/` vacío
+Cuando el autor solicita crear una nota asociada al ámbito
 ```bash
 tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
-
-Entonces existe `notas/gastos-comunes-en-copropiedad.md`
-Y su frontmatter trae `type: Note` y `created` con la fecha de hoy
-Y el cuerpo es el que el agente redactó, tomado del fixture congelado
+Entonces existe `notas/como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad.md`
+Y su frontmatter incluye `type: Note` y `created: 2026-08-11`
+Y el cuerpo coincide con el fixture redactado
+Y la nota enlaza a `[[depto-centro]]`
 
 ## Escenario: queda constancia en la bitácora
 
-Dado el mismo estado
+Dado el mismo estado inicial
 Cuando la nota se escribe
-
 ```bash
 tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
-
-Entonces hay un registro nuevo en el martes 11 que deja constancia de la nota creada
-Y ese registro enlaza a la nota
-Y no hay ningún otro registro narrando el mecanismo
-
-Crear la nota es un hecho de la vida del autor, que la pidió; mover un pendiente de escalón es del sistema. Por eso esta se registra y aquella no.
+Entonces `AHORA.md` gana un registro bajo `## Martes 11 de agosto` enlazando a la nota:
+`- 21:15 - [[depto-centro]] **nota**: escribí la nota [[como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad]]`
 
 ## Escenario: la nota queda enlazada a su ámbito, porque se pidió así
 
-Dado que la petición dijo *"respecto al depto centro"*
+Dado que la petición indicó `--scope depto-centro`
 Cuando la nota se escribe
-
 ```bash
 tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
-
-Entonces la nota enlaza al ámbito `depto-centro`
-Y el enlace resuelve a una página que existe
-Y la constancia se propaga a `ambitos/depto-centro/depto-centro.md` bajo `## Esta semana` sin hora junto al registro previo
-
-Si la petición no hubiera nombrado un ámbito, la nota quedaría suelta y eso sería correcto.
+Entonces la página propia `ambitos/depto-centro/depto-centro.md` recibe bajo `## Esta semana` la constancia de la nota
+Y el enlace en la nota apunta a una página de ámbito existente
 
 ## Escenario: "Ver además" existe y cada enlace lleva motivo
 
-Dado la nota ya escrita
-
+Dado la nota ya creada en `notas/`
 ```bash
 tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
-
-Cuando se revisa
-
+Cuando se valida con el linter
 ```bash
 tuku note lint mi-vault/notas/como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad.md
 ```
-
-Entonces la nota tiene una sección `## Ver además`
-Y cada enlace de esa sección va seguido de texto de motivo
-Y el lint no falla
-
-La **presencia** de la sección y del motivo se verifica sin juicio. Que el motivo sea pertinente y no relleno lo evalúa quien lee, y está más abajo ([`spec/notas.md`](../../spec/notas.md)).
-
-## Escenario: crear la nota dos veces no duplica nada
-
-Dado la nota ya creada
-
-```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
-```
-
-Cuando se repite la operación
-
-```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
-```
-
-Entonces el diff es vacío
-Y no hay un segundo registro de constancia en la bitácora
+Entonces la nota contiene la sección `## Ver además`
+Y cada enlace va acompañado de su motivo explícito
+Y el linter finaliza con código 0 (`EXITO`)
 
 ## Escenario: la nota recién creada deja el vault sano
 
-Este escenario corre sobre un vault limpio para aislar la verificación y asegurar que TUKU no se reporte a sí mismo tras crear una nota.
-
-Dado un vault recién sembrado con su ámbito
-
+Dado un vault limpio recién sembrado con su ámbito
 ```bash
 tuku init vault-limpio --date 2026-08-11
 tuku scope create depto-centro --vault vault-limpio
 ```
-
-Cuando se escribe la nota
-
+Cuando se crea la nota
 ```bash
 tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault vault-limpio
 ```
-
-Entonces `tuku doctor` dice que el vault está sano
-
+Entonces `tuku doctor` valida que el vault está 100% sano
 ```bash
 tuku doctor --vault vault-limpio
 ```
 
-Una nota es un archivo que guarda conocimiento, así que declara `type: Note` como cualquier otro ([`spec/README.md`](../../spec/README.md)). El `subtype` de las notas tipadas es otra clave, de lista abierta, y no la escribe este comando.
-
 ## Escenario: el lint reporta un enlace sin motivo y una sección que falta
 
-Dado dos notas escritas a mano, una sin motivo en su enlace y otra sin la sección
-
+Dado dos notas creadas a mano: una con enlace sin motivo y otra sin `## Ver además`
 ```bash
 printf '# Nota\n\ncuerpo\n\n## Ver además\n\n* [[depto-centro]]\n' > sin-motivo.md
 printf '# Nota\n\ncuerpo\n' > sin-seccion.md
 ```
-
-Cuando se revisan
-
+Cuando se validan
 ```bash
 tuku note lint sin-motivo.md
 tuku note lint sin-seccion.md
 ```
+Entonces ambas se rechazan con código 1 (`RECHAZO`) explicando el motivo faltante y la sección omitida
 
-Entonces cada una se rechaza nombrando su defecto: el enlace que no dice para qué conecta, y la sección que falta
+## Escenario: crear la nota dos veces no duplica nada
 
-Es el reverso del escenario anterior: allá se afirma que la nota bien escrita pasa, acá que las dos formas de escribirla mal se reportan.
+Dado la nota ya creada
+```bash
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
+```
+Cuando se corre el mismo comando una segunda vez
+```bash
+tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
+```
+Entonces el diff contra el estado previo es vacío (idempotente)
+Y no se duplica la constancia en `AHORA.md`
 
 ## Escenario: una nota sin cuerpo se rechaza
 
 Dado el vault de la cadena
-Cuando se pide una nota cuyo cuerpo viene en blanco
-
+Cuando se intenta crear una nota con `--body ""` vacío
 ```bash
 tuku note create "una nota sin cuerpo" --body "" --vault mi-vault
 ```
-
-Entonces se rechaza diciendo que falta el cuerpo
-Y no queda ningún archivo nuevo en `notas/`
-
-El comando ya rechazaba la falta de `--body`, pero no un `--body` vacío. Una nota vacía no es una nota.
-
-Y detrás había algo peor: sin `--body`, el comando leía `stdin` cuando `isatty()` daba falso. Eso no dice que haya datos, dice que no es una terminal, que es el caso de todo pipe abierto. Contra un pipe abierto y vacío, el comando **se colgaba esperando para siempre**, y quien lo lanzaba lo daba por corriendo. Ahora `stdin` se lee solo cuando se pide, con `--body-file -`.
-
-Lo destapó el [`003-06`](003-06-el-dia-completo.md) en dos corridas seguidas: en la primera el agente creó la nota vacía, lo notó y volvió a crearla con cuerpo; en la segunda el comando se colgó, y el agente abandonó el turno a la mitad diciendo que esperaba a que terminara.
+Entonces se rechaza con código 1 indicando que falta el cuerpo
+Y no se crea ningún archivo en `notas/`
 
 ## Escenario: si la constancia no cabe, no se escribe nada
 
-Dado el vault de la cadena, con el ciclo del 10 al 16 de agosto abierto
-Cuando se pide una nota fechada fuera de ese ciclo
-
+Dado el vault con el ciclo del 10 al 16 de agosto abierto
+Cuando se pide crear una nota con fecha fuera del ciclo
 ```bash
 tuku note create "una nota de otro ciclo" --body "da igual" --day 2026-09-01 --vault mi-vault
 ```
+Entonces la operación se rechaza con código 1 explicando el error
+Y no se escribe ningún archivo huérfano en `notas/` (operación atómica)
 
-Entonces se rechaza nombrando el ciclo abierto y cómo corregirlo
-Y `notas/` no gana el archivo
+## Aceptación humana (en Obsidian)
 
-Crear la nota y dejar constancia es un solo hecho, así que es todo o nada. Antes la nota se escribía primero y el rechazo de la constancia salía como traceback de Python: el vault quedaba con una nota que nada registraba. Es el mismo principio que las consecuencias de `tuku entry add`, y el mismo modo de falla.
-
-## De dónde sale el contenido
-
-Del fixture `fixtures/002-09-crear-nota/`: el texto de la nota es salida de agente y se congela, porque no hay un original vivo contra el cual compararlo. Todo lo que este escenario prueba (dónde queda el archivo, la constancia, el enlace, el lint) es determinista.
-
-## Cómo se corre
-
-```bash
-uv run pytest tests/escenarios/ -k 002_09
-```
-
-Cada escenario deja su vault en `playground/002-09-crear-nota/<escenario>/mi-vault/`.
-
-## Qué se mira a mano
-
-- **Leer el motivo del "Ver además".** Ningún script lo juzga: si no responde para qué le sirve al lector hacer clic, está de relleno.
-- Que el registro de constancia en la bitácora se lea como un hecho del día y no como un log de sistema.
-- Que la nota se sostenga sola dentro de un año, sin la conversación que la pidió.
+- Al leer la sección `## Ver además` de la nota en Obsidian, cada enlace saliente debe explicar en una frase para qué le sirve esa conexión al lector sin obligarlo a abrir el documento enlazado.
+- El registro de constancia en la bitácora debe leerse como un hecho natural del autor y no como una traza técnica del sistema.

@@ -102,3 +102,19 @@ def test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora() -> None:
         (vault / "PENDIENTES.md").read_text(encoding="utf-8"),
     )
     assert faltan == [], f"quedaron marcas sin su consecuencia: {faltan}"
+
+
+def test_002_05_comando_directo_close_elimina_y_estampa_huella() -> None:
+    corrida = gherkin.correr(SLUG, "comando directo tuku todo close elimina el ítem")
+    assert corrida.codigo == EXITO, corrida.stderr
+    vault = corrida.ruta("mi-vault")
+
+    pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
+    assert "avisar de los GGCC a la administradora" not in pendientes
+    assert todo.cuerpos(pendientes) == []
+
+    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
+    assert "- 19:30 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora" in ahora
+
+    faltan = todo.sin_consecuencia(ahora, pendientes)
+    assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"

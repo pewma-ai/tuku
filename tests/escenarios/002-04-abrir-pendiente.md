@@ -1,69 +1,58 @@
-# Escenario · 002-04-abrir-pendiente
+# 002-04 · Apertura de compromisos
 
-**Cubre:** epic 002, fase 2. Punto 2 del epic, primera mitad: un registro `**pendiente**` abre el pendiente vía bitácora sin que el autor toque `PENDIENTES.md` ni requiera un comando secundario.
+> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P4 (determinismo)](../../docs/principios.md#L33) · **Brief:** [Triangulación tiempo × compromiso](../../docs/brief.md#L27) · **Spec:** [`spec/pendientes.md`](../../spec/pendientes.md), [`spec/flujo-informacion.md`](../../spec/flujo-informacion.md)
+
+La captura de un compromiso no requiere abrir y editar tablas de tareas: registrar un hecho con `**pendiente**` abre el ítem en `PENDIENTES.md` de forma atómica e idempotente, copiando el cuerpo literal y propagando las vistas derivadas.
 
 ## Estado inicial
 
-El que dejó [`002-03-lint-de-registro`](002-03-lint-de-registro.md).
-
 ```bash
-cp -r ../../002-03-lint-de-registro/un-tipo-abierto-desconocido-se/mi-vault .
+cp -r ../../002-02-registro-en-su-dia/tres-registros-caen-en-el-dia/mi-vault .
 ```
-
 
 ## Escenario: el registro abre el pendiente y copia el cuerpo literal
 
-Dado el estado anterior, con la tabla de pendientes vacía
-Cuando se escribe el registro y se abre su pendiente
-
+Dado el vault con los tres registros del martes 11 y `PENDIENTES.md` vacío
+Cuando se registra un compromiso en el día de hoy
 ```bash
 tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "**pendiente**: avisar de los GGCC a la administradora"
 ```
-
-Entonces la tabla contiene `| esta semana |  | [[personal]] | avisar de los GGCC a la administradora |`
-Y el cuerpo es el mismo texto en los dos lugares, carácter por carácter
-Y la columna `Cuándo` queda vacía, porque el pendiente todavía no tiene fecha
-Y la tabla tiene exactamente una fila y su cabecera sigue intacta
-Y no aparece ningún horizonte que el registro no haya pedido
-Y el diff contra el estado anterior toca `AHORA.md`, `PENDIENTES.md` y `ambitos/PENDIENTES-AMBITOS.md`
-Y la marca del registro queda reflejada en la tabla: `tuku doctor` no reporta ninguna consecuencia sin aplicar
-
-Abrir es copiar: el comando no interpreta, y por eso este paso no necesita LLM ([`spec/agente.md`](../../spec/agente.md)).
-
-La última afirmación garantiza la integridad entre la bitácora y la tabla. `tuku entry add` escribe el registro y aplica de forma atómica su consecuencia en `PENDIENTES.md`: no deja el vault a medias ni requiere invocar `tuku todo open`. Si una edición manual dejara un registro huérfano, `tuku doctor` detecta la discrepancia.
-
-El archivo es una sola tabla y el horizonte es una columna, así que la escalera no ocupa lugar cuando está vacía. Bajar de escalón o agendar edita una celda: no crea ni destruye estructura, que era lo que pedía [`spec/pendientes.md`](../../spec/pendientes.md). El caso fechado entra en [`002-06`](002-06-escribir-en-un-dia-fecha.md).
+Entonces la fila entra en `PENDIENTES.md` bajo `esta semana`:
+`| esta semana |  | [[personal]] | avisar de los GGCC a la administradora |`
+Y el registro queda escrito bajo `## Martes 11 de agosto` en `AHORA.md`
+Y la vista de ámbito `ambitos/personal/personal.md` recibe la actividad propagada
+Y `tuku doctor` valida que no quedan consecuencias pendientes
 
 ## Escenario: abrir dos veces no duplica
 
-Dado el pendiente ya abierto
-
+Dado el pendiente ya abierto en `esta semana`
 ```bash
 tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "**pendiente**: avisar de los GGCC a la administradora"
 ```
-
-Cuando se corre el comando otra vez sobre el mismo registro
-
+Cuando se corre el mismo comando una segunda vez
 ```bash
 tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "**pendiente**: avisar de los GGCC a la administradora"
 ```
+Entonces el diff contra el estado previo es vacío
+Y hay exactamente una fila en `PENDIENTES.md` con ese detalle
 
-Entonces el diff es vacío
-Y la tabla sigue con una sola fila
+## Escenario: comando directo tuku todo open abre el pendiente y estampa huella en AHORA.md
 
-## Dónde queda un pendiente escrito en el día de hoy
-
-Con horizonte `esta semana` (el horizonte del ciclo en curso), y ya no es ambiguo: [`spec/pendientes.md`](../../spec/pendientes.md) dice ahora que **el día de hoy no fecha** y que fechar es escribir bajo un día futuro. Escribir bajo hoy es el acto por defecto de registrar, no una decisión de agendar: entra al horizonte del ciclo en curso. El caso que sí fecha, un día futuro, vive en [`002-06`](002-06-escribir-en-un-dia-fecha.md).
-
-## Cómo se corre
-
+Dado el vault con los tres registros del martes 11 y `PENDIENTES.md` vacío
+Cuando se abre un compromiso directamente con el comando todo open
 ```bash
-uv run pytest tests/escenarios/ -k 002_04
+TUKU_NOW="2026-08-11 15:30" tuku todo open --vault mi-vault --scope personal --body "comprar filtro de cafe"
+```
+Entonces la fila entra en `PENDIENTES.md` bajo `esta semana`:
+`| esta semana |  | [[personal]] | comprar filtro de cafe |`
+Y estampa la constancia en `AHORA.md` bajo `## Martes 11 de agosto`:
+`- 15:30 - [[personal]] **pendiente**: comprar filtro de cafe`
+Y una segunda ejecución directa es idempotente sin duplicar en la bitácora ni en la tabla
+```bash
+TUKU_NOW="2026-08-11 15:30" tuku todo open --vault mi-vault --scope personal --body "comprar filtro de cafe"
 ```
 
-Cada escenario deja su vault en `playground/002-04-abrir-pendiente/<escenario>/mi-vault/`.
+## Aceptación humana (en Obsidian)
 
-## Qué se mira a mano
-
-- Si la tabla se lee de un vistazo con una sola fila, y si la columna `Horizonte` se entiende sin explicación.
-- Que el autor no haya tenido que abrir `PENDIENTES.md`, que es la mitad del criterio de salida del epic.
+- Al leer `PENDIENTES.md`, la tabla debe mostrar el compromiso recién nacido en `esta semana` sin fecha explícita, indicando que pertenece al ciclo en curso.
+- En `AHORA.md`, el registro debe leerse limpio como cualquier otro hecho cronológico del día.

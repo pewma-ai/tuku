@@ -95,3 +95,18 @@ def test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla() -> None:
         (vault / "PENDIENTES.md").read_text(encoding="utf-8"),
     )
     assert faltan == [], f"quedaron marcas sin su consecuencia: {faltan}"
+
+
+def test_002_04_comando_directo_open_estampa_huella() -> None:
+    corrida = gherkin.correr(SLUG, "comando directo tuku todo open abre el pendiente")
+    assert corrida.codigo == EXITO, corrida.stderr
+    vault = corrida.ruta("mi-vault")
+
+    pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
+    assert "| esta semana |  | [[personal]] | comprar filtro de cafe |" in pendientes
+
+    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
+    assert "- 15:30 - [[personal]] **pendiente**: comprar filtro de cafe" in ahora
+
+    faltan = todo.sin_consecuencia(ahora, pendientes)
+    assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"

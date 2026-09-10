@@ -31,6 +31,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass
+from datetime import date, datetime
 from pathlib import Path
 
 from tuku.resultado import Resultado
@@ -346,24 +347,47 @@ def abrir_en_vault(
     horizon: str = ESTA_SEMANA,
     when: str = "",
     propagate: bool = True,
+    record: bool = True,
+    day: date | None = None,
+    hour: str | None = None,
 ) -> Resultado:
-    """Abre un pendiente y propaga las vistas.
+    """Abre un pendiente, estampa huella en la bitácora y propaga las vistas.
 
     Recibe los campos, no la línea del registro: abrir **es** el pendiente, y la
     marca la lleva implícita el verbo. Normalmente lo llama `tuku entry add` al
-    ver un `**pendiente**`; a mano sirve para corregir uno que quedó mal.
+    ver un `**pendiente**` (con `record=False` porque el registro ya se escribió);
+    como comando directo estampa además la constancia cronológica en `AHORA.md`
+    (`spec/pendientes.md`, regla de huella obligatoria).
 
     Propagar es parte de abrir: si la vista quedara para un segundo comando, el
     pendiente existiría sin aparecer en su día, que es la falla silenciosa que
     `spec/pendientes.md` persigue. `propagate=False` es la escotilla del lote,
     que propaga una sola vez al final.
     """
+    from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault, leer_config
+    from tuku.entry import add as entry_add
+    from tuku.entry import componer
     from tuku.propagate import propagar
 
-    marca = Marca(ABRE, scope.strip().strip("[]") if scope else None, body.strip())
+    limpio_scope = scope.strip().strip("[]") if scope else None
+    marca = Marca(ABRE, limpio_scope, body.strip())
     escalera = escalera_de(leer_config(vault).horizontes)
     horizon = canonico(horizon, escalera)
+
+    if record:
+        ahora_path = archivo_vault(vault, "AHORA.md")
+        dia_encabezado = encabezado_de(day or date.today())
+        hora = hour or datetime.now().strftime("%H:%M")
+        linea = componer(hora=hora, scope=limpio_scope, body=f"{ABRE}: {marca.cuerpo}")
+        try:
+            ahora_texto = entry_add(
+                ahora_path.read_text(encoding="utf-8"), [linea], day=dia_encabezado
+            )
+            ahora_path.write_text(ahora_texto, encoding="utf-8")
+        except ValueError as e:
+            return Resultado.rechazo(str(e))
+
     ruta = archivo_vault(vault, "PENDIENTES.md")
     ruta.write_text(
         abrir(
@@ -380,29 +404,66 @@ def abrir_en_vault(
     return Resultado.hecho(f"pendiente abierto en «{horizon}»: {marca.cuerpo}")
 
 
-def cerrar_en_vault(vault: Path, *, body: str, propagate: bool = True) -> Resultado:
-    """Cierra un pendiente por su cuerpo.
+def cerrar_en_vault(
+    vault: Path,
+    *,
+    body: str,
+    propagate: bool = True,
+    record: bool = True,
+    day: date | None = None,
+    hour: str | None = None,
+    scope: str | None = None,
+) -> Resultado:
+    """Cierra un pendiente por su cuerpo, estampando su huella en la bitácora.
 
     Un cierre sin pareja **no es un fallo**: es el caso normal del día uno
     (`devel/epics.md`). Se reporta, el registro queda escrito y `PENDIENTES.md`
     no se toca, porque inventar el pendiente que falta dejaría el archivo
     mintiendo.
     """
+    from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
+    from tuku.entry import add as entry_add
+    from tuku.entry import componer
     from tuku.propagate import propagar
 
     marca = Marca(CIERRA, None, body.strip())
     ruta = archivo_vault(vault, "PENDIENTES.md")
-    texto, hubo_pareja = cerrar(ruta.read_text(encoding="utf-8"), marca)
+    pendientes_texto = ruta.read_text(encoding="utf-8")
+
+    ambito_encontrado: str | None = None
+    for f in filas(pendientes_texto):
+        if f.cuerpo == marca.cuerpo:
+            ambito_encontrado = f.ambito
+            break
+
+    texto, hubo_pareja = cerrar(pendientes_texto, marca)
+    if hubo_pareja:
+        ruta.write_text(texto, encoding="utf-8")
+
+    if record:
+        ambito_final = scope if scope is not None else ambito_encontrado
+        ahora_path = archivo_vault(vault, "AHORA.md")
+        dia_encabezado = encabezado_de(day or date.today())
+        hora = hour or datetime.now().strftime("%H:%M")
+        linea = componer(hora=hora, scope=ambito_final, body=f"{CIERRA}: {marca.cuerpo}")
+        try:
+            ahora_texto = entry_add(
+                ahora_path.read_text(encoding="utf-8"), [linea], day=dia_encabezado
+            )
+            ahora_path.write_text(ahora_texto, encoding="utf-8")
+        except ValueError as e:
+            return Resultado.rechazo(str(e))
+
+    if propagate:
+        propagar(vault)
+
     if not hubo_pareja:
         return Resultado.hecho(
             f"no había ningún pendiente abierto con el cuerpo {marca.cuerpo!r}, "
             f"así que no se borró nada. El registro queda escrito. Si esperabas "
             f"cerrarlo, revisa que el texto coincida palabra por palabra."
         )
-    ruta.write_text(texto, encoding="utf-8")
-    if propagate:
-        propagar(vault)
     return Resultado.hecho(f"pendiente cerrado: {marca.cuerpo}")
 
 

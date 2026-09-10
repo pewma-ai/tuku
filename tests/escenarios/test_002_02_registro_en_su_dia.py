@@ -86,12 +86,19 @@ def test_002_02_registro_sin_ambito_ni_clasificacion_queda_escrito() -> None:
     corrida = gherkin.correr(SLUG, "sin ámbito y sin clasificación es válido")
     assert corrida.codigo == EXITO, corrida.stderr
 
+def test_002_02_omision_de_dia_y_hora_asume_hoy_y_ahora() -> None:
+    corrida = gherkin.correr(SLUG, "omisión de día y hora asume hoy y ahora")
+    assert corrida.codigo == EXITO, corrida.stderr
+
     ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
-    assert LINEA_1130 in ahora
+    deldia = _lineas_del_dia(ahora, HOY)
+    esperada = "- 16:45 - [[personal]] revisión presencial de correspondencia"
+    assert esperada in deldia, f"no cayó en {HOY} a las 16:45: {deldia}"
 
 
 if __name__ == "__main__":
     test_002_02_los_registros_caen_en_su_dia_y_en_orden()
     test_002_02_la_fase_1_no_toca_pendientes()
     test_002_02_registro_sin_ambito_ni_clasificacion_queda_escrito()
-    print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
+    test_002_02_omision_de_dia_y_hora_asume_hoy_y_ahora()
+    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")
