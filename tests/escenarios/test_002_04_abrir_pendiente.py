@@ -30,7 +30,7 @@ CUERPO = "avisar de los GGCC a la administradora"
 FILA = f"| esta semana |  | [[personal]] | {CUERPO} |"
 
 #: Lo que toca abrir un pendiente: la bitácora, la tabla y las dos vistas
-#: derivadas que `tuku todo open` regenera al propagar.
+#: derivadas que `tuku entry add` regenera al propagar la consecuencia.
 DELTA_DE_ABRIR = {
     "AHORA.md": "modificado",
     "PENDIENTES.md": "modificado",
@@ -59,7 +59,7 @@ def test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana() -> None:
 
 
 def test_002_04_la_tabla_gana_una_fila_y_nada_mas() -> None:
-    corrida = gherkin.correr(SLUG, "la tabla gana una fila y nada más")
+    corrida = gherkin.correr(SLUG, "abre el pendiente y copia el cuerpo literal")
     pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
 
     assert todo.horizontes(pendientes) == ["esta semana"], "apareció un horizonte de más"
@@ -84,12 +84,10 @@ if __name__ == "__main__":
 
 
 def test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla() -> None:
-    """Lo que distingue "abrió" de "escribió algo parecido".
+    """Verifica que la marca escrita tenga su fila correspondiente en PENDIENTES.md.
 
-    `tuku entry add` deja el registro y nada más, así que un `**pendiente**` cuyo
-    `tuku todo open` no se corrió deja los dos archivos bien formados y el vault
-    a medias, sin que ninguno lo delate por separado. Es lo que `tuku doctor`
-    revisa desde el 2026-09-09, y lo que este paso existe para no permitir.
+    `tuku entry add` aplica la consecuencia de forma atómica. Esta verificación
+    asegura que `tuku doctor` valide la consistencia entre AHORA.md y PENDIENTES.md.
     """
     vault = gherkin.correr(SLUG, "abre el pendiente y copia el cuerpo literal").ruta("mi-vault")
     faltan = todo.sin_consecuencia(

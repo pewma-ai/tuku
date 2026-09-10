@@ -10,7 +10,7 @@ El corte no pasa entre estructura y lenguaje, pasa por los **campos**. Quien inv
 
 Ese reparto sostiene el principio 1 de [`../docs/principios.md`](../docs/principios.md). Un autor disciplinado hace lo mismo a mano con un editor básico: el comando le ahorra el esfuerzo, no habilita nada que sin él sea imposible. Si un comando empieza a decidir cosas que una persona no podría reproducir a mano, el defecto está en el comando.
 
-**Ningún comando infiere un campo que quien invoca no dio**, salvo donde una spec declare un valor por defecto. Los que hay hoy: la hora de un registro, que por defecto es la actual ([bitacora.md](bitacora.md)).
+**Ningún comando infiere un campo que quien invoca no dio**, salvo donde una spec declare un valor por defecto. Los que hay hoy: el día (la fecha actual, **HOY**) y la hora (la hora actual, **AHORA**) de un registro o de la huella en bitácora dejada por un comando mutador (`todo`, `scope`, `note`), evaluados en la zona horaria `TZ` del vault ([bitacora.md](bitacora.md)).
 
 ## Los códigos de salida
 
@@ -41,7 +41,9 @@ Un comando que no puede determinar algo **no lo adivina y no escribe a medias**.
 
 De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa y nunca escribe. Verificar y corregir son operaciones distintas, y mezclarlas quita la oportunidad de revisar.
 
-**Ningún comando de verificación repara.** Vale para los `lint` y para `tuku doctor`, que los agrega y revisa además lo que ninguno cubre. Ante un hallazgo, el doctor nombra la copia original del template con la que comparar y para ahí. Copiar sobre el vault del autor es consecuencia mayor, y quien decide es él.
+**Ningún comando de verificación repara.** Vale para los `lint` y para `tuku doctor`, que los agrega y revisa además lo que ninguno cubre. Ante un hallazgo, el doctor o linter nombra el defecto y la acción correctiva, pero no modifica archivos.
+
+**El comando que repara es el comando original, y es idempotente.** Cuando un linter detecta un estado desincronizado (por ejemplo, una marca de bitácora sin su fila en la tabla de pendientes), no la repara por su cuenta: nombra como corrección el comando que debió haberse ejecutado originalmente (`tuku todo open`, etc.). Todos los comandos mutadores del CLI son estrictamente idempotentes: ejecutarlos repetidas veces asegura el estado completo sin duplicar líneas en `AHORA.md` ni filas en los derivados.
 
 ## No entra
 

@@ -59,6 +59,21 @@ El libro de estilo ya exige que las observaciones sobre el autor se redacten com
 
 La prueba es simple: **una inferencia que no se le podría mostrar a la persona no va escrita.** Verificarlo no es mecánico: lo hace el agente al redactar, con juicio ético, no un comando.
 
+## Creación y huella en bitácora
+
+Toda creación de nota mediante `tuku note create` deja huella en la bitácora:
+
+- **Escribe la nota:** en `notas/<slug>.md` con frontmatter OKF (`type: Note`). Si la nota es tipada, incluye su campo `subtype`.
+- **Estampa constancia:** agrega una línea cronológica en `AHORA.md` registrando la creación de la nota. Ante la omisión de día u hora, los valores por defecto normativos son la fecha actual (**HOY**) y la hora actual (**AHORA**) evaluadas en la zona horaria `TZ` de `reglas/config.tuku.md`.
+
+### Idempotencia y reparación
+
+`tuku note create` es estrictamente idempotente:
+- Si el archivo ya existe en `notas/`, respeta su contenido y no lo sobreescribe a ciegas.
+- Si la constancia en `AHORA.md` ya existe, la omite y no la duplica.
+
+`tuku note lint` verifica la estructura de las notas (presencia de frontmatter OKF, existencia de la sección `## Ver además` y motivos en cada enlace saliente). El linter nunca repara por su cuenta: informa el defecto y nombra la corrección exacta, ejecutando los comandos originales para restaurar la consistencia.
+
 ## No entra
 
 - **Destilar el histórico y proponer notas nuevas por iniciativa propia**, sin que el uso ya lo haya sugerido. Eso es inferencia semántica, una fase posterior de implementación (ver [`../devel/epics.md`](../devel/epics.md)). Acá solo la mecánica del tejido: crear, tipar, enlazar, indexar.

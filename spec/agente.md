@@ -25,6 +25,8 @@ Eso confina el no determinismo a **elegir** la llamada, nunca a ejecutarla. Un m
 
 De ahí también la prohibición: **editar a mano un archivo que tiene comando** deja el archivo bien formado y ninguna consecuencia aplicada, y es el modo de falla más caro del sistema porque no deja señal. Cómo se enuncia esa prohibición en el vault es [despacho.md](despacho.md).
 
+**El agente no repara a mano ante hallazgos de linters.** Si un comando de verificación (`tuku * lint`, `tuku doctor`) reporta una inconsistencia, el agente no intenta editar los archivos markdown: ejecuta el comando original que el diagnóstico indica como corrección, aprovechando la idempotencia transversal de la herramienta.
+
 Esto solo se sostiene si la salida del comando alcanza. Ahorrar contexto sin salida diagnóstica es operar a ciegas: la regla de [cli.md](cli.md) de que todo error nombre el defecto y la corrección es la que paga este ahorro. Las dos cosas se diseñan juntas o ninguna funciona.
 
 Consecuencia de segundo orden, más útil que el ahorro: una sesión queda reducida a una lista de comandos. Se relee, se compara y se vuelve a ejecutar, que es lo que hace del sistema algo versionable y no una conversación perdida.

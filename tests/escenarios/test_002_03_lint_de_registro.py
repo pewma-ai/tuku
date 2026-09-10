@@ -28,7 +28,7 @@ from tuku.cli import EXITO, RECHAZO  # noqa: E402
 
 SLUG = "002-03-lint-de-registro"
 DESCONOCIDO = "- 12:05 - [[personal]] **cachureo**: ordené los cables del escritorio"
-MAL_ESCRITA = "- 13:00 - [[personal]] **Pendiente**: comprar una maleta"
+MAL_ESCRITA = "- 13:00 - [[personal]] **Cadencia**: comprar una maleta"
 
 
 def test_002_03_cerrada_estricta_abierta_permisiva() -> None:
@@ -36,23 +36,28 @@ def test_002_03_cerrada_estricta_abierta_permisiva() -> None:
 
     texto = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
     assert DESCONOCIDO in texto, "el tipo desconocido no quedó escrito"
-    assert MAL_ESCRITA in texto, "la marca mal escrita no quedó escrita: el lint no rechaza"
 
     lint = corrida.de("entry lint")
-    assert lint.codigo == RECHAZO, "la ontología cerrada mal escrita debía dar rechazo"
+    assert lint.codigo == EXITO, "el tipo abierto desconocido debía dar éxito"
     assert "cachureo" in lint.stdout, "la pregunta de vocabulario no salió en el reporte"
-    assert "**Pendiente**" in lint.stdout, "el error de ontología cerrada no salió"
-    assert "**pendiente**" in lint.stdout, "el error no dice cómo corregirse"
 
 
 def test_002_03_la_marca_mal_escrita_no_abre_ningun_pendiente() -> None:
     corrida = gherkin.correr(SLUG, "la ontología cerrada se valida estricta")
 
+    texto = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
+    assert MAL_ESCRITA in texto, "la marca mal escrita no quedó escrita"
     assert corrida.de("entry add").codigo == EXITO, "la línea debía quedar escrita igual"
+
+    lint = corrida.de("entry lint")
+    assert lint.codigo == RECHAZO, "la ontología cerrada mal escrita debía dar rechazo"
+    assert "**Cadencia**" in lint.stdout, "el error de ontología cerrada no salió"
+    assert "**cadencia**" in lint.stdout, "el error no dice cómo corregirse"
+
     assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
         "ambitos/personal/personal.md": "modificado",
-    }, "`**Pendiente**` no es `**pendiente**`: no se abre ningún pendiente"
+    }, "`**Cadencia**` no es `**cadencia**`: no se abre ninguna consecuencia"
 
 
 def test_002_03_un_registro_fuera_del_ciclo_se_reporta() -> None:

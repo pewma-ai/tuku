@@ -35,6 +35,10 @@ SLUG = "003-07-lo-que-no-hace-sin-preguntar"
 TITULO = "ante dos lecturas posibles"
 DIA = "## Miércoles 12 de agosto"
 
+#: La hora del único hecho que sí se registra. El dictado la dice, así que el
+#: agente no la adivina; lo que sí deriva es el día, y eso es lo que se afirma.
+HORA = "10:15"
+
 #: Los dos pendientes que compiten. Empiezan igual y ninguno es el más probable:
 #: con uno solo, "ya pagué" no sería ambiguo y el escenario mediría otra cosa.
 ABIERTOS = {
@@ -69,6 +73,26 @@ def test_003_07_solo_el_hecho_claro_se_traduce_en_un_comando() -> None:
     turno = gherkin.correr(SLUG, TITULO).turno
     assert turno.traduccion == ["entry add"], (
         f"tres frases y un solo hecho claro, pero ejecutó: {turno.comandos}"
+    )
+
+
+@pytest.mark.agentic
+@sin_arnes
+def test_003_07_el_registro_cae_donde_va_el_vault() -> None:
+    """El día no se dicta nunca en este epic: se deriva, y por eso se afirma.
+
+    El ciclo abierto va del 11 al 17 de agosto y hoy cae fuera, así que el día
+    lo decide `reglas/bitacora.tuku.md`: el último del ciclo que ya tiene
+    registros, que acá es el miércoles por el pendiente que siembra el estado
+    inicial. Sin esta aserción el registro se iba al martes y los seis tests
+    pasaban igual, porque el resto solo mira que no haya pasado nada.
+
+    Peor que pasar: `_dia` lee la sección del miércoles, así que un registro
+    puesto en el martes vaciaba de contenido la aserción del cierre.
+    """
+    assert HORA in _dia(gherkin.correr(SLUG, TITULO)), (
+        f"el registro no quedó en {DIA}, que es hasta donde llegó el vault:\n"
+        f"{_dia(gherkin.correr(SLUG, TITULO))}"
     )
 
 
@@ -128,6 +152,7 @@ if __name__ == "__main__":
         print(f"saltado: {agente.motivo_no_disponible()}")
         raise SystemExit(0)
     test_003_07_solo_el_hecho_claro_se_traduce_en_un_comando()
+    test_003_07_el_registro_cae_donde_va_el_vault()
     test_003_07_ningun_pendiente_se_cerro()
     test_003_07_no_se_escribio_ningun_cierre()
     test_003_07_no_renombro_la_carpeta_de_notas()

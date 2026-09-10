@@ -56,7 +56,7 @@ tuku entry lint --vault mi-vault
 Cuando además se escribe la marca cerrada mal escrita, y se revisa
 
 ```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:00 --scope personal --body "**Pendiente**: comprar una maleta"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:00 --scope personal --body "**Cadencia**: comprar una maleta"
 tuku entry lint --vault mi-vault
 ```
 

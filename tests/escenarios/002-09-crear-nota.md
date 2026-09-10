@@ -97,7 +97,7 @@ Y no hay un segundo registro de constancia en la bitácora
 
 ## Escenario: la nota recién creada deja el vault sano
 
-Este parte de un vault recién sembrado y no del que viene rodando por la cadena: el `002-03` dejó ahí a propósito un registro con `**Pendiente**` mal escrito, y el `doctor` lo reporta con razón. Lo que se afirma acá es lo otro, que TUKU no se reporta a sí mismo.
+Este escenario corre sobre un vault limpio para aislar la verificación y asegurar que TUKU no se reporte a sí mismo tras crear una nota.
 
 Dado un vault recién sembrado con su ámbito
 

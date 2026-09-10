@@ -64,12 +64,18 @@ Toda página de ámbito debe transcluir sus pendientes desde `PENDIENTES-AMBITOS
 ![[../PENDIENTES-AMBITOS.md#^personal]]
 ```
 
-`tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito.
+`tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito, asegura su callout en `PENDIENTES-AMBITOS.md` y estampa una constancia cronológica en `AHORA.md` (con fallback a la fecha actual **HOY** y hora actual **AHORA** en `TZ`).
+
+### Idempotencia y reparación con el comando original
+
+`tuku scope create` es estrictamente idempotente: ejecutarlo sobre un ámbito ya existente no sobreescribe sus reglas ni duplica callouts en `PENDIENTES-AMBITOS.md` ni registros en `AHORA.md`.
 
 El comando `tuku scope lint` (y `tuku doctor`) verifica estructuralmente:
 1. Que ningún registro en `AHORA.md` apunte a una categoría.
 2. Que toda página de ámbito del árbol contenga la transclusión a su bloque en `PENDIENTES-AMBITOS.md`.
 3. Que en `ambitos/PENDIENTES-AMBITOS.md` exista el callout con su ancla `^<ambito>` correspondiente a cada ámbito del árbol.
+
+Ante cualquier defecto, el linter informa y nunca repara por su cuenta: nombra la discrepancia e indica el comando original correspondiente para reparar la consistencia.
 
 ## Convención de mayúsculas
 

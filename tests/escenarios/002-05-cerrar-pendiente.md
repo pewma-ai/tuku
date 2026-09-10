@@ -1,4 +1,4 @@
-# Escenario · 002-05-cerrar-pendiente
+me refiero# Escenario · 002-05-cerrar-pendiente
 
 **Cubre:** epic 002, fase 2. Punto 2 del epic, segunda mitad: un registro `~~(Hecho)~~` cierra el pendiente. Más el cierre sin pareja, el error que el vault real cometía ([`lecciones-macjpgil.md`](../../devel/lecciones-macjpgil.md), lección 4).
 

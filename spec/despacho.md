@@ -15,7 +15,7 @@ De ahí la prueba para saber si una línea pertenece a la raíz: si la respuesta
 No hay taxonomía nueva. [`../devel/epics.md`](../devel/epics.md) fija que el vault se cambia por la vía bitácora o por comando directo y que no existe una tercera, y el despacho decide entre esas dos, más el caso que no escribe:
 
 1. **Vía bitácora.** El autor cuenta algo que ocurrió. Se escribe el registro con `tuku entry add` y las consecuencias las deriva el sistema releyendo lo escrito ([flujo-informacion.md](flujo-informacion.md)). Es el caso por defecto y el más frecuente.
-2. **Vía comando directo.** El autor pide una operación de sistema o toma una decisión explícita que ningún hecho justifica: mover un pendiente de escalón, crear un ámbito, abrir el ciclo.
+2. **Vía comando directo.** El autor pide una operación de sistema o toma una decisión explícita que ningún hecho justifica: abrir o cerrar un pendiente, moverlo de escalón, crear un ámbito, abrir una nota o el ciclo. Toda operación mutadora por esta vía estampa automáticamente constancia cronológica en `AHORA.md` (con fallback de fecha a **HOY** y hora a **AHORA** en `TZ`), de modo que no existan decisiones sin registro temporal.
 3. **Sin despacho.** Deliberar, consultar el estado, investigar, redactar un borrador. No toca ningún archivo del conjunto canónico. Termina en respuesta, no en escritura.
 
 Que la primera vía cubra casi todo es lo que mantiene corta la tabla: el despacho fino es la excepción.
@@ -29,6 +29,8 @@ Vive en el `AGENTS.md` de la raíz y es lo que el ejecutor consulta antes de act
 | cuenta algo que ocurrió | bitácora | `reglas/bitacora.tuku.md` | `tuku entry add` |
 | dice que algo quedó por hacer | bitácora, marca `**pendiente**` | `reglas/bitacora.tuku.md` | `tuku entry add` |
 | da por hecho algo que estaba pendiente | bitácora, marca `~~(Hecho)~~` | `reglas/bitacora.tuku.md` | `tuku entry add` |
+| abre un pendiente sin dictado | comando directo | nada | `tuku todo open` |
+| cierra un pendiente sin dictado | comando directo | nada | `tuku todo close` |
 | nombra un frente que todavía no existe | comando directo | `ambitos/AGENTS.md` | `tuku scope create` |
 | pide guardar una idea que no es de un día | comando directo | `reglas/notas.tuku.md` | `tuku note create` |
 | abre el ciclo | comando directo | nada | `tuku cycle open` |

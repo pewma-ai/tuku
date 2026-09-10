@@ -21,11 +21,15 @@ Todo lo demás son ejemplos.
 
 Ámbito y clasificación son opcionales según el contexto. La marca de la ontología cerrada va en la misma posición, antes de la clasificación abierta.
 
-### De dónde sale la hora
+### De dónde salen el día y la hora
 
-**La hora no viene del dictado**: se deriva de la jornada que el dictado describe, y eso es juicio de quien registra, no lectura mecánica (ver [`../corpus/referencia/referencia-faena.md`](../corpus/referencia/referencia-faena.md), Parte 2).
+**El día y la hora no vienen del dictado**: se derivan de la jornada que el dictado describe, y eso es juicio de quien registra, no lectura mecánica (ver [`../corpus/referencia/referencia-faena.md`](../corpus/referencia/referencia-faena.md), Parte 2).
 
-Cuando no se puede derivar, el valor por defecto es **la hora actual**, en la zona horaria que declara `TZ` en `reglas/config.tuku.md`. Nunca se deja en blanco ni se elige una hora plausible: o se deriva del dictado, o es ahora. Es el único campo del registro con valor por defecto, y por eso está declarado acá y no queda a criterio del comando (ver [cli.md](cli.md)).
+Cuando quien invoca no proporciona el día o la hora (o no se pueden derivar), los valores por defecto son:
+- **El día:** la fecha actual (**HOY**), situando el registro bajo la sección correspondiente al día de hoy en `AHORA.md`.
+- **La hora:** la hora actual (**AHORA**), con formato `HH:MM`.
+
+Ambos se evalúan en la zona horaria que declara `TZ` en `reglas/config.tuku.md`. Nunca se dejan en blanco ni se eligen valores plausibles inventados: o se derivan explícitamente, o hacen fallback al momento actual. Son los dos únicos campos del registro con valor por defecto, y por eso están declarados acá y no quedan a criterio del comando (ver [cli.md](cli.md)).
 
 ## Ejemplos
 

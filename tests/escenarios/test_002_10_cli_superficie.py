@@ -33,7 +33,7 @@ from tuku.cli import ENTORNO, EXITO, RECHAZO, USO, comandos, main  # noqa: E402
 from tuku.lint import lint  # noqa: E402
 
 SLUG = "002-10-cli-superficie"
-MAL_ESCRITA = "- 13:00 - [[personal]] **Pendiente**: comprar una maleta"
+MAL_ESCRITA = "- 13:00 - [[personal]] **Cadencia**: comprar una maleta"
 DESCONOCIDO = "- 12:05 - [[personal]] **cachureo**: ordené los cables"
 DIA = "## Martes 11 de agosto"
 

@@ -2,15 +2,15 @@
 
 > Alguien instala TUKU y empieza a usarlo el mismo día. Todo lo que hace, lo hace sobre un vault que está vacío: cada cosa que necesita, la crea al escribirla.
 
-Los ejemplos salen de [`referencia-faena.md`](../../corpus/referencia/referencia-faena.md), martes 11 de agosto de 2026: primer día del turno, y el único que un vault recién instalado recibe sin inventar ámbitos previos.
+Los ejemplos corresponden al primer día (martes 11 de agosto de 2026): el inicio de ciclo que un vault recién instalado recibe sin inventar ámbitos previos.
 
-El fixture es el día completo, los registros de la Parte 2 tal como están, no un subconjunto que cubra las marcas. La revisión a mano es `diff -r` entre carpetas consecutivas de `playground/`.
+El fixture cubre los registros esenciales del día para ejercitar marcas y consecuencias. La revisión de resultados se apoya en el `diff -r` entre carpetas consecutivas de `playground/`.
 
 ## Qué tiene que funcionar
 
 1. **El ciclo se abre desde la plantilla.** Si no existe `AHORA.md` para la fecha, se crea a partir de `reglas/plantilla/AHORA.md` con la semana completa (lunes a domingo). Si ya existe, no se sobreescribe.
 2. **El registro queda bien puesto.** Dados los campos de un hecho (hora, ámbito, marca de la ontología cerrada, clasificación, cuerpo), lo que queda escrito cumple las reglas de `docs/` y `spec/`, en el día correcto y en orden cronológico.
-3. **Los pendientes se abren y se cierran solos.** Un registro `**pendiente**` los abre, una `~~(Hecho)~~` los cierra, sin que el autor toque `PENDIENTES.md`. Un cierre sin pendiente abierto correspondiente escribe el registro igual, informa que no había pareja y no inventa ninguna.
+3. **Los pendientes se abren y se cierran con huella en la bitácora.** Un registro `**pendiente**` abre el pendiente en `PENDIENTES.md` de forma atómica e idempotente, y `~~(Hecho)~~` lo cierra. Un cierre sin pendiente abierto correspondiente escribe el registro igual, informa que no había pareja y no inventa ninguna.
 4. **Escribir en un día futuro fecha el pendiente.** El pendiente toma la fecha de ese día y queda propagado al inicio del día.
 5. **Crear un ámbito lo deja bien guardado y enlaza hacia atrás.** El árbol queda correcto y las menciones sueltas del ciclo en curso se convierten en enlaces, de forma retroactiva.
 6. **Crear una nota a petición.** El autor la pide, la nota se escribe, queda el registro en la bitácora que deja constancia, y si lo pidió así, queda enlazada a su ámbito.
@@ -41,7 +41,7 @@ Dos superficies:
 
 ## Criterio de salida
 
-Una persona instala, escribe durante un día invocando `tuku` a mano y termina con pendientes abiertos, un ámbito nuevo y una nota enlazada, sin haber abierto `PENDIENTES.md` ni `ambitos/` a mano. Del lado del comando: `tuku -h` describe todo lo agregado, cada error dice cómo corregirse, los comandos de lectura no escriben, y ningún cambio del vault llegó por una vía que no fuera una invocación de `tuku`.
+Una persona instala, escribe durante un día invocando `tuku` y termina con pendientes abiertos, un ámbito nuevo y una nota enlazada, con las vistas derivadas y las páginas de ámbito sincronizadas. Del lado del comando: `tuku -h` describe todo lo agregado, cada error dice cómo corregirse, los comandos de lectura no escriben, y ningún cambio del vault llegó por una vía que no fuera una invocación de `tuku`.
 
 ## No entra
 

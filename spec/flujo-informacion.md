@@ -44,9 +44,9 @@ El orden importa en dos puntos, y por razones distintas. Antes del paso 4, porqu
 
 ## La segunda vía
 
-No todo entra por la voz. Mover un pendiente de escalón, corregir el plan, aprobar o rechazar una propuesta son operaciones del sistema y no hechos de la vida del autor, y ya está decidido que no se registran. Entran **invocando `tuku` directamente** y desembocan en las mismas consecuencias.
+No todo entra por la voz. Abrir o cerrar un pendiente, moverlo de escalón, crear una nota o dar de alta un ámbito entran **invocando `tuku` directamente**. Toda acción que represente una decisión del autor sobre sus compromisos o su estructura deja huella en la bitácora: el comando estampa su constancia cronológica en `AHORA.md` a la vez que actualiza la tabla o archivo correspondiente.
 
-Son dos puertas y una sola sala, y desde que la mitad determinista vive en el comando, la sala tiene un solo mecanismo: **las dos vías terminan en una invocación de `tuku`**. La primera la compone quien interpretó el dictado, la segunda la escribe el autor. Cambia quién arma la llamada, no lo que la ejecuta.
+Son dos puertas y una sola sala, y desde que la mitad determinista vive en el comando, la sala tiene un solo mecanismo: **las dos vías terminan en una invocación de `tuku`**. La primera la compone quien interpretó el dictado, la segunda la escribe el autor. Toda invocación es estrictamente idempotente: correr un comando repetidas veces no duplica líneas en la bitácora ni filas en las tablas. Si un elemento ya existe en un archivo, se omite y se asegura que el estado complementario quede sincronizado.
 
 Esa invariante es sobre lo automatizado y no sobre el autor. A mano el vault se edita como cualquier carpeta de archivos de texto, que es el principio 1, y por eso cada comando declara su equivalente manual (ver [README.md](README.md), el campo "A mano"). Lo que no existe es una tercera forma de que algo cambie **solo**: nada automático toca el vault fuera de un comando. Eso es lo que mantiene chica la plataforma de pruebas, y lo que hace que una sesión se pueda releer y volver a ejecutar.
 

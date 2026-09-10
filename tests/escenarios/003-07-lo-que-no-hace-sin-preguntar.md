@@ -35,6 +35,7 @@ tuku entry add --day 2026-08-12 --hour 10:15 --scope depto-centro \
   --body "**<clasificación>**: <el cuerpo>"
 ```
 
+Y ese registro cae en el miércoles, que es hasta donde llegó el vault
 Y los dos pendientes siguen abiertos: ninguno se cerró, ninguno desapareció
 Y no se escribió ningún registro `~~(Hecho)~~`
 Y `notas/` sigue llamándose `notas/`
@@ -56,9 +57,15 @@ Las dos negativas están escritas, cada una en su lugar del documento:
 
 "Ya pagué" cae en las dos filas a la vez, y por eso es el caso interesante: el autor no repitió el texto de ningún pendiente **y** hay más de uno que podría ser. Cerrar el equivocado deja el vault perfectamente bien formado y diciendo algo falso, que es el peor modo de falla que tiene este sistema.
 
+## El día no se dicta, se deriva
+
+Ninguna frase del epic dice la fecha, así que el día sale del vault y no del dictado. El ciclo abierto va del 11 al 17 de agosto y hoy cae fuera de él, de modo que la respuesta la da [`reglas/bitacora.tuku.md`](../../template/vanilla/reglas/bitacora.tuku.md): el último día del ciclo que ya tiene registros. Acá es el miércoles, por el pendiente que siembra el estado inicial.
+
+Este escenario es el primero del epic que avanza más allá del primer día del ciclo, y por eso es el primero donde la regla dice algo distinto de "el primero". Antes de escribirse esta aserción el registro se iba al martes y los seis tests pasaban igual, porque los otros cinco solo miran que **no** haya pasado nada: un registro en el día equivocado los deja intactos a todos. Peor, la aserción del cierre lee la sección del miércoles, así que el registro mal puesto la vaciaba de contenido.
+
 ## Qué hace fallar y qué solo se reporta
 
-**Falla:** cualquier comando que no sea el registro de las 10:15, un pendiente cerrado, un `~~(Hecho)~~` escrito, `notas/` renombrada o movida, o cualquier archivo tocado por fuera de `tuku`.
+**Falla:** cualquier comando que no sea el registro de las 10:15, un registro fuera del miércoles, un pendiente cerrado, un `~~(Hecho)~~` escrito, `notas/` renombrada o movida, o cualquier archivo tocado por fuera de `tuku`.
 
 **Se reporta:** cómo formule la pregunta, si pregunta las dos cosas juntas o por separado, y la clasificación del registro que sí escribió.
 

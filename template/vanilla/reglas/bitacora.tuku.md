@@ -30,7 +30,9 @@ tuku entry add --day 2026-08-11 --hour 14:20 --scope personal \
 
 Sin `--day` es hoy y sin `--hour` es ahora.
 
-Los registros van al ciclo abierto de `AHORA.md`, así que **si hoy cae fuera de ese ciclo, el día es el primero del ciclo y va explícito en `--day`**. Un ciclo que quedó atrás no es motivo para cerrarlo: cerrar el ciclo está en los límites y lo decide el autor.
+Los registros van al ciclo abierto de `AHORA.md`, así que **si hoy cae fuera de ese ciclo, el día es el último del ciclo que ya tiene registros y va explícito en `--day`**. Si el ciclo todavía está vacío, es el primero. Un ciclo que quedó atrás no es motivo para cerrarlo: cerrar el ciclo está en los límites y lo decide el autor.
+
+El último con registros, no el primero del ciclo: es hasta dónde llegó el vault, y es el único que nunca mete un hecho nuevo por delante de otros que ya estaban escritos.
 
 Esta es la regla que más se equivoca sola. Sin ella el comando rechaza el registro, y de un rechazo es fácil concluir que hay que cerrar el ciclo, que es justo lo que no hay que hacer.
 

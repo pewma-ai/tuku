@@ -1,6 +1,6 @@
 # Escenario · 002-04-abrir-pendiente
 
-**Cubre:** epic 002, fase 2. Punto 2 del epic, primera mitad: un registro `**pendiente**` abre el pendiente sin que el autor toque `PENDIENTES.md`.
+**Cubre:** epic 002, fase 2. Punto 2 del epic, primera mitad: un registro `**pendiente**` abre el pendiente vía bitácora sin que el autor toque `PENDIENTES.md` ni requiera un comando secundario.
 
 ## Estado inicial
 
@@ -23,25 +23,14 @@ tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal -
 Entonces la tabla contiene `| esta semana |  | [[personal]] | avisar de los GGCC a la administradora |`
 Y el cuerpo es el mismo texto en los dos lugares, carácter por carácter
 Y la columna `Cuándo` queda vacía, porque el pendiente todavía no tiene fecha
+Y la tabla tiene exactamente una fila y su cabecera sigue intacta
+Y no aparece ningún horizonte que el registro no haya pedido
 Y el diff contra el estado anterior toca `AHORA.md`, `PENDIENTES.md` y `ambitos/PENDIENTES-AMBITOS.md`
 Y la marca del registro queda reflejada en la tabla: `tuku doctor` no reporta ninguna consecuencia sin aplicar
 
 Abrir es copiar: el comando no interpreta, y por eso este paso no necesita LLM ([`spec/agente.md`](../../spec/agente.md)).
 
-La última afirmación es la que distingue "abrió" de "escribió algo parecido". `tuku entry add` deja el registro y nada más, así que un `**pendiente**` cuyo `tuku todo open` no se corrió deja los dos archivos bien formados y el vault a medias, sin que ninguno de los dos lo delate por separado. Es el defecto que este paso existe para no permitir, y hasta el 2026-09-09 nada lo afirmaba.
-
-## Escenario: la tabla gana una fila y nada más
-
-Dado el mismo estado
-Cuando se abre el pendiente
-
-```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "**pendiente**: avisar de los GGCC a la administradora"
-```
-
-Entonces la tabla tiene exactamente una fila
-Y su cabecera sigue intacta
-Y no aparece ningún horizonte que el registro no haya pedido
+La última afirmación garantiza la integridad entre la bitácora y la tabla. `tuku entry add` escribe el registro y aplica de forma atómica su consecuencia en `PENDIENTES.md`: no deja el vault a medias ni requiere invocar `tuku todo open`. Si una edición manual dejara un registro huérfano, `tuku doctor` detecta la discrepancia.
 
 El archivo es una sola tabla y el horizonte es una columna, así que la escalera no ocupa lugar cuando está vacía. Bajar de escalón o agendar edita una celda: no crea ni destruye estructura, que era lo que pedía [`spec/pendientes.md`](../../spec/pendientes.md). El caso fechado entra en [`002-06`](002-06-escribir-en-un-dia-fecha.md).
 

@@ -79,7 +79,7 @@ El [`003-00`](003-00-el-dia-uno-dictado.md) dice que este epic termina en el mis
 
 | En el vault del 002 | Acá | Por qué |
 | --- | --- | --- |
-| 13:00 dice `**Pendiente**` y no abre nada | `**pendiente**`, y abre | El [`002-03`](002-03-lint-de-registro.md) sembró la mayúscula a propósito para probar el lint. Nadie la dicta. |
+| 13:00 dice `**Cadencia**` y no abre nada | `**pendiente**`, y abre | El [`002-03`](002-03-lint-de-registro.md) sembró la mayúscula a propósito para probar el lint. Nadie la dicta. |
 | 11:30 y 18:40 van sin ámbito | `personal` | El [`002-02`](002-02-registro-en-su-dia.md) probaba el registro sin ámbito. El `AGENTS.md` dice que todos lo llevan. |
 | 19:10 es un cierre sin pareja, y se reporta | cierra de verdad | Consecuencia de la primera: como el de las 13:00 sí abrió, este sí tiene qué cerrar. |
 

@@ -29,6 +29,10 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 
 ## Suite de escenarios
 
+- **Tests en Epic 002 para entradas y pendientes sin fecha (fallback a hoy):** Probar el comportamiento por defecto de `tuku entry add` y `tuku todo open` cuando se omiten `--day` o `--when`, validando que caen en el día de hoy y hora actual. Para testear de forma determinista sin depender del reloj del sistema ni ensuciar el código de producción con variables de entorno, resolverlo directamente en el arnés de testing ([`tests/scripts/gherkin.py`](tests/scripts/gherkin.py)) congelando o parchando `datetime` alrededor de las llamadas en proceso a `cli.main`.
+
+- **Agregar cobertura de comandos directos a escenarios existentes de pendientes:** Los escenarios actuales (`002-04`, `002-05`, `002-06`) solo ejercitan la vía bitácora con `tuku entry add`. Falta incorporar pasos que ejecuten directamente `tuku todo open` y `tuku todo close`, verificando que operan de forma idempotente, actualizan `PENDIENTES.md` y estampan su huella cronológica en `AHORA.md`.
+
 - **Resuelto (2026-09-08): no era un flake, era un sincronizador restaurando archivos borrados.** La suite fallaba en cerca de la mitad de las corridas, en cascada, con `<slug>/<escenario> ya existe después de limpiar el epic`. La causa no estaba en los tests: un LaunchAgent del autor, `com.jgil.sync-obsidian-gdrive`, corría `rclone bisync` **bidireccional** entre `~/Code/MaC` y Google Drive, con el filtro `+ *.md`, que incluye todos los Markdown a cualquier profundidad. Un vault de TUKU es puro Markdown, así que cada corrida sincronizaba `playground/` con la nube: los tests borraban, y rclone reponía desde Drive.
 
   Cómo se acorraló, por si vuelve algo parecido: el fallo se reprodujo **sin pytest**, con un script que solo copiaba y borraba árboles con el mismo patrón (`rm -rf 001-* 002-*` y treinta carpetas de golpe). Ese reproductor de veinte segundos permitió medir por ubicación, y la frontera fue nítida: `/tmp`, `~` y `~/Code` limpios; `~/Code/MaC` fallando. Esa frontera es la raíz del bisync, y `lsof` más el log del agente pusieron el nombre.

@@ -13,12 +13,7 @@ cp -r ../../002-02-registro-en-su-dia/tres-registros-caen-en-el-dia/mi-vault .
 
 ## Escenario: un tipo abierto desconocido se reporta y se acepta
 
-Dado el estado anterior, más una marca de la ontología cerrada mal escrita
-
-```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:00 --scope personal --body "**Pendiente**: comprar una maleta"
-```
-
+Dado el estado anterior
 Cuando se escribe un tipo abierto que nadie declaró, y se revisa
 
 ```bash
@@ -38,12 +33,12 @@ Dado el mismo estado
 Cuando se escribe con la marca mal escrita, y se revisa
 
 ```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:00 --scope personal --body "**Pendiente**: comprar una maleta"
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:00 --scope personal --body "**Cadencia**: comprar una maleta"
 tuku entry lint --vault mi-vault
 ```
 
 Entonces el lint lo reporta como error de la ontología cerrada
-Y **no se abre ningún pendiente**: `**Pendiente**` no es `**pendiente**`, y el comando no interpreta
+Y **no se abre ningún pendiente ni cadencia**: `**Cadencia**` no es `**cadencia**`, y el comando no interpreta
 Y la línea queda escrita igual, porque un error del autor se reporta y nunca se rechaza
 
 Este es el caso que separa las dos ontologías: la misma zona de la línea, dos tratamientos.

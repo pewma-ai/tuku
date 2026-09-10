@@ -37,7 +37,7 @@ type: Pending
 
 **Horizonte** indica el escalón actual del pendiente. Los del autor salen de `### Horizontes` en el libro de estilo (`esta semana`, `próxima semana`, `fin de mes` en el template vanilla) y `con fecha` es del sistema cuando tiene día asignado.
 
-**Cuándo** lleva la fecha exacta cuando el pendiente la tiene y queda vacío cuando no. **Ámbito** es un enlace, o vacío si el pendiente todavía no aterrizó en ninguno. **Detalle** es el cuerpo, el mismo texto que el registro que lo abrió y que el que lo cierre.
+**Cuándo** lleva la fecha exacta cuando el pendiente la tiene y queda vacío cuando no (el valor por defecto al omitir `--when`, integrándose al horizonte del ciclo en curso). **Ámbito** es un enlace, o vacío si el pendiente todavía no aterrizó en ninguno. **Detalle** es el cuerpo, el mismo texto que el registro que lo abrió y que el que lo cierre.
 
 Las filas se insertan ordenadas por la posición del horizonte en la escalera y por `Cuándo`. El orden es determinista y la inserción es posicional: un pendiente nuevo no reordena la tabla entera, preservando un diff limpio.
 
@@ -74,7 +74,18 @@ Con fecha exacta pasa a `con fecha` y aparece bajo el día correspondiente de `A
 
 Esto ataja el escalón: un pendiente puede nacer en `con fecha` sin pasar por ningún horizonte del autor. La escalera describe cómo se concreta lo que nació difuso, no un camino obligatorio.
 
-El movimiento de escalón **no se registra en la bitácora**: mover un pendiente no es un hecho de la vida del autor, es un hecho del sistema. El comando lo hace por sí mismo (segunda vía, ver [`flujo-informacion.md`](flujo-informacion.md)).
+**Toda acción sobre un pendiente deja huella en la bitácora.** Abrir un compromiso (`tuku todo open`), cerrarlo (`tuku todo close`) o moverlo de escalón (postergación) son decisiones deliberadas del autor sobre sus compromisos. Cada operación estampa su constancia cronológica en `AHORA.md` (con fecha actual **HOY** y hora actual **AHORA** en `TZ` por defecto) a la vez que sincroniza `PENDIENTES.md`.
+
+### Idempotencia y reparación con el comando original
+
+Toda operación sobre pendientes (`tuku todo open`, `tuku todo close`, postergaciones) es estrictamente idempotente:
+- Si ya existe el registro en la bitácora (`AHORA.md`), lo omite y continúa.
+- Si ya existe la fila en `PENDIENTES.md`, la omite y continúa.
+Correr el comando repetidas veces no agrega múltiples entradas: sincroniza el estado faltante y preserva el existente.
+
+Por ello, el comando que repara una inconsistencia es **el comando que debió haberse invocado originalmente**:
+- `tuku todo lint` y `tuku doctor` detectan marcas sin reflejo en la tabla o pendientes huérfanos.
+- El linter nunca repara por su cuenta: emite el reporte de error y nombra la corrección exacta, que consiste en ejecutar el comando original (ej. `tuku todo open`). Al ser idempotente, ese comando completa la fila en la tabla sin duplicar el registro en la bitácora.
 
 ## Dónde se muestra, y cómo llega
 

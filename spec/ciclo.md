@@ -97,7 +97,7 @@ Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
 
 ### La estructura del ciclo sale de una plantilla
 
-`cycle open` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. La plantilla es del autor y vive en su vault, así que cambiar el ritmo del ciclo, o qué secciones trae un ciclo recién abierto, se hace editándola y no tocando el comando.
+`cycle open` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. Ante la omisión de fecha de apertura, toma por defecto la fecha actual (**HOY**) evaluada en la zona horaria `TZ` de `reglas/config.tuku.md` para determinar el rango según el ritmo declarado (`cycle_type`). La plantilla es del autor y vive en su vault, así que cambiar el ritmo del ciclo, o qué secciones trae un ciclo recién abierto, se hace editándola y no tocando el comando.
 
 ### Un ciclo abierto con registros no se pisa
 
