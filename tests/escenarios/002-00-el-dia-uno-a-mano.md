@@ -33,6 +33,6 @@ El autor instala TUKU y opera su primer día entero mediante comandos directos (
 - [`002-11-renombrar.md`](002-11-renombrar.md) — Renombrado atómico de entidades sin dejar enlaces rotos en el grafo.
 - [`002-12-reconstruir-lo-derivado.md`](002-12-reconstruir-lo-derivado.md) — Reconstrucción de vistas derivadas idéntica byte a byte ([P9](../../docs/principios.md#L79)).
 
-### Fuera de la cadena
+### Fuera de la cadena determinista
 
 - [`002-10-cli-superficie.md`](002-10-cli-superficie.md) — Superficie pública del CLI (`-h`, códigos fijos, correcciones y campo «A mano»).
