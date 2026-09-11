@@ -377,16 +377,20 @@ def abrir_en_vault(
 
     if record:
         ahora_path = archivo_vault(vault, "AHORA.md")
-        dia_encabezado = encabezado_de(day or date.today())
-        hora = hour or datetime.now().strftime("%H:%M")
-        linea = componer(hora=hora, scope=limpio_scope, body=f"{ABRE}: {marca.cuerpo}")
-        try:
-            ahora_texto = entry_add(
-                ahora_path.read_text(encoding="utf-8"), [linea], day=dia_encabezado
-            )
-            ahora_path.write_text(ahora_texto, encoding="utf-8")
-        except ValueError as e:
-            return Resultado.rechazo(str(e))
+        ahora_actual = ahora_path.read_text(encoding="utf-8")
+        ya_abierto = any(
+            (m := parsear(lin)) is not None and m.marca == ABRE and m.cuerpo == marca.cuerpo
+            for lin in ahora_actual.splitlines()
+        )
+        if not ya_abierto:
+            dia_encabezado = encabezado_de(day or date.today())
+            hora = hour or datetime.now().strftime("%H:%M")
+            linea = componer(hora=hora, scope=limpio_scope, body=f"{ABRE}: {marca.cuerpo}")
+            try:
+                ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
+                ahora_path.write_text(ahora_texto, encoding="utf-8")
+            except ValueError as e:
+                return Resultado.rechazo(str(e))
 
     ruta = archivo_vault(vault, "PENDIENTES.md")
     ruta.write_text(
@@ -447,18 +451,22 @@ def cerrar_en_vault(
         ruta.write_text(texto, encoding="utf-8")
 
     if record:
-        ambito_final = scope if scope is not None else ambito_encontrado
         ahora_path = archivo_vault(vault, "AHORA.md")
-        dia_encabezado = encabezado_de(day or date.today())
-        hora = hour or datetime.now().strftime("%H:%M")
-        linea = componer(hora=hora, scope=ambito_final, body=f"{CIERRA}: {marca.cuerpo}")
-        try:
-            ahora_texto = entry_add(
-                ahora_path.read_text(encoding="utf-8"), [linea], day=dia_encabezado
-            )
-            ahora_path.write_text(ahora_texto, encoding="utf-8")
-        except ValueError as e:
-            return Resultado.rechazo(str(e))
+        ahora_actual = ahora_path.read_text(encoding="utf-8")
+        ya_cerrado = any(
+            (m := parsear(lin)) is not None and m.marca == CIERRA and m.cuerpo == marca.cuerpo
+            for lin in ahora_actual.splitlines()
+        )
+        if not ya_cerrado:
+            ambito_final = scope if scope is not None else ambito_encontrado
+            dia_encabezado = encabezado_de(day or date.today())
+            hora = hour or datetime.now().strftime("%H:%M")
+            linea = componer(hora=hora, scope=ambito_final, body=f"{CIERRA}: {marca.cuerpo}")
+            try:
+                ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
+                ahora_path.write_text(ahora_texto, encoding="utf-8")
+            except ValueError as e:
+                return Resultado.rechazo(str(e))
 
     if record:
         from tuku import scope as ambitos

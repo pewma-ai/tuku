@@ -2,10 +2,9 @@
 
 Escenario: 002-05-cerrar-pendiente.md
 
-Punto 2 del epic, segunda mitad: un registro `~~(Hecho)~~` cierra el pendiente,
-y el cierre sin pareja se reporta sin inventar nada. Ese es el caso negativo más
-importante del epic: con `PENDIENTES.md` como fuente de verdad, un cierre
-inventado deja el archivo mintiendo.
+Punto 2 del epic, segunda mitad: el comando `tuku todo close` cierra el pendiente,
+estampando su huella en `AHORA.md`, y el cierre sin pareja se reporta sin inventar nada.
+La vía bitácora (`tuku entry add`) aplica esta misma consecuencia en automático.
 
 Los comandos salen del `.md`, incluida la copia del estado que dejó `002-04`.
 
@@ -29,6 +28,7 @@ from tuku.cli import EXITO  # noqa: E402
 SLUG = "002-05-cerrar-pendiente"
 CUERPO = "avisar de los GGCC a la administradora"
 APERTURA = f"- 14:20 - [[personal]] **pendiente**: {CUERPO}"
+CIERRE = f"- 19:05 - [[personal]] ~~(Hecho)~~: {CUERPO}"
 HUERFANO = "comprar una maleta"
 CIERRE_HUERFANO = f"- 19:10 - [[personal]] ~~(Hecho)~~: {HUERFANO}"
 
@@ -45,7 +45,9 @@ def test_002_05_cerrar_borra_el_item_y_deja_la_tabla_vacia() -> None:
     assert todo.cuerpos(pendientes) == [], "el ítem no se borró"
     assert len(todo.filas(pendientes)) == 0, "la tabla no quedó vacía"
     assert todo.CABECERA in pendientes, "se perdió la cabecera de la tabla"
-    assert APERTURA in (vault / "AHORA.md").read_text(encoding="utf-8"), "se tocó la apertura"
+    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
+    assert APERTURA in ahora, "se tocó la apertura"
+    assert CIERRE in ahora, "no se estampó la huella de cierre"
 
     assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
@@ -84,13 +86,6 @@ def test_002_05_cerrar_dos_veces_no_vuelve_a_mover() -> None:
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
 
 
-if __name__ == "__main__":
-    test_002_05_cerrar_borra_el_item_y_deja_la_tabla_vacia()
-    test_002_05_un_cierre_sin_pareja_no_inventa_nada()
-    test_002_05_cerrar_dos_veces_no_vuelve_a_mover()
-    print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
-
-
 def test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora() -> None:
     """El gemelo del cierre: un `~~(Hecho)~~` cuyo cuerpo sigue en la tabla es un
     cierre que se escribió y nunca se aplicó, y por separado los dos archivos se
@@ -104,17 +99,25 @@ def test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora() -> None:
     assert faltan == [], f"quedaron marcas sin su consecuencia: {faltan}"
 
 
-def test_002_05_comando_directo_close_elimina_y_estampa_huella() -> None:
-    corrida = gherkin.correr(SLUG, "comando directo tuku todo close elimina el ítem")
+def test_002_05_via_bitacora_entry_add_cierra_en_automatico() -> None:
+    corrida = gherkin.correr(SLUG, "la vía bitácora tuku entry add cierra el pendiente")
     assert corrida.codigo == EXITO, corrida.stderr
     vault = corrida.ruta("mi-vault")
 
     pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    assert "avisar de los GGCC a la administradora" not in pendientes
-    assert todo.cuerpos(pendientes) == []
+    assert "pagar sesión del psicólogo" not in pendientes
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert "- 19:30 - [[personal]] ~~(Hecho)~~: avisar de los GGCC a la administradora" in ahora
+    assert "- 19:20 - [[personal]] ~~(Hecho)~~: pagar sesión del psicólogo" in ahora
 
     faltan = todo.sin_consecuencia(ahora, pendientes)
     assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"
+
+
+if __name__ == "__main__":
+    test_002_05_cerrar_borra_el_item_y_deja_la_tabla_vacia()
+    test_002_05_un_cierre_sin_pareja_no_inventa_nada()
+    test_002_05_cerrar_dos_veces_no_vuelve_a_mover()
+    test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora()
+    test_002_05_via_bitacora_entry_add_cierra_en_automatico()
+    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")
