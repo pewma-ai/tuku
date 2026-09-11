@@ -2,9 +2,9 @@
 
 Escenario: 003-04-un-hecho-con-consecuencia.md
 
-El escenario central del epic: lo que el agente decide acá no es qué comando
-correr, sino si el hecho deja algo abierto. De esa sola decisión depende que el
-pendiente exista, porque `tuku entry add` aplica lo que la marca declara.
+El escenario central del epic: dictado con compromiso pendiente. Se compila en
+un solo `tuku entry add` con marca `**pendiente**`, estampando el registro en
+`AHORA.md` y abriendo el pendiente en `PENDIENTES.md` de forma atómica.
 
 Gemelo determinista: `002-04-abrir-pendiente`.
 
@@ -31,8 +31,6 @@ SLUG = "003-04-un-hecho-con-consecuencia"
 TITULO = "lo que queda por hacer"
 DIA = "## Martes 11 de agosto"
 
-#: Lo que toca abrir un pendiente, copiado del gemelo (`002-04`): la bitácora, la
-#: tabla y las dos vistas derivadas que se regeneran al propagar.
 DELTA_DE_ABRIR = {
     "AHORA.md": "modificado",
     "PENDIENTES.md": "modificado",
@@ -56,12 +54,7 @@ def _registro_pendiente(corrida: gherkin.Corrida) -> str:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_04_la_traduccion_es_un_solo_comando() -> None:
-    """La traducción que el `.md` muestra: el mismo comando del escenario anterior.
-
-    Lo que cambia no es la llamada sino la marca, y de ella se sigue el
-    pendiente. Un `todo open` de más no rompe el vault, porque es idempotente,
-    pero delata a un agente que sigue un mapa viejo.
-    """
+    """Un dictado con compromiso produce un único entry add."""
     turno = gherkin.correr(SLUG, TITULO).turno
     assert turno.traduccion == ["entry add"], f"la traza dice: {turno.comandos}"
 
@@ -76,7 +69,7 @@ def test_003_04_el_registro_lleva_la_marca_de_lo_que_queda_abierto() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_04_la_fila_repite_el_cuerpo_del_registro() -> None:
-    """El mismo texto en los dos sitios: de eso depende poder cerrarlo después."""
+    """El mismo texto en los dos sitios para permitir su cierre posterior."""
     corrida = gherkin.correr(SLUG, TITULO)
     marca = todo.parsear(_registro_pendiente(corrida))
     assert marca is not None, "el registro no tiene una marca que el comando reconozca"
@@ -90,7 +83,7 @@ def test_003_04_la_fila_repite_el_cuerpo_del_registro() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_04_la_fila_entra_en_el_escalon_del_ciclo_en_curso() -> None:
-    """El horizonte sale de la escalera del autor, no de uno inventado."""
+    """El horizonte corresponde a la escalera de configuración del vault."""
     corrida = gherkin.correr(SLUG, TITULO)
     from tuku.config import leer_config
 
@@ -102,11 +95,7 @@ def test_003_04_la_fila_entra_en_el_escalon_del_ciclo_en_curso() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_04_no_quedo_ninguna_marca_sin_su_consecuencia() -> None:
-    """La afirmación que da nombre al escenario: las dos llamadas o ninguna.
-
-    Las otras pueden cumplirse a medias; esta no. Es lo mismo que `tuku doctor`
-    revisa, y lo que el `AGENTS.md` del vault dedica un párrafo a explicar.
-    """
+    """No debe quedar ningún registro marcado sin su fila en PENDIENTES.md."""
     corrida = gherkin.correr(SLUG, TITULO)
     vault = corrida.ruta("mi-vault")
     faltan = todo.sin_consecuencia(
@@ -135,4 +124,4 @@ if __name__ == "__main__":
     test_003_04_la_fila_entra_en_el_escalon_del_ciclo_en_curso()
     test_003_04_no_quedo_ninguna_marca_sin_su_consecuencia()
     test_003_04_el_delta_es_el_del_gemelo()
-    print("ok: la marca y su consecuencia, las dos")
+    print(f"ok: 6 afirmaciones (queda en playground/{SLUG}/)")
