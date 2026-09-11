@@ -2,10 +2,9 @@
 
 Escenario: 003-03-un-hecho-un-comando.md
 
-El primer turno que escribe. Un hecho que no deja nada abierto tiene que ser una
-línea en `AHORA.md` y nada más, y tiene que llegar por `tuku entry add`: un vault
-correcto con la traza vacía es un fallo, porque significa que el agente editó el
-archivo a mano.
+Primer turno agéntico que escribe. Un hecho sin compromisos se compila en un
+único `tuku entry add`: se comprueba que el registro caiga en su día y hora, que
+no se edite a mano y que no se inventen consecuencias en `PENDIENTES.md`.
 
 Gemelo determinista: `002-02-registro-en-su-dia`.
 
@@ -30,16 +29,11 @@ SLUG = "003-03-un-hecho-un-comando"
 TITULO = "un hecho que no deja nada abierto"
 DIA = "## Martes 11 de agosto"
 
-#: Lo que toca escribir un registro, verificado contra el gemelo determinista
-#: (`002-02`): la bitácora y la vista del ámbito, que `tuku entry add` regenera.
-#: Cualquier otra cosa en el delta la hizo el agente sin que nadie se la pidiera.
 DELTA_DE_UN_REGISTRO = {
     "AHORA.md": "modificado",
     "ambitos/personal/personal.md": "modificado",
 }
 
-#: Las marcas que tienen consecuencia. Ninguna corresponde acá: el autor contó
-#: algo que pasó y no dejó nada por hacer ni dio nada por cerrado.
 MARCAS_CERRADAS = ("**pendiente**", "~~(Hecho)~~", "**cadencia**")
 
 sin_arnes = pytest.mark.skipif(
@@ -67,12 +61,7 @@ def test_003_03_el_registro_queda_en_su_dia_y_a_su_hora() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_03_la_traduccion_es_un_solo_comando() -> None:
-    """La traducción que el `.md` muestra: un `entry add` y nada más.
-
-    Uno, y no dos: es lo que separa este escenario del `003-04`. Y que exista es
-    lo que separa "lo escribió con un comando" de "editó el archivo a mano", que
-    dejaría el vault igual de bien y sería el fallo más caro del sistema.
-    """
+    """Un hecho sin consecuencias produce un único entry add."""
     turno = gherkin.correr(SLUG, TITULO).turno
     assert turno.traduccion == ["entry add"], f"la traza dice: {turno.comandos}"
 
@@ -80,7 +69,7 @@ def test_003_03_la_traduccion_es_un_solo_comando() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_03_no_invento_una_consecuencia() -> None:
-    """Un hecho que ocurrió y no dejó nada abierto no lleva marca ni abre nada."""
+    """Un hecho sin pendientes no lleva marca cerrada ni abre PENDIENTES.md."""
     corrida = gherkin.correr(SLUG, TITULO)
     linea = _linea_nueva(corrida)
     puestas = [m for m in MARCAS_CERRADAS if m in linea]
@@ -92,7 +81,7 @@ def test_003_03_no_invento_una_consecuencia() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_03_solo_cambio_la_bitacora() -> None:
-    """El delta es el del gemelo determinista, ni más ni menos."""
+    """El delta coincide con el gemelo determinista (bitácora y vista de ámbito)."""
     corrida = gherkin.correr(SLUG, TITULO)
     assert corrida.delta_de("mi-vault") == DELTA_DE_UN_REGISTRO
 
@@ -105,4 +94,4 @@ if __name__ == "__main__":
     test_003_03_la_traduccion_es_un_solo_comando()
     test_003_03_no_invento_una_consecuencia()
     test_003_03_solo_cambio_la_bitacora()
-    print("ok: un hecho, un comando, una línea")
+    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")

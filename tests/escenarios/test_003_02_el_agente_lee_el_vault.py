@@ -2,12 +2,11 @@
 
 Escenario: 003-02-el-agente-lee-el-vault.md
 
-Primer turno del epic 003. El autor pregunta, el agente responde y el vault no
-cambia: el diff vacío es por construcción, y lo que se mide es si el agente leyó
-el `AGENTS.md` que tiene al lado.
+Primer turno agéntico del epic 003. El autor pregunta, el agente responde y el
+vault no cambia: el diff es vacío por construcción y se verifica que el agente
+haya leído `AGENTS.md` para identificar el destino del hecho y su consecuencia.
 
-El turno sale del bloque `agente` del `.md`, igual que los comandos salen de los
-bloques `bash`.
+El turno sale del bloque `agente` del `.md`.
 
 Ejecutable directo: `python3 tests/escenarios/test_003_02_el_agente_lee_el_vault.py`
 """
@@ -44,7 +43,7 @@ def test_003_02_preguntar_no_cambia_el_vault() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_02_la_traduccion_esta_vacia() -> None:
-    """Una pregunta no se traduce en ningún comando, que es lo que dice el `.md`."""
+    """Una pregunta no se traduce en ningún comando."""
     turno = gherkin.correr(SLUG, TITULO).turno
     assert turno.traduccion == [], (
         f"el autor pidió no hacerlo todavía y ejecutó: {turno.comandos}"
@@ -54,12 +53,7 @@ def test_003_02_la_traduccion_esta_vacia() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_02_la_respuesta_nombra_los_dos_destinos() -> None:
-    """Que sean dos pasos es lo primero que el `AGENTS.md` tiene que transmitir.
-
-    `tuku entry add` escribe el registro y nada más: es `tuku todo open` el que
-    abre el pendiente. Un agente que solo nombra la bitácora va a dejar el vault
-    a medias en cuanto se le pida de verdad, y eso no deja señal.
-    """
+    """El agente debe identificar la bitácora y la tabla de pendientes."""
     turno = gherkin.correr(SLUG, TITULO).turno
     dijo = turno.stdout
     assert "AHORA.md" in dijo, f"no nombró dónde va el registro:\n{dijo}"
@@ -73,4 +67,4 @@ if __name__ == "__main__":
     test_003_02_preguntar_no_cambia_el_vault()
     test_003_02_la_traduccion_esta_vacia()
     test_003_02_la_respuesta_nombra_los_dos_destinos()
-    print("ok: el agente leyó el vault y no lo tocó")
+    print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
