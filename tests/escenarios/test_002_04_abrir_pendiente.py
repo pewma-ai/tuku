@@ -2,9 +2,10 @@
 
 Escenario: 002-04-abrir-pendiente.md
 
-Punto 2 del epic, primera mitad: un registro `**pendiente**` abre el pendiente
-sin que el autor toque `PENDIENTES.md`. Abrir es copiar el cuerpo literal: el
-comando no interpreta, y por eso este paso no necesita LLM.
+Punto 2 del epic, primera mitad: el comando `tuku todo open` abre el pendiente
+sin que el autor toque `PENDIENTES.md`, estampando su huella en `AHORA.md`.
+La vía bitácora (`tuku entry add`) aplica esta misma consecuencia en automático.
+Abrir es copiar el cuerpo literal: el comando no interpreta.
 
 Los comandos salen del `.md`, incluida la copia del estado que dejó `002-03`.
 
@@ -30,7 +31,7 @@ CUERPO = "avisar de los GGCC a la administradora"
 FILA = f"| esta semana |  | [[personal]] | {CUERPO} |"
 
 #: Lo que toca abrir un pendiente: la bitácora, la tabla y las dos vistas
-#: derivadas que `tuku entry add` regenera al propagar la consecuencia.
+#: derivadas que `tuku todo open` regenera al propagar la consecuencia.
 DELTA_DE_ABRIR = {
     "AHORA.md": "modificado",
     "PENDIENTES.md": "modificado",
@@ -40,7 +41,7 @@ DELTA_DE_ABRIR = {
 
 
 def test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana() -> None:
-    corrida = gherkin.correr(SLUG, "abre el pendiente y copia el cuerpo literal")
+    corrida = gherkin.correr(SLUG, "abrir el pendiente copia el cuerpo literal")
     assert corrida.codigo == EXITO, corrida.stderr
     vault = corrida.ruta("mi-vault")
 
@@ -59,7 +60,7 @@ def test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana() -> None:
 
 
 def test_002_04_la_tabla_gana_una_fila_y_nada_mas() -> None:
-    corrida = gherkin.correr(SLUG, "abre el pendiente y copia el cuerpo literal")
+    corrida = gherkin.correr(SLUG, "abrir el pendiente copia el cuerpo literal")
     pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
 
     assert todo.horizontes(pendientes) == ["esta semana"], "apareció un horizonte de más"
@@ -76,20 +77,9 @@ def test_002_04_abrir_dos_veces_no_duplica() -> None:
     assert todo.cuerpos(pendientes, "esta semana") == [CUERPO]
 
 
-if __name__ == "__main__":
-    test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana()
-    test_002_04_la_tabla_gana_una_fila_y_nada_mas()
-    test_002_04_abrir_dos_veces_no_duplica()
-    print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
-
-
 def test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla() -> None:
-    """Verifica que la marca escrita tenga su fila correspondiente en PENDIENTES.md.
-
-    `tuku entry add` aplica la consecuencia de forma atómica. Esta verificación
-    asegura que `tuku doctor` valide la consistencia entre AHORA.md y PENDIENTES.md.
-    """
-    vault = gherkin.correr(SLUG, "abre el pendiente y copia el cuerpo literal").ruta("mi-vault")
+    """Verifica que la marca escrita tenga su fila correspondiente en PENDIENTES.md."""
+    vault = gherkin.correr(SLUG, "abrir el pendiente copia el cuerpo literal").ruta("mi-vault")
     faltan = todo.sin_consecuencia(
         (vault / "AHORA.md").read_text(encoding="utf-8"),
         (vault / "PENDIENTES.md").read_text(encoding="utf-8"),
@@ -97,16 +87,25 @@ def test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla() -> None:
     assert faltan == [], f"quedaron marcas sin su consecuencia: {faltan}"
 
 
-def test_002_04_comando_directo_open_estampa_huella() -> None:
-    corrida = gherkin.correr(SLUG, "comando directo tuku todo open abre el pendiente")
+def test_002_04_via_bitacora_entry_add_abre_en_automatico() -> None:
+    corrida = gherkin.correr(SLUG, "la vía bitácora tuku entry add abre el pendiente")
     assert corrida.codigo == EXITO, corrida.stderr
     vault = corrida.ruta("mi-vault")
 
     pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    assert "| esta semana |  | [[personal]] | comprar filtro de cafe |" in pendientes
+    assert "| esta semana |  | [[personal]] | comprar café tostado |" in pendientes
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert "- 15:30 - [[personal]] **pendiente**: comprar filtro de cafe" in ahora
+    assert "- 16:00 - [[personal]] **pendiente**: comprar café tostado" in ahora
 
     faltan = todo.sin_consecuencia(ahora, pendientes)
     assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"
+
+
+if __name__ == "__main__":
+    test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana()
+    test_002_04_la_tabla_gana_una_fila_y_nada_mas()
+    test_002_04_abrir_dos_veces_no_duplica()
+    test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla()
+    test_002_04_via_bitacora_entry_add_abre_en_automatico()
+    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")

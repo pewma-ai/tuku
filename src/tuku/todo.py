@@ -399,6 +399,11 @@ def abrir_en_vault(
         ),
         encoding="utf-8",
     )
+    if record:
+        from tuku import scope as ambitos
+
+        for amb in ambitos.leer(vault):
+            ambitos.actualizar_pagina(vault, amb.nombre)
     if propagate:
         propagar(vault)
     return Resultado.hecho(f"pendiente abierto en «{horizon}»: {marca.cuerpo}")
@@ -454,6 +459,12 @@ def cerrar_en_vault(
             ahora_path.write_text(ahora_texto, encoding="utf-8")
         except ValueError as e:
             return Resultado.rechazo(str(e))
+
+    if record:
+        from tuku import scope as ambitos
+
+        for amb in ambitos.leer(vault):
+            ambitos.actualizar_pagina(vault, amb.nombre)
 
     if propagate:
         propagar(vault)

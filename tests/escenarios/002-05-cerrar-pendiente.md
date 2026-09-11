@@ -7,7 +7,7 @@ Cerrar un compromiso debe ser tan directo como tacharlo en un cuaderno: registra
 ## Estado inicial
 
 ```bash
-cp -r ../../002-04-abrir-pendiente/el-registro-abre-el-pendiente/mi-vault .
+cp -r ../../002-04-abrir-pendiente/abrir-el-pendiente-copia-el/mi-vault .
 ```
 
 ## Escenario: el cierre repite el texto y borra el ítem
