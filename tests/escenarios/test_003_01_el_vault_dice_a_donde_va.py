@@ -2,11 +2,11 @@
 
 Escenario: 003-01-el-vault-dice-a-donde-va.md
 
-Primer peldaño del epic 003: ningún agente. Lo que se verifica es que el
-`AGENTS.md` que `tuku init` siembra no nombre comandos que no existen, que es la
-condición para que los cinco escenarios agénticos signifiquen algo.
+Primer peldaño del epic 003: verificación determinista sin agente. Lo que se
+comprueba es que el `AGENTS.md` sembrado por `tuku init` no nombre comandos que
+no existen en el CLI, condición básica para que el despacho agéntico funcione.
 
-Los comandos salen del `.md`.
+Los comandos salen del `.md`, que es la fuente ejecutable.
 
 Ejecutable directo: `python3 tests/escenarios/test_003_01_el_vault_dice_a_donde_va.py`
 """
@@ -76,4 +76,4 @@ if __name__ == "__main__":
     test_003_01_la_tabla_sembrada_nombra_comandos_reales()
     test_003_01_un_comando_inventado_es_un_error()
     test_003_01_sin_agents_md_no_hay_despacho()
-    print("ok: la tabla de despacho del vault no miente")
+    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")
