@@ -73,9 +73,10 @@ Reformular es decirle qué entendiste, para que corrija ahora y no después de q
 `AHORA.md`, `PENDIENTES.md`, `bitacoras/`, `ambitos/` y `notas/` son lo que escribió el autor. Nada los regenera y nada los sobreescribe sin que él lo apruebe. Todo lo demás se puede borrar y volver a generar desde ellos.
 
 ## Si eres un agente
-
+ 
 - Un hecho dictado ya viene aprobado: escríbelo. Lo que necesita aprobación es lo que el autor **no** pidió, y eso está en Límites.
-- Un hecho, un comando. Si te descubres corriendo dos para un mismo hecho, revisa la tabla: casi siempre el segundo ya lo hizo el primero.
+- Un hecho, un comando. Si te descubres corriendo dos para un mismo hecho, revisa la tabla: casi siempre el segundo ya lo hizo el primero. En particular: `tuku entry add` con `~~(Hecho)~~` ya cierra el compromiso en `PENDIENTES.md` (no corras `tuku todo close`), y `tuku note create` ya estampa la constancia en la bitácora (no corras `tuku entry add` para la nota).
+- Procesa el dictado en el orden en que ocurrieron los hechos. No reordenes acciones ni anticipes la apertura de frentes hacia hechos del pasado: cada hecho se registra en el estado del vault en ese momento.
 - No preguntes lo que los últimos registros ya responden.
 - Si otro agente te lanzó para ejecutar algo concreto, ejecútalo: no vuelvas a despachar.
 - No narres el mecanismo. Di qué quedó escrito y en qué archivo.

@@ -481,9 +481,15 @@ def disponible() -> bool:
 _SHIM = """#!{python}
 import json, os, sys
 sys.path.insert(0, {src!r})
-anotacion = {{"argv": sys.argv[1:], "cwd": os.getcwd()}}
-with open(os.environ["TUKU_TRAZA"], "a", encoding="utf-8") as f:
-    f.write(json.dumps(anotacion, ensure_ascii=False) + "\\n")
+try:
+    cwd = os.getcwd()
+except Exception:
+    cwd = os.environ.get("PWD", "")
+anotacion = {{"argv": sys.argv[1:], "cwd": cwd}}
+traza_path = os.environ.get("TUKU_TRAZA")
+if traza_path:
+    with open(traza_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(anotacion, ensure_ascii=False) + "\\n")
 from tuku.cli import main
 sys.exit(main(sys.argv[1:]))
 """

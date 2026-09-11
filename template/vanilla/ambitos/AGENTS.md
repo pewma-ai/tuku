@@ -8,7 +8,7 @@ Cada registro dice a qué frente pertenece. Va en `--scope`, sin corchetes.
 
 Usa uno que exista como carpeta o archivo aquí. Si ninguno calza, es `personal`, que siempre está.
 
-Si el autor nombra un frente que todavía no existe, **no lo crees por tu cuenta**: escríbelo en el cuerpo del registro, en palabras, y sigue. El día que se cree, las menciones anteriores se vuelven enlaces solas.
+Si el autor nombra un frente que todavía no existe, **no lo crees por tu cuenta ni antes de tiempo**: escríbelo en el cuerpo del registro bajo `personal`, en palabras, y sigue. En un dictado con varios hechos, procesa cada uno en su orden cronológico sin anticipar la creación de frentes nombrados más adelante. El momento de crearlo es cuando la narración llega a esa petición; al crearse, las menciones anteriores se vuelven enlaces solas.
 
 ## Cuándo se crea un ámbito
 

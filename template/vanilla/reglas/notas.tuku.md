@@ -16,7 +16,7 @@ Cuando el autor la pide de forma explícita: *"una nota respecto a X: ..."*. No 
 2. El frontmatter lleva `type: Note`, que es lo que `reglas/types.md` asigna a todo lo de `notas/`, y `created` con la fecha de hoy.
 3. Si la petición nombró un ámbito, la nota lo enlaza. Si no lo nombró, queda suelta, y eso es correcto.
 4. Cierra con `## Ver además`, y cada enlace de esa sección lleva el motivo de por qué conecta.
-5. Queda un registro en la bitácora que deja constancia, y que enlaza a la nota.
+5. `tuku note create` estampa automáticamente la constancia en la bitácora enlazando a la nota. No agregues un `tuku entry add` manual para la nota.
 
 ## Por qué deja constancia
 
