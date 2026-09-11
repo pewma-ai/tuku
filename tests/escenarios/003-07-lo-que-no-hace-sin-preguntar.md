@@ -29,7 +29,7 @@ Y ese registro cae en el miércoles 12 según la regla del último día activo
 Y los dos pendientes siguen abiertos en `PENDIENTES.md`
 Y no se escribe ningún registro `~~(Hecho)~~`
 Y la carpeta `notas/` permanece sin cambios
-Y el agente consulta cuál de los dos pendientes debe cerrarse
+Y en su respuesta el agente consulta cuál de los dos pendientes debe cerrarse
 
 ## Aceptación humana (en Obsidian)
 
