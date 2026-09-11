@@ -27,7 +27,7 @@ El autor instala TUKU y opera su primer día entero mediante comandos directos (
 - [`002-03-lint-de-registro.md`](002-03-lint-de-registro.md) — Valida ontología cerrada estricta y ontología abierta libre y permisiva.
 - [`002-04-abrir-pendiente.md`](002-04-abrir-pendiente.md) — Apertura atómica e idempotente de compromiso en `PENDIENTES.md`.
 - [`002-05-cerrar-pendiente.md`](002-05-cerrar-pendiente.md) — Cierre literal con `~~(Hecho)~~` y reporte orientador de cierres huérfanos.
-- [`002-06-escribir-en-un-dia-fecha.md`](002-06-escribir-en-un-dia-fecha.md) — Fechado automático al registrar en día futuro y huella de postergación.
+- [`002-06-fechar-pendiente.md`](002-06-fechar-pendiente.md) — Fechado de compromisos directo con `tuku todo open --when` y vía bitácora.
 - [`002-08-crear-ambito.md`](002-08-crear-ambito.md) — Alta de ámbito con transclusiones y enlazado retroactivo en el ciclo.
 - [`002-09-crear-nota.md`](002-09-crear-nota.md) — Creación de nota enlazada con frontmatter OKF y motivos en `## Ver además`.
 - [`002-11-renombrar.md`](002-11-renombrar.md) — Renombrado atómico de entidades sin dejar enlaces rotos en el grafo.

@@ -373,6 +373,8 @@ def abrir_en_vault(
     limpio_scope = scope.strip().strip("[]") if scope else None
     marca = Marca(ABRE, limpio_scope, body.strip())
     escalera = escalera_de(leer_config(vault).horizontes)
+    if when.strip() and horizon == ESTA_SEMANA:
+        horizon = CON_FECHA
     horizon = canonico(horizon, escalera)
 
     if record:

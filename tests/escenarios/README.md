@@ -186,7 +186,7 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`002-03-lint-de-registro.md`](002-03-lint-de-registro.md) | Epic 002, fase 1 | Cerrada estricta, abierta permisiva. El lint informa y no escribe |
 | [`002-04-abrir-pendiente.md`](002-04-abrir-pendiente.md) | Epic 002, fase 2 | Abrir es copiar el cuerpo literal. Lleva un `#REVISAR` sobre una ambigüedad de `spec/pendientes.md` |
 | [`002-05-cerrar-pendiente.md`](002-05-cerrar-pendiente.md) | Epic 002, fase 2 | Cerrar es borrar, y el cierre sin pareja se reporta sin inventar nada |
-| [`002-06-escribir-en-un-dia-fecha.md`](002-06-escribir-en-un-dia-fecha.md) | Epic 002, fase 2 | El punto 3 del epic: agendar es escribir donde corresponde. Fechar mueve, nunca copia |
+| [`002-06-fechar-pendiente.md`](002-06-fechar-pendiente.md) | Epic 002, fase 2 | Fechado de compromisos con `con fecha` y propagación de pendientes del día |
 | [`002-08-crear-ambito.md`](002-08-crear-ambito.md) | Epic 002, fase 3 mínima | El árbol correcto y el enlazado retroactivo, que acá llega solo hasta `AHORA.md` |
 | [`002-09-crear-nota.md`](002-09-crear-nota.md) | Epic 002, fase 5 mínima | Obliga a agregar la consecuencia "nota" a `spec/flujo-informacion.md` |
 | [`002-10-cli-superficie.md`](002-10-cli-superficie.md) | Epic 002 | Fuera de la cadena, siembra su propio vault: nouns y verbs en `-h`, códigos de salida, y el barrido de que todo error nombre la corrección |

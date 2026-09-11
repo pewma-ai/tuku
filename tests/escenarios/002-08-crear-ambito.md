@@ -7,7 +7,7 @@ El autor no preconfigura frentes de vida: escribe de corrido y, cuando un ámbit
 ## Estado inicial
 
 ```bash
-cp -r ../../002-06-escribir-en-un-dia-fecha/escribir-un-pendiente-en-un/mi-vault .
+cp -r ../../002-06-fechar-pendiente/fechar-un-pendiente-en-dia/mi-vault .
 ```
 
 ## Escenario: crear un ámbito deja el árbol correcto
