@@ -34,31 +34,55 @@
 ## 3. Grafo de Propagación y Dependencias
 
 ```mermaid
-graph TD
-    subgraph Canónicos [Fuentes Primarias Canónicas]
-        Entrada[Dictado / Invocación CLI] --> AHORA[AHORA.md]
-        Entrada --> PENDIENTES[PENDIENTES.md]
-        Entrada --> NOTAS[notas/*.md]
-        Entrada --> AMBITO_PAG[ambitos/ambito/ambito.md]
+%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
+flowchart TD
+    subgraph ENTRADAS["Captura y Comandos"]
+        direction LR
+        CLI["Entrada del Autor<br/>(Dictado / CLI tuku)"]
     end
 
-    subgraph Derivados [Regenerables con tuku rebuild]
-        PENDIENTES -->|tuku todo propagate| REGION_DIA[Región del día en AHORA.md]
-        PENDIENTES -->|tuku todo propagate| PENDIENTES_AMBITOS[ambitos/PENDIENTES-AMBITOS.md]
-        AHORA -->|tuku scope activity| AMBITO_ESTA_SEMANA[Sección Esta Semana en ambito.md]
+    subgraph CANONICOS["Fuentes Primarias Canónicas"]
+        direction LR
+        AHORA["AHORA.md<br/>(Logbook)"]
+        PENDIENTES["PENDIENTES.md<br/>(Todo)"]
+        AMBITO_PAG["ambitos/ambito.md<br/>(Scope)"]
+        NOTAS["notas/slug.md<br/>(Note)"]
     end
 
-    subgraph Transclusiones [Vistas en Obsidian]
-        PENDIENTES_AMBITOS -.->|transclusión !...#^ambito| AMBITO_PAG
+    subgraph DERIVADOS["Vistas Derivadas (tuku rebuild)"]
+        direction LR
+        REGION_DIA["Región diaria en AHORA.md<br/>(callout de pendientes del día)"]
+        PENDIENTES_AMBITOS["ambitos/PENDIENTES-AMBITOS.md<br/>(transcluido por ambitos/ambito.md)"]
+        AMBITO_SEMANA["Sección Esta semana<br/>en ambitos/ambito.md"]
     end
 
-    subgraph Verificación [Supervisión y Salud]
-        CONFIG[reglas/config.tuku.md] --> DOCTOR[tuku doctor]
-        TYPES[reglas/types.md] --> DOCTOR
-        LIBRO[LIBRO-DE-ESTILO.md] --> DOCTOR
-        AHORA --> DOCTOR
-        PENDIENTES --> DOCTOR
+    subgraph SUPERVISION["Supervisión de Salud (tuku doctor)"]
+        direction LR
+        CONFIG["reglas/config.tuku.md"]
+        TYPES["reglas/types.md"]
+        LIBRO["LIBRO-DE-ESTILO.md"]
+        DOCTOR["Auditoría Integral<br/>(tuku doctor)"]
     end
+
+    ENTRADAS --> CANONICOS
+    PENDIENTES -->|tuku todo propagate| REGION_DIA
+    PENDIENTES -->|tuku todo propagate| PENDIENTES_AMBITOS
+    AHORA -->|tuku scope activity| AMBITO_SEMANA
+
+    CONFIG --> DOCTOR
+    TYPES --> DOCTOR
+    LIBRO --> DOCTOR
+    CANONICOS --> DOCTOR
+
+    classDef entrada fill:#dbeafe,color:#1e3a5f,stroke:#93c5fd
+    classDef canonico fill:#dcfce7,color:#166534,stroke:#86efac
+    classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
+    classDef regla fill:#f1f5f9,color:#334155,stroke:#cbd5e1
+
+    class CLI,DOCTOR entrada
+    class AHORA,PENDIENTES,AMBITO_PAG,NOTAS canonico
+    class REGION_DIA,PENDIENTES_AMBITOS,AMBITO_SEMANA derivado
+    class CONFIG,TYPES,LIBRO regla
 ```
 
 ---
