@@ -35,7 +35,7 @@
 
 ```mermaid
 %%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart TD
+flowchart LR
     subgraph ENTRADAS["Captura y Comandos"]
         direction LR
         CLI["Entrada del Autor<br/>(Dictado / CLI tuku)"]

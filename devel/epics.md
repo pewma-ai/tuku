@@ -82,7 +82,7 @@ Actualizado el 2026-09-19.
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | cerrado | cerrado el 2026-09-19; siete escenarios en verde y verificación humana de instalación limpia y siembra offline completada |
-| 002 | El día uno, a mano | `vacio` → `primer-dia` | por cerrar | doce escenarios deterministas en verde (`002-01` a `002-12`, con `002-10` completo). Falta revisión a mano de `playground/002-09-crear-nota/` contra criterio de salida |
+| 002 | El día uno, a mano | `vacio` → `primer-dia` | cerrado | cerrado el 2026-09-19; doce escenarios deterministas en verde y aceptación humana en playground/002-09 completada |
 | 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | siete escenarios en verde (`003-01` a `003-07`), con modelo barato y esfuerzo bajo. El `003-08` (segundo arnés) queda pendiente. Falta revisión a mano de los turnos de `playground/003-0*/` contra criterio de salida |
 | 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 004 |
@@ -101,7 +101,7 @@ Que una persona nueva instale TUKU con un comando, siembre un vault en un direct
 Alguien instala TUKU y empieza a usarlo el mismo día sobre un vault vacío. Todo lo que hace lo hace invocando `tuku` a mano: cada decisión del autor (`tuku entry add`, `tuku todo open`, `tuku note create`, etc.) deja huella cronológica en la bitácora del ciclo y aplica sus consecuencias de forma atómica e idempotente. Cubre las fases 1 y 2 completas, y la versión mínima de las fases 3 y 5.
 
 - **Entregable:** ciclo abierto con plantilla completa, registros cronológicos, consecuencias aplicadas de forma atómica vía bitácora, fechado automático, ámbito creado con enlaces retroactivos y nota creada a petición.
-- **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). Doce escenarios en verde (`002-01` a `002-09`, `002-11` y `002-12` en cadena, más `002-10` fuera de ella). Se salda el principio 9 mediante `tuku rebuild`.
+- **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). Doce escenarios en verde (`002-01` a `002-09`, `002-11` y `002-12` en cadena, más `002-10` fuera de ella). Se salda el principio 9 mediante `tuku rebuild`. Cerrado el 2026-09-19 tras verificación humana de notas y bitácora en Obsidian.
 
 ## Epic 003. El día uno, dictado
 
