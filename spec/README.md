@@ -109,7 +109,7 @@ El formato es [OKF](https://github.com/GoogleCloudPlatform/open-knowledge-format
 
 **Los nombres de campo van en inglés**, como los comandos `tuku`: son superficie experta, la lee una máquina o alguien que sabe lo que busca. El cuerpo sigue en castellano, que es donde escribe el autor.
 
-**La lista de `type` vive en [`reglas/types.md`](../template/vanilla/reglas/types.md)**, no en el libro de estilo. Es contrato: renombrar `Logbook` rompe los comandos y deja el vault ilegible para cualquier herramienta que hable OKF, al revés de las tablas del libro de estilo, que el autor cambia a gusto. Los tipos que hay hoy son `Logbook`, `Pending`, `Scope`, `Note`, `Cadence`, `Capacity`, `Config` y `Style Guide`. Agregar uno es agregar una fila.
+**La lista de `type` vive en [`reglas/types.md`](../template/vanilla/reglas/types.md)**, no en el libro de estilo. Es contrato: renombrar `Logbook` rompe los comandos y deja el vault ilegible para cualquier herramienta que hable OKF, al revés de las tablas del libro de estilo, que el autor cambia a gusto. Los tipos que hay hoy son `Logbook`, `Todo`, `Derived`, `Scope`, `Note`, `Cadence`, `Capacity`, `Config` y `Style Guide`. Agregar uno es agregar una fila.
 
 **Los `AGENTS.md` quedan fuera** y no llevan frontmatter: son reglas de operación, no conocimiento.
 

@@ -15,14 +15,14 @@ Guía de trabajo para agentes y colaboradores. Este repositorio contiene el moto
 |---|---|---|
 | [`docs/`](docs/README.md) | Marco rector: brief, principios, glosario y libro de estilo | Fundacional |
 | [`spec/`](spec/README.md) | Especificación normativa de primitivas y contratos del sistema | Normativo |
-| [`devel/`](devel/epics.md) | Plan de construcción: epics, fases, entorno y diario de iteraciones | Planificación |
+| [`devel/`](devel/epics.md) | Plan de construcción: epics, fases, dependencias, entorno y diario de iteraciones | Planificación |
 | [`template/`](template/README.md) | Estructuras Markdown iniciales que se siembran en un nuevo vault | Producto |
 | [`src/`](src/) | Código fuente del paquete Python `tuku` | Implementación |
 | [`corpus/`](corpus/README.md) | Dictados de referencia reales y ficticios para pruebas de proceso | Datos |
 | [`tests/`](tests/README.md) | Capa unitaria en memoria y escenarios encadenados sobre el vault | Verificación |
 | `playground/` | Entornos de prueba efímeros generados por los tests (ignorado por git) | Descartable |
 
-Jerarquía de precedencia: Dentro de un epic, [`spec/`](spec/README.md) manda sobre el código. Entre epics, los experimentos y el uso mandan sobre [`spec/`](spec/README.md). [`devel/epics.md`](devel/epics.md) es la única fuente de verdad sobre el orden y estado de implementación.
+Jerarquía de precedencia: Dentro de un epic, [`spec/`](spec/README.md) manda sobre el código. Entre epics, los experimentos y el uso mandan sobre [`spec/`](spec/README.md). [`devel/epics.md`](devel/epics.md) es la única fuente de verdad sobre el orden y estado de implementación. [`devel/dependencies-tree.md`](devel/dependencies-tree.md) mapea el cableado estructural entre artefactos, specs, plantillas y módulos.
 
 ## El ciclo de desarrollo e iteraciones
 

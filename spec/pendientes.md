@@ -25,7 +25,7 @@ Un archivo y una sola tabla con cuatro columnas: `| Horizonte | Cuándo | Ámbit
 
 ```text
 ---
-type: Pending
+type: Todo
 ---
 
 | Horizonte | Cuándo | Ámbito | Detalle |

@@ -32,7 +32,7 @@ from tuku.resultado import Resultado
 CAMPOS_REQUERIDOS = ("TZ", "cycle_type", "tuku_template")
 
 #: Los `type` sin los cuales un vault no se puede describir entero.
-TIPOS_REQUERIDOS = ("Logbook", "Pending", "Scope", "Note", "Cadence", "Config", "Style Guide")
+TIPOS_REQUERIDOS = ("Logbook", "Todo", "Scope", "Note", "Cadence", "Config", "Style Guide")
 
 _FILA = re.compile(r"^\|\s*`([^`]+)`\s*\|")
 

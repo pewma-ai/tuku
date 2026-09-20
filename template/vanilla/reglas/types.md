@@ -7,9 +7,10 @@ type: Config
 
 | `type`        | Qué archivo                          | Se reconoce por                             |
 | ------------- | ------------------------------------ | ------------------------------------------- |
-| `Logbook`     | `AHORA.md` y todo lo de `bitacoras/` | Registros fechados, en orden de hora        |
-| `Pending`     | `PENDIENTES.md`                      | Lo abierto, agrupado por horizonte          |
-| `Scope`       | Los archivos de `ambitos/`           | Un frente de la vida del autor              |
+| `Logbook`     | `AHORA.md` y todo lo de `bitacoras/` | Registros fechados, en orden de hora                        |
+| `Todo`        | `PENDIENTES.md`                      | Lo abierto, agrupado por horizonte                          |
+| `Derived`     | `ambitos/PENDIENTES-AMBITOS.md`      | Archivos generados automáticamente desde fuentes canónicas |
+| `Scope`       | Los archivos de `ambitos/`           | Un frente de la vida del autor                              |
 | `Note`        | Los archivos de `notas/`             | Algo que no pertenece a un día              |
 | `Cadence`     | Los `CADENCIAS.md`                   | Lo que vuelve                               |
 | `Capacity`    | Los `CAPACIDAD.md`                   | Lo que rinde un día, y lo que se va antes   |

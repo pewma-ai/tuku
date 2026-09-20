@@ -97,7 +97,7 @@ def _vault(tmp: Path, archivos: dict[str, str]) -> Path:
 
 COMPLETO = {
     "AHORA.md": "---\ntype: Logbook\n---\n",
-    "PENDIENTES.md": "---\ntype: Pending\n---\n",
+    "PENDIENTES.md": "---\ntype: Todo\n---\n",
     "LIBRO-DE-ESTILO.md": "---\ntype: Style Guide\n---\n",
     "ambitos/personal/personal.md": "---\ntype: Scope\n---\n",
     "ambitos/AGENTS.md": "# Reglas, sin frontmatter a propósito\n",
@@ -105,7 +105,7 @@ COMPLETO = {
     "reglas/types.md": "---\ntype: Config\n---\n",
     "reglas/plantilla/AHORA.md": "---\ntype: Logbook\n---\n",
 }
-VALIDOS = ["Config", "Logbook", "Pending", "Scope", "Style Guide"]
+VALIDOS = ["Config", "Logbook", "Scope", "Style Guide", "Todo"]
 
 
 def test_vault_completo_esta_sano(tmp_path: Path) -> None:

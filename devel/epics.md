@@ -77,11 +77,11 @@ Todo epic que añada comandos fija su superficie en un escenario propio: `tuku -
 
 ## Estado de los Epics
 
-Actualizado el 2026-09-09.
+Actualizado el 2026-09-19.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
-| 001 | Un TUKU mínimo instalable | `vacio` | reabierto, mecanismo hecho | `tuku init` implementado y los siete `001-0X` en verde; falta re-verificación con persona sobre `uv tool install` + `tuku init` |
+| 001 | Un TUKU mínimo instalable | `vacio` | cerrado | cerrado el 2026-09-19; siete escenarios en verde y verificación humana de instalación limpia y siembra offline completada |
 | 002 | El día uno, a mano | `vacio` → `primer-dia` | por cerrar | doce escenarios deterministas en verde (`002-01` a `002-12`, con `002-10` completo). Falta revisión a mano de `playground/002-09-crear-nota/` contra criterio de salida |
 | 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | siete escenarios en verde (`003-01` a `003-07`), con modelo barato y esfuerzo bajo. El `003-08` (segundo arnés) queda pendiente. Falta revisión a mano de los turnos de `playground/003-0*/` contra criterio de salida |
 | 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
@@ -94,7 +94,7 @@ Actualizado el 2026-09-09.
 Que una persona nueva instale TUKU con un comando, siembre un vault en un directorio vacío y empiece a escribir el mismo día, sin configurar nada y sin saber qué es TUKU. Cubre la fase 0.
 
 - **Entregable:** `uv tool install git+https://github.com/pewma-ai/tuku.git@devel` deja `tuku` en PATH; `tuku init mi-vault` produce el estado cero sin tocar la red.
-- **Detalle completo:** [`../tests/escenarios/001-00-un-tuku-minimo-instalable.md`](../tests/escenarios/001-00-un-tuku-minimo-instalable.md). Los siete escenarios (`001-01` a `001-07`) están en verde.
+- **Detalle completo:** [`../tests/escenarios/001-00-un-tuku-minimo-instalable.md`](../tests/escenarios/001-00-un-tuku-minimo-instalable.md). Siete escenarios (`001-01` a `001-07`) en verde. Cerrado tras verificación humana de instalación y siembra offline.
 
 ## Epic 002. El día uno, a mano
 

@@ -1,5 +1,5 @@
 ---
-type: Pending
+type: Todo
 ---
 
 | Horizonte | Cuándo | Ámbito | Detalle |

@@ -5,7 +5,7 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 ## Instalación y entorno
 
 - **Configuración del agente tras la instalación:** `uv tool install` y [`tuku init`](src/tuku/init.py) dejan el vault escrito, pero no dejan configurado al agente que lo va a leer. Falta un paso complementario que aplique la configuración del agente elegido por el autor. El caso real es Claude Code: hardcodea `CLAUDE.md` como archivo de memoria y no expone ninguna opción para renombrarlo, así que leer el [`AGENTS.md`](AGENTS.md) del vault exige un hook `SessionStart` que lo descubra e inyecte. Codex lee `AGENTS.md` de forma nativa y Gemini usa `GEMINI.md`. Queda por decidir la forma: `tuku init --agente claude`, un comando propio, o solo instrucciones documentadas que el autor ejecuta a mano. Sea cual sea, el principio 1 exige el equivalente "A mano".
-- **Prueba con usuario ajeno:** verificar instalación y primer registro leyendo solo [`AGENTS.md`](AGENTS.md). Es el criterio de salida pendiente del epic 001.
+- **Resuelto (2026-09-19): prueba con usuario ajeno:** verificada la instalación limpia (`uv tool install`) y primer registro a mano leyendo solo [`AGENTS.md`](AGENTS.md). Epic 001 cerrado.
 
 ## Spec por alinear
 

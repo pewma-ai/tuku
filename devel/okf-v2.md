@@ -33,7 +33,7 @@ Existe además un tipo `Attested Computation` con campos propios (`runtime`, `pa
 
 ## Qué conviene tomar
 
-**`type` obligatorio en todo archivo con frontmatter.** Es el único requisito de OKF y el que abre la puerta a que un lector externo entienda un vault sin conocer TUKU. El vocabulario es libre, así que TUKU declara el suyo: `Cycle` para `AHORA.md` y las bitácoras, `Scope` para los ámbitos, `Note` para las notas, `Pending` para `PENDIENTES.md`, `Cadence` para los `CADENCIAS.md`, `Style Guide` para el libro de estilo.
+**`type` obligatorio en todo archivo con frontmatter.** Es el único requisito de OKF y el que abre la puerta a que un lector externo entienda un vault sin conocer TUKU. El vocabulario es libre, así que TUKU declara el suyo: `Cycle` para `AHORA.md` y las bitácoras, `Scope` para los ámbitos, `Note` para las notas, `Todo` para `PENDIENTES.md`, `Cadence` para los `CADENCIAS.md`, `Style Guide` para el libro de estilo.
 
 **Los nombres de campo en inglés.** Igual que los comandos `tuku`, el frontmatter es superficie experta: quien lo edita ya sabe lo que hace. El cuerpo sigue en castellano, que es donde escribe el autor. Hoy `AHORA.md` usa `ciclo`, `desde` y `hasta`; el equivalente es `period`, `from` y `to`.
 

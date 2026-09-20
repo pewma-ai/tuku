@@ -20,7 +20,7 @@ def test_scope_lint_vault_sano(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     callout_esperado = (
-        "---\ntype: Pending\n---\n\n"
+        "---\ntype: Derived\n---\n\n"
         "> [!todo] Pendientes en **Personal** ^personal\n> SIN PENDIENTES\n"
     )
     (ambitos_dir / "PENDIENTES-AMBITOS.md").write_text(
@@ -65,7 +65,7 @@ def test_scope_lint_falta_callout_en_pendientes_ambitos(tmp_path: Path) -> None:
     )
     # PENDIENTES-AMBITOS sin el callout de personal
     (ambitos_dir / "PENDIENTES-AMBITOS.md").write_text(
-        "---\ntype: Pending\n---\n\n# Pendientes\n",
+        "---\ntype: Derived\n---\n\n# Pendientes\n",
         encoding="utf-8",
     )
 

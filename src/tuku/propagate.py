@@ -54,7 +54,17 @@ ARCHIVO_AMBITOS = Path("ambitos") / "PENDIENTES-AMBITOS.md"
 
 SIN_PENDIENTES = "SIN PENDIENTES"
 
-_ENCABEZADO_AMBITOS = "---\ntype: Pending\n---\n\n# Pendientes por ámbito\n"
+_ENCABEZADO_AMBITOS = (
+    "---\n"
+    "type: Derived\n"
+    "origin: PENDIENTES.md\n"
+    "command: tuku todo propagate\n"
+    "---\n\n"
+    "# Pendientes por ámbito\n\n"
+    "> [!warning] Vista derivada\n"
+    "> No modificar este archivo directamente. Los cambios se realizan en "
+    "[[../PENDIENTES.md|PENDIENTES.md]] y se reflejan aquí mediante propagación automática.\n"
+)
 
 
 def linea_del_dia(fila: todo.Fila) -> str:

@@ -9,7 +9,7 @@ from tuku.todo import filas
 
 PENDIENTES = (
     "---\n"
-    "type: Pending\n"
+    "type: Todo\n"
     "---\n\n"
     "| Horizonte | Cuándo | Ámbito | Detalle |\n"
     "| --------- | ------ | ------ | ------- |\n"
