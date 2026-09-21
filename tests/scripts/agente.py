@@ -495,6 +495,21 @@ sys.exit(main(sys.argv[1:]))
 """
 
 
+#: Una función de shell que llama al shim por ruta absoluta, para los arneses
+#: que ejecutan en **shell de login**.
+#:
+#: Anteponer el shim al `PATH` no alcanza: un `bash -l` relee el perfil del
+#: usuario, y un perfil que hace `export PATH="~/.local/bin:$PATH"` (el de esta
+#: máquina, y el que deja `uv tool install`) vuelve a poner el `tuku` instalado
+#: delante del shim. El agente ejecutaba el comando correcto contra el TUKU
+#: equivocado y la traza quedaba vacía, que es el fallo que `gherkin` denuncia.
+#:
+#: Una función gana a cualquier `PATH` porque bash la resuelve antes, y el
+#: perfil del usuario no la pisa. Se exporta para que la hereden los subshells,
+#: y `declare -f` la conserva en los arneses que fotografían el entorno.
+_FUNCION_SHIM = 'tuku() {{ "{shim}" "$@"; }}\nexport -f tuku 2>/dev/null || true\n'
+
+
 def _sembrar_shim(dir: Path) -> Path:
     """Deja un `tuku` ejecutable en `dir` y devuelve el archivo de traza."""
     shim = dir / "tuku"
@@ -502,6 +517,7 @@ def _sembrar_shim(dir: Path) -> Path:
         _SHIM.format(python=sys.executable, src=str(RAIZ_REPO / "src")), encoding="utf-8"
     )
     shim.chmod(0o755)
+    (dir / "shim.bash").write_text(_FUNCION_SHIM.format(shim=shim), encoding="utf-8")
     return dir / "traza.jsonl"
 
 
@@ -555,6 +571,10 @@ def turno(vault: Path, prompt: str, timeout: int | None = None) -> Turno:
             "PATH": f"{bin}{os.pathsep}{_path_sin_venv()}",
             "TUKU_TRAZA": str(traza),
             "TUKU_HOME": str(RAIZ_REPO),
+            # Lo que bash no-interactivo sourcea al arrancar. Es por dónde entra
+            # la función del shim en los arneses que ejecutan por shell de login.
+            "BASH_ENV": str(bin / "shim.bash"),
+            "ENV": str(bin / "shim.bash"),
         }
         espera = timeout or int(os.environ.get("TUKU_AGENTE_TIMEOUT", TIMEOUT))
         try:

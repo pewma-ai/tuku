@@ -32,4 +32,5 @@ El autor dicta su primer día en lenguaje natural y el agente ejecuta las operac
 - [`003-05-lo-que-no-se-registra.md`](003-05-lo-que-no-se-registra.md) — Casos negativos: descarta muletillas de dictado y reporta cierres huérfanos sin tocar archivos a mano.
 - [`003-06-el-dia-completo.md`](003-06-el-dia-completo.md) — Secuencia completa del martes 11 produciendo un vault equivalente al del Epic 002.
 - [`003-07-lo-que-no-hace-sin-preguntar.md`](003-07-lo-que-no-hace-sin-preguntar.md) — Respeto de la tabla de Límites: solicita confirmación ante ambigüedades o carpetas protegidas.
-- [`003-08-el-mismo-vault-otro-arnes.md`](003-08-el-mismo-vault-otro-arnes.md) — Portabilidad: evalúa que las reglas operativas dependen del vault y no del arnés de ejecución.
+- [`003-08-el-mismo-vault-otro-arnes.md`](003-08-el-mismo-vault-otro-arnes.md) — Portabilidad: evalúa que las reglas operativas dependen del vault y no del arnés de ejecución (`hermes`).
+- [`003-09-el-mismo-vault-tercer-arnes.md`](003-09-el-mismo-vault-tercer-arnes.md) — Portabilidad, tercer caso: el mismo dictado bajo `claude` con sonnet en esfuerzo bajo, el único arnés que no descubre solo el `AGENTS.md`.

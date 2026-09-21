@@ -83,7 +83,7 @@ Actualizado el 2026-09-19.
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | cerrado | cerrado el 2026-09-19; siete escenarios en verde y verificación humana de instalación limpia y siembra offline completada |
 | 002 | El día uno, a mano | `vacio` → `primer-dia` | cerrado | cerrado el 2026-09-19; doce escenarios deterministas en verde y aceptación humana en playground/002-09 completada |
-| 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | siete escenarios en verde (`003-01` a `003-07`), con modelo barato y esfuerzo bajo. El `003-08` (segundo arnés) queda pendiente. Falta revisión a mano de los turnos de `playground/003-0*/` contra criterio de salida |
+| 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | nueve escenarios en verde (`003-01` a `003-09`), con modelo barato y esfuerzo bajo. El `003-08` (`hermes`) y el `003-09` (`claude`, sonnet en esfuerzo bajo) quedaron en verde el 2026-09-20: la portabilidad del `AGENTS.md` se sostiene en tres arneses. Falta revisión a mano de los turnos de `playground/003-0*/` contra criterio de salida |
 | 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | sin empezar | depende del epic 004 |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
