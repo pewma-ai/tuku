@@ -191,11 +191,11 @@ TIMEOUT = 600
 #: que uno quiere.
 #:
 #: El sujeto sale de lo que no cambia entre los dos intentos: el argumento
-#: posicional (el título de una nota, el nombre de un ámbito) o el par día y
-#: hora que ubica un registro. Dos invocaciones del mismo verbo sobre el mismo
+#: posicional (el título de una nota, el nombre de un ámbito) o el `--at` que
+#: ubica un registro. Dos invocaciones del mismo verbo sobre el mismo
 #: sujeto, **seguidas**, son un intento y su corrección. Separadas por otro
 #: comando, no: ahí el agente ya siguió adelante y volver es otra cosa.
-_UBICAN = ("--day", "--dia", "--hour", "--hora")
+_UBICAN = ("--at", "--cuando")
 
 
 def _sujeto(argv: list[str]) -> tuple[str, ...]:

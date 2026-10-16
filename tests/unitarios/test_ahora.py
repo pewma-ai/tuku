@@ -2,7 +2,7 @@
 
 Es el módulo que traduce entre la forma en que el autor escribe un día
 (`## Martes 11 de agosto`) y una fecha. El encabezado canónico vivía en
-`cli.py`, y es lo que decide bajo qué día cae un registro sin `--day`.
+`cli.py`, y es lo que decide bajo qué día cae un registro sin día en `--at`.
 """
 
 from __future__ import annotations

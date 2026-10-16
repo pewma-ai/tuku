@@ -100,6 +100,20 @@ class Fila:
     ambito: str | None
     cuerpo: str
 
+    @property
+    def dia(self) -> date | None:
+        """El día en que vence, sin la hora; `None` si no tiene o no se lee."""
+        try:
+            return date.fromisoformat(self.vence.split()[0]) if self.vence else None
+        except ValueError:
+            return None
+
+    @property
+    def hora(self) -> str | None:
+        """La hora en que vence, si la lleva."""
+        partes = self.vence.split()
+        return partes[1] if len(partes) == 2 else None
+
     def linea(self, rutas: Mapping[str, str] | None = None) -> str:
         """La fila como línea de la tabla; el link se escribe desde `PENDIENTES.md`."""
         ambito = link.enlace_ambito(self.ambito, "PENDIENTES.md", rutas) if self.ambito else ""
@@ -475,7 +489,7 @@ def abrir_en_vault(
     body: str,
     scope: str | None = None,
     horizon: str | None = None,
-    due: date | None = None,
+    due: str = "",
     propagate: bool = True,
     day: date | None = None,
     hour: str | None = None,
@@ -492,7 +506,8 @@ def abrir_en_vault(
     `spec/pendientes.md` persigue. `propagate=False` es la escotilla del lote,
     que propaga una sola vez al final.
 
-    `day` y `hour` son cuándo se prometió y `due`, para cuándo es
+    `day` y `hour` son cuándo se prometió y `due`, para cuándo es, como se
+    escribe en la columna `Vence`: `AAAA-MM-DD` o `AAAA-MM-DD HH:MM`
     (`spec/pendientes.md`). Un `day` posterior a HOY se rechaza: el registro
     de algo que todavía no se dijo no existe, y la fecha del pendiente va en
     `due`. Con `due`, el horizonte es `con fecha`; sin ninguno de los dos, el
@@ -507,7 +522,7 @@ def abrir_en_vault(
 
     if day is not None and day > date.today():
         return Resultado.rechazo(
-            f"el {day.isoformat()} todavía no llega: el día es cuándo se prometió. "
+            f"el {day.isoformat()} todavía no llega: `--at` es cuándo se prometió. "
             f"Para que venza ese día: --due {day.isoformat()}"
         )
     limpio_scope = ambitos.normalizar(scope) if scope else None
@@ -546,7 +561,7 @@ def abrir_en_vault(
             ruta.read_text(encoding="utf-8"),
             marca,
             horizon=horizon,
-            due=due.isoformat() if due else "",
+            due=due,
             escalera=escalera,
             rutas=ambitos.rutas(vault),
         ),

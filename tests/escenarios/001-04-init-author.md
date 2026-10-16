@@ -8,7 +8,7 @@ Dado un directorio destino vacío
 Cuando se corre
 
 ```bash
-tuku init mi-vault --date 2026-08-11 --author "ARTURO PEREZ-REVERTE (Arturo)"
+tuku init mi-vault --at 2026-08-11 --author "ARTURO PEREZ-REVERTE (Arturo)"
 ```
 
 Entonces `LIBRO-DE-ESTILO.md` queda con ese nombre en la sección "El autor"
@@ -20,7 +20,7 @@ Dado el mismo destino
 Cuando se corre
 
 ```bash
-tuku init en-blanco --date 2026-08-11 --author "   "
+tuku init en-blanco --at 2026-08-11 --author "   "
 ```
 
 Entonces la línea `**Nombre del autor:**` queda intacta con su texto de partida

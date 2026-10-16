@@ -68,7 +68,7 @@ Consecuencia: **ninguna automatización escribe en `PENDIENTES.md` por calendari
 
 Con fecha exacta pasa a `con fecha` y aparece bajo el día correspondiente de `AHORA.md`, propagado por un comando.
 
-**Cuándo se prometió y para cuándo es son dos fechas.** `--day` y `--hour` son cuándo se dijo: el registro `**pendiente**` va a ese día y hora de la bitácora, y un día posterior a hoy se rechaza, porque lo que todavía no se dijo no tiene registro. `--due` es el día en que vence y lo único que fecha: el pendiente nace `con fecha` y aparece en ese día de `AHORA.md`, derivado de la columna. Fechar es un acto deliberado; escribir hoy no fecha nada. `--due` y `--horizon` son excluyentes: un pendiente tiene fecha o tiene escalón.
+**Cuándo se prometió y para cuándo es son dos fechas.** `--at` es cuándo se dijo: el registro `**pendiente**` va a ese día y hora de la bitácora, y un día posterior a hoy se rechaza, porque lo que todavía no se dijo no tiene registro. `--due` es cuándo vence y lo único que fecha: el pendiente nace `con fecha` y aparece en ese día de `AHORA.md`, derivado de la columna. `Vence` lleva `AAAA-MM-DD`, o `AAAA-MM-DD HH:MM` si se dio la hora, y las vistas muestran la hora delante del pendiente. Fechar es un acto deliberado; escribir hoy no fecha nada. `--due` y `--horizon` son excluyentes: un pendiente tiene fecha o tiene escalón.
 
 Esto ataja el escalón: un pendiente puede nacer en `con fecha` sin pasar por ningún horizonte del autor. La escalera describe cómo se concreta lo que nació difuso, no un camino obligatorio.
 

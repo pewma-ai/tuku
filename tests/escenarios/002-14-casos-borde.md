@@ -16,7 +16,7 @@ cd mi-vault
 Dado una copia de referencia, una línea ajena y otra borrada en `ambitos/PENDIENTES-AMBITOS.md`, y los callouts de pendientes del día borrados de `AHORA.md`
 ```bash
 cp -r . ../referencia
-sed -i.bak '/Ago\/12 - pagar la sesión con el psicólogo/d' ambitos/PENDIENTES-AMBITOS.md
+sed -i.bak '/Ago\/12 09:00 - pagar la sesión con el psicólogo/d' ambitos/PENDIENTES-AMBITOS.md
 echo "- una fila que nadie escribió" >> ambitos/PENDIENTES-AMBITOS.md
 sed -i.bak '/^> \[!todo\] Pendientes del día$/,/^$/d' AHORA.md
 rm ambitos/PENDIENTES-AMBITOS.md.bak AHORA.md.bak
@@ -49,7 +49,7 @@ Entonces sale con código 1 (`RECHAZO`) y nombra como corrección `tuku todo ope
 
 Dado un pendiente abierto el martes 11 y cerrado ese mismo día con un editor: el `(Hecho)` escrito en `AHORA.md` y la fila borrada de `PENDIENTES.md`
 ```bash
-tuku todo open --day 2026-08-11 --hour 15:00 --body "renovar el carnet"
+tuku todo open --at "2026-08-11 15:00" --body "renovar el carnet"
 awk '{print} /^- 19:10 - /{print "- 19:20 - [personal](ambitos/personal/personal.md) (Hecho): ~~renovar el carnet~~"}' AHORA.md > ahora.tmp && mv ahora.tmp AHORA.md
 sed -i.bak '/renovar el carnet/d' PENDIENTES.md && rm PENDIENTES.md.bak
 ```
@@ -72,7 +72,7 @@ touch ambitos/depto-centro/gastos/AGENTS.md ambitos/depto-centro/gastos/CADENCIA
 ```
 Cuando se escribe un registro a `gastos` y se revisa
 ```bash
-tuku entry add --day 2026-08-11 --hour 20:00 --scope gastos --body "**progreso**: revisé el detalle del mes"
+tuku entry add --at "2026-08-11 20:00" --scope gastos --body "**progreso**: revisé el detalle del mes"
 tuku scope lint
 ```
 Entonces `tuku scope lint` sale con código 1 (`RECHAZO`) y explica que una categoría no recibe registros
@@ -82,7 +82,7 @@ Y el registro queda escrito en `AHORA.md`: un error del autor se informa, nunca 
 
 Cuando se escribe `**Cadencia**` en vez de `**cadencia**` y se revisa
 ```bash
-tuku entry add --day 2026-08-11 --hour 13:30 --body "**Cadencia**: revisar la caldera"
+tuku entry add --at "2026-08-11 13:30" --body "**Cadencia**: revisar la caldera"
 tuku entry lint
 ```
 Entonces `tuku entry lint` sale con código 1 (`RECHAZO`) y dice cómo se escribe la marca

@@ -107,7 +107,7 @@ def test_entry_add_rechaza_abrir_y_nombra_tuku_todo_open(vault: Path) -> None:
 
     assert not r.ok
     assert (
-        f"tuku todo open --scope personal --day 2026-08-11 --hour 14:20 --body '{SIN_LINK}'"
+        f"tuku todo open --scope personal --at '2026-08-11 14:20' --body '{SIN_LINK}'"
         in r.mensaje
     )
     assert _ahora(vault) == antes
@@ -119,5 +119,5 @@ def test_entry_add_rechaza_cerrar_y_nombra_tuku_todo_close(vault: Path) -> None:
     r = entry.add_al_vault(vault, body=f"(Hecho): ~~{SIN_LINK}~~", day=DIA, hour="19:05")
 
     assert not r.ok
-    assert f"tuku todo close --day 2026-08-11 --hour 19:05 --body '{SIN_LINK}'" in r.mensaje
+    assert f"tuku todo close --at '2026-08-11 19:05' --body '{SIN_LINK}'" in r.mensaje
     assert _tabla(vault) == [SIN_LINK]

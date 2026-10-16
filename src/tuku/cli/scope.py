@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 
 from tuku import scope
-from tuku.cli.helpers import Handler, Subparsers, fecha, hora, traducir
+from tuku.cli.helpers import Handler, Subparsers, traducir
+from tuku.cli.opciones import Opciones
 
 
 def _cmd_scope_create(args: argparse.Namespace) -> int:
     return traducir(
-        scope.crear_con_enlazado(args.vault, args.name, day=args.day, hour=args.hour),
+        scope.crear_con_enlazado(args.vault, args.name, day=args.at.dia, hour=args.at.hora),
         "tuku scope create",
     )
 
@@ -51,23 +51,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         ),
     )
     scope_create_p.add_argument("name", help="nombre del ámbito")
-    scope_create_p.add_argument(
-        "--day",
-        "--dia",
-        dest="day",
-        type=fecha,
-        default=None,
-        help="día de la constancia (AAAA-MM-DD); por defecto, hoy",
-    )
-    scope_create_p.add_argument(
-        "--hour",
-        "--hora",
-        dest="hour",
-        type=hora,
-        default=None,
-        help="hora de la constancia (HH:MM); por defecto, ahora",
-    )
-    scope_create_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
+    Opciones(scope_create_p).at("cuándo se abre, para la constancia; lo que falte, hoy y ahora")
+    Opciones(scope_create_p).vault("vault a modificar")
 
     scope_rename_p = scope_v.add_parser(
         "rename",
@@ -80,7 +65,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     )
     scope_rename_p.add_argument("name", help="nombre actual del ámbito")
     scope_rename_p.add_argument("nuevo", help="nombre nuevo")
-    scope_rename_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
+    Opciones(scope_rename_p).vault("vault a modificar")
 
     scope_lint_p = scope_v.add_parser(
         "lint",
@@ -92,7 +77,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "`ambitos/PENDIENTES-AMBITOS.md`. No escribe nada."
         ),
     )
-    scope_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
+    Opciones(scope_lint_p).vault("vault a revisar")
 
     return {
         ("scope", "create"): _cmd_scope_create,

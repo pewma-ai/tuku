@@ -9,7 +9,7 @@ El día que se deriva del vault, sin dictarlo, está en el [`003-11`](003-11-el-
 ## Estado inicial
 
 ```bash
-tuku init mi-vault --date 2026-08-11
+tuku init mi-vault --at 2026-08-11
 ```
 
 ## Escenario: el día uno entero, con lo que no se anota, en un turno
@@ -36,16 +36,16 @@ Cámbiale el nombre a la carpeta de notas, ponle "apuntes".
 ```
 Entonces el dictado se traduce en doce comandos y ninguno más
 ```text
-tuku entry add --day 2026-08-11 --hour 09:12 --scope personal --body "..."   ×4
-tuku todo open --day 2026-08-11 --hour 13:00 --scope personal --body "..."    ×2
-tuku todo close --day 2026-08-11 --hour 19:05 --scope personal --body "..."   ×2
-tuku scope create depto-centro --day 2026-08-11
-tuku note create "<el título>" --scope depto-centro --day 2026-08-11 --hour 21:15
-tuku todo open --day 2026-08-11 --due 2026-08-12 --scope personal --body "..."
-tuku todo open --day 2026-08-11 --due 2026-08-12 --scope depto-centro --body "..."
+tuku entry add --at "2026-08-11 09:12" --scope personal --body "..."   ×4
+tuku todo open --at "2026-08-11 13:00" --scope personal --body "..."    ×2
+tuku todo close --at "2026-08-11 19:05" --scope personal --body "..."   ×2
+tuku scope create depto-centro --at 2026-08-11
+tuku note create "<el título>" --scope depto-centro --at "2026-08-11 21:15"
+tuku todo open --at 2026-08-11 --due "2026-08-12 09:00" --scope personal --body "..."
+tuku todo open --at 2026-08-11 --due "2026-08-12 09:30" --scope depto-centro --body "..."
 ```
 Y cada registro tiene su hora, su ámbito y su marca cerrada según la tabla de verdad
-Y los dos pendientes de mañana se prometen el martes 11 y vencen el miércoles 12
+Y los dos pendientes de mañana se prometen el martes 11 y vencen el miércoles 12 a las 09:00 y a las 09:30
 Y la consulta del pase escolar no deja nada escrito, y la respuesta nombra `AHORA.md` y `PENDIENTES.md`
 Y ni "recuérdame" ni la pregunta por los pendientes entran a `AHORA.md`
 Y el cuerpo del registro de las 18:40 enlaza a `depto-centro` de forma retroactiva, y el martes tiene la constancia de haberlo abierto

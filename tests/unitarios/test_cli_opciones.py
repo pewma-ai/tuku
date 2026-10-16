@@ -16,6 +16,7 @@ import pytest
 
 from tuku import cli, entry, init, todo
 from tuku.cli import EXITO, RECHAZO, USO, main
+from tuku.cli.opciones import Momento
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 HOY = "2026-08-11"
@@ -42,13 +43,13 @@ def _parsear(comando: str, *argv: str) -> argparse.Namespace:
 @pytest.mark.parametrize("comando", COMANDOS)
 def test_sin_opciones_el_vault_es_el_directorio_actual(comando: str) -> None:
     args = _parsear(comando)
-    assert (args.vault, args.scope, args.day, args.hour) == (Path("."), None, None, None)
+    assert (args.vault, args.scope, args.at) == (Path("."), None, Momento())
 
 
 @pytest.mark.parametrize("comando", COMANDOS)
 def test_cada_opcion_llega_con_su_tipo(comando: str) -> None:
-    args = _parsear(comando, "--vault", "v", "--scope", "casa", "--day", HOY, "--hour", "09:12")
-    assert (args.vault, args.scope, args.day, args.hour, args.body) == (
+    args = _parsear(comando, "--vault", "v", "--scope", "casa", "--at", f"{HOY} 9:12")
+    assert (args.vault, args.scope, args.at.dia, args.at.hora, args.body) == (
         Path("v"),
         "casa",
         date(2026, 8, 11),
@@ -59,8 +60,8 @@ def test_cada_opcion_llega_con_su_tipo(comando: str) -> None:
 
 @pytest.mark.parametrize("comando", COMANDOS)
 def test_los_alias_en_castellano_son_las_mismas_opciones(comando: str) -> None:
-    ingles = ("--scope", "casa", "--day", HOY, "--hour", "09:12", "--body", CUERPO)
-    castellano = ("--ambito", "casa", "--dia", HOY, "--hora", "09:12", "--cuerpo", CUERPO)
+    ingles = ("--scope", "casa", "--at", f"{HOY} 09:12", "--body", CUERPO)
+    castellano = ("--ambito", "casa", "--cuando", f"{HOY} 09:12", "--cuerpo", CUERPO)
     parser = cli._construir_parser()
     assert parser.parse_args([*comando.split(), *ingles]) == parser.parse_args(
         [*comando.split(), *castellano]
@@ -68,28 +69,20 @@ def test_los_alias_en_castellano_son_las_mismas_opciones(comando: str) -> None:
 
 
 @pytest.mark.parametrize("comando", COMANDOS)
-def test_la_hora_se_normaliza_a_dos_digitos(comando: str) -> None:
-    assert _parsear(comando, "--hour", "9:05").hour == "09:05"
-
-
-@pytest.mark.parametrize("comando", COMANDOS)
-@pytest.mark.parametrize(
-    "opcion", [("--day", "11-08-2026"), ("--hour", "las nueve"), ("--hour", "9:5")]
-)
-def test_una_fecha_o_una_hora_mal_escrita_es_error_de_uso(
-    comando: str, opcion: tuple[str, str], capsys: pytest.CaptureFixture[str]
+def test_un_at_mal_escrito_es_error_de_uso(
+    comando: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
     with pytest.raises(SystemExit) as e:
-        _parsear(comando, *opcion)
+        _parsear(comando, "--at", "11-08-2026")
     assert e.value.code == USO
-    assert opcion[1] in capsys.readouterr().err
+    assert "11-08-2026" in capsys.readouterr().err
 
 
 def test_todo_open_due_y_horizon() -> None:
-    assert _parsear("todo open", "--vence", HOY).due == date(2026, 8, 11)
+    assert _parsear("todo open", "--vence", f"{HOY} 09:00").due.celda() == f"{HOY} 09:00"
     assert _parsear("todo open", "--horizonte", "próxima semana").horizon == "próxima semana"
     sin = _parsear("todo open")
-    assert (sin.due, sin.horizon) == (None, None)
+    assert (sin.due, sin.horizon) == (Momento(), None)
 
 
 def test_due_y_horizon_juntos_es_error_de_uso(capsys: pytest.CaptureFixture[str]) -> None:
@@ -99,9 +92,9 @@ def test_due_y_horizon_juntos_es_error_de_uso(capsys: pytest.CaptureFixture[str]
     assert "--horizon" in capsys.readouterr().err
 
 
-def test_un_due_mal_escrito_es_error_de_uso() -> None:
+def test_entry_rename_exige_la_hora() -> None:
     with pytest.raises(SystemExit) as e:
-        _parsear("todo open", "--due", "mañana")
+        cli._construir_parser().parse_args(["entry", "rename", "--at", HOY, "--body", "x"])
     assert e.value.code == USO
 
 
@@ -125,7 +118,7 @@ def vault(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def _correr(comando: str, *argv: str) -> int:
     """Corre `comando` dentro del vault; un `todo close` cierra lo que abre antes, otro día."""
     if comando == "todo close":
-        abrir = ["todo", "open", "--day", "2026-08-10", "--hour", "08:00", "--body", CUERPO]
+        abrir = ["todo", "open", "--at", "2026-08-10 08:00", "--body", CUERPO]
         assert main(abrir) == EXITO
     return main([*comando.split(), *argv, "--body", CUERPO])
 
@@ -143,7 +136,7 @@ def _config(vault: Path, cambiar: Callable[[str], str]) -> None:
 
 @pytest.mark.parametrize("comando", COMANDOS)
 def test_abreviado_dentro_del_vault_va_al_ambito_por_defecto(comando: str, vault: Path) -> None:
-    assert _correr(comando, "--day", HOY, "--hour", "09:12") == EXITO
+    assert _correr(comando, "--at", f"{HOY} 09:12") == EXITO
     assert _martes(vault) == [f"- 09:12 - {PERSONAL} {REGISTRO[comando]}"]
 
 
@@ -173,13 +166,13 @@ def test_vault_desde_otro_directorio(
     vault: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    assert _correr("entry add", "--vault", str(vault), "--day", HOY, "--hour", "09:12") == EXITO
+    assert _correr("entry add", "--vault", str(vault), "--at", f"{HOY} 09:12") == EXITO
     assert _martes(vault) == [f"- 09:12 - {PERSONAL} {CUERPO}"]
 
 
 def test_sin_scope_default_el_registro_no_lleva_ambito(vault: Path) -> None:
     _config(vault, lambda t: "\n".join(x for x in t.splitlines() if "`scope_default`" not in x))
-    assert _correr("entry add", "--day", HOY, "--hour", "09:12") == EXITO
+    assert _correr("entry add", "--at", f"{HOY} 09:12") == EXITO
     assert _martes(vault) == [f"- 09:12 - {CUERPO}"]
 
 
@@ -187,7 +180,7 @@ def test_un_scope_default_que_no_existe_nombra_scope_create(
     vault: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     _config(vault, lambda t: t.replace("| `personal` ", "| `casa`     "))
-    assert _correr("entry add", "--day", HOY, "--hour", "09:12") == RECHAZO
+    assert _correr("entry add", "--at", f"{HOY} 09:12") == RECHAZO
     assert "tuku scope create casa" in capsys.readouterr().err
     assert _martes(vault) == []
 
@@ -195,7 +188,7 @@ def test_un_scope_default_que_no_existe_nombra_scope_create(
 def test_no_propagate_no_toca_las_vistas(vault: Path) -> None:
     vista = vault / "ambitos" / "PENDIENTES-AMBITOS.md"
     antes = vista.read_bytes()
-    assert _correr("todo open", "--no-propagate", "--day", HOY, "--hour", "09:12") == EXITO
+    assert _correr("todo open", "--no-propagate", "--at", f"{HOY} 09:12") == EXITO
     assert vista.read_bytes() == antes
     assert _martes(vault) == [f"- 09:12 - {PERSONAL} **pendiente**: {CUERPO}"]
 
@@ -206,7 +199,7 @@ def _pendientes(vault: Path) -> list[str]:
 
 
 def test_due_fecha_el_pendiente_y_el_registro_queda_cuando_se_prometio(vault: Path) -> None:
-    assert _correr("todo open", "--day", HOY, "--hour", "21:30", "--due", "2026-08-13") == EXITO
+    assert _correr("todo open", "--at", f"{HOY} 21:30", "--due", "2026-08-13") == EXITO
     assert _martes(vault) == [f"- 21:30 - {PERSONAL} **pendiente**: {CUERPO}"]
     assert _pendientes(vault) == [
         f"| con fecha | 2026-08-13 | [personal](ambitos/personal/personal.md) | {CUERPO} |"
@@ -223,7 +216,7 @@ def test_un_day_futuro_se_rechaza_y_nombra_due(
 
     monkeypatch.setattr(todo, "date", Hoy)
     antes = (vault / "AHORA.md").read_bytes()
-    assert _correr("todo open", "--day", "2026-08-12", "--hour", "09:00") == RECHAZO
+    assert _correr("todo open", "--at", "2026-08-12 09:00") == RECHAZO
     assert "--due 2026-08-12" in capsys.readouterr().err
     assert (vault / "AHORA.md").read_bytes() == antes
     assert _pendientes(vault) == []
@@ -235,5 +228,5 @@ def test_sin_due_ni_horizon_va_al_primer_escalon_del_autor(vault: Path) -> None:
         estilo.read_text(encoding="utf-8").replace("`esta semana`", "`esta quincena`"),
         encoding="utf-8",
     )
-    assert _correr("todo open", "--day", HOY, "--hour", "09:12") == EXITO
+    assert _correr("todo open", "--at", f"{HOY} 09:12") == EXITO
     assert _pendientes(vault)[0].startswith("| esta quincena |")

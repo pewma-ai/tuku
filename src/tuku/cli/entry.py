@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 
 from tuku import entry
-from tuku.cli.helpers import Handler, Subparsers, fecha, hora, traducir
+from tuku.cli.helpers import Handler, Subparsers, traducir
+from tuku.cli.opciones import Opciones
 from tuku.config import ambito_por_defecto
 
 
@@ -16,8 +16,8 @@ def _cmd_entry_add(args: argparse.Namespace) -> int:
             args.vault,
             body=args.body,
             scope=args.scope or ambito_por_defecto(args.vault),
-            day=args.day,
-            hour=args.hour,
+            day=args.at.dia,
+            hour=args.at.hora,
         ),
         "tuku entry add",
     )
@@ -26,7 +26,7 @@ def _cmd_entry_add(args: argparse.Namespace) -> int:
 def _cmd_entry_rename(args: argparse.Namespace) -> int:
     return traducir(
         entry.corregir_en_vault(
-            args.vault, body=args.body, day=args.day, hour=args.hour
+            args.vault, body=args.body, day=args.at.dia, hour=args.at.hora
         ),
         "tuku entry rename",
     )
@@ -59,67 +59,26 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "y `tuku todo close`."
         ),
     )
-    add_p.add_argument("--vault", default=".", type=Path, help="vault destino")
-    add_p.add_argument(
-        "--body",
-        "--cuerpo",
-        dest="body",
-        required=True,
-        help="la marca y el cuerpo: '**pendiente**: avisar de los gastos comunes'",
-    )
-    add_p.add_argument(
-        "--scope",
-        "--ambito",
-        dest="scope",
-        default=None,
-        help="ámbito, sin corchetes; por defecto, `scope_default` de la config",
-    )
-    add_p.add_argument(
-        "--day",
-        "--dia",
-        dest="day",
-        default=None,
-        type=fecha,
-        help="día del registro (AAAA-MM-DD); por defecto, hoy",
-    )
-    add_p.add_argument(
-        "--hour",
-        "--hora",
-        dest="hour",
-        default=None,
-        type=hora,
-        help="hora del registro (HH:MM); por defecto, ahora",
-    )
+    add = Opciones(add_p)
+    add.vault("vault destino")
+    add.body("la marca y el cuerpo: '**señal**: la administradora responde tarde'")
+    add.scope()
+    add.at()
 
     rename_p = entry_v.add_parser(
         "rename",
         help="corrige el cuerpo de un registro ya escrito",
         description=(
-            "Reemplaza el cuerpo del registro de `AHORA.md` ubicado por día y hora, sin "
+            "Reemplaza el cuerpo del registro de `AHORA.md` ubicado por `--at`, sin "
             "tocar hora ni ámbito. Si es un pendiente, reemplaza igual su fila en "
             "`PENDIENTES.md`: las dos copias deben coincidir carácter por carácter para "
             "que el pendiente se pueda cerrar."
         ),
     )
-    rename_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
-    rename_p.add_argument(
-        "--body",
-        "--cuerpo",
-        dest="body",
-        required=True,
-        help="el cuerpo corregido, con su marca si la lleva",
-    )
-    rename_p.add_argument(
-        "--day",
-        "--dia",
-        dest="day",
-        default=None,
-        type=fecha,
-        help="día del registro (AAAA-MM-DD); por defecto, hoy",
-    )
-    rename_p.add_argument(
-        "--hour", "--hora", dest="hour", required=True, help="hora del registro (HH:MM)"
-    )
+    rename = Opciones(rename_p)
+    rename.vault()
+    rename.body("el cuerpo corregido, con su marca si la lleva")
+    rename.at("el registro a corregir: AAAA-MM-DD HH:MM, o HH:MM si es de hoy", con_hora=True)
 
     lint_p = entry_v.add_parser(
         "lint",
@@ -132,7 +91,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "No escribe nada."
         ),
     )
-    lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
+    Opciones(lint_p).vault("vault a revisar")
 
     return {
         ("entry", "add"): _cmd_entry_add,

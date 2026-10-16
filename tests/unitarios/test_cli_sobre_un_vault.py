@@ -67,10 +67,8 @@ def test_entry_add_a_un_ambito_que_no_existe_nombra_scope_create(
         vault,
         "entry",
         "add",
-        "--day",
-        HOY,
-        "--hour",
-        "09:00",
+        "--at",
+        f"{HOY} 09:00",
         "--scope",
         "depto centro",
         "--body",
@@ -83,7 +81,7 @@ def test_entry_add_a_un_ambito_que_no_existe_nombra_scope_create(
 
 def test_scope_create_escribe_con_guion_el_nombre_dicho_con_espacios(vault: Path) -> None:
     assert (
-        _tuku(vault, "scope", "create", "depto centro", "--day", HOY, "--hour", "18:45")
+        _tuku(vault, "scope", "create", "depto centro", "--at", f"{HOY} 18:45")
         == EXITO
     )
     assert (vault / "ambitos" / "depto-centro" / "depto-centro.md").is_file()
@@ -95,7 +93,7 @@ def test_scope_create_sin_tabla_de_pendientes_no_deja_la_carpeta(
 ) -> None:
     (vault / "PENDIENTES.md").write_text("---\ntype: Pending\n---\n", encoding="utf-8")
     assert (
-        _tuku(vault, "scope", "create", "depto-centro", "--day", HOY, "--hour", "18:45")
+        _tuku(vault, "scope", "create", "depto-centro", "--at", f"{HOY} 18:45")
         == RECHAZO
     )
     assert "tabla" in capsys.readouterr().err
@@ -106,7 +104,7 @@ def test_scope_create_fuera_del_ciclo_no_deja_la_carpeta(
     vault: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     codigo = _tuku(
-        vault, "scope", "create", "depto-centro", "--day", "2026-09-01", "--hour", "10:00"
+        vault, "scope", "create", "depto-centro", "--at", "2026-09-01 10:00"
     )
     assert codigo == RECHAZO
     assert "fuera del ciclo" in capsys.readouterr().err
@@ -132,7 +130,7 @@ def test_note_create_fuera_del_ciclo_no_deja_la_nota(
         "una nota de otro ciclo",
         "--body",
         "da igual",
-        "--day",
+        "--at",
         "2026-09-01",
     )
     assert codigo == RECHAZO
@@ -144,7 +142,7 @@ def test_note_create_fuera_del_ciclo_no_deja_la_nota(
 
 def _con_depto_centro(vault: Path) -> None:
     assert (
-        _tuku(vault, "scope", "create", "depto-centro", "--day", HOY, "--hour", "18:45")
+        _tuku(vault, "scope", "create", "depto-centro", "--at", f"{HOY} 18:45")
         == EXITO
     )
     assert (
@@ -152,10 +150,8 @@ def _con_depto_centro(vault: Path) -> None:
             vault,
             "todo",
             "open",
-            "--day",
-            HOY,
-            "--hour",
-            "19:00",
+            "--at",
+            f"{HOY} 19:00",
             "--scope",
             "depto-centro",
             "--body",
@@ -207,10 +203,8 @@ def test_entry_rename_corrige_tambien_la_fila_del_pendiente(vault: Path) -> None
             vault,
             "todo",
             "open",
-            "--day",
-            "2026-08-12",
-            "--hour",
-            "09:00",
+            "--at",
+            "2026-08-12 09:00",
             "--scope",
             "personal",
             "--body",
@@ -223,10 +217,8 @@ def test_entry_rename_corrige_tambien_la_fila_del_pendiente(vault: Path) -> None
             vault,
             "entry",
             "rename",
-            "--day",
-            "2026-08-12",
-            "--hour",
-            "09:00",
+            "--at",
+            "2026-08-12 09:00",
             "--body",
             "**pendiente**: pagar la sesión de terapia",
         )

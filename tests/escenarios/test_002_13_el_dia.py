@@ -59,7 +59,7 @@ FIXTURE = Path(__file__).parent / "fixtures" / SLUG / "cuerpo-nota.md"
 #: Los cuatro pendientes fechados, en el orden en que se abren.
 FECHADOS = (
     ("2026-08-13", PERSONAL, "comprar pasajes de tren"),
-    ("2026-08-12", PERSONAL, "pagar la sesión con el psicólogo"),
+    ("2026-08-12 09:00", PERSONAL, "pagar la sesión con el psicólogo"),
     ("2026-08-13", PERSONAL, "llamar a la administradora"),
     ("2026-08-12", DEPTO, "pagar los gastos comunes"),
 )
@@ -244,12 +244,17 @@ def test_002_13_los_pendientes_de_manana_y_pasado_llegan_a_su_dia() -> None:
         region = _region(ahora, encabezado)
         assert region[1] == "> [!todo] Pendientes del día", region
         callout = [x for x in region if x.startswith("> - ")]
-        assert sorted(callout) == sorted(f"> - {a} - {c}" for d, a, c in FECHADOS if d == dia)
+        esperado = [
+            f"> - {d[11:]} - {a} - {c}" if d[11:] else f"> - {a} - {c}"
+            for d, a, c in FECHADOS
+            if d.startswith(dia)
+        ]
+        assert sorted(callout) == sorted(esperado)
 
     ambitos = _leer(corrida, "ambitos", "PENDIENTES-AMBITOS.md")
     personal = ambitos.split("^personal\n", 1)[1].split("\n\n", 1)[0].splitlines()
     assert personal == [
-        "> - Ago/12 - pagar la sesión con el psicólogo",
+        "> - Ago/12 09:00 - pagar la sesión con el psicólogo",
         "> - Ago/13 - comprar pasajes de tren",
         "> - Ago/13 - llamar a la administradora",
     ]

@@ -12,9 +12,9 @@ El vault del escenario anterior, sembrado además con dos compromisos abiertos q
 
 ```bash
 cp -r ../../004-02-rectificacion-y-marcha-atras/una-propuesta-tentativa-revocada/mi-vault .
-tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal \
+tuku todo open --vault mi-vault --at "2026-08-12 09:00" --scope personal \
   --body "transferir anticipo a la profesora Marcela para talleres"
-tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:05 --scope personal \
+tuku todo open --vault mi-vault --at "2026-08-12 09:05" --scope personal \
   --body "transferir anticipo a la profesora Patricia para biblioteca"
 ```
 
@@ -44,7 +44,7 @@ A la Marcela, lo de los talleres de arte.
 Entonces el agente ejecuta el cierre mediante comando
 
 ```text
-tuku todo close --day 2026-08-12 --hour <hora> --scope personal \
+tuku todo close --at "2026-08-12 <hora>" --scope personal \
   --body "transferir anticipo a la profesora Marcela para talleres"
 ```
 

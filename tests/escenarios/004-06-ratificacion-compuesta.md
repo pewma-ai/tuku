@@ -28,8 +28,8 @@ Ya, en resumen: anota que el viernes a las diez voy al banco a firmar la ampliac
 Entonces el agente ejecuta las llamadas de registro correspondientes para el viernes
 
 ```text
-tuku todo open --due 2026-08-14 --scope personal \
-  --body "ir al banco a las 10:00 a firmar la ampliación de la línea"
+tuku todo open --due "2026-08-14 10:00" --scope personal \
+  --body "ir al banco a firmar la ampliación de la línea"
 tuku todo open --due 2026-08-14 --scope personal \
   --body "llamar a Importadora Andina para cerrar el pedido después del banco"
 ```

@@ -25,6 +25,7 @@ from tuku.cli.helpers import (
 from tuku.cli.helpers import (
     cuerpo_de_la_nota as _cuerpo_de_la_nota,
 )
+from tuku.cli.opciones import sin_anio
 from tuku.config import VaultInvalido, exigir_vault
 from tuku.init import MarcadorAutorFaltante
 from tuku.todo import SinTabla
@@ -89,7 +90,11 @@ def _construir_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
     args = _construir_parser().parse_args(argv)
+    if error := sin_anio(args, argv):
+        print(f"tuku: {error}", file=sys.stderr)
+        return USO
     comando = _COMANDOS[(args.noun, getattr(args, "verb", None))]
     try:
         # `note lint <archivo>` revisa un archivo suelto y no lee el vault.

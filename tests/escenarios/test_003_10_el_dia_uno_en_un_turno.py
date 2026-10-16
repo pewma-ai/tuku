@@ -32,7 +32,6 @@ SLUG = "003-10-el-dia-uno-en-un-turno"
 TITULO = "el día uno entero"
 MARTES = "## Martes 11 de agosto"
 MIERCOLES = "## Miércoles 12 de agosto"
-MANANA = "2026-08-12"
 
 #: La tabla de verdad del `.md`: hora, ámbito y marca cerrada, sin los dos de
 #: mañana, cuya hora no se dicta. Las aperturas de las 13:00 y las 14:20 no
@@ -60,11 +59,11 @@ TRADUCCION = {
     "note create": 1,
 }
 
-#: Los dos pendientes de mañana y su ámbito. Empiezan igual a propósito: "ya
-#: pagué" calza con los dos, y por eso no se puede cerrar ninguno.
+#: Los dos pendientes de mañana, su ámbito y cuándo vencen. Empiezan igual a
+#: propósito: "ya pagué" calza con los dos, y por eso no se puede cerrar ninguno.
 DE_MANANA = {
-    "pagar la sesión con el psicólogo": "personal",
-    "pagar los gastos comunes del depto centro": "depto-centro",
+    "pagar la sesión con el psicólogo": ("personal", "2026-08-12 09:00"),
+    "pagar los gastos comunes del depto centro": ("depto-centro", "2026-08-12 09:30"),
 }
 
 #: Lo que el día escribe, y nada más. La nota se cuenta aparte porque su nombre
@@ -175,10 +174,10 @@ def test_003_10_los_de_manana_se_prometen_hoy_y_vencen_manana() -> None:
     corrida = _corrida()
     aperturas = [x for x in _dia(corrida, MARTES).splitlines() if _de_manana(x)]
     assert sorted(_ambito_de(x) or "" for x in aperturas) == sorted(
-        vault.nombre_comparable(a) for a in DE_MANANA.values()
+        vault.nombre_comparable(a) for a, _ in DE_MANANA.values()
     ), "\n".join(aperturas)
     fechados = {f.cuerpo: f.vence for f in todo.filas(_pendientes(corrida))}
-    assert fechados == dict.fromkeys(DE_MANANA, MANANA), fechados
+    assert fechados == {c: vence for c, (_, vence) in DE_MANANA.items()}, fechados
     assert not _registros(_dia(corrida, MIERCOLES)), "escribió registros en el miércoles 12"
 
 

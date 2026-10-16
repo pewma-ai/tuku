@@ -110,7 +110,7 @@ Una línea `cd <dir>` cambia el directorio de los comandos que la siguen en el e
 
 ### El escenario se lee como lo que hace una persona
 
-El texto no lleva `TUKU_HOME=`, ni rutas de `playground/`, ni banderas que solo existen para el test. Escribe `tuku init mi-vault --date 2026-08-11` y nada más. Lo que el test necesita lo pone el runner alrededor: ejecuta con el directorio de trabajo en el banco de `/tmp`, así que `mi-vault` cae en un árbol aislado, y al terminar lo copia a `playground/<slug>/` para el `## Qué se mira a mano`, y apunta `TUKU_HOME` al checkout, así que la siembra copia de `template/` sin instalar nada.
+El texto no lleva `TUKU_HOME=`, ni rutas de `playground/`, ni banderas que solo existen para el test. Escribe `tuku init mi-vault --at 2026-08-11` y nada más. Lo que el test necesita lo pone el runner alrededor: ejecuta con el directorio de trabajo en el banco de `/tmp`, así que `mi-vault` cae en un árbol aislado, y al terminar lo copia a `playground/<slug>/` para el `## Qué se mira a mano`, y apunta `TUKU_HOME` al checkout, así que la siembra copia de `template/` sin instalar nada.
 
 Un `.md` con varios `## Escenario:` reparte un subdirectorio por escenario (`playground/001-03-destino-no-vacio/force-siembra-igual/`), y el nombre sale del título recortado a treinta caracteres por palabra completa, porque esa ruta se escribe a mano en los `cp -r` de la cadena. Dos escenarios de un mismo `.md` que colisionen en esos treinta caracteres empiezan igual, y lo que hay que arreglar es el título. Si los tres casos del `001-03` compartieran carpeta solo sobreviviría el último, y no habría nada que mirar a mano de los otros dos.
 

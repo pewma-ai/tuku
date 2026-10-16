@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import sys
 from collections.abc import Callable
-from datetime import date
 from pathlib import Path
 
 from tuku import style, vocab
@@ -18,6 +17,7 @@ from tuku.cli.helpers import (
     Subparsers,
     traducir,
 )
+from tuku.cli.opciones import Opciones
 from tuku.doctor import TEMAS as TEMAS_DOCTOR
 from tuku.init import (
     DestinoNoVacio,
@@ -35,7 +35,7 @@ def _cmd_init(args: argparse.Namespace) -> int:
             args.dir,
             variant=args.variant,
             author=args.author,
-            desde=args.date,
+            desde=args.at.dia,
             force=args.force,
             comandos=manual.del_cli(),
         )
@@ -62,7 +62,7 @@ def _cmd_style_lint(args: argparse.Namespace) -> int:
 def _cmd_cycle_open(args: argparse.Namespace) -> int:
     from tuku import cycle
 
-    return traducir(cycle.abrir_en_vault(args.vault, args.date), "tuku cycle open")
+    return traducir(cycle.abrir_en_vault(args.vault, args.at.dia), "tuku cycle open")
 
 
 def _cmd_cycle_lint(args: argparse.Namespace) -> int:
@@ -134,15 +134,7 @@ def registrar(
         default=None,
         help="nombre del autor para LIBRO-DE-ESTILO.md; opcional",
     )
-    init_p.add_argument(
-        "--date",
-        "--fecha",
-        "--desde",
-        dest="date",
-        default=None,
-        type=date.fromisoformat,
-        help="un día de la semana del primer ciclo (AAAA-MM-DD); por defecto, hoy",
-    )
+    Opciones(init_p).at("un día de la semana del primer ciclo, AAAA-MM-DD; por defecto, hoy")
     init_p.add_argument(
         "--force",
         action="store_true",
@@ -163,20 +155,12 @@ def registrar(
         help="abre o verifica el ciclo en AHORA.md",
         description=(
             "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con las fechas de la semana, de "
-            "lunes a domingo, que contiene la fecha. Si el ciclo ya está abierto, solo lo "
+            "lunes a domingo, que contiene `--at`. Si el ciclo ya está abierto, solo lo "
             "verifica."
         ),
     )
-    open_p.add_argument("--vault", default=".", type=Path, help="vault a verificar o abrir")
-    open_p.add_argument(
-        "--date",
-        "--fecha",
-        "--desde",
-        dest="date",
-        default=None,
-        type=date.fromisoformat,
-        help="un día de la semana a abrir (AAAA-MM-DD); por defecto, hoy",
-    )
+    Opciones(open_p).vault("vault a verificar o abrir")
+    Opciones(open_p).at("un día de la semana a abrir, AAAA-MM-DD; por defecto, hoy")
 
     cycle_lint_p = cycle_v.add_parser(
         "lint",
@@ -186,7 +170,7 @@ def registrar(
             "fechas consecutivas y bien escritas. No escribe nada."
         ),
     )
-    cycle_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
+    Opciones(cycle_lint_p).vault("vault a revisar")
 
     doctor_p = sub.add_parser(
         "doctor",
@@ -211,7 +195,7 @@ def registrar(
         action="store_true",
         help="muestra todas las revisiones; por defecto, solo hallazgos y avisos",
     )
-    doctor_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
+    Opciones(doctor_p).vault("vault a revisar")
 
     fix_p = sub.add_parser(
         "fix",
@@ -225,7 +209,7 @@ def registrar(
         ),
     )
     fix_p.add_argument("tema", choices=TEMAS_DOCTOR, help="el tema a reparar")
-    fix_p.add_argument("--vault", default=".", type=Path, help="vault a reparar")
+    Opciones(fix_p).vault("vault a reparar")
 
     regenerate_p = sub.add_parser(
         "regenerate",
@@ -246,7 +230,7 @@ def registrar(
         default=None,
         help="regenerar solo este tema; sin tema, todo",
     )
-    regenerate_p.add_argument("--vault", default=".", type=Path, help="vault a regenerar")
+    Opciones(regenerate_p).vault("vault a regenerar")
 
     vocab_p = sub.add_parser(
         "vocab",
@@ -266,7 +250,7 @@ def registrar(
             "`LIBRO-DE-ESTILO.md`: los términos con que se clasifica."
         ),
     )
-    show_p.add_argument("--vault", default=".", type=Path, help="vault a leer")
+    Opciones(show_p).vault("vault a leer")
 
     style_p = sub.add_parser(
         "style",
@@ -287,7 +271,7 @@ def registrar(
             "No escribe nada."
         ),
     )
-    style_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
+    Opciones(style_lint_p).vault("vault a revisar")
 
     return {
         ("init", None): _cmd_init,

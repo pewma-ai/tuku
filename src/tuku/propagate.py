@@ -74,9 +74,10 @@ def linea_del_dia(fila: todo.Fila, rutas: Mapping[str, str] | None = None) -> st
 
     La región vive en `AHORA.md`, así que la ruta es relativa a ese archivo.
     """
+    hora = f"{fila.hora} - " if fila.hora else ""
     if fila.ambito:
-        return f"- {link.enlace_ambito(fila.ambito, 'AHORA.md', rutas)} - {fila.cuerpo}"
-    return f"- {fila.cuerpo}"
+        return f"- {hora}{link.enlace_ambito(fila.ambito, 'AHORA.md', rutas)} - {fila.cuerpo}"
+    return f"- {hora}{fila.cuerpo}"
 
 
 def region_del_dia(
@@ -87,8 +88,7 @@ def region_del_dia(
     Una fila sin fecha no cae en ningún día: no tener fecha es el estado normal
     de un pendiente del ciclo en curso, no una fecha implícita de hoy.
     """
-    marca = dia.isoformat()
-    items = [linea_del_dia(f, rutas) for f in filas if f.vence.strip() == marca]
+    items = [linea_del_dia(f, rutas) for f in filas if f.dia == dia]
     if not items:
         return []
     return [
@@ -172,16 +172,8 @@ def callout(
     return "\n".join(lineas)
 
 
-def _fecha(fila: todo.Fila) -> date | None:
-    try:
-        return date.fromisoformat(fila.vence.strip())
-    except ValueError:
-        return None
-
-
-def _orden_en_el_ambito(fila: todo.Fila) -> tuple[int, date]:
-    fecha = _fecha(fila)
-    return (0, fecha) if fecha else (1, date.min)
+def _orden_en_el_ambito(fila: todo.Fila) -> tuple[int, str]:
+    return (0, fila.vence) if fila.dia else (1, "")
 
 
 def linea_del_ambito(fila: todo.Fila, formato: str = FORMATO_FECHA) -> str:
@@ -192,8 +184,10 @@ def linea_del_ambito(fila: todo.Fila, formato: str = FORMATO_FECHA) -> str:
     y el callout vive en `ambitos/`, así que sus links se rebasan.
     """
     cuerpo = link.rebasar(fila.cuerpo, "PENDIENTES.md", str(ARCHIVO_AMBITOS.as_posix()))
-    fecha = _fecha(fila)
+    fecha = fila.dia
     vence = fecha_corta(fecha, formato) if fecha else fila.vence.strip()
+    if fecha and fila.hora:
+        vence = f"{vence} {fila.hora}"
     return f"{vence} - {cuerpo}" if vence else cuerpo
 
 

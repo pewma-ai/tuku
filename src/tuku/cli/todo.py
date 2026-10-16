@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 
 from tuku import todo as core_todo
-from tuku.cli.helpers import Handler, Subparsers, fecha, hora, traducir
+from tuku.cli.helpers import Handler, Subparsers, traducir
+from tuku.cli.opciones import Opciones
 from tuku.config import ambito_por_defecto
 
 
@@ -17,10 +17,10 @@ def _cmd_todo_open(args: argparse.Namespace) -> int:
             body=args.body,
             scope=args.scope or ambito_por_defecto(args.vault),
             horizon=args.horizon,
-            due=args.due,
+            due=args.due.celda(),
             propagate=not args.no_propagate,
-            day=args.day,
-            hour=args.hour,
+            day=args.at.dia,
+            hour=args.at.hora,
         ),
         "tuku todo open",
     )
@@ -32,8 +32,8 @@ def _cmd_todo_close(args: argparse.Namespace) -> int:
             args.vault,
             body=args.body,
             propagate=not args.no_propagate,
-            day=args.day,
-            hour=args.hour,
+            day=args.at.dia,
+            hour=args.at.hora,
             scope=args.scope or ambito_por_defecto(args.vault),
         ),
         "todo close",
@@ -65,8 +65,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                 "Escribe en `AHORA.md`, bajo el día y en orden de hora, el registro "
                 "`- HH:MM - [ámbito](ruta) **pendiente**: cuerpo`, agrega la fila a la "
                 "tabla de `PENDIENTES.md` bajo su horizonte y regenera las vistas como "
-                "`tuku regenerate todo`. El día y la hora son cuándo se prometió; la fecha "
-                "del pendiente va en `--due`. Si el registro ya estaba, no lo repite."
+                "`tuku regenerate todo`. `--at` es cuándo se prometió y `--due`, cuándo "
+                "vence. Si el registro ya estaba, no lo repite."
             ),
         ),
         (
@@ -82,48 +82,19 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         ),
     ):
         p = todo_v.add_parser(verbo, help=ayuda, description=descripcion)
-        p.add_argument(
-            "--body", "--cuerpo", dest="body", required=True, help="el texto del pendiente"
-        )
-        p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
+        o = Opciones(p)
+        o.body("el texto del pendiente")
+        o.vault()
+        o.scope()
+        o.at("cuándo se prometió o se cerró; lo que falte, hoy y ahora")
         p.add_argument(
             "--no-propagate",
             action="store_true",
             help="no regenera las vistas derivadas; para el lote, que propaga al final",
         )
-        p.add_argument(
-            "--day",
-            "--dia",
-            dest="day",
-            default=None,
-            type=fecha,
-            help="día en que se registra, AAAA-MM-DD; por defecto, hoy",
-        )
-        p.add_argument(
-            "--hour",
-            "--hora",
-            dest="hour",
-            default=None,
-            type=hora,
-            help="hora en que se registra, HH:MM; por defecto, ahora",
-        )
         if verbo == "open":
-            p.add_argument(
-                "--scope",
-                "--ambito",
-                dest="scope",
-                default=None,
-                help="ámbito, sin corchetes; por defecto, `scope_default` de la config",
-            )
             plazo = p.add_mutually_exclusive_group()
-            plazo.add_argument(
-                "--due",
-                "--vence",
-                dest="due",
-                default=None,
-                type=fecha,
-                help="día en que vence, AAAA-MM-DD; el horizonte pasa a `con fecha`",
-            )
+            o.due(plazo)
             plazo.add_argument(
                 "--horizon",
                 "--horizonte",
@@ -133,14 +104,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                     "escalón del pendiente sin fecha, de `### Horizontes` en el libro de "
                     "estilo; por defecto, el primero"
                 ),
-            )
-        elif verbo == "close":
-            p.add_argument(
-                "--scope",
-                "--ambito",
-                dest="scope",
-                default=None,
-                help="ámbito, sin corchetes; por defecto, `scope_default` de la config",
             )
 
     todo_lint = todo_v.add_parser(
@@ -152,7 +115,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "con la tabla. No escribe nada."
         ),
     )
-    todo_lint.add_argument("--vault", default=".", type=Path, help="vault a revisar")
+    Opciones(todo_lint).vault("vault a revisar")
 
     return {
         ("todo", "open"): _cmd_todo_open,

@@ -10,8 +10,8 @@ El día uno de la cadena determinista del 002, con dos pendientes escritos el mi
 
 ```bash
 cp -r ../../002-13-el-dia/la-nota-del-frente-queda/mi-vault .
-tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --body "pagar la sesión con el psicólogo"
-tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:30 --scope depto-centro --body "pagar los gastos comunes del depto centro"
+tuku todo open --vault mi-vault --at "2026-08-12 09:00" --scope personal --body "pagar la sesión con el psicólogo"
+tuku todo open --vault mi-vault --at "2026-08-12 09:30" --scope depto-centro --body "pagar los gastos comunes del depto centro"
 ```
 
 ## Escenario: el registro va al último día con registros
@@ -23,7 +23,7 @@ A las diez y cuarto llegó el certificado de dominio vigente del depto centro.
 ```
 Entonces esa frase se traduce en un solo comando
 ```text
-tuku entry add --day 2026-08-12 --hour 10:15 --scope depto-centro \
+tuku entry add --at "2026-08-12 10:15" --scope depto-centro \
   --body "**<clasificación>**: <el cuerpo>"
 ```
 Y el registro de las 10:15 cae en el miércoles 12, después de los de las 09:00 y las 09:30

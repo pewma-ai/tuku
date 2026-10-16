@@ -12,7 +12,7 @@ Si el autor nombra un frente que todavía no existe, **no lo crees por tu cuenta
 
 ## Cuándo se crea un ámbito
 
-Cuando el autor lo pide. `tuku scope create` arma la carpeta, su página y sus archivos, enlaza hacia atrás lo que ya lo nombraba y deja la constancia en la bitácora: no escribas otro registro para eso. El nombre se pasa tal como lo dijo el autor: el comando cambia los espacios por guiones. El día y la hora de la constancia se pasan como en un registro (`--day`, `--hour`).
+Cuando el autor lo pide. `tuku scope create` arma la carpeta, su página y sus archivos, enlaza hacia atrás lo que ya lo nombraba y deja la constancia en la bitácora: no escribas otro registro para eso. El nombre se pasa tal como lo dijo el autor: el comando cambia los espacios por guiones. El día y la hora de la constancia se pasan como en un registro, con `--at`.
 
 Si un comando rechaza un ámbito porque no existe, ofrécele al autor crearlo y espera el sí.
 

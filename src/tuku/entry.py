@@ -215,10 +215,9 @@ def rechazo_de_marca(
     partes = ["tuku todo open" if abre else "tuku todo close"]
     if scope:
         partes.append(f"--scope {shlex.quote(scope)}")
-    if day:
-        partes.append(f"--day {day.isoformat()}")
-    if hour:
-        partes.append(f"--hour {hour}")
+    cuando = " ".join(x for x in (day.isoformat() if day else "", hour or "") if x)
+    if cuando:
+        partes.append(f"--at {shlex.quote(cuando)}")
     partes.append(f"--body {shlex.quote(marca.cuerpo)}")
     que = "abre un pendiente" if abre else "cierra un pendiente"
     return (

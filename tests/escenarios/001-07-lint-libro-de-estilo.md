@@ -7,7 +7,7 @@
 Dado un vault al que le falta `### Horizontes` en el libro de estilo
 
 ```bash
-tuku init mi-vault --date 2026-08-11
+tuku init mi-vault --at 2026-08-11
 grep -v '^### Horizontes$' mi-vault/LIBRO-DE-ESTILO.md > t && mv t mi-vault/LIBRO-DE-ESTILO.md
 ```
 
@@ -26,7 +26,7 @@ Y `tuku vocab show` sale con código 1 nombrando el encabezado que falta
 Dado un vault donde `### Clasificaciones` existe pero no declara ningún término
 
 ```bash
-tuku init mi-vault --date 2026-08-11
+tuku init mi-vault --at 2026-08-11
 grep -vE '^\| `(progreso|decisión|fricción|señal|nota)`' mi-vault/LIBRO-DE-ESTILO.md > libro.tmp
 mv libro.tmp mi-vault/LIBRO-DE-ESTILO.md
 ```

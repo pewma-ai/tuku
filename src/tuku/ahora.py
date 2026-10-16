@@ -71,7 +71,7 @@ def encabezado_de(fecha: date) -> str:
     """El encabezado con que un día se escribe en `AHORA.md`.
 
     Vivía en `cli.py`, que lo necesitaba para saber bajo qué día cae un registro
-    sin `--day`. Es la forma canónica de un día del ciclo, no una decisión de la
+    sin día en `--at`. Es la forma canónica de un día del ciclo, no una decisión de la
     interfaz.
     """
     return f"## {DIAS[fecha.weekday()]} {fecha.day} de {MESES[fecha.month - 1]}"

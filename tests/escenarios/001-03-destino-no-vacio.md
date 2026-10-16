@@ -14,7 +14,7 @@ echo "no tocar" > mi-vault/algo-que-ya-estaba.txt
 Cuando se corre
 
 ```bash
-tuku init mi-vault --date 2026-08-11
+tuku init mi-vault --at 2026-08-11
 ```
 
 Entonces sale con código 1, el mensaje nombra el destino ocupado y `--force` como corrección, y el destino queda exactamente igual a como estaba
@@ -31,7 +31,7 @@ echo "no tocar" > mi-vault/algo-que-ya-estaba.txt
 Cuando se corre
 
 ```bash
-tuku init mi-vault --date 2026-08-11 --force
+tuku init mi-vault --at 2026-08-11 --force
 ```
 
 Entonces el contenido previo se reemplaza y queda un vault operable

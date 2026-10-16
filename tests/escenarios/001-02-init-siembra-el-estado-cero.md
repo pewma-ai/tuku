@@ -8,7 +8,7 @@ Dado un directorio vacío, y el módulo `socket` parchado para que abrir un sock
 Cuando se corre
 
 ```bash
-tuku init mi-vault --variant vanilla --date 2026-08-11
+tuku init mi-vault --variant vanilla --at 2026-08-11
 ```
 
 Entonces el árbol sembrado es idéntico a `template/vanilla/` salvo `AHORA.md`, `reglas/config.tuku.md` y `reglas/comandos.tuku.md`, sin que sobre ni falte ningún archivo

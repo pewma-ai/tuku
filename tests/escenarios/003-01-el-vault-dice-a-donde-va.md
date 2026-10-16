@@ -7,7 +7,7 @@
 ## Estado inicial
 
 ```bash
-tuku init mi-vault --date 2026-08-11
+tuku init mi-vault --at 2026-08-11
 ```
 
 ## Escenario: el vault nace con su tabla de despacho y el doctor la aprueba

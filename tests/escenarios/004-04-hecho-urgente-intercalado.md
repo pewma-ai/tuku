@@ -28,7 +28,7 @@ Espérate, me acaba de timbrar el flete con las cajas de témperas. Llegaron tre
 Entonces el agente traduce el hecho inmediato a comando de bitácora
 
 ```text
-tuku todo open --day 2026-08-12 --hour <hora> --scope personal \
+tuku todo open --at "2026-08-12 <hora>" --scope personal \
   --body "reclamar al proveedor por tres cajas de témperas rotas y manchadas"
 ```
 

@@ -7,7 +7,7 @@ Verifica la portabilidad agéntica ejecutando el mismo dictado simple bajo un ar
 ## Estado inicial
 
 ```bash
-tuku init mi-vault --date 2026-08-11
+tuku init mi-vault --at 2026-08-11
 ```
 
 ## Escenario: otro agente, el mismo comando
@@ -19,7 +19,7 @@ A las nueve y doce me di cuenta de que la administradora responde los mensajes c
 ```
 Entonces la traducción coincide con la obtenida en el arnés de referencia
 ```text
-tuku entry add --day 2026-08-11 --hour 09:12 --scope personal \
+tuku entry add --at "2026-08-11 09:12" --scope personal \
   --body "**<clasificación>**: <el cuerpo>"
 ```
 Y queda un registro a las 09:12 en `[personal](ambitos/personal/personal.md)` sin marcas ontológicas cerradas

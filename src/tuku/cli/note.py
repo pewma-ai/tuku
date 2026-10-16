@@ -12,10 +12,9 @@ from tuku.cli.helpers import (
     Handler,
     Subparsers,
     cuerpo_de_la_nota,
-    fecha,
-    hora,
     traducir,
 )
+from tuku.cli.opciones import Opciones
 
 
 def _cmd_note_create(args: argparse.Namespace) -> int:
@@ -33,8 +32,8 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
             title=args.title,
             body=cuerpo,
             scope=args.scope,
-            day=args.day,
-            hour=args.hour,
+            day=args.at.dia,
+            hour=args.at.hora,
             record=not args.no_record,
         ),
         "tuku note create",
@@ -76,9 +75,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         ),
     )
     note_create_p.add_argument("title", help="título de la nota")
-    note_create_p.add_argument(
-        "--body", "--cuerpo", dest="body", default=None, help="cuerpo de la nota"
-    )
+    crear = Opciones(note_create_p)
+    crear.body("cuerpo de la nota", requerido=False)
     note_create_p.add_argument(
         "--body-file",
         "--cuerpo-archivo",
@@ -87,29 +85,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         type=Path,
         help="archivo con el cuerpo de la nota; `-` lo lee de stdin",
     )
-    note_create_p.add_argument(
-        "--scope",
-        "--ambito",
-        dest="scope",
-        default=None,
-        help="ámbito al que pertenece la nota",
-    )
-    note_create_p.add_argument(
-        "--day",
-        "--dia",
-        dest="day",
-        type=fecha,
-        default=None,
-        help="día de la nota y de su constancia (AAAA-MM-DD); por defecto, hoy",
-    )
-    note_create_p.add_argument(
-        "--hour",
-        "--hora",
-        dest="hour",
-        type=hora,
-        default=None,
-        help="hora de la constancia (HH:MM); por defecto, ahora",
-    )
+    crear.scope("ámbito al que pertenece la nota")
+    crear.at("cuándo se escribe, para la nota y su constancia; lo que falte, hoy y ahora")
     note_create_p.add_argument(
         "--no-record",
         "--sin-constancia",
@@ -117,7 +94,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         action="store_true",
         help="no agrega registro de constancia en AHORA.md",
     )
-    note_create_p.add_argument("--vault", default=".", type=Path, help="vault destino")
+    crear.vault("vault destino")
 
     note_rename_p = note_v.add_parser(
         "rename",
@@ -129,7 +106,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     )
     note_rename_p.add_argument("title", help="título actual de la nota")
     note_rename_p.add_argument("nuevo", help="título nuevo")
-    note_rename_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
+    Opciones(note_rename_p).vault("vault a modificar")
 
     note_lint_p = note_v.add_parser(
         "lint",
@@ -146,7 +123,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         type=Path,
         help="archivo de nota a revisar (opcional)",
     )
-    note_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
+    Opciones(note_lint_p).vault("vault a revisar")
 
     return {
         ("note", "create"): _cmd_note_create,
