@@ -34,7 +34,7 @@ tuku scope create depto-centro
 tuku note create "<el título>" --scope depto-centro --day 2026-08-11 --hour 21:15
 tuku entry add --day 2026-08-12 --hour 09:00 --scope personal --body "**pendiente**: ..."
 ```
-Y cada registro del martes 11 tiene su hora, su ámbito y su marca según la tabla de verdad
+Y cada registro del martes 11 tiene su hora, su ámbito y su marca cerrada según la tabla de verdad
 Y el cuerpo del registro de las 18:40 enlaza a `depto-centro` de forma retroactiva
 Y `PENDIENTES.md` queda con una sola fila correspondiente a la sesión con el psicólogo
 Y el miércoles 12 abre con la llamada de pendientes del día
@@ -44,7 +44,9 @@ Y `tuku doctor` confirma la coherencia total del vault
 
 ### Tabla de verdad
 
-| Hora | Día | Ámbito | Marca | Qué deja |
+Solo se afirma la marca cerrada (`**pendiente**`, `~~(Hecho)~~`). "Ninguna" significa que no lleva ninguna de las dos: la clasificación abierta (`**señal**`, `**progreso**`, etc.) la elige el agente y no se verifica.
+
+| Hora | Día | Ámbito | Marca cerrada | Qué deja |
 | --- | --- | --- | --- | --- |
 | 09:12 | martes 11 | `personal` | ninguna | constancia simple |
 | 11:30 | martes 11 | `personal` | ninguna | constancia simple |
