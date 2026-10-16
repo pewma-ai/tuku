@@ -5,7 +5,7 @@ Escenario: 003-11-el-dia-que-no-se-dicta.md
 El día no se dicta: se deriva del vault. El ciclo abierto va del 11 al 17 de
 agosto y HOY cae fuera, así que el día lo decide `reglas/bitacora.tuku.md`: el
 último del ciclo que ya tiene registros, que acá es el miércoles por el
-pendiente que siembra el estado inicial. Venía del `003-07`.
+pendiente que siembra el estado inicial.
 
 Ejecutable directo: `python3 tests/escenarios/test_003_11_el_dia_que_no_se_dicta.py`
 """
@@ -57,7 +57,6 @@ def test_003_11_un_solo_comando() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_11_el_registro_cae_en_el_ultimo_dia_con_registros() -> None:
-    """Sin esta aserción el registro se iba al martes y nada lo notaba."""
     registros = _miercoles(gherkin.correr(SLUG, TITULO))
     horas = [x[2:7] for x in registros]
     assert horas[-1] == "10:15" and "09:30" in horas, (

@@ -45,9 +45,8 @@ Comandos, agentes, LLM. Tampoco el tipo de ciclo real de quien lo usa: arranca s
 ## Escenarios del epic
 
 - [`001-01-instalacion-con-uv-tool.md`](001-01-instalacion-con-uv-tool.md) — Instalación real con `uv tool install --force` desde git (marcado `red`).
-- [`001-02-init-siembra-el-estado-cero.md`](001-02-init-siembra-el-estado-cero.md) — `tuku init` produce byte a byte `template/vanilla/` con fechas resueltas en `AHORA.md`.
+- [`001-02-init-siembra-el-estado-cero.md`](001-02-init-siembra-el-estado-cero.md) — `tuku init` produce byte a byte `template/vanilla/` con fechas resueltas en `AHORA.md`, con la red bloqueada.
 - [`001-03-destino-no-vacio.md`](001-03-destino-no-vacio.md) — Rechazo ante destino ocupado salvo `--force`.
 - [`001-04-init-author.md`](001-04-init-author.md) — `tuku init --author` siembra el nombre en la sección "El autor".
-- [`001-05-init-no-toca-la-red.md`](001-05-init-no-toca-la-red.md) — Siembra offline con socket bloqueado.
-- [`001-06-cli-ayuda.md`](001-06-cli-ayuda.md) — Superficie del CLI y opciones de `tuku init`.
-- [`001-07-lint-libro-de-estilo.md`](001-07-lint-libro-de-estilo.md) — Validación del contrato de identidad y ontología en `LIBRO-DE-ESTILO.md`.
+- [`001-06-cli-ayuda.md`](001-06-cli-ayuda.md) — Opciones de `tuku init` y código de entorno.
+- [`001-07-lint-libro-de-estilo.md`](001-07-lint-libro-de-estilo.md) — Códigos de salida ante un `LIBRO-DE-ESTILO.md` roto.

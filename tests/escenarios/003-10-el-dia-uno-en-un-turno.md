@@ -4,7 +4,7 @@
 
 El criterio de salida del epic en un solo turno: el autor dicta el día uno entero y el agente lo compila a comandos deterministas, dejando un vault equivalente al del [epic 002](002-00-el-dia-uno-a-mano.md). En el mismo turno van las frases que no se anotan: una consulta previa, una instrucción y una pregunta mezcladas con hechos, un cierre ambiguo y un pedido estructural sin comando.
 
-Reemplaza a seis escenarios que medían lo mismo de a una frase (`003-02` a `003-07`, borrados el 2026-10-16). Cada test dice en su docstring de cuál viene. El día que se deriva del vault, que no cabe en un día dictado de corrido, quedó en el [`003-11`](003-11-el-dia-que-no-se-dicta.md).
+El día que se deriva del vault, sin dictarlo, está en el [`003-11`](003-11-el-dia-que-no-se-dicta.md).
 
 ## Estado inicial
 
@@ -57,23 +57,18 @@ tuku doctor --vault mi-vault
 
 ### Tabla de verdad
 
-Solo se afirma la marca cerrada (`**pendiente**`, `(Hecho)`). "Ninguna" significa que no lleva ninguna de las dos: la clasificación abierta la elige el agente y no se verifica. La columna "Viene de" dice qué escenario borrado afirmaba esa línea.
+Solo se afirma la marca cerrada (`**pendiente**`, `(Hecho)`). "Ninguna" significa que no lleva ninguna de las dos: la clasificación abierta la elige el agente y no se verifica.
 
-| Hora | Día | Ámbito | Marca cerrada | Viene de |
-| --- | --- | --- | --- | --- |
-| 09:12 | martes 11 | `personal` | ninguna | `003-03` |
-| 11:30 | martes 11 | `personal` | ninguna | `003-06` |
-| 12:05 | martes 11 | `personal` | ninguna | `003-05` |
-| 13:00 | martes 11 | `personal` | `**pendiente**` | `003-06` |
-| 14:20 | martes 11 | `personal` | `**pendiente**` | `003-04` |
-| 18:40 | martes 11 | `personal` | ninguna | `003-06` |
-| 19:05 | martes 11 | `personal` | `(Hecho)` | `003-06` |
-| 19:10 | martes 11 | `personal` | `(Hecho)` | `003-06` |
-| 21:15 | martes 11 | `depto-centro` | ninguna | `003-06` |
-| 09:00 | miércoles 12 | `personal` | `**pendiente**` | `003-06`, `003-07` |
-| 09:30 | miércoles 12 | `depto-centro` | `**pendiente**` | `003-07` |
-
-### Lo que se perdió al fundir
-
-- **El delta exacto de cada frase.** Se afirma el del turno entero: solo cambian los archivos que el día escribe.
-- **Dos afirmaciones se volvieron más débiles**, porque el turno además escribe y responde otra pregunta: la respuesta a la consulta se busca en el tramo que habla del pase escolar, y la pregunta del agente ante "ya pagué" se cuenta sin el eco de las preguntas del autor.
+| Hora | Día | Ámbito | Marca cerrada |
+| --- | --- | --- | --- |
+| 09:12 | martes 11 | `personal` | ninguna |
+| 11:30 | martes 11 | `personal` | ninguna |
+| 12:05 | martes 11 | `personal` | ninguna |
+| 13:00 | martes 11 | `personal` | `**pendiente**` |
+| 14:20 | martes 11 | `personal` | `**pendiente**` |
+| 18:40 | martes 11 | `personal` | ninguna |
+| 19:05 | martes 11 | `personal` | `(Hecho)` |
+| 19:10 | martes 11 | `personal` | `(Hecho)` |
+| 21:15 | martes 11 | `depto-centro` | ninguna |
+| 09:00 | miércoles 12 | `personal` | `**pendiente**` |
+| 09:30 | miércoles 12 | `depto-centro` | `**pendiente**` |

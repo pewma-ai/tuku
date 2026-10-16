@@ -1,10 +1,10 @@
 # Escenario · 001-02-init-siembra-el-estado-cero
 
-**Cubre:** epic 001, fase 0, decididos #3 y #9 de [`../../devel/epics.md`](../../devel/epics.md).
+**Cubre:** epic 001, fase 0, decididos #3 (incluido "offline: no toca la red") y #9 de [`../../devel/epics.md`](../../devel/epics.md).
 
 ## Escenario: `tuku init` produce el estado cero, byte a byte y sin red
 
-Dado un directorio vacío
+Dado un directorio vacío, y el módulo `socket` parchado para que abrir un socket, conectar o resolver un nombre lance
 Cuando se corre
 
 ```bash
@@ -15,15 +15,17 @@ Entonces el árbol sembrado es idéntico a `template/vanilla/` salvo `AHORA.md`,
 Y `reglas/comandos.tuku.md` dice, por cada comando, lo mismo que su `-h`: qué hace y cómo hacerlo a mano
 Y `AHORA.md` queda como el template con `desde`, `hasta` y los siete días resueltos
 Y ningún archivo del vault conserva un placeholder (`AAAA-MM-DD`, `DD de mes`) fuera de un bloque de código
-Y nada de esto necesitó la red
+Y nada de esto intentó tocar la red
 
 ## Qué prueba, y qué no
 
-Es la verificación byte a byte que antes hacía `test_001_01`, ahora sobre `tuku init` en vez de `install.sh`. Corre el comando con `TUKU_HOME` en el checkout, sin instalar nada: la decisión 4 del epic 002 reserva ese camino para todos los `001-00X` menos el `001-01`.
+Corre el comando con `TUKU_HOME` en el checkout, sin instalar nada: la decisión 4 del epic 002 reserva ese camino para todos los `001-00X` menos el `001-01`.
 
 **No compara contra ninguna copia congelada del template.** El contraste es siempre contra `template/vanilla/` en vivo, y el `AHORA.md` esperado se deriva del template real aplicándole las siete fechas que el escenario escribe a mano, que es donde estuvo el bug (días etiquetados por posición, sin mirar el día real de `desde`). La consecuencia: el template puede cambiar todo lo que haga falta sin tocar el test; solo lo rompe un cambio en la forma de `AHORA.md` o en la lógica de sembrado.
 
 La tercera afirmación cubre el crecimiento del template: si un archivo nuevo trae `DD de mes` y la siembra no lo sustituye, las otras dos pasan en silencio y esta no.
+
+**La red no solo no se ve: se bloquea.** Con `socket.socket`, `socket.create_connection` y `socket.getaddrinfo` parchados para lanzar `RedBloqueada`, cualquier intento sube y el test falla señalando eso.
 
 La fecha fija (2026-08-11, martes) es la del ground truth de `corpus/referencia/referencia-faena.md`. El usuario real siembra con la fecha de hoy; el test la fija para comparar byte a byte. No es lunes a propósito: nada en `spec/` obliga a que un ciclo semanal empiece en lunes.
 

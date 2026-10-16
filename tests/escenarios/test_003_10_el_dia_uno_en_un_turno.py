@@ -2,10 +2,9 @@
 
 Escenario: 003-10-el-dia-uno-en-un-turno.md
 
-El criterio de salida del epic en un turno: el día uno dictado entero, con la
-consulta, la instrucción, el cierre ambiguo y el pedido sin comando que antes
-medían seis escenarios por separado (`003-02` a `003-07`). Cada test dice en su
-docstring de cuál viene.
+El criterio de salida del epic en un turno: el día uno dictado entero, con una
+consulta, una instrucción, una pregunta, un cierre ambiguo y un pedido sin
+comando que no se anotan.
 
 Ejecutable directo: `python3 tests/escenarios/test_003_10_el_dia_uno_en_un_turno.py`
 """
@@ -59,7 +58,7 @@ TABLA: dict[str, dict[str, tuple[str, str | None]]] = {
 TRADUCCION = {"entry add": 10, "scope create": 1, "note create": 1}
 
 #: Los dos pendientes de mañana. Empiezan igual a propósito: "ya pagué" calza
-#: con los dos, y por eso no se puede cerrar ninguno (`003-07`).
+#: con los dos, y por eso no se puede cerrar ninguno.
 DE_MANANA = {
     "pagar la sesión con el psicólogo",
     "pagar los gastos comunes del depto centro",
@@ -130,7 +129,7 @@ def _bloque_que_menciona(texto: str, frase: str) -> str:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_la_traduccion_es_la_del_dia() -> None:
-    """`003-02` a `003-07`: lo que no es un hecho no se traduce en un comando."""
+    """Lo que no es un hecho no se traduce en un comando."""
     turno = _corrida().turno
     hechos = turno.traduccion_sin_reintentos
     contados = {verbo: hechos.count(verbo) for verbo in TRADUCCION}
@@ -143,7 +142,7 @@ def test_003_10_la_traduccion_es_la_del_dia() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_cada_registro_calza_con_la_tabla_de_verdad() -> None:
-    """`003-03`, `003-04`, `003-05`, `003-06`: hora, ámbito y marca cerrada."""
+    """Hora, ámbito y marca cerrada de cada registro."""
     corrida = _corrida()
     for encabezado, esperado in TABLA.items():
         registros = _registros(_dia(corrida, encabezado))
@@ -165,7 +164,7 @@ def test_003_10_cada_registro_calza_con_la_tabla_de_verdad() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_la_consulta_no_escribe_y_nombra_los_dos_destinos() -> None:
-    """`003-02`: preguntar qué haría no es pedir que lo haga."""
+    """Preguntar qué haría no es pedir que lo haga."""
     corrida = _corrida()
     for archivo in (_ahora(corrida), _pendientes(corrida)):
         assert "pase escolar" not in archivo.lower(), "anotó lo que solo se consultó"
@@ -179,7 +178,7 @@ def test_003_10_la_consulta_no_escribe_y_nombra_los_dos_destinos() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_lo_dirigido_al_agente_no_entra_al_dia() -> None:
-    """`003-05` y `003-06`: se registra el hecho, no la conversación."""
+    """Se registra el hecho, no la conversación."""
     texto = _ahora(_corrida()).lower()
     for frase in ("recuérdame", "guárdame", "ábrelo", "cuántos pendientes", "apuntes"):
         assert frase not in texto, f"escribió {frase!r} como si fuera un hecho"
@@ -188,7 +187,7 @@ def test_003_10_lo_dirigido_al_agente_no_entra_al_dia() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_el_ambito_enlaza_hacia_atras_y_deja_su_constancia() -> None:
-    """`003-06`: el frente se nombra antes de existir y se enlaza al crearse."""
+    """El frente se nombra antes de existir y se enlaza al crearse."""
     corrida = _corrida()
     martes = _dia(corrida, MARTES)
     linea = _registros(martes)["18:40"]
@@ -202,7 +201,7 @@ def test_003_10_el_ambito_enlaza_hacia_atras_y_deja_su_constancia() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_los_cierres_encontraron_su_pareja_y_el_ambiguo_no_cerro_nada() -> None:
-    """`003-06` y `003-07`: quedan abiertos exactamente los dos de mañana."""
+    """Quedan abiertos exactamente los dos de mañana."""
     corrida = _corrida()
     abiertos = set(todo.cuerpos(_pendientes(corrida)))
     assert abiertos == DE_MANANA, (
@@ -215,7 +214,7 @@ def test_003_10_los_cierres_encontraron_su_pareja_y_el_ambiguo_no_cerro_nada() -
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_el_agente_pregunta() -> None:
-    """`003-07`: ante "ya pagué" con dos candidatos, consulta. La aserción débil."""
+    """Ante "ya pagué" con dos candidatos, consulta. Es la aserción más débil."""
     # Sin contar el eco de las dos preguntas del autor, que la respuesta repite.
     ecos = ("cuántos pendientes", "pase escolar", "anotarías")
     propias = [
@@ -229,7 +228,7 @@ def test_003_10_el_agente_pregunta() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_no_cambio_nada_fuera_del_dia() -> None:
-    """`003-03`, `003-05`, `003-07`: notas/ no se renombró y nada más se tocó."""
+    """`notas/` no se renombró y nada fuera del día cambió."""
     corrida = _corrida()
     raiz = corrida.ruta("mi-vault")
     assert (raiz / "notas").is_dir() and not (raiz / "apuntes").exists(), (
@@ -245,7 +244,7 @@ def test_003_10_no_cambio_nada_fuera_del_dia() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_10_el_doctor_aprueba_el_vault() -> None:
-    """`003-06`: el vault que dejó el agente está sano."""
+    """El vault que dejó el agente está sano."""
     doctor = _corrida().de("tuku doctor")
     assert doctor.codigo == EXITO, doctor.stdout
 

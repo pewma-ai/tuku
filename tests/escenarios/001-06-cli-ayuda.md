@@ -2,18 +2,6 @@
 
 **Cubre:** epic 001, fase 0. La convención "la ayuda del CLI se prueba en cada epic" de [`../../devel/epics.md`](../../devel/epics.md).
 
-## Escenario: `tuku -h` nombra lo que el epic 001 puso en el CLI
-
-Dado el CLI de TUKU tal como lo deja el epic 001
-Cuando se corre
-
-```bash
-tuku -h
-```
-
-Entonces sale con código 0
-Y el texto nombra el comando `init` y el propósito de TUKU
-
 ## Escenario: `tuku init -h` lista las opciones que añade el epic 001
 
 Dado el mismo CLI
@@ -25,26 +13,6 @@ tuku init -h
 
 Entonces sale con código 0
 Y el texto nombra `dir`, `--variante`, `--author` y `--force`
-
-## Escenario: `tuku` sin comando es error de uso
-
-Cuando se corre
-
-```bash
-tuku
-```
-
-Entonces sale con el código de uso (2) y el error lista los comandos válidos
-
-## Escenario: `--author` sin valor es error de uso
-
-Cuando se corre, sin dar el nombre
-
-```bash
-tuku init --author
-```
-
-Entonces sale con el código de uso (2)
 
 ## Escenario: un entorno roto no se confunde con un error de uso
 
@@ -67,7 +35,9 @@ Y el error dice qué le falta al árbol
 
 La ayuda es superficie pública: es lo primero que ve quien instala TUKU y no sabe qué es. Cada epic que toca `tuku` la amplía (comandos nuevos, opciones nuevas), y sin un test esa ampliación se olvida o se desincroniza del código.
 
-Los códigos de salida son la otra mitad de esa superficie, y son contrato según [`../../spec/cli.md`](../../spec/cli.md). Este escenario los fija porque ya hubo un choque real: `TukuHomeInvalido` devolvía 2, el mismo que argparse emite ante una invocación mal escrita, así que desde fuera no había forma de saber si corregir el comando o la instalación. Ahora son 1 rechazo, 2 uso, 3 entorno, y el test comprueba que ninguna causa comparte código.
+Los códigos de salida son la otra mitad de esa superficie, y son contrato según [`../../spec/cli.md`](../../spec/cli.md). Este escenario fija el de entorno (3), distinto del de uso (2) que emite argparse: quien invoca tiene que saber, sin leer el mensaje, si corrige el comando o la instalación.
+
+`tuku -h`, el error de uso y que ningún código se repita los fija el [`002-10`](002-10-cli-superficie.md) para el CLI entero.
 
 Corre en proceso, sobre `tuku.cli.main`, sin red: argparse imprime la ayuda y sale antes de sembrar nada. Por eso entra en la corrida por defecto, a diferencia de `001-01`.
 

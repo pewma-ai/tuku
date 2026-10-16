@@ -2,7 +2,7 @@
 
 > **Principio:** [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/bitacora.md`](../../spec/bitacora.md), [`spec/agente.md`](../../spec/agente.md)
 
-El autor dicta una hora y no un día. El día se deriva del vault, con la regla de [`reglas/bitacora.tuku.md`](../../template/vanilla/reglas/bitacora.tuku.md): si HOY cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros. Viene del `003-07` (borrado el 2026-10-16): es lo único de ese escenario que no cabe en el día dictado de corrido del [`003-10`](003-10-el-dia-uno-en-un-turno.md).
+El autor dicta una hora y no un día. El día se deriva del vault, con la regla de [`reglas/bitacora.tuku.md`](../../template/vanilla/reglas/bitacora.tuku.md): si HOY cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros.
 
 ## Estado inicial
 

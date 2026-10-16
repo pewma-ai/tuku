@@ -30,5 +30,3 @@ El autor dicta su primer día en lenguaje natural y el agente ejecuta las operac
 - [`003-11-el-dia-que-no-se-dicta.md`](003-11-el-dia-que-no-se-dicta.md) — Un hecho con hora y sin día cae en el último día del ciclo que ya tiene registros.
 - [`003-08-el-mismo-vault-otro-arnes.md`](003-08-el-mismo-vault-otro-arnes.md) — Portabilidad: evalúa que las reglas operativas dependen del vault y no del arnés de ejecución (`hermes`).
 - [`003-09-el-mismo-vault-tercer-arnes.md`](003-09-el-mismo-vault-tercer-arnes.md) — Portabilidad, tercer caso: el mismo dictado bajo `claude` con sonnet en esfuerzo bajo, el único arnés que no descubre solo el `AGENTS.md`.
-
-Del `003-02` al `003-07` medían lo mismo de a una frase y se fundieron en el `003-10` el 2026-10-16; el día derivado del `003-07` quedó en el `003-11`.

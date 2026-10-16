@@ -106,7 +106,7 @@ Un `.md` que cambia su comando cambia lo que el test corre. No hay forma de que 
 
 `Y` y `Pero` continúan el paso anterior y heredan su tipo. Todo lo que viene después de un encabezado que no sea `## Escenario:` es documentación y no se ejecuta, así que el bloque de `## Cómo se corre` no corre dos veces.
 
-Una línea que empieza con `tuku` se ejecuta **en proceso** (`cli.main`): es rápida, comparte intérprete con el test y por eso el `001-05` puede parchar `socket` alrededor. Cualquier otra línea va por `bash`, que es como entran `mkdir`, `grep` o `diff -r` sin caso especial.
+Una línea que empieza con `tuku` se ejecuta **en proceso** (`cli.main`): es rápida, comparte intérprete con el test y por eso el `001-02` puede parchar `socket` alrededor. Cualquier otra línea va por `bash`, que es como entran `mkdir`, `grep` o `diff -r` sin caso especial.
 
 ### El escenario se lee como lo que hace una persona
 
@@ -174,12 +174,11 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | --- | --- | --- |
 | [`001-00-un-tuku-minimo-instalable.md`](001-00-un-tuku-minimo-instalable.md) | Epic 001 | Descripción general, entregable, decisiones y criterios de salida del Epic 001 |
 | [`001-01-instalacion-con-uv-tool.md`](001-01-instalacion-con-uv-tool.md) | Epic 001, fase 0 | Los únicos que instalan de verdad, con `--force`: `uv tool install` y `pipx install` desde `git+...@devel`, y `pipx install` desde este checkout. Marcados `red`, fuera de la corrida por defecto |
-| [`001-02-init-siembra-el-estado-cero.md`](001-02-init-siembra-el-estado-cero.md) | Epic 001, fase 0 | La verificación byte a byte de `tuku init` contra `template/vanilla/` en vivo, con `home` local y sin red |
-| [`001-03-destino-no-vacio.md`](001-03-destino-no-vacio.md) | Epic 001, fase 0 | `init()` se niega a sembrar sobre contenido; `--force` reemplaza. Ahora es un flag, sin prompt ni pty |
-| [`001-04-init-author.md`](001-04-init-author.md) | Epic 001, fase 0 | La capa de identidad: `init(autor=...)` deja el nombre en `LIBRO-DE-ESTILO.md`; omitirlo o vaciarlo deja el vault operable |
-| [`001-05-init-no-toca-la-red.md`](001-05-init-no-toca-la-red.md) | Epic 001, fase 0 | Con el socket parchado para fallar, `tuku init` completa igual. Aísla la afirmación "offline" |
-| [`001-06-cli-ayuda.md`](001-06-cli-ayuda.md) | Epic 001, fase 0 | `tuku -h` y `tuku init -h` nombran lo que el epic añadió, y los cuatro códigos de salida no se pisan. En proceso, sin red. Convención "la ayuda se prueba en cada epic" |
-| [`001-07-lint-libro-de-estilo.md`](001-07-lint-libro-de-estilo.md) | Epic 001, fase 0 | Contratos de `LIBRO-DE-ESTILO.md` (marcador de autor y encabezados de tablas). Todo rechazo nombra defecto y corrección |
+| [`001-02-init-siembra-el-estado-cero.md`](001-02-init-siembra-el-estado-cero.md) | Epic 001, fase 0 | La verificación byte a byte de `tuku init` contra `template/vanilla/` en vivo, con `home` local y la red bloqueada |
+| [`001-03-destino-no-vacio.md`](001-03-destino-no-vacio.md) | Epic 001, fase 0 | `tuku init` se niega a sembrar sobre contenido; `--force` reemplaza |
+| [`001-04-init-author.md`](001-04-init-author.md) | Epic 001, fase 0 | La capa de identidad: `--author` deja el nombre en `LIBRO-DE-ESTILO.md`; en blanco deja el vault operable |
+| [`001-06-cli-ayuda.md`](001-06-cli-ayuda.md) | Epic 001, fase 0 | `tuku init -h` nombra sus opciones, y una instalación rota sale con el código de entorno. En proceso, sin red |
+| [`001-07-lint-libro-de-estilo.md`](001-07-lint-libro-de-estilo.md) | Epic 001, fase 0 | Con qué código salen `style lint` y `vocab show` ante un `LIBRO-DE-ESTILO.md` roto |
 | [`002-00-el-dia-uno-a-mano.md`](002-00-el-dia-uno-a-mano.md) | Epic 002 | Descripción general, qué tiene que funcionar, qué se verifica y movimientos de diseño del Epic 002 |
 | [`002-01-abrir-ciclo.md`](002-01-abrir-ciclo.md) | Epic 002, fase 1 | Primer paso de la cadena, y el único que no hereda: siembra su vault. Apertura de ciclo desde `reglas/plantilla/AHORA.md` con la semana completa |
 | [`002-02-registro-en-su-dia.md`](002-02-registro-en-su-dia.md) | Epic 002, fase 1 | Segundo paso de la cadena. Día correcto, orden cronológico, y el diff no toca `PENDIENTES.md` |
@@ -191,10 +190,10 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`002-09-crear-nota.md`](002-09-crear-nota.md) | Epic 002, fase 5 mínima | Obliga a agregar la consecuencia "nota" a `spec/flujo-informacion.md` |
 | [`002-13-links-markdown.md`](002-13-links-markdown.md) | Epic 002 | Fuera de la cadena: `tuku doctor link` reporta el wikilink escrito a mano y `tuku fix link` lo convierte conservando la fecha; lo ambiguo vuelve como decisión |
 | [`002-10-cli-superficie.md`](002-10-cli-superficie.md) | Epic 002 | Fuera de la cadena, siembra su propio vault: nouns y verbs en `-h`, códigos de salida, y el barrido de que todo error nombre la corrección |
-| [`003-00-el-dia-uno-dictado.md`](003-00-el-dia-uno-dictado.md) | Epic 003 | La escalera de menos a más para probar con un agente en el medio, y los seis escenarios que la suben |
+| [`003-00-el-dia-uno-dictado.md`](003-00-el-dia-uno-dictado.md) | Epic 003 | Qué se verifica con un agente en el medio, y los escenarios del epic |
 | [`003-01-el-vault-dice-a-donde-va.md`](003-01-el-vault-dice-a-donde-va.md) | Epic 003 | `tuku doctor` verifica que la tabla de despacho del `AGENTS.md` no nombre comandos que no existen. Sin agente |
-| [`003-02-el-agente-lee-el-vault.md`](003-02-el-agente-lee-el-vault.md) | Epic 003 | El autor pregunta, el agente responde y el vault no cambia. Primer turno |
-| [`003-03-un-hecho-un-comando.md`](003-03-un-hecho-un-comando.md) | Epic 003 | Un hecho sin consecuencia: una línea, un `tuku entry add`, nada más |
+| [`003-10-el-dia-uno-en-un-turno.md`](003-10-el-dia-uno-en-un-turno.md) | Epic 003 | El día uno dictado en un turno, con lo que no se anota: deja el vault del epic 002 |
+| [`003-11-el-dia-que-no-se-dicta.md`](003-11-el-dia-que-no-se-dicta.md) | Epic 003 | Un hecho con hora y sin día cae en el último día con registros |
 
 ## Escenarios encadenados, desde el epic 002
 

@@ -3,12 +3,11 @@
 Escenario: 001-03-destino-no-vacio.md
 
 `tuku init` se niega a sembrar en un directorio que ya tiene contenido, sin
-tocar nada. Con `--force` lo reemplaza entero. Ya no hay prompt ni `/dev/tty`:
-la decisión 8 del epic 001 lo cambió por un flag.
+tocar nada. Con `--force` lo reemplaza entero.
 
-Los comandos no se escriben acá. Los tres casos viven en el `.md` y este arnés
+Los comandos no se escriben acá. Los dos casos viven en el `.md` y este arnés
 solo afirma sobre lo que dejaron, cada uno buscando su `## Escenario:` por el
-título. Las tres afirmaciones van por la superficie CLI, que es donde el usuario
+título. Las dos afirmaciones van por la superficie CLI, que es donde el usuario
 ve la negativa:
 
 1. Sobre un destino no vacío y sin `--force`, el comando sale con `RECHAZO` (1),
@@ -16,11 +15,11 @@ ve la negativa:
    igual a como estaba (el centinela intacto, nada más).
 2. `--force` sobre ese mismo destino lo reemplaza: el centinela desaparece y
    queda un vault operable.
-3. Sobre un destino que no existe, siembra sin más: la negativa es
-   específicamente por contenido, no por que el directorio exista.
+
+Que un destino que no existe se siembre sin `--force` lo prueba el `001-02`.
 
 Cada caso deja su resultado en su propia carpeta bajo
-`playground/001-03-destino-no-vacio/`, para poder mirar los tres y no solo el
+`playground/001-03-destino-no-vacio/`, para poder mirar los dos y no solo el
 último.
 
 Ejecutable directo: `python3 tests/escenarios/test_001_03_destino_no_vacio.py`.
@@ -66,15 +65,7 @@ def test_001_03_force_reemplaza_el_destino_no_vacio() -> None:
     assert "DD de mes" not in (destino / "AHORA.md").read_text(encoding="utf-8")
 
 
-def test_001_03_destino_vacio_se_siembra_sin_force() -> None:
-    corrida = gherkin.correr(SLUG, "un destino vacío se siembra sin `force`")
-
-    assert corrida.codigo == EXITO, corrida.stderr
-    assert corrida.ruta("mi-vault", "AHORA.md").is_file()
-
-
 if __name__ == "__main__":
     test_001_03_destino_no_vacio_se_niega_y_no_toca_nada()
     test_001_03_force_reemplaza_el_destino_no_vacio()
-    test_001_03_destino_vacio_se_siembra_sin_force()
-    print(f"ok: se niega sin force, force reemplaza, vacío siembra (playground/{SLUG}/)")
+    print(f"ok: se niega sin force, force reemplaza (playground/{SLUG}/)")

@@ -13,15 +13,13 @@ tuku init mi-vault --date 2026-08-11 --author "ARTURO PEREZ-REVERTE (Arturo)"
 
 Entonces `LIBRO-DE-ESTILO.md` queda con ese nombre en la sección "El autor"
 Y no sobrevive el placeholder `por declarar`
-Y el resto del vault queda completo, sin placeholders vivos
 
-## Escenario: omitir el nombre deja el vault operable
+## Escenario: un nombre en blanco deja el vault operable
 
 Dado el mismo destino
 Cuando se corre
 
 ```bash
-tuku init sin-nombre --date 2026-08-11
 tuku init en-blanco --date 2026-08-11 --author "   "
 ```
 
@@ -30,9 +28,9 @@ Y el vault igual queda operable (principio 2: dejar el nombre en blanco no impid
 
 ## Por qué existe
 
-`001-02` cubre la siembra byte a byte sin nombre. Este es la única cobertura de `--author`.
+`001-02` cubre la siembra byte a byte sin nombre, con el libro de estilo intacto, y que el resto del vault quede sin placeholders. Este es la única cobertura de `--author`.
 
-Cambió respecto al cierre anterior: antes el nombre atravesaba `install.sh` (prompt por `/dev/tty`, `read`, `set --`, `--autor`) y el test lo ejercía con `pexpect`. Ahora el nombre entra por `--author` y no pasa por ninguna capa de shell interactiva. El nombre elegido, con espacios, paréntesis y guion, se mantiene: verifica que el reemplazo por prefijo de línea de `_sembrar_autor` no lo parte ni toca la prosa que sigue al marcador.
+El nombre elegido, con espacios, paréntesis y guion, verifica que el reemplazo por prefijo de línea de `_sembrar_autor` no lo parte ni toca la prosa que sigue al marcador.
 
 Fecha fija 2026-08-11, la misma de `001-02`, para que el vault sea comparable con `diff -r` (salvo `LIBRO-DE-ESTILO.md`).
 
@@ -42,7 +40,7 @@ Fecha fija 2026-08-11, la misma de `001-02`, para que el vault sea comparable co
 uv run pytest tests/escenarios/ -k 001_04
 ```
 
-Cada escenario deja lo suyo bajo `playground/001-04-init-author/`: `mi-vault/` el primero, `sin-nombre/` y `en-blanco/` el segundo.
+Cada escenario deja lo suyo bajo `playground/001-04-init-author/`: `mi-vault/` el primero, `en-blanco/` el segundo.
 
 ## Qué se mira a mano
 

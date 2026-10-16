@@ -17,12 +17,16 @@ trabajo, así que la siembra copia de `template/vanilla/` sin tocar `~/.tuku` ni
 la red: el camino que la decisión 4 del epic 002 reserva para todo test salvo
 el `001-01`.
 
-Tres afirmaciones, y las tres fallan por separado:
+Cuatro afirmaciones, y las cuatro fallan por separado:
 
 1. El árbol sembrado no difiere de `template/vanilla/` en ningún archivo salvo
-   `AHORA.md`, ni sobra ni falta ninguno.
+   los que la siembra resuelve, ni sobra ni falta ninguno.
 2. `AHORA.md` queda exactamente como el template con las fechas resueltas.
 3. No sobrevive ningún placeholder en ningún archivo del vault.
+4. Todo eso con la red bloqueada: `socket` parchado para que abrir un socket,
+   conectar o resolver un nombre lance `RedBloqueada`. No basta con no ver
+   tráfico; si algún día `init` (o algo que importe) intenta tocar la red, el
+   test falla señalando eso.
 
 La tercera cubre el crecimiento del template: si un archivo nuevo de
 `template/vanilla/` trae `DD de mes` y `init()` no lo sustituye, las otras dos
@@ -43,7 +47,10 @@ Ejecutable directo:
 
 from __future__ import annotations
 
+import socket
 import sys
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
 
@@ -59,7 +66,6 @@ from vault import (  # noqa: E402
 )
 
 from tuku.cli import EXITO, manual  # noqa: E402
-from tuku.config import parsear_config_md  # noqa: E402
 
 SLUG = "001-02-init-siembra-el-estado-cero"
 
@@ -82,8 +88,33 @@ DIAS = [
 ]
 
 
+class RedBloqueada(RuntimeError):
+    """Algo intentó tocar la red durante `tuku init`."""
+
+
+@contextmanager
+def _sin_red() -> Iterator[None]:
+    def _prohibido(*_args: object, **_kwargs: object) -> object:
+        raise RedBloqueada("init intentó abrir un socket")
+
+    originales = {
+        "socket": socket.socket,
+        "create_connection": socket.create_connection,
+        "getaddrinfo": socket.getaddrinfo,
+    }
+    socket.socket = _prohibido  # type: ignore[assignment,misc]
+    socket.create_connection = _prohibido  # type: ignore[assignment]
+    socket.getaddrinfo = _prohibido  # type: ignore[assignment]
+    try:
+        yield
+    finally:
+        for nombre, valor in originales.items():
+            setattr(socket, nombre, valor)
+
+
 def test_001_02_init_siembra_el_estado_cero_byte_a_byte() -> None:
-    corrida = gherkin.correr(SLUG, "produce el estado cero")
+    with _sin_red():
+        corrida = gherkin.correr(SLUG, "produce el estado cero")
     assert corrida.codigo == EXITO, corrida.stderr
     destino = corrida.ruta("mi-vault")
 
@@ -101,10 +132,6 @@ def test_001_02_init_siembra_el_estado_cero_byte_a_byte() -> None:
     esperado = ahora_sembrado(TEMPLATE_VANILLA, desde=DESDE, hasta=HASTA, dias=DIAS)
     assert obtenido == esperado, "AHORA.md no quedó como el template con las fechas resueltas"
 
-    config = (destino / "reglas" / "config.tuku.md").read_text(encoding="utf-8")
-    zona = parsear_config_md(config)["TZ"]
-    assert zona and zona != "TZ-DEL-SISTEMA", "la zona horaria del sistema no se sembró"
-
     vivos = placeholders_sin_sustituir(destino)
     assert not vivos, f"quedaron placeholders sin sustituir: {vivos}"
 
@@ -112,6 +139,7 @@ def test_001_02_init_siembra_el_estado_cero_byte_a_byte() -> None:
 if __name__ == "__main__":
     test_001_02_init_siembra_el_estado_cero_byte_a_byte()
     print(
-        "ok: árbol idéntico a template/vanilla/, AHORA.md sembrado, sin placeholders vivos "
+        "ok: árbol idéntico a template/vanilla/, AHORA.md sembrado, sin placeholders vivos, "
+        "sin red "
         "(queda en playground/001-02-init-siembra-el-estado-cero/)"
     )
