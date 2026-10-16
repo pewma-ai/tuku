@@ -364,13 +364,16 @@ def abrir_en_vault(
     `spec/pendientes.md` persigue. `propagate=False` es la escotilla del lote,
     que propaga una sola vez al final.
     """
+    from tuku import scope as ambitos
     from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault, leer_config
     from tuku.entry import add as entry_add
     from tuku.entry import componer
     from tuku.propagate import propagar
 
-    limpio_scope = scope.strip().strip("[]") if scope else None
+    limpio_scope = ambitos.normalizar(scope) if scope else None
+    if limpio_scope and (rechazo := ambitos.rechazo_si_no_existe(vault, limpio_scope)):
+        return rechazo
     marca = Marca(ABRE, limpio_scope, body.strip())
     escalera = escalera_de(leer_config(vault).horizontes)
     if when.strip() and horizon == ESTA_SEMANA:

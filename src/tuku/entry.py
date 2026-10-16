@@ -148,6 +148,11 @@ def add_al_vault(
     from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
+    if scope:
+        scope = ambitos.normalizar(scope)
+        if (rechazo := ambitos.rechazo_si_no_existe(vault, scope)) is not None:
+            return rechazo
+
     ruta = archivo_vault(vault, "AHORA.md")
     dia = encabezado_de(day or date.today())
     linea = componer(hora=hour or datetime.now().strftime("%H:%M"), scope=scope, body=body)

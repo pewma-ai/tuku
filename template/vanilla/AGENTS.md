@@ -1,22 +1,22 @@
 # Reglas de este vault
 
-Un vault de TUKU: la bitácora de la vida de su autor, en archivos de texto que se leen y editan sin ningún programa especial.
+Un vault de TUKU: la bitácora de la vida de su autor, en archivos de texto que se leen y editan sin programas especiales.
 
-Este archivo se lee entero en toda sesión, así que dice **a dónde va cada cosa** y nada más. El cómo vive donde se hace, y la tabla de abajo nombra el archivo que hay que abrir antes de ejecutar cada fila.
+Este archivo dice **a dónde va cada cosa**. El cómo está en el archivo que nombra la columna "Lee antes".
 
 ## Qué es cada archivo
 
 | Archivo | Qué guarda |
 | --- | --- |
 | `AHORA.md` | El ciclo en curso. Aquí se escriben los registros del día. |
-| `PENDIENTES.md` | Todo lo que está abierto y sin cerrar. |
-| `LIBRO-DE-ESTILO.md` | Cómo se escribe aquí, y el vocabulario del autor. |
-| `ambitos/` | Los frentes de tu vida, uno por carpeta o archivo. |
-| `notas/` | Ideas y notas que no pertenecen a un día. |
+| `PENDIENTES.md` | Todo lo que está abierto. |
+| `LIBRO-DE-ESTILO.md` | Cómo se escribe aquí y el vocabulario del autor. |
+| `ambitos/` | Los frentes de la vida del autor, uno por carpeta. |
+| `notas/` | Ideas que no pertenecen a un día. |
 | `reglas/` | Reglas de las automatizaciones y configuración. |
-| `bitacoras/` | Los ciclos ya cerrados. Aparece cuando cierres el primero. |
+| `bitacoras/` | Los ciclos cerrados. Aparece al cerrar el primero. |
 
-**MAYÚSCULAS es de TUKU, minúsculas es tuyo.** Sirve para saber de un vistazo qué puedes renombrar.
+MAYÚSCULAS es de TUKU, minúsculas es del autor.
 
 ## A dónde va lo que el autor dice
 
@@ -30,16 +30,13 @@ Este archivo se lee entero en toda sesión, así que dice **a dónde va cada cos
 | empieza el ciclo | nada | `tuku cycle open` |
 | corrige algo ya escrito: "no era eso", "cámbiale el nombre" | nada | `tuku entry rename`, `scope rename`, `note rename` |
 | nombra un proceso del vault | ese proceso | el que el proceso diga |
-| pide algo que ninguna fila cubre | nada | ninguno: **[reformula y confirma](#lo-que-no-tiene-comando)** |
+| pide algo que ninguna fila cubre | nada | ninguno: [reformula y confirma](#lo-que-no-tiene-comando) |
 | pregunta, delibera o pide investigar | nada | ninguno: se responde, no se escribe |
 
-**Contarlo es pedirlo.** Cuando el autor cuenta algo, ejecuta el comando de su fila: no preguntes qué quiere que hagas con lo que acaba de contarte, ni ofrezcas alternativas. Esta tabla ya respondió esa pregunta.
-
-**Abre lo que dice "Lee antes", y ábrelo antes de ejecutar.** Ahí está lo que este archivo no dice: los campos, los plazos, los casos. Si no lo lees, el comando sale mal en la mitad de los casos y bien en la otra mitad, que es peor que fallar.
-
-Casi todo entra por las tres primeras filas, que son el mismo comando y difieren solo en la marca. Pero no todo es un registro: las filas de más abajo no pasan por la bitácora, y dos de ellas no escriben nada.
-
-**Un registro es un comando, y sus consecuencias son parte de escribirlo.** `tuku entry add` deja la línea, actualiza las páginas de ámbito y aplica lo que la marca declara. No hay una segunda llamada que recordar.
+- **Contarlo es pedirlo.** Si el autor cuenta algo, ejecuta el comando de su fila. No preguntes qué hacer con eso ni ofrezcas alternativas.
+- **Abre "Lee antes" antes de ejecutar.** Ahí están los campos, las fechas y los casos.
+- **Un hecho, un comando.** El comando ya aplica sus consecuencias: `tuku entry add` con `~~(Hecho)~~` cierra el pendiente (no corras `tuku todo close`) y `tuku note create` deja su constancia en la bitácora (no corras `tuku entry add` para la nota).
+- **Respeta el orden del dictado.** Cada hecho se registra en el vault tal como estaba en ese momento: un frente que el autor pide abrir más adelante no se crea antes.
 
 ## Las tres marcas
 
@@ -47,21 +44,17 @@ Elegir la marca es lo único que es juicio. Va al principio del cuerpo del regis
 
 | Marca | Qué significa |
 | --- | --- |
-| `**pendiente**` | Queda algo por hacer. Su cuerpo se copia tal cual a `PENDIENTES.md`. |
-| `~~(Hecho)~~` | Se cerró algo **que ya estaba pendiente**. Repite el mismo cuerpo, sin reescribirlo. |
+| `**pendiente**` | Queda algo por hacer. |
+| `~~(Hecho)~~` | Se cerró algo **que ya estaba pendiente**. Repite su cuerpo sin reescribirlo. |
 | `**cadencia**` | Se da de alta algo que se repite. |
 
-Una acción que ocurrió pero que nunca fue pendiente es un registro normal, no un cierre. Todo lo demás que se escriba entre `**` es vocabulario del autor y vive en `LIBRO-DE-ESTILO.md`.
+Una acción que nunca fue pendiente es un registro normal, no un cierre. Cualquier otra palabra entre `**` es una clasificación del autor: `LIBRO-DE-ESTILO.md`, `### Clasificaciones`. Cómo se redacta un registro: `LIBRO-DE-ESTILO.md`, `## Cómo escribe el autor`.
 
 ## Lo que no tiene comando
 
-Cuando existe un comando, hace en una llamada lo que a ti te cuesta muchas. Cuando no existe, el trabajo se hace igual, a mano, más caro y menos seguro. Por eso:
-
-1. **Di en una frase qué vas a hacer**, en palabras del autor y no en las tuyas.
-2. **Espera el sí.** Una petición abierta admite varias lecturas y la tuya puede no ser la suya.
-3. **Después hazlo entero.** A medias deja el vault diciendo dos cosas a la vez.
-
-Reformular es decirle qué entendiste, para que corrija ahora y no después de que esté escrito.
+1. Di en una frase qué vas a hacer, en palabras del autor.
+2. Espera el sí.
+3. Hazlo entero: a medias deja el vault diciendo dos cosas a la vez.
 
 ## Límites
 
@@ -70,15 +63,12 @@ Reformular es decirle qué entendiste, para que corrija ahora y no después de q
 | **Pregunta primero** | Mover archivos, o renombrar algo que no tenga su `rename`. Modificar cualquier `AGENTS.md` o `reglas/`. Cerrar el ciclo o tocar `bitacoras/`. Cerrar un pendiente cuando el autor no repitió su texto: confirma cuál es antes. |
 | **Nunca** | Editar a mano un archivo que tiene comando. Actuar sobre una petición ambigua. Escribir un pendiente que el autor no pidió. Marcar `~~(Hecho)~~` algo que nunca estuvo pendiente. Borrar sin confirmación. |
 
-`AHORA.md`, `PENDIENTES.md`, `bitacoras/`, `ambitos/` y `notas/` son lo que escribió el autor. Nada los regenera y nada los sobreescribe sin que él lo apruebe. Todo lo demás se puede borrar y volver a generar desde ellos.
+`AHORA.md`, `PENDIENTES.md`, `bitacoras/`, `ambitos/` y `notas/` los escribe el autor: nada los sobreescribe sin su aprobación. Todo lo demás se regenera desde ellos.
 
 ## Si eres un agente
- 
-- Un hecho dictado ya viene aprobado: escríbelo. Lo que necesita aprobación es lo que el autor **no** pidió, y eso está en Límites.
-- Un hecho, un comando. Si te descubres corriendo dos para un mismo hecho, revisa la tabla: casi siempre el segundo ya lo hizo el primero. En particular: `tuku entry add` con `~~(Hecho)~~` ya cierra el compromiso en `PENDIENTES.md` (no corras `tuku todo close`), y `tuku note create` ya estampa la constancia en la bitácora (no corras `tuku entry add` para la nota).
-- Procesa el dictado en el orden en que ocurrieron los hechos. No reordenes acciones ni anticipes la apertura de frentes hacia hechos del pasado: cada hecho se registra en el estado del vault en ese momento.
-- No preguntes lo que los últimos registros ya responden.
-- Si otro agente te lanzó para ejecutar algo concreto, ejecútalo: no vuelvas a despachar.
-- No narres el mecanismo. Di qué quedó escrito y en qué archivo.
 
-Este vault no contiene código: las automatizaciones se instalan aparte, con el comando `tuku`, y cada una documenta cómo hacer a mano lo que ella hace. Si no están instaladas, el vault funciona igual. Cuesta más trabajo, y eso es todo.
+- No preguntes lo que los últimos registros ya responden.
+- Si otro agente te lanzó para ejecutar algo concreto, ejecútalo sin volver a despachar.
+- Al terminar, di qué quedó escrito y en qué archivo, no cómo se hizo.
+
+Sin `tuku` instalado el vault funciona igual, a mano: cada archivo de `reglas/` explica cómo.

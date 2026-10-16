@@ -6,8 +6,10 @@ El agente respeta la tabla de Límites de [`AGENTS.md`](../../template/vanilla/A
 
 ## Estado inicial
 
+El día uno de la cadena determinista del 002, equivalente al que deja el `003-06`. No hereda del `003-06`: un escenario con agente no va en la base de una cadena ([`devel/epics.md`](../../devel/epics.md)), porque lo que escribió un modelo cambia de corrida en corrida.
+
 ```bash
-cp -r ../../003-06-el-dia-completo/el-dia-dictado-entero-deja-el/mi-vault .
+cp -r ../../002-09-crear-nota/la-nota-se-escribe-donde/mi-vault .
 tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:30 --scope depto-centro --body "**pendiente**: pagar los gastos comunes del depto centro"
 ```
 

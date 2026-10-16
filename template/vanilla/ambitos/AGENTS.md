@@ -12,7 +12,9 @@ Si el autor nombra un frente que todavía no existe, **no lo crees por tu cuenta
 
 ## Cuándo se crea un ámbito
 
-Cuando el autor lo pide. `tuku scope create` arma la carpeta, su página y sus archivos, y enlaza hacia atrás lo que ya lo nombraba.
+Cuando el autor lo pide. `tuku scope create` arma la carpeta, su página y sus archivos, y enlaza hacia atrás lo que ya lo nombraba. El nombre se pasa tal como lo dijo el autor: el comando cambia los espacios por guiones.
+
+Si un comando rechaza un ámbito porque no existe, ofrécele al autor crearlo y espera el sí.
 
 Un frente que aparece dos veces en la semana probablemente merece página, y eso se propone; no se crea sin el sí. Crear un ámbito cambia dónde va a caer todo lo que venga después, y esa decisión es del autor.
 

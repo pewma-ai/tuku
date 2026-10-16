@@ -77,6 +77,12 @@ El comando `tuku scope lint` (y `tuku doctor`) verifica estructuralmente:
 
 Ante cualquier defecto, el linter informa y nunca repara por su cuenta: nombra la discrepancia e indica el comando original correspondiente para reparar la consistencia.
 
+## El nombre de un ámbito
+
+**Los espacios pasan a guion.** El autor dicta "depto centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry add`, `todo open`, `note create`, `link backfill`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
+
+**Un ámbito que no existe se rechaza.** `entry add`, `todo open` y `note create` salen con `RECHAZO` sin escribir nada, y el mensaje nombra `tuku scope create <nombre>` como corrección. Crear un ámbito cambia dónde cae todo lo que venga después, y esa decisión es del autor: se le ofrece, no se toma por él. Una categoría sí existe, y apuntarle un registro lo reporta `scope lint`, no lo impide el comando.
+
 ## Convención de mayúsculas
 
 Los archivos de TUKU van en MAYÚSCULAS: `AHORA.md`, `PENDIENTES.md`, `AGENTS.md`, `CADENCIAS.md`, `CAPACIDAD.md`. El contenido del autor va en minúsculas: `trabajo.md`, `juanito_perez.md`, las notas.

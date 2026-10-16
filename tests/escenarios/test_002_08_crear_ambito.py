@@ -141,10 +141,41 @@ def test_002_08_crear_dos_veces_no_hace_nada() -> None:
     assert f"[[[[{AMBITO}]]]]" not in ahora, "se enlazó dos veces"
 
 
+def test_002_08_el_nombre_con_espacios_se_escribe_con_guion() -> None:
+    """El autor dicta "depto centro"; el ámbito es uno solo y se llama `depto-centro`."""
+    corrida = gherkin.correr(SLUG, "el nombre dictado con espacios se escribe con guion")
+    assert corrida.codigo == EXITO, corrida.stderr
+
+    ambitos = corrida.ruta("vault-nombres", "ambitos")
+    assert (ambitos / AMBITO / f"{AMBITO}.md").is_file(), "no quedó como depto-centro"
+    assert not (ambitos / "depto centro").exists(), "quedó con el espacio"
+
+
+def test_002_08_un_ambito_que_no_existe_se_rechaza() -> None:
+    corrida = gherkin.correr(SLUG, "un registro a un ámbito que no existe se rechaza")
+
+    assert corrida.codigo == RECHAZO, corrida.stdout
+    assert f"tuku scope create {AMBITO}" in corrida.stderr, corrida.stderr
+    assert corrida.delta_de("vault-sin-ambito") == {}, "escribió pese al rechazo"
+
+
+def test_002_08_un_ambito_rechazado_no_queda_a_medias() -> None:
+    corrida = gherkin.correr(SLUG, "un ámbito rechazado no queda a medias")
+
+    assert corrida.codigo == RECHAZO, corrida.stdout
+    assert "tabla" in corrida.stderr, corrida.stderr
+    assert not corrida.ruta("vault-roto", "ambitos", AMBITO).exists(), (
+        "el rechazo dejó la carpeta creada"
+    )
+
+
 if __name__ == "__main__":
     test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras()
     test_002_08_el_resto_de_la_linea_no_se_reescribe()
     test_002_08_un_registro_no_puede_apuntar_a_una_categoria()
     test_002_08_el_ambito_recien_creado_deja_el_vault_sano()
     test_002_08_crear_dos_veces_no_hace_nada()
-    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")
+    test_002_08_el_nombre_con_espacios_se_escribe_con_guion()
+    test_002_08_un_ambito_que_no_existe_se_rechaza()
+    test_002_08_un_ambito_rechazado_no_queda_a_medias()
+    print(f"ok: 8 afirmaciones (queda en playground/{SLUG}/)")

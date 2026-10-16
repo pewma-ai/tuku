@@ -90,6 +90,7 @@ def backfill_en_vault(vault: Path, ambito: str) -> Resultado:
     from tuku import scope
     from tuku.config import archivo_vault
 
+    ambito = scope.normalizar(ambito)
     ahora_file = archivo_vault(vault, "AHORA.md")
     pagina = vault / "ambitos" / ambito / f"{ambito}.md"
     if not pagina.is_file():

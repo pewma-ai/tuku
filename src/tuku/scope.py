@@ -50,6 +50,54 @@ def _pagina(directorio: Path) -> Path:
     return directorio / f"{directorio.name}.md"
 
 
+def normalizar(nombre: str) -> str:
+    """El nombre de un ámbito tal como va en disco y en los enlaces.
+
+    Los espacios pasan a guion: el autor dicta "depto centro" y el ámbito es
+    `depto-centro`. Sin esto, cada agente elige su forma y el mismo frente
+    termina con dos nombres.
+    """
+    return re.sub(r"\s+", "-", nombre.strip().strip("[]").strip())
+
+
+def nombres(vault: Path) -> set[str]:
+    """Todo lo que un registro puede nombrar en `ambitos/`.
+
+    Ámbitos, categorías y actividades. Que un registro apunte a una categoría es
+    un error que reporta `scope lint`, no uno que impida escribirlo.
+    """
+    raiz = vault / "ambitos"
+    if not raiz.is_dir():
+        return set()
+    salida = set()
+    for p in raiz.rglob("*"):
+        if p.is_dir():
+            salida.add(p.name)
+        elif p.suffix == ".md" and not p.stem.isupper():
+            salida.add(p.stem)
+    return salida
+
+
+def rechazo_si_no_existe(vault: Path, nombre: str) -> Resultado | None:
+    """Rechaza un ámbito que no existe. Crearlo es decisión del autor, no del comando."""
+    if nombre in nombres(vault):
+        return None
+    existentes = ", ".join(sorted(a.nombre for a in leer(vault))) or "ninguno"
+    return Resultado.rechazo(
+        f"no existe el ámbito {nombre!r}. Créalo con `tuku scope create {nombre}` "
+        f"si el autor lo pide, o usa uno que exista: {existentes}."
+    )
+
+
+def _rechazo_de_nombre(nombre: str) -> Resultado | None:
+    if not nombre or "/" in nombre or nombre in (".", ".."):
+        return Resultado.rechazo(
+            f"{nombre!r} no sirve de nombre de ámbito. "
+            f"Usa un nombre sin barras, como el de una carpeta."
+        )
+    return None
+
+
 def keywords(pagina: str) -> list[str]:
     """Las `keywords` del frontmatter de una página de ámbito."""
     m = _KEYWORDS.search(pagina)
@@ -64,7 +112,7 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
     Si ya existe no toca nada: `spec/ambitos.md` no admite dos ámbitos con el
     mismo nombre, y volver a crearlo no es un error del autor.
     """
-    valor = name or nombre
+    valor = normalizar(name or nombre)
     directorio = vault / "ambitos" / valor
     directorio.mkdir(parents=True, exist_ok=True)
 
@@ -332,8 +380,22 @@ def crear_con_enlazado(vault: Path, nombre: str) -> Resultado:
     El enlazado retroactivo es parte de crear, no un segundo paso: un ámbito que
     nace sin recoger lo que el autor ya había escrito sobre él deja la mitad del
     trabajo hecha y nadie se entera.
+
+    **Se rechaza antes de tocar nada:** lo que haría fallar la propagación se
+    revisa antes de crear la carpeta, para que un rechazo no deje un ámbito a
+    medias.
     """
-    from tuku import link
+    from tuku import link, todo
+
+    nombre = normalizar(nombre)
+    if (rechazo := _rechazo_de_nombre(nombre)) is not None:
+        return rechazo
+    pendientes = vault / "PENDIENTES.md"
+    if pendientes.is_file():
+        try:
+            todo.filas(pendientes.read_text(encoding="utf-8"))
+        except todo.SinTabla as e:
+            return Resultado.rechazo(str(e))
 
     directorio = crear(vault, nombre)
     ahora_path = vault / "AHORA.md"
@@ -372,11 +434,9 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     """
     from tuku import propagate, rename
 
-    if not nuevo or "/" in nuevo or nuevo in (".", ".."):
-        return Resultado.rechazo(
-            f"{nuevo!r} no sirve de nombre de ámbito. "
-            f"Usa un nombre sin barras, como el de una carpeta."
-        )
+    viejo, nuevo = normalizar(viejo), normalizar(nuevo)
+    if (rechazo := _rechazo_de_nombre(nuevo)) is not None:
+        return rechazo
     origen = vault / "ambitos" / viejo
     destino = vault / "ambitos" / nuevo
     if not origen.is_dir():

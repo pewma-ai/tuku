@@ -22,7 +22,7 @@ Las tres marcas con efecto mecánico (`**pendiente**`, `~~(Hecho)~~` y `**cadenc
 
 ### Clasificaciones
 
-De qué clase es cada registro. Nadie las valida en forma estricta: si se usa una que no está en la tabla, se acepta y se formaliza después.
+De qué clase es cada registro. Es opcional: un registro sin clasificación está bien escrito. Nadie las valida en forma estricta: si se usa una que no está en la tabla, se acepta y se formaliza después.
 
 | Clasificación | Qué significa |
 | --- | --- |

@@ -77,6 +77,45 @@ tuku scope create depto-centro --vault mi-vault
 Entonces el diff contra el estado previo es vacío (idempotente)
 Y los enlaces existentes no se duplican
 
+## Escenario: el nombre dictado con espacios se escribe con guion
+
+Dado un vault recién sembrado
+```bash
+tuku init vault-nombres --date 2026-08-11
+```
+Cuando el ámbito se pide tal como se dice
+```bash
+tuku scope create "depto centro" --vault vault-nombres
+```
+Entonces el ámbito queda en `ambitos/depto-centro/` y no existe `ambitos/depto centro/`
+
+## Escenario: un registro a un ámbito que no existe se rechaza
+
+Dado un vault recién sembrado, sin `depto-centro`
+```bash
+tuku init vault-sin-ambito --date 2026-08-11
+```
+Cuando se escribe un registro a ese ámbito
+```bash
+tuku entry add --vault vault-sin-ambito --day 2026-08-11 --hour 09:00 --scope "depto centro" --body "llegó la boleta"
+```
+Entonces sale con código 1 (`RECHAZO`) y el mensaje nombra `tuku scope create depto-centro` como corrección
+Y el vault no cambia: crear el ámbito es decisión del autor, no del comando
+
+## Escenario: un ámbito rechazado no queda a medias
+
+Dado un vault cuyo `PENDIENTES.md` perdió su tabla
+```bash
+tuku init vault-roto --date 2026-08-11
+printf -- '---\ntype: Pending\n---\n' > vault-roto/PENDIENTES.md
+```
+Cuando se pide crear un ámbito
+```bash
+tuku scope create depto-centro --vault vault-roto
+```
+Entonces sale con código 1 (`RECHAZO`) nombrando la tabla que falta
+Y no queda la carpeta `ambitos/depto-centro/`
+
 ## Aceptación humana (en Obsidian)
 
 - Al hacer clic en el enlace `[[depto-centro]]` desde `AHORA.md` en Obsidian, debe abrir directamente la página propia `depto-centro.md` y no una página en blanco ni un enlace roto.

@@ -160,6 +160,11 @@ def crear_con_constancia(
     from tuku.ahora import encabezado_de
     from tuku.entry import add
 
+    if scope:
+        scope = scope_mod.normalizar(scope)
+        if (rechazo := scope_mod.rechazo_si_no_existe(vault, scope)) is not None:
+            return rechazo
+
     hoy = day or date.today()
     hora = hour or datetime.now().strftime("%H:%M")
     ruta = vault / "notas" / f"{slug(title)}.md"
