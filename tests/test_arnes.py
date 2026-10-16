@@ -123,3 +123,9 @@ def test_el_agente_configurado_escribe_de_verdad() -> None:
         assert "09:12" in (v / "AHORA.md").read_text(encoding="utf-8"), (
             f"el agente ejecutó {turno.comandos} y el vault no cambió: el arnés no persiste"
         )
+
+
+def test_la_ayuda_abreviada_no_cuenta_como_traduccion() -> None:
+    traza = [["note", "create", "--h"], ["note", "create", "x"], ["todo", "open", "--help"]]
+    turno = agente.Turno(prompt="", codigo=0, stdout="", stderr="", traza=traza)
+    assert turno.traduccion == ["note create"]

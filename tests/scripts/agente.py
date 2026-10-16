@@ -231,6 +231,11 @@ ESCRIBEN = (
 )
 
 
+def es_ayuda(argv: list[str]) -> bool:
+    """`-h`, `--help` o una abreviatura que argparse acepta, como `--h`."""
+    return any(a == "-h" or (len(a) > 2 and "--help".startswith(a)) for a in argv)
+
+
 #: Lo que el runner de pruebas deja en el entorno y el agente no debe heredar.
 #: El agente corre dentro del vault como en la vida real, y en la vida real
 #: nadie lo lanza desde dentro de un `uv run pytest`. Un entorno de Python
@@ -314,7 +319,7 @@ class Turno:
         return [
             argv
             for argv in self.traza
-            if tuple(argv[:largo]) == verbo and not ({"-h", "--help"} & set(argv))
+            if tuple(argv[:largo]) == verbo and not es_ayuda(argv)
         ]
 
     @property
@@ -332,7 +337,7 @@ class Turno:
         """
         secuencia: list[str] = []
         for argv in self.traza:
-            if {"-h", "--help"} & set(argv):
+            if es_ayuda(argv):
                 continue
             for verbo in ESCRIBEN:
                 if tuple(argv[: len(verbo)]) == verbo:
