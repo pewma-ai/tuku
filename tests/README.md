@@ -8,7 +8,7 @@ La suite de pruebas se organiza en dos capas complementarias derivadas de los ep
 
 | Directorio | Naturaleza | Qué prueba | Ejecución |
 |---|---|---|---|
-| [`unitarios/`](unitarios/README.md) | En memoria, sin I/O | Funciones puras, parsers, validaciones algorítmicas y transformaciones de texto | Ultra-rápida (<0.2s toda la suite) |
+| [`unitarios/`](unitarios/README.md) | En memoria, sin I/O | Funciones puras, parsers, validaciones algorítmicas y transformaciones de texto | Rápida (menos de 1,5 s toda la capa) |
 | [`escenarios/`](escenarios/README.md) | Integración E2E (CLI) | Historias BDD de cara al usuario, efectos colaterales en el vault, sincronización e idempotencia | Segundos por epic |
 | [`scripts/`](scripts/README.md) | Infraestructura | Arnés ejecutor ([`gherkin.py`](scripts/gherkin.py)), inspección de fixtures y wrappers de agentes | Soporte |
 
@@ -100,7 +100,7 @@ Para probar fallbacks a la fecha de hoy y hora actual sin depender del reloj del
 
 - Destinados a funciones puras (por ejemplo: `tuku.ahora`, `tuku.todo.parsear`, `tuku.lint`).
 - **Cero I/O de disco y cero red:** no deben crear directorios ni leer archivos reales del sistema. Toda entrada se pasa como cadenas de texto en memoria.
-- Rápidos y aislados: la suite completa debe correr en menos de 0.2 segundos.
+- Rápidos y aislados: la capa completa debe correr en menos de 1,5 segundos.
 
 ## Ejecución y comandos útiles
 

@@ -20,7 +20,7 @@ Cómo se escribe un escenario y cómo se corre la suite, en detalle: [`README.md
 
 | Capa | Dónde | Qué |
 |---|---|---|
-| Unitarios | [`unitarios/`](unitarios/README.md) | En memoria, sin disco. Toda la capa corre en menos de 0,2 s y es la única del hook de pre-commit |
+| Unitarios | [`unitarios/`](unitarios/README.md) | En memoria, sin disco. Toda la capa corre en menos de 1,5 s y es la única del hook de pre-commit |
 | Escenarios | [`escenarios/`](escenarios/README.md) | Gherkin en `.md` ejecutado por `tuku` (CLI o `main(argv)`), nunca por funciones internas |
 
 ## Cómo se corre
