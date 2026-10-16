@@ -44,5 +44,5 @@ Entonces sale con código 2 (`USO`), distinguiéndose claramente de un rechazo d
 
 ## Aceptación humana (en Obsidian)
 
-- Al consultar `tuku <comando> -h`, la ayuda debe incluir el campo `A mano:` explicando cómo lograr exactamente el mismo resultado con un editor de texto estándar sin software propietario.
+- Al consultar `tuku <comando> -h`, el párrafo antes de las opciones alcanza para hacer lo mismo con un editor de texto: qué archivos toca y cómo.
 - Los mensajes de rechazo deben ser claros y directos, indicando siempre la acción correctiva en vez de arrojar trazas de error crudas.
