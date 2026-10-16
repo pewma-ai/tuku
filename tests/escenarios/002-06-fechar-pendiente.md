@@ -40,17 +40,36 @@ tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal -
 Entonces el diff contra el estado previo es vacío (idempotente)
 Y permanece una sola fila en `PENDIENTES.md` y una sola línea propagada en el miércoles
 
-## Escenario: un pendiente escrito bajo un día futuro queda con esa fecha
+## Escenario: pendientes de dos días futuros, dos por día
 
 Dado el vault con el ciclo abierto, y hoy martes 11
-Cuando se abre un pendiente bajo el jueves 13, sin `--when`
+Cuando se abren cuatro pendientes bajo el miércoles 12 y el jueves 13, sin `--when` y en desorden
 ```bash
 TUKU_NOW="2026-08-11 10:00" tuku todo open --vault mi-vault --day 2026-08-13 --hour 10:00 --scope personal --body "comprar pasajes de tren"
+TUKU_NOW="2026-08-11 10:00" tuku todo open --vault mi-vault --day 2026-08-12 --hour 10:05 --scope personal --body "pagar la sesión con el psicólogo"
+TUKU_NOW="2026-08-11 10:00" tuku todo open --vault mi-vault --day 2026-08-13 --hour 10:10 --scope personal --body "retirar el pase escolar"
+TUKU_NOW="2026-08-11 10:00" tuku todo open --vault mi-vault --day 2026-08-12 --hour 10:15 --scope personal --body "llamar a la administradora"
 ```
-Entonces la tabla de `PENDIENTES.md` gana una fila con `con fecha` y `2026-08-13`:
-`| con fecha | 2026-08-13 | [personal](ambitos/personal/personal.md) | comprar pasajes de tren |`
-Y el jueves 13 de `AHORA.md` recibe por propagación el callout de pendientes del día
-Y `tuku doctor` valida que no quedan consecuencias pendientes
+Entonces cada uno queda en `PENDIENTES.md` con `con fecha` y el día bajo el que se escribió
+Y cada día de `AHORA.md` recibe sus dos pendientes en su callout:
+```markdown
+## Miércoles 12 de agosto
+> [!todo] Pendientes del día
+> - [personal](ambitos/personal/personal.md) - pagar la sesión con el psicólogo
+> - [personal](ambitos/personal/personal.md) - llamar a la administradora
+```
+Y el callout de `personal` en `ambitos/PENDIENTES-AMBITOS.md` los lista por fecha, cada uno con su día y sin el ámbito:
+```markdown
+> [!todo] Pendientes en **Personal** ^personal
+> - Miércoles 12 de agosto - pagar la sesión con el psicólogo
+> - Miércoles 12 de agosto - llamar a la administradora
+> - Jueves 13 de agosto - comprar pasajes de tren
+> - Jueves 13 de agosto - retirar el pase escolar
+```
+Y `tuku todo lint` sale limpio
+```bash
+tuku todo lint --vault mi-vault
+```
 
 ## Aceptación humana (en Obsidian)
 

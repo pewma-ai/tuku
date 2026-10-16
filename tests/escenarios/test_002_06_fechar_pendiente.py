@@ -2,9 +2,9 @@
 
 Escenario: 002-06-fechar-pendiente.md
 
-Punto 3 del epic: agendar es fechar mediante el comando `tuku todo open --when <fecha>`,
-o escribiendo en día futuro por la vía bitácora (`tuku entry add`). El pendiente nace
-con fecha exacta sin pasar por la escalera.
+Agendar es fechar con `tuku todo open --when <fecha>` o con un `--day` futuro: el
+pendiente nace con fecha exacta, sin pasar por la escalera, y llega a su día y a su
+ámbito.
 """
 
 from __future__ import annotations
@@ -27,6 +27,14 @@ FECHA = "2026-08-12"
 CUERPO = "pagar la sesión con el psicólogo"
 FILA = f"| con fecha | {FECHA} | {PERSONAL} | {CUERPO} |"
 LINEA_PROPAGADA = f"> - {PERSONAL} - {CUERPO}"
+
+#: Los cuatro pendientes del último escenario, en el orden en que se abren.
+DOS_DIAS = (
+    ("2026-08-13", "comprar pasajes de tren"),
+    ("2026-08-12", "pagar la sesión con el psicólogo"),
+    ("2026-08-13", "retirar el pase escolar"),
+    ("2026-08-12", "llamar a la administradora"),
+)
 
 
 def test_002_06_fechar_un_pendiente_en_dia_futuro() -> None:
@@ -59,23 +67,39 @@ def test_002_06_fechar_dos_veces_no_duplica() -> None:
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
 
 
-def test_002_06_bajo_un_dia_futuro_queda_con_esa_fecha() -> None:
-    corrida = gherkin.correr(SLUG, "un pendiente escrito bajo un día futuro")
+def test_002_06_pendientes_de_dos_dias_llegan_a_su_dia_y_a_su_ambito() -> None:
+    corrida = gherkin.correr(SLUG, "pendientes de dos días futuros")
     assert corrida.codigo == EXITO, corrida.stderr
     vault = corrida.ruta("mi-vault")
 
     pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    assert f"| con fecha | 2026-08-13 | {PERSONAL} | comprar pasajes de tren |" in pendientes
+    for dia, cuerpo in DOS_DIAS:
+        assert f"| con fecha | {dia} | {PERSONAL} | {cuerpo} |" in pendientes, cuerpo
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert f"> - {PERSONAL} - comprar pasajes de tren" in ahora
+    dias = (
+        ("## Miércoles 12 de agosto", "2026-08-12"),
+        ("## Jueves 13 de agosto", "2026-08-13"),
+    )
+    for encabezado, dia in dias:
+        region = ahora.split(encabezado, 1)[1].split("\n## ", 1)[0]
+        esperados = [f"> - {PERSONAL} - {c}" for d, c in DOS_DIAS if d == dia]
+        assert [x for x in region.splitlines() if x.startswith("> - ")] == esperados, region
 
-    faltan = todo.sin_consecuencia(ahora, pendientes)
-    assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"
+    ambitos = (vault / "ambitos" / "PENDIENTES-AMBITOS.md").read_text(encoding="utf-8")
+    callout = ambitos.split("^personal\n", 1)[1].splitlines()
+    assert callout == [
+        "> - Miércoles 12 de agosto - pagar la sesión con el psicólogo",
+        "> - Miércoles 12 de agosto - llamar a la administradora",
+        "> - Jueves 13 de agosto - comprar pasajes de tren",
+        "> - Jueves 13 de agosto - retirar el pase escolar",
+    ]
+
+    assert corrida.de("tuku todo lint").codigo == EXITO
 
 
 if __name__ == "__main__":
     test_002_06_fechar_un_pendiente_en_dia_futuro()
     test_002_06_fechar_dos_veces_no_duplica()
-    test_002_06_bajo_un_dia_futuro_queda_con_esa_fecha()
+    test_002_06_pendientes_de_dos_dias_llegan_a_su_dia_y_a_su_ambito()
     print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
