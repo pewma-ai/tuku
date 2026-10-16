@@ -26,11 +26,9 @@ El autor dicta su primer día en lenguaje natural y el agente ejecuta las operac
 
 ### Escenarios agénticos (`-m agentic`)
 
-- [`003-02-el-agente-lee-el-vault.md`](003-02-el-agente-lee-el-vault.md) — Consulta pura sin mutaciones: el agente identifica el comando correspondiente sin modificar el vault.
-- [`003-03-un-hecho-un-comando.md`](003-03-un-hecho-un-comando.md) — Dictado atómico sin consecuencias genera una sola entrada en `AHORA.md`.
-- [`003-04-un-hecho-con-consecuencia.md`](003-04-un-hecho-con-consecuencia.md) — Dictado con compromiso abre el pendiente en `PENDIENTES.md` además del registro en bitácora.
-- [`003-05-lo-que-no-se-registra.md`](003-05-lo-que-no-se-registra.md) — Casos negativos: descarta muletillas de dictado y reporta cierres huérfanos sin tocar archivos a mano.
-- [`003-06-el-dia-completo.md`](003-06-el-dia-completo.md) — Secuencia completa del martes 11 produciendo un vault equivalente al del Epic 002.
-- [`003-07-lo-que-no-hace-sin-preguntar.md`](003-07-lo-que-no-hace-sin-preguntar.md) — Respeto de la tabla de Límites: solicita confirmación ante ambigüedades o carpetas protegidas.
+- [`003-10-el-dia-uno-en-un-turno.md`](003-10-el-dia-uno-en-un-turno.md) — El criterio de salida: el día uno dictado entero en un turno deja un vault equivalente al del Epic 002, con lo que no se anota en el mismo turno (una consulta, una instrucción, una pregunta, un cierre ambiguo y un pedido sin comando).
+- [`003-11-el-dia-que-no-se-dicta.md`](003-11-el-dia-que-no-se-dicta.md) — Un hecho con hora y sin día cae en el último día del ciclo que ya tiene registros.
 - [`003-08-el-mismo-vault-otro-arnes.md`](003-08-el-mismo-vault-otro-arnes.md) — Portabilidad: evalúa que las reglas operativas dependen del vault y no del arnés de ejecución (`hermes`).
 - [`003-09-el-mismo-vault-tercer-arnes.md`](003-09-el-mismo-vault-tercer-arnes.md) — Portabilidad, tercer caso: el mismo dictado bajo `claude` con sonnet en esfuerzo bajo, el único arnés que no descubre solo el `AGENTS.md`.
+
+Del `003-02` al `003-07` medían lo mismo de a una frase y se fundieron en el `003-10` el 2026-10-16; el día derivado del `003-07` quedó en el `003-11`.

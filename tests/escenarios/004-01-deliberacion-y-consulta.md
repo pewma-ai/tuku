@@ -8,10 +8,10 @@
 
 ## Estado inicial
 
-Un vault poblado con el día uno y compromisos abiertos en `PENDIENTES.md`, tal como lo dejó el [`003-06`](003-06-el-dia-completo.md).
+Un vault poblado con el día uno y compromisos abiertos en `PENDIENTES.md`: el de la cadena determinista del 002, equivalente al que deja el día dictado del [`003-10`](003-10-el-dia-uno-en-un-turno.md). No hereda del `003-10`: un escenario con agente no va en la base de una cadena ([`devel/epics.md`](../../devel/epics.md)).
 
 ```bash
-cp -r ../../003-06-el-dia-completo/el-dia-dictado-entero-deja-el/mi-vault .
+cp -r ../../002-09-crear-nota/la-nota-se-escribe-donde/mi-vault .
 ```
 
 ---
