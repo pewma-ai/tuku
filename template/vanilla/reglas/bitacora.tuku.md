@@ -32,7 +32,7 @@ tuku todo open --at "2026-08-11 14:20" --scope personal \
 
 Si el autor cuenta algo de otro día ("ayer a las nueve", "el lunes a las diez"), va con su día y su hora en `--at`. Un día que todavía no llega no es un `--at`: es el vencimiento de un pendiente.
 
-Cuando el autor no dice el día, los registros van al ciclo abierto de `AHORA.md`: **si hoy cae fuera de ese ciclo, el día es el último del ciclo que ya tiene registros y va explícito en `--at`**. Si el ciclo todavía está vacío, es el primero. Un ciclo que quedó atrás no es motivo para cerrarlo: cerrar el ciclo está en los límites y lo decide el autor.
+Cuando el autor no dice el día, los registros van al ciclo abierto de `AHORA.md`: **si hoy cae fuera de ese ciclo, el día es el último del ciclo que ya tiene registros y va explícito en `--at`**. Si el ciclo todavía está vacío, es el día del ciclo más cercano a hoy. Un ciclo que quedó atrás no es motivo para cerrarlo: cerrar el ciclo está en los límites y lo decide el autor.
 
 El último con registros, no el primero del ciclo: es hasta dónde llegó el vault, y es el único que nunca mete un hecho nuevo por delante de otros que ya estaban escritos.
 
