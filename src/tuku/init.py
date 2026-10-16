@@ -29,10 +29,7 @@ from pathlib import Path
 _PAQUETE = Path(__file__).resolve().parent
 _HOME_EMPAQUETADO = _PAQUETE / "_home"
 
-#: El template escribe los siete encabezados en el orden fijo Lunes..Domingo;
-#: `DIAS[i]` localiza el placeholder i-ésimo. El nombre real de cada día sale de
-#: `fecha.weekday()`, no de esa posición: si `desde` no es lunes, ambos difieren
-#: a propósito. Nada en `spec/` obliga a que un ciclo semanal empiece en lunes.
+#: Los días en el orden del ciclo, que va de lunes a domingo (`spec/ciclo.md`).
 DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 MESES = [
     "enero",
@@ -304,8 +301,9 @@ def init(
     """Siembra un vault de la `variant` en `destino` y devuelve su ruta.
 
     Sembrar en un directorio que ya tiene contenido se rechaza con
-    `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. `desde` fija
-    el primer día del ciclo (por defecto, el lunes de esta semana). `author`, si
+    `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. El ciclo
+    sembrado es la semana de lunes a domingo que contiene `desde` (por defecto,
+    hoy). `author`, si
     se pasa y no viene vacío, se escribe en `LIBRO-DE-ESTILO.md`. `comandos`, si
     se pasa, es `reglas/comandos.tuku.md`: lo compone la capa del CLI, que es la
     que conoce los comandos.
@@ -330,7 +328,7 @@ def init(
 
     shutil.copytree(variante_dir, destino, dirs_exist_ok=True)
 
-    desde = desde or lunes_de_esta_semana(date.today())
+    desde = lunes_de_esta_semana(desde or date.today())
     ahora = destino / "AHORA.md"
     plantilla_ahora = destino / "reglas" / "plantilla" / "AHORA.md"
     if plantilla_ahora.is_file():

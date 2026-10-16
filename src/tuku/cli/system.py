@@ -141,7 +141,7 @@ def registrar(
         dest="date",
         default=None,
         type=date.fromisoformat,
-        help="primer día del ciclo sembrado (AAAA-MM-DD); por defecto, el lunes de esta semana",
+        help="un día de la semana del primer ciclo (AAAA-MM-DD); por defecto, hoy",
     )
     init_p.add_argument(
         "--force",
@@ -153,8 +153,8 @@ def registrar(
         "cycle",
         help="gestión del ciclo en AHORA.md",
         description=(
-            "Un ciclo es la ventana de tiempo que `AHORA.md` registra día por día, semanal "
-            "por defecto. Estos comandos lo abren y revisan su estructura."
+            "Un ciclo es la ventana de tiempo que `AHORA.md` registra día por día; el "
+            "semanal va de lunes a domingo. Estos comandos lo abren y revisan su estructura."
         ),
     )
     cycle_v = cycle_p.add_subparsers(dest="verb", required=True)
@@ -162,8 +162,9 @@ def registrar(
         "open",
         help="abre o verifica el ciclo en AHORA.md",
         description=(
-            "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con las fechas de los siete "
-            "días del ciclo. Si el ciclo ya está abierto, solo lo verifica."
+            "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con las fechas de la semana, de "
+            "lunes a domingo, que contiene la fecha. Si el ciclo ya está abierto, solo lo "
+            "verifica."
         ),
     )
     open_p.add_argument("--vault", default=".", type=Path, help="vault a verificar o abrir")
@@ -174,7 +175,7 @@ def registrar(
         dest="date",
         default=None,
         type=date.fromisoformat,
-        help="fecha deseada (AAAA-MM-DD); por defecto, hoy",
+        help="un día de la semana a abrir (AAAA-MM-DD); por defecto, hoy",
     )
 
     cycle_lint_p = cycle_v.add_parser(

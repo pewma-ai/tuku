@@ -36,15 +36,15 @@ TEMPLATE_VANILLA = RAIZ / "template" / "vanilla"
 
 #: Los siete días que corresponden a FECHA_FIJA, escritos a mano: es lo único que
 #: el test no deriva del template.
-DESDE, HASTA = "2026-08-11", "2026-08-17"
+DESDE, HASTA = "2026-08-10", "2026-08-16"
 DIAS = [
+    "## Lunes 10 de agosto",
     "## Martes 11 de agosto",
     "## Miércoles 12 de agosto",
     "## Jueves 13 de agosto",
     "## Viernes 14 de agosto",
     "## Sábado 15 de agosto",
     "## Domingo 16 de agosto",
-    "## Lunes 17 de agosto",
 ]
 
 

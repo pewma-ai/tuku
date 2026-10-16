@@ -22,7 +22,7 @@ Y nada de esto intentó tocar la red
 - Corre `tuku init` en proceso con `TUKU_HOME` en el checkout, sin instalar nada.
 - Compara contra `template/vanilla/` en vivo, nunca contra una copia congelada. El `AHORA.md` esperado es el del template con las siete fechas escritas a mano en el test.
 - La red se bloquea: `socket.socket`, `socket.create_connection` y `socket.getaddrinfo` lanzan `RedBloqueada`.
-- La fecha fija (2026-08-11, martes) es la de [`corpus/referencia/referencia-faena.md`](../../corpus/referencia/referencia-faena.md). No es lunes a propósito: un ciclo semanal no tiene por qué empezar en lunes.
+- La fecha fija (2026-08-11, martes) es la de [`corpus/referencia/referencia-faena.md`](../../corpus/referencia/referencia-faena.md). No es lunes a propósito: el ciclo sembrado es la semana que la contiene, del lunes 10 al domingo 16.
 
 ## Cómo se corre
 

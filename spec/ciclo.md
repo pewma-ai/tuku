@@ -8,12 +8,14 @@ Lo único canónico aquí son **los registros**. El resto es vista, y entra de d
 
 El frontmatter es OKF, con los campos en inglés porque son superficie de máquina (ver [`README.md`](README.md), "el frontmatter"). `AHORA.md` y una bitácora cerrada llevan **el mismo `type`**, `Logbook`: los separa `status`, que es `draft` mientras el ciclo está abierto y `stable` cuando se archiva y deja de tocarse. `from` y `to` son el rango que cubre, y son lo que dice dónde termina el ciclo: no hay ninguna marca en el cuerpo que lo repita.
 
+**El ciclo semanal va de lunes a domingo.** `tuku init --date` y `tuku cycle open --date` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente.
+
 ```markdown
 ---
 type: Logbook
 status: draft
-from: 2026-08-25
-to: 2026-09-01
+from: 2026-08-24
+to: 2026-08-30
 ---
 
 # Plan
@@ -46,8 +48,8 @@ Lo que va entre el encabezado del día y el primer registro es la **región prop
 ---
 type: Logbook
 status: stable
-from: 2026-08-25
-to: 2026-09-01
+from: 2026-08-24
+to: 2026-08-30
 ---
 
 # Plan

@@ -70,3 +70,12 @@ def test_sin_ahora_lo_crea_desde_la_plantilla_con_la_semana_completa(tmp_path: P
     assert "from: 2026-09-07" in ahora and "to: 2026-09-13" in ahora
     assert "## Lunes 7 de septiembre" in ahora and "## Domingo 13 de septiembre" in ahora
     assert "AAAA-MM-DD" not in ahora
+
+
+def test_init_con_un_dia_cualquiera_siembra_de_lunes_a_domingo(tmp_path: Path) -> None:
+    vault = init(tmp_path / "v", desde=date(2026, 9, 9), home=RAIZ_REPO)
+
+    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
+    assert "from: 2026-09-07" in ahora and "to: 2026-09-13" in ahora
+    _, creado = open_cycle(vault, date(2026, 9, 9))
+    assert not creado, "init y cycle open no abren la misma semana"

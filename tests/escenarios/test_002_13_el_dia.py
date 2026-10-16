@@ -40,13 +40,13 @@ AMBITO = "depto-centro"
 DEPTO = f"[{AMBITO}](ambitos/{AMBITO}/{AMBITO}.md)"
 MARTES = "## Martes 11 de agosto"
 DIAS = (
+    "## Lunes 10 de agosto",
     MARTES,
     "## Miércoles 12 de agosto",
     "## Jueves 13 de agosto",
     "## Viernes 14 de agosto",
     "## Sábado 15 de agosto",
     "## Domingo 16 de agosto",
-    "## Lunes 17 de agosto",
 )
 GGCC = "avisar de los GGCC a la administradora"
 MALETA = "comprar una maleta"
@@ -91,7 +91,7 @@ def test_002_13_la_semana_abre_con_el_vault() -> None:
     assert corrida.delta_de("mi-vault") == {}
 
     ahora = _leer(corrida, "AHORA.md")
-    assert "from: 2026-08-11" in ahora and "to: 2026-08-17" in ahora
+    assert "from: 2026-08-10" in ahora and "to: 2026-08-16" in ahora
     for dia in DIAS:
         assert dia in ahora, f"falta {dia}"
     assert not placeholders_sin_sustituir(corrida.ruta("mi-vault"))
