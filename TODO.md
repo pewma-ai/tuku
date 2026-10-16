@@ -23,6 +23,15 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 
   Tiene consecuencia de diseño y por eso está escrito acá y no en un comentario: una regla que solo obedece un modelo caro no es una regla del vault, es una que se aprovecha de que el modelo adivina. Cuando algo falle con el mínimo, la primera hipótesis es que la regla está mal escrita, no que el modelo es corto.
 
+## Tutorial
+
+- **La historia de Andrea no es coherente entre capítulos** ([`docs/tutorial/`](docs/tutorial/README.md), revisión del 2026-10-16):
+  - En el capítulo 2, la sección "Cuando quedó mal dicho" pide fusionar Liceo Los Robles con `personal` y no le dice al lector que lo rechace. Si confirma, `personal` desaparece y los capítulos siguientes dejan de funcionar.
+  - El capítulo 3 cierra el anticipo de una profesora Marcela que ningún capítulo anterior abrió, y usa un ámbito `compras` que no existe.
+  - El capítulo 5 espera un seguimiento a "Los Robles", que en el capítulo 2 se renombró y quizás se fusionó.
+  - En el capítulo 2, "cambiaron de categoría" usa en sentido coloquial una palabra que en TUKU es un término técnico (directorio sin página propia), y la línea 117 tiene un em dash.
+  - El capítulo 2 anuncia resultados ("la fila desapareció", "las cuatro frases se desglosaron"), aunque el README del tutorial promete no anticiparlos.
+
 ## Sistema
 
 - **Endurecimiento:** casos de error, reconstrucción completa (`tuku rebuild`) e idempotencia global sobre el sistema entero. Un error del autor nunca se rechaza, se reporta. Era la fase 8 y no agrega capacidades, cierra huecos.

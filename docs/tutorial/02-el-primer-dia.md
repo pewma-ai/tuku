@@ -79,7 +79,7 @@ Apareció el directorio `ambitos/colegio-los-robles/` con su página `colegio-lo
 
 ### Vuelve a `AHORA.md`
 
-Revisa los registros escritos hace veinte minutos: los que nombraban a Los Robles en texto plano ahora lo enlazan como `[[colegio-los-robles]]`. Las demás líneas quedaron intactas.
+Revisa los registros escritos hace veinte minutos: los que decían "Colegio Los Robles" en texto plano ahora lo enlazan como `[[colegio-los-robles]]`. Los que decían solo "Los Robles" quedaron igual: se enlaza el nombre del frente y no sus apodos, porque reconocer un apodo sería adivinar. Las demás líneas quedaron intactas.
 
 Esto ilustra que [la organización emerge del uso](../principios.md): registras primero, ordenas cuando el patrón madura, y el ciclo en curso se actualiza solo.
 
@@ -140,7 +140,7 @@ Ejecuta de nuevo `tuku doctor`. Detectará de inmediato la inconsistencia cruzan
 Ahora prueba un dictado continuo, tal como hablarías al final de la jornada:
 
 > [!tip] Dile a tu agente, todo junto
-> Hoy es doce, le mandé todas las facturas y boletas del mes a la Ximena Rojas para el F29. Me dijo que este mes sale IVA a pagar, como ciento ochenta mil.
+> Le mandé todas las facturas y boletas del mes a la Ximena Rojas para el F29. Me dijo que este mes sale IVA a pagar, como ciento ochenta mil.
 > 
 > Llamé a la señora Patricia Lillo del Liceo Andes, que no me compra desde abril. Me contestó de buena: resulta que cambiaron de proveedor por precio pero no quedaron contentos con los plazos. Me pidió que le cotizara de nuevo.
 > 

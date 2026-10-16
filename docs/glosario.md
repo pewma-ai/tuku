@@ -16,12 +16,12 @@
 
 | Archivo o carpeta | Qué guarda |
 |---|---|
-| `AHORA.md` | El ciclo en curso: los registros del día, más plan y pendientes por transclusión. |
+| `AHORA.md` | El ciclo en curso: los registros de cada día y, bajo cada día, sus pendientes con fecha, propagados desde `PENDIENTES.md`. |
 | `bitacoras/` | Los ciclos ya cerrados, inmutables y autocontenidos. |
 | `PENDIENTES.md` | Todos los compromisos abiertos. Fuente de verdad, nunca derivado. |
 | `ambitos/` | El árbol de frentes de actividad de la vida del autor. |
 | `notas/` | El zettelkasten: notas libres y notas tipadas. |
-| `reglas/` | La especificación en prosa de cada consecuencia y de cada comando. |
+| `reglas/` | Las reglas de las automatizaciones, en prosa, y la configuración del vault. |
 | `planes/` | Un plan por ciclo, escrito antes de empezarlo. |
 | `reportes/` | Lo generado que el autor lee: resúmenes de ciclo, cadencias, pendientes por actividad. |
 | `archivado/` | Ramas cerradas, con sus enlaces todavía resolviendo. |
@@ -36,7 +36,7 @@
 
 | Término | Qué es |
 |---|---|
-| **Registro** | Una línea de bitácora: un hecho, con hora, ámbito y clasificación. La única forma de registrar algo. |
+| **Registro** | Una línea de bitácora: un hecho, con hora y ámbito, y una clasificación si el autor la eligió. La única forma de registrar algo. |
 | **Hecho** | La unidad del registro. Una sola frase dictada puede contener varios y produce varios registros. |
 | **Ontología cerrada** | Las tres marcas de TUKU que disparan consecuencias deterministas: `**pendiente**`, `~~(Hecho)~~`, `**cadencia**`. El autor no las puede extender. |
 | **Ontología abierta** | Las clasificaciones del autor (`**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`). Sirven para leer y filtrar, ningún comando actúa sobre ellas. Crece con el uso. |
@@ -49,12 +49,11 @@
 | Término | Qué es |
 |---|---|
 | **Pendiente** | Un compromiso abierto. Nace de un registro `**pendiente**` y muere en un registro `~~(Hecho)~~`. |
-| **Horizonte** | El plazo al que está asignado un pendiente: sin fecha, este turno, próximo turno, fin de mes. |
-| **Escalera de horizontes** | El recorrido de un pendiente al concretarse: sin fecha, horizonte, fecha exacta, cerrado. |
-| **Atrasado** | Un pendiente cuya fecha ya pasó. Se mueve solo a la tabla de `atrasados`, conservando su fecha. |
-| **Callout** | El bloque `> [!TODO]` que agrupa los pendientes de un horizonte o de una fecha en `PENDIENTES.md`. |
-| **Horizonte** | Cada encabezado de `PENDIENTES.md` con su tabla debajo: `atrasados`, `sin fecha`, los tres del autor, y `con fecha`. Un pendiente está bajo exactamente uno. |
-| **Transclusión** | Mostrar un texto en otro archivo sin copiarlo, con `![[archivo#seccion]]`. Se usa cuando el origen ya agrupa contiguo lo que el destino muestra. |
+| **Horizonte** | El escalón de un pendiente, en la columna `Horizonte` de `PENDIENTES.md`: los del autor (`esta semana`, `próxima semana`, `fin de mes` en el template) y `con fecha`, que pone el sistema cuando el pendiente tiene día. Un pendiente está bajo exactamente uno. |
+| **Escalera de horizontes** | El recorrido de un pendiente al concretarse: esta semana, próxima semana o fin de mes, con fecha, cerrado. |
+| **Atrasado** | Un pendiente cuya fecha o cuyo horizonte ya pasó. Se calcula desde su fila: en `PENDIENTES.md` no se mueve nada. |
+| **Callout** | El bloque `> [!todo]` que agrupa pendientes: los del día bajo cada día de `AHORA.md`, y los de cada ámbito en `ambitos/PENDIENTES-AMBITOS.md`. |
+| **Transclusión** | Mostrar un texto en otro archivo sin copiarlo, con `![[archivo#^ancla]]`. Se usa cuando el origen ya agrupa contiguo lo que el destino muestra. |
 | **Propagación** | Escribir una copia derivada donde hace falta, cuando el origen no agrupa contiguo lo que el destino muestra. Un comando la produce y la regenera; si discrepa de la fuente, la que está mal es la copia. |
 | **Ciclo** | La ventana de tiempo que se abre, se planifica y se cierra. Semanal por defecto, o el turno real del autor. |
 | **Cadencia** | Una regla que emite un pendiente con fecha cada cierto tiempo. Vive en el `CADENCIAS.md` del ámbito al que pertenece. |
@@ -86,7 +85,7 @@
 | Término | Qué es |
 |---|---|
 | **`tuku`** | El comando, y la capa determinista del sistema. Es dueño de la forma (dónde va cada cosa, con qué estructura, en qué orden), nunca del juicio. Nada automático toca el vault fuera de una invocación suya. |
-| **Comando** | Cada operación determinista de `tuku`, nombrada `tuku <noun> <verb>`. Se especifica en prosa en `reglas/` y su código vive fuera del vault, en el paquete que instala `pipx`. |
+| **Comando** | Cada operación determinista de `tuku`, nombrada `tuku <noun> <verb>`, salvo las que actúan sobre el vault entero (`init`, `doctor`, `rebuild`). Su código vive fuera del vault, en el paquete que se instala con `uv` o `pipx`. |
 | **"A mano"** | El campo que declara cómo hacer a mano lo que hace un comando. Un comando sin ese campo es una dependencia disfrazada. |
 | **Agente** | El LLM que conversa con el autor, interpreta el dictado y propone. Secretario, nunca dueño. |
 | **Conjunto canónico** | Lo que el autor escribió y nunca se regenera: `AHORA.md`, `bitacoras/`, `PENDIENTES.md`, `ambitos/`, `notas/`. |
