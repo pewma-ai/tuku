@@ -19,10 +19,10 @@ Uno por directorio. Contiene solo las cadencias de esa carpeta.
 
 **Cuándo:** día exacto 10, mensual
 **Emite:** pendiente con fecha
-**Texto:** pagar y enviar comprobante de gastos comunes a [[carmen-navarro]]
+**Texto:** pagar y enviar comprobante de gastos comunes a [carmen-navarro](../../notas/carmen-navarro.md)
 
 ### Procedimiento
-El comprobante está pagado en el portal y enviado a [[carmen-navarro]] por WhatsApp, el mismo día.
+El comprobante está pagado en el portal y enviado a [carmen-navarro](../../notas/carmen-navarro.md) por WhatsApp, el mismo día.
 
 ### Historia
 - 2026-08-09: el comprobante se envía el mismo día. Dos veces quedó sin enviar y hubo cobro duplicado.

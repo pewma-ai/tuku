@@ -20,4 +20,4 @@ Un frente que aparece dos veces en la semana probablemente merece página, y eso
 
 ## A mano
 
-Crear la carpeta con su página del mismo nombre dentro, y escribir `[[nombre]]` en los registros que lo mencionen.
+Crear la carpeta con su página del mismo nombre dentro, y enlazar con `[nombre](ambitos/nombre/nombre.md)` (ruta relativa al archivo donde va) los registros que lo mencionen.

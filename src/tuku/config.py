@@ -35,6 +35,24 @@ def archivo_vault(vault: Path, nombre: str) -> Path:
     return ruta
 
 
+def exigir_vault(vault: Path) -> None:
+    """Lanza VaultInvalido si `vault` no tiene nada de lo que un vault trae.
+
+    Basta con que exista uno de los archivos requeridos: un vault al que le
+    falta alguno sigue siendo un vault, y es justo el que `tuku doctor` debe
+    poder diagnosticar. Lo que no puede hacer ningún comando es recorrer un
+    directorio cualquiera, como el `~` desde donde se invocó sin querer.
+    """
+    from tuku.doctor import ARCHIVOS_REQUERIDOS
+
+    if not any((vault / r).is_file() for r in ARCHIVOS_REQUERIDOS):
+        raise VaultInvalido(
+            f"{vault.resolve()} no es un vault de TUKU: no tiene ninguno de sus archivos "
+            f"({', '.join(ARCHIVOS_REQUERIDOS[:2])}, ...). "
+            "Entra a un vault, pasa `--vault <ruta>`, o siembra uno con `tuku init <dir>`."
+        )
+
+
 @dataclass(frozen=True)
 class Configuracion:
     """Configuración consolidada de un vault."""

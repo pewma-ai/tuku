@@ -227,7 +227,7 @@ ESCRIBEN = (
     ("cycle", "open"),
     ("scope", "create"),
     ("note", "create"),
-    ("link", "backfill"),
+    ("fix",),
 )
 
 

@@ -27,8 +27,9 @@ from tuku import todo  # noqa: E402
 from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "002-04-abrir-pendiente"
+PERSONAL = "[personal](ambitos/personal/personal.md)"
 CUERPO = "avisar de los GGCC a la administradora"
-FILA = f"| esta semana |  | [[personal]] | {CUERPO} |"
+FILA = f"| esta semana |  | {PERSONAL} | {CUERPO} |"
 
 #: Lo que toca abrir un pendiente: la bitácora, la tabla y las dos vistas
 #: derivadas que `tuku todo open` regenera al propagar la consecuencia.
@@ -93,10 +94,10 @@ def test_002_04_via_bitacora_entry_add_abre_en_automatico() -> None:
     vault = corrida.ruta("mi-vault")
 
     pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    assert "| esta semana |  | [[personal]] | comprar café tostado |" in pendientes
+    assert f"| esta semana |  | {PERSONAL} | comprar café tostado |" in pendientes
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert "- 16:00 - [[personal]] **pendiente**: comprar café tostado" in ahora
+    assert f"- 16:00 - {PERSONAL} **pendiente**: comprar café tostado" in ahora
 
     faltan = todo.sin_consecuencia(ahora, pendientes)
     assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"

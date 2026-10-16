@@ -38,7 +38,7 @@ Y `PENDIENTES.md` permanece intacto, byte a byte igual que al inicio
 ## Escenario: el registro sin ámbito y sin clasificación es válido
 
 Dado el mismo estado inicial
-Cuando se ingresa un registro mínimo sin `[[ambito]]` ni `**clasificacion**`
+Cuando se ingresa un registro mínimo sin el link del ámbito ni `**clasificacion**`
 ```bash
 tuku entry add --vault mi-vault --day 2026-08-11 --hour 11:30 --body "hice la consulta presencial por el standing desk"
 ```

@@ -51,13 +51,27 @@ def _cmd_todo_lint(args: argparse.Namespace) -> int:
 
 
 def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
-    todo_p = sub.add_parser("todo", help="pendientes de PENDIENTES.md")
+    todo_p = sub.add_parser(
+        "todo",
+        help="pendientes de PENDIENTES.md",
+        description=(
+            "`PENDIENTES.md` es la única fuente de verdad de lo que está por hacer. Estos "
+            "comandos abren y cierran pendientes, regeneran las vistas que se derivan de "
+            "esa tabla y revisan que sea coherente."
+        ),
+    )
     todo_v = todo_p.add_subparsers(dest="verb", required=True)
 
-    for verbo, ayuda, epilogo in (
+    for verbo, ayuda, descripcion, epilogo in (
         (
             "open",
             "abre el pendiente de un registro **pendiente** y propaga las vistas",
+            (
+                "Agrega una fila a la tabla de `PENDIENTES.md` bajo su horizonte, estampa "
+                "la constancia en la bitácora y propaga las vistas derivadas. Normalmente "
+                "lo llama `tuku entry add`; existe como comando para corregir a mano. "
+                "Es idempotente."
+            ),
             (
                 "A mano: abrir `PENDIENTES.md` y agregar una fila a la tabla con el ámbito, "
                 "cuerpo y plazo."
@@ -65,14 +79,19 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         ),
         (
             "close",
-            "cierra el pendiente de un registro ~~(Hecho)~~",
+            "cierra el pendiente de un registro (Hecho)",
+            (
+                "Borra la fila cuyo detalle coincide palabra por palabra con el cierre, "
+                "estampa la constancia y propaga las vistas. Un cierre sin pareja no es "
+                "un fallo: se reporta y no se inventa nada. Es idempotente."
+            ),
             (
                 "A mano: abrir `PENDIENTES.md` y eliminar la fila correspondiente; en "
-                "`AHORA.md` agregar la constancia de cierre con `~~(Hecho)~~`."
+                "`AHORA.md` agregar la constancia de cierre con `(Hecho)`."
             ),
         ),
     ):
-        p = todo_v.add_parser(verbo, help=ayuda, epilog=epilogo)
+        p = todo_v.add_parser(verbo, help=ayuda, description=descripcion, epilog=epilogo)
         p.add_argument(
             "--body", "--cuerpo", dest="body", required=True, help="el texto del pendiente"
         )
@@ -114,6 +133,12 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     todo_prop = todo_v.add_parser(
         "propagate",
         help="regenera las vistas derivadas de PENDIENTES.md",
+        description=(
+            "Regenera, desde la tabla de `PENDIENTES.md`, las dos vistas derivadas: la "
+            "región de cada día en `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md`. Las "
+            "vistas se regeneran y no se reparan; sobre un vault cuadrado no cambia "
+            "ningún archivo."
+        ),
         epilog=(
             "A mano: bajo cada día de `AHORA.md` copiar los pendientes con esa fecha, "
             "y en `ambitos/PENDIENTES-AMBITOS.md` escribir un callout por ámbito."
@@ -124,6 +149,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     todo_lint = todo_v.add_parser(
         "lint",
         help="revisa los pendientes y reporta; no escribe",
+        description=(
+            "Revisa la tabla de `PENDIENTES.md`: que cada pendiente esté en exactamente "
+            "una fila. No escribe nada."
+        ),
         epilog=(
             "A mano: abrir `PENDIENTES.md` y verificar que las columnas de la tabla "
             "estén completas y alineadas."

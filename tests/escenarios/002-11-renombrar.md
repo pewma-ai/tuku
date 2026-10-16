@@ -18,7 +18,7 @@ Cuando el autor renombra el ámbito
 cd mi-vault && tuku scope rename depto-centro depto-playa
 ```
 Entonces el directorio y la página propia pasan a llamarse `depto-playa`
-Y cada aparición de `[[depto-centro]]` y `^depto-centro` pasa a `[[depto-playa]]` y `^depto-playa`
+Y cada link a `depto-centro` (texto y ruta) y cada `^depto-centro` pasa a `depto-playa` y `^depto-playa`
 Y `tuku scope lint` no detecta ningún enlace roto en el vault
 ```bash
 cd mi-vault && tuku scope lint

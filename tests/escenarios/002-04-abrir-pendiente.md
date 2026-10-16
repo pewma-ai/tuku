@@ -18,7 +18,7 @@ Cuando se abre un compromiso directamente con el comando todo open
 tuku todo open --vault mi-vault --day 2026-08-11 --hour 14:20 --scope personal --body "avisar de los GGCC a la administradora"
 ```
 Entonces la fila entra en `PENDIENTES.md` bajo `esta semana`:
-`| esta semana |  | [[personal]] | avisar de los GGCC a la administradora |`
+`| esta semana |  | [personal](ambitos/personal/personal.md) | avisar de los GGCC a la administradora |`
 Y estampa la constancia en `AHORA.md` bajo `## Martes 11 de agosto`
 Y la vista de ámbito `ambitos/personal/personal.md` recibe la actividad propagada
 Y `tuku doctor` valida que no quedan consecuencias pendientes
@@ -44,7 +44,7 @@ Cuando se registra un hecho con `**pendiente**` en la bitácora
 tuku entry add --vault mi-vault --day 2026-08-11 --hour 16:00 --scope personal --body "**pendiente**: comprar café tostado"
 ```
 Entonces la fila entra en `PENDIENTES.md` bajo `esta semana`:
-`| esta semana |  | [[personal]] | comprar café tostado |`
+`| esta semana |  | [personal](ambitos/personal/personal.md) | comprar café tostado |`
 Y el registro queda escrito bajo `## Martes 11 de agosto` en `AHORA.md`
 Y `tuku doctor` valida que no quedan consecuencias pendientes
 

@@ -31,5 +31,5 @@ Y el pendiente que ya estaba abierto sigue abierto
 
 ## Aceptación humana (en Obsidian)
 
-- En `AHORA.md`, el hecho de las 12:05 aparece como registro simple sin marcas como `**pendiente**` o `~~(Hecho)~~`, y sin rastros de "recuérdame".
+- En `AHORA.md`, el hecho de las 12:05 aparece como registro simple sin marcas como `**pendiente**` o `(Hecho)`, y sin rastros de "recuérdame".
 - En `PENDIENTES.md`, la tabla conserva intacto el compromiso anterior sin modificaciones no solicitadas.

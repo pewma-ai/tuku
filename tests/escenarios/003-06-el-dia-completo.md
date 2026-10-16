@@ -44,7 +44,7 @@ Y `tuku doctor` confirma la coherencia total del vault
 
 ### Tabla de verdad
 
-Solo se afirma la marca cerrada (`**pendiente**`, `~~(Hecho)~~`). "Ninguna" significa que no lleva ninguna de las dos: la clasificación abierta (`**señal**`, `**progreso**`, etc.) la elige el agente y no se verifica.
+Solo se afirma la marca cerrada (`**pendiente**`, `(Hecho)`). "Ninguna" significa que no lleva ninguna de las dos: la clasificación abierta (`**señal**`, `**progreso**`, etc.) la elige el agente y no se verifica.
 
 | Hora | Día | Ámbito | Marca cerrada | Qué deja |
 | --- | --- | --- | --- | --- |
@@ -54,8 +54,8 @@ Solo se afirma la marca cerrada (`**pendiente**`, `~~(Hecho)~~`). "Ninguna" sign
 | 13:00 | martes 11 | `personal` | `**pendiente**` | abre compra de maleta |
 | 14:20 | martes 11 | `personal` | `**pendiente**` | abre aviso a administradora |
 | 18:40 | martes 11 | `personal` | ninguna | mención retroactiva de `depto-centro` |
-| 19:05 | martes 11 | `personal` | `~~(Hecho)~~` | cierra aviso de las 14:20 |
-| 19:10 | martes 11 | `personal` | `~~(Hecho)~~` | cierra compra de las 13:00 |
+| 19:05 | martes 11 | `personal` | `(Hecho)` | cierra aviso de las 14:20 |
+| 19:10 | martes 11 | `personal` | `(Hecho)` | cierra compra de las 13:00 |
 | 21:15 | martes 11 | `depto-centro` | ninguna | constancia de nota creada |
 | 09:00 | miércoles 12 | `personal` | `**pendiente**` | compromiso para 2026-08-12 |
 

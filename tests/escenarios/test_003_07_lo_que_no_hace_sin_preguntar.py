@@ -111,7 +111,7 @@ def test_003_07_ningun_pendiente_se_cerro() -> None:
 @pytest.mark.agentic
 @sin_arnes
 def test_003_07_no_se_escribio_ningun_cierre() -> None:
-    """Ni siquiera el registro: un `~~(Hecho)~~` sin pareja también miente."""
+    """Ni siquiera el registro: un `(Hecho)` sin pareja también miente."""
     dia = _dia(gherkin.correr(SLUG, TITULO))
     assert todo.CIERRA not in dia, f"escribió un cierre que nadie pudo identificar:\n{dia}"
 

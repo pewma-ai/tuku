@@ -19,7 +19,7 @@ tuku scope create depto-centro --vault mi-vault
 ```
 Entonces existe el directorio `ambitos/depto-centro/` con `AGENTS.md`, `CADENCIAS.md` y `depto-centro.md`
 Y `depto-centro.md` transcluye a `![[../PENDIENTES-AMBITOS.md#^depto-centro]]`
-Y la mención previa en `AHORA.md` pasa automáticamente a `[[depto-centro]]`
+Y la mención previa en `AHORA.md` pasa automáticamente a `[depto-centro](ambitos/depto-centro/depto-centro.md)`
 Y `ambitos/PENDIENTES-AMBITOS.md` añade el bloque `^depto-centro` con `SIN PENDIENTES`
 Y `ambitos/personal/` permanece intacto
 
@@ -30,7 +30,7 @@ Cuando se crea el ámbito `depto-centro`
 ```bash
 tuku scope create depto-centro --vault mi-vault
 ```
-Entonces solo esa mención pasa a ser `[[depto-centro]]` en `AHORA.md`
+Entonces solo esa mención pasa a ser el link `[depto-centro](ambitos/depto-centro/depto-centro.md)` en `AHORA.md`
 Y el resto de la línea y demás registros no sufren ninguna alteración
 
 ## Escenario: un registro no puede apuntar a una categoría
@@ -41,7 +41,7 @@ tuku scope create depto-centro --vault mi-vault
 mkdir mi-vault/ambitos/depto-centro/gastos
 touch mi-vault/ambitos/depto-centro/gastos/AGENTS.md mi-vault/ambitos/depto-centro/gastos/CADENCIAS.md
 ```
-Cuando se escribe un registro apuntando a `[[gastos]]` y se valida
+Cuando se escribe un registro apuntando a `[gastos](ambitos/depto-centro/gastos)` y se valida
 ```bash
 tuku entry add --vault mi-vault --day 2026-08-11 --hour 20:00 --scope gastos --body "**progreso**: revisé el detalle del mes"
 tuku scope lint --vault mi-vault
@@ -118,5 +118,5 @@ Y no queda la carpeta `ambitos/depto-centro/`
 
 ## Aceptación humana (en Obsidian)
 
-- Al hacer clic en el enlace `[[depto-centro]]` desde `AHORA.md` en Obsidian, debe abrir directamente la página propia `depto-centro.md` y no una página en blanco ni un enlace roto.
+- Al hacer clic en el link a `depto-centro` desde `AHORA.md` en Obsidian, debe abrir directamente la página propia `depto-centro.md` y no una página en blanco ni un enlace roto.
 - La página `depto-centro.md` debe mostrar la transclusión a su bloque de pendientes y la actividad resumida sin marcas artificiales.

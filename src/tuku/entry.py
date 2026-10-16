@@ -13,9 +13,11 @@ que le toca por hora.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from datetime import date, datetime
 from pathlib import Path
 
+from tuku import link
 from tuku.resultado import Resultado
 
 _HORA = re.compile(r"^- (\d{2}):(\d{2}) - ")
@@ -100,18 +102,29 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     return texto
 
 
-def componer(*, hora: str, scope: str | None, body: str) -> str:
+def componer(
+    *, hora: str, scope: str | None, body: str, rutas: Mapping[str, str] | None = None
+) -> str:
     """La línea de bitácora a partir de sus campos.
 
-    `- HH:MM - [[ambito]] **marca**: cuerpo`. Componerla es mecánico: la hora, el
-    guion, el orden de los campos y los corchetes del ámbito son formato, y no
-    hay razón para pedírselos a quien dicta. Lo único que es juicio es la marca,
-    y esa viaja dentro de `body`.
+    `- HH:MM - [ambito](ruta) **marca**: cuerpo`. Componerla es mecánico: la hora,
+    el guion, el orden de los campos y el link del ámbito son formato, y no hay
+    razón para pedírselos a quien dicta. Lo único que es juicio es la marca, y
+    esa viaja dentro de `body`.
+
+    La ruta del link es relativa a `AHORA.md`, donde vive la línea. `rutas`
+    (`scope.rutas`) trae la de un ámbito anidado; sin ella se asume la plana.
+
+    Un cierre se escribe siempre igual, `(Hecho): ~~cuerpo~~`, venga como venga
+    en `body`: a quien dicta no le toca saber dónde va la tachadura.
     """
+    from tuku import todo
+
     ambito = ""
     if scope:
-        ambito = f"[[{scope.strip().strip('[]')}]] "
-    return f"- {hora} - {ambito}{body.strip()}"
+        nombre = scope.strip().strip("[]")
+        ambito = f"{link.enlace_ambito(nombre, 'AHORA.md', rutas)} "
+    return f"- {hora} - {ambito}{todo.canonizar(body)}"
 
 
 def add_al_vault(
@@ -130,7 +143,7 @@ def add_al_vault(
     consecuencias y todas son parte de escribirlo: queda en `AHORA.md`, las
     páginas de ámbito lo reflejan, y si lleva una marca de la ontología cerrada
     se aplica lo que esa marca declara: `**pendiente**` abre el pendiente y
-    `~~(Hecho)~~` lo cierra.
+    `(Hecho)` lo cierra.
 
     Que las consecuencias sean parte de escribir, y no un segundo comando, es lo
     que evita que el vault quede a medias. Durante un tiempo esto valió solo para
@@ -155,7 +168,12 @@ def add_al_vault(
 
     ruta = archivo_vault(vault, "AHORA.md")
     dia = encabezado_de(day or date.today())
-    linea = componer(hora=hour or datetime.now().strftime("%H:%M"), scope=scope, body=body)
+    linea = componer(
+        hora=hour or datetime.now().strftime("%H:%M"),
+        scope=scope,
+        body=body,
+        rutas=ambitos.rutas(vault),
+    )
     try:
         texto = add(ruta.read_text(encoding="utf-8"), [linea], day=dia)
     except ValueError as e:
@@ -237,7 +255,7 @@ def corregir_en_vault(
             f"no encuentro AHORA.md en {vault}. "
             f"¿Es un vault de TUKU?"
         )
-    cuerpo = body.strip()
+    cuerpo = todo.canonizar(body)
     if not cuerpo:
         return Resultado.rechazo(
             "falta el cuerpo corregido. Pasa --body con el texto nuevo."
@@ -268,9 +286,12 @@ def corregir_en_vault(
         marca_previa = todo.parsear(f"- {hour} - {previo}")
         marca_nueva = todo.parsear(f"- {hour} - {cuerpo}")
         if marca_previa is not None and marca_nueva is not None:
-            viejo_en_tabla = marca_previa.cuerpo.strip()
-            if viejo_en_tabla and viejo_en_tabla in tabla:
-                tabla = tabla.replace(viejo_en_tabla, marca_nueva.cuerpo.strip())
+            # La fila se busca sin links: la bitácora puede llevar uno que la
+            # tabla no tiene, y es el mismo pendiente.
+            tabla, hubo = todo.reemplazar_cuerpo(
+                tabla, marca_previa.cuerpo.strip(), marca_nueva.cuerpo.strip()
+            )
+            if hubo:
                 pendientes_path.write_text(tabla, encoding="utf-8")
                 filas = 1
         propagate.propagar(vault)

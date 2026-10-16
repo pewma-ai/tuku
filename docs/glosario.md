@@ -38,7 +38,7 @@
 |---|---|
 | **Registro** | Una línea de bitácora: un hecho, con hora y ámbito, y una clasificación si el autor la eligió. La única forma de registrar algo. |
 | **Hecho** | La unidad del registro. Una sola frase dictada puede contener varios y produce varios registros. |
-| **Ontología cerrada** | Las tres marcas de TUKU que disparan consecuencias deterministas: `**pendiente**`, `~~(Hecho)~~`, `**cadencia**`. El autor no las puede extender. |
+| **Ontología cerrada** | Las tres marcas de TUKU que disparan consecuencias deterministas: `**pendiente**`, `(Hecho)`, `**cadencia**`. El autor no las puede extender. |
 | **Ontología abierta** | Las clasificaciones del autor (`**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`). Sirven para leer y filtrar, ningún comando actúa sobre ellas. Crece con el uso. |
 | **Clasificación** | El tipo abierto de un registro, elegido del vocabulario del libro de estilo. |
 | **Consecuencia** | Lo que se aplica *después* de escribir el registro, releyendo el texto: abrir un pendiente, enlazar, dar de alta una cadencia, proponer. |
@@ -48,12 +48,12 @@
 
 | Término | Qué es |
 |---|---|
-| **Pendiente** | Un compromiso abierto. Nace de un registro `**pendiente**` y muere en un registro `~~(Hecho)~~`. |
+| **Pendiente** | Un compromiso abierto. Nace de un registro `**pendiente**` y muere en un registro `(Hecho)`. |
 | **Horizonte** | El escalón de un pendiente, en la columna `Horizonte` de `PENDIENTES.md`: los del autor (`esta semana`, `próxima semana`, `fin de mes` en el template) y `con fecha`, que pone el sistema cuando el pendiente tiene día. Un pendiente está bajo exactamente uno. |
 | **Escalera de horizontes** | El recorrido de un pendiente al concretarse: esta semana, próxima semana o fin de mes, con fecha, cerrado. |
 | **Atrasado** | Un pendiente cuya fecha o cuyo horizonte ya pasó. Se calcula desde su fila: en `PENDIENTES.md` no se mueve nada. |
 | **Callout** | El bloque `> [!todo]` que agrupa pendientes: los del día bajo cada día de `AHORA.md`, y los de cada ámbito en `ambitos/PENDIENTES-AMBITOS.md`. |
-| **Transclusión** | Mostrar un texto en otro archivo sin copiarlo, con `![[archivo#^ancla]]`. Se usa cuando el origen ya agrupa contiguo lo que el destino muestra. |
+| **Transclusión** | Mostrar un texto en otro archivo sin copiarlo, con `![[archivo#^ancla]]`. Se usa cuando el origen ya agrupa contiguo lo que el destino muestra. Es la extensión de Obsidian que TUKU admite y el único wikilink que escribe: se reconoce por el `!` inicial, y los demás enlaces son links Markdown. |
 | **Propagación** | Escribir una copia derivada donde hace falta, cuando el origen no agrupa contiguo lo que el destino muestra. Un comando la produce y la regenera; si discrepa de la fuente, la que está mal es la copia. |
 | **Ciclo** | La ventana de tiempo que se abre, se planifica y se cierra. Semanal por defecto, o el turno real del autor. |
 | **Cadencia** | Una regla que emite un pendiente con fecha cada cierto tiempo. Vive en el `CADENCIAS.md` del ámbito al que pertenece. |

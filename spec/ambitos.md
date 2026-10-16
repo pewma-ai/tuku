@@ -79,7 +79,7 @@ Ante cualquier defecto, el linter informa y nunca repara por su cuenta: nombra l
 
 ## El nombre de un ámbito
 
-**Los espacios pasan a guion.** El autor dicta "depto centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry add`, `todo open`, `note create`, `link backfill`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
+**Los espacios pasan a guion.** El autor dicta "depto centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry add`, `todo open`, `note create`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
 
 **Un ámbito que no existe se rechaza.** `entry add`, `todo open` y `note create` salen con `RECHAZO` sin escribir nada, y el mensaje nombra `tuku scope create <nombre>` como corrección. Crear un ámbito cambia dónde cae todo lo que venga después, y esa decisión es del autor: se le ofrece, no se toma por él. Una categoría sí existe, y apuntarle un registro lo reporta `scope lint`, no lo impide el comando.
 
@@ -97,7 +97,15 @@ Lo que hay que resolver en cada archivado:
 
 - **Pendientes abiertos de esa rama.** Se cierran, se mueven a otro ámbito, o expiran dejando el motivo escrito.
 - **Cadencias vigentes.** Dejan de emitir, pero hay que decidir si se archivan con la rama o se reasignan.
-- **Enlaces desde bitácoras ya cerradas.** Este es el que pesa para el principio 1: si archivar rompe enlaces de bitácoras de hace dos años, el archivo histórico deja de ser legible. O `archivado/` preserva rutas resolubles, o el archivado reescribe los enlaces.
+- **Enlaces desde bitácoras ya cerradas.** Este es el que pesa para el principio 1: si archivar rompe enlaces de bitácoras de hace dos años, el archivo histórico deja de ser legible. Como los links son rutas relativas al archivo, **el archivado recalcula la ruta de cada link** de lo que mueve a `bitacoras/` (epic 006; no se implementa todavía).
+
+## Cómo se enlaza un ámbito
+
+El enlace a un ámbito es un link Markdown con ruta relativa al archivo que lo contiene ([README.md](README.md), "Decidido (2026-10-16)"). **A mano:** escribir `[nombre](ruta/hasta/nombre.md)` con la ruta desde el archivo donde va, por ejemplo `[personal](../personal/personal.md)` desde una página de ámbito hermana.
+
+La transclusión de pendientes `![[../PENDIENTES-AMBITOS.md#^personal]]` es una extensión de Obsidian aceptada: es el único wikilink admitido y se reconoce por el `!` inicial.
+
+**Renombrar un ámbito** actualiza el texto y la ruta de cada link que lo nombra.
 
 ## El enlazado retroactivo llega hasta el ciclo en curso
 

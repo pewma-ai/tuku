@@ -43,13 +43,14 @@ def test_la_constancia_enlaza_a_la_nota_y_a_su_ambito() -> None:
         Path("notas/gastos-comunes.md"), time="21:15", scope="depto-centro"
     )
     assert linea == (
-        "- 21:15 - [[depto-centro]] **nota**: escribí la nota [[gastos-comunes]]"
+        "- 21:15 - [depto-centro](ambitos/depto-centro/depto-centro.md) "
+        "**nota**: escribí la nota [gastos-comunes](notas/gastos-comunes.md)"
     )
 
 
 def test_la_constancia_sin_ambito_no_deja_el_enlace_vacio() -> None:
     linea = note.registro_de_constancia(Path("notas/algo.md"), time="09:00")
-    assert linea == "- 09:00 - **nota**: escribí la nota [[algo]]"
+    assert linea == "- 09:00 - **nota**: escribí la nota [algo](notas/algo.md)"
 
 
 def test_una_nota_con_ver_ademas_y_motivos_no_tiene_hallazgos() -> None:

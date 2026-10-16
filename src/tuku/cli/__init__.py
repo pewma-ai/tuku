@@ -24,7 +24,7 @@ from tuku.cli.helpers import (
 from tuku.cli.helpers import (
     cuerpo_de_la_nota as _cuerpo_de_la_nota,
 )
-from tuku.config import VaultInvalido
+from tuku.config import VaultInvalido, exigir_vault
 from tuku.init import MarcadorAutorFaltante
 from tuku.todo import SinTabla
 from tuku.vocab import VocabularioIncompleto
@@ -81,6 +81,9 @@ def main(argv: list[str] | None = None) -> int:
     args = _construir_parser().parse_args(argv)
     comando = _COMANDOS[(args.noun, getattr(args, "verb", None))]
     try:
+        # `note lint <archivo>` revisa un archivo suelto y no lee el vault.
+        if getattr(args, "file", None) is None and (vault := getattr(args, "vault", None)):
+            exigir_vault(vault)
         return comando(args)
     except (
         VaultInvalido,

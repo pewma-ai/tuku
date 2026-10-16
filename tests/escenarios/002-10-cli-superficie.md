@@ -11,7 +11,7 @@ Cuando se consulta la ayuda principal del CLI
 tuku -h
 ```
 Entonces sale con código 0 (`EXITO`)
-Y el texto nombra todos los sustantivos del sistema: `init`, `cycle`, `doctor`, `rebuild`, `vocab`, `style`, `entry`, `todo`, `scope`, `link` y `note`
+Y el texto nombra todos los sustantivos del sistema: `init`, `cycle`, `doctor`, `fix`, `rebuild`, `vocab`, `style`, `entry`, `todo`, `scope` y `note`
 
 ## Escenario: cada noun lista sus verbs
 
@@ -23,8 +23,9 @@ tuku cycle -h
 tuku style -h
 tuku todo -h
 tuku scope -h
-tuku link -h
 tuku note -h
+tuku doctor -h
+tuku fix -h
 tuku entry add -h
 tuku entry rename -h
 ```

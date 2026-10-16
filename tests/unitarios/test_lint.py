@@ -30,7 +30,7 @@ to: 2026-08-17
 
 ## Martes 11 de agosto
 - 09:00 - [[personal]] **pendiente**: comprar pan
-- 10:00 - [[personal]] ~~(Hecho)~~: comprar pan
+- 10:00 - [[personal]] (Hecho): ~~comprar pan~~
 - 11:00 - [[personal]] **cadencia**: revisar el correo
 - 12:00 - [[personal]] **reunión**: almuerzo con el equipo
 """
@@ -53,7 +53,7 @@ def test_lint_sin_registros_sin_hallazgos() -> None:
 
 def test_ontologia_cerrada_reconoce_todas_las_marcas_canonicas() -> None:
     assert "**pendiente**" in CERRADA
-    assert "~~(Hecho)~~" in CERRADA
+    assert "(Hecho)" in CERRADA
     assert "**cadencia**" in CERRADA
 
 
@@ -67,13 +67,15 @@ to: 2026-08-17
 
 ## Martes 11 de agosto
 - 09:00 - **Pendiente**: comprar pan
-- 10:00 - ~~(hecho)~~: comprar pan
+- 10:00 - (hecho): ~~comprar pan~~
+- 10:30 - ~~(hecho)~~: comprar pan
 - 11:00 - **Cadencia**: semanal
 """
     hallazgos = lint.lint(texto, abiertos=[])
     errores = [h for h in hallazgos if h.grado == ERROR]
-    assert len(errores) == 3
+    assert len(errores) == 4
     assert any("**Pendiente**" in e.defecto for e in errores)
+    assert any("(hecho)" in e.defecto for e in errores)
     assert any("~~(hecho)~~" in e.defecto for e in errores)
     assert any("**Cadencia**" in e.defecto for e in errores)
     assert all("ontología cerrada" in e.defecto for e in errores)
@@ -151,3 +153,12 @@ def test_hallazgo_str() -> None:
 
     h_preg = Hallazgo(6, PREGUNTA, "pregunta", "corrección")
     assert str(h_preg) == "AHORA.md:6: pregunta: pregunta. corrección"
+
+
+def test_la_marca_tachada_es_error_y_dice_como_escribirla() -> None:
+    texto = (
+        "---\ntype: Logbook\nfrom: 2026-08-11\nto: 2026-08-17\n---\n\n"
+        "## Martes 11 de agosto\n- 10:00 - [[personal]] ~~(Hecho)~~: comprar pan\n"
+    )
+    [h] = lint.lint(texto, abiertos=[])
+    assert h.grado == ERROR and "Escríbela exactamente (Hecho)" in h.correccion

@@ -55,7 +55,7 @@ Busca la palabra "recuérdame". No está. Lo que quedó escrito es el hecho y su
 
 En `PENDIENTES.md` la fila desapareció.
 
-En `AHORA.md` quedó la constancia de cierre con `~~(Hecho)~~` y la hora exacta en que lo informaste. El mismo comando que asienta el hecho retira el compromiso de la tabla. Nada desaparece sin dejar constancia en la bitácora.
+En `AHORA.md` quedó la constancia de cierre con `(Hecho)` y la hora exacta en que lo informaste. El mismo comando que asienta el hecho retira el compromiso de la tabla. Nada desaparece sin dejar constancia en la bitácora.
 
 ### Trata de romperlo
 
@@ -68,7 +68,7 @@ Eso está hecho, pero nunca estuvo registrado como pendiente. Mira `PENDIENTES.m
 
 ## Un frente nuevo
 
-Abre `AHORA.md` y mira entre corchetes dobles al inicio de cada línea: todo cayó en `personal`, el único frente que trae un vault recién instalado.
+Abre `AHORA.md` y mira el link al inicio de cada línea, `[personal](ambitos/personal/personal.md)`: todo cayó en `personal`, el único frente que trae un vault recién instalado.
 
 > [!tip] Dile a tu agente
 > Colegio Los Robles es un cliente, ábrelo como un frente aparte.
@@ -79,7 +79,7 @@ Apareció el directorio `ambitos/colegio-los-robles/` con su página `colegio-lo
 
 ### Vuelve a `AHORA.md`
 
-Revisa los registros escritos hace veinte minutos: los que decían "Colegio Los Robles" en texto plano ahora lo enlazan como `[[colegio-los-robles]]`. Los que decían solo "Los Robles" quedaron igual: se enlaza el nombre del frente y no sus apodos, porque reconocer un apodo sería adivinar. Las demás líneas quedaron intactas.
+Revisa los registros escritos hace veinte minutos: los que decían "Colegio Los Robles" en texto plano ahora lo enlazan como `[colegio-los-robles](ambitos/colegio-los-robles/colegio-los-robles.md)`. Los que decían solo "Los Robles" quedaron igual: se enlaza el nombre del frente y no sus apodos, porque reconocer un apodo sería adivinar. Las demás líneas quedaron intactas.
 
 Esto ilustra que [la organización emerge del uso](../principios.md): registras primero, ordenas cuando el patrón madura, y el ciclo en curso se actualiza solo.
 
@@ -109,7 +109,7 @@ Dictaste rápido y quedó escrito algo que no era. Corregirlo también se dicta.
 
 Lo que buscas: que el registro **y** el pendiente digan lo mismo. Un registro corregido y una fila sin corregir dejan un pendiente que ya no puedes cerrar, porque cerrarlo es repetir su texto. Por eso corregir es un solo comando y no dos.
 
-Con el [ámbito](../glosario.md#el-árbol-de-ámbitos) pasa lo mismo pero en más sitios: la carpeta, su página y cada mención en tu bitácora. Míralo en `ambitos/` y en `AHORA.md`: no queda ni un `[[colegio-los-robles]]`.
+Con el [ámbito](../glosario.md#el-árbol-de-ámbitos) pasa lo mismo pero en más sitios: la carpeta, su página y cada mención en tu bitácora. Míralo en `ambitos/` y en `AHORA.md`: no queda ni un link al nombre viejo.
 
 > [!tip] Pídele algo que no tenga comando
 > Fusiona Liceo Los Robles y personal en un solo frente.

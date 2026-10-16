@@ -26,11 +26,12 @@ from tuku import todo  # noqa: E402
 from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "002-05-cerrar-pendiente"
+PERSONAL = "[personal](ambitos/personal/personal.md)"
 CUERPO = "avisar de los GGCC a la administradora"
-APERTURA = f"- 14:20 - [[personal]] **pendiente**: {CUERPO}"
-CIERRE = f"- 19:05 - [[personal]] ~~(Hecho)~~: {CUERPO}"
+APERTURA = f"- 14:20 - {PERSONAL} **pendiente**: {CUERPO}"
+CIERRE = f"- 19:05 - {PERSONAL} (Hecho): ~~{CUERPO}~~"
 HUERFANO = "comprar una maleta"
-CIERRE_HUERFANO = f"- 19:10 - [[personal]] ~~(Hecho)~~: {HUERFANO}"
+CIERRE_HUERFANO = f"- 19:10 - {PERSONAL} (Hecho): ~~{HUERFANO}~~"
 
 SIN_PAREJA = "no había ningún pendiente abierto"
 
@@ -87,7 +88,7 @@ def test_002_05_cerrar_dos_veces_no_vuelve_a_mover() -> None:
 
 
 def test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora() -> None:
-    """El gemelo del cierre: un `~~(Hecho)~~` cuyo cuerpo sigue en la tabla es un
+    """El gemelo del cierre: un `(Hecho)` cuyo cuerpo sigue en la tabla es un
     cierre que se escribió y nunca se aplicó, y por separado los dos archivos se
     ven bien. Lo revisa `tuku doctor` desde el 2026-09-09.
     """
@@ -108,7 +109,7 @@ def test_002_05_via_bitacora_entry_add_cierra_en_automatico() -> None:
     assert "pagar sesión del psicólogo" not in pendientes
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert "- 19:20 - [[personal]] ~~(Hecho)~~: pagar sesión del psicólogo" in ahora
+    assert f"- 19:20 - {PERSONAL} (Hecho): ~~pagar sesión del psicólogo~~" in ahora
 
     faltan = todo.sin_consecuencia(ahora, pendientes)
     assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"

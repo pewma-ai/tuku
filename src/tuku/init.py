@@ -23,6 +23,7 @@ from __future__ import annotations
 import os
 import shutil
 from datetime import date, timedelta
+from importlib import metadata
 from pathlib import Path
 
 _PAQUETE = Path(__file__).resolve().parent
@@ -50,9 +51,19 @@ MESES = [
 
 _MARCADOR_AUTOR = "**Nombre del autor:**"
 
+#: De dónde sale TUKU: se escribe en cada vault para saber dónde revisar cambios.
+ORIGEN = "https://github.com/pewma-ai/tuku"
+
+#: Archivo de `~/.tuku` con la versión de TUKU que lo escribió.
+SELLO = "tuku.version"
+
 
 class DestinoNoVacio(Exception):
     """El directorio destino ya tiene contenido y no se pidió `force`."""
+
+
+class DestinoProhibido(Exception):
+    """El destino es el home del usuario o un directorio que lo contiene."""
 
 
 class TukuHomeInvalido(Exception):
@@ -75,12 +86,40 @@ def _raiz_checkout() -> Path | None:
     return None
 
 
+def version_de_tuku() -> str:
+    """La versión del `tuku` instalado, o `desconocida` si no hay metadatos."""
+    try:
+        return metadata.version("tuku")
+    except metadata.PackageNotFoundError:
+        return "desconocida"
+
+
+def version_del_home(home: Path) -> str | None:
+    """La versión que sella `home`, o `None` si no tiene sello (checkout, `TUKU_HOME`)."""
+    sello = home / SELLO
+    if not sello.is_file():
+        return None
+    return sello.read_text(encoding="utf-8").strip() or None
+
+
+def _materializar(destino: Path) -> Path:
+    """Reemplaza `destino` con la copia empaquetada y la sella con la versión actual."""
+    if destino.exists():
+        shutil.rmtree(destino)
+    shutil.copytree(_HOME_EMPAQUETADO, destino)
+    (destino / SELLO).write_text(f"{version_de_tuku()}\n", encoding="utf-8")
+    return destino
+
+
 def resolver_home(home: Path | str | None = None) -> Path:
     """Devuelve el árbol de TUKU instalado, según la cascada del módulo.
 
-    Si la única fuente disponible es la copia empaquetada en el wheel y `~/.tuku`
-    todavía no existe, la copia se materializa ahí y se devuelve esa ruta: es la
-    forma de que `~/.tuku` quede poblado tras un `pipx install`, sin red.
+    `~/.tuku` es un artefacto de la instalación: lleva el sello de la versión de
+    TUKU que lo escribió (`tuku.version`) y, si ese sello no coincide con el
+    `tuku` instalado, se reemplaza entero con la copia empaquetada. Es la forma
+    de que quede poblado tras un `uv tool install` sin red, y de que no se quede
+    atrás tras reinstalar. No se edita a mano: se pierde en el próximo refresco.
+
     """
     if home is not None:
         h = Path(home).expanduser()
@@ -96,14 +135,16 @@ def resolver_home(home: Path | str | None = None) -> Path:
         return h
 
     predeterminado = Path("~/.tuku").expanduser()
+    if _tiene_template(_HOME_EMPAQUETADO):
+        vigente = _tiene_template(predeterminado)
+        if vigente and version_del_home(predeterminado) == version_de_tuku():
+            return predeterminado
+        if vigente or not predeterminado.exists():
+            return _materializar(predeterminado)
+        return _HOME_EMPAQUETADO
+
     if _tiene_template(predeterminado):
         return predeterminado
-
-    if _tiene_template(_HOME_EMPAQUETADO):
-        if not predeterminado.exists():
-            shutil.copytree(_HOME_EMPAQUETADO, predeterminado)
-            return predeterminado
-        return _HOME_EMPAQUETADO
 
     raiz = _raiz_checkout()
     if raiz is not None:
@@ -165,6 +206,16 @@ def _sembrar_tz(destino: Path) -> None:
     config.write_text(contenido.replace(_PLACEHOLDER_TZ, tz_del_sistema()), encoding="utf-8")
 
 
+def _sembrar_version(destino: Path, version: str) -> None:
+    """Escribe la versión de TUKU y su origen en `reglas/config.tuku.md`."""
+    config = destino / "reglas" / "config.tuku.md"
+    if not config.is_file():
+        return
+    contenido = config.read_text(encoding="utf-8")
+    contenido = contenido.replace("TUKU-VERSION", version).replace("TUKU-ORIGEN", ORIGEN)
+    config.write_text(contenido, encoding="utf-8")
+
+
 def lunes_de_esta_semana(hoy: date) -> date:
     return hoy - timedelta(days=hoy.weekday())
 
@@ -219,6 +270,25 @@ def _sembrar_autor(destino: Path, autor: str) -> None:
     )
 
 
+def _exigir_destino_permitido(destino: Path) -> None:
+    """Rechaza el home del usuario y todo directorio que lo contenga.
+
+    Cubre `~`, `/Users`, `C:\\Users` y la raíz del disco, en Mac, Linux y
+    Windows. Va antes de `force`: con `--force` el destino se borra entero, y
+    sembrar en el home sería borrarlo. `samefile` compara por inodo (o índice de
+    archivo en Windows), así que no lo engañan los symlinks ni las mayúsculas.
+    """
+    if not destino.exists():
+        return
+    home = Path.home()
+    for prohibido in (home, *home.parents):
+        if prohibido.exists() and os.path.samefile(destino, prohibido):
+            raise DestinoProhibido(
+                f"{destino.resolve()} es el home del usuario o un directorio que lo contiene. "
+                "Siembra el vault en una carpeta propia: `tuku init <dir>`."
+            )
+
+
 def init(
     destino: Path | str,
     *,
@@ -240,6 +310,7 @@ def init(
     valor_variante = variante if variante is not None else variant
     valor_autor = autor if autor is not None else author
     destino = Path(destino).expanduser()
+    _exigir_destino_permitido(destino)
     home_dir = resolver_home(home)
     variante_dir = home_dir / "template" / valor_variante
     if not variante_dir.is_dir():
@@ -269,6 +340,7 @@ def init(
         )
 
     _sembrar_tz(destino)
+    _sembrar_version(destino, version_del_home(home_dir) or version_de_tuku())
 
     if valor_autor and valor_autor.strip():
         _sembrar_autor(destino, valor_autor.strip())

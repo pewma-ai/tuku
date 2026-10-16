@@ -28,7 +28,7 @@ Vive en el `AGENTS.md` de la raíz y es lo que el ejecutor consulta antes de act
 | --- | --- | --- | --- |
 | cuenta algo que ocurrió | bitácora | `reglas/bitacora.tuku.md` | `tuku entry add` |
 | dice que algo quedó por hacer | bitácora, marca `**pendiente**` | `reglas/bitacora.tuku.md` | `tuku entry add` |
-| da por hecho algo que estaba pendiente | bitácora, marca `~~(Hecho)~~` | `reglas/bitacora.tuku.md` | `tuku entry add` |
+| da por hecho algo que estaba pendiente | bitácora, marca `(Hecho)` | `reglas/bitacora.tuku.md` | `tuku entry add` |
 | abre un pendiente sin dictado | comando directo | nada | `tuku todo open` |
 | cierra un pendiente sin dictado | comando directo | nada | `tuku todo close` |
 | nombra un frente que todavía no existe | comando directo | `ambitos/AGENTS.md` | `tuku scope create` |
@@ -86,7 +86,7 @@ La forma importa porque es lo que la vuelve verificable: un límite escrito así
 
 La tabla es texto en un archivo del vault y el CLI evoluciona aparte, así que envejece. `tuku doctor` revisa que cada comando nombrado en la tabla exista en la superficie real del CLI, del mismo modo que revisa los `type` contra [`reglas/types.md`](../template/vanilla/reglas/types.md).
 
-Ante un hallazgo informa y no corrige: el `AGENTS.md` de un vault en uso lleva las reglas que el autor le agregó, y sobreescribirlo es consecuencia mayor.
+Ante un hallazgo informa y no corrige: el `AGENTS.md` de un vault en uso lleva las reglas que el autor le agregó, y sobreescribirlo es consecuencia mayor. Los temas que sí tienen reparación determinista (hoy `link`) nombran `tuku fix TEMA` como corrección, y si `fix` devuelve decisiones se le plantean al autor ([cli.md](cli.md)).
 
 ## El segundo eje, anotado y fuera
 

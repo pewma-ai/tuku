@@ -22,10 +22,11 @@ from tuku import todo  # noqa: E402
 from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "002-06-fechar-pendiente"
+PERSONAL = "[personal](ambitos/personal/personal.md)"
 FECHA = "2026-08-12"
 CUERPO = "pagar la sesión con el psicólogo"
-FILA = f"| con fecha | {FECHA} | [[personal]] | {CUERPO} |"
-LINEA_PROPAGADA = f"> - [[personal]] - {CUERPO}"
+FILA = f"| con fecha | {FECHA} | {PERSONAL} | {CUERPO} |"
+LINEA_PROPAGADA = f"> - {PERSONAL} - {CUERPO}"
 
 
 def test_002_06_fechar_un_pendiente_en_dia_futuro() -> None:
@@ -75,10 +76,10 @@ def test_002_06_via_bitacora_entry_add_fecha_en_automatico() -> None:
     vault = corrida.ruta("mi-vault")
 
     pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    assert "| con fecha | 2026-08-13 | [[personal]] | comprar pasajes de tren |" in pendientes
+    assert f"| con fecha | 2026-08-13 | {PERSONAL} | comprar pasajes de tren |" in pendientes
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert "> - [[personal]] - comprar pasajes de tren" in ahora
+    assert f"> - {PERSONAL} - comprar pasajes de tren" in ahora
 
     faltan = todo.sin_consecuencia(ahora, pendientes)
     assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"

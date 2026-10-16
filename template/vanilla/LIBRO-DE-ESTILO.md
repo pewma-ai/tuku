@@ -18,7 +18,7 @@ El sistema escribe en primera persona y esa primera persona es el autor. Cuando 
 
 Las automatizaciones leen las tablas que siguen buscando estos encabezados exactos. Las **filas** se agregan, se quitan o se cambian cuando haga falta. Si se renombra un **encabezado**, las automatizaciones dejan de encontrar el vocabulario.
 
-Las tres marcas con efecto mecánico (`**pendiente**`, `~~(Hecho)~~` y `**cadencia**`) no son vocabulario del autor: son de TUKU y están descritas en `AGENTS.md`. No van en estas tablas ni se renombran, y conviene no usar esas palabras para nombrar otra cosa.
+Las tres marcas con efecto mecánico (`**pendiente**`, `(Hecho)` y `**cadencia**`) no son vocabulario del autor: son de TUKU y están descritas en `AGENTS.md`. No van en estas tablas ni se renombran, y conviene no usar esas palabras para nombrar otra cosa.
 
 ### Clasificaciones
 
@@ -79,7 +79,7 @@ Cada cadencia es un encabezado `##` con tres campos de máquina y dos de persona
 
 **Cuándo:** día exacto 10, mensual
 **Emite:** pendiente con fecha
-**Texto:** pagar y enviar comprobante de gastos comunes a [[carmen-navarro]]
+**Texto:** pagar y enviar comprobante de gastos comunes a [carmen-navarro](../../notas/carmen-navarro.md)
 
 ### Procedimiento
 Pagado en el portal, con el comprobante enviado por WhatsApp el mismo día.

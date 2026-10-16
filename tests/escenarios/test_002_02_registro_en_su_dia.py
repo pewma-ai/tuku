@@ -29,6 +29,7 @@ import gherkin  # noqa: E402
 from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "002-02-registro-en-su-dia"
+PERSONAL = "[personal](ambitos/personal/personal.md)"
 HOY = "## Martes 11 de agosto"
 ORDEN_ESPERADO = ["09:12", "11:30", "18:40"]
 LINEA_1840 = (
@@ -78,7 +79,7 @@ def test_002_02_la_fase_1_no_toca_pendientes() -> None:
         "- **señal**: la administradora responde los mensajes con varios días de atraso"
         in personal
     )
-    assert "[[personal]]" not in personal
+    assert f"{PERSONAL}" not in personal
     assert "- 09:12 - " not in personal
 
 
@@ -92,7 +93,7 @@ def test_002_02_omision_de_dia_y_hora_asume_hoy_y_ahora() -> None:
 
     ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
     deldia = _lineas_del_dia(ahora, HOY)
-    esperada = "- 16:45 - [[personal]] revisión presencial de correspondencia"
+    esperada = f"- 16:45 - {PERSONAL} revisión presencial de correspondencia"
     assert esperada in deldia, f"no cayó en {HOY} a las 16:45: {deldia}"
 
 

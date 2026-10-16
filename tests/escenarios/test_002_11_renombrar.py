@@ -51,7 +51,10 @@ def test_002_11_no_queda_ningun_enlace_al_nombre_viejo() -> None:
         f"{ruta.relative_to(vault)}:{i}"
         for ruta in sorted(vault.rglob("*.md"))
         for i, linea in enumerate(ruta.read_text(encoding="utf-8").splitlines(), 1)
-        if f"[[{VIEJO}]]" in linea or f"^{VIEJO}" in linea
+        if f"[[{VIEJO}]]" in linea
+        or f"ambitos/{VIEJO}/" in linea
+        or f"[{VIEJO}](" in linea
+        or f"^{VIEJO}" in linea
     ]
     assert not colgando, f"quedaron enlaces al nombre viejo: {colgando}"
 

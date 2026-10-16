@@ -106,7 +106,7 @@ def test_lint_categorias_en_memoria() -> None:
     texto = "- 10:00 - [[clientes]] reunión con cliente\n- 11:00 - [[personal]] compras\n"
     hallazgos = scope.lint_categorias(texto, categorias=["clientes"])
     assert len(hallazgos) == 1
-    assert "[[clientes]] es una categoría" in hallazgos[0]
+    assert "clientes es una categoría" in hallazgos[0]
     assert "no puede apuntar a una" in hallazgos[0]
 
     sin_categorias = scope.lint_categorias(texto, categorias=[])

@@ -41,10 +41,11 @@ archivo de ámbitos con un callout por carpeta de `ambitos/`.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from datetime import date
 from pathlib import Path
 
-from tuku import scope, todo
+from tuku import link, scope, todo
 from tuku.ahora import dias
 
 #: Un registro de bitácora. Es la frontera inferior de la región del día.
@@ -63,25 +64,30 @@ _ENCABEZADO_AMBITOS = (
     "# Pendientes por ámbito\n\n"
     "> [!warning] Vista derivada\n"
     "> No modificar este archivo directamente. Los cambios se realizan en "
-    "[[../PENDIENTES.md|PENDIENTES.md]] y se reflejan aquí mediante propagación automática.\n"
+    "[PENDIENTES.md](../PENDIENTES.md) y se reflejan aquí mediante propagación automática.\n"
 )
 
 
-def linea_del_dia(fila: todo.Fila) -> str:
-    """La fila, como línea de la región del día: `- [[ambito]] - detalle`."""
+def linea_del_dia(fila: todo.Fila, rutas: Mapping[str, str] | None = None) -> str:
+    """La fila, como línea de la región del día: `- [ambito](ruta) - detalle`.
+
+    La región vive en `AHORA.md`, así que la ruta es relativa a ese archivo.
+    """
     if fila.ambito:
-        return f"- [[{fila.ambito}]] - {fila.cuerpo}"
+        return f"- {link.enlace_ambito(fila.ambito, 'AHORA.md', rutas)} - {fila.cuerpo}"
     return f"- {fila.cuerpo}"
 
 
-def region_del_dia(filas: list[todo.Fila], dia: date) -> list[str]:
+def region_del_dia(
+    filas: list[todo.Fila], dia: date, rutas: Mapping[str, str] | None = None
+) -> list[str]:
     """Las líneas propagadas de un día: callout `[!todo] Pendientes del día` si hay pendientes.
 
     Una fila sin fecha no cae en ningún día: no tener fecha es el estado normal
     de un pendiente del ciclo en curso, no una fecha implícita de hoy.
     """
     marca = dia.isoformat()
-    items = [linea_del_dia(f) for f in filas if f.cuando.strip() == marca]
+    items = [linea_del_dia(f, rutas) for f in filas if f.cuando.strip() == marca]
     if not items:
         return []
     return [
@@ -102,7 +108,9 @@ def _fin_de_seccion(lineas: list[str], ini: int) -> int:
     )
 
 
-def propagar_ahora(ahora: str, pendientes: str) -> str:
+def propagar_ahora(
+    ahora: str, pendientes: str, rutas: Mapping[str, str] | None = None
+) -> str:
     """`AHORA.md` con la región de cada día regenerada desde la tabla.
 
     Reemplaza la región entera, así que propagar dos veces no duplica ninguna
@@ -123,7 +131,7 @@ def propagar_ahora(ahora: str, pendientes: str) -> str:
             fin,
         )
         resto = lineas[corte:fin]
-        callout_lineas = region_del_dia(todas, fecha)
+        callout_lineas = region_del_dia(todas, fecha, rutas)
         if callout_lineas:
             lineas[ini + 1 : fin] = [*callout_lineas, "", *resto]
         else:
@@ -173,7 +181,10 @@ def documento_ambitos(
     por_ambito: dict[str, list[str]] = {nombre: [] for nombre in ambitos}
     for fila in todo.filas(pendientes):
         if fila.ambito in por_ambito:
-            por_ambito[fila.ambito].append(fila.cuerpo)
+            # El detalle se escribió para `PENDIENTES.md`; el callout vive en `ambitos/`.
+            por_ambito[fila.ambito].append(
+                link.rebasar(fila.cuerpo, "PENDIENTES.md", str(ARCHIVO_AMBITOS.as_posix()))
+            )
     bloques = [
         callout(nombre, cuerpos, display_name=nombres_display.get(nombre))
         for nombre, cuerpos in por_ambito.items()
@@ -195,7 +206,9 @@ def propagar(vault: Path) -> list[Path]:
     cambiados = []
 
     ruta_ahora = archivo_vault(vault, "AHORA.md")
-    texto = propagar_ahora(ruta_ahora.read_text(encoding="utf-8"), pendientes)
+    texto = propagar_ahora(
+        ruta_ahora.read_text(encoding="utf-8"), pendientes, scope.rutas(vault)
+    )
     if texto != ruta_ahora.read_text(encoding="utf-8"):
         ruta_ahora.write_text(texto, encoding="utf-8")
         cambiados.append(ruta_ahora)

@@ -35,6 +35,10 @@ Un solo mensaje en prosa, que sirve a los dos. **Sin `--json`.** Hoy no lo consu
 
 Que se cumpla es verificable: la ayuda y los códigos de cada epic se fijan en un escenario, según la convención de [`../devel/epics.md`](../devel/epics.md).
 
+## Fuera de un vault, ningún comando opera
+
+Todo comando que recibe `--vault` (por defecto, el directorio actual) rechaza con código 1 si ese directorio no tiene ninguno de los archivos requeridos de un vault, y no lee ni escribe nada. Sin la regla, `tuku doctor` invocado desde `~` recorría el disco entero. Basta con que exista uno: un vault al que le falta un archivo sigue siendo un vault y es justo lo que `tuku doctor` debe diagnosticar. `tuku note lint <archivo>` queda fuera porque revisa un archivo suelto. `tuku init` tampoco opera sobre un vault, pero tiene su propia regla: **rechaza con código 1 el home del usuario y todo directorio que lo contenga**, incluida la raíz del disco, aun con `--force`, que borra el destino antes de sembrar. Vale igual en Mac, Linux y Windows.
+
 ## Ante la duda, informar y no escribir
 
 Un comando que no puede determinar algo **no lo adivina y no escribe a medias**. Sale con el código que corresponde y dice qué le falta. Es el principio 3 de [`../docs/principios.md`](../docs/principios.md) aplicado a la capa determinista, y es lo que hace que la salida sirva como advertencia en vez de como registro de un daño ya hecho.
@@ -42,6 +46,23 @@ Un comando que no puede determinar algo **no lo adivina y no escribe a medias**.
 De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa y nunca escribe. Verificar y corregir son operaciones distintas, y mezclarlas quita la oportunidad de revisar.
 
 **Ningún comando de verificación repara.** Vale para los `lint` y para `tuku doctor`, que los agrega y revisa además lo que ninguno cubre. Ante un hallazgo, el doctor o linter nombra el defecto y la acción correctiva, pero no modifica archivos.
+
+## La pareja `doctor` / `fix`
+
+`tuku doctor` verifica y `tuku fix TEMA` repara. Se separan por la misma razón que verificar y corregir son operaciones distintas: quien revisa antes de reparar conserva la oportunidad de no hacerlo.
+
+- **`tuku doctor [TEMA]`.** Sin tema revisa todo el vault; con tema, solo esa revisión. Un tema desconocido es error de uso (código 2).
+- **`tuku fix TEMA`.** Todo tema tiene su `fix`, y cada hallazgo del tema nombra `tuku fix TEMA` como corrección.
+- **Lo determinista se aplica.** Cuando el arreglo no requiere juicio, `fix` lo hace entero: cada cambio queda completo, nunca a medias por archivo.
+- **Lo no determinista se devuelve como decisiones, sin escribir.** La salida dice qué hay que decidir, entre qué opciones y qué comando correr una vez decidido. Quien corre TUKU suele ser un agente, y esas decisiones son del autor.
+- **Hallazgos mixtos.** `fix` aplica lo determinista, deja intacto lo que requiere decisión y lista esas decisiones.
+- **Códigos de salida.** 0 si el tema quedó sano; 1 si quedan decisiones. Es idempotente: una segunda corrida no cambia nada.
+- **La fecha de modificación se conserva cuando el cambio es solo de forma.** Convertir `[[x]]` en `[x](ruta)` no es una edición del autor, y esa fecha es la que Obsidian y el sistema de archivos usan para ordenar lo reciente.
+- **Cuándo entra un tema nuevo.** Un tema existe cuando tiene un `fix` que hacer. Las demás revisiones de `tuku doctor` salen sin tema y su corrección sigue siendo el comando original o una tarea del autor. Un tema nuevo entra cuando un epic encuentra un caso real que lo pida. Hoy: `link`.
+
+## La ayuda explica para qué existe cada comando
+
+Todo sustantivo y todo verbo lleva en `tuku … -h` un párrafo en español que dice **para qué existe** el comando, como `description` de argparse. La línea corta (`help=`) y el "A mano" (`epilog`) se mantienen. Un test recorre el árbol de argparse y exige que ninguno quede sin descripción.
 
 **El comando que repara es el comando original, y es idempotente.** Cuando un linter detecta un estado desincronizado (por ejemplo, una marca de bitácora sin su fila en la tabla de pendientes), no la repara por su cuenta: nombra como corrección el comando que debió haberse ejecutado originalmente (`tuku todo open`, etc.). Todos los comandos mutadores del CLI son estrictamente idempotentes: ejecutarlos repetidas veces asegura el estado completo sin duplicar líneas en `AHORA.md` ni filas en los derivados.
 

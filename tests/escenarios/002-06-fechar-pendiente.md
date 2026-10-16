@@ -18,11 +18,11 @@ Cuando se abre un pendiente fechado con todo open
 tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --when 2026-08-12 --body "pagar la sesión con el psicólogo"
 ```
 Entonces la tabla de `PENDIENTES.md` gana una fila con `con fecha` y `2026-08-12`:
-`| con fecha | 2026-08-12 | [[personal]] | pagar la sesión con el psicólogo |`
+`| con fecha | 2026-08-12 | [personal](ambitos/personal/personal.md) | pagar la sesión con el psicólogo |`
 Y el miércoles 12 de `AHORA.md` recibe por propagación el callout:
 ```markdown
 > [!todo] Pendientes del día
-> - [[personal]] - pagar la sesión con el psicólogo
+> - [personal](ambitos/personal/personal.md) - pagar la sesión con el psicólogo
 ```
 Y el pendiente no aparece en `esta semana` ni en horizontes postergados
 
@@ -57,7 +57,7 @@ Cuando se escribe un pendiente bajo el día futuro en la bitácora
 tuku entry add --vault mi-vault --day 2026-08-13 --hour 10:00 --scope personal --when 2026-08-13 --body "**pendiente**: comprar pasajes de tren"
 ```
 Entonces la tabla de `PENDIENTES.md` gana una fila con `con fecha` y `2026-08-13`:
-`| con fecha | 2026-08-13 | [[personal]] | comprar pasajes de tren |`
+`| con fecha | 2026-08-13 | [personal](ambitos/personal/personal.md) | comprar pasajes de tren |`
 Y el jueves 13 de `AHORA.md` recibe por propagación el callout de pendientes del día
 Y `tuku doctor` valida que no quedan consecuencias pendientes
 

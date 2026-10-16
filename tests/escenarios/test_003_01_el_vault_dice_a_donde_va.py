@@ -32,7 +32,7 @@ def test_003_01_el_vault_nace_con_su_tabla_y_el_doctor_la_aprueba() -> None:
     revision = gherkin.correr(SLUG, "el vault nace con su tabla").de("tuku doctor")
     assert revision.codigo == EXITO, revision.stdout + revision.stderr
     assert "el vault está sano" in revision.stdout
-    assert "despacho:" in revision.stdout, "el doctor no corrió la revisión de despacho"
+    assert "dispatch:" in revision.stdout, "el doctor no corrió la revisión de despacho"
     assert "todos existen" in revision.stdout
 
 

@@ -22,15 +22,17 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Mapping
 from datetime import date
 from pathlib import Path
 
+from tuku import link
 from tuku.resultado import Resultado
 
 VER_ADEMAS = "## Ver además"
 
 #: Un enlace de la sección "Ver además": markdown o wikilink, y lo que sigue.
-_ENLACE = re.compile(r"^\s*[*-]\s+(?:\[[^\]]+\]\([^)]+\)|\[\[[^\]]+\]\])(?P<motivo>.*)$")
+_ENLACE = re.compile(rf"^\s*[*-]\s+{link.ENLACE}(?P<motivo>.*)$")
 
 
 def slug(titulo: str) -> str:
@@ -50,6 +52,7 @@ def crear(
     ambito: str | None = None,
     today: date | None = None,
     hoy: date | None = None,
+    rutas: Mapping[str, str] | None = None,
 ) -> Path:
     """Escribe la nota en `notas/` y devuelve su ruta. Idempotente.
 
@@ -73,9 +76,10 @@ def crear(
 
     ver_ademas = ""
     if valor_scope is not None:
+        enlace = link.enlace_ambito(valor_scope, f"notas/{ruta.name}", rutas)
         ver_ademas = (
             f"\n{VER_ADEMAS}\n\n"
-            f"* [[{valor_scope}]] — el ámbito al que pertenece lo que esta nota explica.\n"
+            f"* {enlace} — el ámbito al que pertenece lo que esta nota explica.\n"
         )
 
     ruta.parent.mkdir(parents=True, exist_ok=True)
@@ -97,12 +101,17 @@ def registro_de_constancia(
     hora: str = "",
     scope: str | None = None,
     ambito: str | None = None,
+    rutas: Mapping[str, str] | None = None,
 ) -> str:
-    """La línea de bitácora que deja constancia de la nota creada."""
+    """La línea de bitácora que deja constancia de la nota creada.
+
+    Va en `AHORA.md`, así que los dos links son relativos a ese archivo.
+    """
     valor_hora = time or hora
     valor_scope = scope if scope is not None else ambito
-    prefijo = f"[[{valor_scope}]] " if valor_scope else ""
-    return f"- {valor_hora} - {prefijo}**nota**: escribí la nota [[{nota.stem}]]"
+    prefijo = f"{link.enlace_ambito(valor_scope, 'AHORA.md', rutas)} " if valor_scope else ""
+    nota_link = link.enlace(nota.stem, "AHORA.md", f"notas/{nota.name}")
+    return f"- {valor_hora} - {prefijo}**nota**: escribí la nota {nota_link}"
 
 
 def lint(nota: str) -> list[str]:
@@ -173,14 +182,16 @@ def crear_con_constancia(
     pendiente: str | None = None
     if record and ahora_path.is_file():
         texto = ahora_path.read_text(encoding="utf-8")
-        constancia = registro_de_constancia(ruta, time=hora, scope=scope)
+        constancia = registro_de_constancia(
+            ruta, time=hora, scope=scope, rutas=scope_mod.rutas(vault)
+        )
         if constancia not in texto:
             try:
                 pendiente = add(texto, [constancia], day=encabezado_de(hoy))
             except ValueError as e:
                 return Resultado.rechazo(str(e))
 
-    crear(vault, title=title, body=body, scope=scope, today=hoy)
+    crear(vault, title=title, body=body, scope=scope, today=hoy, rutas=scope_mod.rutas(vault))
     if pendiente is not None:
         ahora_path.write_text(pendiente, encoding="utf-8")
         if scope:
@@ -213,7 +224,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     """Renombra una nota y arregla lo que la enlazaba.
 
     El caso de uso de `tuku note rename`. Una nota se nombra en tres lugares a
-    la vez: el archivo, su `# título` y cada `[[enlace]]` que la menciona, entre
+    la vez: el archivo, su `# título` y cada enlace que la menciona, entre
     ellos la constancia que dejó el día que se creó. Renombrar solo el archivo
     rompe los enlaces sin decirlo.
 
@@ -247,7 +258,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
         encoding="utf-8",
     )
 
-    # Los enlaces apuntan al nombre del archivo, no al título: `[[slug]]`.
+    # Los enlaces apuntan al nombre del archivo, no al título: `notas/<slug>.md`.
     enlaces = 0
     for ruta in sorted(vault.rglob("*.md")):
         texto = ruta.read_text(encoding="utf-8")

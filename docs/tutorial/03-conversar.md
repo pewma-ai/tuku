@@ -49,7 +49,7 @@ El agente no debe adivinar ni asumir la más reciente en silencio. Debe deteners
 
 Ahora sí:
 1. En `PENDIENTES.md` se cerró únicamente el compromiso de Marcela; el de Patricia sigue intacto.
-2. En `AHORA.md` quedó la constancia con `~~(Hecho)~~` repitiendo el cuerpo exacto del pendiente cerrado.
+2. En `AHORA.md` quedó la constancia con `(Hecho)` repitiendo el cuerpo exacto del pendiente cerrado.
 
 ---
 

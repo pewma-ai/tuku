@@ -45,12 +45,12 @@ Entonces el agente ejecuta el cierre mediante comando
 
 ```text
 tuku entry add --day 2026-08-12 --hour <hora> --scope personal \
-  --body "~~(Hecho)~~: transferir anticipo a la profesora Marcela para talleres"
+  --body "(Hecho): ~~transferir anticipo a la profesora Marcela para talleres~~"
 ```
 
 Y en `PENDIENTES.md` se elimina la fila de la profesora Marcela
 Y en `PENDIENTES.md` permanece abierta la fila de la profesora Patricia
-Y en `AHORA.md` queda la constancia de cierre con `~~(Hecho)~~` repitiendo el cuerpo exacto
+Y en `AHORA.md` queda la constancia de cierre con `(Hecho)` repitiendo el cuerpo exacto
 
 ---
 

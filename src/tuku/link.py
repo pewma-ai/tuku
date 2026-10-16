@@ -1,33 +1,359 @@
-"""tuku link backfill: convierte menciones sueltas en enlaces, hacia atrás.
+"""Los links de TUKU: el único módulo que los compone, los reconoce y los convierte.
 
-Punto 4 del epic 002. Cuando nace un ámbito, lo que ya estaba escrito sobre él
-en el ciclo en curso queda enlazado, para que la página del ámbito recoja su
-historia en vez de empezar en blanco.
+Un link de TUKU es Markdown estándar con **ruta relativa al archivo que lo
+contiene**: `[texto](ruta/relativa.md)`. Ningún otro módulo arma ni parsea
+links por su cuenta; todos pasan por acá. Es núcleo puro: recibe texto y rutas
+relativas al vault, nunca toca disco. Quien recorre el vault es el caso de uso
+(`doctor.revisar_links`, `fix_link`).
 
-**Empareja contra las `keywords` declaradas** en el frontmatter de la página del
-ámbito, sin distinguir mayúsculas y tratando guiones y espacios como
-equivalentes (`depto-centro` captura "depto centro"). Nada se adivina: lo que se
-enlaza está escrito en un archivo que el autor lee y edita, y ampliar la
-cobertura es agregar una keyword. Variantes morfológicas y sinónimos quedan
-fuera a propósito: eso es juicio, y el juicio no es del comando.
+El único wikilink que TUKU admite es la transclusión de Obsidian
+(`![[archivo.md#^ancla]]`), y se reconoce por el `!` inicial. Cualquier otro
+`[[x]]` es un wikilink escrito a mano: los lectores lo entienden, los
+escritores no lo producen, y `tuku fix link` lo convierte.
 
-Nunca toca texto que ya está dentro de `[[...]]`, así que correrlo dos veces no
-anida enlaces.
+Lo que no se toca nunca: el código inline y los bloques de código, donde un
+`[[x]]` es texto y no un link.
 
-**Qué lee y escribe:** `AHORA.md`. Los ciclos cerrados de `bitacoras/` son
-inmutables y no se tocan.
-**A mano:** buscar la mención en el texto y rodearla de dobles corchetes.
+Parte de la conversión viene de `jntr.obsidian-links-to-markdown.py` de
+mac-jpgil, con dos cambios: respeta las transclusiones (su regex las convertía
+en imágenes) y no depende de disco.
+
+**A mano:** escribir `[texto](ruta)` con la ruta calculada desde el archivo
+donde va el link, por ejemplo `[personal](../personal/personal.md)` desde una
+página de ámbito hermana.
 """
 
 from __future__ import annotations
 
+import posixpath
 import re
-from pathlib import Path
+from collections.abc import Callable, Iterable, Mapping
+from dataclasses import dataclass
+from urllib.parse import unquote
 
-from tuku.resultado import Resultado
+# ---------------------------------------------------------------------------
+# Reconocer
+# ---------------------------------------------------------------------------
 
-#: Un enlace ya escrito. El texto se parte por acá para no enlazar dentro.
-_ENLACE = re.compile(r"\[\[[^\]]*\]\]")
+#: Un link Markdown. El destino no lleva espacios (se escriben como `%20`).
+_MD = re.compile(r"(?<!!)\[(?P<texto>[^\]\n]*)\]\((?P<destino>[^)\s]+)\)")
+
+#: Un wikilink, sin la transclusión: el `!` delante lo excluye.
+_WIKI = re.compile(r"(?<!!)\[\[(?P<crudo>[^\[\]\n]+)\]\]")
+
+#: Un bloque de código con cercas, o hasta el final del texto si no se cierra.
+_BLOQUE = re.compile(
+    r"^[ \t]*(?P<cerca>```|~~~)[^\n]*\n.*?(?:^[ \t]*(?P=cerca)[^\n]*$|\Z)",
+    re.S | re.M,
+)
+_INLINE = re.compile(r"`[^`\n]+`")
+
+#: Un enlace en cualquiera de los dos formatos, para los lectores que solo
+#: necesitan saber a qué apunta. Sin transclusiones.
+ENLACE = (
+    r"(?:(?<!!)\[\[[^\[\]\n]+\]\]|(?<!!)\[[^\]\n]*\]\([^)\s]+\))"
+)
+
+_LECTOR = re.compile(
+    r"\[\[(?P<wiki>[^\]|#\n]+)(?:[#|][^\]\n]*)?\]\]|\[[^\]\n]*\]\((?P<ruta>[^)\s]+)\)"
+)
+
+_EXTERNO = re.compile(r"^(?:[a-zA-Z][a-zA-Z0-9+.-]*:|#|/|//)")
+
+
+def _sin_codigo(texto: str) -> str:
+    """El texto con el código reemplazado por espacios, para que los offsets coincidan."""
+
+    def blanco(m: re.Match[str]) -> str:
+        return re.sub(r"[^\n]", " ", m.group())
+
+    return _INLINE.sub(blanco, _BLOQUE.sub(blanco, texto))
+
+
+def nombre_de(enlace: str) -> str | None:
+    """El nombre al que apunta un enlace: el del archivo destino, sin `.md`.
+
+    `[x](ambitos/x/x.md#ancla)` y `[[x#ancla]]` dan `x`. Es lo que leen
+    `todo`, `scope` y `rename` para saber a qué ámbito pertenece un registro,
+    sin importar el formato en que quedó escrito.
+    """
+    m = _LECTOR.fullmatch(enlace.strip())
+    if m is None:
+        return None
+    if m.group("wiki") is not None:
+        return str(m.group("wiki")).strip()
+    ruta = unquote(str(m.group("ruta"))).split("#", 1)[0].rstrip("/")
+    base = posixpath.basename(ruta)
+    return base[:-3] if base.endswith(".md") else base
+
+
+def sin_links(texto: str) -> str:
+    """El texto con cada link reemplazado por lo que se lee de él.
+
+    `[Carmen](notas/carmen.md)` y `[[carmen|Carmen]]` quedan como `Carmen`. Sirve
+    para comparar dos textos que difieren solo en sus links: un pendiente que en
+    la bitácora lleva un link y en `PENDIENTES.md` no es el mismo pendiente. Las
+    transclusiones (`![[...]]`) no se tocan.
+    """
+
+    def visible(m: re.Match[str]) -> str:
+        return str(m.group("texto"))
+
+    def wiki(m: re.Match[str]) -> str:
+        resto, _, alias = str(m.group("crudo")).partition("|")
+        return alias or resto.partition("#")[0] or resto
+
+    return _WIKI.sub(wiki, _MD.sub(visible, texto))
+
+
+def nombres_enlazados(linea: str) -> list[str]:
+    """Los nombres a los que apunta una línea, en orden, en cualquier formato."""
+    return [n for m in _LECTOR.finditer(linea) if (n := nombre_de(m.group())) is not None]
+
+
+# ---------------------------------------------------------------------------
+# Componer
+# ---------------------------------------------------------------------------
+
+
+def relativa(desde: str, hacia: str) -> str:
+    """La ruta de `hacia` vista desde el archivo `desde`. Ambas relativas al vault."""
+    return posixpath.relpath(hacia, posixpath.dirname(desde) or ".")
+
+
+def md(texto: str, href: str) -> str:
+    """`[texto](href)`, con los espacios del destino como `%20`."""
+    return f"[{texto}]({href.replace(' ', '%20')})"
+
+
+def enlace(texto: str, desde: str, hacia: str, ancla: str | None = None) -> str:
+    """Un link a `hacia` escrito en el archivo `desde`."""
+    href = relativa(desde, hacia)
+    return md(texto, f"{href}#{ancla}" if ancla else href)
+
+
+def ruta_ambito(nombre: str, rutas: Mapping[str, str] | None = None) -> str:
+    """La ruta de un ámbito dentro del vault.
+
+    Un ámbito anidado lleva su ruta completa y la conoce quien lee el árbol
+    (`scope.rutas`); sin ella se asume la forma plana `ambitos/<n>/<n>.md`.
+    """
+    if rutas and nombre in rutas:
+        return rutas[nombre]
+    return f"ambitos/{nombre}/{nombre}.md"
+
+
+def enlace_ambito(
+    nombre: str, desde: str = "AHORA.md", rutas: Mapping[str, str] | None = None
+) -> str:
+    """El link a un ámbito, escrito en el archivo `desde`."""
+    return enlace(nombre, desde, ruta_ambito(nombre, rutas))
+
+
+# ---------------------------------------------------------------------------
+# Convertir wikilinks
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Wikilink:
+    """Un `[[destino#ancla|alias]]` escrito a mano, con dónde está."""
+
+    inicio: int
+    fin: int
+    linea: int
+    destino: str
+    ancla: str | None
+    alias: str | None
+
+    @property
+    def original(self) -> str:
+        ancla = f"#{self.ancla}" if self.ancla is not None else ""
+        alias = f"|{self.alias}" if self.alias is not None else ""
+        return f"[[{self.destino}{ancla}{alias}]]"
+
+
+@dataclass(frozen=True)
+class Decision:
+    """Un wikilink que `fix` no puede resolver solo: le toca al autor."""
+
+    archivo: str
+    linea: int
+    original: str
+    motivo: str
+
+
+@dataclass(frozen=True)
+class Conversion:
+    """El resultado de convertir un archivo: texto nuevo, cuántos y qué quedó."""
+
+    texto: str
+    convertidos: int
+    decisiones: list[Decision]
+
+
+def wikilinks(texto: str) -> list[Wikilink]:
+    """Los wikilinks del texto, sin las transclusiones y sin los que están en código."""
+    limpio = _sin_codigo(texto)
+    salida = []
+    for m in _WIKI.finditer(limpio):
+        resto, _, alias = str(m.group("crudo")).partition("|")
+        destino, _, ancla = resto.partition("#")
+        tiene_alias = "|" in m.group("crudo")
+        tiene_ancla = "#" in resto
+        salida.append(
+            Wikilink(
+                m.start(),
+                m.end(),
+                texto.count("\n", 0, m.start()) + 1,
+                destino,
+                ancla if tiene_ancla else None,
+                alias if tiene_alias else None,
+            )
+        )
+    return salida
+
+
+def indice(archivos: Iterable[str]) -> dict[str, list[str]]:
+    """Nombre sin `.md` → rutas con ese nombre. Las rutas son relativas al vault."""
+    salida: dict[str, list[str]] = {}
+    for ruta in archivos:
+        if ruta.endswith(".md"):
+            salida.setdefault(posixpath.basename(ruta)[:-3], []).append(ruta)
+    return salida
+
+
+def _sin_md(nombre: str) -> str:
+    return nombre[:-3] if nombre.endswith(".md") else nombre
+
+
+def _resolver(w: Wikilink, desde: str, idx: Mapping[str, list[str]]) -> tuple[str, str] | str:
+    """`(texto, href)` si el wikilink resuelve; si no, el motivo."""
+    origen = posixpath.dirname(desde)
+    if not w.destino:
+        if w.ancla is None:
+            return "el wikilink está vacío"
+        return (w.alias or w.ancla, "#" + w.ancla.replace(" ", "%20"))
+
+    nombre = _sin_md(posixpath.basename(w.destino))
+    candidatos = idx.get(nombre, [])
+    local = posixpath.normpath(
+        posixpath.join(origen, w.destino if w.destino.endswith(".md") else w.destino + ".md")
+    )
+    if local in candidatos:
+        elegido = local
+    else:
+        if "/" in w.destino:
+            cola = posixpath.normpath(w.destino).lstrip("./")
+            cola = cola if cola.endswith(".md") else cola + ".md"
+            candidatos = [c for c in candidatos if c.endswith(cola)]
+        if not candidatos:
+            return f"no existe ningún archivo {nombre}.md en el vault"
+        if len(candidatos) > 1:
+            return f"es ambiguo, coincide con {', '.join(candidatos)}"
+        elegido = candidatos[0]
+
+    href = relativa(desde, elegido)
+    if w.ancla is not None:
+        href += "#" + w.ancla
+    return (w.alias or _sin_md(posixpath.basename(elegido)), href.replace(" ", "%20"))
+
+
+def convertir(texto: str, desde: str, idx: Mapping[str, list[str]]) -> Conversion:
+    """Convierte los wikilinks resolubles de `texto` (el archivo `desde`) a Markdown.
+
+    Lo que no resuelve, o resuelve a más de un archivo, se deja como está y
+    sale como `Decision`: elegir el archivo, o crearlo, es del autor. Idempotente:
+    sobre el resultado no queda nada que convertir.
+    """
+    piezas: list[str] = []
+    cursor = 0
+    convertidos = 0
+    decisiones: list[Decision] = []
+    for w in wikilinks(texto):
+        r = _resolver(w, desde, idx)
+        if isinstance(r, str):
+            decisiones.append(Decision(desde, w.linea, w.original, r))
+            continue
+        piezas.append(texto[cursor : w.inicio])
+        piezas.append(f"[{r[0]}]({r[1]})")
+        cursor = w.fin
+        convertidos += 1
+    piezas.append(texto[cursor:])
+    return Conversion("".join(piezas), convertidos, decisiones)
+
+
+# ---------------------------------------------------------------------------
+# Revisar
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Roto:
+    """Un link Markdown cuya ruta no existe."""
+
+    linea: int
+    texto: str
+    destino: str
+
+
+def _ruta_local(destino: str, desde: str) -> str | None:
+    """La ruta del destino relativa al vault, o `None` si no es un archivo local."""
+    if _EXTERNO.match(destino):
+        return None
+    ruta = unquote(destino).split("#", 1)[0]
+    if not ruta:
+        return None
+    return posixpath.normpath(posixpath.join(posixpath.dirname(desde), ruta))
+
+
+def rotos(texto: str, desde: str, existe: Callable[[str], bool]) -> list[Roto]:
+    """Los links Markdown del archivo `desde` cuya ruta no existe.
+
+    `existe` recibe una ruta relativa al vault y dice si hay un archivo o
+    carpeta ahí: así el núcleo no toca disco. Los links externos y los que solo
+    apuntan a un ancla de la misma página no se revisan.
+    """
+    salida = []
+    for m in _MD.finditer(_sin_codigo(texto)):
+        local = _ruta_local(m.group("destino"), desde)
+        if local is None:
+            continue
+        if local.startswith("..") or not existe(local):
+            salida.append(
+                Roto(texto.count("\n", 0, m.start()) + 1, m.group("texto"), m.group("destino"))
+            )
+    return salida
+
+
+def rebasar(texto: str, desde: str, hacia: str) -> str:
+    """Recalcula las rutas de los links de `texto` al moverlo del archivo `desde` a `hacia`.
+
+    Una línea copiada de `AHORA.md` a la página de un ámbito deja de resolver si
+    sus rutas relativas no se recalculan. Los links externos y de ancla quedan
+    como están.
+    """
+    if posixpath.dirname(desde) == posixpath.dirname(hacia):
+        return texto
+
+    def cambiar(m: re.Match[str]) -> str:
+        local = _ruta_local(m.group("destino"), desde)
+        if local is None:
+            return m.group()
+        ancla = m.group("destino").partition("#")[2]
+        href = relativa(hacia, local)
+        return md(m.group("texto"), f"{href}#{ancla}" if ancla else href)
+
+    return _MD.sub(cambiar, texto)
+
+
+# ---------------------------------------------------------------------------
+# Enlazar hacia atrás
+# ---------------------------------------------------------------------------
+
+#: Un enlace ya escrito, de cualquier formato. El texto se parte por acá para no
+#: enlazar dentro de él.
+_ENLACE_ESCRITO = re.compile(r"!?\[\[[^\]]*\]\]|\[[^\]\n]*\]\([^)\s]*\)")
 
 
 def _patron(keyword: str) -> re.Pattern[str]:
@@ -45,64 +371,42 @@ def backfill(
     scope: str = "",
     ambito: str = "",
     keywords: list[str],
+    desde: str = "AHORA.md",
+    rutas: Mapping[str, str] | None = None,
 ) -> tuple[str, int]:
-    """Enlaza las menciones de `keywords` a `[[scope]]`. Devuelve texto y cuántas.
+    """Enlaza las menciones de `keywords` al ámbito. Devuelve el texto y cuántas.
 
-    Idempotente: lo que ya está enlazado no se vuelve a enlazar, porque los
-    tramos dentro de `[[...]]` no se tocan.
+    **Empareja contra las `keywords` declaradas** en el frontmatter de la página
+    del ámbito, sin distinguir mayúsculas y tratando guiones y espacios como
+    equivalentes (`depto-centro` captura "depto centro"). Nada se adivina: lo
+    que se enlaza está escrito en un archivo que el autor lee y edita. Las
+    variantes morfológicas y los sinónimos quedan fuera a propósito: eso es
+    juicio, y el juicio no es del comando.
+
+    Idempotente: lo que ya está dentro de un enlace, en cualquiera de los dos
+    formatos, no se vuelve a enlazar.
     """
     valor_scope = scope or ambito
-    patrones = [_patron(k) for k in keywords if k.strip()]
+    patrones = [_patron(k).pattern for k in keywords if k.strip()]
     if not patrones:
         return texto, 0
 
-    enlace = f"[[{valor_scope}]]"
+    # Un solo patrón con todas las keywords: aplicarlas una tras otra permitiría
+    # que la segunda empareje dentro del enlace que puso la primera.
+    union = re.compile("|".join(f"(?:{p})" for p in patrones), re.IGNORECASE)
+    nuevo = enlace_ambito(valor_scope, desde, rutas)
+    escritos = _ENLACE_ESCRITO.findall(texto)
+    libres = _ENLACE_ESCRITO.split(texto)
+
     cambios = 0
-
-    # El texto se parte en tramos libres separados por los enlaces que ya están.
-    # Solo se transforman los tramos libres, y después se vuelve a intercalar.
-    libres = _ENLACE.split(texto)
-    existentes = _ENLACE.findall(texto)
-
     transformados = []
     for tramo in libres:
-        tramo, n = _enlazar(tramo, patrones, enlace)
+        tramo, n = union.subn(lambda _m: nuevo, tramo)
         cambios += n
         transformados.append(tramo)
 
     salida = [transformados[0]]
-    for existente, tramo in zip(existentes, transformados[1:], strict=True):
+    for existente, tramo in zip(escritos, transformados[1:], strict=True):
         salida.append(existente)
         salida.append(tramo)
     return "".join(salida), cambios
-
-
-def _enlazar(tramo: str, patrones: list[re.Pattern[str]], enlace: str) -> tuple[str, int]:
-    cambios = 0
-    for patron in patrones:
-        tramo, n = patron.subn(enlace, tramo)
-        cambios += n
-    return tramo, cambios
-
-
-def backfill_en_vault(vault: Path, ambito: str) -> Resultado:
-    """Convierte en enlaces las menciones sueltas del ámbito en `AHORA.md`."""
-    from tuku import scope
-    from tuku.config import archivo_vault
-
-    ambito = scope.normalizar(ambito)
-    ahora_file = archivo_vault(vault, "AHORA.md")
-    pagina = vault / "ambitos" / ambito / f"{ambito}.md"
-    if not pagina.is_file():
-        return Resultado.rechazo(
-            f"no existe el ámbito {ambito!r} o falta su página {pagina.name}. "
-            f"Créalo primero con 'tuku scope create'."
-        )
-    texto, n = backfill(
-        ahora_file.read_text(encoding="utf-8"),
-        scope=ambito,
-        keywords=scope.keywords(pagina.read_text(encoding="utf-8")),
-    )
-    if n > 0:
-        ahora_file.write_text(texto, encoding="utf-8")
-    return Resultado.hecho(f"{n} mención(es) enlazada(s).")

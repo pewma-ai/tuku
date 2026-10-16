@@ -69,9 +69,9 @@ def _dia(corrida: gherkin.Corrida, encabezado: str) -> str:
     return ahora.split(encabezado, 1)[1].split("\n## ", 1)[0]
 
 
-#: El ámbito de un registro es el `[[...]]` que abre la línea. Una mención en el
+#: El ámbito de un registro es el link que abre la línea. Una mención en el
 #: cuerpo no lo es, y confundirlos deja pasar un registro archivado donde no va.
-_AMBITO = re.compile(r"^- \d\d:\d\d - \[\[([^\]]+)\]\]")
+_AMBITO = re.compile(r"^- \d\d:\d\d - \[([^\]]+)\]\([^)]+\)")
 
 
 def _ambito_de(linea: str) -> str | None:
@@ -137,7 +137,7 @@ def test_003_06_cada_registro_del_martes_calza_con_la_tabla_de_verdad() -> None:
     for hora, (ambito_esperado, marca) in MARTES_11.items():
         ambito = vault.nombre_comparable(ambito_esperado)
         linea = registros[hora]
-        assert _ambito_de(linea) == ambito, f"las {hora} van en [[{ambito}]]: {linea}"
+        assert _ambito_de(linea) == ambito, f"las {hora} van en {ambito}: {linea}"
         puestas = [m for m in (todo.ABRE, todo.CIERRA) if m in linea]
         assert puestas == ([marca] if marca else []), (
             f"las {hora} llevan {marca or 'ninguna marca cerrada'}: {linea}"
@@ -162,7 +162,7 @@ def test_003_06_el_ambito_nuevo_enlaza_hacia_atras() -> None:
     assert _ambito_de(linea) == "personal", (
         f"al escribirse, depto-centro no existía y ninguno calzaba: {linea}"
     )
-    assert "[[depto-centro]]" in linea.split("]] ", 1)[1], (
+    assert "[depto-centro](ambitos/depto-centro/depto-centro.md)" in linea.split(") ", 1)[1], (
         f"la mención al frente no quedó enlazada hacia atrás: {linea}"
     )
 
@@ -216,7 +216,7 @@ def test_003_06_la_nota_existe_y_su_constancia_la_enlaza() -> None:
     notas = [x for x in corrida.ruta("mi-vault", "notas").glob("*.md") if x.name.islower()]
     assert len(notas) == 1, f"una nota, y hay {len(notas)}: {[x.name for x in notas]}"
     constancia = _registros(_dia(corrida, MARTES))["21:15"]
-    assert f"[[{notas[0].stem}]]" in constancia, (
+    assert f"[{notas[0].stem}](notas/{notas[0].name})" in constancia, (
         f"la constancia no enlaza a la nota que se creó: {constancia}"
     )
 

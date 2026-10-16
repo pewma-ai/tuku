@@ -29,7 +29,7 @@ tuku entry add --day 2026-08-12 --hour 10:15 --scope depto-centro \
 ```
 Y ese registro cae en el miércoles 12 según la regla del último día activo
 Y los dos pendientes siguen abiertos en `PENDIENTES.md`
-Y no se escribe ningún registro `~~(Hecho)~~`
+Y no se escribe ningún registro `(Hecho)`
 Y la carpeta `notas/` permanece sin cambios
 Y en su respuesta el agente consulta cuál de los dos pendientes debe cerrarse
 

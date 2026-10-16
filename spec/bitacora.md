@@ -11,15 +11,17 @@ Todo lo demás son ejemplos.
 1. **Se registra el hecho, no la conversación.** Fuera lo dirigido a quien escucha, las muletillas y el rodeo. La unidad es el hecho y no la frase: una sola frase puede dar varios registros. Lo evaluativo tampoco va al cuerpo, elige el tipo.
 2. **El registro se sostiene solo.** Se leerá años después, sin el resto del día ni la conversación que lo originó. Deícticos resueltos, personas con su rol la primera vez, tiempo relativo convertido en fecha.
 3. **No se agrega lo que no se dijo.** Ni cuantificadores, ni conclusiones, ni pendientes. Lo que el hecho sugiere se propone al autor y se espera su aprobación.
-4. **La forma la fija la marca, no el gusto.** `**pendiente**` va en infinitivo y su cierre `~~(Hecho)~~` repite ese mismo texto. Los demás hechos van en pasado y primera persona, y las observaciones vigentes en presente. Registro neutro, sin voseo ni fórmulas de encabezado.
+4. **La forma la fija la marca, no el gusto.** `**pendiente**` va en infinitivo y su cierre `(Hecho)` repite ese mismo texto. Los demás hechos van en pasado y primera persona, y las observaciones vigentes en presente. Registro neutro, sin voseo ni fórmulas de encabezado.
 
 ## Formato de la línea
 
 ```text
-- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo
+- HH:MM - [ambito](ruta) (Hecho) **clasificacion**: ~~cuerpo~~
 ```
 
 Ámbito y clasificación son opcionales según el contexto. La marca de la ontología cerrada va en la misma posición, antes de la clasificación abierta.
+
+El ámbito es un **link Markdown cuya ruta es relativa al archivo que contiene la línea**, y la calcula `tuku` a partir del árbol de `ambitos/`: un ámbito anidado lleva su ruta completa (`ambitos/trabajo/pewma/pewma.md`). Quien dicta pasa el nombre; nadie escribe la ruta. En `AHORA.md`, que vive en la raíz, es `[arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md)`. Los lectores aceptan también el wikilink `[[ambito]]` hasta que `tuku fix link` lo convierte ([cli.md](cli.md)).
 
 ### De dónde salen el día y la hora
 
@@ -36,7 +38,7 @@ Ambos se evalúan en la zona horaria que declara `TZ` en `reglas/config.tuku.md`
 **La instrucción no se registra.** Dictado: *"Recuérdame avisar de los GGCC al arrendatario"*
 
 ```text
-- 09:12 - [[arriendo-depto-centro]] **pendiente**: avisar de los GGCC al arrendatario
+- 09:12 - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) **pendiente**: avisar de los GGCC al arrendatario
 ```
 
 "Recuérdame" iba dirigido a quien escucha. Desaparece.
@@ -44,7 +46,7 @@ Ambos se evalúan en la zona horaria que declara `TZ` en `reglas/config.tuku.md`
 **El cierre repite el texto del pendiente.** Dictado: *"Ya le recordé los GGCC al arrendatario"*
 
 ```text
-- 18:40 - [[arriendo-depto-centro]] ~~(Hecho)~~: avisar de los GGCC al arrendatario
+- 18:40 - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) (Hecho): ~~avisar de los GGCC al arrendatario~~
 ```
 
 No se reescribe en pasado. Se lee como la tarea tachada, y el emparejamiento queda literal en vez de semántico.
@@ -52,8 +54,8 @@ No se reescribe en pasado. Se lee como la tarea tachada, y el emparejamiento que
 **Una frase, varios hechos.** Dictado: *"le avisé de los GGCC, me dijo que este mes no lo hará y eso me está molestando pues se repite"*
 
 ```text
-- 18:40 - [[arriendo-depto-centro]] ~~(Hecho)~~: avisar de los GGCC al arrendatario
-- 18:40 - [[arriendo-depto-centro]] **señal**: el arrendatario respondió que este mes no pagará los GGCC, y se repite
+- 18:40 - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) (Hecho): ~~avisar de los GGCC al arrendatario~~
+- 18:40 - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) **señal**: el arrendatario respondió que este mes no pagará los GGCC, y se repite
 ```
 
 El cierre propio y la respuesta del tercero son hechos distintos.
@@ -66,7 +68,7 @@ El cierre propio y la respuesta del tercero son hechos distintos.
 
 En el mismo registro conviven dos vocabularios de naturaleza distinta. No hay que confundirlos aunque compartan aspecto.
 
-**Cerrada, de TUKU.** `**pendiente**`, `~~(Hecho)~~` y `**cadencia**`. Son **mecánicos**: cada marca es la señal de una consecuencia determinista, y el comando actúa sobre ella sin interpretar.
+**Cerrada, de TUKU.** `**pendiente**`, `(Hecho)` y `**cadencia**`. Son **mecánicos**: cada marca es la señal de una consecuencia determinista, y el comando actúa sobre ella sin interpretar.
 
 Cerrada significa **cerrada para el autor**. No crece con el uso ni la puede extender quien lleva la bitácora. Sí crece cuando el diseño de TUKU incorpora una consecuencia nueva, y eso es una decisión de diseño, no de uso. Hoy son tres.
 
@@ -93,16 +95,18 @@ Consecuencia directa para el linter: `tuku entry lint` valida la ontología cerr
 **Las dos van en la misma posición**, después del ámbito. La marca cerrada primero, la clasificación abierta después, y ambas son opcionales:
 
 ```text
-- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo
+- HH:MM - [ambito](ruta) (Hecho) **clasificacion**: ~~cuerpo~~
 ```
 
-Que compartan zona no las mezcla: se distinguen por su forma. `~~(Hecho)~~` y `**pendiente**` son literales fijos que el comando reconoce sin ambigüedad, y todo lo demás en esa zona es vocabulario del autor y se trata como abierto. Un cierre puede entonces ser además `**Hito**` sin que ninguna de las dos ontologías pierda su lugar.
+Que compartan zona no las mezcla: se distinguen por su forma. `(Hecho)` y `**pendiente**` son literales fijos que el comando reconoce sin ambigüedad, y todo lo demás en esa zona es vocabulario del autor y se trata como abierto. Un cierre puede entonces ser además `**Hito**` sin que ninguna de las dos ontologías pierda su lugar.
 
 ## Los dos ganchos deterministas
 
-`**pendiente**` abre, `~~(Hecho)~~` cierra. Van en la misma posición, después del ámbito. En el cierre la clasificación abierta sigue disponible a continuación (`**Hito**`, `**decisión**`) o puede no ir, porque `~~(Hecho)~~` ya señala el cierre por sí solo.
+`**pendiente**` abre, `(Hecho)` cierra. Van en la misma posición, después del ámbito. En el cierre la clasificación abierta sigue disponible a continuación (`**Hito**`, `**decisión**`) o puede no ir, porque `(Hecho)` ya señala el cierre por sí solo.
 
-El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. Ninguna de las dos operaciones interpreta nada. El detalle de esa doble escritura está en [pendientes.md](pendientes.md).
+**En el cierre, la marca queda a la vista y lo tachado es el cuerpo:** `(Hecho): ~~avisar de los GGCC~~`. Lo tachado es lo que ya se hizo. Quien cierra pasa `(Hecho): avisar de los GGCC` y el comando escribe la tachadura, para que a quien dicta no le toque saber dónde va. La marca tachada, `~~(Hecho)~~: cuerpo`, no es válida: `tuku entry lint` la reporta con su corrección.
+
+El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. **Los links no cuentan al encontrarlo:** el mismo pendiente puede llevar `[Carmen](notas/carmen.md)` en la bitácora y `Carmen` en la tabla, o al revés, y se busca comparando el texto que queda al quitar los links. Ninguna de las dos operaciones interpreta nada. El detalle de esa doble escritura está en [pendientes.md](pendientes.md).
 
 ## No entra
 

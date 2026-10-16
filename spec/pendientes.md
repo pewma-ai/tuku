@@ -9,13 +9,13 @@ A cambio exige disciplina, y esa disciplina la sostiene el comando, no la memori
 ## La bitácora es el disparador, no el origen de los datos
 
 - Dictado: *"Recuérdame avisar de los GGCC al arrendatario"*
-  - Bitácora: `- 09:12 - [[arriendo-depto-centro]] **pendiente**: avisar de los GGCC al arrendatario`
-  - El comando agrega una fila bajo el horizonte del ciclo en curso, `esta semana` en el template vanilla: `| | [[arriendo-depto-centro]] | avisar de los GGCC al arrendatario |`
+  - Bitácora: `- 09:12 - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) **pendiente**: avisar de los GGCC al arrendatario`
+  - El comando agrega una fila bajo el horizonte del ciclo en curso, `esta semana` en el template vanilla: `| | [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) | avisar de los GGCC al arrendatario |`
 - Dictado: *"Ya le recordé los GGCC al arrendatario"*
-  - Bitácora: `- 18:40 - [[arriendo-depto-centro]] ~~(Hecho)~~: avisar de los GGCC al arrendatario`
+  - Bitácora: `- 18:40 - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) (Hecho): ~~avisar de los GGCC al arrendatario~~`
   - El comando borra esa fila
 
-Los dos ganchos son deterministas: `**pendiente**` abre, `~~(Hecho)~~` cierra (ver `bitacora.md`). El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. Ninguna de las dos operaciones interpreta nada.
+Los dos ganchos son deterministas: `**pendiente**` abre, `(Hecho)` cierra (ver `bitacora.md`). El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. Al encontrarlo no cuentan los links: dos cuerpos que quedan idénticos al quitárselos son el mismo pendiente, lo lleve o no un link en la bitácora o en la tabla. Ninguna de las dos operaciones interpreta nada.
 
 El archivo contiene solo lo abierto. El historial de lo cerrado vive en las bitácoras.
 
@@ -30,9 +30,9 @@ type: Todo
 
 | Horizonte | Cuándo | Ámbito | Detalle |
 | --------- | ------ | ------ | ------- |
-| esta semana | | [[arriendo-depto-centro]] | avisar de los GGCC al arrendatario |
-| próxima semana | | [[personal]] | comprar una maleta |
-| con fecha | 2026-08-14 | [[personal]] | pagar la sesión con el psicólogo |
+| esta semana | | [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) | avisar de los GGCC al arrendatario |
+| próxima semana | | [personal](ambitos/personal/personal.md) | comprar una maleta |
+| con fecha | 2026-08-14 | [personal](ambitos/personal/personal.md) | pagar la sesión con el psicólogo |
 ```
 
 **Horizonte** indica el escalón actual del pendiente. Los del autor salen de `### Horizontes` en el libro de estilo (`esta semana`, `próxima semana`, `fin de mes` en el template vanilla) y `con fecha` es del sistema cuando tiene día asignado.

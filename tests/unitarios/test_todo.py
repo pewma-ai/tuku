@@ -42,7 +42,7 @@ def test_parsear_reconoce_una_apertura_con_ambito() -> None:
 
 
 def test_parsear_reconoce_un_cierre_sin_ambito() -> None:
-    marca = todo.parsear("- 19:05 - ~~(Hecho)~~: comprar una maleta")
+    marca = todo.parsear("- 19:05 - (Hecho): ~~comprar una maleta~~")
     assert marca is not None
     assert marca.marca == todo.CIERRA
     assert marca.ambito is None
@@ -65,6 +65,8 @@ def test_parsear_es_estricto_con_la_ontologia_cerrada() -> None:
 def test_parsear_devuelve_none_ante_lo_que_no_es_una_marca(linea: str) -> None:
     assert todo.parsear(linea) is None
 
+P = "[personal](ambitos/personal/personal.md)"
+
 
 # --- abrir: copiar el cuerpo literal ---------------------------------------
 
@@ -75,7 +77,7 @@ def test_abrir_copia_el_cuerpo_literal_como_fila() -> None:
 
     texto = todo.abrir(VACIA, marca)
 
-    assert "| esta semana |  | [[personal]] | avisar de los GGCC |" in texto
+    assert f"| esta semana |  | {P} | avisar de los GGCC |" in texto
     assert todo.cuerpos(texto, "esta semana") == ["avisar de los GGCC"]
 
 
@@ -114,7 +116,7 @@ def test_abrir_sin_tabla_se_niega_en_vez_de_inventarla() -> None:
 
 def test_cerrar_borra_la_fila_y_deja_la_cabecera() -> None:
     abre = todo.parsear("- 14:20 - [[personal]] **pendiente**: avisar de los GGCC")
-    cierra = todo.parsear("- 19:05 - [[personal]] ~~(Hecho)~~: avisar de los GGCC")
+    cierra = todo.parsear("- 19:05 - [[personal]] (Hecho): ~~avisar de los GGCC~~")
     assert abre is not None and cierra is not None
 
     texto, hubo_pareja = todo.cerrar(todo.abrir(VACIA, abre), cierra)
@@ -126,7 +128,7 @@ def test_cerrar_borra_la_fila_y_deja_la_cabecera() -> None:
 
 def test_cerrar_sin_pareja_no_toca_nada_y_lo_dice() -> None:
     """El caso negativo más importante: un cierre inventado deja el archivo mintiendo."""
-    cierra = todo.parsear("- 19:10 - [[personal]] ~~(Hecho)~~: comprar una maleta")
+    cierra = todo.parsear("- 19:10 - [[personal]] (Hecho): ~~comprar una maleta~~")
     assert cierra is not None
 
     texto, hubo_pareja = todo.cerrar(VACIA, cierra)
@@ -137,7 +139,7 @@ def test_cerrar_sin_pareja_no_toca_nada_y_lo_dice() -> None:
 
 def test_cerrar_empareja_por_el_cuerpo_literal_y_no_por_semejanza() -> None:
     abre = todo.parsear("- 14:20 - **pendiente**: avisar de los GGCC")
-    casi = todo.parsear("- 19:05 - ~~(Hecho)~~: avisar los GGCC")
+    casi = todo.parsear("- 19:05 - (Hecho): ~~avisar los GGCC~~")
     assert abre is not None and casi is not None
 
     con_fila = todo.abrir(VACIA, abre)
@@ -240,7 +242,7 @@ AHORA_CON_MARCAS = (
     "## Martes 11 de agosto\n"
     "- 10:25 - [[personal]] **pendiente**: enviar la cotización a Los Robles\n"
     "- 11:00 - [[personal]] **pendiente**: llamar al banco\n"
-    "- 12:00 - [[personal]] ~~(Hecho)~~: llamar al banco\n"
+    "- 12:00 - [[personal]] (Hecho): ~~llamar al banco~~\n"
 )
 
 
@@ -272,3 +274,119 @@ def test_sin_consecuencia_encuentra_el_cierre_que_nunca_se_aplico() -> None:
 def test_un_pendiente_arrastrado_de_otro_ciclo_no_se_reporta() -> None:
     """Está en la tabla sin marca en `AHORA.md` porque viene de un ciclo anterior."""
     assert todo.sin_consecuencia("## Martes 11 de agosto\n", _tabla("pagar la patente")) == []
+
+
+# --- el cierre: la marca a la vista y el cuerpo tachado ----------------------
+
+
+def test_cierre_deja_la_marca_sin_tachar_y_tacha_el_cuerpo() -> None:
+    assert todo.cierre("avisar de los GGCC") == "(Hecho): ~~avisar de los GGCC~~"
+
+
+def test_parsear_un_cierre_devuelve_el_cuerpo_sin_la_tachadura() -> None:
+    marca = todo.parsear(f"- 19:05 - {P} (Hecho): ~~avisar de los GGCC~~")
+    assert marca is not None
+    assert (marca.marca, marca.ambito, marca.cuerpo) == (
+        todo.CIERRA,
+        "personal",
+        "avisar de los GGCC",
+    )
+
+
+def test_parsear_no_reconoce_la_marca_tachada() -> None:
+    assert todo.parsear("- 19:05 - ~~(Hecho)~~: avisar de los GGCC") is None
+
+
+def test_parsear_un_cierre_con_clasificacion_abierta() -> None:
+    marca = todo.parsear("- 19:05 - (Hecho) **hito**: ~~avisar de los GGCC~~")
+    assert marca is not None and marca.cuerpo == "avisar de los GGCC"
+
+
+def test_parsear_es_estricto_con_la_mayuscula_del_cierre() -> None:
+    assert todo.parsear("- 19:05 - (hecho): ~~avisar~~") is None
+
+
+@pytest.mark.parametrize(
+    "entrada",
+    [
+        "(Hecho): avisar de los GGCC",
+        "(Hecho): ~~avisar de los GGCC~~",
+        "  (Hecho): avisar de los GGCC  ",
+    ],
+)
+def test_canonizar_escribe_siempre_el_mismo_cierre(entrada: str) -> None:
+    assert todo.canonizar(entrada) == "(Hecho): ~~avisar de los GGCC~~"
+
+
+def test_canonizar_conserva_la_clasificacion_abierta() -> None:
+    assert todo.canonizar("(Hecho) **hito**: x") == "(Hecho) **hito**: ~~x~~"
+
+
+@pytest.mark.parametrize(
+    "cuerpo", ["**pendiente**: avisar", "**señal**: la administradora responde", "", "(Hecho)"]
+)
+def test_canonizar_no_toca_lo_que_no_es_un_cierre(cuerpo: str) -> None:
+    assert todo.canonizar(cuerpo) == cuerpo
+
+
+# --- los links no cuentan al buscar un pendiente -----------------------------
+
+CON_LINK = "avisar a [Carmen](notas/carmen.md) de los GGCC"
+SIN_LINK = "avisar a Carmen de los GGCC"
+
+
+def test_clave_ignora_los_links() -> None:
+    assert todo.clave(CON_LINK) == todo.clave(SIN_LINK)
+    assert todo.clave("ver [[carmen|Carmen]] hoy") == "ver Carmen hoy"
+    assert todo.clave("ver [[carmen]] hoy") == "ver carmen hoy"
+
+
+def test_cerrar_encuentra_la_fila_aunque_solo_la_bitacora_lleve_el_link() -> None:
+    abre = todo.Marca(todo.ABRE, "personal", SIN_LINK)
+    cierra = todo.parsear(f"- 19:05 - {P} (Hecho): ~~{CON_LINK}~~")
+    assert cierra is not None
+
+    texto, hubo_pareja = todo.cerrar(todo.abrir(VACIA, abre), cierra)
+
+    assert hubo_pareja and todo.filas(texto) == []
+
+
+def test_cerrar_encuentra_la_fila_aunque_solo_la_tabla_lleve_el_link() -> None:
+    abre = todo.Marca(todo.ABRE, "personal", CON_LINK)
+    cierra = todo.Marca(todo.CIERRA, "personal", SIN_LINK)
+
+    texto, hubo_pareja = todo.cerrar(todo.abrir(VACIA, abre), cierra)
+
+    assert hubo_pareja and todo.filas(texto) == []
+
+
+def test_abrir_dos_veces_el_mismo_pendiente_con_y_sin_link_no_duplica() -> None:
+    una = todo.abrir(VACIA, todo.Marca(todo.ABRE, "personal", SIN_LINK))
+    dos = todo.abrir(una, todo.Marca(todo.ABRE, "personal", CON_LINK))
+    assert dos == una
+
+
+def test_duplicados_ve_la_misma_tarea_con_y_sin_link() -> None:
+    tabla = _tabla(CON_LINK, SIN_LINK)
+    assert todo.duplicados(tabla) == [SIN_LINK]
+
+
+def test_sin_consecuencia_empareja_sin_links() -> None:
+    ahora = f"- 10:00 - {P} **pendiente**: {CON_LINK}\n"
+    assert todo.sin_consecuencia(ahora, _tabla(SIN_LINK)) == []
+    cierre = f"- 11:00 - {P} (Hecho): ~~{SIN_LINK}~~\n"
+    faltan = todo.sin_consecuencia(cierre, _tabla(CON_LINK))
+    assert [(c.cuerpo, c.comando) for c in faltan] == [(SIN_LINK, "tuku todo close")]
+
+
+def test_reemplazar_cuerpo_busca_sin_links_y_conserva_el_resto() -> None:
+    tabla = _tabla(SIN_LINK)
+    nueva, hubo = todo.reemplazar_cuerpo(tabla, CON_LINK, "avisar a Carmen mañana")
+    assert hubo
+    assert todo.cuerpos(nueva) == ["avisar a Carmen mañana"]
+    assert "| esta semana |  | [[personal]] |" in nueva
+
+
+def test_reemplazar_cuerpo_sin_pareja_no_cambia_nada() -> None:
+    tabla = _tabla(SIN_LINK)
+    assert todo.reemplazar_cuerpo(tabla, "otra cosa", "x") == (tabla, False)

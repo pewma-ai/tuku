@@ -7,14 +7,16 @@ from datetime import date
 from tuku.propagate import documento_ambitos, propagar_ahora, region_del_dia
 from tuku.todo import filas
 
+P = "[personal](ambitos/personal/personal.md)"
+
 PENDIENTES = (
     "---\n"
     "type: Todo\n"
     "---\n\n"
     "| Horizonte | Cuándo | Ámbito | Detalle |\n"
     "| --------- | ------ | ------ | ------- |\n"
-    "| esta semana |  | [[personal]] | comprar una maleta |\n"
-    "| con fecha | 2026-09-08 | [[personal]] | pagar la sesión con el psicólogo |\n"
+    f"| esta semana |  | {P} | comprar una maleta |\n"
+    f"| con fecha | 2026-09-08 | {P} | pagar la sesión con el psicólogo |\n"
     "| con fecha | 2026-09-09 |  | renovar el pasaporte |\n"
 )
 
@@ -27,7 +29,7 @@ AHORA = (
     "# Actividad diaria\n\n"
     "## Lunes 7 de septiembre\n\n"
     "## Martes 8 de septiembre\n"
-    "- 09:12 - [[personal]] **nota**: cuerpo\n\n"
+    f"- 09:12 - {P} **nota**: cuerpo\n\n"
     "## Miércoles 9 de septiembre\n\n"
     "---\n"
 )
@@ -38,7 +40,7 @@ def test_region_del_dia_solo_lleva_los_de_esa_fecha() -> None:
 
     assert region == [
         "> [!todo] Pendientes del día",
-        "> - [[personal]] - pagar la sesión con el psicólogo",
+        f"> - {P} - pagar la sesión con el psicólogo",
     ]
 
 
@@ -58,13 +60,13 @@ def test_un_pendiente_sin_fecha_no_aparece_en_ningun_dia() -> None:
 def test_la_region_se_reemplaza_entera_y_no_se_duplica() -> None:
     viejo = AHORA.replace(
         "## Martes 8 de septiembre\n",
-        "## Martes 8 de septiembre\n- [[personal]] - lo que ya no toca\n",
+        f"## Martes 8 de septiembre\n- {P} - lo que ya no toca\n",
     )
     texto = propagar_ahora(viejo, PENDIENTES)
 
     assert "lo que ya no toca" not in texto
-    assert texto.count("> - [[personal]] - pagar la sesión con el psicólogo") == 1
-    assert "- 09:12 - [[personal]] **nota**: cuerpo" in texto
+    assert texto.count(f"> - {P} - pagar la sesión con el psicólogo") == 1
+    assert f"- 09:12 - {P} **nota**: cuerpo" in texto
 
 
 def test_la_region_va_antes_del_primer_registro() -> None:
@@ -72,7 +74,7 @@ def test_la_region_va_antes_del_primer_registro() -> None:
     i = lineas.index("## Martes 8 de septiembre")
 
     assert lineas[i + 1] == "> [!todo] Pendientes del día"
-    assert lineas[i + 2] == "> - [[personal]] - pagar la sesión con el psicólogo"
+    assert lineas[i + 2] == f"> - {P} - pagar la sesión con el psicólogo"
     assert lineas[i + 3] == ""
     assert lineas[i + 4].startswith("- 09:12 - ")
 

@@ -29,7 +29,7 @@ from pathlib import Path
 from tuku.resultado import Resultado
 
 #: Los campos de `config.tuku.md` sin los cuales los comandos no pueden operar.
-CAMPOS_REQUERIDOS = ("TZ", "cycle_type", "tuku_template")
+CAMPOS_REQUERIDOS = ("TZ", "cycle_type", "tuku_template", "tuku_version")
 
 #: Los `type` sin los cuales un vault no se puede describir entero.
 TIPOS_REQUERIDOS = ("Logbook", "Todo", "Scope", "Note", "Cadence", "Config", "Style Guide")
@@ -150,7 +150,7 @@ def revisar_despacho(agents_md: str | None, comandos: frozenset[str]) -> Revisio
     """
     if agents_md is None:
         return Revision(
-            "despacho",
+            "dispatch",
             "AGENTS.md: error: falta el archivo. Es lo que le dice a un agente a "
             "dónde va cada cosa; sin él, cada arnés opera el vault a su manera.",
             False,
@@ -159,7 +159,7 @@ def revisar_despacho(agents_md: str | None, comandos: frozenset[str]) -> Revisio
     nombrados = comandos_de_despacho(agents_md)
     if not nombrados:
         return Revision(
-            "despacho",
+            "dispatch",
             "AGENTS.md: error: no nombra ningún comando. La tabla de despacho es "
             "lo que traduce lo que el autor dice a una invocación de `tuku`.",
             False,
@@ -169,13 +169,13 @@ def revisar_despacho(agents_md: str | None, comandos: frozenset[str]) -> Revisio
     if faltan:
         lista = ", ".join(f"`tuku {c}`" for c in faltan)
         return Revision(
-            "despacho",
+            "dispatch",
             f"AGENTS.md: error: nombra comandos que no existen: {lista}. "
             f"Corrige la tabla, o agrega el comando al CLI si es el que falta.",
             False,
         )
 
-    return Revision("despacho", f"despacho: {len(nombrados)} comandos, todos existen.", True)
+    return Revision("dispatch", f"dispatch: {len(nombrados)} comandos, todos existen.", True)
 
 
 def revisar_consecuencias(ahora: str | None, pendientes: str | None) -> Revision:
@@ -193,19 +193,19 @@ def revisar_consecuencias(ahora: str | None, pendientes: str | None) -> Revision
     from tuku import todo
 
     if ahora is None or pendientes is None:
-        return ausente("consecuencias", "AHORA.md" if ahora is None else "PENDIENTES.md")
+        return ausente("consequences", "AHORA.md" if ahora is None else "PENDIENTES.md")
 
     faltan = todo.sin_consecuencia(ahora, pendientes)
     if not faltan:
-        salida = "consecuencias: las marcas y la tabla concuerdan."
-        return Revision("consecuencias", salida, True)
+        salida = "consequences: las marcas y la tabla concuerdan."
+        return Revision("consequences", salida, True)
 
     lineas = [
         f"AHORA.md: error: {c.cuerpo!r} lleva {c.marca} y la tabla no lo refleja. "
         f"Corre `{c.comando} \"<la línea del registro>\"`."
         for c in faltan
     ]
-    return Revision("consecuencias", "\n".join(lineas), False)
+    return Revision("consequences", "\n".join(lineas), False)
 
 
 def tipo_declarado(texto: str) -> str | None:
@@ -233,12 +233,12 @@ def revisar_archivos(vault: Path) -> Revision:
     faltan = [r for r in ARCHIVOS_REQUERIDOS if not (vault / r).is_file()]
     if faltan:
         return Revision(
-            "archivos",
+            "files",
             "\n".join(f"{r}: error: falta el archivo." for r in faltan),
             False,
         )
-    salida = f"archivos: los {len(ARCHIVOS_REQUERIDOS)} requeridos están."
-    return Revision("archivos", salida, True)
+    salida = f"files: los {len(ARCHIVOS_REQUERIDOS)} requeridos están."
+    return Revision("files", salida, True)
 
 
 def revisar_frontmatter(vault: Path, *, tipos_validos: list[str]) -> Revision:
@@ -303,6 +303,77 @@ def revisar_config(config_md: str | None) -> Revision:
     return Revision("config", f"config: {len(campos)} campos declarados.", True)
 
 
+def revisar_version(config_md: str | None, version_home: str | None) -> Revision:
+    """Compara la versión con la que se sembró el vault con la de `~/.tuku`.
+
+    Es un aviso y no un error: quedar atrás del `tuku` instalado es lo normal
+    tras cada actualización, y no hay un comando que "ponga al día" (verificar y
+    corregir son operaciones distintas). Nunca consulta la red.
+    """
+    from tuku.config import parsear_config_md
+
+    if config_md is None:
+        return Revision("version", "version: sin config.tuku.md, nada que comparar.", True)
+    if version_home is None:
+        return Revision("version", "version: `~/.tuku` sin sello, nada con qué comparar.", True)
+    del_vault = parsear_config_md(config_md).get("tuku_version")
+    if not del_vault:
+        return Revision("version", "version: el vault no declara `tuku_version`.", True)
+    if del_vault == version_home:
+        return Revision("version", f"version: al día con `~/.tuku` ({version_home}).", True)
+    return Revision(
+        "version",
+        f"version: aviso: el vault se sembró con TUKU {del_vault} y `~/.tuku` trae "
+        f"{version_home}. Compara `reglas/` y el libro de estilo con "
+        "`~/.tuku/template/` y lleva a mano lo que quieras.",
+        True,
+    )
+
+
+#: Los temas de `tuku doctor TEMA`. Un tema existe cuando tiene su `tuku fix TEMA`.
+TEMAS = ("link",)
+
+
+def archivos_md(vault: Path) -> list[str]:
+    """Los `.md` del vault, relativos a él y con `/`, sin las carpetas ocultas."""
+    return sorted(
+        p.relative_to(vault).as_posix()
+        for p in vault.rglob("*.md")
+        if not any(parte.startswith(".") for parte in p.relative_to(vault).parts)
+    )
+
+
+def revisar_links(vault: Path) -> Revision:
+    """Reporta los wikilinks escritos a mano y los links Markdown rotos.
+
+    El wikilink lo convierte `tuku fix link`; el link roto sale de ahí como
+    decisión del autor, porque elegir el destino es juicio. Las transclusiones
+    (`![[...]]`) y el código no cuentan. No escribe nada.
+    """
+    from tuku import link
+
+    def existe(ruta: str) -> bool:
+        return (vault / ruta).exists()
+
+    hallazgos = []
+    for rel in archivos_md(vault):
+        texto = (vault / rel).read_text(encoding="utf-8")
+        hallazgos += [
+            f"{rel}:{w.linea}: error: {w.original} es un wikilink y TUKU escribe links "
+            "Markdown. Corrígelo con `tuku fix link`."
+            for w in link.wikilinks(texto)
+        ]
+        hallazgos += [
+            f"{rel}:{r.linea}: error: el link [{r.texto}]({r.destino}) apunta a un "
+            "archivo que no existe. `tuku fix link` lo lista entre las decisiones."
+            for r in link.rotos(texto, rel, existe)
+        ]
+    if not hallazgos:
+        return Revision("link", "link: sin wikilinks ni links rotos.", True)
+    resumen = f"link: {len(hallazgos)} error(es)."
+    return Revision("link", "\n".join([*hallazgos, resumen]), False)
+
+
 def fuente_de_referencia(variante: str = "vanilla") -> Path | None:
     """El template original con el que comparar un vault roto, si está.
 
@@ -351,7 +422,9 @@ def formatear(revisiones: list[Revision], *, fuente: Path | None = None) -> str:
     return "\n".join(lineas)
 
 
-def revisar_vault(vault: Path, *, comandos: frozenset[str] | None = None) -> Resultado:
+def revisar_vault(
+    vault: Path, *, comandos: frozenset[str] | None = None, tema: str | None = None
+) -> Resultado:
     """Corre todos los lint sobre el vault y revisa lo que ninguno cubre.
 
     **Ninguna revisión que falle detiene al resto.** Un archivo que falta es
@@ -362,7 +435,16 @@ def revisar_vault(vault: Path, *, comandos: frozenset[str] | None = None) -> Res
     Ante hallazgos nombra el template original que `resolver_home` encuentra,
     para reparar comparando. Nunca copia: verificar y corregir son operaciones
     distintas.
+
+    Con `tema` corre solo esa revisión (`TEMAS`); el arreglo de cada hallazgo
+    lo aplica `tuku fix TEMA`.
     """
+    if tema == "link":
+        revision = revisar_links(vault)
+        mensaje = formatear([revision])
+        if revision.sano:
+            return Resultado.hecho(mensaje)
+        return Resultado.rechazo(mensaje, error=False)
     from tuku import cyclelint, scope, style, todo
     from tuku.config import leer_config
     from tuku.lint import ERROR
@@ -372,9 +454,17 @@ def revisar_vault(vault: Path, *, comandos: frozenset[str] | None = None) -> Res
     def leer(nombre: str) -> str | None:
         return archivo_opcional(vault, nombre)
 
+    from tuku.init import TukuHomeInvalido, resolver_home, version_del_home
+
+    try:
+        version_home = version_del_home(resolver_home())
+    except TukuHomeInvalido:
+        version_home = None
+
     types_md = leer("reglas/types.md")
     revisiones = [
         revisar_config(leer("reglas/config.tuku.md")),
+        revisar_version(leer("reglas/config.tuku.md"), version_home),
         revisar_tipos(types_md),
         revisar_archivos(vault),
         revisar_frontmatter(
@@ -384,6 +474,7 @@ def revisar_vault(vault: Path, *, comandos: frozenset[str] | None = None) -> Res
     if comandos is not None:
         revisiones.append(revisar_despacho(leer("AGENTS.md"), comandos))
     revisiones.append(revisar_consecuencias(leer("AHORA.md"), leer("PENDIENTES.md")))
+    revisiones.append(revisar_links(vault))
 
     ahora = leer("AHORA.md")
     if ahora is None:

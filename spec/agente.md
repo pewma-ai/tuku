@@ -43,7 +43,7 @@ El paso 4 estaba repartido en el tiempo ("LLM hoy, script cuando el formato se e
 
 Como el cierre conserva el texto del pendiente sin reescribirlo, el paso 5 para pendientes es **enteramente determinista**: abrir es copiar el cuerpo, cerrar es encontrar ese mismo cuerpo y borrarlo. Ninguna de las dos necesita LLM. El juicio queda entero en los pasos 1 a 3.
 
-**Excepción: el cierre no literal.** `~~(Hecho)~~` cierra repitiendo el texto exacto del pendiente ([`bitacora.md`](bitacora.md)), pero un dictado real no siempre lo repite palabra por palabra. Cuando el emparejamiento no es literal, ya no es paso 5 sino paso 3: hay que decidir a qué pendiente abierto corresponde, y eso es juicio del agente, no lectura mecánica. Ante la duda, se confirma con el autor antes de cerrar; cerrar el pendiente equivocado no tiene forma de deshacerse sola.
+**Excepción: el cierre no literal.** `(Hecho)` cierra repitiendo el texto exacto del pendiente ([`bitacora.md`](bitacora.md)), pero un dictado real no siempre lo repite palabra por palabra. Cuando el emparejamiento no es literal, ya no es paso 5 sino paso 3: hay que decidir a qué pendiente abierto corresponde, y eso es juicio del agente, no lectura mecánica. Ante la duda, se confirma con el autor antes de cerrar; cerrar el pendiente equivocado no tiene forma de deshacerse sola.
 
 ## Conducta
 

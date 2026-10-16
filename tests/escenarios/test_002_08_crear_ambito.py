@@ -32,8 +32,10 @@ from tuku.cli import EXITO, RECHAZO  # noqa: E402
 SLUG = "002-08-crear-ambito"
 AMBITO = "depto-centro"
 MENCION = "del depto centro"
-ENLAZADO = f"del [[{AMBITO}]]"
-REGISTRO_A_CATEGORIA = "- 20:00 - [[gastos]] **progreso**: revisé el detalle del mes"
+ENLAZADO = f"del [{AMBITO}](ambitos/{AMBITO}/{AMBITO}.md)"
+REGISTRO_A_CATEGORIA = (
+    "- 20:00 - [gastos](ambitos/depto-centro/gastos) **progreso**: revisé el detalle del mes"
+)
 
 
 def test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras() -> None:
@@ -138,7 +140,7 @@ def test_002_08_crear_dos_veces_no_hace_nada() -> None:
 
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
     ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
-    assert f"[[[[{AMBITO}]]]]" not in ahora, "se enlazó dos veces"
+    assert ahora.count(f"](ambitos/{AMBITO}/{AMBITO}.md)") == 1, "se enlazó dos veces"
 
 
 def test_002_08_el_nombre_con_espacios_se_escribe_con_guion() -> None:

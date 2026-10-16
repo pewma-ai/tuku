@@ -33,8 +33,9 @@ from tuku.cli import ENTORNO, EXITO, RECHAZO, USO, comandos, main  # noqa: E402
 from tuku.lint import lint  # noqa: E402
 
 SLUG = "002-10-cli-superficie"
-MAL_ESCRITA = "- 13:00 - [[personal]] **Cadencia**: comprar una maleta"
-DESCONOCIDO = "- 12:05 - [[personal]] **cachureo**: ordené los cables"
+PERSONAL = "[personal](ambitos/personal/personal.md)"
+MAL_ESCRITA = f"- 13:00 - {PERSONAL} **Cadencia**: comprar una maleta"
+DESCONOCIDO = f"- 12:05 - {PERSONAL} **cachureo**: ordené los cables"
 DIA = "## Martes 11 de agosto"
 
 #: Cada noun del CLI con los verbs que su ayuda tiene que nombrar.
@@ -45,7 +46,6 @@ VERBS = {
     "style": ("lint",),
     "todo": ("open", "close", "lint"),
     "scope": ("create", "rename", "lint"),
-    "link": ("backfill",),
     "note": ("create", "rename", "lint"),
 }
 
@@ -53,7 +53,7 @@ VERBS = {
 def test_002_10_tuku_h_nombra_los_nouns_del_epic() -> None:
     corrida = gherkin.correr(SLUG, "nombra los nouns del epic")
     assert corrida.codigo == EXITO, corrida.stderr
-    for noun in ("init", "doctor", "rebuild", *VERBS):
+    for noun in ("init", "doctor", "fix", "rebuild", *VERBS):
         assert noun in corrida.stdout, f"`tuku -h` no nombra {noun}"
 
 

@@ -19,10 +19,12 @@ AHORA = (
     "(lo que el autor escriba al final)\n"
 )
 
+P = "[personal](ambitos/personal/personal.md)"
+
 
 def test_componer_con_scope_y_body() -> None:
     linea = componer(hora="14:30", scope="personal", body="**pendiente**: pagar la cuenta")
-    assert linea == "- 14:30 - [[personal]] **pendiente**: pagar la cuenta"
+    assert linea == f"- 14:30 - {P} **pendiente**: pagar la cuenta"
 
 
 def test_componer_sin_scope() -> None:
@@ -32,7 +34,13 @@ def test_componer_sin_scope() -> None:
 
 def test_componer_con_corchetes_preexistentes_en_scope() -> None:
     linea = componer(hora="09:00", scope="[[trabajo]]", body="reunión")
-    assert linea == "- 09:00 - [[trabajo]] reunión"
+    assert linea == "- 09:00 - [trabajo](ambitos/trabajo/trabajo.md) reunión"
+
+
+def test_componer_usa_la_ruta_completa_de_un_ambito_anidado() -> None:
+    rutas = {"pewma": "ambitos/trabajo/pewma/pewma.md"}
+    linea = componer(hora="09:00", scope="pewma", body="reunión", rutas=rutas)
+    assert linea == "- 09:00 - [pewma](ambitos/trabajo/pewma/pewma.md) reunión"
 
 
 def test_clave_hora_extrae_horas_y_minutos() -> None:
@@ -111,3 +119,8 @@ def test_add_sin_rango_y_encabezado_inexistente_lanza_value_error() -> None:
 
 def test_add_sin_lineas_devuelve_texto_intacto() -> None:
     assert add(AHORA, [], dia="Lunes 7 de septiembre") == AHORA
+
+
+def test_componer_escribe_el_cierre_con_el_cuerpo_tachado() -> None:
+    linea = componer(hora="19:05", scope="personal", body="(Hecho): avisar de los GGCC")
+    assert linea == f"- 19:05 - {P} (Hecho): ~~avisar de los GGCC~~"

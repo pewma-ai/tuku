@@ -48,11 +48,13 @@ def test_002_09_la_nota_queda_escrita_enlazada_y_con_constancia() -> None:
     assert f"created: {HOY}" in contenido, "falta created con la fecha de hoy"
     assert FIXTURE.read_text(encoding="utf-8").strip() in contenido, "no llegó el cuerpo"
 
-    assert f"[[{AMBITO}]]" in contenido, "la nota no enlaza a su ámbito"
+    assert f"[{AMBITO}](../ambitos/{AMBITO}/{AMBITO}.md)" in contenido, (
+        "la nota no enlaza a su ámbito"
+    )
     assert (vault / "ambitos" / AMBITO / f"{AMBITO}.md").is_file(), "el enlace no resuelve"
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert f"[[{NOMBRE}]]" in ahora, "la constancia no enlaza a la nota"
+    assert f"[{NOMBRE}](notas/{ARCHIVO})" in ahora, "la constancia no enlaza a la nota"
 
     assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
@@ -66,7 +68,7 @@ def test_002_09_la_nota_queda_escrita_enlazada_y_con_constancia() -> None:
         "- le mandé la boleta de gastos comunes del depto-centro a la "
         "administradora por WhatsApp" in pagina
     )
-    assert f"- **nota**: escribí la nota [[{NOMBRE}]]" in pagina
+    assert f"- **nota**: escribí la nota [{NOMBRE}](../../notas/{ARCHIVO})" in pagina
 
 
 def test_002_09_ver_ademas_existe_y_cada_enlace_lleva_motivo() -> None:
@@ -113,7 +115,7 @@ def test_002_09_crear_dos_veces_no_duplica() -> None:
 
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
     ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
-    assert ahora.count(f"[[{NOMBRE}]]") == 1, "hay dos registros de constancia"
+    assert ahora.count(f"[{NOMBRE}](notas/{ARCHIVO})") == 1, "hay dos registros de constancia"
 
 
 def test_002_09_una_nota_sin_cuerpo_se_rechaza() -> None:

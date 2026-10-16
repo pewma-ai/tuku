@@ -24,7 +24,7 @@ Después cada día tiene sus registros en orden de hora. Llenarlo no es una cade
 >
 > Abre el ciclo o verifica el que ya está abierto. Es idempotente: correrlo dos veces no duplica nada. Con `--fecha` abre un ciclo que no empieza hoy.
 >
-> `tuku entry add "- HH:MM - [[ambito]] **clasificacion**: cuerpo"`
+> `tuku entry add --scope ambito --body "**clasificacion**: cuerpo"`
 > `tuku todo open "<la línea del registro>" --horizonte "esta semana"`
 > `tuku todo close "<la línea del registro>"`
 >

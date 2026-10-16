@@ -21,7 +21,7 @@ tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" 
 Entonces existe `notas/como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad.md`
 Y su frontmatter incluye `type: Note` y `created: 2026-08-11`
 Y el cuerpo coincide con el fixture redactado
-Y la nota enlaza a `[[depto-centro]]`
+Y la nota enlaza a `depto-centro` con `[depto-centro](../ambitos/depto-centro/depto-centro.md)`
 
 ## Escenario: queda constancia en la bitácora
 
@@ -31,7 +31,7 @@ Cuando la nota se escribe
 tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
 ```
 Entonces `AHORA.md` gana un registro bajo `## Martes 11 de agosto` enlazando a la nota:
-`- 21:15 - [[depto-centro]] **nota**: escribí la nota [[como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad]]`
+`- 21:15 - [depto-centro](ambitos/depto-centro/depto-centro.md) **nota**: escribí la nota [como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad](notas/como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad.md)`
 
 ## Escenario: la nota queda enlazada a su ámbito, porque se pidió así
 
@@ -77,7 +77,7 @@ tuku doctor --vault vault-limpio
 
 Dado dos notas creadas a mano: una con enlace sin motivo y otra sin `## Ver además`
 ```bash
-printf '# Nota\n\ncuerpo\n\n## Ver además\n\n* [[depto-centro]]\n' > sin-motivo.md
+printf '# Nota\n\ncuerpo\n\n## Ver además\n\n* [depto-centro](../ambitos/depto-centro/depto-centro.md)\n' > sin-motivo.md
 printf '# Nota\n\ncuerpo\n' > sin-seccion.md
 ```
 Cuando se validan

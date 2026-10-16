@@ -9,6 +9,7 @@ import pytest
 from tuku.config import (
     VaultInvalido,
     archivo_vault,
+    exigir_vault,
     leer_config,
     parsear_autor,
     parsear_config_md,
@@ -113,3 +114,18 @@ def test_archivo_vault_y_vault_invalido(tmp_path: Path) -> None:
     with pytest.raises(VaultInvalido) as exc:
         archivo_vault(tmp_path, "LIBRO-DE-ESTILO.md")
     assert "no parece un vault de TUKU" in str(exc.value)
+
+
+def test_exigir_vault_rechaza_un_directorio_cualquiera(tmp_path: Path) -> None:
+    with pytest.raises(VaultInvalido, match="no es un vault de TUKU"):
+        exigir_vault(tmp_path)
+
+
+def test_exigir_vault_rechaza_un_directorio_inexistente(tmp_path: Path) -> None:
+    with pytest.raises(VaultInvalido):
+        exigir_vault(tmp_path / "no-existe")
+
+
+def test_exigir_vault_acepta_un_vault_incompleto(tmp_path: Path) -> None:
+    (tmp_path / "AHORA.md").write_text("", encoding="utf-8")
+    exigir_vault(tmp_path)

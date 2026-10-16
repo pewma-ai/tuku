@@ -18,6 +18,9 @@ del noun que renombran (`scope`, `note`, `entry`).
 from __future__ import annotations
 
 import re
+from urllib.parse import unquote
+
+from tuku import link
 
 #: Un enlace es `[[nombre]]`, y también `[[nombre#ancla]]` o `[[nombre|alias]]`.
 #: El nombre se compara entero: `[[depto]]` no se toca al renombrar `[[dept]]`.
@@ -25,7 +28,10 @@ _ENLACE = r"\[\[{nombre}((?:#|\|)[^\]]*)?\]\]"
 
 
 def renombrar_enlaces(texto: str, viejo: str, nuevo: str) -> tuple[str, int]:
-    """Cambia `[[viejo]]` por `[[nuevo]]` y devuelve el texto y cuántos cambió.
+    """Cambia los enlaces a `viejo` por enlaces a `nuevo` y devuelve cuántos cambió.
+
+    Entiende los dos formatos: `[[viejo]]` pasa a `[[nuevo]]`, y
+    `[viejo](ambitos/viejo/viejo.md)` pasa a `[nuevo](ambitos/nuevo/nuevo.md)`.
 
     Respeta lo que va después del nombre, que es lo que distingue un enlace de
     una transclusión (`#^ancla`) o de un alias (`|otro texto`): eso apunta a una
@@ -38,7 +44,44 @@ def renombrar_enlaces(texto: str, viejo: str, nuevo: str) -> tuple[str, int]:
     if not viejo or viejo == nuevo:
         return texto, 0
     patron = re.compile(_ENLACE.format(nombre=re.escape(viejo)))
-    return patron.subn(lambda m: f"[[{nuevo}{m.group(1) or ''}]]", texto)
+    texto, wikis = patron.subn(lambda m: f"[[{nuevo}{m.group(1) or ''}]]", texto)
+    texto, mds = _renombrar_md(texto, viejo, nuevo)
+    return texto, wikis + mds
+
+
+_MD = re.compile(r"(?<!!)\[(?P<texto>[^\]\n]*)\]\((?P<destino>[^)\s]+)\)")
+
+
+def _renombrar_md(texto: str, viejo: str, nuevo: str) -> tuple[str, int]:
+    """Cambia el texto y la ruta de los links Markdown que apuntan a `viejo`.
+
+    Un link apunta a `viejo` si el archivo o la carpeta a la que va se llama así
+    (`ambitos/viejo/viejo.md`, `notas/viejo.md`). Cada tramo de la ruta que sea
+    `viejo` (carpeta) o `viejo.md` (archivo) pasa a `nuevo`, y el texto solo
+    cambia si era el nombre mismo: un texto distinto lo eligió el autor.
+    """
+
+    def cambiar(m: re.Match[str]) -> str:
+        if link.nombre_de(m.group()) != viejo:
+            return m.group()
+        ruta, ancla = m.group("destino").partition("#")[::2]
+        tramos = [
+            nuevo if t == viejo else f"{nuevo}.md" if t == f"{viejo}.md" else t
+            for t in unquote(ruta).split("/")
+        ]
+        destino = "/".join(tramos) + (f"#{ancla}" if ancla else "")
+        etiqueta = nuevo if m.group("texto") == viejo else m.group("texto")
+        return link.md(etiqueta, destino)
+
+    cambios = 0
+
+    def contar(m: re.Match[str]) -> str:
+        nonlocal cambios
+        salida = cambiar(m)
+        cambios += salida != m.group()
+        return salida
+
+    return _MD.sub(contar, texto), cambios
 
 
 def renombrar_ancla(texto: str, viejo: str, nuevo: str) -> tuple[str, int]:
@@ -65,10 +108,10 @@ def renombrar_titulo(texto: str, nuevo: str) -> str:
     return re.sub(r"^# .*$", f"# {nuevo}", texto, count=1, flags=re.MULTILINE)
 
 
-#: Un registro de bitácora: `- HH:MM - [[ambito]] cuerpo`. El ámbito es
+#: Un registro de bitácora: `- HH:MM - [ambito](ruta) cuerpo`. El ámbito es
 #: opcional, y lo que se corrige es el cuerpo: la hora y el ámbito los fija otra
 #: cosa (`tuku entry add`), y cambiarlos acá los dejaría fuera de su control.
-_REGISTRO = re.compile(r"^(- (\d{2}:\d{2}) - (?:\[\[[^\]]+\]\] )?)(.*)$")
+_REGISTRO = re.compile(rf"^(- (\d{{2}}:\d{{2}}) - (?:{link.ENLACE} )?)(.*)$")
 
 
 def cuerpo_del_registro(ahora: str, dia: str, hora: str) -> str | None:

@@ -3,8 +3,6 @@
 > **Qué es este directorio.** Qué hace el sistema, con nombres de archivo, formatos e invariantes. Es la única capa que puede nombrar rutas y herramientas, y la única que cambia cuando cambia el layout. Los otros dos documentos del marco: [`../docs/brief.md`](../docs/brief.md) dice qué problema resuelve y para quién, y [`../docs/principios.md`](../docs/principios.md) da el criterio para decidir lo que aún no está escrito.
 
 > Especificaciones normativas de TUKU. Se justifican por referencia a [`../docs/principios.md`](../docs/principios.md) y [`../docs/brief.md`](../docs/brief.md). Lo que aquí se afirma es normativo para el motor: el código no inventa reglas, implementa lo que dice este directorio. Cuando código y spec discrepan, el defecto está en el código, salvo que la spec no se derive de [`../docs/principios.md`](../docs/principios.md), en cuyo caso el defecto está en la spec.
-> [!question] Referencia rota #REVISAR
-> Esta nota citaba "el contrato en `../devel/README.md`", archivo que no existe en el repositorio. No hay ningún documento que hoy desarrolle ese contrato; decidir si se escribe o si la frase se borra.
 
 Este directorio reemplaza al contenido normativo que antes vivía mezclado dentro del plan de fases. La especificación de "qué hace el sistema" vive aquí; el orden y estado de implementación vive en [`../devel/epics.md`](../devel/epics.md).
 
@@ -26,7 +24,7 @@ Igual que las fases de implementación, se lee de lo que no depende de nada a lo
 | # | Documento | Qué especifica |
 | --- | --- | --- |
 | 1 | [flujo-informacion.md](flujo-informacion.md) | El marco: la frontera entre registrar y aplicar consecuencias, los cinco pasos, y la segunda vía de entrada (sin bitácora) |
-| 2 | [bitacora.md](bitacora.md) | El registro: formato de línea, ontología cerrada (`**pendiente**`, `~~(Hecho)~~`, `**cadencia**`) y abierta, reglas de redacción |
+| 2 | [bitacora.md](bitacora.md) | El registro: formato de línea, ontología cerrada (`**pendiente**`, `(Hecho)`, `**cadencia**`) y abierta, reglas de redacción |
 | 3 | [pendientes.md](pendientes.md) | `PENDIENTES.md`: tabla única, escalera de horizontes, y cómo llega cada vista (propagación y transclusión) |
 | 4 | [ambitos.md](ambitos.md) | El árbol de ámbitos: los tres roles, qué carga cada directorio, qué prevalece y qué se acumula, archivado |
 | 5 | [cadencias.md](cadencias.md) | `CADENCIAS.md`: ciclo de vida de una cadencia, qué puede emitir, el trigger que conoce el tipo de ciclo, idempotencia |
@@ -76,7 +74,7 @@ reglas/                       # una regla por consecuencia
   cadencias.tuku.md
   propuestas.tuku.md
   comandos.tuku.md            # qué hace cada comando
-  config.tuku.md              # TZ, cycle_type, tuku_template
+  config.tuku.md              # TZ, cycle_type, tuku_template, tuku_version, origen
   types.md                    # los `type` que el vault reconoce
   plantilla/
     AHORA.md                  # de aquí sale un ciclo nuevo
@@ -154,10 +152,17 @@ Cada spec declara su propio "no entra" en la sección correspondiente. A nivel d
 
 - **La capacidad vive repartida por ámbito**, en archivos `CAPACIDAD.md` opcionales: el bruto, si se declara, una sola vez en `ambitos/personal/`; los costos fijos en el ámbito que los causa. Se acumulan en vez de prevalecer, igual que las cadencias: de los tres archivos por directorio, `AGENTS.md` es el único que es una regla y el único que prevalece. Es deseable, no requisito: el sistema se opera sin capacidad y sin cadencias. Formato y cálculo en [ciclo.md](ciclo.md), ubicación en el árbol en [ambitos.md](ambitos.md).
 
-- **`reglas/config.tuku.md` es una tabla**, y es lo único que leen las automatizaciones de ese archivo. Tres campos hoy: `TZ`, la zona horaria con su nombre IANA, que decide qué día es HOY y por lo tanto qué está atrasado; `cycle_type`, el ritmo con que se abre y se cierra; y `tuku_template`, la variante de la que salió el vault. Los nombres de campo van en inglés, como el resto del frontmatter. La escribe `tuku init`, que toma la zona horaria de la máquina, y un callout en el archivo lo dice. Ningún dato nuevo destinado a una automatización se agrega al libro de estilo (ver [bitacora.md](bitacora.md), "dónde vive cada una"): va a esta tabla, y quien necesite mostrarlo la transcluye en vez de copiarla.
+- **`reglas/config.tuku.md` es una tabla**, y es lo único que leen las automatizaciones de ese archivo. Cinco campos hoy: `TZ`, la zona horaria con su nombre IANA, que decide qué día es HOY y por lo tanto qué está atrasado; `cycle_type`, el ritmo con que se abre y se cierra; `tuku_template`, la variante de la que salió el vault; `tuku_version`, la versión de TUKU con que se sembró, que `tuku doctor` compara con la de `~/.tuku` y avisa si el vault quedó atrás; y `origen`, la URL del repositorio, para saber dónde revisar cambios. `~/.tuku` es un artefacto de la instalación: trae `template/`, `docs/` y `spec/`, lleva el sello `tuku.version` y se reemplaza entero cuando ese sello no coincide con el `tuku` instalado. Los nombres de campo van en inglés, como el resto del frontmatter. La escribe `tuku init`, que toma la zona horaria de la máquina, y un callout en el archivo lo dice. Ningún dato nuevo destinado a una automatización se agrega al libro de estilo (ver [bitacora.md](bitacora.md), "dónde vive cada una"): va a esta tabla, y quien necesite mostrarlo la transcluye en vez de copiarla.
 
 ## Decisiones abiertas
 
 - **Cómo se especifica una cadencia que se gatilla por un evento y no por una fecha.** El caso que lo destapó es el cierre del ciclo: la cadencia sembrada dice `Cuándo: viernes, semanal`, pero lo que la gatilla es que el ciclo termine, y el viernes deja de significar nada si el ciclo pasa a ser quincenal. La fecha es un síntoma del evento. La propuesta sobre la mesa es que `Cuándo` acepte dos gramáticas distinguidas por la primera palabra (todo lo que empieza con `al ` es evento, lo demás es calendario), que los eventos sean vocabulario cerrado en un `reglas/eventos.md` verificable por `tuku doctor`, porque cada evento es código que mira el vault, y que un evento que dura varios días emita una sola vez reusando la idempotencia del pendiente en vez de llevar un registro de eventos vistos. Queda por decidir, y lo decide el epic 006, que es donde entran las cadencias.
 - Si el ciclo es una primitiva propia o se compone sobre bitácora, pendientes y notas. Hoy [`../docs/principios.md`](../docs/principios.md) lo lista entre las primitivas pero lo describe como composición temporal.
-- **Pasar de wikilinks de Obsidian a links Markdown.** Decidido por el autor el 2026-10-15; falta especificar cómo antes de tocar código. Tres puntos: (1) un link Markdown se resuelve por ruta relativa al archivo, y el mismo registro vive en `AHORA.md`, en la página del ámbito y, al cerrar el ciclo, en `bitacoras/`, así que o `tuku` recalcula la ruta en cada propagación y archivado, o se usan rutas desde la raíz del vault, que Obsidian resuelve y otros visores no; (2) la transclusión `![[...#^ambito]]` y el callout `> [!todo]` no existen en Markdown estándar: se mantienen como extras de Obsidian o se reemplazan por contenido generado; (3) la corrección automática de wikilinks a Markdown (base: `jntr.obsidian-links-to-markdown.py` de mac-jpgil) choca con que `tuku doctor` informa y no corrige ([despacho.md](despacho.md)): va como `doctor --fix` explícito o como comando aparte.
+- **Decidido (2026-10-16): links Markdown con ruta relativa y `tuku fix`.** Era la decisión abierta "pasar de wikilinks de Obsidian a links Markdown". Lo decidido:
+  1. **El link es `[texto](ruta/relativa.md)`, relativa al archivo que lo contiene.** Nada de rutas desde la raíz. Como el mismo registro vive en `AHORA.md`, en la página del ámbito y, al cerrar el ciclo, en `bitacoras/`, quien copia una línea de un archivo a otro recalcula las rutas: lo hacen `tuku todo propagate` y las páginas de ámbito, y lo hará el archivado del epic 006.
+  2. **La transclusión de Obsidian es parte del estándar de TUKU.** `![[archivo.md#^ancla]]` se queda, igual que los callouts `> [!todo]`. Es el único wikilink admitido y se reconoce por el `!` inicial.
+  3. **`tuku doctor [TEMA]` y `tuku fix TEMA`.** Sin tema, `doctor` revisa todo; con tema, solo ese. Todo tema tiene su `fix`. Si el arreglo es determinista, `fix` lo aplica; si no, no escribe y devuelve las decisiones que le tocan al autor. Hoy el único tema es `link`. Ver [cli.md](cli.md).
+  4. **Los lectores aceptan los dos formatos y los escritores solo producen Markdown.** Un vault con wikilinks sigue funcionando hasta que se corre `tuku fix link`.
+  5. **El template no trae `.obsidian`.** Obsidian, con su configuración por defecto, escribe wikilinks cuando el autor enlaza a mano, así que `doctor link` y `fix link` son un flujo recurrente y no una migración única.
+  6. **`fix link` alcanza todo el vault, incluidos los ciclos cerrados.** Cambia el formato sin agregar enlaces: es reparar, no enriquecer el pasado ([ambitos.md](ambitos.md)).
+  7. **`tuku link backfill` y el sustantivo `link` desaparecen.** `tuku scope create` ya enlaza hacia atrás y es idempotente.

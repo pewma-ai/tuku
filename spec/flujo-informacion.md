@@ -100,7 +100,7 @@ Las cajas rosadas son las que necesitan juicio, y son las únicas: el juicio se 
 | Consecuencia | Qué hace | Reglas | Comandos |
 | --- | --- | --- | --- |
 | Pendientes | Alta o baja en `PENDIENTES.md`, y las vistas que se derivan de él | `reglas/pendientes.tuku.md` | `todo open`, `todo close`, `todo propagate` |
-| Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md` | `page index`, `link backfill` |
+| Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md` | `page index`, `scope create` |
 | Cadencias | Alta o cambio de una cadencia en su ámbito | `reglas/cadencias.tuku.md` | `cadence add`, `cadence inject` |
 | Nota | Escribe en `notas/` lo que el autor pidió, y deja constancia en la bitácora | `reglas/notas.tuku.md` | `note create`, `note lint` |
 | Propuesta | Sugiere algo al autor y espera aprobación | `reglas/propuestas.tuku.md` | sin comando, a propósito |

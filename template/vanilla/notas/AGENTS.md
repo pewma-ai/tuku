@@ -6,4 +6,4 @@ Formato libre. Nombre de archivo en minúsculas.
 
 Algunas notas son sobre algo que se repite y conviene que sigan una plantilla. Esas declaran `subtype` en su frontmatter, además del `type: Note` que lleva toda nota, y los tipos disponibles están en `LIBRO-DE-ESTILO.md`.
 
-Para enlazar una nota desde un registro de bitácora, usa `[[nombre-del-archivo]]`.
+Para enlazar una nota desde un registro de bitácora, `tuku note create` deja el link; a mano, `[título](notas/nombre-del-archivo.md)`.

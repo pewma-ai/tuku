@@ -55,7 +55,7 @@ Registra el hecho, no la conversación: "recuérdame" y "anota" van dirigidos a 
 Escribir la línea a mano en `AHORA.md`, bajo el encabezado del día que corresponde y en su lugar por hora:
 
 ```markdown
-- 14:20 - [[personal]] **pendiente**: avisar de los gastos comunes a la administradora
+- 14:20 - [personal](ambitos/personal/personal.md) **pendiente**: avisar de los gastos comunes a la administradora
 ```
 
-Si lleva `**pendiente**`, agregar además una fila en la tabla de `PENDIENTES.md` con el mismo cuerpo, carácter por carácter, y su horizonte. Si lleva `~~(Hecho)~~`, buscar esa fila y marcarla cerrada.
+Si lleva `**pendiente**`, agregar además una fila en la tabla de `PENDIENTES.md` con el mismo cuerpo, carácter por carácter, y su horizonte. Si lleva `(Hecho)`, buscar esa fila, sin contar los links, y quitarla; en el registro, la marca va a la vista y el cuerpo tachado: `(Hecho): ~~cuerpo~~`.

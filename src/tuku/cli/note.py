@@ -52,12 +52,26 @@ def _cmd_note_lint(args: argparse.Namespace) -> int:
 
 
 def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
-    note_p = sub.add_parser("note", help="notas en notas/")
+    note_p = sub.add_parser(
+        "note",
+        help="notas en notas/",
+        description=(
+            "Una nota es conocimiento que el autor quiere conservar, en `notas/`, con "
+            "su sección `## Ver además`. Estos comandos crean notas dejando constancia "
+            "en la bitácora, las renombran sin romper sus links y revisan su estructura."
+        ),
+    )
     note_v = note_p.add_subparsers(dest="verb", required=True)
 
     note_create_p = note_v.add_parser(
         "create",
         help="crea una nota y deja constancia en la bitácora",
+        description=(
+            "Escribe la nota en `notas/` con su frontmatter y su sección `## Ver además`, "
+            "y deja en `AHORA.md` un registro con el link a ella. Crear una nota es un "
+            "hecho de la vida del autor, por eso se registra. Es idempotente: no "
+            "reescribe una nota que ya existe."
+        ),
         epilog=(
             "A mano: crear el archivo en `notas/<slug>.md` con sus metadatos y cuerpo, "
             "y registrar en `AHORA.md` la constancia de creación."
@@ -110,9 +124,14 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     note_rename_p = note_v.add_parser(
         "rename",
         help="renombra una nota y arregla lo que la enlazaba",
+        description=(
+            "Renombra el archivo de la nota, su título y el texto y la ruta de cada link "
+            "que la nombra en el vault. Existe porque renombrar solo el archivo deja "
+            "links rotos sin avisar."
+        ),
         epilog=(
-            "A mano: renombrar el archivo en `notas/` y actualizar los enlaces "
-            "`[[nota]]` en la bitácora."
+            "A mano: renombrar el archivo en `notas/` y actualizar los links "
+            "a ella en la bitácora."
         ),
     )
     note_rename_p.add_argument("title", help="título actual de la nota")
@@ -122,6 +141,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     note_lint_p = note_v.add_parser(
         "lint",
         help="revisa que la nota tenga 'Ver además' y motivos",
+        description=(
+            "Revisa que la nota cierre con `## Ver además` y que cada link saliente diga "
+            "para qué conecta. Sin archivo revisa todas las de `notas/`. No escribe nada."
+        ),
         epilog=(
             "A mano: abrir la nota en `notas/` y verificar su sección 'Ver además' "
             "y motivos de enlace."

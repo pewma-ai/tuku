@@ -22,7 +22,7 @@ Entonces la traducción coincide con la obtenida en el arnés de referencia
 tuku entry add --day 2026-08-11 --hour 09:12 --scope personal \
   --body "**<clasificación>**: <el cuerpo>"
 ```
-Y queda un registro a las 09:12 en `[[personal]]` sin marcas ontológicas cerradas
+Y queda un registro a las 09:12 en `[personal](ambitos/personal/personal.md)` sin marcas ontológicas cerradas
 Y el delta del vault es idéntico al gemelo determinista
 Y ningún archivo se edita a mano
 

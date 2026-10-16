@@ -31,10 +31,10 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from tuku import link
 from tuku.resultado import Resultado
 
 _KEYWORDS = re.compile(r"^keywords:\s*\[(?P<lista>[^\]]*)\]\s*$", re.M)
-_ENLACE = re.compile(r"\[\[(?P<destino>[^\]|#]+)")
 
 OBLIGATORIOS = ("AGENTS.md", "CADENCIAS.md")
 
@@ -76,6 +76,35 @@ def nombres(vault: Path) -> set[str]:
         elif p.suffix == ".md" and not p.stem.isupper():
             salida.add(p.stem)
     return salida
+
+
+def rutas(vault: Path) -> dict[str, str]:
+    """Nombre → ruta relativa al vault de todo lo que un registro puede nombrar.
+
+    Es lo que `link` necesita para componer el enlace a un ámbito anidado con
+    su ruta completa: la página del ámbito, el archivo de una actividad, o la
+    carpeta de una categoría. Si dos nombres chocan manda el primero en orden,
+    y `spec/ambitos.md` no admite que choquen.
+    """
+    raiz = vault / "ambitos"
+    if not raiz.is_dir():
+        return {}
+    salida: dict[str, str] = {}
+    for p in sorted(raiz.rglob("*")):
+        if p.is_dir():
+            destino = _pagina(p) if _pagina(p).is_file() else p
+            salida.setdefault(p.name, destino.relative_to(vault).as_posix())
+        elif p.suffix == ".md" and not p.stem.isupper() and p.stem != p.parent.name:
+            salida.setdefault(p.stem, p.relative_to(vault).as_posix())
+    return salida
+
+
+def carpeta(vault: Path, nombre: str) -> Path:
+    """La carpeta del ámbito `nombre`, anidado o no. Plana si no se encuentra."""
+    for a in leer(vault):
+        if a.nombre == nombre:
+            return a.directorio
+    return vault / "ambitos" / nombre
 
 
 def rechazo_si_no_existe(vault: Path, nombre: str) -> Resultado | None:
@@ -127,10 +156,13 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
     pagina = _pagina(directorio)
     if not pagina.exists():
         rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", directorio)
+        rel = rel.replace(os.sep, "/")
         base = f"---\ntype: Scope\nkeywords: [{valor}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n"
         ahora_file = vault / "AHORA.md"
         ahora_texto = ahora_file.read_text(encoding="utf-8") if ahora_file.is_file() else ""
-        texto = actualizar_contenido_pagina(base, ahora_texto, valor)
+        texto = actualizar_contenido_pagina(
+            base, ahora_texto, valor, pagina=pagina.relative_to(vault).as_posix()
+        )
         pagina.write_text(texto, encoding="utf-8")
 
     if (vault / "PENDIENTES.md").is_file():
@@ -144,19 +176,31 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
 create = crear
 
 
-def extraer_actividad_ambito(ahora: str, nombre_ambito: str) -> dict[str, list[str]]:
-    """Extrae las líneas de bitácora vinculadas a `[[nombre_ambito]]`, agrupadas por día.
+def extraer_actividad_ambito(
+    ahora: str, nombre_ambito: str, *, pagina: str | None = None
+) -> dict[str, list[str]]:
+    """Extrae las líneas de bitácora vinculadas al ámbito, agrupadas por día.
 
     Omite la hora `- HH:MM - ` dejando `- cuerpo`.
     Remueve auto-enlaces al propio ámbito:
-    - Si inicia con `[[nombre_ambito]] `, elimina el prefijo.
-    - Si aparece dentro del texto, retira los corchetes `[[...]]`.
+    - Si inicia con el enlace al ámbito, elimina el prefijo.
+    - Si aparece dentro del texto, lo reemplaza por el nombre a secas.
+
+    El enlace se reconoce en cualquiera de los dos formatos. Los demás links de
+    la línea se copian a la página del ámbito, que vive en otra carpeta, así que
+    sus rutas se recalculan desde `AHORA.md` hacia `pagina` (por defecto, la
+    forma plana `ambitos/<n>/<n>.md`).
+
     El orden de días y de líneas dentro de cada día es el mismo de `AHORA.md`.
     """
     from tuku.ahora import dias
 
-    patron_enlace = f"[[{nombre_ambito}]]"
-    prefijo_enlace = re.compile(rf"^\[\[{re.escape(nombre_ambito)}\]\]\s*")
+    destino = pagina or f"ambitos/{nombre_ambito}/{nombre_ambito}.md"
+    propio = re.compile(link.ENLACE)
+
+    def es_el_ambito(m: re.Match[str]) -> bool:
+        return link.nombre_de(m.group()) == nombre_ambito
+
     salida: dict[str, list[str]] = {}
     lineas = ahora.splitlines()
 
@@ -170,11 +214,17 @@ def extraer_actividad_ambito(ahora: str, nombre_ambito: str) -> dict[str, list[s
 
         lineas_dia: list[str] = []
         for i in range(ini + 1, fin):
-            linea = lineas[i]
-            if patron_enlace in linea and (m := re.match(r"^- \d{2}:\d{2} - (.*)$", linea)):
-                cuerpo = prefijo_enlace.sub("", m.group(1))
-                cuerpo = cuerpo.replace(patron_enlace, nombre_ambito)
-                lineas_dia.append(f"- {cuerpo}")
+            m = re.match(r"^- \d{2}:\d{2} - (.*)$", lineas[i])
+            if m is None or not any(es_el_ambito(e) for e in propio.finditer(m.group(1))):
+                continue
+            cuerpo = m.group(1)
+            primero = propio.match(cuerpo)
+            if primero is not None and es_el_ambito(primero):
+                cuerpo = cuerpo[primero.end() :].lstrip()
+            cuerpo = propio.sub(
+                lambda e: nombre_ambito if es_el_ambito(e) else e.group(), cuerpo
+            )
+            lineas_dia.append(f"- {link.rebasar(cuerpo, 'AHORA.md', destino)}")
 
         if lineas_dia:
             salida[encabezado] = lineas_dia
@@ -197,7 +247,7 @@ def formatear_esta_semana(actividad: dict[str, list[str]]) -> str:
 
 
 def actualizar_contenido_pagina(
-    contenido_actual: str, ahora_texto: str, nombre_ambito: str
+    contenido_actual: str, ahora_texto: str, nombre_ambito: str, *, pagina: str | None = None
 ) -> str:
     """Actualiza o incorpora `## Esta semana` y `## Actividad reciente` en el ámbito."""
     from datetime import date
@@ -205,7 +255,7 @@ def actualizar_contenido_pagina(
     from tuku.ahora import rango
     from tuku.init import MESES
 
-    actividad = extraer_actividad_ambito(ahora_texto, nombre_ambito)
+    actividad = extraer_actividad_ambito(ahora_texto, nombre_ambito, pagina=pagina)
     seccion_semana = formatear_esta_semana(actividad).strip()
 
     limites = rango(ahora_texto) if ahora_texto else None
@@ -230,8 +280,7 @@ def actualizar_contenido_pagina(
 
 def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
     """Regenera la actividad en la página del ámbito. Devuelve la ruta si cambió."""
-    directorio = vault / "ambitos" / nombre
-    pagina = _pagina(directorio)
+    pagina = _pagina(carpeta(vault, nombre))
     if not pagina.is_file():
         return None
     ahora_path = vault / "AHORA.md"
@@ -239,7 +288,9 @@ def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
         return None
     ahora_texto = ahora_path.read_text(encoding="utf-8")
     actual = pagina.read_text(encoding="utf-8")
-    nuevo = actualizar_contenido_pagina(actual, ahora_texto, nombre)
+    nuevo = actualizar_contenido_pagina(
+        actual, ahora_texto, nombre, pagina=pagina.relative_to(vault).as_posix()
+    )
     if nuevo != actual:
         pagina.write_text(nuevo, encoding="utf-8")
         return pagina
@@ -299,11 +350,10 @@ def lint_categorias(ahora: str, *, categorias: list[str]) -> list[str]:
     """Registros que apuntan a una categoría. No escribe nada."""
     hallazgos = []
     for n, linea in enumerate(ahora.splitlines(), start=1):
-        for m in _ENLACE.finditer(linea):
-            destino = m.group("destino").strip()
+        for destino in link.nombres_enlazados(linea):
             if destino in categorias:
                 hallazgos.append(
-                    f"AHORA.md:{n}: error: [[{destino}]] es una categoría, y un registro "
+                    f"AHORA.md:{n}: error: {destino} es una categoría, y un registro "
                     f"no puede apuntar a una. Apúntalo al ámbito o a la actividad que "
                     f"corresponda, o dale a {destino} su página propia para volverlo ámbito."
                 )
@@ -406,6 +456,7 @@ def crear_con_enlazado(vault: Path, nombre: str) -> Resultado:
             ahora_path.read_text(encoding="utf-8"),
             scope=nombre,
             keywords=keywords(pagina_path.read_text(encoding="utf-8")),
+            rutas=rutas(vault),
         )
         if n > 0:
             ahora_path.write_text(texto, encoding="utf-8")
@@ -423,7 +474,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     """Renombra un ámbito y arregla todo lo que lo nombraba.
 
     Un ámbito no es una carpeta: es una carpeta, una página, un ancla de
-    transclusión, las cabeceras de sus archivos obligatorios y cada `[[enlace]]`
+    transclusión, las cabeceras de sus archivos obligatorios y cada enlace
     del vault que apunta a él. Renombrar a mano cualquiera de esas piezas por
     separado deja el resto colgando, y el vault no avisa hasta que algo hace
     falta.

@@ -27,8 +27,9 @@ import gherkin  # noqa: E402
 from tuku.cli import EXITO, RECHAZO  # noqa: E402
 
 SLUG = "002-03-lint-de-registro"
-DESCONOCIDO = "- 12:05 - [[personal]] **cachureo**: ordené los cables del escritorio"
-MAL_ESCRITA = "- 13:00 - [[personal]] **Cadencia**: comprar una maleta"
+PERSONAL = "[personal](ambitos/personal/personal.md)"
+DESCONOCIDO = f"- 12:05 - {PERSONAL} **cachureo**: ordené los cables del escritorio"
+MAL_ESCRITA = f"- 13:00 - {PERSONAL} **Cadencia**: comprar una maleta"
 
 
 def test_002_03_cerrada_estricta_abierta_permisiva() -> None:

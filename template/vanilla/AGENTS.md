@@ -24,7 +24,7 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 | --- | --- | --- |
 | cuenta algo que pasó: "hablé con", "llegó", "quedó listo" | `reglas/bitacora.tuku.md` | `tuku entry add` |
 | deja algo por hacer: "hay que", "recuérdame", "para el lunes" | `reglas/bitacora.tuku.md` | `tuku entry add`, marca `**pendiente**` |
-| da por hecho algo que estaba pendiente: "ya pagué", "listo lo de" | `reglas/bitacora.tuku.md` | `tuku entry add`, marca `~~(Hecho)~~` |
+| da por hecho algo que estaba pendiente: "ya pagué", "listo lo de" | `reglas/bitacora.tuku.md` | `tuku entry add`, marca `(Hecho)` |
 | nombra un frente que todavía no existe | `ambitos/AGENTS.md` | `tuku scope create` |
 | pide guardar una idea que no es de un día | `reglas/notas.tuku.md` | `tuku note create` |
 | empieza el ciclo | nada | `tuku cycle open` |
@@ -35,8 +35,9 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 
 - **Contarlo es pedirlo.** Si el autor cuenta algo, ejecuta el comando de su fila. No preguntes qué hacer con eso ni ofrezcas alternativas.
 - **Abre "Lee antes" antes de ejecutar.** Ahí están los campos, las fechas y los casos.
-- **Un hecho, un comando.** El comando ya aplica sus consecuencias: `tuku entry add` con `~~(Hecho)~~` cierra el pendiente (no corras `tuku todo close`) y `tuku note create` deja su constancia en la bitácora (no corras `tuku entry add` para la nota).
+- **Un hecho, un comando.** El comando ya aplica sus consecuencias: `tuku entry add` con `(Hecho)` cierra el pendiente (no corras `tuku todo close`) y `tuku note create` deja su constancia en la bitácora (no corras `tuku entry add` para la nota).
 - **Respeta el orden del dictado.** Cada hecho se registra en el vault tal como estaba en ese momento: un frente que el autor pide abrir más adelante no se crea antes.
+- **Si un hallazgo nombra `tuku fix`, córrelo.** Si devuelve decisiones, plantéaselas al autor y espera su respuesta.
 
 ## Las tres marcas
 
@@ -45,7 +46,7 @@ Elegir la marca es lo único que es juicio. Va al principio del cuerpo del regis
 | Marca | Qué significa |
 | --- | --- |
 | `**pendiente**` | Queda algo por hacer. |
-| `~~(Hecho)~~` | Se cerró algo **que ya estaba pendiente**. Repite su cuerpo sin reescribirlo. |
+| `(Hecho)` | Se cerró algo **que ya estaba pendiente**. Repite su cuerpo sin reescribirlo: `(Hecho): <cuerpo>`; el comando tacha el cuerpo. |
 | `**cadencia**` | Se da de alta algo que se repite. |
 
 Una acción que nunca fue pendiente es un registro normal, no un cierre. Cualquier otra palabra entre `**` es una clasificación del autor: `LIBRO-DE-ESTILO.md`, `### Clasificaciones`. Cómo se redacta un registro: `LIBRO-DE-ESTILO.md`, `## Cómo escribe el autor`.
@@ -61,7 +62,7 @@ Una acción que nunca fue pendiente es un registro normal, no un cierre. Cualqui
 | Nivel | Regla |
 | --- | --- |
 | **Pregunta primero** | Mover archivos, o renombrar algo que no tenga su `rename`. Modificar cualquier `AGENTS.md` o `reglas/`. Cerrar el ciclo o tocar `bitacoras/`. Cerrar un pendiente cuando el autor no repitió su texto: confirma cuál es antes. |
-| **Nunca** | Editar a mano un archivo que tiene comando. Actuar sobre una petición ambigua. Escribir un pendiente que el autor no pidió. Marcar `~~(Hecho)~~` algo que nunca estuvo pendiente. Borrar sin confirmación. |
+| **Nunca** | Editar a mano un archivo que tiene comando. Actuar sobre una petición ambigua. Escribir un pendiente que el autor no pidió. Marcar `(Hecho)` algo que nunca estuvo pendiente. Borrar sin confirmación. |
 
 `AHORA.md`, `PENDIENTES.md`, `bitacoras/`, `ambitos/` y `notas/` los escribe el autor: nada los sobreescribe sin su aprobación. Todo lo demás se regenera desde ellos.
 

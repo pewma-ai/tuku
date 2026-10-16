@@ -25,15 +25,15 @@ to: 2026-09-01
 ## Martes 25 de agosto
 
 > [!todo] Pendientes del día
-> - [[arriendo-depto-centro]] - avisar de los GGCC al arrendatario
+> - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) - avisar de los GGCC al arrendatario
 
-- 09:12 - [[ambito]] **clasificacion**: cuerpo
-- 14:30 - [[ambito]] **clasificacion**: cuerpo
+- 09:12 - [ambito](ruta) **clasificacion**: cuerpo
+- 14:30 - [ambito](ruta) **clasificacion**: cuerpo
 
 ## Miércoles 26 de agosto
 
 > [!todo] Pendientes del día
-> - [[personal]] - pagar la sesión con el psicólogo
+> - [personal](ambitos/personal/personal.md) - pagar la sesión con el psicólogo
 ```
 
 Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku todo propagate`. Se distingue sin marca: los registros empiezan por `- HH:MM - `.
@@ -58,7 +58,7 @@ to: 2026-09-01
 
 ## Martes 25 de agosto
 (pendientes de ese día, aplanados)
-- 09:12 - [[ambito]] **clasificacion**: cuerpo
+- 09:12 - [ambito](ruta) **clasificacion**: cuerpo
 
 # Resumen del ciclo
 

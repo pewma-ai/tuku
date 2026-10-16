@@ -32,6 +32,7 @@ import gherkin  # noqa: E402
 from tuku import todo  # noqa: E402
 
 SLUG = "003-08-el-mismo-vault-otro-arnes"
+PERSONAL = "[personal](ambitos/personal/personal.md)"
 TITULO = "otro agente, el mismo comando"
 DIA = "## Martes 11 de agosto"
 
@@ -105,7 +106,7 @@ def test_003_08_la_traduccion_es_la_misma_que_con_el_otro_arnes() -> None:
 def test_003_08_el_registro_queda_igual_de_bien_puesto() -> None:
     """Hora y ámbito, que son lo cerrado. El cuerpo lo redacta él."""
     linea = _registro(_corrida())
-    assert linea.startswith("- 09:12 - [[personal]]"), f"hora o ámbito distintos: {linea}"
+    assert linea.startswith(f"- 09:12 - {PERSONAL}"), f"hora o ámbito distintos: {linea}"
     puestas = [m for m in (todo.ABRE, todo.CIERRA, "**cadencia**") if m in linea]
     assert not puestas, f"marcó {puestas} un hecho que no abrió ni cerró nada: {linea}"
 

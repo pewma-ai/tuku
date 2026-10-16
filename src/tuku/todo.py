@@ -1,6 +1,6 @@
 """tuku todo open / tuku todo close: las dos consecuencias deterministas.
 
-Fase 2 de `devel/epics.md`. `**pendiente**` abre, `~~(Hecho)~~` cierra
+Fase 2 de `devel/epics.md`. `**pendiente**` abre, `(Hecho)` cierra
 (`spec/bitacora.md`). El cuerpo es el mismo texto en los tres lugares: el
 registro que abre, la fila de `PENDIENTES.md` y el registro que cierra. **Abrir
 es copiar, cerrar es encontrar y borrar.** Ninguna de las dos interpreta nada, y
@@ -30,23 +30,31 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 
+from tuku import link
 from tuku.resultado import Resultado
 
 ABRE = "**pendiente**"
-CIERRA = "~~(Hecho)~~"
+CIERRA = "(Hecho)"
 
 #: Un registro con marca de la ontología cerrada. La clasificación abierta que
 #: puede venir después de la marca no participa: no cambia la consecuencia.
 _REGISTRO = re.compile(
     r"^- \d{2}:\d{2} - "
-    r"(?:\[\[(?P<ambito>[^\]\n]+)\]\] )?"
-    r"(?P<marca>\*\*pendiente\*\*|~~\(Hecho\)~~)"
+    rf"(?:(?P<ambito>{link.ENLACE}) )?"
+    r"(?P<marca>\*\*pendiente\*\*|\(Hecho\))"
     r"(?: \*\*[^*\n]+\*\*)?"
     r": (?P<cuerpo>.+)$"
+)
+
+#: Un cierre tal como llega por `--body`, con o sin clasificación abierta y con
+#: el cuerpo tachado o sin tachar.
+_CIERRE_ENTRADA = re.compile(
+    r"^\(Hecho\)(?P<clasif> \*\*[^*\n]+\*\*)?: (?P<cuerpo>.+)$"
 )
 
 #: Una fila de la tabla: cuatro celdas. La cabecera y el separador tienen la
@@ -55,8 +63,6 @@ _FILA = re.compile(
     r"^\|(?P<horizonte>[^|\n]*)\|(?P<cuando>[^|\n]*)\|"
     r"(?P<ambito>[^|\n]*)\|(?P<cuerpo>[^|\n]*)\|\s*$"
 )
-
-_ENLACE = re.compile(r"^\[\[(?P<ambito>[^\]\n]+)\]\]$")
 
 CABECERA = "| Horizonte | Cuándo | Ámbito | Detalle |"
 
@@ -94,8 +100,9 @@ class Fila:
     ambito: str | None
     cuerpo: str
 
-    def linea(self) -> str:
-        ambito = f"[[{self.ambito}]]" if self.ambito else ""
+    def linea(self, rutas: Mapping[str, str] | None = None) -> str:
+        """La fila como línea de la tabla; el link se escribe desde `PENDIENTES.md`."""
+        ambito = link.enlace_ambito(self.ambito, "PENDIENTES.md", rutas) if self.ambito else ""
         return f"| {self.horizonte} | {self.cuando} | {ambito} | {self.cuerpo} |"
 
 
@@ -140,7 +147,50 @@ def parsear(linea: str) -> Marca | None:
     m = _REGISTRO.match(linea)
     if m is None:
         return None
-    return Marca(m.group("marca"), m.group("ambito"), m.group("cuerpo"))
+    enlace = m.group("ambito")
+    marca = m.group("marca")
+    cuerpo = m.group("cuerpo")
+    if marca == CIERRA:
+        cuerpo = _destachar(cuerpo)
+    return Marca(marca, link.nombre_de(enlace) if enlace else None, cuerpo)
+
+
+def _destachar(cuerpo: str) -> str:
+    """El cuerpo sin la tachadura que lo envuelve: `~~avisar~~` → `avisar`."""
+    m = re.fullmatch(r"~~(.+)~~", cuerpo.strip())
+    return m.group(1) if m else cuerpo
+
+
+def cierre(cuerpo: str) -> str:
+    """El cierre canónico: la marca a la vista y el cuerpo tachado.
+
+    `(Hecho): ~~avisar de los GGCC~~`. Lo tachado es lo que ya se hizo, y la
+    marca queda legible para el lector y para el comando.
+    """
+    return f"{CIERRA}: ~~{_destachar(cuerpo)}~~"
+
+
+def canonizar(body: str) -> str:
+    """El cuerpo de un registro con su cierre en forma canónica, si es un cierre.
+
+    Acepta `(Hecho): cuerpo` y `(Hecho): ~~cuerpo~~`, con o sin clasificación
+    abierta, y escribe siempre la misma. Cualquier otro cuerpo vuelve igual:
+    quien dicta no necesita saber dónde va la tachadura.
+    """
+    m = _CIERRE_ENTRADA.match(body.strip())
+    if m is None:
+        return body.strip()
+    return f"{CIERRA}{m.group('clasif') or ''}: ~~{_destachar(m.group('cuerpo'))}~~"
+
+
+def clave(cuerpo: str) -> str:
+    """Con qué se compara el cuerpo de un pendiente: sin links y sin espacios sobrantes.
+
+    El mismo pendiente puede llevar un link en la bitácora y no llevarlo en
+    `PENDIENTES.md`, o al revés. Al buscar cuál cerrar, o si ya existe, lo que
+    cuenta es lo que se lee.
+    """
+    return link.sin_links(cuerpo).strip()
 
 
 def _es_separador(linea: str) -> bool:
@@ -158,11 +208,10 @@ def _parsear_fila(linea: str) -> Fila | None:
     if horizonte == "Horizonte" and m.group("cuerpo").strip() == "Detalle":
         return None
     ambito = m.group("ambito").strip()
-    enlace = _ENLACE.match(ambito)
     return Fila(
         horizonte,
         m.group("cuando").strip(),
-        enlace.group("ambito") if enlace else None,
+        link.nombre_de(ambito) if ambito else None,
         m.group("cuerpo").strip(),
     )
 
@@ -218,6 +267,7 @@ def abrir(
     when: str = "",
     cuando: str | None = None,
     escalera: tuple[str, ...] = ESCALERA,
+    rutas: Mapping[str, str] | None = None,
 ) -> str:
     """Copia el cuerpo del registro como fila. Idempotente.
 
@@ -239,7 +289,7 @@ def abrir(
     ini, fin = _rango_tabla(lineas)
     existentes = [f for linea in lineas[ini:fin] if (f := _parsear_fila(linea))]
 
-    if fila in existentes:
+    if any(_misma_fila(f, fila) for f in existentes):
         return pendientes
 
     clave = _clave(fila, escalera)
@@ -247,9 +297,36 @@ def abrir(
         (i for i, f in enumerate(existentes) if _clave(f, escalera) > clave), len(existentes)
     )
     corte = ini + desplazamiento
-    nuevas = [*lineas[:corte], fila.linea(), *lineas[corte:]]
+    nuevas = [*lineas[:corte], fila.linea(rutas), *lineas[corte:]]
     texto = "\n".join(nuevas)
     return texto + "\n" if pendientes.endswith("\n") else texto
+
+
+def _misma_fila(a: Fila, b: Fila) -> bool:
+    """Dos filas son la misma si solo difieren en los links de su detalle."""
+    return (a.horizonte, a.cuando, a.ambito, clave(a.cuerpo)) == (
+        b.horizonte,
+        b.cuando,
+        b.ambito,
+        clave(b.cuerpo),
+    )
+
+
+def reemplazar_cuerpo(pendientes: str, viejo: str, nuevo: str) -> tuple[str, bool]:
+    """Cambia el detalle de la fila que dice `viejo` por `nuevo`. Conserva el resto.
+
+    Encuentra la fila comparando sin links, así que sirve aunque la bitácora
+    lleve un link que la tabla no tiene.
+    """
+    lineas = pendientes.splitlines(keepends=True)
+    buscado = clave(viejo)
+    for i, linea in enumerate(lineas):
+        fila = _parsear_fila(linea.rstrip("\n"))
+        m = _FILA.match(linea.rstrip("\n"))
+        if fila is not None and m is not None and clave(fila.cuerpo) == buscado:
+            lineas[i] = linea[: m.start("cuerpo")] + f" {nuevo} " + linea[m.end("cuerpo") :]
+            return "".join(lineas), True
+    return pendientes, False
 
 
 def horizontes(pendientes: str) -> list[str]:
@@ -287,22 +364,22 @@ def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]
 
     1. Un `**pendiente**` que no está en la tabla, salvo que el mismo ciclo lo
        cierre después: abrir y cerrar el mismo día no deja fila, y está bien.
-    2. Un `~~(Hecho)~~` cuyo cuerpo sigue en la tabla.
+    2. Un `(Hecho)` cuyo cuerpo sigue en la tabla.
     """
     marcas = [m for linea in ahora.splitlines() if (m := parsear(linea))]
-    abiertos = [m.cuerpo for m in marcas if m.marca == ABRE]
-    cerrados = {m.cuerpo for m in marcas if m.marca == CIERRA}
-    en_tabla = set(cuerpos(pendientes))
+    abiertos = {clave(m.cuerpo): m.cuerpo for m in marcas if m.marca == ABRE}
+    cerrados = {clave(m.cuerpo) for m in marcas if m.marca == CIERRA}
+    en_tabla = {clave(c) for c in cuerpos(pendientes)}
 
     faltan = [
-        ConsecuenciaPendiente(c, ABRE)
-        for c in dict.fromkeys(abiertos)
-        if c not in en_tabla and c not in cerrados
+        ConsecuenciaPendiente(cuerpo, ABRE)
+        for k, cuerpo in abiertos.items()
+        if k not in en_tabla and k not in cerrados
     ]
     faltan += [
         ConsecuenciaPendiente(m.cuerpo, CIERRA)
         for m in marcas
-        if m.marca == CIERRA and m.cuerpo in en_tabla
+        if m.marca == CIERRA and clave(m.cuerpo) in en_tabla
     ]
     return faltan
 
@@ -316,7 +393,7 @@ def duplicados(pendientes: str) -> list[str]:
     """
     vistos: dict[str, int] = {}
     for fila in filas(pendientes):
-        vistos[fila.cuerpo] = vistos.get(fila.cuerpo, 0) + 1
+        vistos[clave(fila.cuerpo)] = vistos.get(clave(fila.cuerpo), 0) + 1
     return [cuerpo for cuerpo, veces in vistos.items() if veces > 1]
 
 
@@ -332,7 +409,7 @@ def cerrar(pendientes: str, marca: Marca) -> tuple[str, bool]:
     lineas = pendientes.splitlines()
     for i, linea in enumerate(lineas):
         f = _parsear_fila(linea)
-        if f is not None and f.cuerpo == marca.cuerpo:
+        if f is not None and clave(f.cuerpo) == clave(marca.cuerpo):
             restantes = [*lineas[:i], *lineas[i + 1 :]]
             texto = "\n".join(restantes)
             return (texto + "\n" if pendientes.endswith("\n") else texto), True
@@ -384,13 +461,20 @@ def abrir_en_vault(
         ahora_path = archivo_vault(vault, "AHORA.md")
         ahora_actual = ahora_path.read_text(encoding="utf-8")
         ya_abierto = any(
-            (m := parsear(lin)) is not None and m.marca == ABRE and m.cuerpo == marca.cuerpo
+            (m := parsear(lin)) is not None
+            and m.marca == ABRE
+            and clave(m.cuerpo) == clave(marca.cuerpo)
             for lin in ahora_actual.splitlines()
         )
         if not ya_abierto:
             dia_encabezado = encabezado_de(day or date.today())
             hora = hour or datetime.now().strftime("%H:%M")
-            linea = componer(hora=hora, scope=limpio_scope, body=f"{ABRE}: {marca.cuerpo}")
+            linea = componer(
+                hora=hora,
+                scope=limpio_scope,
+                body=f"{ABRE}: {marca.cuerpo}",
+                rutas=ambitos.rutas(vault),
+            )
             try:
                 ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
                 ahora_path.write_text(ahora_texto, encoding="utf-8")
@@ -405,6 +489,7 @@ def abrir_en_vault(
             horizon=horizon,
             when=when,
             escalera=escalera,
+            rutas=ambitos.rutas(vault),
         ),
         encoding="utf-8",
     )
@@ -447,7 +532,7 @@ def cerrar_en_vault(
 
     ambito_encontrado: str | None = None
     for f in filas(pendientes_texto):
-        if f.cuerpo == marca.cuerpo:
+        if clave(f.cuerpo) == clave(marca.cuerpo):
             ambito_encontrado = f.ambito
             break
 
@@ -459,14 +544,23 @@ def cerrar_en_vault(
         ahora_path = archivo_vault(vault, "AHORA.md")
         ahora_actual = ahora_path.read_text(encoding="utf-8")
         ya_cerrado = any(
-            (m := parsear(lin)) is not None and m.marca == CIERRA and m.cuerpo == marca.cuerpo
+            (m := parsear(lin)) is not None
+            and m.marca == CIERRA
+            and clave(m.cuerpo) == clave(marca.cuerpo)
             for lin in ahora_actual.splitlines()
         )
         if not ya_cerrado:
             ambito_final = scope if scope is not None else ambito_encontrado
             dia_encabezado = encabezado_de(day or date.today())
             hora = hour or datetime.now().strftime("%H:%M")
-            linea = componer(hora=hora, scope=ambito_final, body=f"{CIERRA}: {marca.cuerpo}")
+            from tuku import scope as ambitos
+
+            linea = componer(
+                hora=hora,
+                scope=ambito_final,
+                body=cierre(marca.cuerpo),
+                rutas=ambitos.rutas(vault),
+            )
             try:
                 ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
                 ahora_path.write_text(ahora_texto, encoding="utf-8")

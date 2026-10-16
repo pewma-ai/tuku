@@ -34,7 +34,7 @@ DELTA_DE_UN_REGISTRO = {
     "ambitos/personal/personal.md": "modificado",
 }
 
-MARCAS_CERRADAS = ("**pendiente**", "~~(Hecho)~~", "**cadencia**")
+MARCAS_CERRADAS = ("**pendiente**", "(Hecho)", "**cadencia**")
 
 sin_arnes = pytest.mark.skipif(
     not agente.disponible(), reason=agente.motivo_no_disponible() or ""

@@ -2,7 +2,7 @@
 
 > **Principio:** [P2 (organización emergente)](../../docs/principios.md#L17), [P4 (determinismo)](../../docs/principios.md#L33), [P5 (reglas en prosa)](../../docs/principios.md#L47) · **Brief:** [Ontologías y lenguaje del autor](../../docs/brief.md#L23) · **Spec:** [`spec/bitacora.md`](../../spec/bitacora.md)
 
-`tuku entry lint` verifica la integridad de las marcas en la bitácora: la ontología cerrada (`**pendiente**`, `~~(Hecho)~~`, `**cadencia**`) es estricta y rechaza errores de tipeo; la ontología abierta es libre y permisiva para que el vocabulario propio emerja sin trabas. Los linters informan y jamás modifican el vault.
+`tuku entry lint` verifica la integridad de las marcas en la bitácora: la ontología cerrada (`**pendiente**`, `(Hecho)`, `**cadencia**`) es estricta y rechaza errores de tipeo; la ontología abierta es libre y permisiva para que el vocabulario propio emerja sin trabas. Los linters informan y jamás modifican el vault.
 
 ## Estado inicial
 
@@ -39,7 +39,7 @@ Y la línea original permanece intacta en `AHORA.md` (no se censura la voz del a
 Dado el vault con el ciclo abierto del 10 al 16 de agosto
 Cuando se agrega a mano un día fuera de ese rango y se valida
 ```bash
-printf '\n## Martes 25 de agosto\n\n- 08:00 - [[personal]] **progreso**: revisé la bodega\n' >> mi-vault/AHORA.md
+printf '\n## Martes 25 de agosto\n\n- 08:00 - [personal](ambitos/personal/personal.md) **progreso**: revisé la bodega\n' >> mi-vault/AHORA.md
 tuku entry lint --vault mi-vault
 ```
 Entonces el lint reporta el día fuera del ciclo abierto y no inventa días intermedios
