@@ -9,6 +9,7 @@ from datetime import date
 from pathlib import Path
 
 from tuku import style, vocab
+from tuku.cli import manual
 from tuku.cli.helpers import (
     ENTORNO,
     EXITO,
@@ -35,6 +36,7 @@ def _cmd_init(args: argparse.Namespace) -> int:
             author=args.author,
             desde=args.date,
             force=args.force,
+            comandos=manual.del_cli(),
         )
     except (DestinoNoVacio, DestinoProhibido, MarcadorAutorFaltante) as e:
         print(f"tuku init: {e}", file=sys.stderr)
@@ -91,7 +93,9 @@ def _cmd_fix(args: argparse.Namespace) -> int:
 def _cmd_rebuild(args: argparse.Namespace) -> int:
     from tuku import rebuild
 
-    return traducir(rebuild.reconstruir(args.vault), "tuku rebuild")
+    return traducir(
+        rebuild.reconstruir(args.vault, comandos=manual.del_cli()), "tuku rebuild"
+    )
 
 
 def registrar(

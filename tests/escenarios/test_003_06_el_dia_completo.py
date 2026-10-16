@@ -30,7 +30,7 @@ import agente  # noqa: E402
 import gherkin  # noqa: E402
 import vault  # noqa: E402
 
-from tuku import todo  # noqa: E402
+from tuku import scope, todo  # noqa: E402
 
 SLUG = "003-06-el-dia-completo"
 TITULO = "el día dictado entero"
@@ -87,10 +87,16 @@ def _ambito_de(linea: str) -> str | None:
 
 
 def _registros(dia: str) -> dict[str, str]:
-    """Los registros de un día, por hora. Falla si una hora se escribió dos veces."""
+    """Los registros dictados de un día, por hora. Falla si una hora se escribió dos veces.
+
+    La constancia de `scope create` no cuenta: no la dictó el autor, y su hora
+    la elige el agente (o es la del reloj), así que puede caer en una ya usada.
+    """
     por_hora: dict[str, str] = {}
     for linea in dia.splitlines():
         if not linea.startswith("- ") or " - " not in linea:
+            continue
+        if linea.endswith(scope.CONSTANCIA):
             continue
         hora = linea[2:].split(" - ", 1)[0]
         assert hora not in por_hora, f"dos registros a las {hora}:\n{dia}"
@@ -165,6 +171,16 @@ def test_003_06_el_ambito_nuevo_enlaza_hacia_atras() -> None:
     assert "[depto-centro](ambitos/depto-centro/depto-centro.md)" in linea.split(") ", 1)[1], (
         f"la mención al frente no quedó enlazada hacia atrás: {linea}"
     )
+
+
+@pytest.mark.agentic
+@sin_arnes
+def test_003_06_abrir_el_ambito_dejo_su_constancia() -> None:
+    """Una sola constancia, en el martes 11 y en `depto-centro`. La hora no se exige."""
+    martes = _dia(gherkin.correr(SLUG, TITULO), MARTES)
+    constancias = [lin for lin in martes.splitlines() if lin.endswith(scope.CONSTANCIA)]
+    assert len(constancias) == 1, f"se esperaba una constancia de scope create:\n{martes}"
+    assert _ambito_de(constancias[0]) == vault.nombre_comparable("depto-centro"), constancias[0]
 
 
 @pytest.mark.agentic
@@ -254,6 +270,7 @@ if __name__ == "__main__":
     test_003_06_la_traduccion_es_la_del_dia_completo()
     test_003_06_cada_registro_del_martes_calza_con_la_tabla_de_verdad()
     test_003_06_el_ambito_nuevo_enlaza_hacia_atras()
+    test_003_06_abrir_el_ambito_dejo_su_constancia()
     test_003_06_los_dos_cierres_encontraron_su_pareja()
     test_003_06_solo_queda_abierto_el_pendiente_de_manana()
     test_003_06_el_miercoles_abre_con_su_pendiente_propagado()

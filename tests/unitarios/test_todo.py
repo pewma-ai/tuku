@@ -390,3 +390,70 @@ def test_reemplazar_cuerpo_busca_sin_links_y_conserva_el_resto() -> None:
 def test_reemplazar_cuerpo_sin_pareja_no_cambia_nada() -> None:
     tabla = _tabla(SIN_LINK)
     assert todo.reemplazar_cuerpo(tabla, "otra cosa", "x") == (tabla, False)
+
+
+# --- lint: lo que reporta `tuku todo lint` -----------------------------------
+
+
+def test_lint_sobre_una_tabla_sana_no_reporta_nada() -> None:
+    assert todo.lint(_con("| esta semana |  |  | una cosa |")) == []
+
+
+def test_lint_reporta_duplicados_con_su_correccion() -> None:
+    texto = _con(
+        "| esta semana |  |  | avisar de los GGCC |",
+        "| con fecha | 2026-08-12 |  | avisar de los GGCC |",
+    )
+    (hallazgo,) = todo.lint(texto)
+    assert hallazgo.startswith("PENDIENTES.md: error:") and "una sola" in hallazgo
+
+
+def test_lint_reporta_una_marca_sin_su_fila_y_nombra_el_comando_original() -> None:
+    ahora = "## Martes 11 de agosto\n\n- 14:20 - **pendiente**: avisar de los GGCC\n"
+    (hallazgo,) = todo.lint(VACIA, ahora)
+    assert hallazgo.startswith("AHORA.md: error:") and "tuku todo open" in hallazgo
+
+
+def test_lint_sin_ahora_no_cruza_marcas() -> None:
+    assert todo.lint(VACIA, None) == []
+
+
+def test_lint_reporta_una_vista_que_difiere_y_nombra_propagate() -> None:
+    vistas: dict[str, tuple[str | None, str]] = {
+        "ambitos/PENDIENTES-AMBITOS.md": ("viejo", "nuevo"),
+        "AHORA.md": ("igual", "igual"),
+    }
+    (hallazgo,) = todo.lint(VACIA, vistas=vistas)
+    assert hallazgo.startswith("ambitos/PENDIENTES-AMBITOS.md: error:")
+    assert "tuku todo propagate" in hallazgo
+
+
+def test_lint_reporta_una_vista_que_falta() -> None:
+    (hallazgo,) = todo.lint(VACIA, vistas={"ambitos/PENDIENTES-AMBITOS.md": (None, "x")})
+    assert "tuku todo propagate" in hallazgo
+
+
+# --- cuando_por_dia: escribir en un día futuro es fecharlo -------------------
+
+
+def test_un_dia_futuro_sin_when_fecha_el_pendiente() -> None:
+    from datetime import date
+
+    assert todo.cuando_por_dia("", date(2026, 8, 13), date(2026, 8, 11)) == "2026-08-13"
+
+
+def test_hoy_y_el_pasado_no_fechan() -> None:
+    from datetime import date
+
+    hoy = date(2026, 8, 11)
+    assert todo.cuando_por_dia("", hoy, hoy) == ""
+    assert todo.cuando_por_dia("", date(2026, 8, 10), hoy) == ""
+    assert todo.cuando_por_dia("", None, hoy) == ""
+
+
+def test_un_when_explicito_manda_sobre_el_dia() -> None:
+    from datetime import date
+
+    assert todo.cuando_por_dia("2026-08-20", date(2026, 8, 13), date(2026, 8, 11)) == (
+        "2026-08-20"
+    )

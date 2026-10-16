@@ -26,8 +26,13 @@ def archivos_derivados(vault: Path) -> list[Path]:
     return [vault / rel for rel in ARCHIVOS_DERIVADOS]
 
 
-def reconstruir(vault: Path) -> Resultado:
-    """Borra y reconstruye los archivos y secciones derivadas del vault."""
+def reconstruir(vault: Path, *, comandos: str | None = None) -> Resultado:
+    """Borra y reconstruye los archivos y secciones derivadas del vault.
+
+    `comandos`, si se pasa, es `reglas/comandos.tuku.md` tal como lo escribe el
+    `tuku` instalado: es derivado de él, no del conjunto canónico, y reescribirlo
+    es la forma de ponerlo al día tras actualizar TUKU.
+    """
     # 1. Validar canónico antes de tocar disco
     try:
         ruta_pendientes = archivo_vault(vault, "PENDIENTES.md")
@@ -84,6 +89,10 @@ def reconstruir(vault: Path) -> Resultado:
     ruta_ambitos.parent.mkdir(parents=True, exist_ok=True)
     ruta_ambitos.write_text(documento, encoding="utf-8")
     regenerados.append(str(ARCHIVO_AMBITOS))
+
+    if comandos is not None and (vault / "reglas").is_dir():
+        (vault / "reglas" / "comandos.tuku.md").write_text(comandos, encoding="utf-8")
+        regenerados.append("reglas/comandos.tuku.md")
 
     n = len(regenerados)
     lista = ", ".join(sorted(set(regenerados)))

@@ -62,7 +62,7 @@ Y el linter finaliza con código 0 (`EXITO`)
 Dado un vault limpio recién sembrado con su ámbito
 ```bash
 tuku init vault-limpio --date 2026-08-11
-tuku scope create depto-centro --vault vault-limpio
+tuku scope create depto-centro --vault vault-limpio --day 2026-08-11 --hour 18:45
 ```
 Cuando se crea la nota
 ```bash

@@ -41,10 +41,10 @@ AGENTS.md                     # reglas de todo el repo
 LIBRO-DE-ESTILO.md            # reglas del autor, canónico
 AHORA.md                      # ciclo en curso
 PENDIENTES.md                 # fuente de verdad
-log.md                        # generado, OKF compliant
-index.md                      # generado, OKF compliant
+log.md                        # generado, OKF compliant. Todavía no existe
+index.md                      # generado, OKF compliant. Todavía no existe
 
-bitacoras/                    # ciclos cerrados, inmutables
+bitacoras/                    # ciclos cerrados, inmutables. Aparece al cerrar el primero (epic 006)
   bitacora-2026-08-25-2026-09-01.md
 
 ambitos/                      # el árbol de la vida
@@ -68,34 +68,38 @@ ambitos/                      # el árbol de la vida
 
 notas/                        # zettelkasten, formato libre
 
-reglas/                       # una regla por consecuencia
-  pendientes.tuku.md
-  enlaces.tuku.md
-  cadencias.tuku.md
-  propuestas.tuku.md
-  comandos.tuku.md            # qué hace cada comando
+reglas/                       # la prosa de cada automatismo, y la configuración
+  bitacora.tuku.md            # cómo se escribe un registro
+  notas.tuku.md               # cómo se escribe una nota
+  comandos.tuku.md            # qué hace cada comando y cómo a mano. Lo escribe `tuku init`
   config.tuku.md              # TZ, cycle_type, tuku_template, tuku_version, origen
   types.md                    # los `type` que el vault reconoce
   plantilla/
     AHORA.md                  # de aquí sale un ciclo nuevo
-  tipos/                      # una por tipo de nota
+  pendientes.tuku.md          # todavía no existe
+  enlaces.tuku.md             # todavía no existe
+  cadencias.tuku.md           # todavía no existe (epic 006)
+  propuestas.tuku.md          # todavía no existe (epic 007)
+  tipos/                      # una por tipo de nota. Todavía no existe
     persona.tuku.md
 
-planes/                       # un plan por ciclo
+procesos/                     # los que el autor invoca por su nombre. Aparece con el primero
+
+planes/                       # un plan por ciclo. Todavía no existe (epic 006)
   plan-2026-08-25-turno.md
 
-reportes/                     # generados, el autor los lee
+reportes/                     # generados, el autor los lee. Todavía no existe (epic 006)
   resumen-2026-08-25-turno.md
   cadencias.md                # todas, colectadas del árbol
 
-archivado/                    # ramas cerradas, enlaces vivos
+archivado/                    # ramas cerradas, enlaces vivos. Todavía no existe (epic 006)
 ```
 
 **MAYÚSCULAS es de TUKU**, minúsculas es del autor. Se lee del árbol sin explicación.
 
-Y no hay nada más en el disco. **Todo lo que existe, el autor lo puede abrir y leer.** No hay carpeta de cache ni archivos de máquina.
+Lo marcado "todavía no existe" es diseño: el árbol lo muestra para que se sepa dónde va, y el vault sembrado hoy trae el resto. Fuera de este árbol no hay nada más en el disco. **Todo lo que existe, el autor lo puede abrir y leer.** No hay carpeta de cache ni archivos de máquina.
 
-El contexto reciente y el vocabulario de ámbitos no son archivos: son la **salida de un comando**, que se calcula cuando hace falta y se inyecta. Materializarlos solo agregaría copias que envejecen, porque una cola de bitácora queda vieja apenas se escribe el registro siguiente. Calcularla en el momento es más simple y además más correcto.
+El contexto reciente y el vocabulario de ámbitos no son archivos: son la **salida de un comando**, que se calcula cuando hace falta y se inyecta. Materializarlos solo agregaría copias que envejecen, porque una cola de bitácora queda vieja apenas se escribe el registro siguiente. Calcularla en el momento es más simple y además más correcto. Esos comandos todavía no existen: hoy el agente lee `AHORA.md` y `ambitos/` directamente ([`../TODO.md`](../TODO.md)).
 
 Lo que sí se materializa, aunque sea generado, es lo que alguien mira o transcluye: `ambitos/PENDIENTES-AMBITOS.md` lo transcluyen las páginas de ámbito, y `reportes/cadencias.md` es donde el autor ve qué se le viene.
 
@@ -119,23 +123,19 @@ Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de `reglas/t
 
 ## Dónde viven los comandos
 
-La **especificación** vive en el repositorio del autor: `reglas/comandos.tuku.md` describe en prosa qué debe hacer cada comando, para que alguien pueda implementarlo en el futuro aunque el código de hoy ya no exista.
+La **especificación** viaja con el vault: `reglas/comandos.tuku.md` dice en prosa qué hace cada comando y cómo hacerlo a mano, para que alguien pueda operar el vault, o volver a implementar el comando, aunque el código de hoy ya no exista. Lo escribe `tuku init` desde la ayuda de cada comando (su párrafo y su línea "A mano", ver [cli.md](cli.md)) y lo reescribe `tuku rebuild`, porque es derivado: de la versión de `tuku` instalada, no del conjunto canónico.
 
-El **código** vive fuera del vault, en el paquete `tuku` que instala `pipx` o `uv tool install` (epic 001 de [`../devel/epics.md`](../devel/epics.md)). En el vault no hay código. El `AGENTS.md` de la raíz lo declara, así que quien opere el libro lo encuentra en el primer archivo que abre.
+El **código** vive fuera del vault, en el paquete `tuku` que instala `uv tool install` o `pipx` (epic 001 de [`../devel/epics.md`](../devel/epics.md)). En el vault no hay código. El `AGENTS.md` de la raíz lo declara, así que quien opere el libro lo encuentra en el primer archivo que abre.
 
 La división es la de siempre: **la especificación sobrevive, la implementación se reemplaza.** Un script de 2026 no va a correr en 2046, pero la descripción de lo que hacía sí se va a leer. Y así el repositorio del autor no se vuelve una copia del código de TUKU que después diverge por su cuenta.
 
-El nombre canónico de cada comando es su invocación, `tuku <noun> <verb>`, y ese es el encabezado con que se especifica. Cada uno se especifica igual:
+El nombre canónico de cada comando es su invocación, `tuku <noun> <verb>` (o `tuku <noun>` en los que no tienen verbo, como `init` y `doctor`), y ese es el encabezado con que se especifica. Cada uno se especifica igual:
 
 ```markdown
-## todo propagate
+## tuku todo propagate
 
-**Qué hace:** regenera las dos vistas derivadas de `PENDIENTES.md`, la región del día dentro de cada `## <día>` de `AHORA.md` y el archivo `ambitos/PENDIENTES-AMBITOS.md`. Es idempotente, y sobre un vault cuadrado no cambia nada.
-**Cuándo:** cada vez que `PENDIENTES.md` cambia.
-**Lee:** `PENDIENTES.md`, el árbol de `ambitos/`
-**Escribe:** `AHORA.md`, `ambitos/PENDIENTES-AMBITOS.md`
-**Regla:** pendientes.tuku.md
-**A mano:** recorrer `PENDIENTES.md` y reescribir a mano las dos vistas: bajo cada día de `AHORA.md`, entre el encabezado y el primer registro, los pendientes con fecha de ese día; y en `PENDIENTES-AMBITOS.md`, un callout por ámbito del árbol, con sus pendientes o con `SIN PENDIENTES`.
+**Qué hace:** Regenera, desde la tabla de `PENDIENTES.md`, las dos vistas derivadas: la región de cada día en `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md`. Las vistas se regeneran y no se reparan; sobre un vault cuadrado no cambia ningún archivo.
+**A mano:** bajo cada día de `AHORA.md` copiar los pendientes con esa fecha, y en `ambitos/PENDIENTES-AMBITOS.md` escribir un callout por ámbito.
 ```
 
 El campo **A mano** no es cortesía documental, es lo que sostiene el principio 1. Si un comando no se puede ejecutar, el trabajo se hace igual, solo que cuesta más. Un comando sin ese campo es una dependencia disfrazada.
@@ -144,7 +144,7 @@ El campo **A mano** no es cortesía documental, es lo que sostiene el principio 
 
 Cada spec declara su propio "no entra" en la sección correspondiente. A nivel de directorio:
 
-- **Los comandos reales, en código.** Este directorio especifica su contrato (qué leen, qué escriben, el campo "A mano", y en [cli.md](cli.md) lo que vale para todos); la implementación vive fuera del vault, en el paquete que instala `pipx`, y su plan de construcción vive en [`../devel/epics.md`](../devel/epics.md).
+- **Los comandos reales, en código.** Este directorio especifica su contrato (qué leen, qué escriben, el campo "A mano", y en [cli.md](cli.md) lo que vale para todos); la implementación vive fuera del vault, en el paquete que instala `uv tool install` o `pipx`, y su plan de construcción vive en [`../devel/epics.md`](../devel/epics.md).
 - **El orden de implementación y la estrategia de pruebas.** Eso es [`../devel/epics.md`](../devel/epics.md), no este directorio: aquí se especifica qué hace el sistema, no en qué fase se construye ni cómo se verifica.
 - **La deliberación con el autor** (archivar una rama, aprobar una propuesta). Se especifica la mecánica que la rodea, nunca el criterio para decidir.
 
@@ -154,11 +154,7 @@ Cada spec declara su propio "no entra" en la sección correspondiente. A nivel d
 
 - **`reglas/config.tuku.md` es una tabla**, y es lo único que leen las automatizaciones de ese archivo. Cinco campos hoy: `TZ`, la zona horaria con su nombre IANA, que decide qué día es HOY y por lo tanto qué está atrasado; `cycle_type`, el ritmo con que se abre y se cierra; `tuku_template`, la variante de la que salió el vault; `tuku_version`, la versión de TUKU con que se sembró, que `tuku doctor` compara con la de `~/.tuku` y avisa si el vault quedó atrás; y `origen`, la URL del repositorio, para saber dónde revisar cambios. `~/.tuku` es un artefacto de la instalación: trae `template/`, `docs/` y `spec/`, lleva el sello `tuku.version` y se reemplaza entero cuando ese sello no coincide con el `tuku` instalado. Los nombres de campo van en inglés, como el resto del frontmatter. La escribe `tuku init`, que toma la zona horaria de la máquina, y un callout en el archivo lo dice. Ningún dato nuevo destinado a una automatización se agrega al libro de estilo (ver [bitacora.md](bitacora.md), "dónde vive cada una"): va a esta tabla, y quien necesite mostrarlo la transcluye en vez de copiarla.
 
-## Decisiones abiertas
-
-- **Cómo se especifica una cadencia que se gatilla por un evento y no por una fecha.** El caso que lo destapó es el cierre del ciclo: la cadencia sembrada dice `Cuándo: viernes, semanal`, pero lo que la gatilla es que el ciclo termine, y el viernes deja de significar nada si el ciclo pasa a ser quincenal. La fecha es un síntoma del evento. La propuesta sobre la mesa es que `Cuándo` acepte dos gramáticas distinguidas por la primera palabra (todo lo que empieza con `al ` es evento, lo demás es calendario), que los eventos sean vocabulario cerrado en un `reglas/eventos.md` verificable por `tuku doctor`, porque cada evento es código que mira el vault, y que un evento que dura varios días emita una sola vez reusando la idempotencia del pendiente en vez de llevar un registro de eventos vistos. Queda por decidir, y lo decide el epic 006, que es donde entran las cadencias.
-- Si el ciclo es una primitiva propia o se compone sobre bitácora, pendientes y notas. Hoy [`../docs/principios.md`](../docs/principios.md) lo lista entre las primitivas pero lo describe como composición temporal.
-- **Decidido (2026-10-16): links Markdown con ruta relativa y `tuku fix`.** Era la decisión abierta "pasar de wikilinks de Obsidian a links Markdown". Lo decidido:
+- **Links Markdown con ruta relativa y `tuku fix`** (2026-10-16). Era la decisión abierta "pasar de wikilinks de Obsidian a links Markdown". Lo decidido:
   1. **El link es `[texto](ruta/relativa.md)`, relativa al archivo que lo contiene.** Nada de rutas desde la raíz. Como el mismo registro vive en `AHORA.md`, en la página del ámbito y, al cerrar el ciclo, en `bitacoras/`, quien copia una línea de un archivo a otro recalcula las rutas: lo hacen `tuku todo propagate` y las páginas de ámbito, y lo hará el archivado del epic 006.
   2. **La transclusión de Obsidian es parte del estándar de TUKU.** `![[archivo.md#^ancla]]` se queda, igual que los callouts `> [!todo]`. Es el único wikilink admitido y se reconoce por el `!` inicial.
   3. **`tuku doctor [TEMA]` y `tuku fix TEMA`.** Sin tema, `doctor` revisa todo; con tema, solo ese. Todo tema tiene su `fix`. Si el arreglo es determinista, `fix` lo aplica; si no, no escribe y devuelve las decisiones que le tocan al autor. Hoy el único tema es `link`. Ver [cli.md](cli.md).
@@ -166,3 +162,9 @@ Cada spec declara su propio "no entra" en la sección correspondiente. A nivel d
   5. **El template no trae `.obsidian`.** Obsidian, con su configuración por defecto, escribe wikilinks cuando el autor enlaza a mano, así que `doctor link` y `fix link` son un flujo recurrente y no una migración única.
   6. **`fix link` alcanza todo el vault, incluidos los ciclos cerrados.** Cambia el formato sin agregar enlaces: es reparar, no enriquecer el pasado ([ambitos.md](ambitos.md)).
   7. **`tuku link backfill` y el sustantivo `link` desaparecen.** `tuku scope create` ya enlaza hacia atrás y es idempotente.
+
+## Decisiones abiertas
+
+- **Cómo se especifica una cadencia que se gatilla por un evento y no por una fecha.** El caso que lo destapó es el cierre del ciclo: la cadencia sembrada dice `Cuándo: viernes, semanal`, pero lo que la gatilla es que el ciclo termine, y el viernes deja de significar nada si el ciclo pasa a ser quincenal. La fecha es un síntoma del evento. La propuesta sobre la mesa es que `Cuándo` acepte dos gramáticas distinguidas por la primera palabra (todo lo que empieza con `al ` es evento, lo demás es calendario), que los eventos sean vocabulario cerrado en un `reglas/eventos.md` verificable por `tuku doctor`, porque cada evento es código que mira el vault, y que un evento que dura varios días emita una sola vez reusando la idempotencia del pendiente en vez de llevar un registro de eventos vistos. Queda por decidir, y lo decide el epic 006, que es donde entran las cadencias.
+- Si el ciclo es una primitiva propia o se compone sobre bitácora, pendientes y notas. Hoy [`../docs/glosario.md`](../docs/glosario.md) lo lista entre las primitivas, y [`../docs/principios.md`](../docs/principios.md) no lo nombra entre ellas.
+- **Cómo se suman las magnitudes de la capacidad.** Dónde vive la capacidad está decidido (arriba), pero no qué queda de un día al restarle `casi todo el día` y `un rato`, ni cómo se combinan dos costos el mismo día. Lo decide el epic 006 con casos reales, que es donde entran los planes.

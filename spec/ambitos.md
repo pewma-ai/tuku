@@ -53,8 +53,7 @@ Cómo se comparan los tres archivos por directorio:
 
 **Si se declara un bruto, va en `ambitos/personal/`**, porque el bruto es uno solo: el tiempo de la persona no se reparte por ámbito, se gasta en ellos. Un ámbito sin `CAPACIDAD.md` no cobra costo fijo, que es el caso por defecto. Y sin bruto declarado en ninguna parte, no hay dimensionamiento: los costos fijos quedan como advertencias sueltas en el plan, sin nada de qué restarse.
 
-> [!question] Propuesta de diseño, no decisión tomada #REVISAR
-> El reparto bruto en `personal/` más costos fijos acumulables en el resto es propuesta mía, derivada de lo que ya dice `ciclo.md`. La alternativa sería que cada ámbito declare su capacidad asignada y el total sea la suma, que es más simétrico pero obliga al autor a repartir por adelantado, antes de saber en qué se le va el ciclo.
+Se descartó la alternativa de que cada ámbito declare cuánto tiempo se le asigna y el total sea la suma: es más simétrica, pero obliga al autor a repartir por adelantado, antes de saber en qué se le va el ciclo, y deja con cero a un ámbito que no declaró nada. Cómo se suman las magnitudes sigue abierto ([README.md](README.md), "Decisiones abiertas").
 
 ## Transclusión de pendientes
 
@@ -64,11 +63,17 @@ Toda página de ámbito debe transcluir sus pendientes desde `PENDIENTES-AMBITOS
 ![[../PENDIENTES-AMBITOS.md#^personal]]
 ```
 
-`tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito, asegura su callout en `PENDIENTES-AMBITOS.md` y estampa una constancia cronológica en `AHORA.md` (con fallback a la fecha actual **HOY** y hora actual **AHORA** en `TZ`).
+`tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito, asegura su callout en `PENDIENTES-AMBITOS.md` y estampa una constancia cronológica en `AHORA.md`, con `--day` y `--hour` o, si faltan, HOY y AHORA en `TZ`:
+
+```text
+- 18:45 - [depto-centro](ambitos/depto-centro/depto-centro.md) **nota**: abrí el ámbito
+```
+
+La constancia la deja solo quien crea la carpeta. Un día fuera del ciclo abierto se rechaza antes de crear nada, igual que en `tuku note create`.
 
 ### Idempotencia y reparación con el comando original
 
-`tuku scope create` es estrictamente idempotente: ejecutarlo sobre un ámbito ya existente no sobreescribe sus reglas ni duplica callouts en `PENDIENTES-AMBITOS.md` ni registros en `AHORA.md`.
+`tuku scope create` es estrictamente idempotente: ejecutarlo sobre un ámbito ya existente no sobreescribe sus reglas ni duplica callouts en `PENDIENTES-AMBITOS.md`, y no escribe otra constancia en `AHORA.md`, ni en este ciclo ni en uno posterior.
 
 El comando `tuku scope lint` (y `tuku doctor`) verifica estructuralmente:
 1. Que ningún registro en `AHORA.md` apunte a una categoría.
@@ -99,6 +104,8 @@ Lo que hay que resolver en cada archivado:
 - **Cadencias vigentes.** Dejan de emitir, pero hay que decidir si se archivan con la rama o se reasignan.
 - **Enlaces desde bitácoras ya cerradas.** Este es el que pesa para el principio 1: si archivar rompe enlaces de bitácoras de hace dos años, el archivo histórico deja de ser legible. Como los links son rutas relativas al archivo, **el archivado recalcula la ruta de cada link** de lo que mueve a `bitacoras/` (epic 006; no se implementa todavía).
 
+Las dos primeras son decisiones y se resuelven conversando. La tercera es trabajo, y es la que hace cara la operación.
+
 ## Cómo se enlaza un ámbito
 
 El enlace a un ámbito es un link Markdown con ruta relativa al archivo que lo contiene ([README.md](README.md), "Decidido (2026-10-16)"). **A mano:** escribir `[nombre](ruta/hasta/nombre.md)` con la ruta desde el archivo donde va, por ejemplo `[personal](../personal/personal.md)` desde una página de ámbito hermana.
@@ -112,8 +119,6 @@ La transclusión de pendientes `![[../PENDIENTES-AMBITOS.md#^personal]]` es una 
 Crear un ámbito convierte en enlaces las menciones sueltas que ya estaban escritas. Ese barrido alcanza **`AHORA.md` y nada más**: los ciclos cerrados de `bitacoras/` son inmutables y no se reescriben para agregarles enlaces que no tenían.
 
 La distinción es entre reparar y agregar. Al archivar una rama, un enlace que ya existía y dejaría de resolver sí se repara en una bitácora cerrada, porque lo contrario rompe el principio 1. Lo que nunca ocurre solo es enriquecer el pasado: si el autor quiere que un ámbito nuevo enlace hacia atrás en la historia, lo pide explícitamente y es una operación deliberada, como archivar.
-
-Las dos primeras son decisiones y se resuelven conversando. La tercera es trabajo, y es la que hace cara la operación.
 
 ## No entra
 

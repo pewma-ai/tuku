@@ -51,15 +51,25 @@ Y permanece una sola fila en `PENDIENTES.md` y una sola línea propagada en el m
 
 ## Escenario: la vía bitácora tuku entry add fecha el pendiente en automático
 
-Dado el vault con el ciclo abierto
-Cuando se escribe un pendiente bajo el día futuro en la bitácora
+Dado el vault con el ciclo abierto, y hoy martes 11
+Cuando se escribe un pendiente bajo el jueves 13 en la bitácora, sin `--when`
 ```bash
-tuku entry add --vault mi-vault --day 2026-08-13 --hour 10:00 --scope personal --when 2026-08-13 --body "**pendiente**: comprar pasajes de tren"
+TUKU_NOW="2026-08-11 10:00" tuku entry add --vault mi-vault --day 2026-08-13 --hour 10:00 --scope personal --body "**pendiente**: comprar pasajes de tren"
 ```
 Entonces la tabla de `PENDIENTES.md` gana una fila con `con fecha` y `2026-08-13`:
 `| con fecha | 2026-08-13 | [personal](ambitos/personal/personal.md) | comprar pasajes de tren |`
 Y el jueves 13 de `AHORA.md` recibe por propagación el callout de pendientes del día
 Y `tuku doctor` valida que no quedan consecuencias pendientes
+
+## Escenario: el día de hoy no fecha
+
+Dado el vault con el ciclo abierto, y hoy martes 11
+Cuando se escribe un pendiente bajo el día de hoy, sin `--when`
+```bash
+TUKU_NOW="2026-08-11 10:00" tuku entry add --vault mi-vault --day 2026-08-11 --hour 10:05 --scope personal --body "**pendiente**: renovar el pase escolar"
+```
+Entonces la fila entra en `esta semana`, con `Cuándo` vacío: escribir hoy es registrar, no agendar
+`| esta semana |  | [personal](ambitos/personal/personal.md) | renovar el pase escolar |`
 
 ## Aceptación humana (en Obsidian)
 

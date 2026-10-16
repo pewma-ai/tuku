@@ -299,13 +299,16 @@ def init(
     desde: date | None = None,
     force: bool = False,
     home: Path | str | None = None,
+    comandos: str | None = None,
 ) -> Path:
     """Siembra un vault de la `variant` en `destino` y devuelve su ruta.
 
     Sembrar en un directorio que ya tiene contenido se rechaza con
     `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. `desde` fija
     el primer día del ciclo (por defecto, el lunes de esta semana). `author`, si
-    se pasa y no viene vacío, se escribe en `LIBRO-DE-ESTILO.md`.
+    se pasa y no viene vacío, se escribe en `LIBRO-DE-ESTILO.md`. `comandos`, si
+    se pasa, es `reglas/comandos.tuku.md`: lo compone la capa del CLI, que es la
+    que conoce los comandos.
     """
     valor_variante = variante if variante is not None else variant
     valor_autor = autor if autor is not None else author
@@ -341,6 +344,8 @@ def init(
 
     _sembrar_tz(destino)
     _sembrar_version(destino, version_del_home(home_dir) or version_de_tuku())
+    if comandos is not None and (destino / "reglas").is_dir():
+        (destino / "reglas" / "comandos.tuku.md").write_text(comandos, encoding="utf-8")
 
     if valor_autor and valor_autor.strip():
         _sembrar_autor(destino, valor_autor.strip())

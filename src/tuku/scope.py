@@ -28,7 +28,9 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 from tuku import link
@@ -424,18 +426,39 @@ def lint(
     return hallazgos
 
 
-def crear_con_enlazado(vault: Path, nombre: str) -> Resultado:
-    """Crea el ámbito y convierte en enlaces las menciones sueltas que ya había.
+#: El cuerpo de la constancia que deja `scope create` en la bitácora.
+CONSTANCIA = "**nota**: abrí el ámbito"
+
+
+def registro_de_constancia(
+    nombre: str, *, hora: str, rutas: Mapping[str, str] | None = None
+) -> str:
+    """La línea de bitácora que deja constancia del ámbito creado, para `AHORA.md`."""
+    return f"- {hora} - {link.enlace_ambito(nombre, 'AHORA.md', rutas)} {CONSTANCIA}"
+
+
+def crear_con_enlazado(
+    vault: Path, nombre: str, *, day: date | None = None, hour: str | None = None
+) -> Resultado:
+    """Crea el ámbito, enlaza las menciones sueltas que ya había y deja constancia.
 
     El enlazado retroactivo es parte de crear, no un segundo paso: un ámbito que
     nace sin recoger lo que el autor ya había escrito sobre él deja la mitad del
     trabajo hecha y nadie se entera.
 
-    **Se rechaza antes de tocar nada:** lo que haría fallar la propagación se
-    revisa antes de crear la carpeta, para que un rechazo no deje un ámbito a
-    medias.
+    Crear un ámbito es una decisión del autor sobre su estructura, así que deja
+    huella en `AHORA.md`, en el día `day` (HOY si falta) y a la hora `hour` (AHORA
+    si falta). Solo la deja quien crea la carpeta: correrlo sobre un ámbito que ya
+    existe no escribe nada, ni en este ciclo ni en uno posterior.
+
+    **Se rechaza antes de tocar nada:** lo que haría fallar la propagación, o un
+    día fuera del ciclo abierto, se revisa antes de crear la carpeta, para que un
+    rechazo no deje un ámbito a medias.
     """
-    from tuku import link, todo
+    from datetime import datetime
+
+    from tuku import entry, todo
+    from tuku.ahora import encabezado_de
 
     nombre = normalizar(nombre)
     if (rechazo := _rechazo_de_nombre(nombre)) is not None:
@@ -447,20 +470,32 @@ def crear_con_enlazado(vault: Path, nombre: str) -> Resultado:
         except todo.SinTabla as e:
             return Resultado.rechazo(str(e))
 
-    directorio = crear(vault, nombre)
     ahora_path = vault / "AHORA.md"
+    nuevo = not (vault / "ambitos" / nombre).exists()
+    dia = encabezado_de(day or date.today())
+    hora = hour or datetime.now().strftime("%H:%M")
+    if nuevo and ahora_path.is_file():
+        try:
+            entry.add(ahora_path.read_text(encoding="utf-8"), [], day=dia)
+        except ValueError as e:
+            return Resultado.rechazo(str(e))
+
+    directorio = crear(vault, nombre)
     menciones = 0
     pagina_path = directorio / f"{nombre}.md"
     if ahora_path.is_file() and pagina_path.is_file():
-        texto, n = link.backfill(
-            ahora_path.read_text(encoding="utf-8"),
+        original = ahora_path.read_text(encoding="utf-8")
+        texto, menciones = link.backfill(
+            original,
             scope=nombre,
             keywords=keywords(pagina_path.read_text(encoding="utf-8")),
             rutas=rutas(vault),
         )
-        if n > 0:
+        if nuevo:
+            constancia = registro_de_constancia(nombre, hora=hora, rutas=rutas(vault))
+            texto = entry.add(texto, [constancia], day=dia)
+        if texto != original:
             ahora_path.write_text(texto, encoding="utf-8")
-            menciones = n
         actualizar_pagina(vault, nombre)
 
     if menciones > 0:

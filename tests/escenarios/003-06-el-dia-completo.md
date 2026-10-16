@@ -30,12 +30,13 @@ Mañana a las nueve tengo que pagar la sesión con el psicólogo.
 Entonces el dictado se traduce en once comandos y ninguno más
 ```text
 tuku entry add --day 2026-08-11 --hour 09:12 --scope personal --body "..."   ×8
-tuku scope create depto-centro
+tuku scope create depto-centro --day 2026-08-11
 tuku note create "<el título>" --scope depto-centro --day 2026-08-11 --hour 21:15
 tuku entry add --day 2026-08-12 --hour 09:00 --scope personal --body "**pendiente**: ..."
 ```
 Y cada registro del martes 11 tiene su hora, su ámbito y su marca cerrada según la tabla de verdad
 Y el cuerpo del registro de las 18:40 enlaza a `depto-centro` de forma retroactiva
+Y el martes 11 tiene la constancia de haber abierto `depto-centro`, a la hora que el agente elija
 Y `PENDIENTES.md` queda con una sola fila correspondiente a la sesión con el psicólogo
 Y el miércoles 12 abre con la llamada de pendientes del día
 Y existe la nota en `notas/` enlazada desde el registro de las 21:15

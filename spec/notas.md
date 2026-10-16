@@ -12,7 +12,7 @@ Algunas notas no son libres: son sobre algo que se repite en la bitácora y que 
 
 **"Persona" no es una entidad del diseño.** Serlo la volvería un caso especial, y en cuanto apareciera el segundo concepto inferido habría que abrir otro. El concepto general es la **nota tipada**: una nota que declara `subtype` en su frontmatter y que por eso tiene plantilla y procedimiento de destilado.
 
-La lista de tipos es **abierta**, igual que las clasificaciones y los horizontes (ver [`bitacora.md`](bitacora.md)). Vive en `LIBRO-DE-ESTILO.md` bajo `### Tipos de nota` y crece cuando el uso revela uno nuevo. Cada tipo tiene su archivo en `reglas/tipos/`.
+La lista de tipos es **abierta**, igual que las clasificaciones y los horizontes (ver [`bitacora.md`](bitacora.md)). Vive en `LIBRO-DE-ESTILO.md` bajo `### Tipos de nota` y crece cuando el uso revela uno nuevo. Cada tipo tiene su archivo en `reglas/tipos/`, que todavía no existe: lo crea el epic que escriba la primera nota tipada.
 
 ## El destilado no depende del tipo
 
@@ -25,7 +25,7 @@ Lo que cambia entre tipos es la plantilla y qué se infiere. El procedimiento es
 5. Se escribe la nota con la plantilla del tipo.
 6. Se indexa y las menciones sueltas se convierten en enlaces.
 
-El paso 3 es caro y conviene aislarlo: barrer meses de bitácoras no cabe dentro de una conversación. Se ejecuta en **contexto aislado**, vía `tuku note distill`.
+El paso 3 es caro y conviene aislarlo: barrer meses de bitácoras no cabe dentro de una conversación. Se ejecuta en **contexto aislado**, vía `tuku note distill`, que todavía no existe.
 
 ## Lo que declara un tipo
 

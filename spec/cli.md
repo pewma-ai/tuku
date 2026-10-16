@@ -10,7 +10,7 @@ El corte no pasa entre estructura y lenguaje, pasa por los **campos**. Quien inv
 
 Ese reparto sostiene el principio 1 de [`../docs/principios.md`](../docs/principios.md). Un autor disciplinado hace lo mismo a mano con un editor básico: el comando le ahorra el esfuerzo, no habilita nada que sin él sea imposible. Si un comando empieza a decidir cosas que una persona no podría reproducir a mano, el defecto está en el comando.
 
-**Ningún comando infiere un campo que quien invoca no dio**, salvo donde una spec declare un valor por defecto. Los que hay hoy: el día (la fecha actual, **HOY**) y la hora (la hora actual, **AHORA**) de un registro o de la huella en bitácora dejada por un comando mutador (`todo`, `scope`, `note`), evaluados en la zona horaria `TZ` del vault ([bitacora.md](bitacora.md)).
+**Ningún comando infiere un campo que quien invoca no dio**, salvo donde una spec declare un valor por defecto. Los que hay hoy: el día (la fecha actual, **HOY**) y la hora (la hora actual, **AHORA**) de un registro o de la huella en bitácora dejada por un comando mutador (`todo`, `scope`, `note`), evaluados en la zona horaria `TZ` del vault ([bitacora.md](bitacora.md)); y la fecha de un pendiente escrito bajo un día posterior a HOY, que es ese día ([pendientes.md](pendientes.md)).
 
 ## Los códigos de salida
 
@@ -25,7 +25,7 @@ Son contrato. Quien invoca decide qué hacer según el código, sin leer el mens
 
 El **2 está reservado**: lo emite argparse ante una invocación mal formada y ningún comando puede devolverlo por otra causa. Un rechazo y un comando mal escrito son cosas distintas, y quien invoca tiene que poder distinguirlas sin leer prosa. Es un choque real y ya ocurrió: `TukuHomeInvalido` devolvía 2, igual que argparse, y desde fuera no había forma de saber si corregir el comando o la instalación.
 
-Códigos nuevos se agregan a esta tabla antes que al código. Fijados en `tuku/cli.py` como constantes con nombre, nunca como literales.
+Códigos nuevos se agregan a esta tabla antes que al código. Fijados en `tuku/cli/` como constantes con nombre, nunca como literales.
 
 ## La salida es una sola, para persona y para agente
 
@@ -47,6 +47,8 @@ De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa
 
 **Ningún comando de verificación repara.** Vale para los `lint` y para `tuku doctor`, que los agrega y revisa además lo que ninguno cubre. Ante un hallazgo, el doctor o linter nombra el defecto y la acción correctiva, pero no modifica archivos.
 
+**El comando que repara es el comando original, y es idempotente.** Cuando un linter detecta un estado desincronizado (por ejemplo, una marca de bitácora sin su fila en la tabla de pendientes), no la repara por su cuenta: nombra como corrección el comando que debió haberse ejecutado originalmente (`tuku todo open`, etc.). Todos los comandos mutadores del CLI son estrictamente idempotentes: ejecutarlos repetidas veces asegura el estado completo sin duplicar líneas en `AHORA.md` ni filas en los derivados.
+
 ## La pareja `doctor` / `fix`
 
 `tuku doctor` verifica y `tuku fix TEMA` repara. Se separan por la misma razón que verificar y corregir son operaciones distintas: quien revisa antes de reparar conserva la oportunidad de no hacerlo.
@@ -63,9 +65,9 @@ De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa
 
 ## La ayuda explica para qué existe cada comando
 
-Todo sustantivo y todo verbo lleva en `tuku … -h` un párrafo en español que dice **para qué existe** el comando, como `description` de argparse. La línea corta (`help=`) y el "A mano" (`epilog`) se mantienen. Un test recorre el árbol de argparse y exige que ninguno quede sin descripción.
+Todo sustantivo y todo verbo lleva en `tuku … -h` un párrafo en español que dice **para qué existe** el comando, como `description` de argparse. La línea corta (`help=`) y el "A mano" (`epilog`) se mantienen. Un test recorre el árbol de argparse y exige que ninguno quede sin descripción, y que todo comando invocable tenga su "A mano".
 
-**El comando que repara es el comando original, y es idempotente.** Cuando un linter detecta un estado desincronizado (por ejemplo, una marca de bitácora sin su fila en la tabla de pendientes), no la repara por su cuenta: nombra como corrección el comando que debió haberse ejecutado originalmente (`tuku todo open`, etc.). Todos los comandos mutadores del CLI son estrictamente idempotentes: ejecutarlos repetidas veces asegura el estado completo sin duplicar líneas en `AHORA.md` ni filas en los derivados.
+Ese párrafo y esa línea son también los que `tuku init` copia en `reglas/comandos.tuku.md`, para que el vault diga qué hace cada comando aunque `tuku` no esté instalado ([README.md](README.md), "Dónde viven los comandos").
 
 ## No entra
 

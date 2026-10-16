@@ -26,11 +26,11 @@ No entra solo la voz. Entran cuatro cosas y ninguna es opcional, porque una pers
 | Qué | De dónde sale | Sin esto no se puede |
 | --- | --- | --- |
 | Lo dicho o escrito | del autor, en lenguaje natural | nada |
-| Contexto reciente | `tuku context show` | evitar repreguntar o duplicar lo ya escrito |
-| Vocabulario de ámbitos | `tuku vocab show`, desde los frontmatter | elegir ámbito, porque no se sabe cuáles existen |
+| Contexto reciente | `tuku context show` (todavía no existe) | evitar repreguntar o duplicar lo ya escrito |
+| Vocabulario de ámbitos | `tuku vocab show`, desde los frontmatter (hoy no los lista) | elegir ámbito, porque no se sabe cuáles existen |
 | Vocabularios abiertos | `tuku vocab show`, desde los tres subtítulos de `LIBRO-DE-ESTILO.md` | elegir clasificación |
 
-Las tres que salen del vault llegan **por un comando y no leyendo archivos**. Quien ejecuta no tiene que saber dónde vive cada cosa ni en qué formato: eso lo sabe el comando. De ahí que lo único que hay que cargar sea lo que se usa para decidir, nunca lo que se usa para escribir (ver [cli.md](cli.md) y [agente.md](agente.md)).
+Las tres que salen del vault llegan **por un comando y no leyendo archivos**. Hoy solo la última: mientras los otros dos comandos no existan, quien ejecuta lee `AHORA.md` y el árbol de `ambitos/` ([`../TODO.md`](../TODO.md)). Quien ejecuta no tiene que saber dónde vive cada cosa ni en qué formato: eso lo sabe el comando. De ahí que lo único que hay que cargar sea lo que se usa para decidir, nunca lo que se usa para escribir (ver [cli.md](cli.md) y [agente.md](agente.md)).
 
 ## Los cinco pasos
 
@@ -99,11 +99,11 @@ Las cajas rosadas son las que necesitan juicio, y son las únicas: el juicio se 
 
 | Consecuencia | Qué hace | Reglas | Comandos |
 | --- | --- | --- | --- |
-| Pendientes | Alta o baja en `PENDIENTES.md`, y las vistas que se derivan de él | `reglas/pendientes.tuku.md` | `todo open`, `todo close`, `todo propagate` |
-| Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md` | `page index`, `scope create` |
-| Cadencias | Alta o cambio de una cadencia en su ámbito | `reglas/cadencias.tuku.md` | `cadence add`, `cadence inject` |
+| Pendientes | Alta o baja en `PENDIENTES.md`, y las vistas que se derivan de él | `reglas/bitacora.tuku.md` (`reglas/pendientes.tuku.md` todavía no existe) | `entry add` las aplica; `todo open`, `todo close`, `todo propagate` corrigen a mano |
+| Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md`, todavía no existe | `scope create`; `page index` todavía no existe |
+| Cadencias | Alta o cambio de una cadencia en su ámbito | `reglas/cadencias.tuku.md`, todavía no existe (epic 006) | `cadence add`, `cadence inject`, todavía no existen |
 | Nota | Escribe en `notas/` lo que el autor pidió, y deja constancia en la bitácora | `reglas/notas.tuku.md` | `note create`, `note lint` |
-| Propuesta | Sugiere algo al autor y espera aprobación | `reglas/propuestas.tuku.md` | sin comando, a propósito |
+| Propuesta | Sugiere algo al autor y espera aprobación | `reglas/propuestas.tuku.md`, todavía no existe (epic 007) | sin comando, a propósito |
 
 La lista es **abierta** y va a crecer a medida que el uso la revele. Agregar una consecuencia es agregar un archivo en `reglas/`, no tocar el flujo. Esa es la prueba de que el corte está bien hecho.
 

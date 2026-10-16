@@ -58,7 +58,7 @@ from vault import (  # noqa: E402
     placeholders_sin_sustituir,
 )
 
-from tuku.cli import EXITO  # noqa: E402
+from tuku.cli import EXITO, manual  # noqa: E402
 from tuku.config import parsear_config_md  # noqa: E402
 
 SLUG = "001-02-init-siembra-el-estado-cero"
@@ -87,11 +87,15 @@ def test_001_02_init_siembra_el_estado_cero_byte_a_byte() -> None:
     assert corrida.codigo == EXITO, corrida.stderr
     destino = corrida.ruta("mi-vault")
 
-    # Los dos archivos que la instalación resuelve: el ciclo y la zona horaria.
+    # Lo que la instalación resuelve: el ciclo, la zona horaria y el manual de
+    # comandos, que sale de la ayuda del `tuku` instalado y no del template.
     # El resto tiene que ser idéntico al template, byte a byte.
-    resueltos = frozenset({"AHORA.md", "config.tuku.md"})
+    resueltos = frozenset({"AHORA.md", "config.tuku.md", "comandos.tuku.md"})
     diferencias = diff_recursivo(destino, TEMPLATE_VANILLA, ignorar=resueltos)
     assert not diferencias, f"difiere de template/vanilla/: {diferencias}"
+
+    manual_escrito = (destino / "reglas" / "comandos.tuku.md").read_text(encoding="utf-8")
+    assert manual_escrito == manual.del_cli(), "reglas/comandos.tuku.md no es el del CLI"
 
     obtenido = (destino / "AHORA.md").read_text(encoding="utf-8")
     esperado = ahora_sembrado(TEMPLATE_VANILLA, desde=DESDE, hasta=HASTA, dias=DIAS)

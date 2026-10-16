@@ -24,7 +24,7 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 import gherkin  # noqa: E402
 
 from tuku import todo  # noqa: E402
-from tuku.cli import EXITO  # noqa: E402
+from tuku.cli import EXITO, RECHAZO  # noqa: E402
 
 SLUG = "002-04-abrir-pendiente"
 PERSONAL = "[personal](ambitos/personal/personal.md)"
@@ -103,10 +103,30 @@ def test_002_04_via_bitacora_entry_add_abre_en_automatico() -> None:
     assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"
 
 
+def test_002_04_todo_lint_encuentra_la_fila_borrada_a_mano() -> None:
+    corrida = gherkin.correr(SLUG, "todo lint encuentra la fila que se borró a mano")
+
+    lint = corrida.de("tuku todo lint")
+    assert lint.codigo == RECHAZO, lint.stdout
+    assert "tuku todo open" in lint.stdout, lint.stdout
+
+
+def test_002_04_todo_lint_encuentra_una_vista_desactualizada() -> None:
+    corrida = gherkin.correr(SLUG, "todo lint encuentra una vista desactualizada")
+
+    primera, segunda = [r for r in corrida.resultados if "tuku todo lint" in r.comando]
+    assert primera.codigo == RECHAZO, primera.stdout
+    assert "PENDIENTES-AMBITOS.md" in primera.stdout, primera.stdout
+    assert "tuku todo propagate" in primera.stdout, primera.stdout
+    assert segunda.codigo == EXITO, segunda.stdout
+
+
 if __name__ == "__main__":
     test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana()
     test_002_04_la_tabla_gana_una_fila_y_nada_mas()
     test_002_04_abrir_dos_veces_no_duplica()
     test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla()
     test_002_04_via_bitacora_entry_add_abre_en_automatico()
-    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")
+    test_002_04_todo_lint_encuentra_la_fila_borrada_a_mano()
+    test_002_04_todo_lint_encuentra_una_vista_desactualizada()
+    print(f"ok: 7 afirmaciones (queda en playground/{SLUG}/)")

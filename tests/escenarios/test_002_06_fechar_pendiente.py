@@ -85,9 +85,18 @@ def test_002_06_via_bitacora_entry_add_fecha_en_automatico() -> None:
     assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"
 
 
+def test_002_06_el_dia_de_hoy_no_fecha() -> None:
+    corrida = gherkin.correr(SLUG, "el día de hoy no fecha")
+    assert corrida.codigo == EXITO, corrida.stderr
+
+    pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
+    assert f"| esta semana |  | {PERSONAL} | renovar el pase escolar |" in pendientes
+
+
 if __name__ == "__main__":
     test_002_06_fechar_un_pendiente_en_dia_futuro()
     test_002_06_la_fecha_vive_en_columna_cuando()
     test_002_06_fechar_dos_veces_no_duplica()
     test_002_06_via_bitacora_entry_add_fecha_en_automatico()
-    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")
+    test_002_06_el_dia_de_hoy_no_fecha()
+    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")

@@ -45,7 +45,7 @@ Lo que va entre el encabezado del día y el primer registro es la **región prop
 ```markdown
 ---
 type: Logbook
-status: draft
+status: stable
 from: 2026-08-25
 to: 2026-09-01
 ---
@@ -84,6 +84,8 @@ El resumen es la excepción y va como enlace: es un documento de decisión compl
 
 ## Abrir un ciclo
 
+De los comandos de esta sección y de las siguientes, hoy existen `tuku cycle open`, `tuku cycle lint` y `tuku todo propagate`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `cycle open` hace los pasos 1 y 2.
+
 En este orden:
 
 1. Instanciar `reglas/plantilla/AHORA.md`, con `from` y `to` del ciclo y `status: draft` → `cycle open`
@@ -117,7 +119,7 @@ En este orden:
 
 **El orden importa**: aplanar antes de generar el resumen lo deja sin de dónde leer.
 
-`status: stable` es lo que declara que el archivo dejó de tocarse. Mientras siga en `draft` es un ciclo abierto viviendo en el lugar equivocado, y eso lo reporta `tuku cycle lint`.
+`status: stable` es lo que declara que el archivo dejó de tocarse. Mientras siga en `draft` es un ciclo abierto viviendo en el lugar equivocado, y eso lo reportará `tuku cycle lint` cuando exista `bitacoras/` (epic 006); hoy solo revisa `AHORA.md`.
 
 Idempotencia: cerrar dos veces no vuelve a mover ni a duplicar.
 

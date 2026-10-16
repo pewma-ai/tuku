@@ -7,9 +7,9 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 - **Configuración del agente tras la instalación:** `uv tool install` y [`tuku init`](src/tuku/init.py) dejan el vault escrito, pero no dejan configurado al agente que lo va a leer. Falta un paso complementario que aplique la configuración del agente elegido por el autor. El caso real es Claude Code: hardcodea `CLAUDE.md` como archivo de memoria y no expone ninguna opción para renombrarlo, así que leer el [`AGENTS.md`](AGENTS.md) del vault exige un hook `SessionStart` que lo descubra e inyecte. Codex lee `AGENTS.md` de forma nativa y Gemini usa `GEMINI.md`. Queda por decidir la forma: `tuku init --agente claude`, un comando propio, o solo instrucciones documentadas que el autor ejecuta a mano. Sea cual sea, el principio 1 exige el equivalente "A mano".
 - **Resuelto (2026-09-19): prueba con usuario ajeno:** verificada la instalación limpia (`uv tool install`) y primer registro a mano leyendo solo [`AGENTS.md`](AGENTS.md). Epic 001 cerrado.
 
-## Spec por alinear
+## Agente
 
-- **Cómo se llama el subtipo de una nota tipada.** [`spec/notas.md`](spec/notas.md) dice que una nota tipada declara `tipo:` en su frontmatter, y con OKF el campo `type` ya está tomado y vale `Note` para todas. El subtipo (persona, lugar, concepto) necesita otro nombre, en inglés como el resto del frontmatter, y la lista sigue siendo abierta y viviendo en `### Tipos de nota` del libro de estilo. Es una decisión de diseño, no una corrección de redacción: lo decide el epic que escriba la primera nota tipada.
+- **El contexto que se inyecta al agente.** [`spec/flujo-informacion.md`](spec/flujo-informacion.md) y [`spec/agente.md`](spec/agente.md) prometen `tuku context show` (los últimos registros) y que `tuku vocab show` liste también los ámbitos con sus `keywords`, para que el agente decida sin leer archivos. Ninguno existe: el agente lee `AHORA.md` y `ambitos/` directamente, y el epic 003 pasa así. La spec queda como diseño, marcada como no implementada, hasta que un fallo del agente lo pida (revisión de spec del 2026-10-16).
 
 ## Reglas del vault
 

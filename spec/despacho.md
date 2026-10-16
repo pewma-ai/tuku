@@ -22,22 +22,9 @@ Que la primera vía cubra casi todo es lo que mantiene corta la tabla: el despac
 
 ## La tabla de despacho
 
-Vive en el `AGENTS.md` de la raíz y es lo que el ejecutor consulta antes de actuar. Mapea señal del autor a destino y a comando, en ese orden:
+Vive en el `AGENTS.md` de la raíz y es lo que el ejecutor consulta antes de actuar. Mapea señal del autor a lectura previa y a comando, en tres columnas: **El autor...**, **Lee antes** y **Comando**. La tabla es la del [`AGENTS.md` del template](../template/vanilla/AGENTS.md), sección "A dónde va lo que el autor dice", y esta spec no la copia: dice por qué tiene la forma que tiene.
 
-| El autor... | Vía | Lee antes | Comando |
-| --- | --- | --- | --- |
-| cuenta algo que ocurrió | bitácora | `reglas/bitacora.tuku.md` | `tuku entry add` |
-| dice que algo quedó por hacer | bitácora, marca `**pendiente**` | `reglas/bitacora.tuku.md` | `tuku entry add` |
-| da por hecho algo que estaba pendiente | bitácora, marca `(Hecho)` | `reglas/bitacora.tuku.md` | `tuku entry add` |
-| abre un pendiente sin dictado | comando directo | nada | `tuku todo open` |
-| cierra un pendiente sin dictado | comando directo | nada | `tuku todo close` |
-| nombra un frente que todavía no existe | comando directo | `ambitos/AGENTS.md` | `tuku scope create` |
-| pide guardar una idea que no es de un día | comando directo | `reglas/notas.tuku.md` | `tuku note create` |
-| abre el ciclo | comando directo | nada | `tuku cycle open` |
-| corrige algo que ya quedó escrito | comando directo | nada | `tuku entry rename` / `scope rename` / `note rename` |
-| nombra un proceso del vault | escape, ver abajo | el proceso | el que el proceso indique |
-| pide algo que ninguna fila cubre | a mano | nada | ninguno: reformular y confirmar |
-| pregunta, delibera o pide investigar | sin despacho | nada | ninguno |
+La vía de cada fila no va en una columna, porque el ejecutor no la necesita para elegir: las tres primeras son la vía bitácora; crear un frente, guardar una nota, abrir el ciclo y corregir son comando directo; nombrar un proceso es el escape; las dos últimas no escriben. `tuku todo open` y `tuku todo close` no tienen fila: `tuku entry add` ya aplica la consecuencia de la marca, y esos dos quedan para corregir a mano.
 
 La columna **Lee antes** es la que hace que la cascada funcione sin explorar. Dice qué archivo se abre antes de ejecutar esa fila, y es un nombre, no una pista: sin él la regla que vive abajo depende de que el ejecutor decida ir a buscarla, y esa decisión es el punto donde una cascada se rompe en silencio. Con ella, lo que no se usa sigue sin cargarse, que es todo lo que la cascada quería.
 
@@ -100,4 +87,4 @@ Sí entra desde el primer día su cláusula de recursión: una sesión lanzada p
 
 - Qué hace cada comando y qué escribe. Eso es la spec de la primitiva que toca, y el contrato común es [cli.md](cli.md).
 - Cómo el ejecutor decide los campos de un registro. Eso es [agente.md](agente.md).
-- Cómo se conduce una sesión de agente para verificarlo. Es material de pruebas y lo construye el epic 004 ([`../devel/epics.md`](../devel/epics.md)).
+- Cómo se conduce una sesión de agente para verificarlo. Es material de pruebas: el arnés se construyó en el epic 003 y la conversación de varios turnos es el epic 004 ([`../devel/epics.md`](../devel/epics.md)).

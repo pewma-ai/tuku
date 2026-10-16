@@ -6,11 +6,14 @@ import argparse
 from pathlib import Path
 
 from tuku import scope
-from tuku.cli.helpers import Handler, Subparsers, traducir
+from tuku.cli.helpers import Handler, Subparsers, fecha, hora, traducir
 
 
 def _cmd_scope_create(args: argparse.Namespace) -> int:
-    return traducir(scope.crear_con_enlazado(args.vault, args.name), "tuku scope create")
+    return traducir(
+        scope.crear_con_enlazado(args.vault, args.name, day=args.day, hour=args.hour),
+        "tuku scope create",
+    )
 
 
 def _cmd_scope_rename(args: argparse.Namespace) -> int:
@@ -40,17 +43,36 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "create",
         help="crea un ámbito bajo ambitos/",
         description=(
-            "Crea la carpeta del ámbito con su página, `AGENTS.md` y `CADENCIAS.md`, y "
-            "enlaza hacia atrás las menciones que ya había en `AHORA.md`. Existe porque "
-            "un ámbito no es solo una carpeta: es también su transclusión de pendientes "
-            "y su callout. Es idempotente."
+            "Crea la carpeta del ámbito con su página, `AGENTS.md` y `CADENCIAS.md`, "
+            "enlaza hacia atrás las menciones que ya había en `AHORA.md` y deja en la "
+            "bitácora la constancia de haberlo abierto. Existe porque un ámbito no es "
+            "solo una carpeta: es también su transclusión de pendientes, su callout y "
+            "una decisión del autor. Es idempotente: sobre un ámbito que ya existe no "
+            "escribe nada."
         ),
         epilog=(
             "A mano: crear la carpeta en `ambitos/<nombre>/` con su página `<nombre>.md`, "
-            "`AGENTS.md` y `CADENCIAS.md`."
+            "`AGENTS.md` y `CADENCIAS.md`, y registrar en `AHORA.md` "
+            "`- HH:MM - [<nombre>](ambitos/<nombre>/<nombre>.md) **nota**: abrí el ámbito`."
         ),
     )
     scope_create_p.add_argument("name", help="nombre del ámbito")
+    scope_create_p.add_argument(
+        "--day",
+        "--dia",
+        dest="day",
+        type=fecha,
+        default=None,
+        help="día de la constancia (AAAA-MM-DD); por defecto, hoy",
+    )
+    scope_create_p.add_argument(
+        "--hour",
+        "--hora",
+        dest="hour",
+        type=hora,
+        default=None,
+        help="hora de la constancia (HH:MM); por defecto, ahora",
+    )
     scope_create_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
 
     scope_rename_p = scope_v.add_parser(

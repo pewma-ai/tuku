@@ -191,7 +191,7 @@ def add_al_vault(
             body=marca.cuerpo,
             scope=scope,
             horizon=horizon or todo.ESTA_SEMANA,
-            when=when,
+            when=todo.cuando_por_dia(when, day, date.today()),
             propagate=False,
             record=False,
         )

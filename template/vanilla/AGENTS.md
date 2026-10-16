@@ -35,7 +35,7 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 
 - **Contarlo es pedirlo.** Si el autor cuenta algo, ejecuta el comando de su fila. No preguntes qué hacer con eso ni ofrezcas alternativas.
 - **Abre "Lee antes" antes de ejecutar.** Ahí están los campos, las fechas y los casos.
-- **Un hecho, un comando.** El comando ya aplica sus consecuencias: `tuku entry add` con `(Hecho)` cierra el pendiente (no corras `tuku todo close`) y `tuku note create` deja su constancia en la bitácora (no corras `tuku entry add` para la nota).
+- **Un hecho, un comando.** El comando ya aplica sus consecuencias: `tuku entry add` con `(Hecho)` cierra el pendiente (no corras `tuku todo close`) y `tuku note create` y `tuku scope create` dejan su constancia en la bitácora (no corras `tuku entry add` para la nota ni para el frente).
 - **Respeta el orden del dictado.** Cada hecho se registra en el vault tal como estaba en ese momento: un frente que el autor pide abrir más adelante no se crea antes.
 - **Si un hallazgo nombra `tuku fix`, córrelo.** Si devuelve decisiones, plantéaselas al autor y espera su respuesta.
 
@@ -72,4 +72,4 @@ Una acción que nunca fue pendiente es un registro normal, no un cierre. Cualqui
 - Si otro agente te lanzó para ejecutar algo concreto, ejecútalo sin volver a despachar.
 - Al terminar, di qué quedó escrito y en qué archivo, no cómo se hizo.
 
-Sin `tuku` instalado el vault funciona igual, a mano: cada archivo de `reglas/` explica cómo.
+El código de `tuku` vive fuera del vault, en su paquete. Sin `tuku` instalado el vault funciona igual, a mano: `reglas/comandos.tuku.md` dice qué hace cada comando y cómo hacerlo.

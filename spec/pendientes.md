@@ -10,7 +10,7 @@ A cambio exige disciplina, y esa disciplina la sostiene el comando, no la memori
 
 - Dictado: *"Recuérdame avisar de los GGCC al arrendatario"*
   - Bitácora: `- 09:12 - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) **pendiente**: avisar de los GGCC al arrendatario`
-  - El comando agrega una fila bajo el horizonte del ciclo en curso, `esta semana` en el template vanilla: `| | [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) | avisar de los GGCC al arrendatario |`
+  - El comando agrega una fila bajo el horizonte del ciclo en curso, `esta semana` en el template vanilla: `| esta semana | | [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) | avisar de los GGCC al arrendatario |`
 - Dictado: *"Ya le recordé los GGCC al arrendatario"*
   - Bitácora: `- 18:40 - [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) (Hecho): ~~avisar de los GGCC al arrendatario~~`
   - El comando borra esa fila

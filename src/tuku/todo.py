@@ -353,11 +353,10 @@ class ConsecuenciaPendiente:
 def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]:
     """Las marcas del ciclo en curso que la tabla no refleja.
 
-    Es el modo de falla más caro del sistema y el único que no deja señal:
-    `tuku entry add` escribe el registro y nada más, así que un `**pendiente**`
-    cuyo `tuku todo open` no se corrió deja un archivo perfectamente bien formado
-    al que le falta la mitad. Nada lo delata al leerlo; solo cruzando los dos
-    archivos aparece.
+    Es el modo de falla más caro del sistema y el único que no deja señal: un
+    `**pendiente**` escrito a mano en `AHORA.md`, sin pasar por `tuku entry add`,
+    deja un archivo perfectamente bien formado al que le falta la mitad. Nada lo
+    delata al leerlo; solo cruzando los dos archivos aparece.
 
     Dos casos, y ninguno mira `bitacoras/`: un pendiente que viene arrastrado de
     un ciclo anterior está en la tabla sin marca en `AHORA.md`, y eso es correcto.
@@ -416,6 +415,18 @@ def cerrar(pendientes: str, marca: Marca) -> tuple[str, bool]:
     return pendientes, False
 
 
+def cuando_por_dia(when: str, day: date | None, hoy: date) -> str:
+    """La fecha de un pendiente: la de `when` o, si falta, la de un `day` futuro.
+
+    Escribir un pendiente en un día posterior a HOY es fecharlo
+    (`spec/pendientes.md`): lo que haría alguien en una agenda de papel. El día
+    de hoy no fecha, porque escribir hoy es el acto por defecto de registrar.
+    """
+    if when.strip() or day is None or day <= hoy:
+        return when
+    return day.isoformat()
+
+
 def abrir_en_vault(
     vault: Path,
     *,
@@ -453,6 +464,7 @@ def abrir_en_vault(
         return rechazo
     marca = Marca(ABRE, limpio_scope, body.strip())
     escalera = escalera_de(leer_config(vault).horizontes)
+    when = cuando_por_dia(when, day, date.today())
     if when.strip() and horizon == ESTA_SEMANA:
         horizon = CON_FECHA
     horizon = canonico(horizon, escalera)
@@ -595,17 +607,70 @@ def propagar_vistas(vault: Path) -> Resultado:
     return Resultado.hecho("\n".join(f"regenerado: {ruta}" for ruta in cambiados))
 
 
-def lint_del_vault(vault: Path) -> Resultado:
-    """Revisa los pendientes y reporta; no escribe."""
+def lint(
+    pendientes: str,
+    ahora: str | None = None,
+    *,
+    vistas: Mapping[str, tuple[str | None, str]] | None = None,
+) -> list[str]:
+    """Los hallazgos de `tuku todo lint`, cada uno con su corrección. No lee disco.
+
+    Tres revisiones, las de `spec/pendientes.md`:
+
+    1. Un detalle en más de una fila (regla 1).
+    2. Una marca de `ahora` que la tabla no refleja (`sin_consecuencia`). La
+       corrección es el comando original, que es idempotente.
+    3. Una vista derivada que no es la que la tabla produce (regla 7). `vistas`
+       mapea cada archivo a su texto actual y al que `tuku todo propagate`
+       escribiría; si difieren, la que está mal es la vista.
+    """
+    hallazgos = [
+        f"PENDIENTES.md: error: {cuerpo!r} aparece en más de una fila. "
+        f"Déjalo en una sola: un pendiente está en exactamente un horizonte."
+        for cuerpo in duplicados(pendientes)
+    ]
+    if ahora is not None:
+        hallazgos += [
+            f"AHORA.md: error: {c.cuerpo!r} lleva {c.marca} y la tabla no lo refleja. "
+            f"Corre `{c.comando} \"<la línea del registro>\"`."
+            for c in sin_consecuencia(ahora, pendientes)
+        ]
+    for archivo, (actual, esperado) in (vistas or {}).items():
+        if actual != esperado:
+            hallazgos.append(
+                f"{archivo}: error: la vista de pendientes no coincide con PENDIENTES.md. "
+                "Corre `tuku todo propagate`."
+            )
+    return hallazgos
+
+
+def hallazgos_del_vault(vault: Path) -> list[str]:
+    """`lint` sobre el vault: lee los archivos y calcula las vistas esperadas."""
+    from tuku import propagate, scope
     from tuku.config import archivo_vault
 
     pendientes = archivo_vault(vault, "PENDIENTES.md").read_text(encoding="utf-8")
-    repetidos = duplicados(pendientes)
-    if not repetidos:
+    ahora_path = vault / "AHORA.md"
+    ahora = ahora_path.read_text(encoding="utf-8") if ahora_path.is_file() else None
+    vistas: dict[str, tuple[str | None, str]] = {}
+    if ahora is not None:
+        vistas["AHORA.md"] = (
+            ahora,
+            propagate.propagar_ahora(ahora, pendientes, scope.rutas(vault)),
+        )
+    ambitos_path = vault / propagate.ARCHIVO_AMBITOS
+    vistas[propagate.ARCHIVO_AMBITOS.as_posix()] = (
+        ambitos_path.read_text(encoding="utf-8") if ambitos_path.is_file() else None,
+        propagate.documento_del_vault(vault, pendientes),
+    )
+    return lint(pendientes, ahora, vistas=vistas)
+
+
+def lint_del_vault(vault: Path) -> Resultado:
+    """Revisa los pendientes y reporta; no escribe."""
+    hallazgos = hallazgos_del_vault(vault)
+    if not hallazgos:
         return Resultado.hecho("sin hallazgos.")
-    lineas = [
-        f"PENDIENTES.md: error: {cuerpo!r} aparece en más de una fila. "
-        f"Déjalo en una sola: un pendiente está en exactamente un horizonte."
-        for cuerpo in repetidos
-    ]
-    return Resultado.rechazo("\n".join([*lineas, f"{len(repetidos)} error(es)."]), error=False)
+    return Resultado.rechazo(
+        "\n".join([*hallazgos, f"{len(hallazgos)} error(es)."]), error=False
+    )

@@ -194,6 +194,19 @@ def documento_ambitos(
     return _ENCABEZADO_AMBITOS + "\n" + "\n\n".join(bloques) + "\n"
 
 
+def documento_del_vault(vault: Path, pendientes: str) -> str:
+    """El `ambitos/PENDIENTES-AMBITOS.md` que corresponde al árbol y a la tabla."""
+    ambitos_objs = scope.leer(vault)
+    disp_map: dict[str, str] = {}
+    for a in ambitos_objs:
+        pag = a.directorio / f"{a.nombre}.md"
+        texto_pag = pag.read_text(encoding="utf-8") if pag.is_file() else None
+        disp_map[a.nombre] = display_name(a.nombre, texto_pag)
+    return documento_ambitos(
+        pendientes, [a.nombre for a in ambitos_objs], display_names=disp_map
+    )
+
+
 def propagar(vault: Path) -> list[Path]:
     """Regenera las dos vistas del vault. Devuelve los archivos que cambiaron.
 
@@ -213,20 +226,13 @@ def propagar(vault: Path) -> list[Path]:
         ruta_ahora.write_text(texto, encoding="utf-8")
         cambiados.append(ruta_ahora)
 
-    ambitos_objs = scope.leer(vault)
-    disp_map: dict[str, str] = {}
-    for a in ambitos_objs:
-        pag = a.directorio / f"{a.nombre}.md"
-        texto_pag = pag.read_text(encoding="utf-8") if pag.is_file() else None
-        disp_map[a.nombre] = display_name(a.nombre, texto_pag)
+    for a in scope.leer(vault):
         pag_mod = scope.actualizar_pagina(vault, a.nombre)
         if pag_mod and pag_mod not in cambiados:
             cambiados.append(pag_mod)
 
     ruta_ambitos = vault / ARCHIVO_AMBITOS
-    documento = documento_ambitos(
-        pendientes, [a.nombre for a in ambitos_objs], display_names=disp_map
-    )
+    documento = documento_del_vault(vault, pendientes)
     previo = ruta_ambitos.read_text(encoding="utf-8") if ruta_ambitos.is_file() else None
     if documento != previo:
         ruta_ambitos.parent.mkdir(parents=True, exist_ok=True)

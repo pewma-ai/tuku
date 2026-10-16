@@ -2,7 +2,7 @@
 
 > **Principio:** [P2 (organización emergente)](../../docs/principios.md#L17), [P7 (carpetas archivan, enlaces conectan)](../../docs/principios.md#L63) · **Brief:** [Frentes de actividad sin configuración previa](../../docs/brief.md#L19) · **Spec:** [`spec/ambitos.md`](../../spec/ambitos.md)
 
-El autor no preconfigura frentes de vida: escribe de corrido y, cuando un ámbito cobra identidad, darlo de alta mediante `tuku scope create` genera la estructura de carpetas, enlaza retroactivamente menciones previas en `AHORA.md` y siembra las transclusiones a `PENDIENTES-AMBITOS.md`.
+El autor no preconfigura frentes de vida: escribe de corrido y, cuando un ámbito cobra identidad, darlo de alta mediante `tuku scope create` genera la estructura de carpetas, deja constancia en la bitácora, enlaza retroactivamente menciones previas en `AHORA.md` y siembra las transclusiones a `PENDIENTES-AMBITOS.md`.
 
 ## Estado inicial
 
@@ -15,29 +15,30 @@ cp -r ../../002-06-fechar-pendiente/fechar-un-pendiente-en-dia/mi-vault .
 Dado un vault cuyo único ámbito es `personal` y con mención `del depto centro` en el martes 11
 Cuando se crea el ámbito `depto-centro`
 ```bash
-tuku scope create depto-centro --vault mi-vault
+tuku scope create depto-centro --vault mi-vault --day 2026-08-11 --hour 18:45
 ```
 Entonces existe el directorio `ambitos/depto-centro/` con `AGENTS.md`, `CADENCIAS.md` y `depto-centro.md`
 Y `depto-centro.md` transcluye a `![[../PENDIENTES-AMBITOS.md#^depto-centro]]`
 Y la mención previa en `AHORA.md` pasa automáticamente a `[depto-centro](ambitos/depto-centro/depto-centro.md)`
 Y `ambitos/PENDIENTES-AMBITOS.md` añade el bloque `^depto-centro` con `SIN PENDIENTES`
 Y `ambitos/personal/` permanece intacto
+Y el martes 11 gana la constancia `- 18:45 - [depto-centro](ambitos/depto-centro/depto-centro.md) **nota**: abrí el ámbito`
 
 ## Escenario: las menciones sueltas del ciclo en curso pasan a enlace
 
 Dado el mismo estado con `del depto centro` escrito sin enlazar
 Cuando se crea el ámbito `depto-centro`
 ```bash
-tuku scope create depto-centro --vault mi-vault
+tuku scope create depto-centro --vault mi-vault --day 2026-08-11 --hour 18:45
 ```
 Entonces solo esa mención pasa a ser el link `[depto-centro](ambitos/depto-centro/depto-centro.md)` en `AHORA.md`
-Y el resto de la línea y demás registros no sufren ninguna alteración
+Y el resto de la línea y demás registros no sufren ninguna alteración, salvo la constancia nueva
 
 ## Escenario: un registro no puede apuntar a una categoría
 
 Dado el ámbito `depto-centro` creado y una subcarpeta `gastos/` sin página propia (categoría)
 ```bash
-tuku scope create depto-centro --vault mi-vault
+tuku scope create depto-centro --vault mi-vault --day 2026-08-11 --hour 18:45
 mkdir mi-vault/ambitos/depto-centro/gastos
 touch mi-vault/ambitos/depto-centro/gastos/AGENTS.md mi-vault/ambitos/depto-centro/gastos/CADENCIAS.md
 ```
@@ -57,7 +58,7 @@ tuku init vault-limpio --date 2026-08-11
 ```
 Cuando se crea el ámbito `depto-centro`
 ```bash
-tuku scope create depto-centro --vault vault-limpio
+tuku scope create depto-centro --vault vault-limpio --day 2026-08-11 --hour 18:45
 ```
 Entonces `tuku doctor` valida que el vault está 100% sano
 ```bash
@@ -68,14 +69,15 @@ tuku doctor --vault vault-limpio
 
 Dado el ámbito ya creado
 ```bash
-tuku scope create depto-centro --vault mi-vault
+tuku scope create depto-centro --vault mi-vault --day 2026-08-11 --hour 18:45
 ```
-Cuando se vuelve a ejecutar `tuku scope create` sobre el mismo ámbito
+Cuando se vuelve a ejecutar `tuku scope create` sobre el mismo ámbito, a otra hora
 ```bash
-tuku scope create depto-centro --vault mi-vault
+tuku scope create depto-centro --vault mi-vault --day 2026-08-11 --hour 19:30
 ```
 Entonces el diff contra el estado previo es vacío (idempotente)
 Y los enlaces existentes no se duplican
+Y la constancia no se repite: solo la deja quien crea la carpeta
 
 ## Escenario: el nombre dictado con espacios se escribe con guion
 
@@ -85,7 +87,7 @@ tuku init vault-nombres --date 2026-08-11
 ```
 Cuando el ámbito se pide tal como se dice
 ```bash
-tuku scope create "depto centro" --vault vault-nombres
+tuku scope create "depto centro" --vault vault-nombres --day 2026-08-11 --hour 18:45
 ```
 Entonces el ámbito queda en `ambitos/depto-centro/` y no existe `ambitos/depto centro/`
 
@@ -111,9 +113,22 @@ printf -- '---\ntype: Pending\n---\n' > vault-roto/PENDIENTES.md
 ```
 Cuando se pide crear un ámbito
 ```bash
-tuku scope create depto-centro --vault vault-roto
+tuku scope create depto-centro --vault vault-roto --day 2026-08-11 --hour 18:45
 ```
 Entonces sale con código 1 (`RECHAZO`) nombrando la tabla que falta
+Y no queda la carpeta `ambitos/depto-centro/`
+
+## Escenario: un día fuera del ciclo se rechaza sin crear nada
+
+Dado un vault sembrado en la semana del 10 de agosto
+```bash
+tuku init vault-fuera --date 2026-08-11
+```
+Cuando se pide crear un ámbito con su constancia en un día de otra semana
+```bash
+tuku scope create depto-centro --vault vault-fuera --day 2026-09-01 --hour 10:00
+```
+Entonces sale con código 1 (`RECHAZO`) diciendo que el día cae fuera del ciclo abierto
 Y no queda la carpeta `ambitos/depto-centro/`
 
 ## Aceptación humana (en Obsidian)

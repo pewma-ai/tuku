@@ -11,7 +11,8 @@ Cuando se corre
 tuku init mi-vault --variant vanilla --date 2026-08-11
 ```
 
-Entonces el árbol sembrado es idéntico a `template/vanilla/` salvo `AHORA.md`, sin que sobre ni falte ningún archivo
+Entonces el árbol sembrado es idéntico a `template/vanilla/` salvo `AHORA.md`, `reglas/config.tuku.md` y `reglas/comandos.tuku.md`, sin que sobre ni falte ningún archivo
+Y `reglas/comandos.tuku.md` dice, por cada comando, lo mismo que su `-h`: qué hace y cómo hacerlo a mano
 Y `AHORA.md` queda como el template con `desde`, `hasta` y los siete días resueltos
 Y ningún archivo del vault conserva un placeholder (`AAAA-MM-DD`, `DD de mes`) fuera de un bloque de código
 Y nada de esto necesitó la red
