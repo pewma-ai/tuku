@@ -41,10 +41,11 @@ tuku todo open --day 2026-08-11 --hour 13:00 --scope personal --body "..."    ×
 tuku todo close --day 2026-08-11 --hour 19:05 --scope personal --body "..."   ×2
 tuku scope create depto-centro --day 2026-08-11
 tuku note create "<el título>" --scope depto-centro --day 2026-08-11 --hour 21:15
-tuku todo open --day 2026-08-12 --hour 09:00 --scope personal --body "..."
-tuku todo open --day 2026-08-12 --hour 09:30 --scope depto-centro --body "..."
+tuku todo open --day 2026-08-11 --due 2026-08-12 --scope personal --body "..."
+tuku todo open --day 2026-08-11 --due 2026-08-12 --scope depto-centro --body "..."
 ```
 Y cada registro tiene su hora, su ámbito y su marca cerrada según la tabla de verdad
+Y los dos pendientes de mañana se prometen el martes 11 y vencen el miércoles 12
 Y la consulta del pase escolar no deja nada escrito, y la respuesta nombra `AHORA.md` y `PENDIENTES.md`
 Y ni "recuérdame" ni la pregunta por los pendientes entran a `AHORA.md`
 Y el cuerpo del registro de las 18:40 enlaza a `depto-centro` de forma retroactiva, y el martes tiene la constancia de haberlo abierto
@@ -70,5 +71,5 @@ Solo se afirma la marca cerrada (`**pendiente**`, `(Hecho)`). "Ninguna" signific
 | 19:05 | martes 11 | `personal` | `(Hecho)` |
 | 19:10 | martes 11 | `personal` | `(Hecho)` |
 | 21:15 | martes 11 | `depto-centro` | ninguna |
-| 09:00 | miércoles 12 | `personal` | `**pendiente**` |
-| 09:30 | miércoles 12 | `depto-centro` | `**pendiente**` |
+| la que elija | martes 11 | `personal` | `**pendiente**` |
+| la que elija | martes 11 | `depto-centro` | `**pendiente**` |

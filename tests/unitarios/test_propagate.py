@@ -13,7 +13,7 @@ PENDIENTES = (
     "---\n"
     "type: Todo\n"
     "---\n\n"
-    "| Horizonte | Cuándo | Ámbito | Detalle |\n"
+    "| Horizonte | Vence | Ámbito | Detalle |\n"
     "| --------- | ------ | ------ | ------- |\n"
     f"| esta semana |  | {P} | comprar una maleta |\n"
     f"| con fecha | 2026-09-08 | {P} | pagar la sesión con el psicólogo |\n"

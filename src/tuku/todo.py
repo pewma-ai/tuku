@@ -12,7 +12,7 @@ un reconciliador borraría los pendientes abiertos en ciclos anteriores que el
 `AHORA.md` en curso ya no menciona. La idempotencia se paga a mano: abrir
 comprueba que la fila no esté, cerrar que la pareja exista.
 
-El archivo es **una sola tabla**, `| Horizonte | Cuándo | Ámbito | Detalle |`.
+El archivo es **una sola tabla**, `| Horizonte | Vence | Ámbito | Detalle |`.
 El horizonte y la fecha son columnas y no estructura: bajar de escalón o agendar
 mueve o edita una fila, y nunca crea ni destruye secciones.
 
@@ -60,11 +60,11 @@ _CIERRE_ENTRADA = re.compile(
 #: Una fila de la tabla: cuatro celdas. La cabecera y el separador tienen la
 #: misma forma y se descartan aparte.
 _FILA = re.compile(
-    r"^\|(?P<horizonte>[^|\n]*)\|(?P<cuando>[^|\n]*)\|"
+    r"^\|(?P<horizonte>[^|\n]*)\|(?P<vence>[^|\n]*)\|"
     r"(?P<ambito>[^|\n]*)\|(?P<cuerpo>[^|\n]*)\|\s*$"
 )
 
-CABECERA = "| Horizonte | Cuándo | Ámbito | Detalle |"
+CABECERA = "| Horizonte | Vence | Ámbito | Detalle |"
 
 #: La escalera del template vanilla, y solo el punto de partida: los escalones
 #: son del autor y salen de `### Horizontes` en su libro de estilo
@@ -96,14 +96,14 @@ class Fila:
     """Una fila de la tabla de pendientes."""
 
     horizonte: str
-    cuando: str
+    vence: str
     ambito: str | None
     cuerpo: str
 
     def linea(self, rutas: Mapping[str, str] | None = None) -> str:
         """La fila como línea de la tabla; el link se escribe desde `PENDIENTES.md`."""
         ambito = link.enlace_ambito(self.ambito, "PENDIENTES.md", rutas) if self.ambito else ""
-        return f"| {self.horizonte} | {self.cuando} | {ambito} | {self.cuerpo} |"
+        return f"| {self.horizonte} | {self.vence} | {ambito} | {self.cuerpo} |"
 
 
 class SinTabla(Exception):
@@ -210,7 +210,7 @@ def _parsear_fila(linea: str) -> Fila | None:
     ambito = m.group("ambito").strip()
     return Fila(
         horizonte,
-        m.group("cuando").strip(),
+        m.group("vence").strip(),
         link.nombre_de(ambito) if ambito else None,
         m.group("cuerpo").strip(),
     )
@@ -255,7 +255,7 @@ def _clave(fila: Fila, escalera: tuple[str, ...] = ESCALERA) -> tuple[int, str]:
     escalones = [slug(n) for n in escalera]
     propio = slug(fila.horizonte)
     orden = escalones.index(propio) if propio in escalones else len(escalones)
-    return orden, fila.cuando or "9999-99-99"
+    return orden, fila.vence or "9999-99-99"
 
 
 def abrir(
@@ -263,9 +263,7 @@ def abrir(
     marca: Marca,
     *,
     horizon: str = ESTA_SEMANA,
-    horizonte: str | None = None,
-    when: str = "",
-    cuando: str | None = None,
+    due: str = "",
     escalera: tuple[str, ...] = ESCALERA,
     rutas: Mapping[str, str] | None = None,
 ) -> str:
@@ -277,11 +275,9 @@ def abrir(
     Si el detalle ya existe no duplica la fila: un registro repetido en la
     bitácora no abre dos veces el mismo pendiente.
     """
-    dest_horizon = horizonte if horizonte is not None else horizon
-    dest_when = cuando if cuando is not None else when
     fila = Fila(
-        horizonte=canonico(dest_horizon, escalera),
-        cuando=dest_when.strip(),
+        horizonte=canonico(horizon, escalera),
+        vence=due.strip(),
         ambito=marca.ambito,
         cuerpo=marca.cuerpo,
     )
@@ -304,9 +300,9 @@ def abrir(
 
 def _misma_fila(a: Fila, b: Fila) -> bool:
     """Dos filas son la misma si solo difieren en los links de su detalle."""
-    return (a.horizonte, a.cuando, a.ambito, clave(a.cuerpo)) == (
+    return (a.horizonte, a.vence, a.ambito, clave(a.cuerpo)) == (
         b.horizonte,
-        b.cuando,
+        b.vence,
         b.ambito,
         clave(b.cuerpo),
     )
@@ -473,25 +469,13 @@ def cerrar(pendientes: str, marca: Marca) -> tuple[str, bool]:
     return pendientes, False
 
 
-def cuando_por_dia(when: str, day: date | None, hoy: date) -> str:
-    """La fecha de un pendiente: la de `when` o, si falta, la de un `day` futuro.
-
-    Escribir un pendiente en un día posterior a HOY es fecharlo
-    (`spec/pendientes.md`): lo que haría alguien en una agenda de papel. El día
-    de hoy no fecha, porque escribir hoy es el acto por defecto de registrar.
-    """
-    if when.strip() or day is None or day <= hoy:
-        return when
-    return day.isoformat()
-
-
 def abrir_en_vault(
     vault: Path,
     *,
     body: str,
     scope: str | None = None,
-    horizon: str = ESTA_SEMANA,
-    when: str = "",
+    horizon: str | None = None,
+    due: date | None = None,
     propagate: bool = True,
     day: date | None = None,
     hour: str | None = None,
@@ -507,6 +491,12 @@ def abrir_en_vault(
     pendiente existiría sin aparecer en su día, que es la falla silenciosa que
     `spec/pendientes.md` persigue. `propagate=False` es la escotilla del lote,
     que propaga una sola vez al final.
+
+    `day` y `hour` son cuándo se prometió y `due`, para cuándo es
+    (`spec/pendientes.md`). Un `day` posterior a HOY se rechaza: el registro
+    de algo que todavía no se dijo no existe, y la fecha del pendiente va en
+    `due`. Con `due`, el horizonte es `con fecha`; sin ninguno de los dos, el
+    primer escalón del autor.
     """
     from tuku import scope as ambitos
     from tuku.ahora import encabezado_de
@@ -515,15 +505,17 @@ def abrir_en_vault(
     from tuku.entry import componer
     from tuku.propagate import propagar
 
+    if day is not None and day > date.today():
+        return Resultado.rechazo(
+            f"el {day.isoformat()} todavía no llega: el día es cuándo se prometió. "
+            f"Para que venza ese día: --due {day.isoformat()}"
+        )
     limpio_scope = ambitos.normalizar(scope) if scope else None
     if limpio_scope and (rechazo := ambitos.rechazo_si_no_existe(vault, limpio_scope)):
         return rechazo
     marca = Marca(ABRE, limpio_scope, body.strip())
     escalera = escalera_de(leer_config(vault).horizontes)
-    when = cuando_por_dia(when, day, date.today())
-    if when.strip() and horizon == ESTA_SEMANA:
-        horizon = CON_FECHA
-    horizon = canonico(horizon, escalera)
+    horizon = CON_FECHA if due else canonico(horizon or escalera[0], escalera)
 
     ahora_path = archivo_vault(vault, "AHORA.md")
     ahora_actual = ahora_path.read_text(encoding="utf-8")
@@ -554,7 +546,7 @@ def abrir_en_vault(
             ruta.read_text(encoding="utf-8"),
             marca,
             horizon=horizon,
-            when=when,
+            due=due.isoformat() if due else "",
             escalera=escalera,
             rutas=ambitos.rutas(vault),
         ),

@@ -10,7 +10,7 @@ El corte no pasa entre estructura y lenguaje, pasa por los **campos**. Quien inv
 
 Ese reparto sostiene el principio 1 de [`../docs/principios.md`](../docs/principios.md). Un autor disciplinado hace lo mismo a mano con un editor básico: el comando le ahorra el esfuerzo, no habilita nada que sin él sea imposible. Si un comando empieza a decidir cosas que una persona no podría reproducir a mano, el defecto está en el comando.
 
-**Ningún comando infiere un campo que quien invoca no dio**, salvo donde una spec declare un valor por defecto. Los que hay hoy: el día (la fecha actual, **HOY**) y la hora (la hora actual, **AHORA**) de un registro o de la huella en bitácora dejada por un comando mutador (`todo`, `scope`, `note`), evaluados en la zona horaria `TZ` del vault ([bitacora.md](bitacora.md)); y la fecha de un pendiente escrito bajo un día posterior a HOY, que es ese día ([pendientes.md](pendientes.md)).
+**Ningún comando infiere un campo que quien invoca no dio**, salvo donde una spec declare un valor por defecto. Los que hay hoy: el día (la fecha actual, **HOY**) y la hora (la hora actual, **AHORA**) de un registro o de la huella en bitácora dejada por un comando mutador (`todo`, `scope`, `note`), evaluados en la zona horaria `TZ` del vault ([bitacora.md](bitacora.md)); y el horizonte de un pendiente sin `--due` ni `--horizon`, que es el primer escalón del autor ([pendientes.md](pendientes.md)).
 
 ## Los códigos de salida
 

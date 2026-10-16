@@ -27,7 +27,7 @@ def test_parsear_un_ambito_anidado_toma_el_nombre_del_archivo() -> None:
 def test_la_fila_se_lee_y_se_escribe_en_markdown() -> None:
     fila = todo.Fila("esta semana", "", "personal", "comprar pan")
     assert fila.linea() == f"| esta semana |  | {MD} | comprar pan |"
-    tabla = f"| Horizonte | Cuándo | Ámbito | Detalle |\n| - | - | - | - |\n{fila.linea()}\n"
+    tabla = f"| Horizonte | Vence | Ámbito | Detalle |\n| - | - | - | - |\n{fila.linea()}\n"
     assert todo.filas(tabla) == [fila]
     con_wiki = tabla.replace(MD, "[[personal]]")
     assert todo.filas(con_wiki) == [fila]

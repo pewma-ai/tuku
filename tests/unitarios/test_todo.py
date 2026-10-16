@@ -92,15 +92,15 @@ def test_abrir_dos_veces_no_duplica_la_fila() -> None:
     assert len(todo.filas(dos)) == 1
 
 
-def test_abrir_con_fecha_deja_la_fecha_en_la_columna_cuando() -> None:
+def test_abrir_con_fecha_deja_la_fecha_en_la_columna_vence() -> None:
     marca = todo.parsear("- 09:00 - [[personal]] **pendiente**: pagar la sesión")
     assert marca is not None
 
-    texto = todo.abrir(VACIA, marca, horizon=todo.CON_FECHA, when="2026-08-12")
+    texto = todo.abrir(VACIA, marca, horizon=todo.CON_FECHA, due="2026-08-12")
 
     fila = todo.filas(texto)[0]
     assert fila.horizonte == todo.CON_FECHA
-    assert fila.cuando == "2026-08-12"
+    assert fila.vence == "2026-08-12"
     assert todo.cuerpos(texto, "esta semana") == [], "no debía pasar por la escalera"
 
 
@@ -160,7 +160,7 @@ def test_filas_y_horizontes_leen_lo_que_hay() -> None:
 
     assert todo.horizontes(texto) == ["esta semana", "con fecha"]
     assert [f.cuerpo for f in todo.filas(texto)] == ["una cosa", "otra cosa"]
-    assert todo.filas(texto, "con fecha")[0].cuando == "2026-08-12"
+    assert todo.filas(texto, "con fecha")[0].vence == "2026-08-12"
 
 
 def test_duplicados_encuentra_el_mismo_cuerpo_en_dos_filas() -> None:
@@ -223,7 +223,7 @@ def test_un_horizonte_renombrado_por_el_autor_ordena_como_el_primero() -> None:
         VACIA,
         todo.Marca("**pendiente**", "[[personal]]", "pagar la patente"),
         horizon="con fecha",
-        when="2026-08-20",
+        due="2026-08-20",
         escalera=escalera,
     )
     tabla = todo.abrir(
@@ -431,32 +431,6 @@ def test_lint_reporta_una_vista_que_difiere_y_nombra_propagate() -> None:
 def test_lint_reporta_una_vista_que_falta() -> None:
     (hallazgo,) = todo.lint(VACIA, vistas={"ambitos/PENDIENTES-AMBITOS.md": (None, "x")})
     assert "tuku regenerate todo" in hallazgo
-
-
-# --- cuando_por_dia: escribir en un día futuro es fecharlo -------------------
-
-
-def test_un_dia_futuro_sin_when_fecha_el_pendiente() -> None:
-    from datetime import date
-
-    assert todo.cuando_por_dia("", date(2026, 8, 13), date(2026, 8, 11)) == "2026-08-13"
-
-
-def test_hoy_y_el_pasado_no_fechan() -> None:
-    from datetime import date
-
-    hoy = date(2026, 8, 11)
-    assert todo.cuando_por_dia("", hoy, hoy) == ""
-    assert todo.cuando_por_dia("", date(2026, 8, 10), hoy) == ""
-    assert todo.cuando_por_dia("", None, hoy) == ""
-
-
-def test_un_when_explicito_manda_sobre_el_dia() -> None:
-    from datetime import date
-
-    assert todo.cuando_por_dia("2026-08-20", date(2026, 8, 13), date(2026, 8, 11)) == (
-        "2026-08-20"
-    )
 
 
 DIA_CERRADO = (

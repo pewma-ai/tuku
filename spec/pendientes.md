@@ -21,14 +21,14 @@ El archivo contiene solo lo abierto. El historial de lo cerrado vive en las bit�
 
 ## Formato
 
-Un archivo y una sola tabla con cuatro columnas: `| Horizonte | Cuándo | Ámbito | Detalle |`. El horizonte y la fecha viven en columnas y no en la estructura del documento.
+Un archivo y una sola tabla con cuatro columnas: `| Horizonte | Vence | Ámbito | Detalle |`. El horizonte y la fecha viven en columnas y no en la estructura del documento.
 
 ```text
 ---
 type: Todo
 ---
 
-| Horizonte | Cuándo | Ámbito | Detalle |
+| Horizonte | Vence | Ámbito | Detalle |
 | --------- | ------ | ------ | ------- |
 | esta semana | | [arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md) | avisar de los GGCC al arrendatario |
 | próxima semana | | [personal](ambitos/personal/personal.md) | comprar una maleta |
@@ -37,9 +37,9 @@ type: Todo
 
 **Horizonte** indica el escalón actual del pendiente. Los del autor salen de `### Horizontes` en el libro de estilo (`esta semana`, `próxima semana`, `fin de mes` en el template vanilla) y `con fecha` es del sistema cuando tiene día asignado.
 
-**Cuándo** lleva la fecha exacta cuando el pendiente la tiene y queda vacío cuando no (el valor por defecto al omitir `--when`, integrándose al horizonte del ciclo en curso). **Ámbito** es un enlace, o vacío si el pendiente todavía no aterrizó en ninguno. **Detalle** es el cuerpo, el mismo texto que el registro que lo abrió y que el que lo cierre.
+**Vence** es el día en que toca el pendiente: ese día aparece entre los pendientes del día, y desde el siguiente está atrasado. Queda vacío cuando no lo tiene (sin `--due`), y el pendiente va al horizonte del ciclo en curso. **Ámbito** es un enlace, o vacío si el pendiente todavía no aterrizó en ninguno. **Detalle** es el cuerpo, el mismo texto que el registro que lo abrió y que el que lo cierre.
 
-Las filas se insertan ordenadas por la posición del horizonte en la escalera y por `Cuándo`. El orden es determinista y la inserción es posicional: un pendiente nuevo no reordena la tabla entera, preservando un diff limpio.
+Las filas se insertan ordenadas por la posición del horizonte en la escalera y por `Vence`. El orden es determinista y la inserción es posicional: un pendiente nuevo no reordena la tabla entera, preservando un diff limpio.
 
 **No hay encabezados por horizonte ni de fecha.** El horizonte y la fecha viven en columnas, así que mover de escalón o fechar edita una fila existente y nunca crea ni destruye secciones.
 
@@ -59,18 +59,16 @@ Efecto secundario valioso: una lista de deseos hay que postergarla ciclo tras ci
 
 Un pendiente está atrasado por dos vías, las dos deducibles de la fila:
 
-- Su `Cuándo` es anterior a HOY.
+- Su `Vence` es anterior a HOY.
 - No tiene fecha, el ciclo en cuyo horizonte estaba se cerró y sigue abierto: el horizonte expiró.
 
-Guardarlo además como encabezado repetía un dato que la columna `Cuándo` ya tenía, con el riesgo de que las dos copias discreparan. Un comando lo calcula y lo informa; en `PENDIENTES.md` no se mueve nada.
+Guardarlo además como encabezado repetía un dato que la columna `Vence` ya tenía, con el riesgo de que las dos copias discreparan. Un comando lo calcula y lo informa; en `PENDIENTES.md` no se mueve nada.
 
 Consecuencia: **ninguna automatización escribe en `PENDIENTES.md` por calendario.** El archivo cambia cuando el autor cambia algo, y no porque pasó la medianoche. Es el principio 3 de [`../docs/principios.md`](../docs/principios.md): una consecuencia mayor no ocurre sin que nadie la aprobara.
 
 Con fecha exacta pasa a `con fecha` y aparece bajo el día correspondiente de `AHORA.md`, propagado por un comando.
 
-**Escribir en un día futuro es fecharlo.** Un pendiente abierto con `tuku todo open` bajo un día posterior a hoy (`--day`) nace con la fecha de ese día, y queda propagado al inicio de ese día. No hay un comando aparte para agendar: agendar es escribir donde corresponde, que es lo que alguien haría en una agenda de papel.
-
-**El día de hoy no fecha**, y va al horizonte del ciclo en curso. Escribir bajo el día de hoy es el acto por defecto de registrar, no una decisión de agendar: el autor escribe ahí porque hoy es cuando habla. Si eso fechara, todo lo que mencionara quedaría venciendo hoy, que casi nunca es cierto. Fechar queda como lo que es, un acto deliberado: escribirlo en el día en que toca.
+**Cuándo se prometió y para cuándo es son dos fechas.** `--day` y `--hour` son cuándo se dijo: el registro `**pendiente**` va a ese día y hora de la bitácora, y un día posterior a hoy se rechaza, porque lo que todavía no se dijo no tiene registro. `--due` es el día en que vence y lo único que fecha: el pendiente nace `con fecha` y aparece en ese día de `AHORA.md`, derivado de la columna. Fechar es un acto deliberado; escribir hoy no fecha nada. `--due` y `--horizon` son excluyentes: un pendiente tiene fecha o tiene escalón.
 
 Esto ataja el escalón: un pendiente puede nacer en `con fecha` sin pasar por ningún horizonte del autor. La escalera describe cómo se concreta lo que nació difuso, no un camino obligatorio.
 
@@ -153,10 +151,10 @@ Un pendiente que rueda de ciclo en ciclo se vuelve invisible por costumbre, y lo
 ## Reglas
 
 1. Un pendiente está en **una sola fila de `PENDIENTES.md`**, siempre. El alcance de la regla es este archivo: lo que aparece en un día o en la página de un ámbito es una vista derivada y no cuenta como segunda aparición. Sin esa distinción, la vista se confunde con el error que la regla prohíbe.
-2. **Nada se mueve por vencimiento.** Estar atrasado se calcula desde la fila, por `Cuándo` anterior a HOY o por horizonte expirado, y un comando lo informa sin tocar `PENDIENTES.md`. Guardar el atraso como encabezado duplicaba lo que la columna ya decía.
+2. **Nada se mueve por vencimiento.** Estar atrasado se calcula desde la fila, por `Vence` anterior a HOY o por horizonte expirado, y un comando lo informa sin tocar `PENDIENTES.md`. Guardar el atraso como encabezado duplicaba lo que la columna ya decía.
 3. Al cerrar ciclo, lo que quede sin fecha en el horizonte del ciclo en curso rueda al mismo horizonte del ciclo nuevo, y **rodar deja rastro**: la apertura marca en el `AHORA.md` recién abierto qué pendientes se trajeron desde el ciclo anterior.
 4. Al cerrar ciclo, la bitácora que queda archivada deja constancia de qué pendientes quedaron atrasados. Es un snapshot y no rompe la fuente única, por el mismo argumento con que [`ciclo.md`](ciclo.md) aplana el plan: al cerrar nada sigue vivo.
-5. **La fecha vive en la columna `Cuándo` y en ningún otro lugar.** No se repite en el detalle ni se codifica en la estructura. La antigüedad se saca del historial de git de `PENDIENTES.md`, que se versiona como fuente.
+5. **La fecha vive en la columna `Vence` y en ningún otro lugar.** No se repite en el detalle ni se codifica en la estructura. La antigüedad se saca del historial de git de `PENDIENTES.md`, que se versiona como fuente.
 6. HOY se evalúa en la zona horaria del autor, la que declara `TZ` en `reglas/config.tuku.md`. La VM hereda el TZ del laptop, así que no hay que convertir, pero sí declararlo para que ningún comando asuma UTC.
 7. **Las vistas se regeneran, no se reparan.** Todo lo que muestra un pendiente fuera de `PENDIENTES.md` se deriva de él. Si una vista discrepa de la fuente, la que está mal es la vista, y la corrección es volver a propagar. `tuku todo lint` lo detecta re-derivando y comparando.
 8. `PENDIENTES.md` se versiona como fuente. La reconstrucción desde bitácoras no lo regenera ni lo verifica. El conjunto canónico es `AHORA.md` + `bitacoras/` + `PENDIENTES.md` + `ambitos/` + `notas/`, y el principio 9 aplica solo a lo que queda fuera de esa lista.

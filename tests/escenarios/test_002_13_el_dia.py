@@ -229,6 +229,14 @@ def test_002_13_los_pendientes_de_manana_y_pasado_llegan_a_su_dia() -> None:
     assert "^" not in pendientes and "> [!todo]" not in pendientes
 
     ahora = _leer(corrida, "AHORA.md")
+    martes = _region(ahora, "## Martes 11 de agosto")
+    promesas = [x for x in martes if x.startswith("- 21:3")]
+    assert [x.rsplit("**pendiente**: ", 1)[1] for x in promesas] == [
+        "comprar pasajes de tren",
+        "pagar la sesión con el psicólogo",
+        "llamar a la administradora",
+        "pagar los gastos comunes",
+    ]
     for encabezado, dia in (
         ("## Miércoles 12 de agosto", "2026-08-12"),
         ("## Jueves 13 de agosto", "2026-08-13"),

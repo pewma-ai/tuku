@@ -17,7 +17,7 @@ def _cmd_todo_open(args: argparse.Namespace) -> int:
             body=args.body,
             scope=args.scope or ambito_por_defecto(args.vault),
             horizon=args.horizon,
-            when=args.when,
+            due=args.due,
             propagate=not args.no_propagate,
             day=args.day,
             hour=args.hour,
@@ -65,8 +65,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                 "Escribe en `AHORA.md`, bajo el día y en orden de hora, el registro "
                 "`- HH:MM - [ámbito](ruta) **pendiente**: cuerpo`, agrega la fila a la "
                 "tabla de `PENDIENTES.md` bajo su horizonte y regenera las vistas como "
-                "`tuku regenerate todo`. Un día posterior a hoy es la fecha del pendiente. "
-                "Si el registro ya estaba, no lo repite."
+                "`tuku regenerate todo`. El día y la hora son cuándo se prometió; la fecha "
+                "del pendiente va en `--due`. Si el registro ya estaba, no lo repite."
             ),
         ),
         (
@@ -97,7 +97,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             dest="day",
             default=None,
             type=fecha,
-            help="día de registro, AAAA-MM-DD",
+            help="día en que se registra, AAAA-MM-DD; por defecto, hoy",
         )
         p.add_argument(
             "--hour",
@@ -105,7 +105,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             dest="hour",
             default=None,
             type=hora,
-            help="hora en que se registra, HH:MM",
+            help="hora en que se registra, HH:MM; por defecto, ahora",
         )
         if verbo == "open":
             p.add_argument(
@@ -115,19 +115,24 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                 default=None,
                 help="ámbito, sin corchetes; por defecto, `scope_default` de la config",
             )
-            p.add_argument(
+            plazo = p.add_mutually_exclusive_group()
+            plazo.add_argument(
+                "--due",
+                "--vence",
+                dest="due",
+                default=None,
+                type=fecha,
+                help="día en que vence, AAAA-MM-DD; el horizonte pasa a `con fecha`",
+            )
+            plazo.add_argument(
                 "--horizon",
                 "--horizonte",
                 dest="horizon",
-                default=core_todo.ESTA_SEMANA,
-                help="horizonte destino: el encabezado bajo el que va la fila",
-            )
-            p.add_argument(
-                "--when",
-                "--cuando",
-                dest="when",
-                default="",
-                help="fecha del pendiente, AAAA-MM-DD; vacío si no la tiene",
+                default=None,
+                help=(
+                    "escalón del pendiente sin fecha, de `### Horizontes` en el libro de "
+                    "estilo; por defecto, el primero"
+                ),
             )
         elif verbo == "close":
             p.add_argument(

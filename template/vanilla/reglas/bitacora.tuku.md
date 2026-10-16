@@ -23,14 +23,15 @@ tuku todo open --day 2026-08-11 --hour 14:20 --scope personal \
 | --- | --- |
 | `--body` | El hecho. En `tuku entry add`, con su clasificación al principio si la lleva; en `tuku todo open` y `tuku todo close`, solo el cuerpo: la marca la pone el comando |
 | `--scope` | El frente al que pertenece, sin corchetes |
-| `--day` | El día en que ocurrió |
-| `--hour` | La hora en que ocurrió |
+| `--day` | El día en que ocurrió, o en que se prometió si es un pendiente |
+| `--hour` | La hora en que ocurrió, o en que se prometió |
+| `--due` | Solo en `tuku todo open`: el día en que vence |
 
 ## El día y la hora
 
 Sin `--day` es hoy y sin `--hour` es ahora.
 
-Si el autor nombra un día explícito ("mañana a las nueve", "el miércoles a las diez"), el registro va a ese día en `--day` y a esa hora en `--hour`.
+Si el autor cuenta algo de otro día ("ayer a las nueve", "el lunes a las diez"), el registro va a ese día en `--day` y a esa hora en `--hour`. Un día que todavía no llega no es un `--day`: es el vencimiento de un pendiente.
 
 Cuando el autor no dice el día, los registros van al ciclo abierto de `AHORA.md`: **si hoy cae fuera de ese ciclo, el día es el último del ciclo que ya tiene registros y va explícito en `--day`**. Si el ciclo todavía está vacío, es el primero. Un ciclo que quedó atrás no es motivo para cerrarlo: cerrar el ciclo está en los límites y lo decide el autor.
 
@@ -40,9 +41,9 @@ Esta es la regla que más se equivoca sola. Sin ella el comando rechaza el regis
 
 ## Cuándo vence un pendiente
 
-Si el autor dijo cuándo ("mañana", "el lunes", "antes del 20"), va en `--when` con la fecha ya resuelta.
+Si el autor dijo para cuándo ("mañana", "el lunes", "antes del 20"), va en `--due` con la fecha ya resuelta. El registro queda hoy y ahora, que es cuándo se prometió, y el pendiente aparece en su día de `AHORA.md`.
 
-Solo el pendiente sin fecha nace en el primer escalón de `### Horizontes`. Para mandarlo a otro escalón, `--horizon`, con el nombre tal como está escrito en `LIBRO-DE-ESTILO.md`: los escalones son del autor y puede haberlos renombrado.
+Sin `--due`, el pendiente nace en el primer escalón de `### Horizontes`. Para mandarlo a otro escalón, `--horizon`, con el nombre tal como está escrito en `LIBRO-DE-ESTILO.md`: los escalones son del autor y puede haberlos renombrado. `--due` y `--horizon` no van juntos.
 
 ## Un hecho, un comando
 

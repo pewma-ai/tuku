@@ -85,11 +85,24 @@ def test_una_fecha_o_una_hora_mal_escrita_es_error_de_uso(
     assert opcion[1] in capsys.readouterr().err
 
 
-def test_todo_open_when_y_horizon() -> None:
-    args = _parsear("todo open", "--when", "2026-08-20", "--horizonte", "próxima semana")
-    assert (args.when, args.horizon) == ("2026-08-20", "próxima semana")
+def test_todo_open_due_y_horizon() -> None:
+    assert _parsear("todo open", "--vence", HOY).due == date(2026, 8, 11)
+    assert _parsear("todo open", "--horizonte", "próxima semana").horizon == "próxima semana"
     sin = _parsear("todo open")
-    assert (sin.when, sin.horizon) == ("", todo.ESTA_SEMANA)
+    assert (sin.due, sin.horizon) == (None, None)
+
+
+def test_due_y_horizon_juntos_es_error_de_uso(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as e:
+        _parsear("todo open", "--due", HOY, "--horizon", "fin de mes")
+    assert e.value.code == USO
+    assert "--horizon" in capsys.readouterr().err
+
+
+def test_un_due_mal_escrito_es_error_de_uso() -> None:
+    with pytest.raises(SystemExit) as e:
+        _parsear("todo open", "--due", "mañana")
+    assert e.value.code == USO
 
 
 @pytest.mark.parametrize("comando", ("todo open", "todo close"))
@@ -185,3 +198,42 @@ def test_no_propagate_no_toca_las_vistas(vault: Path) -> None:
     assert _correr("todo open", "--no-propagate", "--day", HOY, "--hour", "09:12") == EXITO
     assert vista.read_bytes() == antes
     assert _martes(vault) == [f"- 09:12 - {PERSONAL} **pendiente**: {CUERPO}"]
+
+
+def _pendientes(vault: Path) -> list[str]:
+    texto = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
+    return [linea for linea in texto.splitlines() if CUERPO in linea]
+
+
+def test_due_fecha_el_pendiente_y_el_registro_queda_cuando_se_prometio(vault: Path) -> None:
+    assert _correr("todo open", "--day", HOY, "--hour", "21:30", "--due", "2026-08-13") == EXITO
+    assert _martes(vault) == [f"- 21:30 - {PERSONAL} **pendiente**: {CUERPO}"]
+    assert _pendientes(vault) == [
+        f"| con fecha | 2026-08-13 | [personal](ambitos/personal/personal.md) | {CUERPO} |"
+    ]
+
+
+def test_un_day_futuro_se_rechaza_y_nombra_due(
+    vault: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    class Hoy(date):
+        @classmethod
+        def today(cls) -> Hoy:
+            return cls(2026, 8, 11)
+
+    monkeypatch.setattr(todo, "date", Hoy)
+    antes = (vault / "AHORA.md").read_bytes()
+    assert _correr("todo open", "--day", "2026-08-12", "--hour", "09:00") == RECHAZO
+    assert "--due 2026-08-12" in capsys.readouterr().err
+    assert (vault / "AHORA.md").read_bytes() == antes
+    assert _pendientes(vault) == []
+
+
+def test_sin_due_ni_horizon_va_al_primer_escalon_del_autor(vault: Path) -> None:
+    estilo = vault / "LIBRO-DE-ESTILO.md"
+    estilo.write_text(
+        estilo.read_text(encoding="utf-8").replace("`esta semana`", "`esta quincena`"),
+        encoding="utf-8",
+    )
+    assert _correr("todo open", "--day", HOY, "--hour", "09:12") == EXITO
+    assert _pendientes(vault)[0].startswith("| esta quincena |")

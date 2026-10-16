@@ -32,9 +32,11 @@ SLUG = "003-10-el-dia-uno-en-un-turno"
 TITULO = "el día uno entero"
 MARTES = "## Martes 11 de agosto"
 MIERCOLES = "## Miércoles 12 de agosto"
+MANANA = "2026-08-12"
 
-#: La tabla de verdad del `.md`: hora, ámbito y marca cerrada, por día. Las aperturas de
-#: las 13:00 y las 14:20 no quedan: se cerraron el mismo día.
+#: La tabla de verdad del `.md`: hora, ámbito y marca cerrada, sin los dos de
+#: mañana, cuya hora no se dicta. Las aperturas de las 13:00 y las 14:20 no
+#: quedan: se cerraron el mismo día.
 TABLA: dict[str, dict[str, tuple[str, str | None]]] = {
     MARTES: {
         "09:12": ("personal", None),
@@ -44,10 +46,6 @@ TABLA: dict[str, dict[str, tuple[str, str | None]]] = {
         "19:05": ("personal", todo.CIERRA),
         "19:10": ("personal", todo.CIERRA),
         "21:15": ("depto-centro", None),
-    },
-    MIERCOLES: {
-        "09:00": ("personal", todo.ABRE),
-        "09:30": ("depto-centro", todo.ABRE),
     },
 }
 
@@ -62,11 +60,11 @@ TRADUCCION = {
     "note create": 1,
 }
 
-#: Los dos pendientes de mañana. Empiezan igual a propósito: "ya pagué" calza
-#: con los dos, y por eso no se puede cerrar ninguno.
+#: Los dos pendientes de mañana y su ámbito. Empiezan igual a propósito: "ya
+#: pagué" calza con los dos, y por eso no se puede cerrar ninguno.
 DE_MANANA = {
-    "pagar la sesión con el psicólogo",
-    "pagar los gastos comunes del depto centro",
+    "pagar la sesión con el psicólogo": "personal",
+    "pagar los gastos comunes del depto centro": "depto-centro",
 }
 
 #: Lo que el día escribe, y nada más. La nota se cuenta aparte porque su nombre
@@ -111,13 +109,18 @@ def _ambito_de(linea: str) -> str | None:
     return vault.nombre_comparable(m.group(1)) if m else None
 
 
+def _de_manana(linea: str) -> bool:
+    return todo.ABRE in linea and any(linea.endswith(c) for c in DE_MANANA)
+
+
 def _registros(dia: str) -> dict[str, str]:
-    """Los registros dictados de un día, por hora; sin la constancia de `scope create`."""
+    """Los registros dictados de un día, por hora; sin la constancia de `scope create`
+    ni las aperturas de mañana."""
     por_hora: dict[str, str] = {}
     for linea in dia.splitlines():
         if not linea.startswith("- ") or " - " not in linea:
             continue
-        if linea.endswith(scope.CONSTANCIA):
+        if linea.endswith(scope.CONSTANCIA) or _de_manana(linea):
             continue
         hora = linea[2:].split(" - ", 1)[0]
         assert hora not in por_hora, f"dos registros a las {hora}:\n{dia}"
@@ -168,6 +171,19 @@ def test_003_10_cada_registro_calza_con_la_tabla_de_verdad() -> None:
 
 @pytest.mark.agentic
 @sin_arnes
+def test_003_10_los_de_manana_se_prometen_hoy_y_vencen_manana() -> None:
+    corrida = _corrida()
+    aperturas = [x for x in _dia(corrida, MARTES).splitlines() if _de_manana(x)]
+    assert sorted(_ambito_de(x) or "" for x in aperturas) == sorted(
+        vault.nombre_comparable(a) for a in DE_MANANA.values()
+    ), "\n".join(aperturas)
+    fechados = {f.cuerpo: f.vence for f in todo.filas(_pendientes(corrida))}
+    assert fechados == dict.fromkeys(DE_MANANA, MANANA), fechados
+    assert not _registros(_dia(corrida, MIERCOLES)), "escribió registros en el miércoles 12"
+
+
+@pytest.mark.agentic
+@sin_arnes
 def test_003_10_la_consulta_no_escribe_y_nombra_los_dos_destinos() -> None:
     """Preguntar qué haría no es pedir que lo haga."""
     corrida = _corrida()
@@ -209,11 +225,12 @@ def test_003_10_los_cierres_encontraron_su_pareja_y_el_ambiguo_no_cerro_nada() -
     """Quedan abiertos exactamente los dos de mañana."""
     corrida = _corrida()
     abiertos = set(todo.cuerpos(_pendientes(corrida)))
-    assert abiertos == DE_MANANA, (
-        f"la tabla debía quedar con los dos de mañana. Sobra {abiertos - DE_MANANA}, "
-        f"falta {DE_MANANA - abiertos}"
+    assert abiertos == set(DE_MANANA), (
+        f"la tabla debía quedar con los dos de mañana. Sobra {abiertos - set(DE_MANANA)}, "
+        f"falta {set(DE_MANANA) - abiertos}"
     )
-    assert todo.CIERRA not in _dia(corrida, MIERCOLES), "cerró algo que nadie identificó"
+    cierres = [x for x in _ahora(corrida).splitlines() if todo.CIERRA in x]
+    assert len(cierres) == 2, "cerró algo que nadie identificó:\n" + "\n".join(cierres)
 
 
 @pytest.mark.agentic
@@ -260,6 +277,7 @@ if __name__ == "__main__":
         raise SystemExit(0)
     test_003_10_la_traduccion_es_la_del_dia()
     test_003_10_cada_registro_calza_con_la_tabla_de_verdad()
+    test_003_10_los_de_manana_se_prometen_hoy_y_vencen_manana()
     test_003_10_la_consulta_no_escribe_y_nombra_los_dos_destinos()
     test_003_10_lo_dirigido_al_agente_no_entra_al_dia()
     test_003_10_el_ambito_enlaza_hacia_atras_y_deja_su_constancia()
@@ -267,4 +285,4 @@ if __name__ == "__main__":
     test_003_10_el_agente_pregunta()
     test_003_10_no_cambio_nada_fuera_del_dia()
     test_003_10_el_doctor_aprueba_el_vault()
-    print(f"ok: 9 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 10 afirmaciones (queda en playground/{SLUG}/)")

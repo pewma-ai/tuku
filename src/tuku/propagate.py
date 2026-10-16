@@ -10,7 +10,7 @@ Las dos vistas:
 
 | Vista | Dónde | Qué contiene |
 | --- | --- | --- |
-| El día | La región del día en `AHORA.md` | Las filas cuyo `Cuándo` cae en ese día |
+| El día | La región del día en `AHORA.md` | Las filas cuyo `Vence` cae en ese día |
 | El ámbito | `ambitos/PENDIENTES-AMBITOS.md` | Un callout por ámbito del árbol |
 
 **La región del día** es lo que va entre el encabezado `## <día>` y el primer
@@ -88,7 +88,7 @@ def region_del_dia(
     de un pendiente del ciclo en curso, no una fecha implícita de hoy.
     """
     marca = dia.isoformat()
-    items = [linea_del_dia(f, rutas) for f in filas if f.cuando.strip() == marca]
+    items = [linea_del_dia(f, rutas) for f in filas if f.vence.strip() == marca]
     if not items:
         return []
     return [
@@ -174,7 +174,7 @@ def callout(
 
 def _fecha(fila: todo.Fila) -> date | None:
     try:
-        return date.fromisoformat(fila.cuando.strip())
+        return date.fromisoformat(fila.vence.strip())
     except ValueError:
         return None
 
@@ -193,8 +193,8 @@ def linea_del_ambito(fila: todo.Fila, formato: str = FORMATO_FECHA) -> str:
     """
     cuerpo = link.rebasar(fila.cuerpo, "PENDIENTES.md", str(ARCHIVO_AMBITOS.as_posix()))
     fecha = _fecha(fila)
-    cuando = fecha_corta(fecha, formato) if fecha else fila.cuando.strip()
-    return f"{cuando} - {cuerpo}" if cuando else cuerpo
+    vence = fecha_corta(fecha, formato) if fecha else fila.vence.strip()
+    return f"{vence} - {cuerpo}" if vence else cuerpo
 
 
 def documento_ambitos(

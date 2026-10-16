@@ -2,5 +2,5 @@
 type: Todo
 ---
 
-| Horizonte | Cuándo | Ámbito | Detalle |
+| Horizonte | Vence | Ámbito | Detalle |
 | --------- | ------ | ------ | ------- |
