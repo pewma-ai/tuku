@@ -14,7 +14,7 @@ De ahí la prueba para saber si una línea pertenece a la raíz: si la respuesta
 
 No hay taxonomía nueva. [`../devel/epics.md`](../devel/epics.md) fija que el vault se cambia por la vía bitácora o por comando directo y que no existe una tercera, y el despacho decide entre esas dos, más el caso que no escribe:
 
-1. **Vía bitácora.** El autor cuenta algo que ocurrió. Se escribe el registro con `tuku entry add` y las consecuencias las deriva el sistema releyendo lo escrito ([flujo-informacion.md](flujo-informacion.md)). Es el caso por defecto y el más frecuente.
+1. **Vía bitácora.** El autor cuenta algo que ocurrió, deja algo por hacer o cierra algo pendiente. Se escribe el registro con `tuku entry add`, o con `tuku todo open` y `tuku todo close` cuando abre o cierra un pendiente: esos dos escriben el registro y su consecuencia en la misma llamada, y la consecuencia sigue siendo derivable de lo escrito ([flujo-informacion.md](flujo-informacion.md)). Es el caso por defecto y el más frecuente.
 2. **Vía comando directo.** El autor pide una operación de sistema o toma una decisión explícita que ningún hecho justifica: abrir o cerrar un pendiente, moverlo de escalón, crear un ámbito, abrir una nota o el ciclo. Toda operación mutadora por esta vía estampa automáticamente constancia cronológica en `AHORA.md` (con fallback de fecha a **HOY** y hora a **AHORA** en `TZ`), de modo que no existan decisiones sin registro temporal.
 3. **Sin despacho.** Deliberar, consultar el estado, investigar, redactar un borrador. No toca ningún archivo del conjunto canónico. Termina en respuesta, no en escritura.
 
@@ -24,7 +24,7 @@ Que la primera vía cubra casi todo es lo que mantiene corta la tabla: el despac
 
 Vive en el `AGENTS.md` de la raíz y es lo que el ejecutor consulta antes de actuar. Mapea señal del autor a lectura previa y a comando, en tres columnas: **El autor...**, **Lee antes** y **Comando**. La tabla es la del [`AGENTS.md` del template](../template/vanilla/AGENTS.md), sección "A dónde va lo que el autor dice", y esta spec no la copia: dice por qué tiene la forma que tiene.
 
-La vía de cada fila no va en una columna, porque el ejecutor no la necesita para elegir: las tres primeras son la vía bitácora; crear un frente, guardar una nota, abrir el ciclo y corregir son comando directo; nombrar un proceso es el escape; las dos últimas no escriben. `tuku todo open` y `tuku todo close` no tienen fila: `tuku entry add` ya aplica la consecuencia de la marca, y esos dos quedan para corregir a mano.
+La vía de cada fila no va en una columna, porque el ejecutor no la necesita para elegir: las tres primeras son la vía bitácora; crear un frente, guardar una nota, abrir el ciclo y corregir son comando directo; nombrar un proceso es el escape; las dos últimas no escriben.
 
 La columna **Lee antes** es la que hace que la cascada funcione sin explorar. Dice qué archivo se abre antes de ejecutar esa fila, y es un nombre, no una pista: sin él la regla que vive abajo depende de que el ejecutor decida ir a buscarla, y esa decisión es el punto donde una cascada se rompe en silencio. Con ella, lo que no se usa sigue sin cargarse, que es todo lo que la cascada quería.
 
@@ -32,7 +32,7 @@ Una fila que dice `nada` no es una fila sin reglas: es una cuyo comando se expli
 
 **La tabla nombra solo comandos que existen.** Cerrar el ciclo y cambiar un pendiente de horizonte están en el diseño y todavía no tienen comando, así que no tienen fila: el vault sembrado no promete lo que no puede hacer, y `tuku doctor` lo comprueba (ver abajo). Entran acá el día que el comando entre a la superficie del CLI.
 
-Las tres primeras filas son el mismo comando y difieren solo en la marca, que es juicio. Esa es la forma que se busca: pocas entradas, y la diferencia entre ellas en los campos, no en el comando.
+Las tres primeras filas comparten archivo de reglas y campos, y difieren en el comando, que fija la marca: abrir y cerrar un pendiente es solo de `tuku todo`. `tuku entry add` rechaza `**pendiente**` y `(Hecho)` y nombra el comando correcto, así que equivocarse de fila se corrige con la salida y no deja nada escrito.
 
 La tabla nombra comandos y no reglas. Quien la lee no necesita saber cómo se arma una línea ni cómo se propaga un pendiente, solo qué comando lo hace ([agente.md](agente.md)). Es también lo que la hace servir a una persona sin ningún agente instalado, que la lee como el índice de comandos que es.
 

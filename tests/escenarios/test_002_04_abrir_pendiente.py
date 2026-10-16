@@ -65,21 +65,6 @@ def test_002_04_abrir_dos_veces_no_duplica() -> None:
     assert todo.cuerpos(pendientes, "esta semana") == [CUERPO]
 
 
-def test_002_04_via_bitacora_entry_add_abre_en_automatico() -> None:
-    corrida = gherkin.correr(SLUG, "la vía bitácora tuku entry add abre el pendiente")
-    assert corrida.codigo == EXITO, corrida.stderr
-    vault = corrida.ruta("mi-vault")
-
-    pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    assert f"| esta semana |  | {PERSONAL} | comprar café tostado |" in pendientes
-
-    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert f"- 16:00 - {PERSONAL} **pendiente**: comprar café tostado" in ahora
-
-    faltan = todo.sin_consecuencia(ahora, pendientes)
-    assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"
-
-
 def test_002_04_todo_lint_encuentra_la_fila_borrada_a_mano() -> None:
     corrida = gherkin.correr(SLUG, "todo lint encuentra la fila que se borró a mano")
 
@@ -101,7 +86,6 @@ def test_002_04_todo_lint_encuentra_una_vista_desactualizada() -> None:
 if __name__ == "__main__":
     test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana()
     test_002_04_abrir_dos_veces_no_duplica()
-    test_002_04_via_bitacora_entry_add_abre_en_automatico()
     test_002_04_todo_lint_encuentra_la_fila_borrada_a_mano()
     test_002_04_todo_lint_encuentra_una_vista_desactualizada()
-    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")

@@ -2,7 +2,7 @@
 
 > **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P6 (tres ejes sin registro paralelo)](../../docs/principios.md#L55) · **Brief:** [Lo que entró vuelve solo cuando corresponde](../../docs/brief.md#L13) · **Spec:** [`spec/pendientes.md`](../../spec/pendientes.md) · **Origen:** [Lección 7 de `mac-jpgil`](../../devel/lecciones-macjpgil.md) (tareas duplicadas entre horizontes)
 
-Agendar un compromiso opera directamente con el comando `tuku todo open`: pasar una fecha en `--when` asigna automáticamente el horizonte `con fecha` en `PENDIENTES.md`, estampa la constancia cronológica en `AHORA.md` y propaga el callout de pendientes del día bajo la fecha indicada. La vía bitácora (`tuku entry add`) replica esta consecuencia en automático.
+Un compromiso se agenda con `tuku todo open`: una fecha en `--when`, o un `--day` posterior a hoy, le asigna el horizonte `con fecha` en `PENDIENTES.md`, escribe el registro en `AHORA.md` y propaga el callout de pendientes bajo ese día.
 
 ## Estado inicial
 
@@ -40,12 +40,12 @@ tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal -
 Entonces el diff contra el estado previo es vacío (idempotente)
 Y permanece una sola fila en `PENDIENTES.md` y una sola línea propagada en el miércoles
 
-## Escenario: la vía bitácora tuku entry add fecha el pendiente en automático
+## Escenario: un pendiente escrito bajo un día futuro queda con esa fecha
 
 Dado el vault con el ciclo abierto, y hoy martes 11
-Cuando se escribe un pendiente bajo el jueves 13 en la bitácora, sin `--when`
+Cuando se abre un pendiente bajo el jueves 13, sin `--when`
 ```bash
-TUKU_NOW="2026-08-11 10:00" tuku entry add --vault mi-vault --day 2026-08-13 --hour 10:00 --scope personal --body "**pendiente**: comprar pasajes de tren"
+TUKU_NOW="2026-08-11 10:00" tuku todo open --vault mi-vault --day 2026-08-13 --hour 10:00 --scope personal --body "comprar pasajes de tren"
 ```
 Entonces la tabla de `PENDIENTES.md` gana una fila con `con fecha` y `2026-08-13`:
 `| con fecha | 2026-08-13 | [personal](ambitos/personal/personal.md) | comprar pasajes de tren |`

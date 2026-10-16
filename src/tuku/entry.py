@@ -13,12 +13,17 @@ que le toca por hora.
 from __future__ import annotations
 
 import re
+import shlex
 from collections.abc import Mapping
 from datetime import date, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from tuku import link
 from tuku.resultado import Resultado
+
+if TYPE_CHECKING:
+    from tuku.todo import Marca
 
 _HORA = re.compile(r"^- (\d{2}):(\d{2}) - ")
 
@@ -134,23 +139,13 @@ def add_al_vault(
     scope: str | None = None,
     day: date | None = None,
     hour: str | None = None,
-    horizon: str | None = None,
-    when: str = "",
 ) -> Resultado:
-    """Escribe un registro y aplica todo lo que ese registro implica.
+    """Escribe un registro en `AHORA.md` y propaga lo que se deriva de él.
 
-    El caso de uso completo de `tuku entry add`. Escribir un registro tiene
-    consecuencias y todas son parte de escribirlo: queda en `AHORA.md`, las
-    páginas de ámbito lo reflejan, y si lleva una marca de la ontología cerrada
-    se aplica lo que esa marca declara: `**pendiente**` abre el pendiente y
-    `(Hecho)` lo cierra.
-
-    Que las consecuencias sean parte de escribir, y no un segundo comando, es lo
-    que evita que el vault quede a medias. Durante un tiempo esto valió solo para
-    la propagación y no para los pendientes, y esa asimetría era el modo de falla
-    más caro del sistema: un archivo bien formado al que le faltaba la mitad, sin
-    nada que lo delatara. `tuku todo open` y `close` siguen existiendo para
-    corregir a mano, no para completar lo que este comando dejó a medias.
+    El caso de uso de `tuku entry add`. Un registro con marca de la ontología
+    cerrada se rechaza antes de escribir: abrir y cerrar pendientes es de
+    `tuku todo open` y `tuku todo close`, que escriben el registro y la fila
+    juntos, y el rechazo nombra el comando exacto.
 
     Recibe los campos, no la línea: el encabezado `## Martes 11 de agosto` se
     calcula desde `2026-08-11`, y la línea se compone. Un registro por llamada.
@@ -158,6 +153,7 @@ def add_al_vault(
     Sin `day` es hoy; sin `hour`, ahora.
     """
     from tuku import scope as ambitos
+    from tuku import todo
     from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
@@ -174,6 +170,11 @@ def add_al_vault(
         body=body,
         rutas=ambitos.rutas(vault),
     )
+    marca = todo.parsear(linea)
+    if marca is not None:
+        return Resultado.rechazo(
+            rechazo_de_marca(marca, scope=scope, day=day, hour=hour)
+        )
     try:
         texto = add(ruta.read_text(encoding="utf-8"), [linea], day=dia)
     except ValueError as e:
@@ -181,34 +182,43 @@ def add_al_vault(
 
     ruta.write_text(texto, encoding="utf-8")
 
-    from tuku import todo
-
-    hecho = [f"{linea}", f"en {dia.removeprefix('## ')}."]
-    marca = todo.parsear(linea)
-    if marca is not None and marca.marca == todo.ABRE:
-        consecuencia = todo.abrir_en_vault(
-            vault,
-            body=marca.cuerpo,
-            scope=scope,
-            horizon=horizon or todo.ESTA_SEMANA,
-            when=todo.cuando_por_dia(when, day, date.today()),
-            propagate=False,
-            record=False,
-        )
-        hecho.append(consecuencia.mensaje)
-    elif marca is not None and marca.marca == todo.CIERRA:
-        hecho.append(
-            todo.cerrar_en_vault(
-                vault, body=marca.cuerpo, propagate=False, record=False
-            ).mensaje
-        )
-
     for ambito in ambitos.leer(vault):
         ambitos.actualizar_pagina(vault, ambito.nombre)
     from tuku.propagate import propagar
 
     propagar(vault)
-    return Resultado.hecho("\n".join(hecho))
+    return Resultado.hecho(f"{linea}\nen {dia.removeprefix('## ')}.")
+
+
+def rechazo_de_marca(
+    marca: Marca,
+    *,
+    scope: str | None = None,
+    day: date | None = None,
+    hour: str | None = None,
+) -> str:
+    """El mensaje que manda un `**pendiente**` o un `(Hecho)` a `tuku todo`.
+
+    Nombra el comando entero, con los mismos campos, para que quien invoca
+    solo tenga que correrlo.
+    """
+    from tuku import todo
+
+    abre = marca.marca == todo.ABRE
+    partes = ["tuku todo open" if abre else "tuku todo close"]
+    if scope:
+        partes.append(f"--scope {shlex.quote(scope)}")
+    if day:
+        partes.append(f"--day {day.isoformat()}")
+    if hour:
+        partes.append(f"--hour {hour}")
+    partes.append(f"--body {shlex.quote(marca.cuerpo)}")
+    que = "abre un pendiente" if abre else "cierra un pendiente"
+    return (
+        f"`{marca.marca}` {que}, y eso no lo escribe `tuku entry add`: "
+        f"usa `{' '.join(partes)}`, que escribe el registro y la fila de "
+        "`PENDIENTES.md` juntos."
+    )
 
 
 def lint_del_vault(vault: Path) -> Resultado:

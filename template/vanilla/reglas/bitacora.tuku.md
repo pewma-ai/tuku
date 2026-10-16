@@ -4,24 +4,24 @@ type: Config
 
 # Bitácora
 
-Cómo se escribe un registro. Se lee antes de la primera llamada a `tuku entry add` de la sesión, y con eso basta para todas las demás.
+Cómo se escribe un registro. Se lee antes de la primera llamada de la sesión a `tuku entry add`, `tuku todo open` o `tuku todo close`, y con eso basta para todas las demás.
 
 ## Cuándo aplica
 
-Cuando el autor cuenta algo que pasó, deja algo por hacer o da por cerrado algo que estaba pendiente. Son las tres primeras filas del `AGENTS.md` de la raíz, y entre ellas cambia la marca, no el comando.
+Cuando el autor cuenta algo que pasó (`tuku entry add`), deja algo por hacer (`tuku todo open`) o da por cerrado algo que estaba pendiente (`tuku todo close`). Son las tres primeras filas del `AGENTS.md` de la raíz, y los tres reciben los mismos campos. `tuku entry add` rechaza `**pendiente**` y `(Hecho)` y nombra el comando que corresponde.
 
 ## Le pasas los campos, no la línea
 
 El formato lo arma el comando. El autor dice *"a las dos y veinte, hay que avisarle de los gastos comunes a la administradora"* y eso es, entero:
 
 ```
-tuku entry add --day 2026-08-11 --hour 14:20 --scope personal \
-  --body "**pendiente**: avisar de los gastos comunes a la administradora"
+tuku todo open --day 2026-08-11 --hour 14:20 --scope personal \
+  --body "avisar de los gastos comunes a la administradora"
 ```
 
 | Campo | Qué lleva |
 | --- | --- |
-| `--body` | El hecho, con su marca al principio si la lleva |
+| `--body` | El hecho. En `tuku entry add`, con su clasificación al principio si la lleva; en `tuku todo open` y `tuku todo close`, solo el cuerpo: la marca la pone el comando |
 | `--scope` | El frente al que pertenece, sin corchetes |
 | `--day` | El día en que ocurrió |
 | `--hour` | La hora en que ocurrió |
@@ -46,7 +46,7 @@ Solo el pendiente sin fecha nace en el primer escalón de `### Horizontes`. Para
 
 ## Un hecho, un comando
 
-Una frase del autor puede dar varios registros, y cada uno es una llamada. Lo que no ocurre nunca es lo contrario: dos llamadas para un mismo hecho. `tuku entry add` deja la línea, actualiza las páginas de ámbito y aplica lo que la marca declara, todo en la misma llamada.
+Una frase del autor puede dar varios registros, y cada uno es una llamada. Lo que no ocurre nunca es lo contrario: dos llamadas para un mismo hecho. Cada comando deja la línea y actualiza las páginas de ámbito; `tuku todo open` y `tuku todo close` además abren o cierran la fila de `PENDIENTES.md`, todo en la misma llamada.
 
 Registra el hecho, no la conversación: "recuérdame" y "anota" van dirigidos a ti y no son parte de lo ocurrido. El resto de cómo escribe el autor está en `LIBRO-DE-ESTILO.md`.
 

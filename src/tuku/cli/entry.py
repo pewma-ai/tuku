@@ -17,8 +17,6 @@ def _cmd_entry_add(args: argparse.Namespace) -> int:
             scope=args.scope,
             day=args.day,
             hour=args.hour,
-            horizon=args.horizon,
-            when=args.when,
         ),
         "tuku entry add",
     )
@@ -54,9 +52,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help="escribe un registro en la bitácora",
         description=(
             "Escribe en `AHORA.md`, bajo el día y en orden de hora, la línea "
-            "`- HH:MM - [ámbito](ambitos/ámbito/ámbito.md) **marca**: cuerpo`. Un "
-            "`**pendiente**` abre además su fila en `PENDIENTES.md`, y un `(Hecho)` la "
-            "borra. Quien invoca decide los campos; el comando les da la forma."
+            "`- HH:MM - [ámbito](ambitos/ámbito/ámbito.md) **marca**: cuerpo`. Quien "
+            "invoca decide los campos; el comando les da la forma. Un `**pendiente**` o "
+            "un `(Hecho)` se rechaza: abrir y cerrar pendientes es de `tuku todo open` "
+            "y `tuku todo close`."
         ),
     )
     add_p.add_argument("--vault", default=".", type=Path, help="vault destino")
@@ -85,20 +84,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         default=None,
         type=hora,
         help="hora del registro (HH:MM); por defecto, ahora",
-    )
-    add_p.add_argument(
-        "--horizon",
-        "--horizonte",
-        dest="horizon",
-        default=None,
-        help="para un **pendiente**: el escalón donde nace; por defecto, el del ciclo",
-    )
-    add_p.add_argument(
-        "--when",
-        "--cuando",
-        dest="when",
-        default="",
-        help="para un **pendiente**: su fecha (AAAA-MM-DD), si la tiene",
     )
 
     rename_p = entry_v.add_parser(

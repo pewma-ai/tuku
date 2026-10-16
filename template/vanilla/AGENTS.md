@@ -23,8 +23,8 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 | El autor... | Lee antes | Comando |
 | --- | --- | --- |
 | cuenta algo que pasó: "hablé con", "llegó", "quedó listo" | `reglas/bitacora.tuku.md` | `tuku entry add` |
-| deja algo por hacer: "hay que", "recuérdame", "para el lunes" | `reglas/bitacora.tuku.md` | `tuku entry add`, marca `**pendiente**` |
-| da por hecho algo que estaba pendiente: "ya pagué", "listo lo de" | `reglas/bitacora.tuku.md` | `tuku entry add`, marca `(Hecho)` |
+| deja algo por hacer: "hay que", "recuérdame", "para el lunes" | `reglas/bitacora.tuku.md` | `tuku todo open` |
+| da por hecho algo que estaba pendiente: "ya pagué", "listo lo de" | `reglas/bitacora.tuku.md` | `tuku todo close` |
 | nombra un frente que todavía no existe | `ambitos/AGENTS.md` | `tuku scope create` |
 | pide guardar una idea que no es de un día | `reglas/notas.tuku.md` | `tuku note create` |
 | empieza el ciclo | nada | `tuku cycle open` |
@@ -35,18 +35,18 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 
 - **Contarlo es pedirlo.** Si el autor cuenta algo, ejecuta el comando de su fila. No preguntes qué hacer con eso ni ofrezcas alternativas.
 - **Abre "Lee antes" antes de ejecutar.** Ahí están los campos, las fechas y los casos.
-- **Un hecho, un comando.** El comando ya aplica sus consecuencias: `tuku entry add` con `(Hecho)` cierra el pendiente (no corras `tuku todo close`) y `tuku note create` y `tuku scope create` dejan su constancia en la bitácora (no corras `tuku entry add` para la nota ni para el frente).
+- **Un hecho, un comando.** El comando ya escribe su registro: `tuku todo open`, `tuku todo close`, `tuku note create` y `tuku scope create` lo dejan en la bitácora, así que no corras además `tuku entry add`.
 - **Respeta el orden del dictado.** Cada hecho se registra en el vault tal como estaba en ese momento: un frente que el autor pide abrir más adelante no se crea antes.
 - **Si un hallazgo nombra `tuku fix`, córrelo.** Si devuelve decisiones, plantéaselas al autor y espera su respuesta.
 
 ## Las tres marcas
 
-Elegir la marca es lo único que es juicio. Va al principio del cuerpo del registro.
+Elegir la marca es lo único que es juicio. `**pendiente**` y `(Hecho)` los escriben `tuku todo open` y `tuku todo close`; las demás van al principio de `--body` de `tuku entry add`.
 
 | Marca | Qué significa |
 | --- | --- |
-| `**pendiente**` | Queda algo por hacer. |
-| `(Hecho)` | Se cerró algo **que ya estaba pendiente**. Repite su cuerpo sin reescribirlo: `(Hecho): <cuerpo>`; el comando tacha el cuerpo. |
+| `**pendiente**` | Queda algo por hacer: `tuku todo open`. |
+| `(Hecho)` | Se cerró algo **que ya estaba pendiente**: `tuku todo close` con su cuerpo sin reescribirlo; el comando lo tacha. |
 | `**cadencia**` | Se da de alta algo que se repite. |
 
 Una acción que nunca fue pendiente es un registro normal, no un cierre. Cualquier otra palabra entre `**` es una clasificación del autor: `LIBRO-DE-ESTILO.md`, `### Clasificaciones`. Cómo se redacta un registro: `LIBRO-DE-ESTILO.md`, `## Cómo escribe el autor`.

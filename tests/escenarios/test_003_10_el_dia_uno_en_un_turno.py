@@ -52,10 +52,16 @@ TABLA: dict[str, dict[str, tuple[str, str | None]]] = {
     },
 }
 
-#: Doce comandos: ocho registros del martes, el ámbito, la nota y los dos
-#: pendientes de mañana. La consulta, la pregunta y los dos pedidos al final no
-#: producen ninguno.
-TRADUCCION = {"entry add": 10, "scope create": 1, "note create": 1}
+#: Doce comandos: cuatro registros, cuatro aperturas y dos cierres, el ámbito y
+#: la nota. La consulta, la pregunta y los dos pedidos al final no producen
+#: ninguno.
+TRADUCCION = {
+    "entry add": 4,
+    "todo open": 4,
+    "todo close": 2,
+    "scope create": 1,
+    "note create": 1,
+}
 
 #: Los dos pendientes de mañana. Empiezan igual a propósito: "ya pagué" calza
 #: con los dos, y por eso no se puede cerrar ninguno.

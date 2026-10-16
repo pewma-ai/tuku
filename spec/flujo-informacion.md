@@ -37,7 +37,7 @@ Las tres que salen del vault llegan **por un comando y no leyendo archivos**. Ho
 1. **Separar lo dirigido al sistema de lo que pasó.** "Recuérdame", "anota", "oye" son instrucciones a quien lleva la bitácora. No son parte del hecho y no se registran.
 2. **Partir en hechos.** Una sola frase puede contener varios: un cierre propio y la respuesta de un tercero son dos hechos distintos.
 3. **Situar cada hecho.** A qué ámbito pertenece, a qué hora ocurrió y de qué clase es.
-4. **Escribir el registro** en `AHORA.md`. Los campos ya quedaron decididos en el paso 3, así que construir la línea canónica con ellos, ponerla en el día que corresponde y mantener el orden es mecánico: lo hace `tuku entry add` (formato en [bitacora.md](bitacora.md), reparto en [cli.md](cli.md)). **Acá termina el registro.**
+4. **Escribir el registro** en `AHORA.md`. Los campos ya quedaron decididos en el paso 3, así que construir la línea canónica con ellos, ponerla en el día que corresponde y mantener el orden es mecánico: lo hace `tuku entry add`, o `tuku todo open` y `tuku todo close` si el registro abre o cierra un pendiente (formato en [bitacora.md](bitacora.md), reparto en [cli.md](cli.md)). **Acá termina el registro.**
 5. **Releer lo escrito y aplicar las consecuencias.** Cada tipo tiene su archivo en `reglas/` y se carga solo cuando corresponde.
 
 El orden importa en dos puntos, y por razones distintas. Antes del paso 4, porque redactar sin haber desglosado produce un registro por frase y la unidad es el hecho. Antes del paso 5, porque la fuente de la consecuencia es el texto, y si todavía no existe no hay de dónde leer.
@@ -59,7 +59,7 @@ flowchart TD
     LE["Vocabularios abiertos<br/>(LIBRO-DE-ESTILO.md)"]
     I["(1) (2) Intención y desglose<br/>qué pasó, y cuántos hechos son"]
     S["(3) Situar cada hecho<br/>ámbito, hora, clase"]
-    ENT["(4) tuku entry add<br/>escribe el registro en AHORA.md"]
+    ENT["(4) tuku entry add · todo open · todo close<br/>escribe el registro en AHORA.md"]
     J["tuku invocado con argumentos<br/>(operaciones del sistema)"]
 
     subgraph CONS["(5) Consecuencias, leyendo lo escrito"]
@@ -99,7 +99,7 @@ Las cajas rosadas son las que necesitan juicio, y son las únicas: el juicio se 
 
 | Consecuencia | Qué hace | Reglas | Comandos |
 | --- | --- | --- | --- |
-| Pendientes | Alta o baja en `PENDIENTES.md`, y las vistas que se derivan de él | `reglas/bitacora.tuku.md` (`reglas/pendientes.tuku.md` todavía no existe) | `entry add` las aplica; `todo open`, `todo close`, `todo propagate` corrigen a mano |
+| Pendientes | Alta o baja en `PENDIENTES.md`, y las vistas que se derivan de él | `reglas/bitacora.tuku.md` (`reglas/pendientes.tuku.md` todavía no existe) | `todo open` y `todo close` las aplican junto con el registro; `todo propagate` regenera las vistas |
 | Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md`, todavía no existe | `scope create`; `page index` todavía no existe |
 | Cadencias | Alta o cambio de una cadencia en su ámbito | `reglas/cadencias.tuku.md`, todavía no existe (epic 006) | `cadence add`, `cadence inject`, todavía no existen |
 | Nota | Escribe en `notas/` lo que el autor pidió, y deja constancia en la bitácora | `reglas/notas.tuku.md` | `note create`, `note lint` |

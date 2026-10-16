@@ -2,7 +2,7 @@
 
 > **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P4 (determinismo)](../../docs/principios.md#L33) · **Brief:** [Triangulación tiempo × compromiso](../../docs/brief.md#L27) · **Spec:** [`spec/pendientes.md`](../../spec/pendientes.md) · **Origen:** [Lección 4 de `mac-jpgil`](../../devel/lecciones-macjpgil.md) (cierres sin pareja)
 
-Cerrar un compromiso opera primordialmente mediante el comando directo `tuku todo close`: busca el pendiente por su cuerpo, lo elimina de `PENDIENTES.md` de forma determinista y estampa su constancia cronológica en `AHORA.md`. La vía bitácora (`tuku entry add`) aplica esta misma consecuencia en automático ante la marca `(Hecho)`.
+Un compromiso se cierra con `tuku todo close`: escribe el registro `(Hecho)` en `AHORA.md` y borra de `PENDIENTES.md` la fila con el mismo cuerpo. `tuku entry add` rechaza la marca `(Hecho)` y nombra este comando.
 
 ## Estado inicial
 
@@ -49,20 +49,6 @@ tuku todo close --vault mi-vault --day 2026-08-11 --hour 19:05 --body "avisar de
 ```
 Entonces el diff contra el estado previo es vacío (idempotente)
 Y el comando reporta cierre sin pareja, pues el pendiente ya no estaba abierto
-
-## Escenario: la vía bitácora tuku entry add cierra el pendiente en automático
-
-Dado un pendiente abierto en el vault
-```bash
-tuku todo open --vault mi-vault --day 2026-08-11 --hour 15:00 --scope personal --body "pagar sesión del psicólogo"
-```
-Cuando se registra el cierre en la bitácora con `(Hecho)`
-```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 19:20 --scope personal --body "(Hecho): ~~pagar sesión del psicólogo~~"
-```
-Entonces la fila desaparece de la tabla de `PENDIENTES.md`
-Y el registro de cierre queda escrito bajo `## Martes 11 de agosto` en `AHORA.md`
-Y `tuku doctor` valida que no quedan consecuencias pendientes
 
 ## Aceptación humana (en Obsidian)
 

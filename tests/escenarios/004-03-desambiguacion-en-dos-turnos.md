@@ -12,10 +12,10 @@ El vault del escenario anterior, sembrado además con dos compromisos abiertos q
 
 ```bash
 cp -r ../../004-02-rectificacion-y-marcha-atras/una-propuesta-tentativa-revocada/mi-vault .
-tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal \
-  --body "**pendiente**: transferir anticipo a la profesora Marcela para talleres"
-tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:05 --scope personal \
-  --body "**pendiente**: transferir anticipo a la profesora Patricia para biblioteca"
+tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal \
+  --body "transferir anticipo a la profesora Marcela para talleres"
+tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:05 --scope personal \
+  --body "transferir anticipo a la profesora Patricia para biblioteca"
 ```
 
 Dos pendientes abiertos sobre transferir anticipos a profesoras.
@@ -44,8 +44,8 @@ A la Marcela, lo de los talleres de arte.
 Entonces el agente ejecuta el cierre mediante comando
 
 ```text
-tuku entry add --day 2026-08-12 --hour <hora> --scope personal \
-  --body "(Hecho): ~~transferir anticipo a la profesora Marcela para talleres~~"
+tuku todo close --day 2026-08-12 --hour <hora> --scope personal \
+  --body "transferir anticipo a la profesora Marcela para talleres"
 ```
 
 Y en `PENDIENTES.md` se elimina la fila de la profesora Marcela

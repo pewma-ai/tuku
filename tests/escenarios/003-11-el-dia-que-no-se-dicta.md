@@ -10,7 +10,7 @@ El día uno de la cadena determinista del 002, con un pendiente escrito el miér
 
 ```bash
 cp -r ../../002-09-crear-nota/la-nota-se-escribe-donde/mi-vault .
-tuku entry add --vault mi-vault --day 2026-08-12 --hour 09:30 --scope depto-centro --body "**pendiente**: pagar los gastos comunes del depto centro"
+tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:30 --scope depto-centro --body "pagar los gastos comunes del depto centro"
 ```
 
 ## Escenario: el registro va al último día con registros

@@ -36,11 +36,13 @@ Cámbiale el nombre a la carpeta de notas, ponle "apuntes".
 ```
 Entonces el dictado se traduce en doce comandos y ninguno más
 ```text
-tuku entry add --day 2026-08-11 --hour 09:12 --scope personal --body "..."   ×8
+tuku entry add --day 2026-08-11 --hour 09:12 --scope personal --body "..."   ×4
+tuku todo open --day 2026-08-11 --hour 13:00 --scope personal --body "..."    ×2
+tuku todo close --day 2026-08-11 --hour 19:05 --scope personal --body "..."   ×2
 tuku scope create depto-centro --day 2026-08-11
 tuku note create "<el título>" --scope depto-centro --day 2026-08-11 --hour 21:15
-tuku entry add --day 2026-08-12 --hour 09:00 --scope personal --body "**pendiente**: ..."
-tuku entry add --day 2026-08-12 --hour 09:30 --scope depto-centro --body "**pendiente**: ..."
+tuku todo open --day 2026-08-12 --hour 09:00 --scope personal --body "..."
+tuku todo open --day 2026-08-12 --hour 09:30 --scope depto-centro --body "..."
 ```
 Y cada registro tiene su hora, su ámbito y su marca cerrada según la tabla de verdad
 Y la consulta del pase escolar no deja nada escrito, y la respuesta nombra `AHORA.md` y `PENDIENTES.md`

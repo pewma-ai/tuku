@@ -83,24 +83,8 @@ def test_002_05_cerrar_dos_veces_no_vuelve_a_mover() -> None:
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
 
 
-def test_002_05_via_bitacora_entry_add_cierra_en_automatico() -> None:
-    corrida = gherkin.correr(SLUG, "la vía bitácora tuku entry add cierra el pendiente")
-    assert corrida.codigo == EXITO, corrida.stderr
-    vault = corrida.ruta("mi-vault")
-
-    pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    assert "pagar sesión del psicólogo" not in pendientes
-
-    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert f"- 19:20 - {PERSONAL} (Hecho): ~~pagar sesión del psicólogo~~" in ahora
-
-    faltan = todo.sin_consecuencia(ahora, pendientes)
-    assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"
-
-
 if __name__ == "__main__":
     test_002_05_cerrar_borra_el_item_y_deja_la_tabla_vacia()
     test_002_05_un_cierre_sin_pareja_no_inventa_nada()
     test_002_05_cerrar_dos_veces_no_vuelve_a_mover()
-    test_002_05_via_bitacora_entry_add_cierra_en_automatico()
-    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")

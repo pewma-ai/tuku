@@ -65,21 +65,23 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     for verbo, ayuda, descripcion in (
         (
             "open",
-            "abre el pendiente de un registro **pendiente** y propaga las vistas",
+            "abre un pendiente: registro **pendiente** y fila en PENDIENTES.md",
             (
-                "Agrega la fila del pendiente a la tabla de `PENDIENTES.md`, bajo su "
-                "horizonte; si `AHORA.md` no tiene su registro `**pendiente**`, lo escribe; "
-                "y regenera las vistas como `tuku todo propagate`. `tuku entry add` ya lo "
-                "hace al registrar un `**pendiente**`: este comando corrige."
+                "Escribe en `AHORA.md`, bajo el día y en orden de hora, el registro "
+                "`- HH:MM - [ámbito](ruta) **pendiente**: cuerpo`, agrega la fila a la "
+                "tabla de `PENDIENTES.md` bajo su horizonte y regenera las vistas como "
+                "`tuku todo propagate`. Un día posterior a hoy es la fecha del pendiente. "
+                "Si el registro ya estaba, no lo repite."
             ),
         ),
         (
             "close",
-            "cierra el pendiente de un registro (Hecho)",
+            "cierra un pendiente: registro (Hecho) y fila borrada",
             (
-                "Borra de `PENDIENTES.md` la fila cuyo detalle coincide palabra por "
-                "palabra, registra el cierre con `(Hecho)` en `AHORA.md` y regenera las "
-                "vistas. Si ninguna fila coincide, lo reporta y no escribe."
+                "Escribe en `AHORA.md` el registro `- HH:MM - [ámbito](ruta) (Hecho): "
+                "~~cuerpo~~`, borra de `PENDIENTES.md` la fila cuyo detalle coincide "
+                "palabra por palabra y regenera las vistas. Si ninguna fila coincide, lo "
+                "reporta y deja solo el registro."
             ),
         ),
     ):

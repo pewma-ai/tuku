@@ -68,7 +68,7 @@ Consecuencia: **ninguna automatización escribe en `PENDIENTES.md` por calendari
 
 Con fecha exacta pasa a `con fecha` y aparece bajo el día correspondiente de `AHORA.md`, propagado por un comando.
 
-**Escribir en un día futuro es fecharlo.** Un registro `**pendiente**` escrito bajo un día posterior a hoy en `AHORA.md` abre el pendiente ya con la fecha de ese día, y queda propagado al inicio de ese día. No hay un comando aparte para agendar: agendar es escribir donde corresponde, que es lo que alguien haría en una agenda de papel.
+**Escribir en un día futuro es fecharlo.** Un pendiente abierto con `tuku todo open` bajo un día posterior a hoy (`--day`) nace con la fecha de ese día, y queda propagado al inicio de ese día. No hay un comando aparte para agendar: agendar es escribir donde corresponde, que es lo que alguien haría en una agenda de papel.
 
 **El día de hoy no fecha**, y va al horizonte del ciclo en curso. Escribir bajo el día de hoy es el acto por defecto de registrar, no una decisión de agendar: el autor escribe ahí porque hoy es cuando habla. Si eso fechara, todo lo que mencionara quedaría venciendo hoy, que casi nunca es cierto. Fechar queda como lo que es, un acto deliberado: escribirlo en el día en que toca.
 

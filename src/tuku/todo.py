@@ -17,10 +17,10 @@ El horizonte y la fecha son columnas y no estructura: bajar de escalón o agenda
 mueve o edita una fila, y nunca crea ni destruye secciones.
 
 **Qué lee y escribe:** las funciones de este módulo solo tocan `PENDIENTES.md`,
-que es la fuente de verdad. La línea del registro llega como argumento; quien la
-escribió en `AHORA.md` fue `tuku entry add`. El comando `tuku todo open` escribe
-además las dos vistas derivadas, `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md`,
-llamando a `tuku.propagate`; con `--no-propagate` no lo hace y el lote propaga
+que es la fuente de verdad. Los casos de uso `abrir_en_vault` y `cerrar_en_vault`
+escriben además el registro en `AHORA.md` y regeneran las dos vistas derivadas,
+la región de cada día de `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md`, llamando
+a `tuku.propagate`; con `--no-propagate` no lo hace y el lote propaga
 una sola vez al final.
 **A mano:** agregar la fila con su horizonte, o borrarla al cerrarlo, y copiar
 el pendiente bajo su día y en el callout de su ámbito.
@@ -354,7 +354,7 @@ def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]
     """Las marcas del ciclo en curso que la tabla no refleja.
 
     Es el modo de falla más caro del sistema y el único que no deja señal: un
-    `**pendiente**` escrito a mano en `AHORA.md`, sin pasar por `tuku entry add`,
+    `**pendiente**` escrito a mano en `AHORA.md`, sin pasar por `tuku todo open`,
     deja un archivo perfectamente bien formado al que le falta la mitad. Nada lo
     delata al leerlo; solo cruzando los dos archivos aparece.
 
@@ -435,17 +435,15 @@ def abrir_en_vault(
     horizon: str = ESTA_SEMANA,
     when: str = "",
     propagate: bool = True,
-    record: bool = True,
     day: date | None = None,
     hour: str | None = None,
 ) -> Resultado:
     """Abre un pendiente, estampa huella en la bitácora y propaga las vistas.
 
     Recibe los campos, no la línea del registro: abrir **es** el pendiente, y la
-    marca la lleva implícita el verbo. Normalmente lo llama `tuku entry add` al
-    ver un `**pendiente**` (con `record=False` porque el registro ya se escribió);
-    como comando directo estampa además la constancia cronológica en `AHORA.md`
-    (`spec/pendientes.md`, regla de huella obligatoria).
+    marca la lleva implícita el verbo. Es la única vía: `tuku entry add` rechaza
+    un `**pendiente**` y manda acá. El registro en `AHORA.md` se escribe salvo que
+    ya esté.
 
     Propagar es parte de abrir: si la vista quedara para un segundo comando, el
     pendiente existiría sin aparecer en su día, que es la falla silenciosa que
@@ -469,29 +467,28 @@ def abrir_en_vault(
         horizon = CON_FECHA
     horizon = canonico(horizon, escalera)
 
-    if record:
-        ahora_path = archivo_vault(vault, "AHORA.md")
-        ahora_actual = ahora_path.read_text(encoding="utf-8")
-        ya_abierto = any(
-            (m := parsear(lin)) is not None
-            and m.marca == ABRE
-            and clave(m.cuerpo) == clave(marca.cuerpo)
-            for lin in ahora_actual.splitlines()
+    ahora_path = archivo_vault(vault, "AHORA.md")
+    ahora_actual = ahora_path.read_text(encoding="utf-8")
+    ya_abierto = any(
+        (m := parsear(lin)) is not None
+        and m.marca == ABRE
+        and clave(m.cuerpo) == clave(marca.cuerpo)
+        for lin in ahora_actual.splitlines()
+    )
+    if not ya_abierto:
+        dia_encabezado = encabezado_de(day or date.today())
+        hora = hour or datetime.now().strftime("%H:%M")
+        linea = componer(
+            hora=hora,
+            scope=limpio_scope,
+            body=f"{ABRE}: {marca.cuerpo}",
+            rutas=ambitos.rutas(vault),
         )
-        if not ya_abierto:
-            dia_encabezado = encabezado_de(day or date.today())
-            hora = hour or datetime.now().strftime("%H:%M")
-            linea = componer(
-                hora=hora,
-                scope=limpio_scope,
-                body=f"{ABRE}: {marca.cuerpo}",
-                rutas=ambitos.rutas(vault),
-            )
-            try:
-                ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
-                ahora_path.write_text(ahora_texto, encoding="utf-8")
-            except ValueError as e:
-                return Resultado.rechazo(str(e))
+        try:
+            ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
+            ahora_path.write_text(ahora_texto, encoding="utf-8")
+        except ValueError as e:
+            return Resultado.rechazo(str(e))
 
     ruta = archivo_vault(vault, "PENDIENTES.md")
     ruta.write_text(
@@ -505,11 +502,8 @@ def abrir_en_vault(
         ),
         encoding="utf-8",
     )
-    if record:
-        from tuku import scope as ambitos
-
-        for amb in ambitos.leer(vault):
-            ambitos.actualizar_pagina(vault, amb.nombre)
+    for amb in ambitos.leer(vault):
+        ambitos.actualizar_pagina(vault, amb.nombre)
     if propagate:
         propagar(vault)
     return Resultado.hecho(f"pendiente abierto en «{horizon}»: {marca.cuerpo}")
@@ -520,7 +514,6 @@ def cerrar_en_vault(
     *,
     body: str,
     propagate: bool = True,
-    record: bool = True,
     day: date | None = None,
     hour: str | None = None,
     scope: str | None = None,
@@ -532,12 +525,17 @@ def cerrar_en_vault(
     no se toca, porque inventar el pendiente que falta dejaría el archivo
     mintiendo.
     """
+    from tuku import scope as ambitos
     from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
     from tuku.entry import add as entry_add
     from tuku.entry import componer
     from tuku.propagate import propagar
 
+    if scope:
+        scope = ambitos.normalizar(scope)
+        if (rechazo := ambitos.rechazo_si_no_existe(vault, scope)) is not None:
+            return rechazo
     marca = Marca(CIERRA, None, body.strip())
     ruta = archivo_vault(vault, "PENDIENTES.md")
     pendientes_texto = ruta.read_text(encoding="utf-8")
@@ -549,41 +547,35 @@ def cerrar_en_vault(
             break
 
     texto, hubo_pareja = cerrar(pendientes_texto, marca)
+
+    ahora_path = archivo_vault(vault, "AHORA.md")
+    ahora_actual = ahora_path.read_text(encoding="utf-8")
+    ya_cerrado = any(
+        (m := parsear(lin)) is not None
+        and m.marca == CIERRA
+        and clave(m.cuerpo) == clave(marca.cuerpo)
+        for lin in ahora_actual.splitlines()
+    )
+    if not ya_cerrado:
+        ambito_final = scope if scope is not None else ambito_encontrado
+        dia_encabezado = encabezado_de(day or date.today())
+        hora = hour or datetime.now().strftime("%H:%M")
+        linea = componer(
+            hora=hora,
+            scope=ambito_final,
+            body=cierre(marca.cuerpo),
+            rutas=ambitos.rutas(vault),
+        )
+        try:
+            ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
+            ahora_path.write_text(ahora_texto, encoding="utf-8")
+        except ValueError as e:
+            return Resultado.rechazo(str(e))
+
     if hubo_pareja:
         ruta.write_text(texto, encoding="utf-8")
-
-    if record:
-        ahora_path = archivo_vault(vault, "AHORA.md")
-        ahora_actual = ahora_path.read_text(encoding="utf-8")
-        ya_cerrado = any(
-            (m := parsear(lin)) is not None
-            and m.marca == CIERRA
-            and clave(m.cuerpo) == clave(marca.cuerpo)
-            for lin in ahora_actual.splitlines()
-        )
-        if not ya_cerrado:
-            ambito_final = scope if scope is not None else ambito_encontrado
-            dia_encabezado = encabezado_de(day or date.today())
-            hora = hour or datetime.now().strftime("%H:%M")
-            from tuku import scope as ambitos
-
-            linea = componer(
-                hora=hora,
-                scope=ambito_final,
-                body=cierre(marca.cuerpo),
-                rutas=ambitos.rutas(vault),
-            )
-            try:
-                ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
-                ahora_path.write_text(ahora_texto, encoding="utf-8")
-            except ValueError as e:
-                return Resultado.rechazo(str(e))
-
-    if record:
-        from tuku import scope as ambitos
-
-        for amb in ambitos.leer(vault):
-            ambitos.actualizar_pagina(vault, amb.nombre)
+    for amb in ambitos.leer(vault):
+        ambitos.actualizar_pagina(vault, amb.nombre)
 
     if propagate:
         propagar(vault)

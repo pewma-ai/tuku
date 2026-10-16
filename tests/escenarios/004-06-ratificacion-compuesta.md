@@ -28,10 +28,10 @@ Ya, en resumen: anota que el viernes a las diez voy al banco a firmar la ampliac
 Entonces el agente ejecuta las llamadas de registro correspondientes para el viernes
 
 ```text
-tuku entry add --day 2026-08-14 --hour 10:00 --scope personal \
-  --body "**pendiente**: ir al banco a firmar la ampliación de la línea"
-tuku entry add --day 2026-08-14 --scope personal \
-  --body "**pendiente**: llamar a Importadora Andina para cerrar el pedido después del banco"
+tuku todo open --day 2026-08-14 --hour 10:00 --scope personal \
+  --body "ir al banco a firmar la ampliación de la línea"
+tuku todo open --day 2026-08-14 --scope personal \
+  --body "llamar a Importadora Andina para cerrar el pedido después del banco"
 ```
 
 Y en `PENDIENTES.md` aparecen los dos compromisos fechados

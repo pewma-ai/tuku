@@ -59,8 +59,8 @@ def test_002_06_fechar_dos_veces_no_duplica() -> None:
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
 
 
-def test_002_06_via_bitacora_entry_add_fecha_en_automatico() -> None:
-    corrida = gherkin.correr(SLUG, "la vía bitácora tuku entry add fecha el pendiente")
+def test_002_06_bajo_un_dia_futuro_queda_con_esa_fecha() -> None:
+    corrida = gherkin.correr(SLUG, "un pendiente escrito bajo un día futuro")
     assert corrida.codigo == EXITO, corrida.stderr
     vault = corrida.ruta("mi-vault")
 
@@ -77,5 +77,5 @@ def test_002_06_via_bitacora_entry_add_fecha_en_automatico() -> None:
 if __name__ == "__main__":
     test_002_06_fechar_un_pendiente_en_dia_futuro()
     test_002_06_fechar_dos_veces_no_duplica()
-    test_002_06_via_bitacora_entry_add_fecha_en_automatico()
+    test_002_06_bajo_un_dia_futuro_queda_con_esa_fecha()
     print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
