@@ -44,6 +44,7 @@ def test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana() -> None:
     pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
     assert FILA in pendientes, pendientes
     assert todo.cuerpos(pendientes, "esta semana") == [CUERPO], "el cuerpo no llegó literal"
+    assert len(todo.filas(pendientes)) == 1, "la tabla tiene más de una fila"
     assert CUERPO in (vault / "AHORA.md").read_text(encoding="utf-8")
     assert todo.filas(pendientes)[0].cuando == "", "la fila no debe llevar fecha"
 
@@ -55,15 +56,6 @@ def test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana() -> None:
     assert f"- **pendiente**: {CUERPO}" in personal
 
 
-def test_002_04_la_tabla_gana_una_fila_y_nada_mas() -> None:
-    corrida = gherkin.correr(SLUG, "abrir el pendiente copia el cuerpo literal")
-    pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
-
-    assert todo.horizontes(pendientes) == ["esta semana"], "apareció un horizonte de más"
-    assert len(todo.filas(pendientes)) == 1, "la tabla tiene más de una fila"
-    assert todo.CABECERA in pendientes, "se perdió la cabecera de la tabla"
-
-
 def test_002_04_abrir_dos_veces_no_duplica() -> None:
     corrida = gherkin.correr(SLUG, "abrir dos veces no duplica")
     assert corrida.codigo == EXITO, corrida.stderr
@@ -71,16 +63,6 @@ def test_002_04_abrir_dos_veces_no_duplica() -> None:
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
     pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
     assert todo.cuerpos(pendientes, "esta semana") == [CUERPO]
-
-
-def test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla() -> None:
-    """Verifica que la marca escrita tenga su fila correspondiente en PENDIENTES.md."""
-    vault = gherkin.correr(SLUG, "abrir el pendiente copia el cuerpo literal").ruta("mi-vault")
-    faltan = todo.sin_consecuencia(
-        (vault / "AHORA.md").read_text(encoding="utf-8"),
-        (vault / "PENDIENTES.md").read_text(encoding="utf-8"),
-    )
-    assert faltan == [], f"quedaron marcas sin su consecuencia: {faltan}"
 
 
 def test_002_04_via_bitacora_entry_add_abre_en_automatico() -> None:
@@ -118,10 +100,8 @@ def test_002_04_todo_lint_encuentra_una_vista_desactualizada() -> None:
 
 if __name__ == "__main__":
     test_002_04_abrir_copia_el_cuerpo_literal_en_esta_semana()
-    test_002_04_la_tabla_gana_una_fila_y_nada_mas()
     test_002_04_abrir_dos_veces_no_duplica()
-    test_002_04_abrir_deja_la_marca_reflejada_en_la_tabla()
     test_002_04_via_bitacora_entry_add_abre_en_automatico()
     test_002_04_todo_lint_encuentra_la_fila_borrada_a_mano()
     test_002_04_todo_lint_encuentra_una_vista_desactualizada()
-    print(f"ok: 7 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")

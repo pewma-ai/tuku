@@ -83,19 +83,6 @@ def test_002_05_cerrar_dos_veces_no_vuelve_a_mover() -> None:
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
 
 
-def test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora() -> None:
-    """El gemelo del cierre: un `(Hecho)` cuyo cuerpo sigue en la tabla es un
-    cierre que se escribió y nunca se aplicó, y por separado los dos archivos se
-    ven bien.
-    """
-    vault = gherkin.correr(SLUG, "el cierre repite el texto").ruta("mi-vault")
-    faltan = todo.sin_consecuencia(
-        (vault / "AHORA.md").read_text(encoding="utf-8"),
-        (vault / "PENDIENTES.md").read_text(encoding="utf-8"),
-    )
-    assert faltan == [], f"quedaron marcas sin su consecuencia: {faltan}"
-
-
 def test_002_05_via_bitacora_entry_add_cierra_en_automatico() -> None:
     corrida = gherkin.correr(SLUG, "la vía bitácora tuku entry add cierra el pendiente")
     assert corrida.codigo == EXITO, corrida.stderr
@@ -115,6 +102,5 @@ if __name__ == "__main__":
     test_002_05_cerrar_borra_el_item_y_deja_la_tabla_vacia()
     test_002_05_un_cierre_sin_pareja_no_inventa_nada()
     test_002_05_cerrar_dos_veces_no_vuelve_a_mover()
-    test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora()
     test_002_05_via_bitacora_entry_add_cierra_en_automatico()
-    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")

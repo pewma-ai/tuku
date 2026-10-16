@@ -21,28 +21,9 @@ tuku entry add --vault mi-vault --day 2026-08-11 --hour 11:30 --body "hice la co
 ```
 Entonces los tres registros quedan bajo `## Martes 11 de agosto`
 Y ordenados por hora: 09:12, 11:30 y 18:40
+Y el de las 18:40, sin ámbito ni clasificación, queda tal cual
 Y el resto de los días del ciclo permanecen vacíos
-
-## Escenario: la fase 1 propaga hacia ámbitos y no toca PENDIENTES.md
-
-Dado el mismo estado inicial
-Cuando se corren los tres registros del día
-```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 18:40 --body "le mandé la boleta de gastos comunes del depto centro a la administradora por WhatsApp"
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 09:12 --scope personal --body "**señal**: la administradora responde los mensajes con varios días de atraso"
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 11:30 --body "hice la consulta presencial por el standing desk"
-```
-Entonces el diff toca `AHORA.md` y `ambitos/personal/personal.md`
-Y `PENDIENTES.md` permanece intacto, byte a byte igual que al inicio
-
-## Escenario: el registro sin ámbito y sin clasificación es válido
-
-Dado el mismo estado inicial
-Cuando se ingresa un registro mínimo sin el link del ámbito ni `**clasificacion**`
-```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 11:30 --body "hice la consulta presencial por el standing desk"
-```
-Entonces `tuku entry add` lo escribe tal cual sin forzar marcas artificiales
+Y el diff toca solo `AHORA.md` y `ambitos/personal/personal.md`: `PENDIENTES.md` queda intacto
 
 ## Escenario: omisión de día y hora asume hoy y ahora
 Dado el mismo estado inicial

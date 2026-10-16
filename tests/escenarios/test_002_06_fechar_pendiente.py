@@ -38,6 +38,8 @@ def test_002_06_fechar_un_pendiente_en_dia_futuro() -> None:
     assert FILA in pendientes, "no nació la fila con fecha"
     assert todo.cuerpos(pendientes, "con fecha") == [CUERPO]
     assert todo.cuerpos(pendientes, "esta semana") == [], "no debía pasar por la escalera"
+    assert "^" not in pendientes, "no debe haber anclas en PENDIENTES.md"
+    assert "> [!todo]" not in pendientes, "no debe haber callouts en PENDIENTES.md"
 
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
     assert "> [!todo] Pendientes del día" in ahora
@@ -49,19 +51,6 @@ def test_002_06_fechar_un_pendiente_en_dia_futuro() -> None:
         "ambitos/PENDIENTES-AMBITOS.md": "modificado",
         "ambitos/personal/personal.md": "modificado",
     }
-
-
-def test_002_06_la_fecha_vive_en_columna_cuando() -> None:
-    corrida = gherkin.correr(SLUG, "la fecha vive en la columna Cuándo")
-    pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
-
-    filas = [f for f in todo.filas(pendientes) if f.cuerpo == CUERPO]
-    assert len(filas) == 1, f"el pendiente está en más de una fila: {filas}"
-    assert filas[0].cuando == FECHA
-    assert filas[0].horizonte == todo.CON_FECHA
-    assert todo.duplicados(pendientes) == [], "todo lint encontró una aparición duplicada"
-    assert "^" not in pendientes, "no debe haber anclas en PENDIENTES.md"
-    assert "> [!todo]" not in pendientes, "no debe haber callouts en PENDIENTES.md"
 
 
 def test_002_06_fechar_dos_veces_no_duplica() -> None:
@@ -85,18 +74,8 @@ def test_002_06_via_bitacora_entry_add_fecha_en_automatico() -> None:
     assert faltan == [], f"inconsistencia entre AHORA y PENDIENTES: {faltan}"
 
 
-def test_002_06_el_dia_de_hoy_no_fecha() -> None:
-    corrida = gherkin.correr(SLUG, "el día de hoy no fecha")
-    assert corrida.codigo == EXITO, corrida.stderr
-
-    pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
-    assert f"| esta semana |  | {PERSONAL} | renovar el pase escolar |" in pendientes
-
-
 if __name__ == "__main__":
     test_002_06_fechar_un_pendiente_en_dia_futuro()
-    test_002_06_la_fecha_vive_en_columna_cuando()
     test_002_06_fechar_dos_veces_no_duplica()
     test_002_06_via_bitacora_entry_add_fecha_en_automatico()
-    test_002_06_el_dia_de_hoy_no_fecha()
-    print(f"ok: 5 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")

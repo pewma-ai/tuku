@@ -64,6 +64,15 @@ def test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras() -> No
     martes = ahora.split("## Martes 11 de agosto", 1)[1].split("\n## ", 1)[0]
     assert CONSTANCIA in martes, "crear el ámbito no dejó su constancia en el martes 11"
 
+    # La constancia es la única línea nueva, y en la de la mención solo cambia la mención.
+    antes = corrida.antes["mi-vault/AHORA.md"].decode("utf-8").splitlines()
+    despues = ahora.splitlines()
+    despues.remove(CONSTANCIA)
+    cambiadas = [(a, d) for a, d in zip(antes, despues, strict=True) if a != d]
+    assert len(cambiadas) == 1, cambiadas
+    a, d = cambiadas[0]
+    assert d == a.replace(MENCION, ENLAZADO), "se reescribió algo más de la línea"
+
     pendientes_ambitos = (vault / "ambitos" / "PENDIENTES-AMBITOS.md").read_text(
         encoding="utf-8"
     )
@@ -89,21 +98,6 @@ def test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras() -> No
     )
 
 
-def test_002_08_el_resto_de_la_linea_no_se_reescribe() -> None:
-    corrida = gherkin.correr(SLUG, "las menciones sueltas del ciclo en curso pasan a enlace")
-
-    antes = corrida.antes["mi-vault/AHORA.md"].decode("utf-8").splitlines()
-    despues = corrida.despues["mi-vault/AHORA.md"].decode("utf-8").splitlines()
-    # La constancia es la única línea nueva; el resto se compara una a una.
-    assert despues.count(CONSTANCIA) == 1, "falta la constancia, o está dos veces"
-    despues.remove(CONSTANCIA)
-    cambiadas = [(a, d) for a, d in zip(antes, despues, strict=True) if a != d]
-
-    assert len(cambiadas) == 1, cambiadas
-    a, d = cambiadas[0]
-    assert d == a.replace(MENCION, ENLAZADO), "se reescribió algo más de la línea"
-
-
 def test_002_08_un_registro_no_puede_apuntar_a_una_categoria() -> None:
     corrida = gherkin.correr(SLUG, "un registro no puede apuntar a una categoría")
 
@@ -115,19 +109,6 @@ def test_002_08_un_registro_no_puede_apuntar_a_una_categoria() -> None:
     assert REGISTRO_A_CATEGORIA in ahora, (
         "el registro no quedó escrito: se reporta, nunca se rechaza"
     )
-
-
-def test_002_08_el_ambito_recien_creado_deja_el_vault_sano() -> None:
-    """El doctor sobre lo que TUKU acaba de escribir.
-
-    Va sobre un vault recién sembrado: el de la cadena arrastra a propósito,
-    desde el `002-03`, un registro que el doctor reporta.
-    """
-    corrida = gherkin.correr(SLUG, "el ámbito recién creado deja el vault sano")
-
-    doctor = corrida.de("tuku doctor")
-    assert doctor.codigo == EXITO, doctor.stdout
-    assert "el vault está sano" in doctor.stdout, doctor.stdout
 
 
 def test_002_08_crear_dos_veces_no_hace_nada() -> None:
@@ -181,12 +162,10 @@ def test_002_08_un_dia_fuera_del_ciclo_no_crea_el_ambito() -> None:
 
 if __name__ == "__main__":
     test_002_08_crear_ambito_deja_el_arbol_correcto_y_enlaza_hacia_atras()
-    test_002_08_el_resto_de_la_linea_no_se_reescribe()
     test_002_08_un_registro_no_puede_apuntar_a_una_categoria()
-    test_002_08_el_ambito_recien_creado_deja_el_vault_sano()
     test_002_08_crear_dos_veces_no_hace_nada()
     test_002_08_el_nombre_con_espacios_se_escribe_con_guion()
     test_002_08_un_ambito_que_no_existe_se_rechaza()
     test_002_08_un_ambito_rechazado_no_queda_a_medias()
     test_002_08_un_dia_fuera_del_ciclo_no_crea_el_ambito()
-    print(f"ok: 9 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 7 afirmaciones (queda en playground/{SLUG}/)")

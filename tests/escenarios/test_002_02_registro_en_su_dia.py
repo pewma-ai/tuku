@@ -27,7 +27,6 @@ LINEA_1840 = (
     "- 18:40 - le mandé la boleta de gastos comunes del depto centro "
     "a la administradora por WhatsApp"
 )
-LINEA_1130 = "- 11:30 - hice la consulta presencial por el standing desk"
 
 
 def _lineas_del_dia(ahora: str, encabezado: str) -> list[str]:
@@ -53,15 +52,10 @@ def test_002_02_los_registros_caen_en_su_dia_y_en_orden() -> None:
     resto = lineas[lineas.index(HOY) + len(deldia) + 1 :]
     assert [linea for linea in resto if linea.startswith("- ")] == [], "se escribió en otro día"
 
-
-def test_002_02_la_fase_1_no_toca_pendientes() -> None:
-    corrida = gherkin.correr(SLUG, "no toca PENDIENTES.md")
-    assert corrida.codigo == EXITO, corrida.stderr
     assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
         "ambitos/personal/personal.md": "modificado",
     }
-
     personal = corrida.ruta("mi-vault", "ambitos", "personal", "personal.md").read_text(
         encoding="utf-8"
     )
@@ -73,10 +67,6 @@ def test_002_02_la_fase_1_no_toca_pendientes() -> None:
     assert f"{PERSONAL}" not in personal
     assert "- 09:12 - " not in personal
 
-
-def test_002_02_registro_sin_ambito_ni_clasificacion_queda_escrito() -> None:
-    corrida = gherkin.correr(SLUG, "sin ámbito y sin clasificación es válido")
-    assert corrida.codigo == EXITO, corrida.stderr
 
 def test_002_02_omision_de_dia_y_hora_asume_hoy_y_ahora() -> None:
     corrida = gherkin.correr(SLUG, "omisión de día y hora asume hoy y ahora")
@@ -90,7 +80,5 @@ def test_002_02_omision_de_dia_y_hora_asume_hoy_y_ahora() -> None:
 
 if __name__ == "__main__":
     test_002_02_los_registros_caen_en_su_dia_y_en_orden()
-    test_002_02_la_fase_1_no_toca_pendientes()
-    test_002_02_registro_sin_ambito_ni_clasificacion_queda_escrito()
     test_002_02_omision_de_dia_y_hora_asume_hoy_y_ahora()
-    print(f"ok: 4 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 2 afirmaciones (queda en playground/{SLUG}/)")

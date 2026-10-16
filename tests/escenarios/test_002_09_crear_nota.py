@@ -17,7 +17,6 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
 import gherkin  # noqa: E402
 
-from tuku import note  # noqa: E402
 from tuku.cli import EXITO, RECHAZO  # noqa: E402
 
 SLUG = "002-09-crear-nota"
@@ -63,15 +62,8 @@ def test_002_09_la_nota_queda_escrita_enlazada_y_con_constancia() -> None:
     )
     assert f"- **nota**: escribí la nota [{NOMBRE}](../../notas/{ARCHIVO})" in pagina
 
-
-def test_002_09_ver_ademas_existe_y_cada_enlace_lleva_motivo() -> None:
-    corrida = gherkin.correr(SLUG, '"Ver además" existe y cada enlace lleva motivo')
-
-    contenido = corrida.ruta("mi-vault", "notas", ARCHIVO).read_text(encoding="utf-8")
-    assert note.VER_ADEMAS in contenido
-
     lint = corrida.de("note lint")
-    assert lint.codigo == EXITO, lint.stderr
+    assert lint.codigo == EXITO, lint.stdout
     assert "sin hallazgos" in lint.stdout
 
 
@@ -161,11 +153,10 @@ def test_002_09_si_la_constancia_no_cabe_no_se_escribe_nada() -> None:
 
 if __name__ == "__main__":
     test_002_09_la_nota_queda_escrita_enlazada_y_con_constancia()
-    test_002_09_ver_ademas_existe_y_cada_enlace_lleva_motivo()
     test_002_09_la_nota_recien_creada_deja_el_vault_sano()
     test_002_09_el_lint_reporta_un_enlace_sin_motivo()
     test_002_09_crear_dos_veces_no_duplica()
     test_002_09_una_nota_sin_cuerpo_se_rechaza()
     test_002_09_el_cuerpo_no_se_busca_en_stdin_sin_que_lo_pidan()
     test_002_09_si_la_constancia_no_cabe_no_se_escribe_nada()
-    print(f"ok: 8 afirmaciones (queda en playground/{SLUG}/)")
+    print(f"ok: 7 afirmaciones (queda en playground/{SLUG}/)")

@@ -49,7 +49,12 @@ def test_un_parser_vacio_deja_solo_el_encabezado() -> None:
     assert "## " not in manual.documento([])
 
 
-def test_todo_comando_del_cli_declara_como_hacerlo_a_mano() -> None:
-    """Principio 1: un comando sin su "A mano" es una dependencia disfrazada."""
-    sin = [e.nombre for e in manual.entradas(cli._construir_parser()) if not e.a_mano]
-    assert not sin, f"sin epilog 'A mano': {sin}"
+def test_todo_comando_del_cli_dice_como_hacerlo_a_mano() -> None:
+    """Principio 1: el "A mano" de cada comando, en archivos del vault y sin jerga de código."""
+    archivos = (".md", "ambitos/", "notas/", "reglas/", "template/")
+    jerga = ("def ", "import ", "module", "function", "class ")
+    for e in manual.entradas(cli._construir_parser()):
+        assert e.a_mano, f"{e.nombre} no dice cómo hacerlo a mano"
+        texto = f"{e.que_hace} {e.a_mano}"
+        assert any(a in texto for a in archivos), f"{e.nombre} no nombra archivos del vault"
+        assert not any(j in texto for j in jerga), f"{e.nombre} usa jerga de código"

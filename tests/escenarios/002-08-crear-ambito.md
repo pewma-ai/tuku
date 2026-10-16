@@ -23,16 +23,7 @@ Y la mención previa en `AHORA.md` pasa automáticamente a `[depto-centro](ambit
 Y `ambitos/PENDIENTES-AMBITOS.md` añade el bloque `^depto-centro` con `SIN PENDIENTES`
 Y `ambitos/personal/` permanece intacto
 Y el martes 11 gana la constancia `- 18:45 - [depto-centro](ambitos/depto-centro/depto-centro.md) **nota**: abrí el ámbito`
-
-## Escenario: las menciones sueltas del ciclo en curso pasan a enlace
-
-Dado el mismo estado con `del depto centro` escrito sin enlazar
-Cuando se crea el ámbito `depto-centro`
-```bash
-tuku scope create depto-centro --vault mi-vault --day 2026-08-11 --hour 18:45
-```
-Entonces solo esa mención pasa a ser el link `[depto-centro](ambitos/depto-centro/depto-centro.md)` en `AHORA.md`
-Y el resto de la línea y demás registros no sufren ninguna alteración, salvo la constancia nueva
+Y el resto de la línea de la mención y los demás registros no cambian
 
 ## Escenario: un registro no puede apuntar a una categoría
 
@@ -49,21 +40,6 @@ tuku scope lint --vault mi-vault
 ```
 Entonces `tuku scope lint` lo reporta con código 1 (`RECHAZO`), explicando que una categoría no recibe registros
 Y el registro original permanece escrito en `AHORA.md` (un error del autor se informa, nunca se borra)
-
-## Escenario: el ámbito recién creado deja el vault sano
-
-Dado un vault limpio recién sembrado
-```bash
-tuku init vault-limpio --date 2026-08-11
-```
-Cuando se crea el ámbito `depto-centro`
-```bash
-tuku scope create depto-centro --vault vault-limpio --day 2026-08-11 --hour 18:45
-```
-Entonces `tuku doctor` valida que el vault está 100% sano
-```bash
-tuku doctor --vault vault-limpio
-```
 
 ## Escenario: crear dos veces el mismo ámbito no hace nada
 

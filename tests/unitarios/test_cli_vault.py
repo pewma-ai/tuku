@@ -23,7 +23,9 @@ def test_rechaza_fuera_de_un_vault(
     argv: list[str], tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     assert main([*argv, "--vault", str(tmp_path)]) == RECHAZO
-    assert "no es un vault de TUKU" in capsys.readouterr().err
+    err = capsys.readouterr().err
+    assert "no es un vault de TUKU" in err
+    assert "AHORA.md" in err and "tuku init" in err, "el error no dice qué falta ni qué hacer"
     assert list(tmp_path.iterdir()) == []
 
 

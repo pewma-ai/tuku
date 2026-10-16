@@ -22,40 +22,13 @@ Entonces existe `notas/como-funciona-el-cobro-de-gastos-comunes-en-una-copropied
 Y su frontmatter incluye `type: Note` y `created: 2026-08-11`
 Y el cuerpo coincide con el fixture redactado
 Y la nota enlaza a `depto-centro` con `[depto-centro](../ambitos/depto-centro/depto-centro.md)`
-
-## Escenario: queda constancia en la bitácora
-
-Dado el mismo estado inicial
-Cuando la nota se escribe
-```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
-```
-Entonces `AHORA.md` gana un registro bajo `## Martes 11 de agosto` enlazando a la nota:
+Y `AHORA.md` gana bajo `## Martes 11 de agosto` la constancia que enlaza a la nota:
 `- 21:15 - [depto-centro](ambitos/depto-centro/depto-centro.md) **nota**: escribí la nota [como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad](notas/como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad.md)`
-
-## Escenario: la nota queda enlazada a su ámbito, porque se pidió así
-
-Dado que la petición indicó `--scope depto-centro`
-Cuando la nota se escribe
-```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
-```
-Entonces la página propia `ambitos/depto-centro/depto-centro.md` recibe bajo `## Esta semana` la constancia de la nota
-Y el enlace en la nota apunta a una página de ámbito existente
-
-## Escenario: "Ver además" existe y cada enlace lleva motivo
-
-Dado la nota ya creada en `notas/`
-```bash
-tuku note create "cómo funciona el cobro de gastos comunes en una copropiedad" --body-file cuerpo-nota.md --scope depto-centro --day 2026-08-11 --hour 21:15 --vault mi-vault
-```
-Cuando se valida con el linter
+Y la página de `depto-centro` recibe la constancia bajo `## Esta semana`
+Y la nota pasa el lint: tiene `## Ver además` y cada enlace lleva su motivo
 ```bash
 tuku note lint mi-vault/notas/como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad.md
 ```
-Entonces la nota contiene la sección `## Ver además`
-Y cada enlace va acompañado de su motivo explícito
-Y el linter finaliza con código 0 (`EXITO`)
 
 ## Escenario: la nota recién creada deja el vault sano
 

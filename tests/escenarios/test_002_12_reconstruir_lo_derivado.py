@@ -41,7 +41,9 @@ def test_002_12_borrar_lo_derivado_y_regenerarlo_devuelve_lo_mismo() -> None:
         for d in archivos_derivados(vault)
     }
     # Además de los derivados puros, las secciones propagadas de páginas de ámbito
-    for ruta_modificada in corrida.delta:
+    delta = corrida.delta_de("mi-vault")
+    assert "ambitos/PENDIENTES-AMBITOS.md" in delta, "la edición a mano no se corrigió"
+    for ruta_modificada in delta:
         es_derivado = (
             ruta_modificada in derivados_rel
             or (ruta_modificada.startswith("ambitos/") and ruta_modificada.endswith(".md"))
@@ -59,17 +61,6 @@ def test_002_12_reconstruir_dos_veces_seguidas_no_mueve_nada() -> None:
 
     # Idempotencia: la segunda reconstrucción no mueve ningún archivo
     assert not corrida.delta, f"la segunda reconstrucción modificó archivos: {corrida.delta}"
-
-
-def test_002_12_un_derivado_editado_a_mano_se_corrige_al_reconstruir() -> None:
-    corrida = gherkin.correr(SLUG, "un derivado editado a mano se corrige al reconstruir")
-    assert corrida.codigo == EXITO, corrida.stderr
-    vault = corrida.ruta("mi-vault")
-
-    contenido = (vault / "ambitos" / "PENDIENTES-AMBITOS.md").read_text(encoding="utf-8")
-    assert "- una fila que nadie escribió" not in contenido, (
-        "la edición manual no se limpió al reconstruir"
-    )
 
 
 def test_002_12_reconstruir_sobre_canonico_roto_informa_y_no_escribe() -> None:

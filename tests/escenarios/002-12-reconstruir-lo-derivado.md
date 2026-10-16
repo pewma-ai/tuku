@@ -12,15 +12,16 @@ cp -r ../../002-11-renombrar/corregir-un-registro-corrige/mi-vault .
 
 ## Escenario: borrar lo derivado y regenerarlo devuelve lo mismo
 
-Dado un vault sano con copia de respaldo de lo derivado para contrastar
+Dado un vault sano con una copia de referencia, y un derivado editado a mano con una línea ajena
 ```bash
 cp -r mi-vault referencia
+echo "- una fila que nadie escribió" >> mi-vault/ambitos/PENDIENTES-AMBITOS.md
 ```
-Cuando se borra todo lo derivado y se reconstruye desde el canónico
+Cuando se reconstruye desde el canónico
 ```bash
 cd mi-vault && tuku rebuild
 ```
-Entonces cada archivo derivado vuelve idéntico, byte a byte
+Entonces el vault vuelve a ser idéntico a la referencia, byte a byte, sin la línea ajena
 ```bash
 diff -r referencia mi-vault
 ```
@@ -37,18 +38,6 @@ Cuando se ejecuta `tuku rebuild` por segunda vez consecutiva
 cd mi-vault && tuku rebuild
 ```
 Entonces el vault no sufre ninguna modificación (idempotencia estricta)
-
-## Escenario: un derivado editado a mano se corrige al reconstruir
-
-Dado que alguien editó a mano un archivo derivado agregando una línea ajena
-```bash
-cd mi-vault && echo "- una fila que nadie escribió" >> ambitos/PENDIENTES-AMBITOS.md
-```
-Cuando se reconstruye el vault
-```bash
-cd mi-vault && tuku rebuild
-```
-Entonces la línea agregada desaparece y el archivo vuelve a reflejar exactamente el conjunto canónico
 
 ## Escenario: reconstruir sobre un canónico roto informa y no escribe
 

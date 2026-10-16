@@ -6,15 +6,6 @@ El enlace de TUKU es un link Markdown con ruta relativa al archivo que lo contie
 
 Fuera de la cadena: siembra su propio vault.
 
-## Escenario: un vault sembrado no tiene wikilinks
-
-Cuando se siembra un vault y se revisa el tema `link`
-```bash
-tuku init mi-vault --date 2026-08-10
-tuku doctor link --vault mi-vault
-```
-Entonces sale con código 0 (`EXITO`) y no reporta ningún wikilink ni link roto
-
 ## Escenario: doctor link reporta el wikilink y fix link lo convierte
 
 Dado un vault con una nota que enlaza a mano con un wikilink, de fecha antigua

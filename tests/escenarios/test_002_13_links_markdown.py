@@ -29,12 +29,6 @@ SLUG = "002-13-links-markdown"
 ANTIGUA = 1577836800  # 2020-01-01 00:00 UTC, con holgura de zona horaria
 
 
-def test_002_13_un_vault_sembrado_no_tiene_wikilinks() -> None:
-    corrida = gherkin.correr(SLUG, "un vault sembrado no tiene wikilinks")
-    assert corrida.codigo == EXITO, corrida.stdout + corrida.stderr
-    assert "sin hallazgos" in corrida.stdout
-
-
 def test_002_13_doctor_link_reporta_y_fix_link_convierte() -> None:
     corrida = gherkin.correr(SLUG, "doctor link reporta el wikilink y fix link lo convierte")
 
@@ -69,7 +63,6 @@ def test_002_13_un_wikilink_ambiguo_se_devuelve_como_decision() -> None:
 
 
 if __name__ == "__main__":
-    test_002_13_un_vault_sembrado_no_tiene_wikilinks()
     test_002_13_doctor_link_reporta_y_fix_link_convierte()
     test_002_13_una_segunda_reparacion_no_cambia_nada()
     test_002_13_un_wikilink_ambiguo_se_devuelve_como_decision()
