@@ -1,0 +1,106 @@
+# 002-14 · Casos borde del día uno
+
+> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P4 (determinismo)](../../docs/principios.md#L33), [P6 (conjunto canónico)](../../docs/principios.md#L55), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Soberanía de archivos y una sola fuente de verdad](../../docs/brief.md#L43) · **Spec:** [`spec/pendientes.md`](../../spec/pendientes.md), [`spec/bitacora.md`](../../spec/bitacora.md), [`spec/ambitos.md`](../../spec/ambitos.md)
+
+El vault del día uno editado con cualquier editor: cada lint nombra el comando que corrige, el reparador deja el vault como lo habría dejado el comando, y lo derivado se regenera desde el canónico. Cada escenario parte del día uno completo.
+
+## Estado inicial
+
+```bash
+cp -r ../../002-13-el-dia/repetir-el-dia-no-cambia-nada/mi-vault .
+```
+
+## Escenario: un derivado editado a mano se detecta y se regenera
+
+Dado una copia de referencia, una línea ajena y otra borrada en `ambitos/PENDIENTES-AMBITOS.md`, y los callouts de pendientes del día borrados de `AHORA.md`
+```bash
+cp -r mi-vault referencia
+sed -i.bak '/Ago\/12 - pagar la sesión con el psicólogo/d' mi-vault/ambitos/PENDIENTES-AMBITOS.md
+echo "- una fila que nadie escribió" >> mi-vault/ambitos/PENDIENTES-AMBITOS.md
+sed -i.bak '/^> \[!todo\] Pendientes del día$/,/^$/d' mi-vault/AHORA.md
+rm mi-vault/ambitos/PENDIENTES-AMBITOS.md.bak mi-vault/AHORA.md.bak
+```
+Cuando se revisa y se regenera
+```bash
+tuku todo lint --vault mi-vault
+tuku regenerate --vault mi-vault
+```
+Entonces `tuku todo lint` sale con código 1 (`RECHAZO`) y nombra `tuku regenerate todo`
+Y `tuku regenerate` nombra cada archivo que reescribió
+Y el vault vuelve a ser idéntico a la referencia, byte a byte
+```bash
+diff -r referencia mi-vault
+```
+
+## Escenario: una fila borrada a mano la nombra todo lint
+
+Dado la fila de `pagar la sesión con el psicólogo` borrada de `PENDIENTES.md`
+```bash
+sed -i.bak '/pagar la sesión con el psicólogo/d' mi-vault/PENDIENTES.md && rm mi-vault/PENDIENTES.md.bak
+```
+Cuando se revisa
+```bash
+tuku todo lint --vault mi-vault
+```
+Entonces sale con código 1 (`RECHAZO`) y nombra como corrección `tuku todo open`
+
+## Escenario: abierto y cerrado a mano el mismo día lo repara fix
+
+Dado un pendiente abierto el martes 11 y cerrado ese mismo día con un editor: el `(Hecho)` escrito en `AHORA.md` y la fila borrada de `PENDIENTES.md`
+```bash
+tuku todo open --vault mi-vault --day 2026-08-11 --hour 15:00 --scope personal --body "renovar el carnet"
+awk '{print} /^- 19:10 - /{print "- 19:20 - [personal](ambitos/personal/personal.md) (Hecho): ~~renovar el carnet~~"}' mi-vault/AHORA.md > ahora.tmp && mv ahora.tmp mi-vault/AHORA.md
+sed -i.bak '/renovar el carnet/d' mi-vault/PENDIENTES.md && rm mi-vault/PENDIENTES.md.bak
+```
+Cuando se revisa y se repara
+```bash
+tuku todo lint --vault mi-vault
+tuku fix todo --vault mi-vault
+tuku todo lint --vault mi-vault
+```
+Entonces el primer `tuku todo lint` sale con código 1 (`RECHAZO`) y nombra `tuku fix todo`
+Y `tuku fix todo` quita el registro de las 15:00 de `AHORA.md` y de la página de `personal`, y deja el cierre de las 19:20
+Y el segundo `tuku todo lint` sale limpio
+
+## Escenario: un registro a una categoría lo reporta scope lint
+
+Dado una subcarpeta `gastos/` de `depto-centro` sin página propia, es decir, una categoría
+```bash
+mkdir mi-vault/ambitos/depto-centro/gastos
+touch mi-vault/ambitos/depto-centro/gastos/AGENTS.md mi-vault/ambitos/depto-centro/gastos/CADENCIAS.md
+```
+Cuando se escribe un registro a `gastos` y se revisa
+```bash
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 20:00 --scope gastos --body "**progreso**: revisé el detalle del mes"
+tuku scope lint --vault mi-vault
+```
+Entonces `tuku scope lint` sale con código 1 (`RECHAZO`) y explica que una categoría no recibe registros
+Y el registro queda escrito en `AHORA.md`: un error del autor se informa, nunca se borra
+
+## Escenario: una marca cerrada mal escrita la reporta entry lint
+
+Cuando se escribe `**Cadencia**` en vez de `**cadencia**` y se revisa
+```bash
+tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:30 --scope personal --body "**Cadencia**: revisar la caldera"
+tuku entry lint --vault mi-vault
+```
+Entonces `tuku entry lint` sale con código 1 (`RECHAZO`) y dice cómo se escribe la marca
+Y la línea queda intacta en `AHORA.md` y `PENDIENTES.md` no cambia
+
+## Escenario: un canónico roto hace que regenerate no escriba
+
+Dado `PENDIENTES.md` sin su tabla
+```bash
+echo "sin tabla" > mi-vault/PENDIENTES.md
+```
+Cuando se intenta regenerar
+```bash
+tuku regenerate --vault mi-vault
+```
+Entonces sale con código 1 (`RECHAZO`) nombrando `PENDIENTES.md`
+Y no escribe ningún archivo
+
+## Aceptación humana (en Obsidian)
+
+- Cada mensaje de lint dice qué está mal y qué comando lo corrige, sin sonar punitivo.
+- Tras `tuku regenerate` y `tuku fix todo`, las páginas de ámbito se leen completas, sin artefactos técnicos.

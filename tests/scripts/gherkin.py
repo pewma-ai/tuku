@@ -323,6 +323,26 @@ def _escenario_de_preparacion(epic: str) -> Escenario | None:
     return escenarios[0] if escenarios else None
 
 
+def _podar(epic: str) -> None:
+    """Borra del banco y de `playground/` las carpetas que ningún `.md` reclama.
+
+    Un escenario borrado o renombrado deja su carpeta, y nadie la vuelve a
+    pisar: sin esto, el autor mira resultados de escenarios que ya no existen.
+    Solo carpetas: las trazas de agente (`*.txt`) son evidencia y se quedan.
+    """
+    for raiz in (vault.PLAYGROUND, vault.ARCHIVO):
+        for dir in sorted(raiz.glob(f"{epic}-*")):
+            if not dir.is_dir():
+                continue
+            if not (ESCENARIOS / f"{dir.name}.md").is_file():
+                shutil.rmtree(dir)
+                continue
+            vigentes = {slugificar(e.titulo) for e in leer_escenarios(dir.name)}
+            for sub in dir.iterdir():
+                if sub.is_dir() and sub.name not in vigentes:
+                    shutil.rmtree(sub)
+
+
 def preparar_epic(epic: str) -> None:
     """Corre el `XXX-00` del epic, una vez por sesión, antes de que nada escriba.
 
@@ -331,6 +351,7 @@ def preparar_epic(epic: str) -> None:
     """
     if epic in _PREPARADOS:
         return
+    _podar(epic)
     escenario = _escenario_de_preparacion(epic)
     if escenario is None:
         _PREPARADOS.add(epic)

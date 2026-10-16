@@ -20,15 +20,7 @@ El autor instala TUKU y opera su primer día entero mediante comandos directos (
 
 ## Escenarios BDD del epic
 
-Cada escenario parte del vault que dejó el anterior.
+- [`002-13-el-dia.md`](002-13-el-dia.md) — Los caminos felices: el martes 11 hora por hora, cada tramo sobre el vault del anterior, hasta repetir el día y regenerar lo derivado sin cambios ([P9](../../docs/principios.md#L79)).
+- [`002-14-casos-borde.md`](002-14-casos-borde.md) — Los casos borde que necesitan el día: ediciones con un editor que cada lint nombra, `tuku fix todo`, `tuku regenerate` y un canónico roto.
 
-- [`002-01-abrir-ciclo.md`](002-01-abrir-ciclo.md) — Abre el ciclo semanal desde plantilla editable de lunes a domingo.
-- [`002-02-registro-en-su-dia.md`](002-02-registro-en-su-dia.md) — Inserta registros en el día de hoy en estricto orden cronológico.
-- [`002-03-lint-de-registro.md`](002-03-lint-de-registro.md) — Valida ontología cerrada estricta y ontología abierta libre y permisiva.
-- [`002-04-abrir-pendiente.md`](002-04-abrir-pendiente.md) — Apertura atómica e idempotente de compromiso en `PENDIENTES.md`.
-- [`002-05-cerrar-pendiente.md`](002-05-cerrar-pendiente.md) — Cierre literal con `(Hecho)` y reporte orientador de cierres huérfanos.
-- [`002-06-fechar-pendiente.md`](002-06-fechar-pendiente.md) — Fechado de compromisos con `tuku todo open --when` o un `--day` futuro.
-- [`002-08-crear-ambito.md`](002-08-crear-ambito.md) — Alta de ámbito con transclusiones y enlazado retroactivo en el ciclo.
-- [`002-09-crear-nota.md`](002-09-crear-nota.md) — Creación de nota enlazada con frontmatter OKF y motivos en `## Ver además`.
-- [`002-11-renombrar.md`](002-11-renombrar.md) — Renombrado atómico de entidades sin dejar enlaces rotos en el grafo.
-- [`002-12-reconstruir-lo-derivado.md`](002-12-reconstruir-lo-derivado.md) — Reconstrucción de vistas derivadas idéntica byte a byte ([P9](../../docs/principios.md#L79)).
+Los rechazos que no necesitan el día (ámbito inexistente, día fuera del ciclo, nota sin cuerpo, renombrar sobre un nombre ocupado) están en [`../unitarios/`](../unitarios/README.md).

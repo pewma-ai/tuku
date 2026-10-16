@@ -6,10 +6,11 @@ El autor dicta una hora y no un día. El día se deriva del vault, con la regla 
 
 ## Estado inicial
 
-El día uno de la cadena determinista del 002, con un pendiente escrito el miércoles 12. No hereda de un escenario con agente ([`devel/epics.md`](../../devel/epics.md)).
+El día uno de la cadena determinista del 002, con dos pendientes escritos el miércoles 12. No hereda de un escenario con agente ([`devel/epics.md`](../../devel/epics.md)).
 
 ```bash
-cp -r ../../002-09-crear-nota/la-nota-se-escribe-donde/mi-vault .
+cp -r ../../002-13-el-dia/la-nota-del-frente-queda/mi-vault .
+tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:00 --scope personal --body "pagar la sesión con el psicólogo"
 tuku todo open --vault mi-vault --day 2026-08-12 --hour 09:30 --scope depto-centro --body "pagar los gastos comunes del depto centro"
 ```
 

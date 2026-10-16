@@ -49,7 +49,7 @@ ENTORNO = {
     "TUKU_AGENTE_ESFUERZO": ESFUERZO,
 }
 
-#: El delta del gemelo `002-02`: un registro sin consecuencia toca la bitácora y
+#: El delta del gemelo `002-13`: un registro sin consecuencia toca la bitácora y
 #: la página de su ámbito. Los mismos criterios para todo arnés, sin relajar nada: si
 #: hubiera que relajarlo para que pase otro arnés, el hallazgo sería que el
 #: `AGENTS.md` depende de quién lo lee.

@@ -57,3 +57,16 @@ def test_un_ciclo_con_registros_no_se_pisa(tmp_path: Path) -> None:
 
     assert "bitacoras/bitacora-2026-09-07-2026-09-13.md" in str(e.value)
     assert "no se pierde" in ahora.read_text(encoding="utf-8")
+
+
+def test_sin_ahora_lo_crea_desde_la_plantilla_con_la_semana_completa(tmp_path: Path) -> None:
+    vault = _vault(tmp_path)
+    (vault / "AHORA.md").unlink()
+
+    _, creado = open_cycle(vault, date(2026, 9, 9))
+
+    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
+    assert creado
+    assert "from: 2026-09-07" in ahora and "to: 2026-09-13" in ahora
+    assert "## Lunes 7 de septiembre" in ahora and "## Domingo 13 de septiembre" in ahora
+    assert "AAAA-MM-DD" not in ahora

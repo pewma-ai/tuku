@@ -30,7 +30,7 @@ SLUG = "003-11-el-dia-que-no-se-dicta"
 TITULO = "el registro va al último día"
 MIERCOLES = "## Miércoles 12 de agosto"
 
-#: Lo que toca un registro sin consecuencia en `depto-centro`, del gemelo `002-02`.
+#: Lo que toca un registro sin consecuencia en `depto-centro`, del gemelo `002-13`.
 DELTA_SIN_CONSECUENCIA = {
     "AHORA.md": "modificado",
     "ambitos/depto-centro/depto-centro.md": "modificado",

@@ -89,3 +89,20 @@ def test_el_lint_solo_mira_dentro_de_ver_ademas() -> None:
 
 def test_una_nota_vacia_reporta_la_seccion_que_falta() -> None:
     assert len(note.lint("")) == 1
+
+
+def test_el_cuerpo_no_se_busca_en_stdin_sin_pedirlo(monkeypatch: pytest.MonkeyPatch) -> None:
+    """`stdin` se lee solo con `--body-file -`: un pipe abierto y vacío colgaría el comando."""
+    import argparse
+
+    from tuku import cli
+
+    class StdinQueNadieDebeLeer:
+        def isatty(self) -> bool:
+            return False
+
+        def read(self) -> str:
+            raise AssertionError("leyó stdin sin que se lo pidieran")
+
+    monkeypatch.setattr(sys, "stdin", StdinQueNadieDebeLeer())
+    assert cli._cuerpo_de_la_nota(argparse.Namespace(body=None, body_file=None)) is None

@@ -119,7 +119,7 @@ Un `.md` con varios `## Escenario:` reparte un subdirectorio por escenario (`pla
 El estado inicial de un paso es el estado final del anterior, y eso se escribe en el `## Estado inicial`, que hace de *Background*: sus comandos corren antes de cada escenario del archivo.
 
 ```bash
-cp -r ../../002-01-abrir-ciclo/crear-ahora-md-a-partir-de-la/mi-vault .
+cp -r ../../002-13-el-dia/repetir-el-dia-no-cambia-nada/mi-vault .
 ```
 
 Antes la herencia vivía escondida en una constante `PREVIO` del arnés. Ahora se lee en el escenario. Si el paso previo no corrió, el error lo dice con esas palabras en vez de un `cp: No such file`.
@@ -180,14 +180,8 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`001-06-cli-ayuda.md`](001-06-cli-ayuda.md) | Epic 001, fase 0 | `tuku init -h` nombra sus opciones, y una instalación rota sale con el código de entorno. En proceso, sin red |
 | [`001-07-lint-libro-de-estilo.md`](001-07-lint-libro-de-estilo.md) | Epic 001, fase 0 | Con qué código salen `style lint` y `vocab show` ante un `LIBRO-DE-ESTILO.md` roto |
 | [`002-00-el-dia-uno-a-mano.md`](002-00-el-dia-uno-a-mano.md) | Epic 002 | Descripción general, qué tiene que funcionar, qué se verifica y movimientos de diseño del Epic 002 |
-| [`002-01-abrir-ciclo.md`](002-01-abrir-ciclo.md) | Epic 002, fase 1 | Primer paso de la cadena, y el único que no hereda: siembra su vault. Apertura de ciclo desde `reglas/plantilla/AHORA.md` con la semana completa |
-| [`002-02-registro-en-su-dia.md`](002-02-registro-en-su-dia.md) | Epic 002, fase 1 | Segundo paso de la cadena. Día correcto, orden cronológico, y el diff no toca `PENDIENTES.md` |
-| [`002-03-lint-de-registro.md`](002-03-lint-de-registro.md) | Epic 002, fase 1 | Cerrada estricta, abierta permisiva. El lint informa y no escribe |
-| [`002-04-abrir-pendiente.md`](002-04-abrir-pendiente.md) | Epic 002, fase 2 | Abrir es copiar el cuerpo literal. Lleva un `#REVISAR` sobre una ambigüedad de `spec/pendientes.md` |
-| [`002-05-cerrar-pendiente.md`](002-05-cerrar-pendiente.md) | Epic 002, fase 2 | Cerrar es borrar, y el cierre sin pareja se reporta sin inventar nada |
-| [`002-06-fechar-pendiente.md`](002-06-fechar-pendiente.md) | Epic 002, fase 2 | Fechado de compromisos con `con fecha` y propagación de pendientes del día |
-| [`002-08-crear-ambito.md`](002-08-crear-ambito.md) | Epic 002, fase 3 mínima | El árbol correcto y el enlazado retroactivo, que acá llega solo hasta `AHORA.md` |
-| [`002-09-crear-nota.md`](002-09-crear-nota.md) | Epic 002, fase 5 mínima | Obliga a agregar la consecuencia "nota" a `spec/flujo-informacion.md` |
+| [`002-13-el-dia.md`](002-13-el-dia.md) | Epic 002 | El día uno hora por hora, un escenario por tramo encadenado al anterior: ciclo, registros, pendientes de hoy, ámbito, nota, pendientes fechados y repetir el día sin cambios |
+| [`002-14-casos-borde.md`](002-14-casos-borde.md) | Epic 002 | Sobre el vault final del `002-13`: ediciones con un editor que cada lint nombra, `fix todo`, `regenerate` y un canónico roto |
 | [`003-00-el-dia-uno-dictado.md`](003-00-el-dia-uno-dictado.md) | Epic 003 | Qué se verifica con un agente en el medio, y los escenarios del epic |
 | [`003-01-el-vault-dice-a-donde-va.md`](003-01-el-vault-dice-a-donde-va.md) | Epic 003 | `tuku doctor` verifica que la tabla de despacho del `AGENTS.md` no nombre comandos que no existen. Sin agente |
 | [`003-10-el-dia-uno-en-un-turno.md`](003-10-el-dia-uno-en-un-turno.md) | Epic 003 | El día uno dictado en un turno, con lo que no se anota: deja el vault del epic 002 |

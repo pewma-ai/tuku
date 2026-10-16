@@ -43,8 +43,8 @@ dev = [
 #
 # **El orden de los tests importa y no se debe aleatorizar.** Los escenarios de un
 # epic son una cadena: el estado inicial de un paso es el estado final del
-# anterior (`tests/escenarios/README.md`), y el `002-02` copia el vault que dejó
-# el `002-01`. El orden alfabético de recolección de pytest es justo el que la
+# anterior (`tests/escenarios/README.md`), y el `002-14` copia el vault que dejó
+# el `002-13`. El orden alfabético de recolección de pytest es justo el que la
 # cadena necesita, y por eso acá no se fija nada: ya es correcto por defecto. Lo
 # que no hay que hacer es instalar un aleatorizador (`pytest-randomly`) ni
 # paralelizar por test (`pytest-xdist`) sin antes hacer que cada paso sepa

@@ -35,6 +35,11 @@ def _clave_hora(linea: str) -> tuple[int, int]:
     return int(m.group(1)), int(m.group(2))
 
 
+def _sin_links(linea: str) -> str:
+    """La línea como se lee, con guion y espacio equivalentes, como `link.backfill`."""
+    return link.sin_links(linea).replace("-", " ").casefold()
+
+
 def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     """Devuelve `AHORA.md` con `lineas` insertadas bajo el encabezado `day` o `dia`.
 
@@ -95,8 +100,10 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     previas = [linea for linea in src[ini + 1 : fin] if _HORA.match(linea)]
     # Idempotencia (principio 9, y `DEVEL.md`): una línea idéntica bajo el mismo
     # día es el mismo registro escrito dos veces, no dos hechos. Dos hechos de
-    # verdad difieren en algo, aunque sea la hora.
-    nuevas = [x for linea in lineas if (x := linea.rstrip("\n")) not in previas]
+    # verdad difieren en algo, aunque sea la hora. Se compara sin links: una
+    # mención que `tuku scope create` enlazó después sigue siendo el mismo hecho.
+    vistas = {_sin_links(p) for p in previas}
+    nuevas = [x for linea in lineas if _sin_links(x := linea.rstrip("\n")) not in vistas]
 
     ordenadas = sorted([*previas, *nuevas], key=_clave_hora)
     seccion = [encabezado, *ordenadas, ""]

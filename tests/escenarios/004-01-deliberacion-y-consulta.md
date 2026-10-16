@@ -11,7 +11,7 @@
 Un vault poblado con el día uno y compromisos abiertos en `PENDIENTES.md`, el de la cadena determinista del 002. Un escenario con agente no va en la base de una cadena ([`devel/epics.md`](../../devel/epics.md)).
 
 ```bash
-cp -r ../../002-09-crear-nota/la-nota-se-escribe-donde/mi-vault .
+cp -r ../../002-13-el-dia/repetir-el-dia-no-cambia-nada/mi-vault .
 ```
 
 ---

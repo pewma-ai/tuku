@@ -77,6 +77,13 @@ def test_add_idempotente_no_duplica_lineas() -> None:
     assert segundo.count(linea) == 1
 
 
+def test_add_no_duplica_un_registro_cuya_mencion_ya_se_enlazo() -> None:
+    enlazada = "- 18:40 - la boleta del [depto-centro](ambitos/depto-centro/depto-centro.md)"
+    primero = add(AHORA, [enlazada], dia="Lunes 7 de septiembre")
+    suelta = "- 18:40 - la boleta del depto centro"
+    assert add(primero, [suelta], dia="Lunes 7 de septiembre") == primero
+
+
 def test_add_ordena_por_hora_cronologicamente() -> None:
     lineas = [
         "- 15:00 - tarde",

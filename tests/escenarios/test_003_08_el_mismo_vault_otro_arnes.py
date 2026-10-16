@@ -34,7 +34,7 @@ DIA = "## Martes 11 de agosto"
 #: el entorno; este fija uno, porque cambiar de lector **es** lo que prueba.
 ARNES = "hermes"
 
-#: El delta del gemelo `002-02`: un registro sin consecuencia toca la bitácora y
+#: El delta del gemelo `002-13`: un registro sin consecuencia toca la bitácora y
 #: la página de su ámbito. Los mismos criterios para todo arnés, sin relajar nada: si
 #: hubiera que relajarlo para que pase otro arnés, el hallazgo sería que el
 #: `AGENTS.md` depende de quién lo lee.
