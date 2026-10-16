@@ -123,7 +123,7 @@ Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de `reglas/t
 
 ## Dónde viven los comandos
 
-La **especificación** viaja con el vault: `reglas/comandos.tuku.md` dice en prosa qué hace cada comando y cómo hacerlo a mano, para que alguien pueda operar el vault, o volver a implementar el comando, aunque el código de hoy ya no exista. Lo escribe `tuku init` desde la ayuda de cada comando (su párrafo y su línea "A mano", ver [cli.md](cli.md)) y lo reescribe `tuku rebuild`, porque es derivado: de la versión de `tuku` instalada, no del conjunto canónico.
+La **especificación** viaja con el vault: `reglas/comandos.tuku.md` dice en prosa qué hace cada comando sobre los archivos del vault, para que alguien pueda operar el vault, o volver a implementar el comando, aunque el código de hoy ya no exista. Lo escribe `tuku init` desde el párrafo de ayuda de cada comando ([cli.md](cli.md)) y lo reescribe `tuku rebuild`, porque es derivado: de la versión de `tuku` instalada, no del conjunto canónico.
 
 El **código** vive fuera del vault, en el paquete `tuku` que instala `uv tool install` o `pipx` (epic 001 de [`../devel/epics.md`](../devel/epics.md)). En el vault no hay código. El `AGENTS.md` de la raíz lo declara, así que quien opere el libro lo encuentra en el primer archivo que abre.
 
@@ -134,17 +134,16 @@ El nombre canónico de cada comando es su invocación, `tuku <noun> <verb>` (o `
 ```markdown
 ## tuku todo propagate
 
-**Qué hace:** Regenera, desde la tabla de `PENDIENTES.md`, las dos vistas derivadas: la región de cada día en `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md`. Las vistas se regeneran y no se reparan; sobre un vault cuadrado no cambia ningún archivo.
-**A mano:** bajo cada día de `AHORA.md` copiar los pendientes con esa fecha, y en `ambitos/PENDIENTES-AMBITOS.md` escribir un callout por ámbito.
+Regenera desde `PENDIENTES.md` sus dos vistas: bajo cada día de `AHORA.md`, los pendientes con esa fecha; en `ambitos/PENDIENTES-AMBITOS.md`, un callout por ámbito con sus filas. Sobre un vault al día no cambia nada.
 ```
 
-El campo **A mano** no es cortesía documental, es lo que sostiene el principio 1. Si un comando no se puede ejecutar, el trabajo se hace igual, solo que cuesta más. Un comando sin ese campo es una dependencia disfrazada.
+Que el párrafo nombre archivos y cómo cambian no es cortesía documental, es lo que sostiene el principio 1: si un comando no se puede ejecutar, el trabajo se hace igual con un editor, solo que cuesta más. Un comando cuya descripción no alcanza para eso es una dependencia disfrazada.
 
 ## Qué está fuera de alcance
 
 Cada spec declara su propio "no entra" en la sección correspondiente. A nivel de directorio:
 
-- **Los comandos reales, en código.** Este directorio especifica su contrato (qué leen, qué escriben, el campo "A mano", y en [cli.md](cli.md) lo que vale para todos); la implementación vive fuera del vault, en el paquete que instala `uv tool install` o `pipx`, y su plan de construcción vive en [`../devel/epics.md`](../devel/epics.md).
+- **Los comandos reales, en código.** Este directorio especifica su contrato (qué leen, qué escriben y cómo, y en [cli.md](cli.md) lo que vale para todos); la implementación vive fuera del vault, en el paquete que instala `uv tool install` o `pipx`, y su plan de construcción vive en [`../devel/epics.md`](../devel/epics.md).
 - **El orden de implementación y la estrategia de pruebas.** Eso es [`../devel/epics.md`](../devel/epics.md), no este directorio: aquí se especifica qué hace el sistema, no en qué fase se construye ni cómo se verifica.
 - **La deliberación con el autor** (archivar una rama, aprobar una propuesta). Se especifica la mecánica que la rodea, nunca el criterio para decidir.
 

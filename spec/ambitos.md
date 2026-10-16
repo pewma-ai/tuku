@@ -108,7 +108,7 @@ Las dos primeras son decisiones y se resuelven conversando. La tercera es trabaj
 
 ## Cómo se enlaza un ámbito
 
-El enlace a un ámbito es un link Markdown con ruta relativa al archivo que lo contiene ([README.md](README.md), "Decidido (2026-10-16)"). **A mano:** escribir `[nombre](ruta/hasta/nombre.md)` con la ruta desde el archivo donde va, por ejemplo `[personal](../personal/personal.md)` desde una página de ámbito hermana.
+El enlace a un ámbito es un link Markdown con ruta relativa al archivo que lo contiene ([README.md](README.md), "Decidido (2026-10-16)"). Se escribe `[nombre](ruta/hasta/nombre.md)` con la ruta desde el archivo donde va, por ejemplo `[personal](../personal/personal.md)` desde una página de ámbito hermana.
 
 La transclusión de pendientes `![[../PENDIENTES-AMBITOS.md#^personal]]` es una extensión de Obsidian aceptada: es el único wikilink admitido y se reconoce por el `!` inicial.
 

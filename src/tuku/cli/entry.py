@@ -53,14 +53,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "add",
         help="escribe un registro en la bitácora",
         description=(
-            "Compone la línea canónica a partir de los campos (hora, ámbito con su link, "
-            "marca y cuerpo), la inserta en su día por orden de hora y aplica lo que la "
-            "marca implica: un `**pendiente**` abre su fila y un `(Hecho)` la cierra. "
-            "Existe para que quien dicta aporte el juicio y el comando, la forma."
-        ),
-        epilog=(
-            "A mano: abrir `AHORA.md`, buscar el día correspondiente y agregar una línea "
-            "bajo la sección con formato `- HH:MM - [ambito](ruta) **marca**: cuerpo`."
+            "Escribe en `AHORA.md`, bajo el día y en orden de hora, la línea "
+            "`- HH:MM - [ámbito](ambitos/ámbito/ámbito.md) **marca**: cuerpo`. Un "
+            "`**pendiente**` abre además su fila en `PENDIENTES.md`, y un `(Hecho)` la "
+            "borra. Quien invoca decide los campos; el comando les da la forma."
         ),
     )
     add_p.add_argument("--vault", default=".", type=Path, help="vault destino")
@@ -109,15 +105,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "rename",
         help="corrige el cuerpo de un registro ya escrito",
         description=(
-            "Reemplaza el cuerpo de un registro, ubicado por su día y su hora, y actualiza "
-            "la fila de `PENDIENTES.md` si era un pendiente. Existe porque las dos copias "
-            "deben decir lo mismo carácter por carácter o el pendiente deja de poder "
-            "cerrarse. La hora y el ámbito no se tocan."
-        ),
-        epilog=(
-            "A mano: abrir `AHORA.md`, ubicar el registro por su hora y editar su texto. "
-            "Si era un pendiente, buscar la fila en `PENDIENTES.md` y actualizarla para "
-            "que coincida palabra por palabra."
+            "Reemplaza el cuerpo del registro de `AHORA.md` ubicado por día y hora, sin "
+            "tocar hora ni ámbito. Si es un pendiente, reemplaza igual su fila en "
+            "`PENDIENTES.md`: las dos copias deben coincidir carácter por carácter para "
+            "que el pendiente se pueda cerrar."
         ),
     )
     rename_p.add_argument("--vault", default=".", type=Path, help="vault a modificar")
@@ -144,13 +135,11 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "lint",
         help="revisa los registros y reporta; no escribe",
         description=(
-            "Revisa que cada registro de `AHORA.md` tenga la forma canónica y use marcas "
-            "válidas. Solo la ontología cerrada se rechaza; un vocabulario abierto "
-            "desconocido se reporta para preguntar. No escribe nada."
-        ),
-        epilog=(
-            "A mano: abrir `AHORA.md` y revisar que cada registro empiece con "
-            "`- HH:MM - ` y use marcas válidas."
+            "Revisa que cada registro de `AHORA.md` tenga la forma "
+            "`- HH:MM - [ámbito](ruta) **marca**: cuerpo` y que su marca exista en "
+            "`LIBRO-DE-ESTILO.md`. Una marca de la ontología cerrada mal escrita se "
+            "rechaza; un término abierto desconocido se reporta para preguntar al autor. "
+            "No escribe nada."
         ),
     )
     lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")

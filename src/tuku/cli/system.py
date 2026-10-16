@@ -105,14 +105,10 @@ def registrar(
         "init",
         help="siembra un vault nuevo en un directorio",
         description=(
-            "Copia el template de TUKU al directorio destino y lo deja listo para "
-            "escribir la primera línea: fija la zona horaria de esta máquina, el primer "
-            "día del ciclo y, si se pide, el nombre del autor. No opera sobre un vault "
-            "existente: rechaza un destino con contenido, y nunca el home del usuario."
-        ),
-        epilog=(
-            "A mano: copiar la carpeta `template/vanilla` al directorio destino "
-            "y reemplazar las fechas en `AHORA.md`."
+            "Copia el template al directorio destino. Escribe `AHORA.md` desde "
+            "`reglas/plantilla/AHORA.md` con las fechas del primer ciclo, la zona horaria "
+            "de esta máquina en `reglas/config.tuku.md` y, si se da, el autor en "
+            "`LIBRO-DE-ESTILO.md`. Rechaza un destino con contenido y el home del usuario."
         ),
     )
     init_p.add_argument(
@@ -164,13 +160,8 @@ def registrar(
         "open",
         help="abre o verifica el ciclo en AHORA.md",
         description=(
-            "Abre el ciclo desde la plantilla, con las fechas de sus siete días, o "
-            "verifica el que ya está abierto. Es idempotente: correrlo dos veces no "
-            "duplica nada."
-        ),
-        epilog=(
-            "A mano: copiar `reglas/plantilla/AHORA.md` a la raíz como `AHORA.md` "
-            "sustituyendo las fechas de los siete días de la semana."
+            "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con las fechas de los siete "
+            "días del ciclo. Si el ciclo ya está abierto, solo lo verifica."
         ),
     )
     open_p.add_argument("--vault", default=".", type=Path, help="vault a verificar o abrir")
@@ -188,12 +179,8 @@ def registrar(
         "lint",
         help="revisa la estructura de AHORA.md y reporta; no escribe",
         description=(
-            "Revisa que los encabezados de día de `AHORA.md` tengan fechas consecutivas "
-            "y formato válido. No escribe nada."
-        ),
-        epilog=(
-            "A mano: abrir `AHORA.md` y verificar que los encabezados de día tengan "
-            "fechas consecutivas y formato válido."
+            "Revisa el frontmatter de `AHORA.md` y que sus encabezados de día tengan "
+            "fechas consecutivas y bien escritas. No escribe nada."
         ),
     )
     cycle_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
@@ -202,18 +189,10 @@ def registrar(
         "doctor",
         help="corre todos los lint y revisa las tablas de contrato",
         description=(
-            "Revisa el vault entero y reporta lo que encuentra: archivos que faltan, "
-            "campos de configuración, comandos nombrados en `AGENTS.md`, marcas sin su "
-            "consecuencia, links y la versión con que se sembró. Con un TEMA revisa solo "
-            "esa parte. Sin --verbose muestra solo los hallazgos y los avisos; con "
-            "--verbose, todas las revisiones. No escribe nada: cada hallazgo nombra la "
-            "corrección, y si el "
-            "tema tiene `tuku fix TEMA`, es ese comando."
-        ),
-        epilog=(
-            "A mano: revisar `AHORA.md` y `PENDIENTES.md` verificando que cada pendiente "
-            "abierto tenga su fila en la tabla y que cada mención a un ámbito exista "
-            "en `ambitos/`."
+            "Corre todos los lint y revisa el vault entero: archivos requeridos, "
+            "`reglas/config.tuku.md`, los comandos que nombra cada `AGENTS.md`, la tabla "
+            "de `reglas/types.md`, los links y la versión con que se sembró. Con un TEMA "
+            "revisa solo esa parte. No escribe nada: cada hallazgo dice cómo corregirlo."
         ),
     )
     doctor_p.add_argument(
@@ -235,15 +214,10 @@ def registrar(
         "fix",
         help="repara lo que tuku doctor TEMA reporta",
         description=(
-            "Repara un tema que `tuku doctor TEMA` reportó. Lo determinista se aplica; "
-            "lo que requiere una decisión del autor no se escribe y sale listado como "
-            "decisión, con código 1. Existe porque verificar y reparar son operaciones "
-            "distintas, y quien corre TUKU suele ser un agente que no debe decidir por "
-            "el autor. Es idempotente."
-        ),
-        epilog=(
-            "A mano: buscar cada `[[nombre]]` y reemplazarlo por "
-            "`[nombre](ruta/hasta/nombre.md)`, con la ruta calculada desde el archivo."
+            "Repara lo que `tuku doctor TEMA` reportó. Tema `link`: reemplaza cada "
+            "`[[nombre]]` por `[nombre](ruta/a/nombre.md)`, con la ruta relativa al "
+            "archivo que lo contiene. Lo que pide una decisión del autor no se escribe: "
+            "sale listado, con código 1."
         ),
     )
     fix_p.add_argument("tema", choices=TEMAS_DOCTOR, help="el tema a reparar")
@@ -253,13 +227,11 @@ def registrar(
         "rebuild",
         help="reconstruye los archivos y vistas derivadas del vault",
         description=(
-            "Borra y regenera desde sus fuentes todo lo que el vault deriva, como "
-            "`ambitos/PENDIENTES-AMBITOS.md`. Existe porque lo derivado se regenera y "
-            "no se repara: el resultado debe ser el mismo byte a byte. Es idempotente."
-        ),
-        epilog=(
-            "A mano: en `ambitos/PENDIENTES-AMBITOS.md` escribir un callout por cada "
-            "carpeta en `ambitos/` listando sus pendientes desde `PENDIENTES.md`."
+            "Borra y regenera lo que el vault deriva: `ambitos/PENDIENTES-AMBITOS.md`, "
+            "con un callout por ámbito que lista sus filas de `PENDIENTES.md`; en la "
+            "página de cada ámbito, la actividad tomada de `AHORA.md`; y "
+            "`reglas/comandos.tuku.md`, desde esta ayuda. Dos corridas dejan los mismos "
+            "bytes."
         ),
     )
     rebuild_p.add_argument("--vault", default=".", type=Path, help="vault a reconstruir")
@@ -277,12 +249,8 @@ def registrar(
         "show",
         help="muestra los vocabularios del libro de estilo",
         description=(
-            "Muestra las tres tablas de vocabulario de `LIBRO-DE-ESTILO.md`, para saber "
-            "con qué términos se clasifica sin inventar otros."
-        ),
-        epilog=(
-            "A mano: abrir `LIBRO-DE-ESTILO.md` y leer los vocabularios definidos "
-            "en la sección de vocabulario."
+            "Muestra las tablas Clasificaciones, Horizontes y Tipos de nota de "
+            "`LIBRO-DE-ESTILO.md`: los términos con que se clasifica."
         ),
     )
     show_p.add_argument("--vault", default=".", type=Path, help="vault a leer")
@@ -300,13 +268,9 @@ def registrar(
         "lint",
         help="revisa contratos en LIBRO-DE-ESTILO.md",
         description=(
-            "Revisa que `LIBRO-DE-ESTILO.md` cumpla el contrato que los demás comandos "
-            "leen: el marcador del autor y las tres tablas (Clasificaciones, Horizontes "
-            "y Tipos de nota). No escribe nada."
-        ),
-        epilog=(
-            "A mano: abrir `LIBRO-DE-ESTILO.md` y verificar que el formato de títulos, "
-            "reglas y listas cumpla las convenciones de Markdown."
+            "Revisa que `LIBRO-DE-ESTILO.md` tenga lo que leen los demás comandos: la "
+            "línea del autor y las tablas Clasificaciones, Horizontes y Tipos de nota. "
+            "No escribe nada."
         ),
     )
     style_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")

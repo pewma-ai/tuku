@@ -1,4 +1,4 @@
-"""`reglas/comandos.tuku.md`: qué hace cada comando y cómo hacerlo a mano.
+"""`reglas/comandos.tuku.md`: qué hace cada comando sobre los archivos del vault.
 
 El principio 5 pide que la especificación de cada automatismo acompañe al libro
 del autor y que el código viva fuera. Sin `tuku` instalado no hay `-h`, así que
@@ -9,7 +9,8 @@ que `comandos()`: una lista paralela se desincroniza en silencio. Lo escribe
 `tuku init` al sembrar y lo reescribe `tuku rebuild`, porque es derivado: de la
 versión de `tuku` instalada, no del conjunto canónico.
 
-**A mano:** copiar, por cada comando, el párrafo y la línea "A mano" de su `-h`.
+Cada descripción dice qué archivos toca y cómo, con precisión para hacerlo sin
+`tuku` (principio 1).
 """
 
 from __future__ import annotations
@@ -22,10 +23,10 @@ ARCHIVO = "reglas/comandos.tuku.md"
 
 _ENCABEZADO = (
     "---\ntype: Config\n---\n\n# Comandos de TUKU\n\n"
-    "Qué hace cada comando de `tuku` y cómo hacerlo a mano. El código vive fuera de "
+    "Qué hace cada comando de `tuku` sobre los archivos del vault. El código vive fuera de "
     "este vault, en el paquete `tuku`; este archivo es lo que queda si no está "
     "instalado. Lo escribe `tuku init` desde la ayuda de cada comando "
-    "(`tuku <comando> -h`) y lo reescribe `tuku rebuild`: no se edita a mano.\n"
+    "(`tuku <comando> -h`) y lo reescribe `tuku rebuild`, así que no se edita.\n"
 )
 
 
@@ -35,7 +36,6 @@ class Entrada:
 
     nombre: str
     que_hace: str
-    a_mano: str
 
 
 def entradas(parser: argparse.ArgumentParser, camino: str = "tuku") -> list[Entrada]:
@@ -54,22 +54,14 @@ def entradas(parser: argparse.ArgumentParser, camino: str = "tuku") -> list[Entr
             if hijos:
                 salida += hijos
                 continue
-            epilog = (sub.epilog or "").strip()
-            salida.append(
-                Entrada(
-                    nombre=ruta,
-                    que_hace=" ".join((sub.description or "").split()),
-                    a_mano=" ".join(epilog.removeprefix("A mano:").split()),
-                )
-            )
+            salida.append(Entrada(ruta, " ".join((sub.description or "").split())))
     return salida
 
 
 def documento(lista: list[Entrada]) -> str:
     """El archivo entero. Determinista: la misma lista da los mismos bytes."""
     bloques = [
-        f"## {e.nombre}\n\n**Qué hace:** {e.que_hace or 'sin declarar.'}\n"
-        f"**A mano:** {e.a_mano or 'sin declarar.'}\n"
+        f"## {e.nombre}\n\n{e.que_hace or 'Sin descripción.'}\n"
         for e in lista
     ]
     return _ENCABEZADO + "".join(f"\n{b}" for b in bloques)

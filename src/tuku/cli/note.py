@@ -67,14 +67,12 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "create",
         help="crea una nota y deja constancia en la bitácora",
         description=(
-            "Escribe la nota en `notas/` con su frontmatter y su sección `## Ver además`, "
-            "y deja en `AHORA.md` un registro con el link a ella. Crear una nota es un "
-            "hecho de la vida del autor, por eso se registra. Es idempotente: no "
-            "reescribe una nota que ya existe."
-        ),
-        epilog=(
-            "A mano: crear el archivo en `notas/<slug>.md` con sus metadatos y cuerpo, "
-            "y registrar en `AHORA.md` la constancia de creación."
+            "Escribe `notas/<título sin tildes, en minúsculas y con guiones>.md` con "
+            "frontmatter "
+            "(`type: Note`, `created`), el cuerpo, el link a su ámbito y la sección "
+            "`## Ver además`, y registra en `AHORA.md` "
+            "`**nota**: escribí la nota [título](notas/...)`. Una nota que ya existe no "
+            "se reescribe."
         ),
     )
     note_create_p.add_argument("title", help="título de la nota")
@@ -125,13 +123,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "rename",
         help="renombra una nota y arregla lo que la enlazaba",
         description=(
-            "Renombra el archivo de la nota, su título y el texto y la ruta de cada link "
-            "que la nombra en el vault. Existe porque renombrar solo el archivo deja "
-            "links rotos sin avisar."
-        ),
-        epilog=(
-            "A mano: renombrar el archivo en `notas/` y actualizar los links "
-            "a ella en la bitácora."
+            "Renombra el archivo de la nota en `notas/`, su título y el texto y la ruta "
+            "de cada link a ella en todo el vault."
         ),
     )
     note_rename_p.add_argument("title", help="título actual de la nota")
@@ -144,10 +137,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         description=(
             "Revisa que la nota cierre con `## Ver además` y que cada link saliente diga "
             "para qué conecta. Sin archivo revisa todas las de `notas/`. No escribe nada."
-        ),
-        epilog=(
-            "A mano: abrir la nota en `notas/` y verificar su sección 'Ver además' "
-            "y motivos de enlace."
         ),
     )
     note_lint_p.add_argument(

@@ -48,7 +48,7 @@ No todo entra por la voz. Abrir o cerrar un pendiente, moverlo de escalón, crea
 
 Son dos puertas y una sola sala, y desde que la mitad determinista vive en el comando, la sala tiene un solo mecanismo: **las dos vías terminan en una invocación de `tuku`**. La primera la compone quien interpretó el dictado, la segunda la escribe el autor. Toda invocación es estrictamente idempotente: correr un comando repetidas veces no duplica líneas en la bitácora ni filas en las tablas. Si un elemento ya existe en un archivo, se omite y se asegura que el estado complementario quede sincronizado.
 
-Esa invariante es sobre lo automatizado y no sobre el autor. A mano el vault se edita como cualquier carpeta de archivos de texto, que es el principio 1, y por eso cada comando declara su equivalente manual (ver [README.md](README.md), el campo "A mano"). Lo que no existe es una tercera forma de que algo cambie **solo**: nada automático toca el vault fuera de un comando. Eso es lo que mantiene chica la plataforma de pruebas, y lo que hace que una sesión se pueda releer y volver a ejecutar.
+Esa invariante es sobre lo automatizado y no sobre el autor. A mano el vault se edita como cualquier carpeta de archivos de texto, que es el principio 1, y por eso la ayuda de cada comando dice qué archivos toca y cómo ([cli.md](cli.md)). Lo que no existe es una tercera forma de que algo cambie **solo**: nada automático toca el vault fuera de un comando. Eso es lo que mantiene chica la plataforma de pruebas, y lo que hace que una sesión se pueda releer y volver a ejecutar.
 
 ```mermaid
 %%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%

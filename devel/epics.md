@@ -39,7 +39,7 @@ La numeración salta la fase 8 porque el endurecimiento pasó a la Wishlist: no 
 - **Un fixture nuevo por vez:** si necesita dos estados iniciales nuevos, está haciendo dos cosas.
 - **El LLM se aísla:** las fases 1, 7 y 9 lo usan y las demás no.
 - **Idempotencia:** correr cualquier operación dos veces da el mismo resultado (principio 9).
-- **El campo "A mano":** ningún comando entra sin él para garantizar el principio 1.
+- **La ayuda como equivalente manual:** ningún comando entra sin una descripción que diga qué archivos toca y cómo, para garantizar el principio 1.
 - **Contrato de [`spec/cli.md`](../spec/cli.md):** códigos de salida fijos, mensajes que nombran defecto y corrección, y ante la duda informar sin escribir.
 
 ## Estrategia de pruebas

@@ -62,7 +62,11 @@ def _construir_parser() -> argparse.ArgumentParser:
     global _COMANDOS
     parser = argparse.ArgumentParser(
         prog="tuku",
-        description="TUKU — Management as Code para la vida personal.",
+        description=(
+            "TUKU: gestión personal en archivos Markdown (Management as Code). Cada "
+            "comando escribe o revisa archivos del vault que también se editan con "
+            "cualquier editor; su ayuda dice cuáles y cómo."
+        ),
     )
     sub = parser.add_subparsers(dest="noun", required=True)
 

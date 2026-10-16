@@ -43,17 +43,11 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "create",
         help="crea un ámbito bajo ambitos/",
         description=(
-            "Crea la carpeta del ámbito con su página, `AGENTS.md` y `CADENCIAS.md`, "
-            "enlaza hacia atrás las menciones que ya había en `AHORA.md` y deja en la "
-            "bitácora la constancia de haberlo abierto. Existe porque un ámbito no es "
-            "solo una carpeta: es también su transclusión de pendientes, su callout y "
-            "una decisión del autor. Es idempotente: sobre un ámbito que ya existe no "
-            "escribe nada."
-        ),
-        epilog=(
-            "A mano: crear la carpeta en `ambitos/<nombre>/` con su página `<nombre>.md`, "
-            "`AGENTS.md` y `CADENCIAS.md`, y registrar en `AHORA.md` "
-            "`- HH:MM - [<nombre>](ambitos/<nombre>/<nombre>.md) **nota**: abrí el ámbito`."
+            "Crea `ambitos/<nombre>/` con `AGENTS.md`, `CADENCIAS.md` y la página "
+            "`<nombre>.md` (`type: Scope`, `keywords: [<nombre>]` y la transclusión de su "
+            "callout en `ambitos/PENDIENTES-AMBITOS.md`). Convierte en link las menciones "
+            "del ámbito que ya había en `AHORA.md` y registra ahí "
+            "`**nota**: abrí el ámbito`. Sobre un ámbito existente no escribe nada."
         ),
     )
     scope_create_p.add_argument("name", help="nombre del ámbito")
@@ -79,15 +73,9 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "rename",
         help="renombra un ámbito y arregla lo que lo enlazaba",
         description=(
-            "Renombra un ámbito entero: la carpeta, la página, el ancla de la "
-            "transclusión y el texto y la ruta de cada link que lo nombra en el vault. "
-            "Existe porque hacerlo a mano deja links rotos que nadie ve hasta que hacen "
-            "falta. Se rechaza antes de tocar nada si algo lo impide."
-        ),
-        epilog=(
-            "A mano: renombrar la carpeta en `ambitos/` y su archivo `.md`, actualizar "
-            "las cabeceras internas y reemplazar en todos los links del vault el nombre y la "
-            "ruta viejos por los nuevos."
+            "Renombra `ambitos/<nombre>/` y su página, las `keywords`, el ancla de la "
+            "transclusión y el texto y la ruta de cada link al ámbito en todo el vault. "
+            "Si algo lo impide, rechaza sin tocar nada."
         ),
     )
     scope_rename_p.add_argument("name", help="nombre actual del ámbito")
@@ -98,13 +86,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "lint",
         help="revisa que ningún registro apunte a una categoría",
         description=(
-            "Revisa el árbol de ámbitos y reporta: que ningún registro apunte a una "
-            "categoría, que cada página transcluya sus pendientes y que cada ámbito "
-            "tenga su callout. No escribe nada."
-        ),
-        epilog=(
-            "A mano: revisar `ambitos/` verificando que cada carpeta tenga su página "
-            "y que todos los enlaces en la bitácora apunten a ámbitos existentes."
+            "Revisa que ningún registro de `AHORA.md` apunte a una categoría (carpeta de "
+            "`ambitos/` sin página propia), que cada página de ámbito transcluya sus "
+            "pendientes y que cada ámbito tenga su callout en "
+            "`ambitos/PENDIENTES-AMBITOS.md`. No escribe nada."
         ),
     )
     scope_lint_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")

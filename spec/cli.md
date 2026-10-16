@@ -65,9 +65,9 @@ De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa
 
 ## La ayuda explica para qué existe cada comando
 
-Todo sustantivo y todo verbo lleva en `tuku … -h` un párrafo en español que dice **para qué existe** el comando, como `description` de argparse. La línea corta (`help=`) y el "A mano" (`epilog`) se mantienen. Un test recorre el árbol de argparse y exige que ninguno quede sin descripción, y que todo comando invocable tenga su "A mano".
+Todo sustantivo y todo verbo lleva en `tuku … -h`, antes de las opciones, un párrafo en español (la `description` de argparse). En un comando invocable ese párrafo dice qué archivos del vault lee o escribe y cómo, con precisión suficiente para hacerlo con un editor: es su equivalente manual, el que pide el principio 1, y no va en un campo aparte. Un test recorre el árbol de argparse y exige que ninguno quede sin descripción y que todo comando invocable nombre archivos del vault.
 
-Ese párrafo y esa línea son también los que `tuku init` copia en `reglas/comandos.tuku.md`, para que el vault diga qué hace cada comando aunque `tuku` no esté instalado ([README.md](README.md), "Dónde viven los comandos").
+Ese párrafo es también el que `tuku init` copia en `reglas/comandos.tuku.md`, para que el vault diga qué hace cada comando aunque `tuku` no esté instalado ([README.md](README.md), "Dónde viven los comandos").
 
 ## No entra
 
