@@ -64,6 +64,15 @@ def test_no_toca_si_el_sello_coincide(entorno: tuple[Path, Path]) -> None:
     assert extra.is_file()
 
 
+def test_refresca_si_el_paquete_cambio_con_la_misma_version(entorno: tuple[Path, Path]) -> None:
+    tuku_home, empaquetado = entorno
+    init.resolver_home()
+    (empaquetado / "template" / "nuevo.md").write_text("cambiado", encoding="utf-8")
+    init.resolver_home()
+    assert (tuku_home / "template" / "nuevo.md").read_text(encoding="utf-8") == "cambiado"
+    assert init.version_del_home(tuku_home) == "2.0"
+
+
 def test_version_del_home_sin_sello_es_none(tmp_path: Path) -> None:
     assert init.version_del_home(tmp_path) is None
 

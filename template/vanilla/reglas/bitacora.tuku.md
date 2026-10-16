@@ -58,4 +58,4 @@ Escribir la línea a mano en `AHORA.md`, bajo el encabezado del día que corresp
 - 14:20 - [personal](ambitos/personal/personal.md) **pendiente**: avisar de los gastos comunes a la administradora
 ```
 
-Si lleva `**pendiente**`, agregar además una fila en la tabla de `PENDIENTES.md` con el mismo cuerpo, carácter por carácter, y su horizonte. Si lleva `(Hecho)`, buscar esa fila, sin contar los links, y quitarla; en el registro, la marca va a la vista y el cuerpo tachado: `(Hecho): ~~cuerpo~~`. Si el pendiente se abrió ese mismo día, borrar también el registro que lo abrió: queda solo el cierre.
+Si lleva `**pendiente**`, agregar además una fila en la tabla de `PENDIENTES.md` con el mismo cuerpo, carácter por carácter salvo un `|`, que en la tabla va `\|`, y su horizonte. Si lleva `(Hecho)`, buscar esa fila, sin contar los links, y quitarla; en el registro, la marca va a la vista y el cuerpo tachado: `(Hecho): ~~cuerpo~~`. Si el pendiente se abrió ese mismo día, borrar también el registro que lo abrió: queda solo el cierre.

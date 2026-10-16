@@ -76,7 +76,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     )
     note_create_p.add_argument("title", help="título de la nota")
     crear = Opciones(note_create_p)
-    crear.body("cuerpo de la nota", requerido=False)
+    crear.body("cuerpo de la nota", requerido=False, una_linea=False)
     note_create_p.add_argument(
         "--body-file",
         "--cuerpo-archivo",

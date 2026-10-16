@@ -118,6 +118,18 @@ def momento_con_hora(valor: str) -> Momento:
     return m
 
 
+def cuerpo_de_registro(valor: str) -> str:
+    """Un registro es una línea: ni vacío ni con saltos, que se perderían."""
+    if not valor.strip():
+        raise argparse.ArgumentTypeError("el cuerpo está vacío")
+    if "\n" in valor or "\r" in valor:
+        raise argparse.ArgumentTypeError(
+            "el cuerpo tiene saltos de línea y un registro es una sola línea: "
+            "júntalo en una, o escribe una nota con `tuku note create`"
+        )
+    return valor
+
+
 class Opciones:
     """Las opciones compartidas de un subcomando, cada una con su único vocabulario."""
 
@@ -127,13 +139,14 @@ class Opciones:
     def vault(self, ayuda: str = "vault a modificar") -> None:
         self.parser.add_argument("--vault", default=".", type=Path, help=ayuda)
 
-    def body(self, ayuda: str, *, requerido: bool = True) -> None:
+    def body(self, ayuda: str, *, requerido: bool = True, una_linea: bool = True) -> None:
         self.parser.add_argument(
             "--body",
             "--cuerpo",
             dest="body",
             required=requerido,
             default=None,
+            type=cuerpo_de_registro if una_linea else str,
             help=ayuda,
         )
 

@@ -253,8 +253,8 @@ def _tabla(*cuerpos: str) -> str:
 
 def test_sin_consecuencia_encuentra_el_pendiente_que_nunca_se_abrio() -> None:
     faltan = todo.sin_consecuencia(AHORA_CON_MARCAS, _tabla())
-    assert [(c.cuerpo, c.comando) for c in faltan] == [
-        ("enviar la cotización a Los Robles", "tuku todo open")
+    assert [(c.cuerpo, c.marca) for c in faltan] == [
+        ("enviar la cotización a Los Robles", todo.ABRE)
     ]
 
 
@@ -268,7 +268,7 @@ def test_sin_consecuencia_encuentra_el_cierre_que_nunca_se_aplico() -> None:
     faltan = todo.sin_consecuencia(
         AHORA_CON_MARCAS, _tabla("enviar la cotización a Los Robles", "llamar al banco")
     )
-    assert [(c.cuerpo, c.comando) for c in faltan] == [("llamar al banco", "tuku todo close")]
+    assert [(c.cuerpo, c.marca) for c in faltan] == [("llamar al banco", todo.CIERRA)]
 
 
 def test_un_pendiente_arrastrado_de_otro_ciclo_no_se_reporta() -> None:
@@ -376,7 +376,7 @@ def test_sin_consecuencia_empareja_sin_links() -> None:
     assert todo.sin_consecuencia(ahora, _tabla(SIN_LINK)) == []
     cierre = f"- 11:00 - {P} (Hecho): ~~{SIN_LINK}~~\n"
     faltan = todo.sin_consecuencia(cierre, _tabla(CON_LINK))
-    assert [(c.cuerpo, c.comando) for c in faltan] == [(SIN_LINK, "tuku todo close")]
+    assert [(c.cuerpo, c.marca) for c in faltan] == [(SIN_LINK, todo.CIERRA)]
 
 
 def test_reemplazar_cuerpo_busca_sin_links_y_conserva_el_resto() -> None:
@@ -408,10 +408,29 @@ def test_lint_reporta_duplicados_con_su_correccion() -> None:
     assert hallazgo.startswith("PENDIENTES.md: error:") and "una sola" in hallazgo
 
 
-def test_lint_reporta_una_marca_sin_su_fila_y_nombra_el_comando_original() -> None:
-    ahora = "## Martes 11 de agosto\n\n- 14:20 - **pendiente**: avisar de los GGCC\n"
+def test_lint_reporta_una_marca_sin_su_fila_y_nombra_el_comando_que_la_corrige() -> None:
+    ahora = (
+        "---\nfrom: 2026-08-10\nto: 2026-08-16\n---\n"
+        f"## Martes 11 de agosto\n\n- 14:20 - {P} **pendiente**: avisar de los GGCC\n"
+    )
     (hallazgo,) = todo.lint(VACIA, ahora)
-    assert hallazgo.startswith("AHORA.md: error:") and "tuku todo open" in hallazgo
+    assert hallazgo.startswith("AHORA.md: error:")
+    assert (
+        "tuku todo open --scope personal --at '2026-08-11 14:20' --body 'avisar de los GGCC'"
+        in hallazgo
+    )
+
+
+# --- un `|` en el cuerpo ----------------------------------------------------
+
+
+def test_un_pipe_en_el_cuerpo_no_rompe_la_tabla() -> None:
+    texto = todo.abrir(VACIA, todo.Marca(todo.ABRE, "personal", "luz | agua"))
+    texto = todo.abrir(texto, todo.Marca(todo.ABRE, "personal", "comprar pan"))
+    assert sorted(todo.cuerpos(texto)) == ["comprar pan", "luz | agua"]
+    cierre = todo.Marca(todo.CIERRA, "personal", "luz | agua")
+    sin_fila, hubo_pareja = todo.cerrar(texto, cierre)
+    assert hubo_pareja and todo.cuerpos(sin_fila) == ["comprar pan"]
 
 
 def test_lint_sin_ahora_no_cruza_marcas() -> None:

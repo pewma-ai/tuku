@@ -169,6 +169,10 @@ def crear_con_constancia(
     from tuku.ahora import encabezado_de
     from tuku.entry import add
 
+    if not slug(title):
+        return Resultado.rechazo(
+            f"{title!r} no sirve de título: sin letras ni números no hay nombre de archivo."
+        )
     if scope:
         scope = scope_mod.normalizar(scope)
         if (rechazo := scope_mod.rechazo_si_no_existe(vault, scope)) is not None:

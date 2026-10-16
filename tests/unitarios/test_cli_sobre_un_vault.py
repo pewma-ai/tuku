@@ -230,3 +230,11 @@ def test_entry_rename_corrige_tambien_la_fila_del_pendiente(vault: Path) -> None
     pendientes = _leer(vault, "PENDIENTES.md")
     assert "pagar la sesión de terapia" in pendientes
     assert "psicólogo" not in pendientes
+
+
+@pytest.mark.parametrize("titulo", ["", "  ", "¿?"])
+def test_una_nota_sin_titulo_se_rechaza_sin_escribir(vault: Path, titulo: str) -> None:
+    antes = _foto(vault)
+    codigo = _tuku(vault, "note", "create", titulo, "--body", "x", "--at", f"{HOY} 10:00")
+    assert codigo == RECHAZO
+    assert _foto(vault) == antes

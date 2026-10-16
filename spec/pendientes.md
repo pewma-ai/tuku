@@ -37,7 +37,7 @@ type: Todo
 
 **Horizonte** indica el escalón actual del pendiente. Los del autor salen de `### Horizontes` en el libro de estilo (`esta semana`, `próxima semana`, `fin de mes` en el template vanilla) y `con fecha` es del sistema cuando tiene día asignado.
 
-**Vence** es el día en que toca el pendiente: ese día aparece entre los pendientes del día, y desde el siguiente está atrasado. Queda vacío cuando no lo tiene (sin `--due`), y el pendiente va al horizonte del ciclo en curso. **Ámbito** es un enlace, o vacío si el pendiente todavía no aterrizó en ninguno. **Detalle** es el cuerpo, el mismo texto que el registro que lo abrió y que el que lo cierre.
+**Vence** es el día en que toca el pendiente: ese día aparece entre los pendientes del día, y desde el siguiente está atrasado. Queda vacío cuando no lo tiene (sin `--due`), y el pendiente va al horizonte del ciclo en curso. **Ámbito** es un enlace, o vacío si el pendiente todavía no aterrizó en ninguno. **Detalle** es el cuerpo, el mismo texto que el registro que lo abrió y que el que lo cierre; un `|` del cuerpo se escribe `\|`, como en cualquier tabla Markdown.
 
 Las filas se insertan ordenadas por la posición del horizonte en la escalera y por `Vence`. El orden es determinista y la inserción es posicional: un pendiente nuevo no reordena la tabla entera, preservando un diff limpio.
 

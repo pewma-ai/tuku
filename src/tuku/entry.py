@@ -13,7 +13,6 @@ que le toca por hora.
 from __future__ import annotations
 
 import re
-import shlex
 from collections.abc import Mapping
 from datetime import date, datetime
 from pathlib import Path
@@ -212,17 +211,11 @@ def rechazo_de_marca(
     from tuku import todo
 
     abre = marca.marca == todo.ABRE
-    partes = ["tuku todo open" if abre else "tuku todo close"]
-    if scope:
-        partes.append(f"--scope {shlex.quote(scope)}")
-    cuando = " ".join(x for x in (day.isoformat() if day else "", hour or "") if x)
-    if cuando:
-        partes.append(f"--at {shlex.quote(cuando)}")
-    partes.append(f"--body {shlex.quote(marca.cuerpo)}")
+    comando = todo.comando_de(marca.marca, marca.cuerpo, ambito=scope, day=day, hour=hour)
     que = "abre un pendiente" if abre else "cierra un pendiente"
     return (
         f"`{marca.marca}` {que}, y eso no lo escribe `tuku entry add`: "
-        f"usa `{' '.join(partes)}`, que escribe el registro y la fila de "
+        f"usa `{comando}`, que escribe el registro y la fila de "
         "`PENDIENTES.md` juntos."
     )
 

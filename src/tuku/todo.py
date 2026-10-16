@@ -57,11 +57,15 @@ _CIERRE_ENTRADA = re.compile(
     r"^\(Hecho\)(?P<clasif> \*\*[^*\n]+\*\*)?: (?P<cuerpo>.+)$"
 )
 
+#: Una celda de la tabla: un `|` dentro del texto va escapado, `\|`, como en
+#: cualquier tabla Markdown.
+_CELDA = r"(?:[^|\n\\]|\\.)*"
+
 #: Una fila de la tabla: cuatro celdas. La cabecera y el separador tienen la
 #: misma forma y se descartan aparte.
 _FILA = re.compile(
-    r"^\|(?P<horizonte>[^|\n]*)\|(?P<vence>[^|\n]*)\|"
-    r"(?P<ambito>[^|\n]*)\|(?P<cuerpo>[^|\n]*)\|\s*$"
+    rf"^\|(?P<horizonte>{_CELDA})\|(?P<vence>{_CELDA})\|"
+    rf"(?P<ambito>{_CELDA})\|(?P<cuerpo>{_CELDA})\|\s*$"
 )
 
 CABECERA = "| Horizonte | Vence | Ámbito | Detalle |"
@@ -117,7 +121,8 @@ class Fila:
     def linea(self, rutas: Mapping[str, str] | None = None) -> str:
         """La fila como línea de la tabla; el link se escribe desde `PENDIENTES.md`."""
         ambito = link.enlace_ambito(self.ambito, "PENDIENTES.md", rutas) if self.ambito else ""
-        return f"| {self.horizonte} | {self.vence} | {ambito} | {self.cuerpo} |"
+        cuerpo = self.cuerpo.replace("|", r"\|")
+        return f"| {self.horizonte} | {self.vence} | {ambito} | {cuerpo} |"
 
 
 class SinTabla(Exception):
@@ -226,7 +231,7 @@ def _parsear_fila(linea: str) -> Fila | None:
         horizonte,
         m.group("vence").strip(),
         link.nombre_de(ambito) if ambito else None,
-        m.group("cuerpo").strip(),
+        m.group("cuerpo").strip().replace(r"\|", "|"),
     )
 
 
@@ -348,16 +353,41 @@ def horizontes(pendientes: str) -> list[str]:
     return vistos
 
 
+def comando_de(
+    marca: str,
+    cuerpo: str,
+    *,
+    ambito: str | None = None,
+    day: date | None = None,
+    hour: str | None = None,
+) -> str:
+    """El `tuku todo open` o `close` entero que escribe esa marca, listo para correr."""
+    import shlex
+
+    partes = ["tuku todo open" if marca == ABRE else "tuku todo close"]
+    if ambito:
+        partes.append(f"--scope {shlex.quote(ambito)}")
+    if cuando := " ".join(x for x in (day.isoformat() if day else "", hour or "") if x):
+        partes.append(f"--at {shlex.quote(cuando)}")
+    partes.append(f"--body {shlex.quote(cuerpo)}")
+    return " ".join(partes)
+
+
 @dataclass(frozen=True)
 class ConsecuenciaPendiente:
     """Una marca de la bitácora cuyo comando de consecuencia nunca se corrió."""
 
     cuerpo: str
     marca: str
+    ambito: str | None = None
+    dia: date | None = None
+    hora: str | None = None
 
     @property
     def comando(self) -> str:
-        return "tuku todo open" if self.marca == ABRE else "tuku todo close"
+        return comando_de(
+            self.marca, self.cuerpo, ambito=self.ambito, day=self.dia, hour=self.hora
+        )
 
 
 @dataclass(frozen=True)
@@ -433,21 +463,22 @@ def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]
        cierre después: abrir y cerrar el mismo día no deja fila, y está bien.
     2. Un `(Hecho)` cuyo cuerpo sigue en la tabla.
     """
-    marcas = [m for linea in ahora.splitlines() if (m := parsear(linea))]
-    abiertos = {clave(m.cuerpo): m.cuerpo for m in marcas if m.marca == ABRE}
-    cerrados = {clave(m.cuerpo) for m in marcas if m.marca == CIERRA}
+    from tuku.ahora import dias
+
+    fechas = {i: fecha for i, _, fecha in dias(ahora)}
+    ubicadas: list[ConsecuenciaPendiente] = []
+    dia: date | None = None
+    for i, linea in enumerate(ahora.splitlines()):
+        if i in fechas:
+            dia = fechas[i]
+        if m := parsear(linea):
+            ubicadas.append(ConsecuenciaPendiente(m.cuerpo, m.marca, m.ambito, dia, linea[2:7]))
+    abiertos = {clave(c.cuerpo): c for c in ubicadas if c.marca == ABRE}
+    cerrados = {clave(c.cuerpo) for c in ubicadas if c.marca == CIERRA}
     en_tabla = {clave(c) for c in cuerpos(pendientes)}
 
-    faltan = [
-        ConsecuenciaPendiente(cuerpo, ABRE)
-        for k, cuerpo in abiertos.items()
-        if k not in en_tabla and k not in cerrados
-    ]
-    faltan += [
-        ConsecuenciaPendiente(m.cuerpo, CIERRA)
-        for m in marcas
-        if m.marca == CIERRA and clave(m.cuerpo) in en_tabla
-    ]
+    faltan = [c for k, c in abiertos.items() if k not in en_tabla and k not in cerrados]
+    faltan += [c for c in ubicadas if c.marca == CIERRA and clave(c.cuerpo) in en_tabla]
     return faltan
 
 
@@ -683,7 +714,7 @@ def lint(
     if ahora is not None:
         hallazgos += [
             f"AHORA.md: error: {c.cuerpo!r} lleva {c.marca} y la tabla no lo refleja. "
-            f"Corre `{c.comando} \"<la línea del registro>\"`."
+            f"Corre `{c.comando}`."
             for c in sin_consecuencia(ahora, pendientes)
         ]
     if ahora is not None:

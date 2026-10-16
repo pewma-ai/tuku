@@ -78,6 +78,14 @@ def test_un_at_mal_escrito_es_error_de_uso(
     assert "11-08-2026" in capsys.readouterr().err
 
 
+@pytest.mark.parametrize("comando", COMANDOS)
+@pytest.mark.parametrize("cuerpo", ["", "   ", "dos\nlíneas"])
+def test_un_cuerpo_vacio_o_de_varias_lineas_es_error_de_uso(comando: str, cuerpo: str) -> None:
+    with pytest.raises(SystemExit) as e:
+        cli._construir_parser().parse_args([*comando.split(), "--body", cuerpo])
+    assert e.value.code == USO
+
+
 def test_todo_open_due_y_horizon() -> None:
     assert _parsear("todo open", "--vence", f"{HOY} 09:00").due.celda() == f"{HOY} 09:00"
     assert _parsear("todo open", "--horizonte", "próxima semana").horizon == "próxima semana"

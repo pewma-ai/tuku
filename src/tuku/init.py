@@ -20,6 +20,7 @@ encima. Los tests llaman a `init()` directo, sin subprocesos.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 from datetime import date, timedelta
@@ -51,7 +52,8 @@ _MARCADOR_AUTOR = "**Nombre del autor:**"
 #: De dónde sale TUKU: se escribe en cada vault para saber dónde revisar cambios.
 ORIGEN = "https://github.com/pewma-ai/tuku"
 
-#: Archivo de `~/.tuku` con la versión de TUKU que lo escribió.
+#: Archivo de `~/.tuku` con la versión de TUKU que lo escribió, en la primera
+#: línea, y la huella de lo que copió, en la segunda.
 SELLO = "tuku.version"
 
 
@@ -96,7 +98,26 @@ def version_del_home(home: Path) -> str | None:
     sello = home / SELLO
     if not sello.is_file():
         return None
-    return sello.read_text(encoding="utf-8").strip() or None
+    lineas = sello.read_text(encoding="utf-8").split()
+    return lineas[0] if lineas else None
+
+
+def huella(arbol: Path) -> str:
+    """El SHA-256 de las rutas y el contenido de `arbol`.
+
+    La versión sola no alcanza: instalado en modo editable, el `tuku` de un
+    checkout conserva la versión con que se instaló aunque `template/` cambie
+    en cada commit, y `~/.tuku` se quedaba atrás en silencio.
+    """
+    h = hashlib.sha256()
+    for archivo in sorted(p for p in arbol.rglob("*") if p.is_file()):
+        h.update(archivo.relative_to(arbol).as_posix().encode())
+        h.update(archivo.read_bytes())
+    return h.hexdigest()
+
+
+def _sello() -> str:
+    return f"{version_de_tuku()}\n{huella(_HOME_EMPAQUETADO)}\n"
 
 
 def _materializar(destino: Path) -> Path:
@@ -104,7 +125,7 @@ def _materializar(destino: Path) -> Path:
     if destino.exists():
         shutil.rmtree(destino)
     shutil.copytree(_HOME_EMPAQUETADO, destino)
-    (destino / SELLO).write_text(f"{version_de_tuku()}\n", encoding="utf-8")
+    (destino / SELLO).write_text(_sello(), encoding="utf-8")
     return destino
 
 
@@ -134,7 +155,8 @@ def resolver_home(home: Path | str | None = None) -> Path:
     predeterminado = Path("~/.tuku").expanduser()
     if _tiene_template(_HOME_EMPAQUETADO):
         vigente = _tiene_template(predeterminado)
-        if vigente and version_del_home(predeterminado) == version_de_tuku():
+        sello = predeterminado / SELLO
+        if vigente and sello.is_file() and sello.read_text(encoding="utf-8") == _sello():
             return predeterminado
         if vigente or not predeterminado.exists():
             return _materializar(predeterminado)
