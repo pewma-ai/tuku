@@ -101,7 +101,7 @@ Que una persona nueva instale TUKU con un comando, siembre un vault en un direct
 Alguien instala TUKU y empieza a usarlo el mismo día sobre un vault vacío. Todo lo que hace lo hace invocando `tuku` a mano: cada decisión del autor (`tuku entry add`, `tuku todo open`, `tuku note create`, etc.) deja huella cronológica en la bitácora del ciclo y aplica sus consecuencias de forma atómica e idempotente. Cubre las fases 1 y 2 completas, y la versión mínima de las fases 3 y 5.
 
 - **Entregable:** ciclo abierto con plantilla completa, registros cronológicos, consecuencias aplicadas de forma atómica vía bitácora, fechado automático, ámbito creado con enlaces retroactivos y nota creada a petición.
-- **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). Doce escenarios en verde (`002-01` a `002-09`, `002-11` y `002-12` en cadena, más `002-10` fuera de ella). Se salda el principio 9 mediante `tuku rebuild`. Cerrado el 2026-09-19 tras verificación humana de notas y bitácora en Obsidian.
+- **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). Diez escenarios en cadena (`002-01` a `002-09`, `002-11` y `002-12`); lo que no necesita un vault está en unitarios. Se salda el principio 9 mediante `tuku rebuild`. Cerrado el 2026-09-19 tras verificación humana de notas y bitácora en Obsidian.
 
 ## Epic 003. El día uno, dictado
 

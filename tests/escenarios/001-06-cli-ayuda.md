@@ -1,6 +1,6 @@
 # Escenario · 001-06-cli-ayuda
 
-**Cubre:** epic 001. La ayuda de `tuku init` y el código de entorno (3), distinto del de uso (2), según [`spec/cli.md`](../../spec/cli.md). La ayuda del resto del CLI está en el [`002-10`](002-10-cli-superficie.md).
+**Cubre:** epic 001. La ayuda de `tuku init` y el código de entorno (3), distinto del de uso (2), según [`spec/cli.md`](../../spec/cli.md).
 
 ## Escenario: `tuku init -h` lista las opciones que añade el epic 001
 
