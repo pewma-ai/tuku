@@ -1,48 +1,10 @@
-"""Test byte a byte del escenario 001-02-init-siembra-el-estado-cero.
+"""Test del escenario 001-02-init-siembra-el-estado-cero.
 
-Escenario: 001-02-init-siembra-el-estado-cero.md
+Con la red bloqueada, `tuku init` deja un árbol idéntico a `template/vanilla/`
+salvo lo que resuelve, un `AHORA.md` con las siete fechas y ningún placeholder
+vivo. Compara contra el template en vivo, nunca contra una copia congelada.
 
-`init()` hace dos cosas: copia `template/vanilla/` tal cual, y sustituye las
-fechas de `AHORA.md`. **Nada se compara contra una copia congelada del
-template.** Los archivos copiados se contrastan en vivo contra
-`template/vanilla/`, y el `AHORA.md` esperado se deriva del template real
-aplicándole las siete fechas que este escenario fija a mano. Un cambio en el
-template no obliga a regenerar nada; un cambio en la lógica de sembrado sigue
-rompiendo el test.
-
-El comando no se escribe acá: sale del `.md`, que es la fuente ejecutable
-(`tests/scripts/gherkin.py`). Este arnés solo afirma sobre lo que ese comando
-dejó. El runner corre `tuku init` en proceso con `TUKU_HOME` en el checkout de
-trabajo, así que la siembra copia de `template/vanilla/` sin tocar `~/.tuku` ni
-la red: el camino que la decisión 4 del epic 002 reserva para todo test salvo
-el `001-01`.
-
-Cuatro afirmaciones, y las cuatro fallan por separado:
-
-1. El árbol sembrado no difiere de `template/vanilla/` en ningún archivo salvo
-   los que la siembra resuelve, ni sobra ni falta ninguno.
-2. `AHORA.md` queda exactamente como el template con las fechas resueltas.
-3. No sobrevive ningún placeholder en ningún archivo del vault.
-4. Todo eso con la red bloqueada: `socket` parchado para que abrir un socket,
-   conectar o resolver un nombre lance `RedBloqueada`. No basta con no ver
-   tráfico; si algún día `init` (o algo que importe) intenta tocar la red, el
-   test falla señalando eso.
-
-La tercera cubre el crecimiento del template: si un archivo nuevo de
-`template/vanilla/` trae `DD de mes` y `init()` no lo sustituye, las otras dos
-pasan en silencio y esta no.
-
-La corrida deja el vault en `playground/001-02-init-siembra-el-estado-cero/mi-vault/`
-(git-ignored, se pisa en cada corrida), a la vista para el `## Qué se mira a
-mano` del escenario.
-
-Fecha fija: 2026-08-11 (martes), el mismo día donde arranca el ground truth de
-`corpus/referencia/referencia-faena.md` ("Turno Faena"). El usuario real siembra
-con la fecha de hoy; este test la fija para que el resultado sea comparable byte
-a byte.
-
-Ejecutable directo:
-`python3 tests/escenarios/test_001_02_init_siembra_el_estado_cero.py`
+Ejecutable directo: `python3 tests/escenarios/test_001_02_init_siembra_el_estado_cero.py`
 """
 
 from __future__ import annotations
@@ -72,10 +34,8 @@ SLUG = "001-02-init-siembra-el-estado-cero"
 FECHA_FIJA = date(2026, 8, 11)
 TEMPLATE_VANILLA = RAIZ / "template" / "vanilla"
 
-#: Los siete días resueltos que corresponden a FECHA_FIJA, escritos a mano. Es
-#: lo único que este test afirma sin derivarlo del template: el mapeo de fecha a
-#: nombre de día es donde estuvo el bug que este escenario destapó (los días
-#: salían en orden fijo Lunes..Domingo sin mirar el día real).
+#: Los siete días que corresponden a FECHA_FIJA, escritos a mano: es lo único que
+#: el test no deriva del template.
 DESDE, HASTA = "2026-08-11", "2026-08-17"
 DIAS = [
     "## Martes 11 de agosto",

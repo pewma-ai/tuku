@@ -1,45 +1,14 @@
 """Tests del escenario 001-01-instalacion-con-uv-tool.
 
-Escenario: 001-01-instalacion-con-uv-tool.md
+Instala TUKU por las tres vías (`uv tool` y `pipx` desde git, `pipx` desde este
+checkout) y afirma que `tuku --help` responde, que `tuku init` siembra un vault
+operable y que deja `~/.tuku/template/vanilla/` poblado. `HOME` y los
+directorios de herramientas van a un tempdir.
 
-Los únicos tests del epic que instalan TUKU de verdad, por las tres vías que la
-decisión 1 del epic nombra:
+Este arnés no toma los comandos del `.md`, porque lo que prueba es el ejecutable
+instalado y no `tuku` en proceso. El `.md` manda.
 
-1. `uv tool install --force` desde `git+https://github.com/pewma-ai/tuku.git@devel`
-2. `pipx install --force` desde esa misma URL
-3. `pipx install --force` desde **este checkout**, que es el que prueba el
-   código sin commitear y el que le sirve al autor mientras desarrolla
-
-Los tres llevan `--force`, así que reinstalan sobre lo que hubiera en vez de
-fallar cuando el entorno aislado ya existe.
-
-Descargan y compilan, así que llevan el marcador `red` (además de `lento`) y
-**no corren en la corrida por defecto**: `pyproject.toml` la excluye con
-`-m "not agentic and not red"`. Para correrlos:
-
-    uv run pytest tests/escenarios/ -k 001_01 -m red
-
-Todo queda aislado: `HOME`, `UV_TOOL_DIR`, `UV_TOOL_BIN_DIR` y `PIPX_HOME`
-apuntan a un tempdir, así que ninguna instalación toca el `~` real ni las tools
-que el autor ya tenga. Para las dos primeras, el branch `devel` tiene que estar
-empujado a GitHub.
-
-A diferencia del resto del epic, este arnés no toma los comandos del `.md`: el
-runner de escenarios corre `tuku` en proceso, y acá el asunto es justamente el
-ejecutable instalado, con su propio `HOME` y su propio `PATH`. Los comandos
-están escritos en los dos lados a propósito, y el `.md` manda.
-
-Cada instalación afirma el camino completo:
-
-1. Deja el ejecutable `tuku` en el bin dir y `tuku --help` responde.
-2. `tuku init <dir>` sobre un directorio vacío siembra un vault operable
-   (`AHORA.md` con los días resueltos, sin placeholders).
-3. Esa primera siembra deja `~/.tuku/template/vanilla/` poblado desde la copia
-   que el wheel trae empaquetada (decisión 2): el árbol queda a la vista y
-   editable, sin que `tuku init` toque la red.
-
-Ejecutable directo (corre igual que con pytest, sin el filtro de marcador):
-`python3 tests/escenarios/test_001_01_instalacion_con_uv_tool.py`
+Se corre con el marcador `red`: `uv run pytest tests/escenarios/ -k 001_01 -m red`
 """
 
 from __future__ import annotations
@@ -128,8 +97,6 @@ def _verificar_instalacion(raiz_tmp: Path, entorno: dict[str, str], bin_dir: Pat
         f"tuku init no pobló ~/.tuku desde la copia empaquetada: {poblado} no existe"
     )
     # La plantilla del ciclo, que es lo que `tuku init` lee para sembrar `AHORA.md`.
-    # No se afirma un `AHORA.md` en la raíz del template: ahí no está, y la copia
-    # empaquetada tiene que reflejar `template/vanilla/` tal como es hoy.
     assert (poblado / "reglas" / "plantilla" / "AHORA.md").is_file(), (
         f"la copia empaquetada no trae la plantilla del ciclo: {list(poblado.iterdir())}"
     )

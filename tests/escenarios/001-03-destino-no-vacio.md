@@ -1,6 +1,6 @@
 # Escenario · 001-03-destino-no-vacio
 
-**Cubre:** epic 001, fase 0, decidido #8 de [`../../devel/epics.md`](../../devel/epics.md).
+**Cubre:** epic 001, decisión 8. Es el único caso donde equivocarse borra trabajo de alguien.
 
 ## Escenario: no sembrar sobre un directorio que ya tiene algo
 
@@ -36,17 +36,13 @@ tuku init mi-vault --date 2026-08-11 --force
 
 Entonces el contenido previo se reemplaza y queda un vault operable
 
-## Por qué importa
-
-Es el único caso donde equivocarse borra trabajo de alguien. `001-01` y `001-02` prueban que la siembra llega a buen puerto, y el `001-02` además que un destino nuevo se siembra sin `--force`; este prueba que no hace daño cuando no debería tocar nada.
-
 ## Cómo se corre
 
 ```bash
 uv run pytest tests/escenarios/ -k 001_03
 ```
 
-Cada caso deja su resultado en su propia carpeta bajo `playground/001-03-destino-no-vacio/`, para poder mirar los dos y no solo el último.
+Cada caso deja su resultado en su propia carpeta bajo `playground/001-03-destino-no-vacio/`.
 
 ## Qué se mira a mano
 

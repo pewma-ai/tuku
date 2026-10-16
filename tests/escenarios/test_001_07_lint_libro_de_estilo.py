@@ -1,10 +1,7 @@
 """Tests del escenario 001-07-lint-libro-de-estilo.
 
-Escenario: 001-07-lint-libro-de-estilo.md
-
 Con qué código salen `tuku style lint` y `tuku vocab show` ante un libro de
-estilo roto. Qué hallazgos reporta el lint lo prueban los unitarios de
-`tuku.style`.
+estilo roto. Los hallazgos del lint los prueban los unitarios de `tuku.style`.
 
 Ejecutable directo: `python3 tests/escenarios/test_001_07_lint_libro_de_estilo.py`
 """

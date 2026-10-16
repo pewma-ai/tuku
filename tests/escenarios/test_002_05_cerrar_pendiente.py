@@ -1,12 +1,8 @@
 """Tests del escenario 002-05-cerrar-pendiente.
 
-Escenario: 002-05-cerrar-pendiente.md
-
-Punto 2 del epic, segunda mitad: el comando `tuku todo close` cierra el pendiente,
-estampando su huella en `AHORA.md`, y el cierre sin pareja se reporta sin inventar nada.
-La vía bitácora (`tuku entry add`) aplica esta misma consecuencia en automático.
-
-Los comandos salen del `.md`, incluida la copia del estado que dejó `002-04`.
+`tuku todo close` borra la fila y deja su huella en `AHORA.md`; un cierre sin
+pareja se reporta sin inventar nada. `tuku entry add` con `(Hecho)` hace lo
+mismo.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_05_cerrar_pendiente.py`
 """
@@ -90,7 +86,7 @@ def test_002_05_cerrar_dos_veces_no_vuelve_a_mover() -> None:
 def test_002_05_cerrar_deja_la_tabla_al_dia_con_la_bitacora() -> None:
     """El gemelo del cierre: un `(Hecho)` cuyo cuerpo sigue en la tabla es un
     cierre que se escribió y nunca se aplicó, y por separado los dos archivos se
-    ven bien. Lo revisa `tuku doctor` desde el 2026-09-09.
+    ven bien.
     """
     vault = gherkin.correr(SLUG, "el cierre repite el texto").ruta("mi-vault")
     faltan = todo.sin_consecuencia(

@@ -1,12 +1,6 @@
 """Tests del escenario 003-01-el-vault-dice-a-donde-va.
 
-Escenario: 003-01-el-vault-dice-a-donde-va.md
-
-Primer peldaño del epic 003: verificación determinista sin agente. Lo que se
-comprueba es que el `AGENTS.md` sembrado por `tuku init` no nombre comandos que
-no existen en el CLI, condición básica para que el despacho agéntico funcione.
-
-Los comandos salen del `.md`, que es la fuente ejecutable.
+El `AGENTS.md` sembrado no nombra comandos que no existen en el CLI.
 
 Ejecutable directo: `python3 tests/escenarios/test_003_01_el_vault_dice_a_donde_va.py`
 """
@@ -37,12 +31,7 @@ def test_003_01_el_vault_nace_con_su_tabla_y_el_doctor_la_aprueba() -> None:
 
 
 def test_003_01_la_tabla_sembrada_nombra_comandos_reales() -> None:
-    """Sin pasar por el CLI: lo mismo, dicho sobre el template en vivo.
-
-    El escenario lo afirma sobre el vault sembrado; esto lo afirma sobre la
-    fuente. Si alguien edita `template/vanilla/AGENTS.md` y agrega una fila con
-    un comando que no existe, este falla antes de que nadie siembre nada.
-    """
+    """Lo mismo, sobre `template/vanilla/AGENTS.md` en vivo y sin pasar por el CLI."""
     agents = (RAIZ / "template" / "vanilla" / "AGENTS.md").read_text(encoding="utf-8")
     nombrados = doctor.comandos_de_despacho(agents)
     assert nombrados, "el AGENTS.md del template no nombra ningún comando"

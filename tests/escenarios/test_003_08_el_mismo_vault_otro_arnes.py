@@ -1,13 +1,7 @@
 """Tests del escenario 003-08-el-mismo-vault-otro-arnés.
 
-Escenario: 003-08-el-mismo-vault-otro-arnes.md
-
-La afirmación que le da sentido al resto del epic: el entregable no es que `agy`
-opere un vault, sino que el `AGENTS.md` haga que **cualquier** agente lo opere
-igual. Con un solo arnés eso no se puede sostener, porque todo lo verde es
-compatible con que el documento no diga nada y ese arnés acierte por su cuenta.
-
-Mismo dictado y mismos criterios que el `003-03`, cambiando solo quién lee.
+El mismo dictado simple bajo `hermes`: el `AGENTS.md` tiene que hacer que
+cualquier agente opere el vault igual, no solo `agy`.
 
 Ejecutable directo: `python3 tests/escenarios/test_003_08_el_mismo_vault_otro_arnes.py`
 """
@@ -41,7 +35,7 @@ DIA = "## Martes 11 de agosto"
 ARNES = "hermes"
 
 #: El delta del gemelo `002-02`: un registro sin consecuencia toca la bitácora y
-#: la página de su ámbito. Copiado tal cual del `003-03`, sin relajar nada: si
+#: la página de su ámbito. Los mismos criterios para todo arnés, sin relajar nada: si
 #: hubiera que relajarlo para que pase otro arnés, el hallazgo sería que el
 #: `AGENTS.md` depende de quién lo lee.
 DELTA_SIN_CONSECUENCIA = {
@@ -125,7 +119,7 @@ def test_003_08_el_turno_queda_escrito_para_leerlo_a_mano() -> None:
 
     Un turno no repite resultado, así que el archivo es lo único que va a
     existir de esta corrida. Se afirma su estructura y no su contenido: lo que
-    el agente diga se juzga leyéndolo, al lado del turno del `003-03`.
+    el agente diga se juzga leyéndolo, al lado de los turnos de los otros arneses.
 
     La conversación intermedia sería mejor evidencia que la respuesta final, y
     el arnés la pide (`sesion` en `ARNESES`), pero `hermes` no persiste la

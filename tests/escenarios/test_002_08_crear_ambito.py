@@ -1,16 +1,8 @@
 """Tests del escenario 002-08-crear-ambito.
 
-Escenario: 002-08-crear-ambito.md
-
-Punto 4 del epic en su versión mínima: crear el ámbito `depto-centro` deja el
-árbol correcto (los dos obligatorios más la página propia, que es lo que lo hace
-ámbito y no categoría) y el enlazado retroactivo convierte la mención suelta del
-martes 11 en enlace.
-
-`scope lint` cubre la única regla de los tres roles verificable sin un árbol
-profundo: un registro no puede apuntar a una categoría.
-
-Los comandos salen del `.md`, incluida la copia del estado que dejó `002-06`.
+`tuku scope create` deja el árbol del ámbito, su constancia en la bitácora y las
+menciones previas enlazadas; `scope lint` reporta un registro que apunta a una
+categoría.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_08_crear_ambito.py`
 """
@@ -128,10 +120,8 @@ def test_002_08_un_registro_no_puede_apuntar_a_una_categoria() -> None:
 def test_002_08_el_ambito_recien_creado_deja_el_vault_sano() -> None:
     """El doctor sobre lo que TUKU acaba de escribir.
 
-    Un `CADENCIAS.md` sin `type` hacía que el doctor reportara un archivo que el
-    propio comando había escrito, y ninguna afirmación del escenario lo notaba.
-    Va sobre un vault recién sembrado porque el de la cadena arrastra, a
-    propósito desde el `002-03`, un registro que el doctor reporta con razón.
+    Va sobre un vault recién sembrado: el de la cadena arrastra a propósito,
+    desde el `002-03`, un registro que el doctor reporta.
     """
     corrida = gherkin.correr(SLUG, "el ámbito recién creado deja el vault sano")
 

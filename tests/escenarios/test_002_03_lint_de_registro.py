@@ -1,14 +1,7 @@
 """Tests del escenario 002-03-lint-de-registro.
 
-Escenario: 002-03-lint-de-registro.md
-
-Criterio de salida de la fase 1: `tuku entry lint` valida estricta la ontología
-cerrada y permisiva la abierta. La misma zona de la línea, dos tratamientos.
-
-Los comandos salen del `.md`, incluida la copia del estado que dejó `002-02`.
-Todo pasa por el CLI, también el caso del día fuera del ciclo: antes se armaba
-el texto en memoria y se llamaba a `lint()` directo, lo que dejaba sin probar
-que el comando lo reporte igual.
+`tuku entry lint` valida estricta la ontología cerrada y permisiva la abierta,
+reporta un día fuera del ciclo y no escribe.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_03_lint_de_registro.py`
 """

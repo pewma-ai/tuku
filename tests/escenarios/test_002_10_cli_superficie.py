@@ -1,19 +1,9 @@
 """Tests del escenario 002-10-cli-superficie.
 
-Escenario: 002-10-cli-superficie.md
-
-La ayuda y los códigos de salida son superficie pública, y son la mitad del
-entregable del epic que la cadena no mira: la cadena verifica el vault, este
-verifica el comando. Más la regla transversal de `spec/cli.md`, convertida en
-barrido: toda salida de error nombra el defecto y la corrección.
-
-Los comandos salen del `.md`. Dos afirmaciones no son escenarios y se quedan en
-Python porque no hay comando que las exprese: el barrido sobre los hallazgos que
-el lint sabe producir, y la inspección de las fuentes que verifica que ningún
-comando persista propuestas.
-
-Está fuera de la cadena: no hereda de ningún paso ni deja estado para el
-siguiente.
+La ayuda y los códigos de salida del CLI, y la regla de `spec/cli.md` de que
+todo error nombre defecto y corrección. Dos afirmaciones quedan en Python porque
+no hay comando que las exprese: el barrido sobre los hallazgos del lint y que
+ningún comando persista propuestas.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_10_cli_superficie.py`
 """
@@ -140,9 +130,7 @@ def test_002_10_ningun_comando_escribe_una_propuesta() -> None:
     """La mitad estructural del principio 3, la única verificable sin agente.
 
     La propuesta es la consecuencia que a propósito no tiene comando: se muestra
-    y espera, y una rechazada no escribe nada, así que no hay nada que limpiar.
-    Que el agente proponga en vez de escribir necesita al agente en el circuito
-    y se prueba en el epic 003.
+    y espera, y una rechazada no escribe nada.
     """
     ayuda = gherkin.correr(SLUG, "nombra los nouns del epic")
     assert "propose" not in ayuda.stdout, "apareció un verbo que persiste propuestas"

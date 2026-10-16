@@ -1,16 +1,7 @@
 """Tests del escenario 002-02-registro-en-su-dia.
 
-Escenario: 002-02-registro-en-su-dia.md
-
-Segundo paso de la cadena, punto 1 del epic: el registro queda en el día
-correcto y en orden cronológico, aunque llegue desordenado.
-
-Los comandos y las tres líneas de registro salen del `.md`, que es la fuente
-ejecutable, incluida la copia del estado que dejó `002-01`. Este arnés afirma
-sobre lo que quedó.
-
-El criterio de corte de la fase 1 es el delta: si algo escribe en
-`PENDIENTES.md`, el corte está mal hecho.
+El registro queda en su día y en orden cronológico aunque llegue desordenado, y
+no toca `PENDIENTES.md`.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_02_registro_en_su_dia.py`
 """

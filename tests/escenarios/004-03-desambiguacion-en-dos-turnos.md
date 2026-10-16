@@ -2,7 +2,7 @@
 
 > La versión fuerte de la ambigüedad: ante dos interpretaciones posibles, el agente detiene la acción en el primer turno y formula una pregunta con opciones; en el segundo turno el autor aclara y se ejecuta el cierre exacto.
 
-**Cubre:** Epic 004, regla "Pregunta primero: cerrar un pendiente cuando el autor no repitió su texto", y contraprueba fuerte del [`003-07`](003-07-lo-que-no-hace-sin-preguntar.md).
+**Cubre:** Epic 004, regla "Pregunta primero: cerrar un pendiente cuando el autor no repitió su texto".
 
 ---
 

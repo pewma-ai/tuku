@@ -1,15 +1,7 @@
 """Test del escenario 001-06-cli-ayuda.
 
-Escenario: 001-06-cli-ayuda.md
-
-Lo que el epic 001 agregó al CLI y nadie más fija: las opciones de `tuku init`
-y que una instalación rota salga con el código de entorno (3), no con el de uso.
-El resto de la superficie (`tuku -h`, el error de uso, que los cuatro códigos
-sean distintos) lo fija el `002-10` para todo el CLI.
-
-Los comandos no se escriben acá: salen del `.md`, que es la fuente ejecutable
-(`tests/scripts/gherkin.py`). El runner los corre en proceso sobre
-`tuku.cli.main`, sin red y dentro de la corrida por defecto.
+`tuku init -h` nombra sus opciones, y una instalación rota sale con el código de
+entorno (3).
 
 Ejecutable directo: `python3 tests/escenarios/test_001_06_cli_ayuda.py`
 """

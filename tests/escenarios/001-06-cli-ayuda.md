@@ -1,6 +1,6 @@
 # Escenario · 001-06-cli-ayuda
 
-**Cubre:** epic 001, fase 0. La convención "la ayuda del CLI se prueba en cada epic" de [`../../devel/epics.md`](../../devel/epics.md).
+**Cubre:** epic 001. La ayuda de `tuku init` y el código de entorno (3), distinto del de uso (2), según [`spec/cli.md`](../../spec/cli.md). El resto de la superficie del CLI está en el [`002-10`](002-10-cli-superficie.md).
 
 ## Escenario: `tuku init -h` lista las opciones que añade el epic 001
 
@@ -30,18 +30,6 @@ TUKU_HOME=arbol-roto tuku init mi-vault
 
 Entonces sale con el código de entorno (3), distinto del de uso
 Y el error dice qué le falta al árbol
-
-## Por qué existe
-
-La ayuda es superficie pública: es lo primero que ve quien instala TUKU y no sabe qué es. Cada epic que toca `tuku` la amplía (comandos nuevos, opciones nuevas), y sin un test esa ampliación se olvida o se desincroniza del código.
-
-Los códigos de salida son la otra mitad de esa superficie, y son contrato según [`../../spec/cli.md`](../../spec/cli.md). Este escenario fija el de entorno (3), distinto del de uso (2) que emite argparse: quien invoca tiene que saber, sin leer el mensaje, si corrige el comando o la instalación.
-
-`tuku -h`, el error de uso y que ningún código se repita los fija el [`002-10`](002-10-cli-superficie.md) para el CLI entero.
-
-Corre en proceso, sobre `tuku.cli.main`, sin red: argparse imprime la ayuda y sale antes de sembrar nada. Por eso entra en la corrida por defecto, a diferencia de `001-01`.
-
-No fija el texto palabra por palabra (eso se lee a mano, abajo): solo que cada pieza que el epic 001 agregó está nombrada y que `-h` sale con código 0. Que la prosa se entienda es juicio humano.
 
 ## Cómo se corre
 

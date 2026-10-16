@@ -1,14 +1,8 @@
 """Tests del escenario 003-09-el-mismo-vault-tercer-arnés.
 
-Escenario: 003-09-el-mismo-vault-tercer-arnes.md
-
-El [`003-08`](003-08-el-mismo-vault-otro-arnes.md) sostiene la portabilidad en
-dos arneses; este agrega el tercero. Lo que hace distinto a `claude` es que no
-descubre solo el documento del vault (busca `CLAUDE.md`, no `AGENTS.md`), así
-que el arnés le antepone un preámbulo que dice **dónde mirar, no qué dice**: si
-el `AGENTS.md` no alcanzara, el turno fallaría igual.
-
-Mismo dictado y mismos criterios que el `003-03`, cambiando solo quién lee.
+El mismo dictado simple bajo `claude`. Como `claude` no descubre solo el
+`AGENTS.md`, el arnés le antepone un preámbulo que dice dónde mirar, no qué
+dice.
 
 Ejecutable directo: `python3 tests/escenarios/test_003_09_el_mismo_vault_tercer_arnes.py`
 """
@@ -56,7 +50,7 @@ ENTORNO = {
 }
 
 #: El delta del gemelo `002-02`: un registro sin consecuencia toca la bitácora y
-#: la página de su ámbito. Copiado tal cual del `003-03`, sin relajar nada: si
+#: la página de su ámbito. Los mismos criterios para todo arnés, sin relajar nada: si
 #: hubiera que relajarlo para que pase otro arnés, el hallazgo sería que el
 #: `AGENTS.md` depende de quién lo lee.
 DELTA_SIN_CONSECUENCIA = {
@@ -141,8 +135,7 @@ def test_003_09_el_turno_queda_escrito_para_leerlo_a_mano() -> None:
 
     Un turno no repite resultado, así que el archivo es lo único que va a
     existir de esta corrida. Se afirma su estructura y no su contenido: lo que
-    el agente diga se juzga leyéndolo, al lado de los turnos del `003-03` y el
-    `003-08`.
+    el agente diga se juzga leyéndolo, al lado de los turnos de los otros arneses.
     """
     corrida = _corrida()
     escritos = list(corrida.dir.parent.glob(f"{ARNES}.*.txt"))

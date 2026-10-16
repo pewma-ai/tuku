@@ -1,13 +1,8 @@
 """Tests del escenario 002-04-abrir-pendiente.
 
-Escenario: 002-04-abrir-pendiente.md
-
-Punto 2 del epic, primera mitad: el comando `tuku todo open` abre el pendiente
-sin que el autor toque `PENDIENTES.md`, estampando su huella en `AHORA.md`.
-La vía bitácora (`tuku entry add`) aplica esta misma consecuencia en automático.
-Abrir es copiar el cuerpo literal: el comando no interpreta.
-
-Los comandos salen del `.md`, incluida la copia del estado que dejó `002-03`.
+`tuku todo open` copia el cuerpo literal a `PENDIENTES.md` y deja su huella en
+`AHORA.md`; `tuku entry add` con `**pendiente**` hace lo mismo. `tuku todo lint`
+encuentra lo que se editó a mano.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_04_abrir_pendiente.py`
 """

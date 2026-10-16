@@ -1,16 +1,8 @@
 """Tests del escenario 002-01-abrir-ciclo.
 
-Escenario: 002-01-abrir-ciclo.md
-
-Primer paso de la cadena del epic 002. `AHORA.md` no se genera por código
-rígido: se instancia desde la plantilla editable en `reglas/plantilla/AHORA.md`.
-`tuku cycle open` verifica si hay un ciclo que cubra la fecha y lo crea con su
-semana completa si falta.
-
-Los comandos salen del `.md`, que es la fuente ejecutable. El runner ejecuta el
-`## Estado inicial` del archivo antes de cada escenario, toma la instantánea del
-vault justo antes del primer `Cuando`, y `corrida.delta` dice qué cambió: el
-assert es el diff entre dos estados, como pide el README de escenarios.
+Primer paso de la cadena del epic 002. `tuku cycle open` instancia `AHORA.md`
+desde `reglas/plantilla/AHORA.md` con la semana que contiene la fecha, y sobre
+un ciclo que ya la cubre no escribe nada.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_01_abrir_ciclo.py`
 """

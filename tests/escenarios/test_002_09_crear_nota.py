@@ -1,14 +1,7 @@
 """Tests del escenario 002-09-crear-nota.
 
-Escenario: 002-09-crear-nota.md
-
-Punto 5 del epic en su versión mínima: crear una nota a petición del autor,
-enlazarla a su ámbito y dejar constancia en la bitácora. Crear la nota es un
-hecho de la vida del autor, que la pidió, así que se registra; mover un
-pendiente de escalón es del sistema y no se registra.
-
-Los comandos salen del `.md`, incluidas la copia del estado que dejó `002-08` y
-la del fixture con el cuerpo, que es salida de agente y por eso va congelado.
+`tuku note create` escribe la nota enlazada a su ámbito y deja constancia en la
+bitácora. El cuerpo de la nota es un fixture congelado.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_09_crear_nota.py`
 """
@@ -85,10 +78,8 @@ def test_002_09_ver_ademas_existe_y_cada_enlace_lleva_motivo() -> None:
 def test_002_09_la_nota_recien_creada_deja_el_vault_sano() -> None:
     """El doctor sobre lo que TUKU acaba de escribir.
 
-    Una nota sin `type` hacía que el doctor reportara un archivo que el propio
-    comando había escrito, y ninguna afirmación del escenario lo notaba. Va
-    sobre un vault recién sembrado porque el de la cadena arrastra, a propósito
-    desde el `002-03`, un registro que el doctor reporta con razón.
+    Va sobre un vault recién sembrado: el de la cadena arrastra a propósito,
+    desde el `002-03`, un registro que el doctor reporta.
     """
     corrida = gherkin.correr(SLUG, "la nota recién creada deja el vault sano")
 
@@ -130,9 +121,8 @@ def test_002_09_una_nota_sin_cuerpo_se_rechaza() -> None:
 def test_002_09_el_cuerpo_no_se_busca_en_stdin_sin_que_lo_pidan() -> None:
     """`stdin` se lee solo con `--body-file -`, nunca por olfato.
 
-    Un `stdin` que no es terminal no significa que traiga datos: significa que no
-    es una terminal, que es el caso de todo pipe abierto. Leerlo por su cuenta
-    colgaba el comando para siempre contra un pipe abierto y vacío.
+    Un `stdin` que no es terminal no significa que traiga datos: un pipe abierto y
+    vacío colgaría el comando para siempre.
 
     Se afirma sin subproceso, poniendo un `stdin` que estalla si alguien lo toca:
     el cuelgue no se puede reproducir en la suite sin arriesgar colgarla.
@@ -159,7 +149,7 @@ def test_002_09_el_cuerpo_no_se_busca_en_stdin_sin_que_lo_pidan() -> None:
 
 
 def test_002_09_si_la_constancia_no_cabe_no_se_escribe_nada() -> None:
-    """Todo o nada: antes la nota quedaba escrita y el rechazo era un traceback."""
+    """Todo o nada: un rechazo no deja la nota escrita."""
     corrida = gherkin.correr(SLUG, "si la constancia no cabe")
 
     assert corrida.codigo == RECHAZO, corrida.stdout

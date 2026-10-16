@@ -1,28 +1,9 @@
 """Tests del escenario 001-03-destino-no-vacio.
 
-Escenario: 001-03-destino-no-vacio.md
+Sobre un destino con contenido, `tuku init` sale con 1, nombra `--force` y no
+toca nada. Con `--force` lo reemplaza y deja un vault operable.
 
-`tuku init` se niega a sembrar en un directorio que ya tiene contenido, sin
-tocar nada. Con `--force` lo reemplaza entero.
-
-Los comandos no se escriben acá. Los dos casos viven en el `.md` y este arnés
-solo afirma sobre lo que dejaron, cada uno buscando su `## Escenario:` por el
-título. Las dos afirmaciones van por la superficie CLI, que es donde el usuario
-ve la negativa:
-
-1. Sobre un destino no vacío y sin `--force`, el comando sale con `RECHAZO` (1),
-   el mensaje nombra el defecto y la corrección, y el destino queda exactamente
-   igual a como estaba (el centinela intacto, nada más).
-2. `--force` sobre ese mismo destino lo reemplaza: el centinela desaparece y
-   queda un vault operable.
-
-Que un destino que no existe se siembre sin `--force` lo prueba el `001-02`.
-
-Cada caso deja su resultado en su propia carpeta bajo
-`playground/001-03-destino-no-vacio/`, para poder mirar los dos y no solo el
-último.
-
-Ejecutable directo: `python3 tests/escenarios/test_001_03_destino_no_vacio.py`.
+Ejecutable directo: `python3 tests/escenarios/test_001_03_destino_no_vacio.py`
 """
 
 from __future__ import annotations

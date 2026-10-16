@@ -1,24 +1,7 @@
 """Test del escenario 001-04-init-author.
 
-Escenario: 001-04-init-author.md
-
-Cierra la capa de identidad mínima, y es la única cobertura del parámetro
-`autor` de `init()`: el nombre que se pasa queda en la sección "El autor" de
-`LIBRO-DE-ESTILO.md`, y pasarlo en blanco deja el vault operable sin nombre,
-sin romper nada (principio 2). Omitirlo lo cubre el `001-02`, que compara el
-libro de estilo byte a byte contra el template.
-
-El nombre elegido, `ARTURO PEREZ-REVERTE (Arturo)`, con espacios, paréntesis y
-guion, verifica que el reemplazo por prefijo de línea de `_sembrar_autor` no lo
-parte ni toca la prosa que sigue al marcador.
-
-Fecha fija 2026-08-11, la misma de `001-02`, para que el vault resultante sea
-comparable con `diff -r` contra el de ese escenario (salvo `LIBRO-DE-ESTILO.md`,
-que acá lleva el nombre).
-
-El caso con nombre deja el vault en
-`playground/001-04-init-author/<escenario>/mi-vault/`; el segundo deja
-`en-blanco/`.
+`--author` deja el nombre en la sección "El autor" de `LIBRO-DE-ESTILO.md`, y un
+nombre en blanco deja la línea intacta y el vault operable.
 
 Ejecutable directo: `python3 tests/escenarios/test_001_04_init_author.py`
 """

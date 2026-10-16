@@ -4,7 +4,7 @@
 
 Verifica la portabilidad agéntica ejecutando el mismo dictado simple bajo un tercer arnés (`claude`, con sonnet en esfuerzo bajo), garantizando que el comportamiento operativo es gobernado por el `AGENTS.md` del vault y no por peculiaridades del modelo.
 
-El [`003-08`](003-08-el-mismo-vault-otro-arnes.md) ya sostiene la afirmación en dos arneses. Este agrega el caso que más se le parece a la forma en que el autor trabaja a diario, y el único de los tres que **no descubre solo** el documento del vault: `claude` busca `CLAUDE.md` y no `AGENTS.md`, así que el arnés le antepone un preámbulo que dice dónde mirar, no qué dice. Si el `AGENTS.md` no alcanzara, el turno fallaría igual.
+`claude` no descubre solo el documento del vault (busca `CLAUDE.md`, no `AGENTS.md`), así que el arnés le antepone un preámbulo que dice dónde mirar, no qué dice. Si el `AGENTS.md` no alcanzara, el turno fallaría igual.
 
 ## Estado inicial
 

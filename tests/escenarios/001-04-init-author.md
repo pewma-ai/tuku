@@ -1,6 +1,6 @@
 # Escenario · 001-04-init-author
 
-**Cubre:** epic 001, fase 0, decidido #10 de [`../../devel/epics.md`](../../devel/epics.md), la capa de identidad mínima.
+**Cubre:** epic 001, decisión 10. El nombre lleva espacios, paréntesis y guion para verificar que la siembra no lo parte ni toca la prosa que sigue al marcador.
 
 ## Escenario: el nombre del autor queda en el libro de estilo
 
@@ -25,14 +25,6 @@ tuku init en-blanco --date 2026-08-11 --author "   "
 
 Entonces la línea `**Nombre del autor:**` queda intacta con su texto de partida
 Y el vault igual queda operable (principio 2: dejar el nombre en blanco no impide escribir)
-
-## Por qué existe
-
-`001-02` cubre la siembra byte a byte sin nombre, con el libro de estilo intacto, y que el resto del vault quede sin placeholders. Este es la única cobertura de `--author`.
-
-El nombre elegido, con espacios, paréntesis y guion, verifica que el reemplazo por prefijo de línea de `_sembrar_autor` no lo parte ni toca la prosa que sigue al marcador.
-
-Fecha fija 2026-08-11, la misma de `001-02`, para que el vault sea comparable con `diff -r` (salvo `LIBRO-DE-ESTILO.md`).
 
 ## Cómo se corre
 

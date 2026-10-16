@@ -2,7 +2,7 @@
 
 > El autor deja de dictar hechos consumados y conversa: delibera, consulta el estado, cambia de rumbo a media sesión, atiende urgencias y solo al final ratifica. El vault final debe contener únicamente lo resuelto.
 
-Si el [Epic 003](003-00-el-dia-uno-dictado.md) midió la traducción aislada en un turno único, este epic mide la **resistencia del sistema al diálogo humano**: varias idas y vueltas donde pensar en voz alta no debe ensuciar el conjunto canónico ([principio 3](../../docs/principios.md#3-el-agente-es-un-secretario-no-un-dueno)), las dudas se aclaran con preguntas directas y los límites de [`AGENTS.md`](../../template/vanilla/AGENTS.md) se sostienen bajo acumulación de contexto.
+Este epic mide la **resistencia del sistema al diálogo humano**: varias idas y vueltas donde pensar en voz alta no debe ensuciar el conjunto canónico ([principio 3](../../docs/principios.md#3-el-agente-es-un-secretario-no-un-dueno)), las dudas se aclaran con preguntas directas y los límites de [`AGENTS.md`](../../template/vanilla/AGENTS.md) se sostienen bajo acumulación de contexto.
 
 ---
 

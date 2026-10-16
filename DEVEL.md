@@ -19,7 +19,7 @@ Guía de trabajo para agentes y colaboradores. Este repositorio contiene el moto
 | [`template/`](template/README.md) | Estructuras Markdown iniciales que se siembran en un nuevo vault | Producto |
 | [`src/`](src/) | Código fuente del paquete Python `tuku` | Implementación |
 | [`corpus/`](corpus/README.md) | Dictados de referencia reales y ficticios para pruebas de proceso | Datos |
-| [`tests/`](tests/README.md) | Capa unitaria en memoria y escenarios encadenados sobre el vault | Verificación |
+| [`tests/`](tests/AGENTS.md) | Capa unitaria en memoria y escenarios encadenados sobre el vault | Verificación |
 | `playground/` | Entornos de prueba efímeros generados por los tests (ignorado por git) | Descartable |
 
 Jerarquía de precedencia: Dentro de un epic, [`spec/`](spec/README.md) manda sobre el código. Entre epics, los experimentos y el uso mandan sobre [`spec/`](spec/README.md). [`devel/epics.md`](devel/epics.md) es la única fuente de verdad sobre el orden y estado de implementación. [`devel/dependencies-tree.md`](devel/dependencies-tree.md) mapea el cableado estructural entre artefactos, specs, plantillas y módulos.
@@ -40,47 +40,7 @@ Jerarquía de precedencia: Dentro de un epic, [`spec/`](spec/README.md) manda so
 
 ## Verificación y pruebas (`tests/`)
 
-La suite separa las pruebas puras de lógica interna de la evolución de integración del vault:
-
-| Capa | Ubicación | Propósito |
-|---|---|---|
-| **Unitarios** | [`tests/unitarios/`](tests/unitarios/README.md) | Funciones puras, parsers y lógica interna en memoria. Aislados, ultra-rápidos (~0,05s). |
-| **Escenarios** | [`tests/escenarios/`](tests/escenarios/README.md) | Pruebas E2E narrativas Gherkin (`Dado / Cuando / Entonces`) encadenadas en `playground/`. Evalúan el comportamiento de cara al usuario invocando el comando `tuku` (CLI), nunca funciones internas. |
-
-### Cobertura de tests unitarios
-
-Toda función pura de parsing, formateo de texto, expresiones regulares o validación que opere en memoria (sin tocar disco ni red) debe contar con tests unitarios en [`tests/unitarios/`](tests/unitarios/README.md).
-- Debe cubrir: caso nominal, entradas vacías y entradas malformadas.
-- Los tests unitarios prueban componentes aislados. Los escenarios en [`tests/escenarios/`](tests/escenarios/README.md) son pruebas end-to-end (E2E): **deben usar siempre el comando `tuku`** (CLI o `main(argv)`) para evaluar el comportamiento exacto de cara al usuario, verificar efectos colaterales completos y evitar divergencias silenciosas.
-- **Invariante de rendimiento:** La suite unitaria (`uv run pytest --unittests`) debe ejecutarse en menos de **0,2 segundos** y con cero I/O de disco. Es la única capa de tests que se fuerza en el hook de pre-commit.
-
-### Modos de ejecución
-
-- **Toda la suite determinista (por defecto):**
-  ```bash
-  uv run pytest
-  ```
-- **Solo tests unitarios:**
-  ```bash
-  uv run pytest --unittests         # o: uv run pytest --unit
-  uv run pytest tests/unitarios/    # o por ruta
-  ```
-- **Escenarios de un epic específico:**
-  ```bash
-  uv run pytest tests/escenarios/ -k 002
-  ```
-- **Un escenario individual:**
-  ```bash
-  uv run pytest tests/escenarios/ -k 002_04
-  ```
-- **Tests con modelo LLM (agénticos):** Requieren tokens y no son deterministas. Excluidos por defecto.
-  ```bash
-  uv run pytest -m agentic
-  ```
-- **Instalación real desde la red:** Verifican descargas directas desde git con socket real. Excluidos por defecto.
-  ```bash
-  uv run pytest -m red
-  ```
+Las reglas de los tests, el lenguaje de los escenarios y cómo se corre la suite viven en [`tests/AGENTS.md`](tests/AGENTS.md).
 
 ## Entorno e higiene técnica
 
