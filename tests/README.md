@@ -100,7 +100,7 @@ Para probar fallbacks a la fecha de hoy y hora actual sin depender del reloj del
 
 - Destinados a funciones puras (por ejemplo: `tuku.ahora`, `tuku.todo.parsear`, `tuku.lint`).
 - **Cero I/O de disco y cero red:** no deben crear directorios ni leer archivos reales del sistema. Toda entrada se pasa como cadenas de texto en memoria.
-- Rápidos y aislados: la capa completa debe correr en menos de 1,5 segundos.
+- Rápidos y aislados: la capa completa debe correr en menos de 1,5 segundos. Es la única que corre el hook de pre-commit.
 
 ## Ejecución y comandos útiles
 
@@ -115,7 +115,13 @@ uv run pytest --unittests
 uv run pytest tests/escenarios/ -k 002
 
 # Correr un escenario puntual
-uv run pytest tests/escenarios/ -k 002_04
+uv run pytest tests/escenarios/ -k 002_13
+
+# Con agente: cuesta tokens y no es determinista
+uv run pytest -m agentic -k 003
+
+# Instalación real desde la red
+uv run pytest -m red
 
 # Verificación de linter y tipado estricto
 uv run ruff check .
