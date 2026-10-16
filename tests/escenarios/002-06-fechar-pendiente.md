@@ -58,13 +58,13 @@ Y cada día de `AHORA.md` recibe sus dos pendientes en su callout:
 > - [personal](ambitos/personal/personal.md) - pagar la sesión con el psicólogo
 > - [personal](ambitos/personal/personal.md) - llamar a la administradora
 ```
-Y el callout de `personal` en `ambitos/PENDIENTES-AMBITOS.md` los lista por fecha, cada uno con su día y sin el ámbito:
+Y el callout de `personal` en `ambitos/PENDIENTES-AMBITOS.md` los lista por fecha, con el `date_format` de `reglas/config.tuku.md` y sin el ámbito:
 ```markdown
 > [!todo] Pendientes en **Personal** ^personal
-> - Miércoles 12 de agosto - pagar la sesión con el psicólogo
-> - Miércoles 12 de agosto - llamar a la administradora
-> - Jueves 13 de agosto - comprar pasajes de tren
-> - Jueves 13 de agosto - retirar el pase escolar
+> - Ago/12 - pagar la sesión con el psicólogo
+> - Ago/12 - llamar a la administradora
+> - Ago/13 - comprar pasajes de tren
+> - Ago/13 - retirar el pase escolar
 ```
 Y `tuku todo lint` sale limpio
 ```bash

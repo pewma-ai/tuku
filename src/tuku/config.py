@@ -10,10 +10,11 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 from tuku import vocab
-from tuku.init import resolver_home
+from tuku.init import MESES, resolver_home
 
 #: Fila de la tabla de configuración: `| `Campo` | `Valor` |`.
 _FILA_CONFIG = re.compile(r"^\|\s*`([^`]+)`\s*\|\s*`?([^`|]*?)`?\s*\|")
@@ -74,6 +75,35 @@ class Configuracion:
     def vocabularios_abiertos(self) -> list[str]:
         """Términos declarados en todas las tablas del libro de estilo."""
         return [t for terminos in self.vocabularios.values() for t in terminos]
+
+
+#: Cómo se escribe una fecha corta si `config.tuku.md` no declara `date_format`.
+FORMATO_FECHA = "MMM/DD"
+
+_MESES_CORTOS = tuple(m[:3].capitalize() for m in MESES)
+
+
+def fecha_corta(fecha: date, formato: str = FORMATO_FECHA) -> str:
+    """La fecha con el formato del vault.
+
+    `MMM` es el mes abreviado (`Ago`), `MM` el mes en dos dígitos, `DD` el día
+    en dos dígitos y `AAAA` el año.
+    """
+    return (
+        (formato or FORMATO_FECHA)
+        .replace("AAAA", f"{fecha.year:04d}")
+        .replace("MMM", "\0")
+        .replace("MM", f"{fecha.month:02d}")
+        .replace("DD", f"{fecha.day:02d}")
+        .replace("\0", _MESES_CORTOS[fecha.month - 1])
+    )
+
+
+def formato_fecha(vault: Path) -> str:
+    """El `date_format` de `reglas/config.tuku.md`, o el de por defecto."""
+    ruta = Path(vault) / "reglas" / "config.tuku.md"
+    texto = ruta.read_text(encoding="utf-8") if ruta.is_file() else ""
+    return parsear_config_md(texto).get("date_format", "").strip("`") or FORMATO_FECHA
 
 
 def parsear_config_md(texto: str) -> dict[str, str]:

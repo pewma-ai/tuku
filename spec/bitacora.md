@@ -106,7 +106,7 @@ Que compartan zona no las mezcla: se distinguen por su forma. `(Hecho)` y `**pen
 
 **En el cierre, la marca queda a la vista y lo tachado es el cuerpo:** `(Hecho): ~~avisar de los GGCC~~`. Lo tachado es lo que ya se hizo. Quien cierra pasa `(Hecho): avisar de los GGCC` y el comando escribe la tachadura, para que a quien dicta no le toque saber dónde va. La marca tachada, `~~(Hecho)~~: cuerpo`, no es válida: `tuku entry lint` la reporta con su corrección.
 
-El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. **Los links no cuentan al encontrarlo:** el mismo pendiente puede llevar `[Carmen](notas/carmen.md)` en la bitácora y `Carmen` en la tabla, o al revés, y se busca comparando el texto que queda al quitar los links. Ninguna de las dos operaciones interpreta nada. El detalle de esa doble escritura está en [pendientes.md](pendientes.md).
+El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. **Los links no cuentan al encontrarlo:** el mismo pendiente puede llevar `[Carmen](notas/carmen.md)` en la bitácora y `Carmen` en la tabla, o al revés, y se busca comparando el texto que queda al quitar los links. Ninguna de las dos operaciones interpreta nada. Si el cierre cae el mismo día que la apertura, queda solo el cierre. El detalle de esa doble escritura está en [pendientes.md](pendientes.md).
 
 ## No entra
 

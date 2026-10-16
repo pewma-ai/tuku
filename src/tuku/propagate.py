@@ -46,7 +46,8 @@ from datetime import date
 from pathlib import Path
 
 from tuku import link, scope, todo
-from tuku.ahora import dias, encabezado_de
+from tuku.ahora import dias
+from tuku.config import FORMATO_FECHA, fecha_corta, formato_fecha
 
 #: Un registro de bitácora. Es la frontera inferior de la región del día.
 _REGISTRO = re.compile(r"^- \d{2}:\d{2} - ")
@@ -183,16 +184,16 @@ def _orden_en_el_ambito(fila: todo.Fila) -> tuple[int, date]:
     return (0, fecha) if fecha else (1, date.min)
 
 
-def linea_del_ambito(fila: todo.Fila) -> str:
-    """La fila, como línea del callout de su ámbito: `<día> - detalle`, o solo el detalle.
+def linea_del_ambito(fila: todo.Fila, formato: str = FORMATO_FECHA) -> str:
+    """La fila, como línea del callout de su ámbito: `<fecha> - detalle`, o solo el detalle.
 
-    El día se escribe como el encabezado de `AHORA.md` y el ámbito no va, porque
-    el callout ya es el del ámbito. El detalle se escribió para `PENDIENTES.md`
+    La fecha va con el `date_format` del vault y el ámbito no va, porque el
+    callout ya es el del ámbito. El detalle se escribió para `PENDIENTES.md`
     y el callout vive en `ambitos/`, así que sus links se rebasan.
     """
     cuerpo = link.rebasar(fila.cuerpo, "PENDIENTES.md", str(ARCHIVO_AMBITOS.as_posix()))
     fecha = _fecha(fila)
-    cuando = encabezado_de(fecha).removeprefix("## ") if fecha else fila.cuando.strip()
+    cuando = fecha_corta(fecha, formato) if fecha else fila.cuando.strip()
     return f"{cuando} - {cuerpo}" if cuando else cuerpo
 
 
@@ -200,6 +201,7 @@ def documento_ambitos(
     pendientes: str,
     ambitos: list[str],
     display_names: dict[str, str] | None = None,
+    formato: str = FORMATO_FECHA,
 ) -> str:
     """`ambitos/PENDIENTES-AMBITOS.md` entero: un callout por ámbito, en orden.
 
@@ -214,7 +216,7 @@ def documento_ambitos(
     bloques = [
         callout(
             nombre,
-            [linea_del_ambito(f) for f in sorted(filas_, key=_orden_en_el_ambito)],
+            [linea_del_ambito(f, formato) for f in sorted(filas_, key=_orden_en_el_ambito)],
             display_name=nombres_display.get(nombre),
         )
         for nombre, filas_ in por_ambito.items()
@@ -233,7 +235,10 @@ def documento_del_vault(vault: Path, pendientes: str) -> str:
         texto_pag = pag.read_text(encoding="utf-8") if pag.is_file() else None
         disp_map[a.nombre] = display_name(a.nombre, texto_pag)
     return documento_ambitos(
-        pendientes, [a.nombre for a in ambitos_objs], display_names=disp_map
+        pendientes,
+        [a.nombre for a in ambitos_objs],
+        display_names=disp_map,
+        formato=formato_fecha(vault),
     )
 
 

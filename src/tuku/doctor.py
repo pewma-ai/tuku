@@ -305,7 +305,7 @@ def revisar_version(config_md: str | None, version_home: str | None) -> Revision
 
 
 #: Los temas de `tuku doctor TEMA`. Un tema existe cuando tiene su `tuku fix TEMA`.
-TEMAS = ("link",)
+TEMAS = ("link", "todo")
 
 
 def archivos_md(vault: Path) -> list[str]:
@@ -404,6 +404,20 @@ def formatear(
     return "\n".join(lineas)
 
 
+def revisar_todo(vault: Path) -> Revision:
+    """`todo lint` sobre el vault, como una revisión del doctor."""
+    from tuku import todo
+
+    h_todo = todo.hallazgos_del_vault(vault)
+    return Revision(
+        "todo",
+        "todo lint: sin hallazgos."
+        if not h_todo
+        else "\n".join([*h_todo, f"todo lint: {len(h_todo)} error(es)."]),
+        not h_todo,
+    )
+
+
 def revisar_vault(
     vault: Path,
     *,
@@ -427,8 +441,8 @@ def revisar_vault(
 
     Sin `verbose` el reporte trae solo los hallazgos y los avisos; ver `formatear`.
     """
-    if tema == "link":
-        revision = revisar_links(vault)
+    if tema in TEMAS:
+        revision = revisar_links(vault) if tema == "link" else revisar_todo(vault)
         if revision.sano:
             return Resultado.hecho(
                 formatear([revision], verbose=True)
@@ -436,7 +450,7 @@ def revisar_vault(
                 else f"doctor {tema}: sin hallazgos."
             )
         return Resultado.rechazo(formatear([revision], verbose=verbose), error=False)
-    from tuku import cyclelint, scope, style, todo
+    from tuku import cyclelint, scope, style
     from tuku.config import leer_config
     from tuku.lint import ERROR
     from tuku.lint import formatear as formatear_registros
@@ -490,16 +504,7 @@ def revisar_vault(
         revisiones.append(ausente("todo", "PENDIENTES.md"))
     else:
         # `todo lint` entero: duplicados, marcas sin su fila y vistas desactualizadas.
-        h_todo = todo.hallazgos_del_vault(vault)
-        revisiones.append(
-            Revision(
-                "todo",
-                "todo lint: sin hallazgos."
-                if not h_todo
-                else "\n".join([*h_todo, f"todo lint: {len(h_todo)} error(es)."]),
-                not h_todo,
-            )
-        )
+        revisiones.append(revisar_todo(vault))
 
     libro = leer("LIBRO-DE-ESTILO.md")
     if libro is None:

@@ -90,7 +90,7 @@ def test_documento_de_ambitos_agrupa_por_ambito() -> None:
 
     assert "> [!todo] Pendientes en **Personal** ^personal" in documento
     assert "> - comprar una maleta" in documento
-    assert "> - Martes 8 de septiembre - pagar la sesión con el psicólogo" in documento
+    assert "> - Sep/08 - pagar la sesión con el psicólogo" in documento
 
 
 def test_en_el_ambito_van_primero_los_fechados_por_fecha() -> None:
@@ -101,8 +101,8 @@ def test_en_el_ambito_van_primero_los_fechados_por_fecha() -> None:
     callout = documento_ambitos(tabla, ["personal"]).split("^personal\n", 1)[1]
 
     assert callout.splitlines() == [
-        "> - Lunes 7 de septiembre - llamar al banco",
-        "> - Martes 8 de septiembre - pagar la sesión con el psicólogo",
+        "> - Sep/07 - llamar al banco",
+        "> - Sep/08 - pagar la sesión con el psicólogo",
         "> - comprar una maleta",
         "> - ordenar el escritorio",
     ]
@@ -141,3 +141,9 @@ def test_el_documento_de_ambitos_es_estable() -> None:
     ambitos = ["personal", "depto-centro"]
 
     assert documento_ambitos(PENDIENTES, ambitos) == documento_ambitos(PENDIENTES, ambitos)
+
+
+def test_el_formato_de_la_fecha_es_el_del_vault() -> None:
+    documento = documento_ambitos(PENDIENTES, ["personal"], formato="DD/MM/AAAA")
+
+    assert "> - 08/09/2026 - pagar la sesión con el psicólogo" in documento

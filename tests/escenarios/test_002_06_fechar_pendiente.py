@@ -89,10 +89,10 @@ def test_002_06_pendientes_de_dos_dias_llegan_a_su_dia_y_a_su_ambito() -> None:
     ambitos = (vault / "ambitos" / "PENDIENTES-AMBITOS.md").read_text(encoding="utf-8")
     callout = ambitos.split("^personal\n", 1)[1].splitlines()
     assert callout == [
-        "> - Miércoles 12 de agosto - pagar la sesión con el psicólogo",
-        "> - Miércoles 12 de agosto - llamar a la administradora",
-        "> - Jueves 13 de agosto - comprar pasajes de tren",
-        "> - Jueves 13 de agosto - retirar el pase escolar",
+        "> - Ago/12 - pagar la sesión con el psicólogo",
+        "> - Ago/12 - llamar a la administradora",
+        "> - Ago/13 - comprar pasajes de tren",
+        "> - Ago/13 - retirar el pase escolar",
     ]
 
     assert corrida.de("tuku todo lint").codigo == EXITO

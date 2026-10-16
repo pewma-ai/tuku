@@ -77,7 +77,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             (
                 "Escribe en `AHORA.md` el registro `- HH:MM - [ámbito](ruta) (Hecho): "
                 "~~cuerpo~~`, borra de `PENDIENTES.md` la fila cuyo detalle coincide "
-                "palabra por palabra y regenera las vistas. Si ninguna fila coincide, lo "
+                "palabra por palabra y regenera las vistas. Si el pendiente se abrió ese "
+                "mismo día, borra el registro que lo abrió. Si ninguna fila coincide, lo "
                 "reporta y deja solo el registro."
             ),
         ),

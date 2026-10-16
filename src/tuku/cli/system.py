@@ -218,8 +218,9 @@ def registrar(
         description=(
             "Repara lo que `tuku doctor TEMA` reportó. Tema `link`: reemplaza cada "
             "`[[nombre]]` por `[nombre](ruta/a/nombre.md)`, con la ruta relativa al "
-            "archivo que lo contiene. Lo que pide una decisión del autor no se escribe: "
-            "sale listado, con código 1."
+            "archivo que lo contiene. Tema `todo`: borra de `AHORA.md` el registro "
+            "`**pendiente**` de un pendiente cuyo `(Hecho)` está en el mismo día. Lo que "
+            "pide una decisión del autor no se escribe: sale listado, con código 1."
         ),
     )
     fix_p.add_argument("tema", choices=TEMAS_DOCTOR, help="el tema a reparar")

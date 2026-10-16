@@ -350,6 +350,64 @@ class ConsecuenciaPendiente:
         return "tuku todo open" if self.marca == ABRE else "tuku todo close"
 
 
+@dataclass(frozen=True)
+class AperturaCerrada:
+    """Un `**pendiente**` cuyo `(Hecho)` está en el mismo día de `AHORA.md`."""
+
+    linea: int  #: 1-based, la del registro que abrió
+    cuerpo: str
+    dia: str  #: el encabezado del día, sin `## `
+
+
+def cerrados_el_mismo_dia(ahora: str) -> list[AperturaCerrada]:
+    """Los pendientes que se abrieron y se cerraron bajo el mismo día.
+
+    De esos queda solo el cierre: el registro que abrió ya no dice nada que el
+    `(Hecho)` no diga. Un pendiente que se cerró otro día conserva los dos.
+    """
+    hallados: list[AperturaCerrada] = []
+    dia = ""
+    aperturas: list[tuple[int, Marca]] = []
+    cierres: set[str] = set()
+
+    def cerrar_dia() -> None:
+        hallados.extend(
+            AperturaCerrada(n, m.cuerpo, dia)
+            for n, m in aperturas
+            if clave(m.cuerpo) in cierres
+        )
+
+    for n, linea in enumerate(ahora.splitlines(), start=1):
+        if linea.startswith("## "):
+            cerrar_dia()
+            dia, aperturas, cierres = linea[3:].strip(), [], set()
+            continue
+        if (m := parsear(linea)) is None:
+            continue
+        if m.marca == ABRE:
+            aperturas.append((n, m))
+        elif m.marca == CIERRA:
+            cierres.add(clave(m.cuerpo))
+    cerrar_dia()
+    return hallados
+
+
+def quitar_aperturas_cerradas(ahora: str, cuerpo: str | None = None) -> str:
+    """`ahora` sin los registros que abrieron un pendiente cerrado el mismo día.
+
+    Con `cuerpo`, solo los de ese pendiente.
+    """
+    sobran = {
+        a.linea
+        for a in cerrados_el_mismo_dia(ahora)
+        if cuerpo is None or clave(a.cuerpo) == clave(cuerpo)
+    }
+    if not sobran:
+        return ahora
+    lineas = ahora.splitlines(keepends=True)
+    return "".join(x for n, x in enumerate(lineas, start=1) if n not in sobran)
+
+
 def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]:
     """Las marcas del ciclo en curso que la tabla no refleja.
 
@@ -567,10 +625,12 @@ def cerrar_en_vault(
             rutas=ambitos.rutas(vault),
         )
         try:
-            ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
-            ahora_path.write_text(ahora_texto, encoding="utf-8")
+            ahora_actual = entry_add(ahora_actual, [linea], day=dia_encabezado)
         except ValueError as e:
             return Resultado.rechazo(str(e))
+    ahora_texto = quitar_aperturas_cerradas(ahora_actual, marca.cuerpo)
+    if ahora_texto != ahora_path.read_text(encoding="utf-8"):
+        ahora_path.write_text(ahora_texto, encoding="utf-8")
 
     if hubo_pareja:
         ruta.write_text(texto, encoding="utf-8")
@@ -597,7 +657,7 @@ def lint(
 ) -> list[str]:
     """Los hallazgos de `tuku todo lint`, cada uno con su corrección. No lee disco.
 
-    Tres revisiones, las de `spec/pendientes.md`:
+    Cuatro revisiones:
 
     1. Un detalle en más de una fila (regla 1).
     2. Una marca de `ahora` que la tabla no refleja (`sin_consecuencia`). La
@@ -605,6 +665,8 @@ def lint(
     3. Una vista derivada que no es la que la tabla produce (regla 7). `vistas`
        mapea cada archivo a su texto actual y al que `tuku regenerate todo`
        escribiría; si difieren, la que está mal es la vista.
+    4. Un pendiente abierto y cerrado el mismo día: sobra el registro que lo
+       abrió, y lo quita `tuku fix todo`.
     """
     hallazgos = [
         f"PENDIENTES.md: error: {cuerpo!r} aparece en más de una fila. "
@@ -616,6 +678,12 @@ def lint(
             f"AHORA.md: error: {c.cuerpo!r} lleva {c.marca} y la tabla no lo refleja. "
             f"Corre `{c.comando} \"<la línea del registro>\"`."
             for c in sin_consecuencia(ahora, pendientes)
+        ]
+    if ahora is not None:
+        hallazgos += [
+            f"AHORA.md:{a.linea}: error: {a.cuerpo!r} se abrió y se cerró el {a.dia}: "
+            "sobra el registro que lo abrió. Corre `tuku fix todo`."
+            for a in cerrados_el_mismo_dia(ahora)
         ]
     for archivo, (actual, esperado) in (vistas or {}).items():
         if actual != esperado:

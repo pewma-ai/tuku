@@ -61,7 +61,7 @@ De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa
 - **Hallazgos mixtos.** `fix` aplica lo determinista, deja intacto lo que requiere decisión y lista esas decisiones.
 - **Códigos de salida.** 0 si el tema quedó sano; 1 si quedan decisiones. Es idempotente: una segunda corrida no cambia nada.
 - **La fecha de modificación se conserva cuando el cambio es solo de forma.** Convertir `[[x]]` en `[x](ruta)` no es una edición del autor, y esa fecha es la que Obsidian y el sistema de archivos usan para ordenar lo reciente.
-- **Cuándo entra un tema nuevo.** Un tema existe cuando tiene un `fix` que hacer. Las demás revisiones de `tuku doctor` salen sin tema y su corrección sigue siendo el comando original o una tarea del autor. Un tema nuevo entra cuando un epic encuentra un caso real que lo pida. Hoy: `link`.
+- **Cuándo entra un tema nuevo.** Un tema existe cuando tiene un `fix` que hacer. Las demás revisiones de `tuku doctor` salen sin tema y su corrección sigue siendo el comando original o una tarea del autor. Un tema nuevo entra cuando un epic encuentra un caso real que lo pida. Hoy: `link` y `todo`.
 
 ## La ayuda explica para qué existe cada comando
 

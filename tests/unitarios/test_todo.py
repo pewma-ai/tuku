@@ -457,3 +457,38 @@ def test_un_when_explicito_manda_sobre_el_dia() -> None:
     assert todo.cuando_por_dia("2026-08-20", date(2026, 8, 13), date(2026, 8, 11)) == (
         "2026-08-20"
     )
+
+
+DIA_CERRADO = (
+    "## Martes 11 de agosto\n"
+    "- 13:00 - **pendiente**: comprar una maleta\n"
+    "- 14:20 - **pendiente**: avisar a [Carmen](notas/carmen.md)\n"
+    "- 19:10 - (Hecho): ~~comprar una maleta~~\n"
+    "\n"
+    "## Miércoles 12 de agosto\n"
+    "- 09:00 - (Hecho): ~~avisar a Carmen~~\n"
+)
+
+
+def test_una_apertura_cerrada_el_mismo_dia_se_detecta() -> None:
+    hallados = todo.cerrados_el_mismo_dia(DIA_CERRADO)
+    assert [(a.linea, a.cuerpo, a.dia) for a in hallados] == [
+        (2, "comprar una maleta", "Martes 11 de agosto")
+    ]
+
+
+def test_quitar_deja_solo_el_cierre_y_respeta_otros_dias() -> None:
+    texto = todo.quitar_aperturas_cerradas(DIA_CERRADO)
+    assert "**pendiente**: comprar una maleta" not in texto
+    assert "(Hecho): ~~comprar una maleta~~" in texto
+    assert "**pendiente**: avisar a [Carmen](notas/carmen.md)" in texto
+    assert todo.quitar_aperturas_cerradas(texto) == texto
+
+
+def test_quitar_con_cuerpo_toca_solo_ese_pendiente() -> None:
+    assert todo.quitar_aperturas_cerradas(DIA_CERRADO, "otro") == DIA_CERRADO
+
+
+def test_el_lint_reporta_la_apertura_y_nombra_fix_todo() -> None:
+    hallazgos = todo.lint(todo.CABECERA + "\n| --- | --- | --- | --- |\n", DIA_CERRADO)
+    assert any("AHORA.md:2:" in h and "tuku fix todo" in h for h in hallazgos), hallazgos

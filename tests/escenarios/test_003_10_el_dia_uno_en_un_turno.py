@@ -33,14 +33,13 @@ TITULO = "el día uno entero"
 MARTES = "## Martes 11 de agosto"
 MIERCOLES = "## Miércoles 12 de agosto"
 
-#: La tabla de verdad del `.md`: hora, ámbito y marca cerrada, por día.
+#: La tabla de verdad del `.md`: hora, ámbito y marca cerrada, por día. Las aperturas de
+#: las 13:00 y las 14:20 no quedan: se cerraron el mismo día.
 TABLA: dict[str, dict[str, tuple[str, str | None]]] = {
     MARTES: {
         "09:12": ("personal", None),
         "11:30": ("personal", None),
         "12:05": ("personal", None),
-        "13:00": ("personal", todo.ABRE),
-        "14:20": ("personal", todo.ABRE),
         "18:40": ("personal", None),
         "19:05": ("personal", todo.CIERRA),
         "19:10": ("personal", todo.CIERRA),

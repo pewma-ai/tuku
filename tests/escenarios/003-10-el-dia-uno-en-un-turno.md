@@ -48,7 +48,7 @@ Y cada registro tiene su hora, su ámbito y su marca cerrada según la tabla de 
 Y la consulta del pase escolar no deja nada escrito, y la respuesta nombra `AHORA.md` y `PENDIENTES.md`
 Y ni "recuérdame" ni la pregunta por los pendientes entran a `AHORA.md`
 Y el cuerpo del registro de las 18:40 enlaza a `depto-centro` de forma retroactiva, y el martes tiene la constancia de haberlo abierto
-Y los dos cierres de las 19:05 y las 19:10 encontraron su pareja
+Y los dos cierres de las 19:05 y las 19:10 encontraron su pareja, y como se abrieron ese mismo día, de cada uno queda solo el cierre
 Y "ya pagué" no cierra ninguno de los dos pendientes de mañana, y el agente pregunta cuál
 Y `notas/` sigue llamándose así, con la nota de las 21:15 adentro
 Y fuera de lo que el día escribe, no cambió ningún archivo
@@ -66,8 +66,6 @@ Solo se afirma la marca cerrada (`**pendiente**`, `(Hecho)`). "Ninguna" signific
 | 09:12 | martes 11 | `personal` | ninguna |
 | 11:30 | martes 11 | `personal` | ninguna |
 | 12:05 | martes 11 | `personal` | ninguna |
-| 13:00 | martes 11 | `personal` | `**pendiente**` |
-| 14:20 | martes 11 | `personal` | `**pendiente**` |
 | 18:40 | martes 11 | `personal` | ninguna |
 | 19:05 | martes 11 | `personal` | `(Hecho)` |
 | 19:10 | martes 11 | `personal` | `(Hecho)` |

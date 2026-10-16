@@ -87,7 +87,33 @@ def fix_link(vault: Path) -> Resultado:
     )
 
 
-TEMAS = {"link": fix_link}
+def fix_todo(vault: Path) -> Resultado:
+    """Quita de `AHORA.md` los registros que abrieron un pendiente cerrado el mismo día.
+
+    Queda solo el `(Hecho)`. Después regenera lo que se deriva de `AHORA.md`.
+    Una segunda corrida no cambia nada.
+    """
+    from tuku import propagate, todo
+    from tuku.config import archivo_vault
+
+    ruta = archivo_vault(vault, "AHORA.md")
+    texto = ruta.read_text(encoding="utf-8")
+    quitados = todo.cerrados_el_mismo_dia(texto)
+    if not quitados:
+        return Resultado.hecho("fix todo: nada que reparar.")
+    ruta.write_text(todo.quitar_aperturas_cerradas(texto), encoding="utf-8")
+    propagate.propagar(vault)
+    return Resultado.hecho(
+        "\n".join(
+            [
+                *(f"AHORA.md: quitado el que abrió {a.cuerpo!r} ({a.dia})." for a in quitados),
+                f"fix todo: {len(quitados)} registro(s) quitado(s).",
+            ]
+        )
+    )
+
+
+TEMAS = {"link": fix_link, "todo": fix_todo}
 
 
 def corregir(vault: Path, tema: str) -> Resultado:

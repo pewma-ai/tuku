@@ -86,6 +86,7 @@ Correr el comando repetidas veces no agrega múltiples entradas: sincroniza el e
 Por ello, el comando que repara una inconsistencia es **el comando que debió haberse invocado originalmente**:
 - `tuku todo lint` y `tuku doctor` detectan marcas sin reflejo en la tabla o pendientes huérfanos.
 - El linter nunca repara por su cuenta: emite el reporte de error y nombra la corrección exacta, que consiste en ejecutar el comando original (ej. `tuku todo open`). Al ser idempotente, ese comando completa la fila en la tabla sin duplicar el registro en la bitácora.
+- Un pendiente abierto y cerrado bajo el mismo día escrito a mano no tiene comando original que repetir: `tuku todo lint` lo reporta y `tuku fix todo` quita el registro que lo abrió (regla 10).
 
 ## Dónde se muestra, y cómo llega
 
@@ -118,11 +119,11 @@ No hay marca que la delimite, y es a propósito: los registros empiezan siempre 
 
 ```markdown
 > [!todo] Pendientes en **Personal** ^personal
-> - Miércoles 12 de agosto - pagar la sesión con el psicólogo
+> - Ago/12 - pagar la sesión con el psicólogo
 > - comprar una maleta
 ```
 
-Un pendiente con fecha lleva el día al principio, escrito como el encabezado de `AHORA.md`, y no lleva el ámbito porque el callout ya es el suyo. Van primero los que tienen fecha, de la más próxima a la más lejana, y después los demás en el orden de la tabla.
+Un pendiente con fecha lleva el día al principio, con el `date_format` de `reglas/config.tuku.md` ([README.md](README.md)), y no lleva el ámbito porque el callout ya es el suyo. Van primero los que tienen fecha, de la más próxima a la más lejana, y después los demás en el orden de la tabla.
 
 La página del ámbito lo transcluye con ruta relativa:
 
@@ -160,6 +161,7 @@ Un pendiente que rueda de ciclo en ciclo se vuelve invisible por costumbre, y lo
 7. **Las vistas se regeneran, no se reparan.** Todo lo que muestra un pendiente fuera de `PENDIENTES.md` se deriva de él. Si una vista discrepa de la fuente, la que está mal es la vista, y la corrección es volver a propagar. `tuku todo lint` lo detecta re-derivando y comparando.
 8. `PENDIENTES.md` se versiona como fuente. La reconstrucción desde bitácoras no lo regenera ni lo verifica. El conjunto canónico es `AHORA.md` + `bitacoras/` + `PENDIENTES.md` + `ambitos/` + `notas/`, y el principio 9 aplica solo a lo que queda fuera de esa lista.
 9. **Dentro de `AHORA.md` conviven las dos naturalezas**, y hay que saber cuál es cuál: los registros son canónicos y la región propagada de cada día es derivada. Es la única parte del conjunto canónico que se puede borrar y regenerar, y por eso está delimitada por estructura visible.
+10. **Abierto y cerrado el mismo día, queda solo el cierre.** El registro que abrió no dice nada que el `(Hecho)` no diga, y bajo el mismo día los dos se leen como la misma tarea repetida. `tuku todo close` quita la apertura al cerrar, de `AHORA.md` y por lo tanto de la página del ámbito. Un pendiente cerrado otro día conserva los dos registros: la apertura es el rastro de cuándo se prometió.
 
 ## No entra
 

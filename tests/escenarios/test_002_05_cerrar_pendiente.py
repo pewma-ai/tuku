@@ -19,7 +19,7 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 import gherkin  # noqa: E402
 
 from tuku import todo  # noqa: E402
-from tuku.cli import EXITO  # noqa: E402
+from tuku.cli import EXITO, RECHAZO  # noqa: E402
 
 SLUG = "002-05-cerrar-pendiente"
 PERSONAL = "[personal](ambitos/personal/personal.md)"
@@ -43,8 +43,11 @@ def test_002_05_cerrar_borra_el_item_y_deja_la_tabla_vacia() -> None:
     assert len(todo.filas(pendientes)) == 0, "la tabla no quedó vacía"
     assert todo.CABECERA in pendientes, "se perdió la cabecera de la tabla"
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert APERTURA in ahora, "se tocó la apertura"
+    assert APERTURA not in ahora, "abierto y cerrado el mismo día: sobra la apertura"
     assert CIERRE in ahora, "no se estampó la huella de cierre"
+    pagina = (vault / "ambitos" / "personal" / "personal.md").read_text(encoding="utf-8")
+    assert f"**pendiente**: {CUERPO}" not in pagina, "la página del ámbito conserva la apertura"
+    assert f"(Hecho): ~~{CUERPO}~~" in pagina
 
     assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
@@ -83,8 +86,26 @@ def test_002_05_cerrar_dos_veces_no_vuelve_a_mover() -> None:
     assert corrida.delta_de("mi-vault") == {}, "el segundo pase escribió"
 
 
+def test_002_05_abierto_y_cerrado_a_mano_el_mismo_dia_fix_deja_el_cierre() -> None:
+    corrida = gherkin.correr(SLUG, "abierto y cerrado a mano el mismo día")
+    vault = corrida.ruta("mi-vault")
+
+    antes, despues = [r for r in corrida.resultados if "tuku todo lint" in r.comando]
+    assert antes.codigo == RECHAZO, antes.stdout
+    assert "tuku fix todo" in antes.stdout, antes.stdout
+    assert corrida.de("tuku fix todo").codigo == EXITO
+    assert despues.codigo == EXITO, despues.stdout
+
+    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
+    pagina = (vault / "ambitos" / "personal" / "personal.md").read_text(encoding="utf-8")
+    for texto in (ahora, pagina):
+        assert "**pendiente**: renovar el carnet" not in texto
+        assert "(Hecho): ~~renovar el carnet~~" in texto
+
+
 if __name__ == "__main__":
     test_002_05_cerrar_borra_el_item_y_deja_la_tabla_vacia()
     test_002_05_un_cierre_sin_pareja_no_inventa_nada()
     test_002_05_cerrar_dos_veces_no_vuelve_a_mover()
+    test_002_05_abierto_y_cerrado_a_mano_el_mismo_dia_fix_deja_el_cierre()
     print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")
