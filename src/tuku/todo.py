@@ -589,16 +589,6 @@ def cerrar_en_vault(
     return Resultado.hecho(f"pendiente cerrado: {marca.cuerpo}")
 
 
-def propagar_vistas(vault: Path) -> Resultado:
-    """Regenera las vistas derivadas de `PENDIENTES.md`."""
-    from tuku.propagate import propagar
-
-    cambiados = propagar(vault)
-    if not cambiados:
-        return Resultado.hecho("las vistas ya estaban al día.")
-    return Resultado.hecho("\n".join(f"regenerado: {ruta}" for ruta in cambiados))
-
-
 def lint(
     pendientes: str,
     ahora: str | None = None,
@@ -613,7 +603,7 @@ def lint(
     2. Una marca de `ahora` que la tabla no refleja (`sin_consecuencia`). La
        corrección es el comando original, que es idempotente.
     3. Una vista derivada que no es la que la tabla produce (regla 7). `vistas`
-       mapea cada archivo a su texto actual y al que `tuku todo propagate`
+       mapea cada archivo a su texto actual y al que `tuku regenerate todo`
        escribiría; si difieren, la que está mal es la vista.
     """
     hallazgos = [
@@ -631,7 +621,7 @@ def lint(
         if actual != esperado:
             hallazgos.append(
                 f"{archivo}: error: la vista de pendientes no coincide con PENDIENTES.md. "
-                "Corre `tuku todo propagate`."
+                "Corre `tuku regenerate todo`."
             )
     return hallazgos
 

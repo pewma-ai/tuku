@@ -100,7 +100,7 @@ La regla general, que decide los dos casos con un solo criterio:
 | El día, en `AHORA.md` | Propagación | Los pendientes de un día están repartidos entre horizontes |
 | El ámbito, en su página | Transclusión desde `ambitos/PENDIENTES-AMBITOS.md` | Ese archivo se genera con un callout por ámbito, así que cada grupo ya es contiguo |
 
-`tuku todo propagate` produce las dos. Es idempotente: correrlo dos veces da el mismo resultado, y sobre un vault cuadrado no cambia nada.
+`tuku regenerate todo` produce las dos, y `todo open` y `todo close` las regeneran al escribir. Es idempotente: correrlo dos veces da el mismo resultado, y sobre un vault cuadrado no cambia nada.
 
 Lo que se gana al propagar en vez de transcluir es que la vista no depende de que un ancla siga existiendo, que era la falla silenciosa de este archivo: un pendiente que existía y no aparecía en su día, y el autor se enteraba cuando ya había vencido. Lo que se pierde es que una copia sí puede quedar vieja. Se compra de vuelta barato, porque una vista derivada se verifica **re-derivando y comparando**, que es una función pura contra su salida.
 

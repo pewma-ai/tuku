@@ -425,12 +425,12 @@ def test_lint_reporta_una_vista_que_difiere_y_nombra_propagate() -> None:
     }
     (hallazgo,) = todo.lint(VACIA, vistas=vistas)
     assert hallazgo.startswith("ambitos/PENDIENTES-AMBITOS.md: error:")
-    assert "tuku todo propagate" in hallazgo
+    assert "tuku regenerate todo" in hallazgo
 
 
 def test_lint_reporta_una_vista_que_falta() -> None:
     (hallazgo,) = todo.lint(VACIA, vistas={"ambitos/PENDIENTES-AMBITOS.md": (None, "x")})
-    assert "tuku todo propagate" in hallazgo
+    assert "tuku regenerate todo" in hallazgo
 
 
 # --- cuando_por_dia: escribir en un día futuro es fecharlo -------------------

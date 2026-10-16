@@ -385,7 +385,7 @@ def lint_callouts(vault: Path) -> list[str]:
     if not archivo.is_file():
         return [
             "ambitos/PENDIENTES-AMBITOS.md: error: falta el archivo. "
-            "Corre 'tuku todo propagate' para generarlo."
+            "Corre `tuku regenerate todo` para generarlo."
         ]
     contenido = archivo.read_text(encoding="utf-8")
     hallazgos = []
@@ -394,7 +394,7 @@ def lint_callouts(vault: Path) -> list[str]:
         if not re.search(patron, contenido):
             hallazgos.append(
                 f"ambitos/PENDIENTES-AMBITOS.md: error: falta el callout para el ámbito "
-                f"'{a.nombre}' (esperado: '^{a.nombre}'). Corre 'tuku todo propagate'."
+                f"'{a.nombre}' (esperado: '^{a.nombre}'). Corre `tuku regenerate todo`."
             )
     return hallazgos
 

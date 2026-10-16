@@ -223,7 +223,7 @@ ESCRIBEN = (
     ("entry", "add"),
     ("todo", "open"),
     ("todo", "close"),
-    ("todo", "propagate"),
+    ("regenerate",),
     ("cycle", "open"),
     ("scope", "create"),
     ("note", "create"),

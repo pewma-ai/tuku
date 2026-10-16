@@ -19,8 +19,8 @@
 |---|---|---|---|---|---|
 | **`AHORA.md`** | Canónico + Derivado (`Logbook`) | [`reglas/plantilla/AHORA.md`](../template/vanilla/reglas/plantilla/AHORA.md) | [`bitacora.md`](../spec/bitacora.md), [`ciclo.md`](../spec/ciclo.md) | [`entry.py`](../src/tuku/entry.py), [`ahora.py`](../src/tuku/ahora.py), [`propagate.py`](../src/tuku/propagate.py), [`cycle.py`](../src/tuku/cycle.py) | **Escribe:** `tuku entry add`, `tuku cycle open`.<br>**Propaga:** `tuku todo propagate` inyecta callouts diarios. |
 | **`PENDIENTES.md`** | Canónico (`Todo`) | [`PENDIENTES.md`](../template/vanilla/PENDIENTES.md) | [`pendientes.md`](../spec/pendientes.md) | [`todo.py`](../src/tuku/todo.py), [`cli/todo.py`](../src/tuku/cli/todo.py) | **Escribe:** `tuku todo open`, `tuku todo close`.<br>**Dispara:** regeneración de vistas derivadas. |
-| **`ambitos/PENDIENTES-AMBITOS.md`** | Derivado (`Derived`) | [`ambitos/PENDIENTES-AMBITOS.md`](../template/vanilla/ambitos/PENDIENTES-AMBITOS.md) | [`pendientes.md`](../spec/pendientes.md), [`ambitos.md`](../spec/ambitos.md) | [`propagate.py`](../src/tuku/propagate.py), [`rebuild.py`](../src/tuku/rebuild.py), [`scope.py`](../src/tuku/scope.py) | **Lee:** `PENDIENTES.md`, árbol `ambitos/`.<br>**Escribe:** `tuku todo propagate`, `tuku rebuild`. |
-| **`ambitos/<nom>/<nom>.md`** | Canónico + Derivado (`Scope`) | [`ambitos/personal/personal.md`](../template/vanilla/ambitos/personal/personal.md) | [`ambitos.md`](../spec/ambitos.md) | [`scope.py`](../src/tuku/scope.py), [`link.py`](../src/tuku/link.py), [`rebuild.py`](../src/tuku/rebuild.py) | **Crea:** `tuku scope create`.<br>**Transcluye:** `PENDIENTES-AMBITOS.md`.<br>**Deriva:** sección `## Esta semana`. |
+| **`ambitos/PENDIENTES-AMBITOS.md`** | Derivado (`Derived`) | [`ambitos/PENDIENTES-AMBITOS.md`](../template/vanilla/ambitos/PENDIENTES-AMBITOS.md) | [`pendientes.md`](../spec/pendientes.md), [`ambitos.md`](../spec/ambitos.md) | [`propagate.py`](../src/tuku/propagate.py), [`regenerate.py`](../src/tuku/regenerate.py), [`scope.py`](../src/tuku/scope.py) | **Lee:** `PENDIENTES.md`, árbol `ambitos/`.<br>**Escribe:** `tuku todo propagate`, `tuku rebuild`. |
+| **`ambitos/<nom>/<nom>.md`** | Canónico + Derivado (`Scope`) | [`ambitos/personal/personal.md`](../template/vanilla/ambitos/personal/personal.md) | [`ambitos.md`](../spec/ambitos.md) | [`scope.py`](../src/tuku/scope.py), [`link.py`](../src/tuku/link.py), [`regenerate.py`](../src/tuku/regenerate.py) | **Crea:** `tuku scope create`.<br>**Transcluye:** `PENDIENTES-AMBITOS.md`.<br>**Deriva:** sección `## Esta semana`. |
 | **`ambitos/<nom>/CADENCIAS.md`** | Canónico (`Cadence`) | [`ambitos/CADENCIAS.md`](../template/vanilla/ambitos/CADENCIAS.md) | [`cadencias.md`](../spec/cadencias.md) | [`cadence.py`](../src/tuku/cadence.py) *(futuro epic 006)* | **Lee:** `tuku cycle open` para emitir al abrir ciclo. |
 | **`ambitos/<nom>/CAPACIDAD.md`** | Canónico (`Capacity`) | [`ambitos/personal/CAPACIDAD.md`](../template/vanilla/ambitos/personal/CAPACIDAD.md) | [`ambitos.md`](../spec/ambitos.md), [`ciclo.md`](../spec/ciclo.md) | [`capacity.py`](../src/tuku/capacity.py) *(futuro epic 006)* | **Lee:** plan y balance de ciclo. |
 | **`notas/<slug>.md`** | Canónico (`Note`) | *(Generada dinámicamente con OKF)* | [`notas.md`](../spec/notas.md) | [`note.py`](../src/tuku/note.py), [`cli/note.py`](../src/tuku/cli/note.py) | **Escribe:** `tuku note create`.<br>**Valida:** `tuku note lint` (`## Ver además`). |
@@ -49,7 +49,7 @@ flowchart LR
         NOTAS["notas/slug.md<br/>(Note)"]
     end
 
-    subgraph DERIVADOS["Vistas Derivadas (tuku rebuild)"]
+    subgraph DERIVADOS["Vistas Derivadas (tuku regenerate)"]
         direction LR
         REGION_DIA["Región diaria en AHORA.md<br/>(callout de pendientes del día)"]
         PENDIENTES_AMBITOS["ambitos/PENDIENTES-AMBITOS.md<br/>(transcluido por ambitos/ambito.md)"]
@@ -65,8 +65,8 @@ flowchart LR
     end
 
     ENTRADAS --> CANONICOS
-    PENDIENTES -->|tuku todo propagate| REGION_DIA
-    PENDIENTES -->|tuku todo propagate| PENDIENTES_AMBITOS
+    PENDIENTES -->|tuku regenerate todo| REGION_DIA
+    PENDIENTES -->|tuku regenerate todo| PENDIENTES_AMBITOS
     AHORA -->|tuku scope activity| AMBITO_SEMANA
 
     CONFIG --> DOCTOR
@@ -104,5 +104,5 @@ Antes de modificar un archivo o comportamiento, verificar el cuadrante:
 
 1. **Si cambia una regla de negocio o formato:** Modificar primero [`spec/`](../spec/README.md).
 2. **Si cambia una plantilla sembrada:** Modificar [`template/vanilla/`](../template/vanilla/) y sincronizar con `src/tuku/_pack.py`.
-3. **Si el archivo es derivado:** Modificar la constante o función constructora en [`src/tuku/propagate.py`](../src/tuku/propagate.py) o [`src/tuku/rebuild.py`](../src/tuku/rebuild.py), nunca solo el archivo en disco.
+3. **Si el archivo es derivado:** Modificar la constante o función constructora en [`src/tuku/propagate.py`](../src/tuku/propagate.py) o [`src/tuku/regenerate.py`](../src/tuku/regenerate.py), nunca solo el archivo en disco.
 4. **Si cambia un metadato frontmatter:** Actualizar [`template/vanilla/reglas/types.md`](../template/vanilla/reglas/types.md) para mantener `tuku doctor` en verde.

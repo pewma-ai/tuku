@@ -85,7 +85,7 @@
 | Término | Qué es |
 |---|---|
 | **`tuku`** | El comando, y la capa determinista del sistema. Es dueño de la forma (dónde va cada cosa, con qué estructura, en qué orden), nunca del juicio. Nada automático toca el vault fuera de una invocación suya. |
-| **Comando** | Cada operación determinista de `tuku`, nombrada `tuku <noun> <verb>`, salvo las que actúan sobre el vault entero (`init`, `doctor`, `rebuild`). Su código vive fuera del vault, en el paquete que se instala con `uv` o `pipx`. |
+| **Comando** | Cada operación determinista de `tuku`, nombrada `tuku <noun> <verb>`, salvo las que actúan sobre el vault entero (`init`, `doctor`, `fix`, `regenerate`). Su código vive fuera del vault, en el paquete que se instala con `uv` o `pipx`. |
 | **Equivalente manual** | Cómo se hace con un editor lo que hace un comando. Lo dice la ayuda del comando, que nombra los archivos que toca y cómo. Un comando cuya ayuda no alcanza para eso es una dependencia disfrazada. |
 | **Agente** | El LLM que conversa con el autor, interpreta el dictado y propone. Secretario, nunca dueño. |
 | **Conjunto canónico** | Lo que el autor escribió y nunca se regenera: `AHORA.md`, `bitacoras/`, `PENDIENTES.md`, `ambitos/`, `notas/`. |

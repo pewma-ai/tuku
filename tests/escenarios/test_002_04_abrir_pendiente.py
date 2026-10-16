@@ -79,7 +79,7 @@ def test_002_04_todo_lint_encuentra_una_vista_desactualizada() -> None:
     primera, segunda = [r for r in corrida.resultados if "tuku todo lint" in r.comando]
     assert primera.codigo == RECHAZO, primera.stdout
     assert "PENDIENTES-AMBITOS.md" in primera.stdout, primera.stdout
-    assert "tuku todo propagate" in primera.stdout, primera.stdout
+    assert "tuku regenerate todo" in primera.stdout, primera.stdout
     assert segunda.codigo == EXITO, segunda.stdout
 
 

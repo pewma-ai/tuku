@@ -15,7 +15,7 @@ from tuku.cli import EXITO, RECHAZO, main
         ["doctor"],
         ["entry", "lint"],
         ["todo", "open", "--body", "x"],
-        ["rebuild"],
+        ["regenerate"],
         ["note", "lint"],
     ],
 )

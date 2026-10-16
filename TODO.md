@@ -34,7 +34,7 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 
 ## Sistema
 
-- **Endurecimiento:** casos de error, reconstrucción completa (`tuku rebuild`) e idempotencia global sobre el sistema entero. Un error del autor nunca se rechaza, se reporta. Era la fase 8 y no agrega capacidades, cierra huecos.
+- **Endurecimiento:** casos de error, regeneración completa (`tuku regenerate`) e idempotencia global sobre el sistema entero. Un error del autor nunca se rechaza, se reporta. Era la fase 8 y no agrega capacidades, cierra huecos.
 
 ## Suite de escenarios
 

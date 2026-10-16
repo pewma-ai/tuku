@@ -6,7 +6,7 @@ lo que el `-h` dice tiene que estar también en el vault: este archivo.
 
 Sale del árbol de argparse y no de una lista escrita aparte, por la misma razón
 que `comandos()`: una lista paralela se desincroniza en silencio. Lo escribe
-`tuku init` al sembrar y lo reescribe `tuku rebuild`, porque es derivado: de la
+`tuku init` al sembrar y lo reescribe `tuku regenerate`, porque es derivado: de la
 versión de `tuku` instalada, no del conjunto canónico.
 
 Cada descripción dice qué archivos toca y cómo, con precisión para hacerlo sin
@@ -26,7 +26,7 @@ _ENCABEZADO = (
     "Qué hace cada comando de `tuku` sobre los archivos del vault. El código vive fuera de "
     "este vault, en el paquete `tuku`; este archivo es lo que queda si no está "
     "instalado. Lo escribe `tuku init` desde la ayuda de cada comando "
-    "(`tuku <comando> -h`) y lo reescribe `tuku rebuild`, así que no se edita.\n"
+    "(`tuku <comando> -h`) y lo reescribe `tuku regenerate`, así que no se edita.\n"
 )
 
 

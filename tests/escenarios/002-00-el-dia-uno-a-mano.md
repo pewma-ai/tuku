@@ -10,7 +10,7 @@ El autor instala TUKU y opera su primer día entero mediante comandos directos (
 2. **La organización emerge del uso ([P2](../../docs/principios.md#L17)):** No se preconfiguran taxonomías ni frentes artificiales; nacen de los registros diarios.
 3. **Todo baja hasta donde alcance el determinismo ([P4](../../docs/principios.md#L33)):** La captura y la sincronización de tablas y vistas son 100% mecánicas y libres de LLM.
 4. **Conjunto canónico inmutable y tres ejes ([P6](../../docs/principios.md#L55)):** `AHORA.md` y `PENDIENTES.md` son fuentes primarias; ninguna vista guarda registros paralelos.
-5. **Reconstrucción determinista ([P9](../../docs/principios.md#L79)):** Reconstruir lo derivado desde el canónico (`tuku rebuild`) devuelve un resultado idéntico byte a byte.
+5. **Reconstrucción determinista ([P9](../../docs/principios.md#L79)):** Reconstruir lo derivado desde el canónico (`tuku regenerate`) devuelve un resultado idéntico byte a byte.
 
 ## Qué se verifica
 

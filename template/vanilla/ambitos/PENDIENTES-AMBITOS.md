@@ -1,7 +1,7 @@
 ---
 type: Derived
 origin: PENDIENTES.md
-command: tuku todo propagate
+command: tuku regenerate todo
 ---
 
 # Pendientes por ámbito

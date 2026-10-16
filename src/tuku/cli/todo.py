@@ -42,10 +42,6 @@ def _cmd_todo_close(args: argparse.Namespace) -> int:
     )
 
 
-def _cmd_todo_propagate(args: argparse.Namespace) -> int:
-    return traducir(core_todo.propagar_vistas(args.vault), "todo propagate")
-
-
 def _cmd_todo_lint(args: argparse.Namespace) -> int:
     return traducir(core_todo.lint_del_vault(args.vault), "todo lint")
 
@@ -57,8 +53,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         description=(
             "Un pendiente es un compromiso abierto: una fila de `PENDIENTES.md`, la única "
             "fuente de lo que está por hacer, y su registro `**pendiente**` en `AHORA.md`. "
-            "Estos comandos abren y cierran pendientes, regeneran las vistas que se derivan "
-            "de la tabla y la revisan."
+            "Estos comandos abren y cierran pendientes y revisan la tabla; sus vistas las "
+            "regenera `tuku regenerate todo`."
         ),
     )
     todo_v = todo_p.add_subparsers(dest="verb", required=True)
@@ -71,7 +67,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                 "Escribe en `AHORA.md`, bajo el día y en orden de hora, el registro "
                 "`- HH:MM - [ámbito](ruta) **pendiente**: cuerpo`, agrega la fila a la "
                 "tabla de `PENDIENTES.md` bajo su horizonte y regenera las vistas como "
-                "`tuku todo propagate`. Un día posterior a hoy es la fecha del pendiente. "
+                "`tuku regenerate todo`. Un día posterior a hoy es la fecha del pendiente. "
                 "Si el registro ya estaba, no lo repite."
             ),
         ),
@@ -125,16 +121,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                 "--scope", "--ambito", dest="scope", default=None, help="ámbito, sin corchetes"
             )
 
-    todo_prop = todo_v.add_parser(
-        "propagate",
-        help="regenera las vistas derivadas de PENDIENTES.md",
-        description=(
-            "Regenera desde `PENDIENTES.md` sus dos vistas: bajo cada día de `AHORA.md`, "
-            "los pendientes con esa fecha; en `ambitos/PENDIENTES-AMBITOS.md`, un callout "
-            "por ámbito con sus filas. Sobre un vault al día no cambia nada."
-        ),
-    )
-    todo_prop.add_argument("--vault", default=".", type=Path, help="vault a modificar")
 
     todo_lint = todo_v.add_parser(
         "lint",
@@ -150,6 +136,5 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     return {
         ("todo", "open"): _cmd_todo_open,
         ("todo", "close"): _cmd_todo_close,
-        ("todo", "propagate"): _cmd_todo_propagate,
         ("todo", "lint"): _cmd_todo_lint,
     }

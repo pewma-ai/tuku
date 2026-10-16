@@ -1,4 +1,4 @@
-"""Comandos del sistema: `init`, `cycle`, `doctor`, `fix`, `rebuild`, `vocab` y `style`."""
+"""Comandos del sistema: `init`, `cycle`, `doctor`, `fix`, `regenerate`, `vocab` y `style`."""
 
 from __future__ import annotations
 
@@ -26,6 +26,7 @@ from tuku.init import (
     TukuHomeInvalido,
     init,
 )
+from tuku.regenerate import TEMAS as TEMAS_REGENERATE
 
 
 def _cmd_init(args: argparse.Namespace) -> int:
@@ -90,11 +91,12 @@ def _cmd_fix(args: argparse.Namespace) -> int:
     return traducir(fix.corregir(args.vault, args.tema), f"tuku fix {args.tema}")
 
 
-def _cmd_rebuild(args: argparse.Namespace) -> int:
-    from tuku import rebuild
+def _cmd_regenerate(args: argparse.Namespace) -> int:
+    from tuku import regenerate
 
+    nombre = f"tuku regenerate {args.tema}" if args.tema else "tuku regenerate"
     return traducir(
-        rebuild.reconstruir(args.vault, comandos=manual.del_cli()), "tuku rebuild"
+        regenerate.regenerar(args.vault, tema=args.tema, comandos=manual.del_cli()), nombre
     )
 
 
@@ -223,18 +225,26 @@ def registrar(
     fix_p.add_argument("tema", choices=TEMAS_DOCTOR, help="el tema a reparar")
     fix_p.add_argument("--vault", default=".", type=Path, help="vault a reparar")
 
-    rebuild_p = sub.add_parser(
-        "rebuild",
-        help="reconstruye los archivos y vistas derivadas del vault",
+    regenerate_p = sub.add_parser(
+        "regenerate",
+        help="regenera lo derivado del vault desde el canónico",
         description=(
-            "Borra y regenera lo que el vault deriva: `ambitos/PENDIENTES-AMBITOS.md`, "
-            "con un callout por ámbito que lista sus filas de `PENDIENTES.md`; en la "
-            "página de cada ámbito, la actividad tomada de `AHORA.md`; y "
-            "`reglas/comandos.tuku.md`, desde esta ayuda. Dos corridas dejan los mismos "
-            "bytes."
+            "Reescribe lo que el vault deriva del canónico. Tema `todo`: bajo cada día "
+            "de `AHORA.md`, el callout con los pendientes de esa fecha, y en "
+            "`ambitos/PENDIENTES-AMBITOS.md`, un callout por ámbito con sus filas de "
+            "`PENDIENTES.md`. Sin tema, además la actividad de cada página de ámbito, "
+            "tomada de `AHORA.md`, y `reglas/comandos.tuku.md`, desde esta ayuda. Solo "
+            "escribe lo que cambió; sobre un vault al día no toca nada."
         ),
     )
-    rebuild_p.add_argument("--vault", default=".", type=Path, help="vault a reconstruir")
+    regenerate_p.add_argument(
+        "tema",
+        nargs="?",
+        choices=TEMAS_REGENERATE,
+        default=None,
+        help="regenerar solo este tema; sin tema, todo",
+    )
+    regenerate_p.add_argument("--vault", default=".", type=Path, help="vault a regenerar")
 
     vocab_p = sub.add_parser(
         "vocab",
@@ -283,7 +293,7 @@ def registrar(
         ("cycle", "lint"): _cmd_cycle_lint,
         ("doctor", None): _crear_cmd_doctor(comandos_fn),
         ("fix", None): _cmd_fix,
-        ("rebuild", None): _cmd_rebuild,
+        ("regenerate", None): _cmd_regenerate,
         ("vocab", "show"): _cmd_vocab_show,
         ("style", "lint"): _cmd_style_lint,
     }

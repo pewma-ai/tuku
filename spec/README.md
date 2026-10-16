@@ -123,18 +123,18 @@ Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de `reglas/t
 
 ## Dónde viven los comandos
 
-La **especificación** viaja con el vault: `reglas/comandos.tuku.md` dice en prosa qué hace cada comando sobre los archivos del vault, para que alguien pueda operar el vault, o volver a implementar el comando, aunque el código de hoy ya no exista. Lo escribe `tuku init` desde el párrafo de ayuda de cada comando ([cli.md](cli.md)) y lo reescribe `tuku rebuild`, porque es derivado: de la versión de `tuku` instalada, no del conjunto canónico.
+La **especificación** viaja con el vault: `reglas/comandos.tuku.md` dice en prosa qué hace cada comando sobre los archivos del vault, para que alguien pueda operar el vault, o volver a implementar el comando, aunque el código de hoy ya no exista. Lo escribe `tuku init` desde el párrafo de ayuda de cada comando ([cli.md](cli.md)) y lo reescribe `tuku regenerate`, porque es derivado: de la versión de `tuku` instalada, no del conjunto canónico.
 
 El **código** vive fuera del vault, en el paquete `tuku` que instala `uv tool install` o `pipx` (epic 001 de [`../devel/epics.md`](../devel/epics.md)). En el vault no hay código. El `AGENTS.md` de la raíz lo declara, así que quien opere el libro lo encuentra en el primer archivo que abre.
 
 La división es la de siempre: **la especificación sobrevive, la implementación se reemplaza.** Un script de 2026 no va a correr en 2046, pero la descripción de lo que hacía sí se va a leer. Y así el repositorio del autor no se vuelve una copia del código de TUKU que después diverge por su cuenta.
 
-El nombre canónico de cada comando es su invocación, `tuku <noun> <verb>` (o `tuku <noun>` en los que no tienen verbo, como `init` y `doctor`), y ese es el encabezado con que se especifica. Cada uno se especifica igual:
+El nombre canónico de cada comando es su invocación, `tuku <noun> <verb>` (o `tuku <noun>` en los que no tienen verbo, como `init` y `doctor`), y ese es el encabezado con que se especifica: `##` para el sustantivo, con qué es, y `###` para cada verbo. Cada uno se especifica igual:
 
 ```markdown
-## tuku todo propagate
+### tuku todo close
 
-Regenera desde `PENDIENTES.md` sus dos vistas: bajo cada día de `AHORA.md`, los pendientes con esa fecha; en `ambitos/PENDIENTES-AMBITOS.md`, un callout por ámbito con sus filas. Sobre un vault al día no cambia nada.
+Escribe en `AHORA.md` el registro `- HH:MM - [ámbito](ruta) (Hecho): ~~cuerpo~~`, borra de `PENDIENTES.md` la fila cuyo detalle coincide palabra por palabra y regenera las vistas. Si ninguna fila coincide, lo reporta y deja solo el registro.
 ```
 
 Que el párrafo nombre archivos y cómo cambian no es cortesía documental, es lo que sostiene el principio 1: si un comando no se puede ejecutar, el trabajo se hace igual con un editor, solo que cuesta más. Un comando cuya descripción no alcanza para eso es una dependencia disfrazada.
@@ -154,7 +154,7 @@ Cada spec declara su propio "no entra" en la sección correspondiente. A nivel d
 - **`reglas/config.tuku.md` es una tabla**, y es lo único que leen las automatizaciones de ese archivo. Cinco campos hoy: `TZ`, la zona horaria con su nombre IANA, que decide qué día es HOY y por lo tanto qué está atrasado; `cycle_type`, el ritmo con que se abre y se cierra; `tuku_template`, la variante de la que salió el vault; `tuku_version`, la versión de TUKU con que se sembró, que `tuku doctor` compara con la de `~/.tuku` y avisa si el vault quedó atrás; y `origen`, la URL del repositorio, para saber dónde revisar cambios. `~/.tuku` es un artefacto de la instalación: trae `template/`, `docs/` y `spec/`, lleva el sello `tuku.version` y se reemplaza entero cuando ese sello no coincide con el `tuku` instalado. Los nombres de campo van en inglés, como el resto del frontmatter. La escribe `tuku init`, que toma la zona horaria de la máquina, y un callout en el archivo lo dice. Ningún dato nuevo destinado a una automatización se agrega al libro de estilo (ver [bitacora.md](bitacora.md), "dónde vive cada una"): va a esta tabla, y quien necesite mostrarlo la transcluye en vez de copiarla.
 
 - **Links Markdown con ruta relativa y `tuku fix`** (2026-10-16). Era la decisión abierta "pasar de wikilinks de Obsidian a links Markdown". Lo decidido:
-  1. **El link es `[texto](ruta/relativa.md)`, relativa al archivo que lo contiene.** Nada de rutas desde la raíz. Como el mismo registro vive en `AHORA.md`, en la página del ámbito y, al cerrar el ciclo, en `bitacoras/`, quien copia una línea de un archivo a otro recalcula las rutas: lo hacen `tuku todo propagate` y las páginas de ámbito, y lo hará el archivado del epic 006.
+  1. **El link es `[texto](ruta/relativa.md)`, relativa al archivo que lo contiene.** Nada de rutas desde la raíz. Como el mismo registro vive en `AHORA.md`, en la página del ámbito y, al cerrar el ciclo, en `bitacoras/`, quien copia una línea de un archivo a otro recalcula las rutas: lo hacen `tuku regenerate todo` y las páginas de ámbito, y lo hará el archivado del epic 006.
   2. **La transclusión de Obsidian es parte del estándar de TUKU.** `![[archivo.md#^ancla]]` se queda, igual que los callouts `> [!todo]`. Es el único wikilink admitido y se reconoce por el `!` inicial.
   3. **`tuku doctor [TEMA]` y `tuku fix TEMA`.** Sin tema, `doctor` revisa todo; con tema, solo ese. Todo tema tiene su `fix`. Si el arreglo es determinista, `fix` lo aplica; si no, no escribe y devuelve las decisiones que le tocan al autor. Hoy el único tema es `link`. Ver [cli.md](cli.md).
   4. **Los lectores aceptan los dos formatos y los escritores solo producen Markdown.** Un vault con wikilinks sigue funcionando hasta que se corre `tuku fix link`.

@@ -1,4 +1,4 @@
-"""tuku todo propagate: las dos vistas derivadas de `PENDIENTES.md`.
+"""Las dos vistas derivadas de `PENDIENTES.md`, que regenera `tuku regenerate todo`.
 
 `PENDIENTES.md` es fuente de verdad y nada más lo es (`spec/pendientes.md`).
 Todo lo que muestre un pendiente fuera de él es derivado, y se **regenera** en
@@ -59,7 +59,7 @@ _ENCABEZADO_AMBITOS = (
     "---\n"
     "type: Derived\n"
     "origin: PENDIENTES.md\n"
-    "command: tuku todo propagate\n"
+    "command: tuku regenerate todo\n"
     "---\n\n"
     "# Pendientes por ámbito\n\n"
     "> [!warning] Vista derivada\n"
@@ -207,11 +207,12 @@ def documento_del_vault(vault: Path, pendientes: str) -> str:
     )
 
 
-def propagar(vault: Path) -> list[Path]:
+def propagar(vault: Path, *, paginas: bool = True) -> list[Path]:
     """Regenera las dos vistas del vault. Devuelve los archivos que cambiaron.
 
     Escribe solo lo que difiere: sobre un vault ya cuadrado no toca ningún
-    archivo, y la lista vuelve vacía.
+    archivo, y la lista vuelve vacía. Con `paginas`, regenera además la
+    actividad de cada página de ámbito, que se deriva de `AHORA.md`.
     """
     from tuku.config import archivo_vault
 
@@ -226,7 +227,7 @@ def propagar(vault: Path) -> list[Path]:
         ruta_ahora.write_text(texto, encoding="utf-8")
         cambiados.append(ruta_ahora)
 
-    for a in scope.leer(vault):
+    for a in scope.leer(vault) if paginas else []:
         pag_mod = scope.actualizar_pagina(vault, a.nombre)
         if pag_mod and pag_mod not in cambiados:
             cambiados.append(pag_mod)

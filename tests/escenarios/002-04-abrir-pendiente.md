@@ -61,10 +61,10 @@ Cuando el autor borra a mano el pendiente del callout de `ambitos/PENDIENTES-AMB
 sed -i.bak '/avisar de los GGCC a la administradora/d' mi-vault/ambitos/PENDIENTES-AMBITOS.md
 tuku todo lint --vault mi-vault
 ```
-Entonces `tuku todo lint` sale con código 1 (`RECHAZO`) y nombra `tuku todo propagate` como corrección
+Entonces `tuku todo lint` sale con código 1 (`RECHAZO`) y nombra `tuku regenerate todo` como corrección
 Y después de propagar, `tuku todo lint` sale limpio
 ```bash
-tuku todo propagate --vault mi-vault
+tuku regenerate todo --vault mi-vault
 tuku todo lint --vault mi-vault
 ```
 

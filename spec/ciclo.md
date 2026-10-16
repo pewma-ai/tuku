@@ -36,7 +36,7 @@ to: 2026-09-01
 > - [personal](ambitos/personal/personal.md) - pagar la sesión con el psicólogo
 ```
 
-Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku todo propagate`. Se distingue sin marca: los registros empiezan por `- HH:MM - `.
+Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku regenerate todo`. Se distingue sin marca: los registros empiezan por `- HH:MM - `.
 
 **No tiene resumen.** El resumen se genera al cerrar, así que no existe mientras el ciclo está abierto.
 
@@ -84,7 +84,7 @@ El resumen es la excepción y va como enlace: es un documento de decisión compl
 
 ## Abrir un ciclo
 
-De los comandos de esta sección y de las siguientes, hoy existen `tuku cycle open`, `tuku cycle lint` y `tuku todo propagate`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `cycle open` hace los pasos 1 y 2.
+De los comandos de esta sección y de las siguientes, hoy existen `tuku cycle open`, `tuku cycle lint` y `tuku regenerate todo`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `cycle open` hace los pasos 1 y 2.
 
 En este orden:
 
@@ -93,7 +93,7 @@ En este orden:
 3. Rodar y promover pendientes: lo del horizonte del ciclo en curso que no tenga fecha rueda al del ciclo nuevo, y el horizonte siguiente promueve → `todo promote`
 4. Colectar cadencias desde el árbol y emitir lo que corresponda → `cadence collect`, `cadence resolve`, `cadence inject`
 5. Generar el plan en `planes/` y transcluirlo → `capacity calc` lo alimenta, leyendo los `CAPACIDAD.md` del árbol
-6. Propagar los pendientes a cada día → `todo propagate`
+6. Propagar los pendientes a cada día → `regenerate todo`
 
 Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
 
