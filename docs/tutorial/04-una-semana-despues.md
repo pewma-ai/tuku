@@ -2,25 +2,25 @@
 
 > [!warning] Todavía no funciona
 
-Todo lo anterior ocurrió sobre un vault vacío, donde no había margen de confusión. Con semanas de uso el desafío cambia: existe un acumulado histórico.
+Los capítulos anteriores ocurrieron sobre un vault vacío, donde no había nada que confundir. Con semanas de uso hay un historial acumulado.
 
-> [!tip] Dile a tu agente, sin más contexto que este
+> [!tip] Dile a tu agente, sin más contexto
 > Hablé con la Patricia del precio y quedó conforme.
 
 ## Mira `AHORA.md`
 
-No dijiste el apellido, ni de qué colegio es, ni a qué precio te refieres.
+No dijiste el apellido, el colegio ni el precio.
 
-Lo que esperas: que identifique que se trata de Patricia Lillo, asociada al Liceo Andes, y que continúe el hilo de la llamada anterior donde se abrió la negociación de precios. No lo adivinó: lo leyó de lo registrado la semana previa.
+El agente identifica a Patricia Lillo, del Liceo Andes, y continúa el hilo de la llamada anterior donde se abrió la negociación de precios. Lo lee de lo registrado la semana previa.
 
-> [!tip] Y ahora en un caso ambiguo
+> [!tip] Ahora un caso ambiguo
 > Le mandé el catálogo a la Paula.
 
 ## Mira qué hace
 
-Si existen dos personas llamadas Paula en tus registros, o ninguna con certeza clara, lo correcto es que **pregunte**.
+Si tus registros tienen dos personas llamadas Paula, o ninguna con certeza, el agente **pregunta**.
 
-Asumir en silencio la opción más reciente introduce registros erróneos en el historial que nadie suele auditar después.
+Asumir en silencio la opción más reciente deja registros erróneos en un historial que casi nadie audita.
 
 ---
 

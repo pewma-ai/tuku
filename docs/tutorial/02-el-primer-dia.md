@@ -13,16 +13,16 @@
 
 ¿Bajo qué día quedó? ¿De dónde salió la hora, si no dijiste ninguna?
 
-Ahora pregúntale al agente qué corrió para escribir eso. La respuesta importa: **no editó el archivo a mano**, le pidió al comando `tuku` que lo escribiera. Todo lo que viene después depende de esa diferencia ([principio 4](../principios.md)).
+Pregúntale al agente qué corrió para escribir eso. La respuesta es un comando `tuku`: el agente le pidió el registro al comando y el archivo lo escribió el comando. Todo lo que viene después depende de eso ([principio 4](../principios.md)).
 
-> [!tip] Y una segunda frase
+> [!tip] Una segunda frase
 > Estamos abajo en cuadernos universitarios de cien hojas y en témperas de doce colores.
 
 ### Mira `AHORA.md` otra vez
 
-Dos líneas, dos horas, el mismo día.
+Hay dos líneas con dos horas, bajo el mismo día.
 
-Fíjate en la palabra entre asteriscos de cada una. No es la misma, y ninguna de las dos la dijiste tú. Esa palabra es lo único que tu agente tuvo que decidir; todo el resto de la línea es mecánico.
+Cada línea lleva una palabra entre asteriscos. Son distintas y tú no dijiste ninguna. Esa palabra es lo único que tu agente decidió; el resto de la línea lo arma el comando.
 
 ---
 
@@ -33,16 +33,16 @@ Fíjate en la palabra entre asteriscos de cada una. No es la misma, y ninguna de
 
 ### Mira `AHORA.md` y después `PENDIENTES.md`
 
-Una sola frase dejó dos líneas en la bitácora: el hecho ocurrido y el compromiso contraído.
+Una frase dejó dos cosas en `AHORA.md`: el hecho ocurrido y el compromiso contraído.
 
-Solo una de las dos llegó a `PENDIENTES.md`. Compara el texto de las dos versiones: es idéntico palabra por palabra. Un hecho, un comando: al asentar el registro con su compromiso, la fila en `PENDIENTES.md` se abre sola por [consecuencia](../glosario.md#lo-que-se-escribe).
+El compromiso tiene además una fila en `PENDIENTES.md`, con el mismo texto palabra por palabra. La columna `Vence` trae la fecha de mañana, porque dijiste "mañana". Un hecho, un comando: el comando que asienta el registro abre la fila por [consecuencia](../glosario.md#lo-que-se-escribe).
 
-> [!tip] Ahora prueba esto
+> [!tip] Ahora un pendiente con día y hora
 > Recuérdame que la Emilia tiene reunión de apoderados el jueves a las siete.
 
 ### Mira `AHORA.md`
 
-Busca la palabra "recuérdame". No está. Lo que quedó escrito es el hecho y su compromiso, no la instrucción dirigida al agente.
+Busca la palabra "recuérdame". Falta en el registro: quedó el compromiso, sin la instrucción dirigida al agente. En `PENDIENTES.md`, la columna `Vence` trae el jueves con su hora, y `AHORA.md` lo muestra bajo ese día.
 
 ---
 
@@ -53,104 +53,104 @@ Busca la palabra "recuérdame". No está. Lo que quedó escrito es el hecho y su
 
 ### Mira `PENDIENTES.md` y `AHORA.md`
 
-En `PENDIENTES.md` la fila desapareció.
+La fila desapareció de `PENDIENTES.md`.
 
-En `AHORA.md` quedó la constancia de cierre con `(Hecho)` y la hora exacta en que lo informaste. El mismo comando que asienta el hecho retira el compromiso de la tabla. Nada desaparece sin dejar constancia en la bitácora.
+`AHORA.md` conserva la constancia del cierre, con `(Hecho)` y la hora en que lo informaste. El mismo comando que asienta el hecho retira el compromiso de la tabla, y cada cierre deja su constancia en la bitácora.
 
 ### Trata de romperlo
 
 > [!tip] Dile a tu agente
 > Pagué las cotizaciones de la Katia en Previred, alcancé justo.
 
-Eso está hecho, pero nunca estuvo registrado como pendiente. Mira `PENDIENTES.md`: no apareció ninguna fila nueva ni se alteró ninguna existente. El registro se escribió directo en `AHORA.md`. Un sistema que inventa pendientes ficticios para poder cerrarlos falsea tu propio historial.
+Eso ya está hecho y nunca fue un pendiente. Mira `PENDIENTES.md`: no tiene filas nuevas y las existentes siguen iguales. El registro quedó directo en `AHORA.md`. Inventar pendientes para poder cerrarlos falsearía tu historial.
 
 ---
 
 ## Un frente nuevo
 
-Abre `AHORA.md` y mira el link al inicio de cada línea, `[personal](ambitos/personal/personal.md)`: todo cayó en `personal`, el único frente que trae un vault recién instalado.
+Abre `AHORA.md` y mira el link al inicio de cada línea, `[personal](ambitos/personal/personal.md)`. Todo cayó en `personal`, el único frente de un vault recién instalado.
 
 > [!tip] Dile a tu agente
 > Colegio Los Robles es un cliente, ábrelo como un frente aparte.
 
 ### Mira la carpeta `ambitos/`
 
-Apareció el directorio `ambitos/colegio-los-robles/` con su página `colegio-los-robles.md`, `AGENTS.md` y `CADENCIAS.md`.
+Apareció `ambitos/colegio-los-robles/` con su página `colegio-los-robles.md`, su `AGENTS.md` y su `CADENCIAS.md`.
 
 ### Vuelve a `AHORA.md`
 
-Revisa los registros escritos hace veinte minutos: los que decían "Colegio Los Robles" en texto plano ahora lo enlazan como `[colegio-los-robles](ambitos/colegio-los-robles/colegio-los-robles.md)`. Los que decían solo "Los Robles" quedaron igual: se enlaza el nombre del frente y no sus apodos, porque reconocer un apodo sería adivinar. Las demás líneas quedaron intactas.
+Los registros de hace veinte minutos que decían "Colegio Los Robles" ahora lo enlazan como `[colegio-los-robles](ambitos/colegio-los-robles/colegio-los-robles.md)`. Los que decían "Los Robles" quedaron con el texto original: se enlaza el nombre del frente y los apodos se dejan como los escribiste, porque reconocer un apodo sería adivinar. Las demás líneas se mantienen igual.
 
-Esto ilustra que [la organización emerge del uso](../principios.md): registras primero, ordenas cuando el patrón madura, y el ciclo en curso se actualiza solo.
+Así [la organización emerge del uso](../principios.md): registras primero, ordenas cuando el patrón madura, y el ciclo en curso se actualiza solo.
 
 ---
 
 ## Algo que no es de hoy
 
-No todo lo que sabes ocurrió a una hora fija de hoy.
+Parte de lo que sabes no ocurrió a una hora de hoy.
 
 > [!tip] Dile a tu agente
 > Guárdame una ficha de Los Robles: don Rodolfo Cifuentes es el administrador, compran para el segundo semestre, y les importa más el plazo de entrega que el precio.
 
 ### Mira `notas/` y `AHORA.md`
 
-En `notas/` apareció la ficha enlazada al cliente. En `AHORA.md` quedó la constancia temporal de haberla creado hoy.
+En `notas/` apareció la ficha, enlazada al cliente. En `AHORA.md` quedó la constancia de haberla creado hoy.
 
-El día guarda lo que pasó; la nota guarda lo que sabes. Separar ambos ejes ([principio 6](../principios.md)) te permite consultar la ficha en marzo sin tener que releer agosto completo.
+El día guarda lo que pasó y la nota guarda lo que sabes. Con los dos ejes separados ([principio 6](../principios.md)), consultas la ficha en marzo sin releer agosto completo.
 
 ---
 
 ## Cuando quedó mal dicho
 
-Dictaste rápido y quedó escrito algo que no era. Corregirlo también se dicta.
+Dictaste rápido y quedó escrito algo equivocado. Corregirlo también se dicta.
 
 > [!tip] Dile a tu agente
 > La reunión de apoderados de la Emilia no era a las siete, es a las seis y media. Y al frente ponle Liceo Los Robles, que cambiaron de categoría.
 
-Lo que buscas: que el registro **y** el pendiente digan lo mismo. Un registro corregido y una fila sin corregir dejan un pendiente que ya no puedes cerrar, porque cerrarlo es repetir su texto. Por eso corregir es un solo comando y no dos.
+Comprueba que el registro y el pendiente digan lo mismo. Si uno cambia y el otro no, el pendiente ya no se puede cerrar, porque cerrarlo es repetir su texto. Por eso corregir es un solo comando.
 
-Con el [ámbito](../glosario.md#el-árbol-de-ámbitos) pasa lo mismo pero en más sitios: la carpeta, su página y cada mención en tu bitácora. Míralo en `ambitos/` y en `AHORA.md`: no queda ni un link al nombre viejo.
+El [ámbito](../glosario.md#el-árbol-de-ámbitos) se corrige en varios sitios: la carpeta, su página y cada mención en tu bitácora. Míralo en `ambitos/` y en `AHORA.md`: ningún link conserva el nombre viejo.
 
-> [!tip] Pídele algo que no tenga comando
+> [!tip] Pídele algo que ningún comando hace
 > Fusiona Liceo Los Robles y personal en un solo frente.
 
-Eso no lo hace ningún comando, y tu agente puede resolverlo igual, a mano. Lo que debe hacer primero es **decirte en una frase qué entendió** —en tus palabras, no en jerga— y esperar tu confirmación. Si se pone a trabajar sin decirte qué va a hacer, o si contesta con tecnicismos, eso es lo que hay que arreglar.
+Tu agente puede resolverlo a mano. Antes, debe **decirte en una frase qué entendió**, en tus palabras y sin jerga, y esperar tu confirmación. Si empieza a trabajar sin avisar, o contesta con tecnicismos, ahí hay algo que arreglar.
 
 ---
 
 ## Revisar con el doctor
 
-Este es el segundo y último comando que corres directamente en tu terminal:
+Es el segundo y último comando que corres tú:
 
 ```bash
 tuku doctor
 ```
 
-Por defecto muestra solo lo que hay que leer: los hallazgos y los avisos. Con `tuku doctor --verbose` ves además cada revisión que salió bien. Si la salida indica "pregunta" junto a una palabra tuya, no es un error: es un término nuevo que el sistema aceptó y sobre el que te consultará cuando corresponda formalizarlo en el estilo. El vocabulario lo defines tú.
+Muestra los hallazgos y los avisos. Con `tuku doctor --verbose` ves también cada revisión que salió bien. Una salida con "pregunta" junto a una palabra tuya indica un término nuevo que el sistema aceptó. Cuando corresponda, te consultará si lo formalizas en el libro de estilo. El vocabulario lo defines tú.
 
 > [!tip] Hazlo enojar
-> Abre `PENDIENTES.md` en tu editor y borra manualmente una fila.
+> Abre `PENDIENTES.md` en tu editor y borra una fila a mano.
 
-Ejecuta de nuevo `tuku doctor`. Detectará de inmediato la inconsistencia cruzando `AHORA.md` con `PENDIENTES.md`. Deshaz el cambio manual antes de seguir.
+Ejecuta `tuku doctor` otra vez. Cruza `AHORA.md` con `PENDIENTES.md` y reporta la inconsistencia. Deshaz el cambio antes de seguir.
 
 ---
 
 ## El día completo
 
-Ahora prueba un dictado continuo, tal como hablarías al final de la jornada:
+Dicta ahora seguido, como al final de una jornada:
 
 > [!tip] Dile a tu agente, todo junto
 > Le mandé todas las facturas y boletas del mes a la Ximena Rojas para el F29. Me dijo que este mes sale IVA a pagar, como ciento ochenta mil.
-> 
+>
 > Llamé a la señora Patricia Lillo del Liceo Andes, que no me compra desde abril. Me contestó de buena: resulta que cambiaron de proveedor por precio pero no quedaron contentos con los plazos. Me pidió que le cotizara de nuevo.
-> 
+>
 > Fui al banco a ver la línea de capital de trabajo para la compra de marzo. Me atendió Felipe Correa, me pidió los últimos tres F29 y el balance del año pasado.
-> 
+>
 > Y el Vicente amaneció con fiebre, lo tuve que ir a buscar al colegio a las once. Perdí toda la mañana.
 
 ### Mira `AHORA.md` y `PENDIENTES.md`
 
-Las cuatro frases se desglosaron en sus respectivos hechos independientes, asignando ámbitos, horas y compromisos abiertos.
+Las cuatro frases se separaron en hechos independientes, cada uno con su ámbito, su hora y, cuando corresponde, su compromiso abierto.
 
 ---
 

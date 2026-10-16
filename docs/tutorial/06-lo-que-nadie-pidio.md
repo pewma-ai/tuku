@@ -2,29 +2,29 @@
 
 > [!warning] Todavía no funciona
 
-Este capítulo es el único que no requiere pedir nada.
+En este capítulo no pides nada.
 
-Abre tu agente sobre un vault con meses de uso acumulado y no le des instrucciones.
+Abre tu agente sobre un vault con meses de uso y deja que hable primero.
 
 ## Mira lo que propone
 
-El agente debe observar anomalías o patrones sin intervención previa:
+El agente observa anomalías y patrones por su cuenta:
 
-- Una cotización que se ha arrastrado de un ciclo a otro por cinco semanas sin avance.
-- Un cliente regular que dejó de comprar hace cuatro meses (la ausencia prolongada de un patrón).
-- Una tarea recurrente de los lunes que nunca fue declarada explícitamente como cadencia.
+- Una cotización que lleva cinco semanas pasando de un ciclo a otro sin avance.
+- Un cliente regular que dejó de comprar hace cuatro meses.
+- Una tarea de los lunes que se repite y nunca se declaró como cadencia.
 
-Ninguno de estos puntos fue registrado como un hecho directo; surgen del cruce de los tres ejes del sistema ([`brief.md`](../brief.md#los-tres-ejes)).
+Ninguno de esos puntos se registró como hecho. Salen del cruce de los tres ejes del sistema ([`brief.md`](../brief.md#los-tres-ejes)).
 
 ## Rechaza las propuestas
 
-Dile que no a todas las sugerencias.
+Dile que no a todas.
 
 ## Revisa el vault
 
-Busca rastros de lo rechazado: no existe ninguno. Ni marcas, ni notas de rechazo, ni expedientes sobre tu negativa.
+El vault queda igual que antes de las propuestas: sin marcas, sin notas de rechazo y sin expedientes sobre tu respuesta.
 
-Un asistente que registra cada rechazo termina coartando al autor. En TUKU, una propuesta rechazada simplemente no ocurrió ([principio 3](../principios.md)).
+Un asistente que registra cada rechazo termina condicionando al autor. En TUKU, una propuesta rechazada queda como si nunca se hubiera hecho ([principio 3](../principios.md)).
 
 ---
 

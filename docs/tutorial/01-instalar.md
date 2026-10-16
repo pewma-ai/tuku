@@ -10,26 +10,26 @@ uv tool install --force "git+https://github.com/pewma-ai/tuku.git@devel"
 tuku init mi-vault
 ```
 
-Ese es el primero de los dos comandos que corres tú.
+Es el primero de los dos comandos que corres tú.
 
 ## Mira la carpeta
 
-Ábrela con lo que sea: el Finder, tu editor, Obsidian. Son archivos de texto y no necesitan nada especial.
+Ábrela con el Finder, tu editor u Obsidian. Son archivos de texto y cualquier programa los lee.
 
-Unos están en MAYÚSCULAS y otros en minúsculas. La diferencia no es estética y una de las dos es tuya para renombrar. `AGENTS.md` dice cuál.
+Unos nombres van en MAYÚSCULAS y otros en minúsculas. Los de MAYÚSCULAS son de TUKU y los de minúsculas son tuyos. `AGENTS.md` lo explica.
 
-Abre `AHORA.md`. Tiene siete días con su fecha, y tú no escribiste ninguno.
+Abre `AHORA.md`. Tiene siete días con su fecha, ya escritos por `tuku init`.
 
-Abre `AGENTS.md`. Son las instrucciones que va a leer tu agente. Léelas tú también: en dos minutos sabes exactamente lo que él sabe, y no hay una segunda capa escondida.
+Abre `AGENTS.md`. Son las instrucciones que va a leer tu agente. Léelas también: en dos minutos sabes todo lo que él sabe, porque el vault no guarda otras instrucciones.
 
 ## Abre tu agente
 
-Ábrelo apuntando a la carpeta `mi-vault`, no a un archivo de adentro.
+Ábrelo apuntando a la carpeta `mi-vault`.
 
-> Claude Code, agy, Antigravity, o el escritorio que uses. Sirve cualquiera que pueda leer la carpeta y correr comandos.
+> Claude Code, agy, Antigravity o el escritorio que uses. Sirve cualquiera que pueda leer la carpeta y correr comandos.
 
-No le expliques qué es TUKU ni le pegues instrucciones. Ya está todo ahí.
+Empieza a hablarle. Todas las instrucciones ya están en la carpeta.
 
-Si tienes que explicárselo para que funcione, el defecto es del vault y no tuyo. Anótalo: eso es justo lo que este tutorial sirve para encontrar.
+Si necesitas explicarle algo para que funcione, el vault tiene un defecto. Anótalo: el tutorial sirve para encontrar esos defectos.
 
 Siguiente: [2. El primer día](02-el-primer-dia.md).
