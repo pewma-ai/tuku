@@ -11,6 +11,7 @@ sobre uno, así que no tiene sustantivo sobre el que actuar.
 from __future__ import annotations
 
 import argparse
+import functools
 import sys
 
 from tuku.cli import entry, note, scope, system, todo
@@ -58,7 +59,13 @@ def comandos() -> frozenset[str]:
     )
 
 
+@functools.cache
 def _construir_parser() -> argparse.ArgumentParser:
+    """El árbol entero de comandos. Se arma una vez por proceso.
+
+    Armarlo cuesta tanto como el comando más común, y `main` se llama muchas
+    veces en el mismo proceso cuando lo invocan los tests o un lote.
+    """
     global _COMANDOS
     parser = argparse.ArgumentParser(
         prog="tuku",
