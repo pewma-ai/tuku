@@ -209,7 +209,7 @@ def clave(cuerpo: str) -> str:
     `PENDIENTES.md`, o al revés. Al buscar cuál cerrar, o si ya existe, lo que
     cuenta es lo que se lee.
     """
-    return link.sin_links(cuerpo).strip()
+    return " ".join(link.sin_links(cuerpo).split())
 
 
 def _es_separador(linea: str) -> bool:
@@ -514,6 +514,28 @@ def cerrar(pendientes: str, marca: Marca) -> tuple[str, bool]:
     return pendientes, False
 
 
+def avisos_de_plazo(due: str, day: date | None, hour: str | None) -> tuple[str, ...]:
+    """Lo raro de un vencimiento, que no lo impide: ya pasó, o es anterior a la promesa.
+
+    Registrar algo que ya venció es legítimo ("se me pasó pagar la luz"), y
+    estar atrasado se calcula (`spec/pendientes.md`): el pendiente se abre y el
+    comando alerta.
+    """
+    if not due:
+        return ()
+    ahora = datetime.now()
+    dia, _, h = due.partition(" ")
+    vence = datetime.fromisoformat(f"{dia} {h or '23:59'}")
+    prometido = datetime.fromisoformat(
+        f"{(day or ahora.date()).isoformat()} {hour or ahora.strftime('%H:%M')}"
+    )
+    if (day or hour) and vence < prometido:
+        return (f"vence el {due}, antes de {prometido:%Y-%m-%d %H:%M}, cuando se promete.",)
+    if vence < ahora:
+        return (f"vence el {due}, que ya pasó: el pendiente nace atrasado.",)
+    return ()
+
+
 def abrir_en_vault(
     vault: Path,
     *,
@@ -556,7 +578,7 @@ def abrir_en_vault(
             f"el {day.isoformat()} todavía no llega: `--at` es cuándo se prometió. "
             f"Para que venza ese día: --due {day.isoformat()}"
         )
-    limpio_scope = ambitos.normalizar(scope) if scope else None
+    limpio_scope = ambitos.canonico(vault, scope) if scope else None
     if limpio_scope and (rechazo := ambitos.rechazo_si_no_existe(vault, limpio_scope)):
         return rechazo
     marca = Marca(ABRE, limpio_scope, body.strip())
@@ -602,7 +624,10 @@ def abrir_en_vault(
         ambitos.actualizar_pagina(vault, amb.nombre)
     if propagate:
         propagar(vault)
-    return Resultado.hecho(f"pendiente abierto en «{horizon}»: {marca.cuerpo}")
+    return Resultado.hecho(
+        f"pendiente abierto en «{horizon}»: {marca.cuerpo}",
+        avisos=avisos_de_plazo(due, day, hour),
+    )
 
 
 def cerrar_en_vault(
@@ -629,7 +654,7 @@ def cerrar_en_vault(
     from tuku.propagate import propagar
 
     if scope:
-        scope = ambitos.normalizar(scope)
+        scope = ambitos.canonico(vault, scope)
         if (rechazo := ambitos.rechazo_si_no_existe(vault, scope)) is not None:
             return rechazo
     marca = Marca(CIERRA, None, body.strip())
@@ -680,9 +705,12 @@ def cerrar_en_vault(
 
     if not hubo_pareja:
         return Resultado.hecho(
-            f"no había ningún pendiente abierto con el cuerpo {marca.cuerpo!r}, "
-            f"así que no se borró nada. El registro queda escrito. Si esperabas "
-            f"cerrarlo, revisa que el texto coincida palabra por palabra."
+            f"cierre escrito: {marca.cuerpo}",
+            avisos=(
+                f"no había ningún pendiente abierto con el cuerpo {marca.cuerpo!r}, "
+                f"así que no se borró nada. Si esperabas cerrarlo, revisa que el texto "
+                f"coincida palabra por palabra.",
+            ),
         )
     return Resultado.hecho(f"pendiente cerrado: {marca.cuerpo}")
 

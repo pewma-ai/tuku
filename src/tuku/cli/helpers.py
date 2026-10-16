@@ -56,6 +56,8 @@ def traducir(r: Resultado, prefijo: str) -> int:
         print(f"{prefijo}: {r.mensaje}", file=sys.stderr)
     else:
         print(r.mensaje)
+    for aviso in r.avisos:
+        print(f"{prefijo}: warning: {aviso}", file=sys.stderr)
     return EXITO if r.ok else RECHAZO
 
 

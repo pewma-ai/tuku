@@ -100,3 +100,9 @@ def test_un_registro_que_ya_existe_se_ubica_con_hora() -> None:
     assert momento_con_hora("2026-08-10 09:12").hora == "09:12"
     with pytest.raises(argparse.ArgumentTypeError):
         momento_con_hora("2026-08-10")
+
+
+@pytest.mark.parametrize("valor", ["-08-10", "mañana", "2026/08/10"])
+def test_lo_que_no_parece_hora_dice_las_tres_formas_y_no_pide_una_hora(valor: str) -> None:
+    with pytest.raises(argparse.ArgumentTypeError, match="AAAA-MM-DD"):
+        momento_pasado(valor)

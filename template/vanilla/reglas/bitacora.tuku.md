@@ -44,6 +44,8 @@ Si el autor dijo para cuándo ("mañana", "el lunes", "antes del 20"), va en `--
 
 Sin `--due`, el pendiente nace en el primer escalón de `### Horizontes`. Para mandarlo a otro escalón, `--horizon`, con el nombre tal como está escrito en `LIBRO-DE-ESTILO.md`: los escalones son del autor y puede haberlos renombrado. `--due` y `--horizon` no van juntos.
 
+Un `warning` en la salida de error es una alerta, no un fallo: el comando procedió. Un `todo close` que avisa que no encontró su pendiente escribió el cierre y no borró nada; un `--due` que avisa que ya pasó abrió un pendiente atrasado. Léelo y, si no era lo que el autor quería, corrige el texto o díselo.
+
 ## Un hecho, un comando
 
 Una frase del autor puede dar varios registros, y cada uno es una llamada. Lo que no ocurre nunca es lo contrario: dos llamadas para un mismo hecho. Cada comando deja la línea y actualiza las páginas de ámbito; `tuku todo open` y `tuku todo close` además abren o cierran la fila de `PENDIENTES.md`, todo en la misma llamada.

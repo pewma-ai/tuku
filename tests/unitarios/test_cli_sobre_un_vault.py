@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tuku import entry, init
+from tuku import entry, init, todo
 from tuku.cli import EXITO, RECHAZO, main
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -238,3 +238,120 @@ def test_una_nota_sin_titulo_se_rechaza_sin_escribir(vault: Path, titulo: str) -
     codigo = _tuku(vault, "note", "create", titulo, "--body", "x", "--at", f"{HOY} 10:00")
     assert codigo == RECHAZO
     assert _foto(vault) == antes
+
+
+def _congelar(monkeypatch: pytest.MonkeyPatch, modulo: object, dia: date, hora: str) -> None:
+    h, m = hora.split(":")
+
+    class Hoy(date):
+        @classmethod
+        def today(cls) -> Hoy:
+            return cls(dia.year, dia.month, dia.day)
+
+    class Ahora(datetime):
+        @classmethod
+        def now(cls, tz: object = None) -> Ahora:
+            return cls(dia.year, dia.month, dia.day, int(h), int(m))
+
+    monkeypatch.setattr(modulo, "date", Hoy)
+    monkeypatch.setattr(modulo, "datetime", Ahora)
+
+
+# --- los ámbitos no distinguen mayúsculas -----------------------------------
+
+
+def test_un_ambito_que_solo_difiere_en_mayusculas_choca_con_el_existente(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    antes = _foto(vault)
+    assert _tuku(vault, "scope", "create", "PERSONAL", "--at", f"{HOY} 10:00") == RECHAZO
+    assert "personal" in capsys.readouterr().err
+    assert _foto(vault) == antes
+
+
+def test_el_ambito_se_encuentra_sin_distinguir_mayusculas(vault: Path) -> None:
+    assert _tuku(vault, "scope", "create", "Ñandú Rojo", "--at", f"{HOY} 10:00") == EXITO
+    for cuerpo, hora, nombre in (("uno", "11:00", "ñandú rojo"), ("dos", "12:00", "PERSONAL")):
+        argv = ("entry", "add", "--scope", nombre, "--body", cuerpo, "--at", f"{HOY} {hora}")
+        assert _tuku(vault, *argv) == EXITO
+    ahora = _leer(vault, "AHORA.md")
+    assert "[Ñandú-Rojo](ambitos/Ñandú-Rojo/Ñandú-Rojo.md) uno" in ahora
+    assert "[personal](ambitos/personal/personal.md) dos" in ahora
+
+
+def test_renombrar_solo_las_mayusculas_de_un_ambito(vault: Path) -> None:
+    assert _tuku(vault, "scope", "create", "casa", "--at", f"{HOY} 10:00") == EXITO
+    assert _tuku(vault, "scope", "rename", "casa", "Casa") == EXITO
+    assert "Casa" in [p.name for p in (vault / "ambitos").iterdir()]
+    assert "Casa.md" in [p.name for p in (vault / "ambitos" / "Casa").iterdir()]
+
+
+def test_renombrar_a_un_nombre_que_choca_por_mayusculas_se_rechaza(vault: Path) -> None:
+    for nombre in ("casa", "taller"):
+        assert _tuku(vault, "scope", "create", nombre, "--at", f"{HOY} 10:00") == EXITO
+    antes = _foto(vault)
+    assert _tuku(vault, "scope", "rename", "taller", "CASA") == RECHAZO
+    assert _foto(vault) == antes
+
+
+# --- un registro cuenta lo que ya pasó --------------------------------------
+
+
+def test_entry_add_en_un_dia_futuro_se_rechaza_y_nombra_todo_open(
+    vault: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _congelar(monkeypatch, entry, date(2026, 8, 11), "21:30")
+    antes = _foto(vault)
+    assert _tuku(vault, "entry", "add", "--body", "x", "--at", "2026-08-12 09:00") == RECHAZO
+    assert "todo open --due 2026-08-12" in capsys.readouterr().err
+    assert _foto(vault) == antes
+
+
+# --- avisos: el comando procede y alerta por stderr -------------------------
+
+
+def test_un_cierre_sin_pareja_avisa_y_sale_bien(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    argv = ("todo", "close", "--body", "algo que nunca se abrió", "--at", f"{HOY} 10:00")
+    assert _tuku(vault, *argv) == EXITO
+    salida = capsys.readouterr()
+    assert "warning" in salida.err and "palabra por palabra" in salida.err
+    assert "warning" not in salida.out
+    assert "algo que nunca se abrió" in _leer(vault, "AHORA.md")
+
+
+def test_un_cierre_con_pareja_no_avisa(vault: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    assert _tuku(vault, "todo", "open", "--body", "pagar", "--at", f"{HOY} 09:00") == EXITO
+    assert _tuku(vault, "todo", "close", "--body", "pagar", "--at", f"{HOY} 10:00") == EXITO
+    assert "warning" not in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    ("argv", "dice"),
+    [
+        (("--due", "2026-08-10"), "ya pasó"),
+        (("--at", "2026-08-11 10:00", "--due", "2026-08-11 09:00"), "antes de"),
+    ],
+)
+def test_un_due_absurdo_avisa_y_el_pendiente_se_abre(
+    vault: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    argv: tuple[str, ...],
+    dice: str,
+) -> None:
+    _congelar(monkeypatch, todo, date(2026, 8, 11), "21:30")
+    assert _tuku(vault, "todo", "open", "--body", "pagar la luz", *argv) == EXITO
+    err = capsys.readouterr().err
+    assert "warning" in err and dice in err
+    assert "pagar la luz" in _leer(vault, "PENDIENTES.md")
+
+
+def test_un_due_futuro_no_avisa(
+    vault: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _congelar(monkeypatch, todo, date(2026, 8, 11), "21:30")
+    argv = ("todo", "open", "--body", "pagar la luz", "--due", "2026-08-12 09:00")
+    assert _tuku(vault, *argv) == EXITO
+    assert "warning" not in capsys.readouterr().err

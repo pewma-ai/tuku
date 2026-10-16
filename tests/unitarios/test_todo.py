@@ -485,3 +485,19 @@ def test_quitar_con_cuerpo_toca_solo_ese_pendiente() -> None:
 def test_el_lint_reporta_la_apertura_y_nombra_fix_todo() -> None:
     hallazgos = todo.lint(todo.CABECERA + "\n| --- | --- | --- | --- |\n", DIA_CERRADO)
     assert any("AHORA.md:2:" in h and "tuku fix todo" in h for h in hallazgos), hallazgos
+
+
+# --- los espacios repetidos no hacen otro pendiente -------------------------
+
+
+def test_los_espacios_repetidos_no_hacen_otro_pendiente() -> None:
+    una = todo.abrir(VACIA, todo.Marca(todo.ABRE, "personal", "pagar la luz"))
+    assert todo.abrir(una, todo.Marca(todo.ABRE, "personal", "pagar  la\tluz ")) == una
+    sin_fila, hubo_pareja = todo.cerrar(
+        una, todo.Marca(todo.CIERRA, "personal", "pagar   la luz")
+    )
+    assert hubo_pareja and todo.cuerpos(sin_fila) == []
+
+
+def test_las_mayusculas_siguen_distinguiendo_al_cerrar() -> None:
+    assert todo.clave("Pagar la luz") != todo.clave("pagar la luz")

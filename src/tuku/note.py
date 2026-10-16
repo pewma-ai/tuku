@@ -44,14 +44,10 @@ def slug(titulo: str) -> str:
 def crear(
     vault: Path,
     *,
-    title: str = "",
-    titulo: str = "",
-    body: str = "",
-    cuerpo: str = "",
+    title: str,
+    body: str,
     scope: str | None = None,
-    ambito: str | None = None,
     today: date | None = None,
-    hoy: date | None = None,
     rutas: Mapping[str, str] | None = None,
 ) -> Path:
     """Escribe la nota en `notas/` y devuelve su ruta. Idempotente.
@@ -65,18 +61,13 @@ def crear(
     `Note` en las notas tipadas (`spec/notas.md`): solo lo declaran algunas, y
     TUKU todavía no lo escribe.
     """
-    valor_titulo = title or titulo
-    valor_cuerpo = body or cuerpo
-    valor_scope = scope if scope is not None else ambito
-    valor_fecha = today or hoy or date.today()
-
-    ruta = vault / "notas" / f"{slug(valor_titulo)}.md"
+    ruta = vault / "notas" / f"{slug(title)}.md"
     if ruta.exists():
         return ruta
 
     ver_ademas = ""
-    if valor_scope is not None:
-        enlace = link.enlace_ambito(valor_scope, f"notas/{ruta.name}", rutas)
+    if scope is not None:
+        enlace = link.enlace_ambito(scope, f"notas/{ruta.name}", rutas)
         ver_ademas = (
             f"\n{VER_ADEMAS}\n\n"
             f"* {enlace} — el ámbito al que pertenece lo que esta nota explica.\n"
@@ -84,34 +75,27 @@ def crear(
 
     ruta.parent.mkdir(parents=True, exist_ok=True)
     contenido = (
-        f"---\ntype: Note\ncreated: {valor_fecha.isoformat()}\n---\n\n"
-        f"# {valor_titulo}\n\n{valor_cuerpo.strip()}\n{ver_ademas}"
+        f"---\ntype: Note\ncreated: {(today or date.today()).isoformat()}\n---\n\n"
+        f"# {title}\n\n{body.strip()}\n{ver_ademas}"
     )
     ruta.write_text(contenido, encoding="utf-8")
     return ruta
 
 
-create = crear
-
-
 def registro_de_constancia(
     nota: Path,
     *,
-    time: str = "",
-    hora: str = "",
+    hour: str,
     scope: str | None = None,
-    ambito: str | None = None,
     rutas: Mapping[str, str] | None = None,
 ) -> str:
     """La línea de bitácora que deja constancia de la nota creada.
 
     Va en `AHORA.md`, así que los dos links son relativos a ese archivo.
     """
-    valor_hora = time or hora
-    valor_scope = scope if scope is not None else ambito
-    prefijo = f"{link.enlace_ambito(valor_scope, 'AHORA.md', rutas)} " if valor_scope else ""
+    prefijo = f"{link.enlace_ambito(scope, 'AHORA.md', rutas)} " if scope else ""
     nota_link = link.enlace(nota.stem, "AHORA.md", f"notas/{nota.name}")
-    return f"- {valor_hora} - {prefijo}**nota**: escribí la nota {nota_link}"
+    return f"- {hour} - {prefijo}**nota**: escribí la nota {nota_link}"
 
 
 def lint(nota: str) -> list[str]:
@@ -174,7 +158,7 @@ def crear_con_constancia(
             f"{title!r} no sirve de título: sin letras ni números no hay nombre de archivo."
         )
     if scope:
-        scope = scope_mod.normalizar(scope)
+        scope = scope_mod.canonico(vault, scope)
         if (rechazo := scope_mod.rechazo_si_no_existe(vault, scope)) is not None:
             return rechazo
 
@@ -187,7 +171,7 @@ def crear_con_constancia(
     if record and ahora_path.is_file():
         texto = ahora_path.read_text(encoding="utf-8")
         constancia = registro_de_constancia(
-            ruta, time=hora, scope=scope, rutas=scope_mod.rutas(vault)
+            ruta, hour=hora, scope=scope, rutas=scope_mod.rutas(vault)
         )
         if constancia not in texto:
             try:

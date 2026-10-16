@@ -62,6 +62,36 @@ def normalizar(nombre: str) -> str:
     return re.sub(r"\s+", "-", nombre.strip().strip("[]").strip())
 
 
+def igual_nombre(a: str, b: str) -> bool:
+    """Dos nombres de ámbito son el mismo si solo difieren en mayúsculas.
+
+    En macOS y Windows el disco no las distingue, y un vault viaja entre
+    sistemas: dos carpetas que solo difieren en mayúsculas no pueden coexistir.
+    """
+    return a.casefold() == b.casefold()
+
+
+def canonico(vault: Path, nombre: str) -> str:
+    """El nombre normalizado, tal como está escrito el ámbito existente que calza.
+
+    `ñandú rojo` encuentra `Ñandú-Rojo`. Si no hay ninguno, el normalizado.
+    """
+    limpio = normalizar(nombre)
+    return next((n for n in sorted(nombres(vault)) if igual_nombre(n, limpio)), limpio)
+
+
+def _choque(vault: Path, nombre: str, *, salvo: str = "") -> str | None:
+    """Otro nombre de `ambitos/` que solo difiere de `nombre` en mayúsculas."""
+    return next(
+        (
+            n
+            for n in sorted(nombres(vault))
+            if igual_nombre(n, nombre) and n != nombre and n != salvo
+        ),
+        None,
+    )
+
+
 def nombres(vault: Path) -> set[str]:
     """Todo lo que un registro puede nombrar en `ambitos/`.
 
@@ -137,13 +167,13 @@ def keywords(pagina: str) -> list[str]:
     return [k.strip() for k in m.group("lista").split(",") if k.strip()]
 
 
-def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
-    """Crea el ámbito `name`/`nombre` bajo `ambitos/`. Idempotente.
+def crear(vault: Path, name: str) -> Path:
+    """Crea el ámbito `name` bajo `ambitos/`. Idempotente.
 
     Si ya existe no toca nada: `spec/ambitos.md` no admite dos ámbitos con el
     mismo nombre, y volver a crearlo no es un error del autor.
     """
-    valor = normalizar(name or nombre)
+    valor = normalizar(name)
     directorio = vault / "ambitos" / valor
     directorio.mkdir(parents=True, exist_ok=True)
 
@@ -173,9 +203,6 @@ def crear(vault: Path, name: str = "", *, nombre: str = "") -> Path:
         propagate.propagar(vault)
 
     return directorio
-
-
-create = crear
 
 
 def extraer_actividad_ambito(
@@ -431,10 +458,10 @@ CONSTANCIA = "**nota**: abrí el ámbito"
 
 
 def registro_de_constancia(
-    nombre: str, *, hora: str, rutas: Mapping[str, str] | None = None
+    nombre: str, *, hour: str, rutas: Mapping[str, str] | None = None
 ) -> str:
     """La línea de bitácora que deja constancia del ámbito creado, para `AHORA.md`."""
-    return f"- {hora} - {link.enlace_ambito(nombre, 'AHORA.md', rutas)} {CONSTANCIA}"
+    return f"- {hour} - {link.enlace_ambito(nombre, 'AHORA.md', rutas)} {CONSTANCIA}"
 
 
 def crear_con_enlazado(
@@ -463,6 +490,11 @@ def crear_con_enlazado(
     nombre = normalizar(nombre)
     if (rechazo := _rechazo_de_nombre(nombre)) is not None:
         return rechazo
+    if (otro := _choque(vault, nombre)) is not None:
+        return Resultado.rechazo(
+            f"ya existe el ámbito {otro!r}, y los nombres no distinguen mayúsculas. "
+            f"Usa {otro!r}, o elige otro nombre."
+        )
     pendientes = vault / "PENDIENTES.md"
     if pendientes.is_file():
         try:
@@ -492,7 +524,7 @@ def crear_con_enlazado(
             rutas=rutas(vault),
         )
         if nuevo:
-            constancia = registro_de_constancia(nombre, hora=hora, rutas=rutas(vault))
+            constancia = registro_de_constancia(nombre, hour=hora, rutas=rutas(vault))
             texto = entry.add(texto, [constancia], day=dia)
         if texto != original:
             ahora_path.write_text(texto, encoding="utf-8")
@@ -520,7 +552,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     """
     from tuku import propagate, rename
 
-    viejo, nuevo = normalizar(viejo), normalizar(nuevo)
+    viejo, nuevo = canonico(vault, viejo), normalizar(nuevo)
     if (rechazo := _rechazo_de_nombre(nuevo)) is not None:
         return rechazo
     origen = vault / "ambitos" / viejo
@@ -531,9 +563,11 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
         )
     if viejo == nuevo:
         return Resultado.hecho(f"el ámbito ya se llama {nuevo!r}: nada que hacer.")
-    if destino.exists():
+    if (otro := _choque(vault, nuevo, salvo=viejo)) is not None or (
+        destino.exists() and not igual_nombre(viejo, nuevo)
+    ):
         return Resultado.rechazo(
-            f"ya existe un ámbito {nuevo!r}. "
+            f"ya existe un ámbito {otro or nuevo!r}. "
             f"Dos ámbitos no pueden llamarse igual: elige otro nombre, o mueve "
             f"a mano lo que quieras conservar de {viejo!r} y bórralo después."
         )

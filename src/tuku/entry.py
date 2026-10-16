@@ -163,8 +163,13 @@ def add_al_vault(
     from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
+    if day is not None and day > date.today():
+        return Resultado.rechazo(
+            f"el {day.isoformat()} todavía no llega: un registro cuenta lo que ya pasó. "
+            f"Si es un compromiso, ábrelo con `tuku todo open --due {day.isoformat()}`."
+        )
     if scope:
-        scope = ambitos.normalizar(scope)
+        scope = ambitos.canonico(vault, scope)
         if (rechazo := ambitos.rechazo_si_no_existe(vault, scope)) is not None:
             return rechazo
 

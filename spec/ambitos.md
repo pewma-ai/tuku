@@ -63,7 +63,7 @@ Toda página de ámbito debe transcluir sus pendientes desde `PENDIENTES-AMBITOS
 ![[../PENDIENTES-AMBITOS.md#^personal]]
 ```
 
-`tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito, asegura su callout en `PENDIENTES-AMBITOS.md` y estampa una constancia cronológica en `AHORA.md`, con `--at` o, si falta, HOY y AHORA en `TZ`:
+Los nombres de ámbito no distinguen mayúsculas: dos carpetas que solo difieren en ellas no pueden coexistir (el disco de macOS y Windows no las distingue), y un nombre que escribe mal las mayúsculas encuentra el ámbito existente. `tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito, asegura su callout en `PENDIENTES-AMBITOS.md` y estampa una constancia cronológica en `AHORA.md`, con `--at` o, si falta, HOY y AHORA en `TZ`:
 
 ```text
 - 18:45 - [depto-centro](ambitos/depto-centro/depto-centro.md) **nota**: abrí el ámbito

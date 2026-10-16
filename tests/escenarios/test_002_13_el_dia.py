@@ -267,7 +267,7 @@ def test_002_13_los_pendientes_de_manana_y_pasado_llegan_a_su_dia() -> None:
 def test_002_13_repetir_el_dia_no_cambia_nada() -> None:
     corrida = _paso(CADENA[7])
     assert corrida.delta_de("mi-vault") == {}, "repetir el día escribió"
-    assert "no había ningún pendiente abierto" in corrida.de("19:05").stdout
+    assert "warning" in corrida.de("19:05").stderr
     assert "al día" in corrida.de("regenerate").stdout
     assert "el vault está sano" in corrida.de("doctor").stdout
 

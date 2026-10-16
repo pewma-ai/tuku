@@ -51,7 +51,7 @@ def _leer(valor: str) -> tuple[re.Match[str] | None, str | None]:
     if not partes or len(partes) > 2:
         raise argparse.ArgumentTypeError(_formato(valor))
     m = _FECHA.match(partes[0])
-    if m is None and len(partes) == 2:
+    if m is None and (len(partes) == 2 or ":" not in partes[0]):
         raise argparse.ArgumentTypeError(_formato(valor))
     resto = partes[1:] if m else partes
     return m, (hora(resto[0]) if resto else None)

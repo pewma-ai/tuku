@@ -29,6 +29,9 @@ from dataclasses import dataclass
 class Resultado:
     """Si la operación procedió, y qué decir sobre ella.
 
+    `avisos` son advertencias de una operación que procedió: el comando sale con
+    éxito y cada aviso se escribe en `stderr` como `warning`.
+
     `error` distingue a dónde va el mensaje: un rechazo por el estado del vault
     se escribe en `stderr`, y lo que el comando reporta sin negarse (un lint con
     hallazgos, un cierre sin pareja) va a `stdout` aunque no sea un éxito.
@@ -37,11 +40,12 @@ class Resultado:
     ok: bool
     mensaje: str
     error: bool = False
+    avisos: tuple[str, ...] = ()
 
     @classmethod
-    def hecho(cls, mensaje: str) -> Resultado:
-        """La operación procedió."""
-        return cls(True, mensaje)
+    def hecho(cls, mensaje: str, *, avisos: tuple[str, ...] = ()) -> Resultado:
+        """La operación procedió. Cada aviso alerta por `stderr` sin cambiar el código."""
+        return cls(True, mensaje, avisos=avisos)
 
     @classmethod
     def rechazo(cls, mensaje: str, *, error: bool = True) -> Resultado:

@@ -33,6 +33,8 @@ Un solo mensaje en prosa, que sirve a los dos. **Sin `--json`.** Hoy no lo consu
 
 **Toda salida de error nombra el defecto y la corrección.** Decir qué pasó no basta; hay que decir qué hacer. `tuku init` sobre un directorio con contenido no dice solo que está ocupado, dice que `--force` lo reemplaza. La regla vale igual para la persona que escribió rápido y para el agente que tiene que decidir el paso siguiente, y por eso el mensaje es uno solo.
 
+**Un aviso no es un error.** Cuando el comando procede pero algo merece mirarse, sale con 0 y escribe en `stderr` una línea `tuku <comando>: warning: ...` que dice qué pasó y qué revisar. Hoy: un `todo close` que no encontró su pendiente (se escribe el cierre, no se borra ninguna fila) y un `todo open --due` que ya venció o que vence antes de la promesa (el pendiente nace atrasado). Quien invoca que no lee `stderr` sigue funcionando; quien lo lee puede corregir.
+
 Que se cumpla es verificable: la ayuda y los códigos de cada epic se fijan en un escenario, según la convención de [`../devel/epics.md`](../devel/epics.md).
 
 ## Fuera de un vault, ningún comando opera
