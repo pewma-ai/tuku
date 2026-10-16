@@ -22,7 +22,25 @@ Guía de trabajo para agentes y colaboradores. Este repositorio contiene el moto
 | [`tests/`](tests/AGENTS.md) | Capa unitaria en memoria y escenarios encadenados sobre el vault | Verificación |
 | `playground/` | Entornos de prueba efímeros generados por los tests (ignorado por git) | Descartable |
 
-Jerarquía de precedencia: Dentro de un epic, [`spec/`](spec/README.md) manda sobre el código. Entre epics, los experimentos y el uso mandan sobre [`spec/`](spec/README.md). [`devel/epics.md`](devel/epics.md) es la única fuente de verdad sobre el orden y estado de implementación. [`devel/dependencies-tree.md`](devel/dependencies-tree.md) mapea el cableado estructural entre artefactos, specs, plantillas y módulos.
+Jerarquía de precedencia: Dentro de un epic, [`spec/`](spec/README.md) manda sobre el código. Entre epics, los experimentos y el uso mandan sobre [`spec/`](spec/README.md). [`devel/epics.md`](devel/epics.md) es la única fuente de verdad sobre el orden y estado de implementación.
+
+### Artefactos, spec y código
+
+Antes de cambiar un artefacto del vault, esta tabla dice qué más se toca. La plantilla es `template/vanilla/<la misma ruta>`, que `python -m tuku._pack` empaqueta en `src/tuku/_home/` (ignorado por git). Un archivo derivado se cambia en su función constructora, nunca solo en disco.
+
+| Artefacto | Spec | Módulos | Lo escriben |
+|---|---|---|---|
+| `AHORA.md` | [`bitacora.md`](spec/bitacora.md), [`ciclo.md`](spec/ciclo.md) | [`entry.py`](src/tuku/entry.py), [`ahora.py`](src/tuku/ahora.py), [`cycle.py`](src/tuku/cycle.py), [`propagate.py`](src/tuku/propagate.py) | `tuku entry add`, `tuku cycle open`; la región del día, `tuku regenerate` |
+| `PENDIENTES.md` | [`pendientes.md`](spec/pendientes.md) | [`todo.py`](src/tuku/todo.py) | `tuku todo open`, `tuku todo close` |
+| `ambitos/PENDIENTES-AMBITOS.md` | [`pendientes.md`](spec/pendientes.md), [`ambitos.md`](spec/ambitos.md) | [`propagate.py`](src/tuku/propagate.py), [`regenerate.py`](src/tuku/regenerate.py) | `tuku regenerate` |
+| `ambitos/<nombre>/<nombre>.md` | [`ambitos.md`](spec/ambitos.md) | [`scope.py`](src/tuku/scope.py), [`link.py`](src/tuku/link.py) | `tuku scope create`, `tuku scope rename`; la actividad, `tuku regenerate` |
+| `notas/<slug>.md` | [`notas.md`](spec/notas.md) | [`note.py`](src/tuku/note.py) | `tuku note create` |
+| `LIBRO-DE-ESTILO.md` | [`bitacora.md`](spec/bitacora.md) | [`style.py`](src/tuku/style.py), [`vocab.py`](src/tuku/vocab.py) | el autor; se lee con `tuku vocab show` |
+| `reglas/config.tuku.md` | [`README.md`](spec/README.md) | [`config.py`](src/tuku/config.py), [`init.py`](src/tuku/init.py) | `tuku init` |
+| `reglas/types.md` | [`README.md`](spec/README.md) | [`doctor.py`](src/tuku/doctor.py) | el autor; lo valida `tuku doctor` |
+| `AGENTS.md` | [`despacho.md`](spec/despacho.md), [`agente.md`](spec/agente.md) | [`doctor.py`](src/tuku/doctor.py) | el autor; lo revisa `tuku doctor` |
+
+Las cadencias y la capacidad todavía no tienen módulo (epic 006).
 
 ## El ciclo de desarrollo e iteraciones
 

@@ -99,7 +99,7 @@ Las cajas rosadas son las que necesitan juicio, y son las únicas: el juicio se 
 
 | Consecuencia | Qué hace | Reglas | Comandos |
 | --- | --- | --- | --- |
-| Pendientes | Alta o baja en `PENDIENTES.md`, y las vistas que se derivan de él | `reglas/bitacora.tuku.md` (`reglas/pendientes.tuku.md` todavía no existe) | `todo open` y `todo close` las aplican junto con el registro; `todo propagate` regenera las vistas |
+| Pendientes | Alta o baja en `PENDIENTES.md`, y las vistas que se derivan de él | `reglas/bitacora.tuku.md` (`reglas/pendientes.tuku.md` todavía no existe) | `todo open` y `todo close` las aplican junto con el registro; `regenerate todo` regenera las vistas |
 | Enlaces | Conecta el registro con páginas que ya existen | `reglas/enlaces.tuku.md`, todavía no existe | `scope create`; `page index` todavía no existe |
 | Cadencias | Alta o cambio de una cadencia en su ámbito | `reglas/cadencias.tuku.md`, todavía no existe (epic 006) | `cadence add`, `cadence inject`, todavía no existen |
 | Nota | Escribe en `notas/` lo que el autor pidió, y deja constancia en la bitácora | `reglas/notas.tuku.md` | `note create`, `note lint` |
