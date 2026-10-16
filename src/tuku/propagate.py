@@ -46,7 +46,7 @@ from datetime import date
 from pathlib import Path
 
 from tuku import link, scope, todo
-from tuku.ahora import dias
+from tuku.ahora import dias, encabezado_de
 
 #: Un registro de bitácora. Es la frontera inferior de la región del día.
 _REGISTRO = re.compile(r"^- \d{2}:\d{2} - ")
@@ -171,23 +171,53 @@ def callout(
     return "\n".join(lineas)
 
 
+def _fecha(fila: todo.Fila) -> date | None:
+    try:
+        return date.fromisoformat(fila.cuando.strip())
+    except ValueError:
+        return None
+
+
+def _orden_en_el_ambito(fila: todo.Fila) -> tuple[int, date]:
+    fecha = _fecha(fila)
+    return (0, fecha) if fecha else (1, date.min)
+
+
+def linea_del_ambito(fila: todo.Fila) -> str:
+    """La fila, como línea del callout de su ámbito: `<día> - detalle`, o solo el detalle.
+
+    El día se escribe como el encabezado de `AHORA.md` y el ámbito no va, porque
+    el callout ya es el del ámbito. El detalle se escribió para `PENDIENTES.md`
+    y el callout vive en `ambitos/`, así que sus links se rebasan.
+    """
+    cuerpo = link.rebasar(fila.cuerpo, "PENDIENTES.md", str(ARCHIVO_AMBITOS.as_posix()))
+    fecha = _fecha(fila)
+    cuando = encabezado_de(fecha).removeprefix("## ") if fecha else fila.cuando.strip()
+    return f"{cuando} - {cuerpo}" if cuando else cuerpo
+
+
 def documento_ambitos(
     pendientes: str,
     ambitos: list[str],
     display_names: dict[str, str] | None = None,
 ) -> str:
-    """`ambitos/PENDIENTES-AMBITOS.md` entero: un callout por ámbito, en orden."""
+    """`ambitos/PENDIENTES-AMBITOS.md` entero: un callout por ámbito, en orden.
+
+    Dentro de cada callout van primero los pendientes con fecha, de la más
+    próxima a la más lejana, y después los demás en el orden de la tabla.
+    """
     nombres_display = display_names or {}
-    por_ambito: dict[str, list[str]] = {nombre: [] for nombre in ambitos}
+    por_ambito: dict[str, list[todo.Fila]] = {nombre: [] for nombre in ambitos}
     for fila in todo.filas(pendientes):
         if fila.ambito in por_ambito:
-            # El detalle se escribió para `PENDIENTES.md`; el callout vive en `ambitos/`.
-            por_ambito[fila.ambito].append(
-                link.rebasar(fila.cuerpo, "PENDIENTES.md", str(ARCHIVO_AMBITOS.as_posix()))
-            )
+            por_ambito[fila.ambito].append(fila)
     bloques = [
-        callout(nombre, cuerpos, display_name=nombres_display.get(nombre))
-        for nombre, cuerpos in por_ambito.items()
+        callout(
+            nombre,
+            [linea_del_ambito(f) for f in sorted(filas_, key=_orden_en_el_ambito)],
+            display_name=nombres_display.get(nombre),
+        )
+        for nombre, filas_ in por_ambito.items()
     ]
     if not bloques:
         return _ENCABEZADO_AMBITOS

@@ -90,7 +90,22 @@ def test_documento_de_ambitos_agrupa_por_ambito() -> None:
 
     assert "> [!todo] Pendientes en **Personal** ^personal" in documento
     assert "> - comprar una maleta" in documento
-    assert "> - pagar la sesión con el psicólogo" in documento
+    assert "> - Martes 8 de septiembre - pagar la sesión con el psicólogo" in documento
+
+
+def test_en_el_ambito_van_primero_los_fechados_por_fecha() -> None:
+    tabla = PENDIENTES + (
+        f"| con fecha | 2026-09-07 | {P} | llamar al banco |\n"
+        f"| esta semana |  | {P} | ordenar el escritorio |\n"
+    )
+    callout = documento_ambitos(tabla, ["personal"]).split("^personal\n", 1)[1]
+
+    assert callout.splitlines() == [
+        "> - Lunes 7 de septiembre - llamar al banco",
+        "> - Martes 8 de septiembre - pagar la sesión con el psicólogo",
+        "> - comprar una maleta",
+        "> - ordenar el escritorio",
+    ]
 
 
 def test_un_ambito_sin_pendientes_igual_tiene_su_callout() -> None:

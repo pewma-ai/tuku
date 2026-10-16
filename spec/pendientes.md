@@ -118,9 +118,11 @@ No hay marca que la delimite, y es a propósito: los registros empiezan siempre 
 
 ```markdown
 > [!todo] Pendientes en **Personal** ^personal
-> - pagar la sesión con el psicólogo
+> - Miércoles 12 de agosto - pagar la sesión con el psicólogo
 > - comprar una maleta
 ```
+
+Un pendiente con fecha lleva el día al principio, escrito como el encabezado de `AHORA.md`, y no lleva el ámbito porque el callout ya es el suyo. Van primero los que tienen fecha, de la más próxima a la más lejana, y después los demás en el orden de la tabla.
 
 La página del ámbito lo transcluye con ruta relativa:
 
