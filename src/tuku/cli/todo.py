@@ -3,24 +3,23 @@
 from __future__ import annotations
 
 import argparse
-from datetime import date
 from pathlib import Path
 
 from tuku import todo as core_todo
-from tuku.cli.helpers import Handler, Subparsers, traducir
+from tuku.cli.helpers import Handler, Subparsers, fecha, hora, traducir
+from tuku.config import ambito_por_defecto
 
 
 def _cmd_todo_open(args: argparse.Namespace) -> int:
-    day = date.fromisoformat(args.day) if args.day else None
     return traducir(
         core_todo.abrir_en_vault(
             args.vault,
             body=args.body,
-            scope=args.scope,
+            scope=args.scope or ambito_por_defecto(args.vault),
             horizon=args.horizon,
             when=args.when,
             propagate=not args.no_propagate,
-            day=day,
+            day=args.day,
             hour=args.hour,
         ),
         "tuku todo open",
@@ -28,15 +27,14 @@ def _cmd_todo_open(args: argparse.Namespace) -> int:
 
 
 def _cmd_todo_close(args: argparse.Namespace) -> int:
-    day = date.fromisoformat(args.day) if args.day else None
     return traducir(
         core_todo.cerrar_en_vault(
             args.vault,
             body=args.body,
             propagate=not args.no_propagate,
-            day=day,
+            day=args.day,
             hour=args.hour,
-            scope=args.scope,
+            scope=args.scope or ambito_por_defecto(args.vault),
         ),
         "todo close",
     )
@@ -94,14 +92,28 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             help="no regenera las vistas derivadas; para el lote, que propaga al final",
         )
         p.add_argument(
-            "--day", "--dia", dest="day", default=None, help="día de registro, AAAA-MM-DD"
+            "--day",
+            "--dia",
+            dest="day",
+            default=None,
+            type=fecha,
+            help="día de registro, AAAA-MM-DD",
         )
         p.add_argument(
-            "--hour", "--hora", dest="hour", default=None, help="hora en que se registra, HH:MM"
+            "--hour",
+            "--hora",
+            dest="hour",
+            default=None,
+            type=hora,
+            help="hora en que se registra, HH:MM",
         )
         if verbo == "open":
             p.add_argument(
-                "--scope", "--ambito", dest="scope", default=None, help="ámbito, sin corchetes"
+                "--scope",
+                "--ambito",
+                dest="scope",
+                default=None,
+                help="ámbito, sin corchetes; por defecto, `scope_default` de la config",
             )
             p.add_argument(
                 "--horizon",
@@ -119,9 +131,12 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             )
         elif verbo == "close":
             p.add_argument(
-                "--scope", "--ambito", dest="scope", default=None, help="ámbito, sin corchetes"
+                "--scope",
+                "--ambito",
+                dest="scope",
+                default=None,
+                help="ámbito, sin corchetes; por defecto, `scope_default` de la config",
             )
-
 
     todo_lint = todo_v.add_parser(
         "lint",

@@ -106,7 +106,7 @@ Un `.md` que cambia su comando cambia lo que el test corre. No hay forma de que 
 
 `Y` y `Pero` continúan el paso anterior y heredan su tipo. Todo lo que viene después de un encabezado que no sea `## Escenario:` es documentación y no se ejecuta, así que el bloque de `## Cómo se corre` no corre dos veces.
 
-Una línea que empieza con `tuku` se ejecuta **en proceso** (`cli.main`): es rápida, comparte intérprete con el test y por eso el `001-02` puede parchar `socket` alrededor. Cualquier otra línea va por `bash`, que es como entran `mkdir`, `grep` o `diff -r` sin caso especial.
+Una línea `cd <dir>` cambia el directorio de los comandos que la siguen en el escenario, como en una terminal: tras `cd mi-vault`, `tuku todo open` no necesita `--vault`. Una línea que empieza con `tuku` se ejecuta **en proceso** (`cli.main`): es rápida, comparte intérprete con el test y por eso el `001-02` puede parchar `socket` alrededor. Cualquier otra línea va por `bash`, que es como entran `mkdir`, `grep` o `diff -r` sin caso especial.
 
 ### El escenario se lee como lo que hace una persona
 

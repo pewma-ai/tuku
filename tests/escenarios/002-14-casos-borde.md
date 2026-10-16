@@ -8,39 +8,40 @@ El vault del día uno editado con cualquier editor: cada lint nombra el comando 
 
 ```bash
 cp -r ../../002-13-el-dia/repetir-el-dia-no-cambia-nada/mi-vault .
+cd mi-vault
 ```
 
 ## Escenario: un derivado editado a mano se detecta y se regenera
 
 Dado una copia de referencia, una línea ajena y otra borrada en `ambitos/PENDIENTES-AMBITOS.md`, y los callouts de pendientes del día borrados de `AHORA.md`
 ```bash
-cp -r mi-vault referencia
-sed -i.bak '/Ago\/12 - pagar la sesión con el psicólogo/d' mi-vault/ambitos/PENDIENTES-AMBITOS.md
-echo "- una fila que nadie escribió" >> mi-vault/ambitos/PENDIENTES-AMBITOS.md
-sed -i.bak '/^> \[!todo\] Pendientes del día$/,/^$/d' mi-vault/AHORA.md
-rm mi-vault/ambitos/PENDIENTES-AMBITOS.md.bak mi-vault/AHORA.md.bak
+cp -r . ../referencia
+sed -i.bak '/Ago\/12 - pagar la sesión con el psicólogo/d' ambitos/PENDIENTES-AMBITOS.md
+echo "- una fila que nadie escribió" >> ambitos/PENDIENTES-AMBITOS.md
+sed -i.bak '/^> \[!todo\] Pendientes del día$/,/^$/d' AHORA.md
+rm ambitos/PENDIENTES-AMBITOS.md.bak AHORA.md.bak
 ```
 Cuando se revisa y se regenera
 ```bash
-tuku todo lint --vault mi-vault
-tuku regenerate --vault mi-vault
+tuku todo lint
+tuku regenerate
 ```
 Entonces `tuku todo lint` sale con código 1 (`RECHAZO`) y nombra `tuku regenerate todo`
 Y `tuku regenerate` nombra cada archivo que reescribió
 Y el vault vuelve a ser idéntico a la referencia, byte a byte
 ```bash
-diff -r referencia mi-vault
+diff -r ../referencia .
 ```
 
 ## Escenario: una fila borrada a mano la nombra todo lint
 
 Dado la fila de `pagar la sesión con el psicólogo` borrada de `PENDIENTES.md`
 ```bash
-sed -i.bak '/pagar la sesión con el psicólogo/d' mi-vault/PENDIENTES.md && rm mi-vault/PENDIENTES.md.bak
+sed -i.bak '/pagar la sesión con el psicólogo/d' PENDIENTES.md && rm PENDIENTES.md.bak
 ```
 Cuando se revisa
 ```bash
-tuku todo lint --vault mi-vault
+tuku todo lint
 ```
 Entonces sale con código 1 (`RECHAZO`) y nombra como corrección `tuku todo open`
 
@@ -48,15 +49,15 @@ Entonces sale con código 1 (`RECHAZO`) y nombra como corrección `tuku todo ope
 
 Dado un pendiente abierto el martes 11 y cerrado ese mismo día con un editor: el `(Hecho)` escrito en `AHORA.md` y la fila borrada de `PENDIENTES.md`
 ```bash
-tuku todo open --vault mi-vault --day 2026-08-11 --hour 15:00 --scope personal --body "renovar el carnet"
-awk '{print} /^- 19:10 - /{print "- 19:20 - [personal](ambitos/personal/personal.md) (Hecho): ~~renovar el carnet~~"}' mi-vault/AHORA.md > ahora.tmp && mv ahora.tmp mi-vault/AHORA.md
-sed -i.bak '/renovar el carnet/d' mi-vault/PENDIENTES.md && rm mi-vault/PENDIENTES.md.bak
+tuku todo open --day 2026-08-11 --hour 15:00 --body "renovar el carnet"
+awk '{print} /^- 19:10 - /{print "- 19:20 - [personal](ambitos/personal/personal.md) (Hecho): ~~renovar el carnet~~"}' AHORA.md > ahora.tmp && mv ahora.tmp AHORA.md
+sed -i.bak '/renovar el carnet/d' PENDIENTES.md && rm PENDIENTES.md.bak
 ```
 Cuando se revisa y se repara
 ```bash
-tuku todo lint --vault mi-vault
-tuku fix todo --vault mi-vault
-tuku todo lint --vault mi-vault
+tuku todo lint
+tuku fix todo
+tuku todo lint
 ```
 Entonces el primer `tuku todo lint` sale con código 1 (`RECHAZO`) y nombra `tuku fix todo`
 Y `tuku fix todo` quita el registro de las 15:00 de `AHORA.md` y de la página de `personal`, y deja el cierre de las 19:20
@@ -66,13 +67,13 @@ Y el segundo `tuku todo lint` sale limpio
 
 Dado una subcarpeta `gastos/` de `depto-centro` sin página propia, es decir, una categoría
 ```bash
-mkdir mi-vault/ambitos/depto-centro/gastos
-touch mi-vault/ambitos/depto-centro/gastos/AGENTS.md mi-vault/ambitos/depto-centro/gastos/CADENCIAS.md
+mkdir ambitos/depto-centro/gastos
+touch ambitos/depto-centro/gastos/AGENTS.md ambitos/depto-centro/gastos/CADENCIAS.md
 ```
 Cuando se escribe un registro a `gastos` y se revisa
 ```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 20:00 --scope gastos --body "**progreso**: revisé el detalle del mes"
-tuku scope lint --vault mi-vault
+tuku entry add --day 2026-08-11 --hour 20:00 --scope gastos --body "**progreso**: revisé el detalle del mes"
+tuku scope lint
 ```
 Entonces `tuku scope lint` sale con código 1 (`RECHAZO`) y explica que una categoría no recibe registros
 Y el registro queda escrito en `AHORA.md`: un error del autor se informa, nunca se borra
@@ -81,8 +82,8 @@ Y el registro queda escrito en `AHORA.md`: un error del autor se informa, nunca 
 
 Cuando se escribe `**Cadencia**` en vez de `**cadencia**` y se revisa
 ```bash
-tuku entry add --vault mi-vault --day 2026-08-11 --hour 13:30 --scope personal --body "**Cadencia**: revisar la caldera"
-tuku entry lint --vault mi-vault
+tuku entry add --day 2026-08-11 --hour 13:30 --body "**Cadencia**: revisar la caldera"
+tuku entry lint
 ```
 Entonces `tuku entry lint` sale con código 1 (`RECHAZO`) y dice cómo se escribe la marca
 Y la línea queda intacta en `AHORA.md` y `PENDIENTES.md` no cambia
@@ -91,11 +92,11 @@ Y la línea queda intacta en `AHORA.md` y `PENDIENTES.md` no cambia
 
 Dado `PENDIENTES.md` sin su tabla
 ```bash
-echo "sin tabla" > mi-vault/PENDIENTES.md
+echo "sin tabla" > PENDIENTES.md
 ```
 Cuando se intenta regenerar
 ```bash
-tuku regenerate --vault mi-vault
+tuku regenerate
 ```
 Entonces sale con código 1 (`RECHAZO`) nombrando `PENDIENTES.md`
 Y no escribe ningún archivo

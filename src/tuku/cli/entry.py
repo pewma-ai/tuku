@@ -7,6 +7,7 @@ from pathlib import Path
 
 from tuku import entry
 from tuku.cli.helpers import Handler, Subparsers, fecha, hora, traducir
+from tuku.config import ambito_por_defecto
 
 
 def _cmd_entry_add(args: argparse.Namespace) -> int:
@@ -14,7 +15,7 @@ def _cmd_entry_add(args: argparse.Namespace) -> int:
         entry.add_al_vault(
             args.vault,
             body=args.body,
-            scope=args.scope,
+            scope=args.scope or ambito_por_defecto(args.vault),
             day=args.day,
             hour=args.hour,
         ),
@@ -67,7 +68,11 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help="la marca y el cuerpo: '**pendiente**: avisar de los gastos comunes'",
     )
     add_p.add_argument(
-        "--scope", "--ambito", dest="scope", default=None, help="ámbito, sin corchetes"
+        "--scope",
+        "--ambito",
+        dest="scope",
+        default=None,
+        help="ámbito, sin corchetes; por defecto, `scope_default` de la config",
     )
     add_p.add_argument(
         "--day",

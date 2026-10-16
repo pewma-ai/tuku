@@ -106,6 +106,13 @@ def formato_fecha(vault: Path) -> str:
     return parsear_config_md(texto).get("date_format", "").strip("`") or FORMATO_FECHA
 
 
+def ambito_por_defecto(vault: Path) -> str | None:
+    """El `scope_default` de `reglas/config.tuku.md`: el ámbito de lo que no nombra otro."""
+    ruta = Path(vault) / "reglas" / "config.tuku.md"
+    texto = ruta.read_text(encoding="utf-8") if ruta.is_file() else ""
+    return parsear_config_md(texto).get("scope_default", "").strip("`") or None
+
+
 def parsear_config_md(texto: str) -> dict[str, str]:
     """Los campos de la tabla de `config.tuku.md`.
 

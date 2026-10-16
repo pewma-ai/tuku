@@ -69,6 +69,7 @@ _PALABRAS = ("Dado", "Cuando", "Entonces", "Y", "Pero")
 _PASO = re.compile(rf"^({'|'.join(_PALABRAS)})\b(.*)$")
 _FENCE = re.compile(r"^```(\w*)\s*$")
 _TITULO = re.compile(r"^##\s+Escenario:\s*(.+?)\s*$")
+_CD = re.compile(r"^cd\s+(\S+)$")
 
 #: El encabezado que hace de `Background`: sus comandos corren antes de cada
 #: escenario del archivo. Es donde un paso de la cadena declara de qué estado
@@ -613,6 +614,7 @@ def correr(slug: str, titulo: str) -> Corrida:
     previo_home, previo_cwd = os.environ.get("TUKU_HOME"), Path.cwd()
     os.environ["TUKU_HOME"] = str(RAIZ_REPO)
     os.chdir(dir)
+    actual = dir
     try:
         for paso in escenario.todos_los_pasos:
             if paso.tipo == "Cuando" and not antes:
@@ -622,10 +624,15 @@ def correr(slug: str, titulo: str) -> Corrida:
                 turnos.append(_correr_agente(paso, dir))
             for comando in paso.comandos:
                 entorno, partes = _separar_entorno(shlex.split(comando))
-                if partes and partes[0] == "tuku":
+                if cd := _CD.match(comando):
+                    # Como en una terminal: los comandos que siguen corren ahí.
+                    actual = (actual / cd.group(1)).resolve()
+                    os.chdir(actual)
+                    codigo, salida, error = 0, "", ""
+                elif partes and partes[0] == "tuku":
                     codigo, salida, error = _correr_tuku(partes[1:], entorno)
                 else:
-                    codigo, salida, error = _correr_bash(comando, dir)
+                    codigo, salida, error = _correr_bash(comando, actual)
                 resultados.append(Resultado(comando, codigo, salida, error))
                 if codigo != 0 and paso.tipo != "Cuando":
                     pista = ""

@@ -33,11 +33,14 @@ def fecha(valor: str) -> date:
 
 
 def hora(valor: str) -> str:
-    """HH:MM, normalizada a dos dígitos."""
+    """HH:MM, normalizada a dos dígitos: `9:05` es `09:05`."""
     try:
-        return time.fromisoformat(valor).strftime("%H:%M")
+        h, m = valor.split(":")
+        if len(m) == 2:
+            return time(int(h), int(m)).strftime("%H:%M")
     except ValueError:
-        raise argparse.ArgumentTypeError(f"{valor!r} no es una hora HH:MM") from None
+        pass
+    raise argparse.ArgumentTypeError(f"{valor!r} no es una hora HH:MM")
 
 
 def traducir(r: Resultado, prefijo: str) -> int:
