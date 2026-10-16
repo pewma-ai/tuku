@@ -41,8 +41,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help="registros de la bitácora",
         description=(
             "Un registro es una línea de `AHORA.md` que cuenta un hecho: hora, ámbito, "
-            "marca y cuerpo. Estos comandos escriben y corrigen registros con el "
-            "formato canónico, y revisan los que ya están."
+            "clasificación y cuerpo. Estos comandos los escriben, corrigen y revisan. Los "
+            "pendientes se abren y cierran con `tuku todo open` y `tuku todo close`."
         ),
     )
     entry_v = entry_p.add_subparsers(dest="verb", required=True)

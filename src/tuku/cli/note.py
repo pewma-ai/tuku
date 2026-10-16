@@ -56,9 +56,9 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "note",
         help="notas en notas/",
         description=(
-            "Una nota es conocimiento que el autor quiere conservar, en `notas/`, con "
-            "su sección `## Ver además`. Estos comandos crean notas dejando constancia "
-            "en la bitácora, las renombran sin romper sus links y revisan su estructura."
+            "Una nota es una idea que vale más allá de un día, en `notas/`, cerrada con `## "
+            "Ver además`. Estos comandos crean notas registrándolas en la bitácora, las "
+            "renombran sin romper sus links y revisan su estructura."
         ),
     )
     note_v = note_p.add_subparsers(dest="verb", required=True)

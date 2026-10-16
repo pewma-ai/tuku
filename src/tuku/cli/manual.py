@@ -32,17 +32,26 @@ _ENCABEZADO = (
 
 @dataclass(frozen=True)
 class Entrada:
-    """Un comando invocable y lo que su ayuda dice de él."""
+    """Un sustantivo o un comando, con lo que su ayuda dice de él.
+
+    `nivel` es la profundidad en el árbol: 1 para `tuku scope`, 2 para
+    `tuku scope rename`. `invocable` es falso en un sustantivo con verbos.
+    """
 
     nombre: str
     que_hace: str
+    nivel: int = 1
+    invocable: bool = True
 
 
-def entradas(parser: argparse.ArgumentParser, camino: str = "tuku") -> list[Entrada]:
-    """Los comandos invocables del árbol, en el orden en que se registraron.
+def entradas(
+    parser: argparse.ArgumentParser, camino: str = "tuku", nivel: int = 1
+) -> list[Entrada]:
+    """El árbol de la ayuda, en el orden en que se registró.
 
-    Un sustantivo con verbos no se invoca solo: entran sus verbos. Un sustantivo
-    sin verbos (`init`, `doctor`) entra él.
+    Cada sustantivo entra con su descripción, seguido de sus verbos un nivel
+    más adentro. Un sustantivo sin verbos (`init`, `doctor`) es él mismo el
+    comando.
     """
     salida: list[Entrada] = []
     for accion in parser._actions:
@@ -50,18 +59,17 @@ def entradas(parser: argparse.ArgumentParser, camino: str = "tuku") -> list[Entr
             continue
         for nombre, sub in accion.choices.items():
             ruta = f"{camino} {nombre}"
-            hijos = entradas(sub, ruta)
-            if hijos:
-                salida += hijos
-                continue
-            salida.append(Entrada(ruta, " ".join((sub.description or "").split())))
+            hijos = entradas(sub, ruta, nivel + 1)
+            texto = " ".join((sub.description or "").split())
+            salida.append(Entrada(ruta, texto, nivel, invocable=not hijos))
+            salida += hijos
     return salida
 
 
 def documento(lista: list[Entrada]) -> str:
     """El archivo entero. Determinista: la misma lista da los mismos bytes."""
     bloques = [
-        f"## {e.nombre}\n\n{e.que_hace or 'Sin descripción.'}\n"
+        f"{'#' * (e.nivel + 1)} {e.nombre}\n\n{e.que_hace or 'Sin descripción.'}\n"
         for e in lista
     ]
     return _ENCABEZADO + "".join(f"\n{b}" for b in bloques)

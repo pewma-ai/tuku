@@ -31,10 +31,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "scope",
         help="árbol de ámbitos y categorías",
         description=(
-            "Un ámbito es un frente de actividad del autor (un trabajo, una casa, un "
-            "proyecto) con su carpeta en `ambitos/`. Estos comandos crean ámbitos, los "
-            "renombran sin romper los links que los nombran y revisan que los registros "
-            "apunten a uno que exista."
+            "Un ámbito es un frente de actividad del autor con identidad propia (un "
+            "trabajo, una casa, un proyecto): una carpeta de `ambitos/` con su página. Una "
+            "carpeta sin página es una categoría y solo agrupa. Estos comandos crean y "
+            "renombran ámbitos sin romper sus links, y revisan el árbol."
         ),
     )
     scope_v = scope_p.add_subparsers(dest="verb", required=True)

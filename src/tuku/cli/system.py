@@ -151,8 +151,8 @@ def registrar(
         "cycle",
         help="gestión del ciclo en AHORA.md",
         description=(
-            "El ciclo es el período de trabajo que `AHORA.md` registra, día por día. "
-            "Estos comandos lo abren y revisan que su estructura sea válida."
+            "Un ciclo es la ventana de tiempo que `AHORA.md` registra día por día, semanal "
+            "por defecto. Estos comandos lo abren y revisan su estructura."
         ),
     )
     cycle_v = cycle_p.add_subparsers(dest="verb", required=True)
@@ -240,8 +240,9 @@ def registrar(
         "vocab",
         help="vocabularios abiertos del autor",
         description=(
-            "Los vocabularios abiertos son las listas de términos que el autor declara "
-            "en su libro de estilo (clasificaciones, horizontes, tipos de nota)."
+            "Los vocabularios del autor son las tablas Clasificaciones, Horizontes y Tipos "
+            "de nota de `LIBRO-DE-ESTILO.md`, y crecen con el uso. Este comando los "
+            "muestra."
         ),
     )
     vocab_v = vocab_p.add_subparsers(dest="verb", required=True)
@@ -259,8 +260,9 @@ def registrar(
         "style",
         help="libro de estilo y contratos de autor",
         description=(
-            "El libro de estilo es el contrato del autor con el sistema: sus "
-            "vocabularios y sus reglas de escritura. Este comando lo revisa."
+            "`LIBRO-DE-ESTILO.md` es el contrato del autor con el sistema: cómo escribe y "
+            "sus vocabularios. Este comando revisa que tenga lo que los demás comandos "
+            "leen."
         ),
     )
     style_v = style_p.add_subparsers(dest="verb", required=True)

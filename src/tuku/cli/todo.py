@@ -55,9 +55,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "todo",
         help="pendientes de PENDIENTES.md",
         description=(
-            "`PENDIENTES.md` es la única fuente de verdad de lo que está por hacer. Estos "
-            "comandos abren y cierran pendientes, regeneran las vistas que se derivan de "
-            "esa tabla y revisan que sea coherente."
+            "Un pendiente es un compromiso abierto: una fila de `PENDIENTES.md`, la única "
+            "fuente de lo que está por hacer, y su registro `**pendiente**` en `AHORA.md`. "
+            "Estos comandos abren y cierran pendientes, regeneran las vistas que se derivan "
+            "de la tabla y la revisan."
         ),
     )
     todo_v = todo_p.add_subparsers(dest="verb", required=True)
