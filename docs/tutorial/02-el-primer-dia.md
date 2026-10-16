@@ -126,7 +126,7 @@ Este es el segundo y último comando que corres directamente en tu terminal:
 tuku doctor
 ```
 
-Lee la salida. Si indica "pregunta" junto a una palabra tuya, no es un error: es un término nuevo que el sistema aceptó y sobre el que te consultará cuando corresponda formalizarlo en el estilo. El vocabulario lo defines tú.
+Por defecto muestra solo lo que hay que leer: los hallazgos y los avisos. Con `tuku doctor --verbose` ves además cada revisión que salió bien. Si la salida indica "pregunta" junto a una palabra tuya, no es un error: es un término nuevo que el sistema aceptó y sobre el que te consultará cuando corresponda formalizarlo en el estilo. El vocabulario lo defines tú.
 
 > [!tip] Hazlo enojar
 > Abre `PENDIENTES.md` en tu editor y borra manualmente una fila.

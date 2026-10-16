@@ -73,7 +73,9 @@ def _crear_cmd_doctor(comandos_fn: Callable[[], frozenset[str]]) -> Handler:
         from tuku import doctor
 
         return traducir(
-            doctor.revisar_vault(args.vault, comandos=comandos_fn(), tema=args.tema),
+            doctor.revisar_vault(
+                args.vault, comandos=comandos_fn(), tema=args.tema, verbose=args.verbose
+            ),
             "tuku doctor",
         )
 
@@ -199,7 +201,9 @@ def registrar(
             "Revisa el vault entero y reporta lo que encuentra: archivos que faltan, "
             "campos de configuración, comandos nombrados en `AGENTS.md`, marcas sin su "
             "consecuencia, links y la versión con que se sembró. Con un TEMA revisa solo "
-            "esa parte. No escribe nada: cada hallazgo nombra la corrección, y si el "
+            "esa parte. Sin --verbose muestra solo los hallazgos y los avisos; con "
+            "--verbose, todas las revisiones. No escribe nada: cada hallazgo nombra la "
+            "corrección, y si el "
             "tema tiene `tuku fix TEMA`, es ese comando."
         ),
         epilog=(
@@ -214,6 +218,12 @@ def registrar(
         choices=TEMAS_DOCTOR,
         default=None,
         help="revisar solo este tema; sin tema, todo",
+    )
+    doctor_p.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="muestra todas las revisiones; por defecto, solo hallazgos y avisos",
     )
     doctor_p.add_argument("--vault", default=".", type=Path, help="vault a revisar")
 

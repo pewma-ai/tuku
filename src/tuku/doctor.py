@@ -66,6 +66,9 @@ class Revision:
     nombre: str
     salida: str
     sano: bool
+    #: Una revisión sana con algo que el autor debería leer (una pregunta del
+    #: lint, un vault sembrado con otra versión). Sin `--verbose` se muestra.
+    aviso: bool = False
 
 
 def tipos_declarados(types_md: str) -> list[str]:
@@ -327,6 +330,7 @@ def revisar_version(config_md: str | None, version_home: str | None) -> Revision
         f"{version_home}. Compara `reglas/` y el libro de estilo con "
         "`~/.tuku/template/` y lleva a mano lo que quieras.",
         True,
+        aviso=True,
     )
 
 
@@ -396,16 +400,24 @@ def archivo_opcional(vault: Path, relativo: str) -> str | None:
     return p.read_text(encoding="utf-8") if p.is_file() else None
 
 
-def formatear(revisiones: list[Revision], *, fuente: Path | None = None) -> str:
-    """El reporte completo, para persona y para agente.
+def formatear(
+    revisiones: list[Revision], *, fuente: Path | None = None, verbose: bool = False
+) -> str:
+    """El reporte, para persona y para agente.
+
+    Sin `verbose` muestra solo lo que hay que leer: las revisiones con
+    hallazgos y las que traen un aviso. Con `verbose`, todas. El cierre
+    (`doctor: ...`) sale siempre.
 
     `fuente` es el template original. Solo aparece cuando algo falla: es ahí
     donde sirve, y en un vault sano sería ruido.
     """
     rotas = [r for r in revisiones if not r.sano]
-    cuerpo = "\n".join(r.salida for r in revisiones)
+    mostradas = revisiones if verbose else [r for r in revisiones if not r.sano or r.aviso]
+    cuerpo = "\n".join(r.salida for r in mostradas)
     if not rotas:
-        return f"{cuerpo}\ndoctor: el vault está sano."
+        cierre = "doctor: el vault está sano."
+        return f"{cuerpo}\n{cierre}" if cuerpo else cierre
 
     nombres = ", ".join(r.nombre for r in rotas)
     lineas = [cuerpo, f"doctor: {len(rotas)} revisión(es) con hallazgos: {nombres}."]
@@ -423,7 +435,11 @@ def formatear(revisiones: list[Revision], *, fuente: Path | None = None) -> str:
 
 
 def revisar_vault(
-    vault: Path, *, comandos: frozenset[str] | None = None, tema: str | None = None
+    vault: Path,
+    *,
+    comandos: frozenset[str] | None = None,
+    tema: str | None = None,
+    verbose: bool = False,
 ) -> Resultado:
     """Corre todos los lint sobre el vault y revisa lo que ninguno cubre.
 
@@ -438,13 +454,18 @@ def revisar_vault(
 
     Con `tema` corre solo esa revisión (`TEMAS`); el arreglo de cada hallazgo
     lo aplica `tuku fix TEMA`.
+
+    Sin `verbose` el reporte trae solo los hallazgos y los avisos; ver `formatear`.
     """
     if tema == "link":
         revision = revisar_links(vault)
-        mensaje = formatear([revision])
         if revision.sano:
-            return Resultado.hecho(mensaje)
-        return Resultado.rechazo(mensaje, error=False)
+            return Resultado.hecho(
+                formatear([revision], verbose=True)
+                if verbose
+                else f"doctor {tema}: sin hallazgos."
+            )
+        return Resultado.rechazo(formatear([revision], verbose=verbose), error=False)
     from tuku import cyclelint, scope, style, todo
     from tuku.config import leer_config
     from tuku.lint import ERROR
@@ -485,11 +506,13 @@ def revisar_vault(
         revisiones.append(Revision("cycle", cyclelint.formatear(h_cycle), not h_cycle))
 
         h_entry = lint_registros(ahora, abiertos=leer_config(vault).vocabularios_abiertos())
+        sano_entry = not any(h.grado == ERROR for h in h_entry)
         revisiones.append(
             Revision(
                 "entry",
                 formatear_registros(h_entry),
-                not any(h.grado == ERROR for h in h_entry),
+                sano_entry,
+                aviso=sano_entry and bool(h_entry),
             )
         )
 
@@ -513,11 +536,13 @@ def revisar_vault(
         revisiones.append(ausente("style", "LIBRO-DE-ESTILO.md"))
     else:
         h_style = style.lint(libro)
+        sano_style = not any(h.grado == ERROR for h in h_style)
         revisiones.append(
             Revision(
                 "style",
                 style.formatear(h_style),
-                not any(h.grado == ERROR for h in h_style),
+                sano_style,
+                aviso=sano_style and bool(h_style),
             )
         )
 
@@ -532,7 +557,7 @@ def revisar_vault(
         )
     )
 
-    mensaje = formatear(revisiones, fuente=fuente_de_referencia())
+    mensaje = formatear(revisiones, fuente=fuente_de_referencia(), verbose=verbose)
     if all(r.sano for r in revisiones):
         return Resultado.hecho(mensaje)
     return Resultado.rechazo(mensaje, error=False)

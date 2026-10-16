@@ -52,6 +52,7 @@ De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa
 `tuku doctor` verifica y `tuku fix TEMA` repara. Se separan por la misma razón que verificar y corregir son operaciones distintas: quien revisa antes de reparar conserva la oportunidad de no hacerlo.
 
 - **`tuku doctor [TEMA]`.** Sin tema revisa todo el vault; con tema, solo esa revisión. Un tema desconocido es error de uso (código 2).
+- **Sin `--verbose`, solo lo que hay que leer.** El reporte trae las revisiones con hallazgos y las que dejan un aviso (una pregunta del lint, un vault sembrado con otra versión), más el cierre `doctor: el vault está sano.` o la cuenta de hallazgos. Con `--verbose` (`-v`), todas las revisiones. El código de salida no depende de la opción, y un aviso no hace fallar.
 - **`tuku fix TEMA`.** Todo tema tiene su `fix`, y cada hallazgo del tema nombra `tuku fix TEMA` como corrección.
 - **Lo determinista se aplica.** Cuando el arreglo no requiere juicio, `fix` lo hace entero: cada cambio queda completo, nunca a medias por archivo.
 - **Lo no determinista se devuelve como decisiones, sin escribir.** La salida dice qué hay que decidir, entre qué opciones y qué comando correr una vez decidido. Quien corre TUKU suele ser un agente, y esas decisiones son del autor.

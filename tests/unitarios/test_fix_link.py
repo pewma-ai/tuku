@@ -47,7 +47,9 @@ def test_doctor_ignora_transclusiones_y_codigo(tmp_path: Path) -> None:
 def test_doctor_con_tema_corre_solo_esa_revision(tmp_path: Path) -> None:
     v = _vault(tmp_path, {"AHORA.md": "sin links\n"})
     r = doctor.revisar_vault(v, tema="link")
-    assert r.ok and "link:" in r.mensaje and "config:" not in r.mensaje
+    assert r.ok and r.mensaje == "doctor link: sin hallazgos."
+    detallado = doctor.revisar_vault(v, tema="link", verbose=True)
+    assert "link: sin wikilinks ni links rotos." in detallado.mensaje
 
 
 def test_fix_convierte_conserva_la_fecha_y_es_idempotente(tmp_path: Path) -> None:

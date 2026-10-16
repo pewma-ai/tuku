@@ -13,9 +13,9 @@ tuku init mi-vault --date 2026-08-11
 ## Escenario: el vault nace con su tabla de despacho y el doctor la aprueba
 
 Dado un vault recién sembrado
-Cuando se corre
+Cuando se corre con el detalle de cada revisión
 ```bash
-tuku doctor --vault mi-vault
+tuku doctor --verbose --vault mi-vault
 ```
 Entonces el vault está sano
 Y la revisión `despacho` confirma que todos los comandos existen
