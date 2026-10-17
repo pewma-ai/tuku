@@ -45,6 +45,7 @@ from contextlib import (
 from dataclasses import dataclass, field
 from datetime import datetime as real_datetime
 from pathlib import Path
+from typing import Any
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ_REPO / "src"))
@@ -52,6 +53,7 @@ sys.path.insert(0, str(RAIZ_REPO / "src"))
 sys.path.insert(0, str(RAIZ_REPO / "tests" / "scripts"))
 
 import agente  # noqa: E402
+import conversar  # noqa: E402
 import tiempo  # noqa: E402
 import vault  # noqa: E402
 
@@ -460,23 +462,53 @@ def _correr_bash(comando: str, dir: Path) -> tuple[int, str, str]:
 VAULT_DEL_ESCENARIO = "mi-vault"
 
 
-def _correr_agente(paso: Paso, dir: Path) -> agente.Turno:
-    """El turno que el paso lleva en su bloque ```agente```."""
+def _correr_agente(paso: Paso, dir: Path, conversacion: dict[str, Any]) -> agente.Turno:
+    """El turno que el paso lleva en su bloque ```agente```.
+
+    Cada turno se anota en `conversacion`, que `_dejar_la_conversacion` vuelve el
+    `conversation-log.md` del vault: la misma bitácora de la conversación a mano.
+    """
     prompt = "\n".join(paso.agente)
-    vault = dir / VAULT_DEL_ESCENARIO
-    if not vault.is_dir():
+    raiz = dir / VAULT_DEL_ESCENARIO
+    if not raiz.is_dir():
         raise PasoFallido(
             f"el paso {paso.texto!r} es agéntico y no hay un {VAULT_DEL_ESCENARIO}/ "
             f"en {dir}. El agente corre dentro del vault, así que el escenario "
             f"tiene que haberlo sembrado en su `## Estado inicial`."
         )
-    turno = agente.turno(vault, prompt, ahora=paso.ahora)
+    antes = vault.instantanea(raiz)
+    enviado = real_datetime.now()
+    turno = agente.turno(raiz, prompt, ahora=paso.ahora)
+    respondido = real_datetime.now()
+    conversacion["turnos"].append(
+        conversar.registro(
+            prompt, turno, vault.delta(antes, vault.instantanea(raiz)), enviado, respondido
+        )
+    )
+    conversacion["ahora"] = conversacion["ahora"] or paso.ahora
     _dejar_a_la_vista(turno, dir)
     if turno.codigo != 0:
         raise PasoFallido(
             f"el turno de {paso.texto!r} salió {turno.codigo}: {turno.stderr.strip()}"
         )
     return turno
+
+
+def _dejar_la_conversacion(dir: Path, conversacion: dict[str, Any], titulo: str) -> None:
+    """Escribe `notas/conversation-log.md` en el vault del escenario, si hubo turnos.
+
+    Se escribe **después** de la instantánea que usan las aserciones, así que el
+    delta del escenario no lo cuenta. Queda en el vault archivado para leer la
+    conversación sin abrir la traza.
+    """
+    raiz = dir / VAULT_DEL_ESCENARIO
+    if not conversacion["turnos"] or not raiz.is_dir():
+        return
+    arnes = agente.configurado()
+    conversacion["modelo"] = arnes.modelo or agente.modelo_barato(
+        arnes.nombre, arnes.ejecutable
+    )
+    conversar.escribir_log(raiz, conversacion, f"Conversación {dir.parent.name} · {titulo}")
 
 
 def _dejar_a_la_vista(turno: agente.Turno, dir: Path) -> None:
@@ -570,6 +602,12 @@ def correr(slug: str, titulo: str) -> Corrida:
     codigo, salida, error = 0, "", ""
     resultados: list[Resultado] = []
     turnos: list[agente.Turno] = []
+    conversacion: dict[str, Any] = {
+        "ahora": None,
+        "turnos": [],
+        "autor": "Autor",
+        "presenta": "El autor es el texto del escenario.",
+    }
     antes: dict[str, bytes] = {}
     previo_home, previo_cwd = os.environ.get("TUKU_HOME"), Path.cwd()
     os.environ["TUKU_HOME"] = str(RAIZ_REPO)
@@ -581,7 +619,7 @@ def correr(slug: str, titulo: str) -> Corrida:
                 # El estado del que parte la acción: todo lo anterior es `Dado`.
                 antes = vault.instantanea(dir)
             if paso.agente:
-                turnos.append(_correr_agente(paso, dir))
+                turnos.append(_correr_agente(paso, dir, conversacion))
             for comando in paso.comandos:
                 entorno, partes = _separar_entorno(shlex.split(comando))
                 if cd := _CD.match(comando):
@@ -610,6 +648,7 @@ def correr(slug: str, titulo: str) -> Corrida:
         # Un paso que falla también consume el turno: se cachea igual, y la
         # evidencia se archiva igual.
         _FALLIDAS[clave] = e
+        _dejar_la_conversacion(dir, conversacion, escenario.titulo)
         vault.archivar(escenario.slug)
         raise
     finally:
@@ -623,12 +662,14 @@ def correr(slug: str, titulo: str) -> Corrida:
     # esa distancia. Va en `finally` porque el turno que hay que mirar es
     # justamente el del escenario que falló, y antes se perdía: la comprobación
     # de la traza aborta, y con ella se iba la única evidencia de la corrida.
+    despues = vault.instantanea(dir)
     try:
-        _exigir_que_la_traza_explique(escenario, turnos, antes, vault.instantanea(dir))
+        _exigir_que_la_traza_explique(escenario, turnos, antes, despues)
     except Exception as e:
         _FALLIDAS[clave] = e
         raise
     finally:
+        _dejar_la_conversacion(dir, conversacion, escenario.titulo)
         vault.archivar(escenario.slug)
     corrida = Corrida(
         escenario=escenario,
@@ -638,7 +679,7 @@ def correr(slug: str, titulo: str) -> Corrida:
         stderr=error,
         resultados=resultados,
         antes=antes,
-        despues=vault.instantanea(dir),
+        despues=despues,
         turnos=turnos,
     )
     _CORRIDAS[(slug, escenario.titulo)] = corrida

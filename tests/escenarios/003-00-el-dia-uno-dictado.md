@@ -16,6 +16,7 @@ El autor dicta su primer día en lenguaje natural y el agente ejecuta las operac
 
 - **Traza del agente:** Comandos invocados, flags y orden capturados mediante el shim de intercepción, garantizando que el agente opera exclusivamente a través del CLI.
 - **Superficie del vault:** Diff exacto de la ontología cerrada (marcas, fechas, ámbitos y consecuencias) contra el vault esperado en `playground/`.
+- **Conversación:** Cada escenario agéntico deja `notas/conversation-log.md` en su vault archivado de `playground/`, con lo que dijo el autor, lo que respondió el agente, los comandos que escriben, el delta del vault y la hora y duración del turno. Se escribe después de medir el delta: el log no cuenta como cambio del escenario.
 - **Límites negativos:** Que no edite archivos a mano, no invente cierres huérfanos, descarte muletillas de voz y consulte antes de actuar ante casos ambiguos o carpetas protegidas.
 
 ## Escenarios BDD del epic

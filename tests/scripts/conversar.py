@@ -52,6 +52,23 @@ def resumir(turno: agente.Turno, delta: dict[str, str]) -> dict[str, Any]:
     }
 
 
+def registro(
+    frase: str,
+    turno: agente.Turno,
+    delta: dict[str, str],
+    enviado: datetime,
+    respondido: datetime,
+) -> dict[str, Any]:
+    """Un turno para el log: lo que dijo el autor, cuándo, y lo que `resumir` guarda."""
+    return {
+        "damian": frase,
+        "enviado": enviado.isoformat(timespec="seconds"),
+        "respondido": respondido.isoformat(timespec="seconds"),
+        "segundos": round((respondido - enviado).total_seconds()),
+        **resumir(turno, delta),
+    }
+
+
 def _quien(nombre: str, hora_iso: str | None, extra: str = "") -> str:
     """`**Nombre** (HH:MM:SS, 37 s):`, o `**Nombre:**` si el turno no trae hora."""
     if not hora_iso:
@@ -61,14 +78,16 @@ def _quien(nombre: str, hora_iso: str | None, extra: str = "") -> str:
 
 def renderizar(estado: dict[str, Any], titulo: str) -> str:
     """El `conversation-log.md`: una nota con la conversación completa."""
+    autor = estado.get("autor", "Damián")
+    presenta = estado.get("presenta", "Damián lo interpreta quien conduce la prueba.")
+    reloj = f"Reloj simulado: {estado['ahora']}. " if estado.get("ahora") else ""
     lineas = [
         "---",
         "type: Note",
         "---",
         f"# {titulo}",
         "",
-        f"Reloj simulado: {estado['ahora']}. Damián lo interpreta quien conduce la prueba. "
-        f"Responde el agente del arnés (`{estado['modelo']}`) con `tuku`.",
+        f"{reloj}{presenta} Responde el agente del arnés (`{estado['modelo']}`) con `tuku`.",
         "",
     ]
     for n, t in enumerate(estado["turnos"], start=1):
@@ -77,7 +96,7 @@ def renderizar(estado: dict[str, Any], titulo: str) -> str:
         lineas += [
             f"## Turno {n}",
             "",
-            f"{_quien('Damián', t.get('enviado'))} {t['damian']}",
+            f"{_quien(autor, t.get('enviado'))} {t['damian']}",
             "",
             _quien("Agente", t.get("respondido"), f", {t.get('segundos', 0)} s"),
             "",
@@ -91,6 +110,14 @@ def renderizar(estado: dict[str, Any], titulo: str) -> str:
             *([delta, ""] if delta != "vacío" else []),
         ]
     return "\n".join(lineas)
+
+
+def escribir_log(v: Path, estado: dict[str, Any], titulo: str) -> Path:
+    """Deja el `conversation-log.md` en `notas/` del vault `v`."""
+    ruta = v / LOG
+    ruta.parent.mkdir(exist_ok=True)
+    ruta.write_text(renderizar(estado, titulo), encoding="utf-8")
+    return ruta
 
 
 def preparar(base: Path, slug: str, escenario: str) -> Path:
@@ -112,13 +139,9 @@ def turno(v: Path, frase: str, ahora: str) -> dict[str, Any]:
     enviado = datetime.now()
     resultado = agente.turno(v, frase, ahora=ahora, sesion=sesion)
     respondido = datetime.now()
-    registro = {
-        "damian": frase,
-        "enviado": enviado.isoformat(timespec="seconds"),
-        "respondido": respondido.isoformat(timespec="seconds"),
-        "segundos": round((respondido - enviado).total_seconds()),
-        **resumir(resultado, vault.delta(antes, vault.instantanea(v))),
-    }
+    turno_registrado = registro(
+        frase, resultado, vault.delta(antes, vault.instantanea(v)), enviado, respondido
+    )
     arnes = agente.configurado()
     estado.update(
         id=sesion.id,
@@ -127,18 +150,16 @@ def turno(v: Path, frase: str, ahora: str) -> dict[str, Any]:
         or arnes.modelo
         or agente.modelo_barato(arnes.nombre, arnes.ejecutable),
     )
-    estado["turnos"].append(registro)
+    estado["turnos"].append(turno_registrado)
     _ruta_estado(v).write_text(
         json.dumps(estado, ensure_ascii=False, indent=1), encoding="utf-8"
     )
-    return registro
+    return turno_registrado
 
 
 def cerrar(v: Path, slug: str, titulo: str) -> Path | None:
     """Escribe el log en el vault y archiva el resultado en `playground/`."""
-    registro = v / LOG
-    registro.parent.mkdir(exist_ok=True)
-    registro.write_text(renderizar(_cargar(v), titulo), encoding="utf-8")
+    escribir_log(v, _cargar(v), titulo)
     return vault.archivar(slug)
 
 
