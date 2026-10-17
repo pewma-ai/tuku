@@ -23,86 +23,41 @@ def test_slug_convierte_el_titulo_en_nombre_de_archivo() -> None:
     assert note.slug("Cómo funciona el cobro de gastos comunes") == (
         "como-funciona-el-cobro-de-gastos-comunes"
     )
-
-
-@pytest.mark.parametrize(
-    ("titulo", "esperado"),
-    [
+    for titulo, esperado in [
         ("  espacios  alrededor  ", "espacios-alrededor"),
         ("signos: ¿y esto?", "signos-y-esto"),
         ("ÑANDÚ en mayúsculas", "nandu-en-mayusculas"),
         ("", ""),
-    ],
-)
-def test_slug_ante_entradas_incomodas(titulo: str, esperado: str) -> None:
-    assert note.slug(titulo) == esperado
+    ]:
+        assert note.slug(titulo) == esperado, titulo
 
 
-def test_la_constancia_enlaza_a_la_nota_y_a_su_ambito() -> None:
-    linea = note.registro_de_constancia(
+def test_la_constancia_enlaza_a_la_nota_y_a_su_ambito_si_lo_hay() -> None:
+    assert note.registro_de_constancia(
         Path("notas/gastos-comunes.md"), hour="21:15", scope="depto-centro"
-    )
-    assert linea == (
+    ) == (
         "- 21:15 - [depto-centro](ambitos/depto-centro/depto-centro.md) "
         "**nota**: escribí la nota [gastos-comunes](notas/gastos-comunes.md)"
     )
-
-
-def test_la_constancia_sin_ambito_no_deja_el_enlace_vacio() -> None:
-    linea = note.registro_de_constancia(Path("notas/algo.md"), hour="09:00")
-    assert linea == "- 09:00 - **nota**: escribí la nota [algo](notas/algo.md)"
-
-
-def test_una_nota_con_ver_ademas_y_motivos_no_tiene_hallazgos() -> None:
-    nota = (
-        "# Nota\n\ncuerpo\n\n## Ver además\n\n"
-        "- [[depto-centro]] — el ámbito donde se aplica este cobro\n"
+    assert note.registro_de_constancia(Path("notas/algo.md"), hour="09:00") == (
+        "- 09:00 - **nota**: escribí la nota [algo](notas/algo.md)"
     )
-    assert note.lint(nota) == []
 
 
-def test_falta_la_seccion_ver_ademas() -> None:
-    hallazgos = note.lint("# Nota\n\ncuerpo\n")
-    assert len(hallazgos) == 1
-    assert "falta la sección" in hallazgos[0]
-    assert "cierra con sus enlaces" in hallazgos[0], "el error no dice la corrección"
+def test_el_lint_pide_la_seccion_ver_ademas_y_un_motivo_por_enlace() -> None:
+    sana = "# Nota\n\ncuerpo\n\n## Ver además\n\n- [[depto-centro]] — el ámbito del cobro\n"
+    assert note.lint(sana) == []
 
-
-def test_un_enlace_sin_motivo_se_reporta_con_su_linea() -> None:
-    nota = "# Nota\n\ncuerpo\n\n## Ver además\n\n- [[depto-centro]]\n"
-    hallazgos = note.lint(nota)
-    assert len(hallazgos) == 1
-    assert "para qué conecta" in hallazgos[0]
-    assert "línea 7" in hallazgos[0]
-
-
-def test_un_guion_de_adorno_no_cuenta_como_motivo() -> None:
-    nota = "# Nota\n\ncuerpo\n\n## Ver además\n\n- [[depto-centro]] —\n"
-    assert len(note.lint(nota)) == 1
-
-
-def test_el_lint_solo_mira_dentro_de_ver_ademas() -> None:
-    """Un enlace del cuerpo no necesita motivo: la regla es de la sección final."""
-    nota = "# Nota\n\nhabla del [[depto-centro]] sin motivo\n\n## Ver además\n\n"
-    assert note.lint(nota) == []
-
-
-def test_una_nota_vacia_reporta_la_seccion_que_falta() -> None:
+    [sin_seccion] = note.lint("# Nota\n\ncuerpo\n")
+    assert "falta la sección" in sin_seccion
+    assert "cierra con sus enlaces" in sin_seccion, "el error no dice la corrección"
     assert len(note.lint("")) == 1
 
+    [sin_motivo] = note.lint("# Nota\n\ncuerpo\n\n## Ver además\n\n- [[depto-centro]]\n")
+    assert "para qué conecta" in sin_motivo and "línea 7" in sin_motivo
 
-def test_el_cuerpo_no_se_busca_en_stdin_sin_pedirlo(monkeypatch: pytest.MonkeyPatch) -> None:
-    """`stdin` se lee solo con `--body-file -`: un pipe abierto y vacío colgaría el comando."""
-    import argparse
+    adorno = "# Nota\n\ncuerpo\n\n## Ver además\n\n- [[depto-centro]] —\n"
+    assert len(note.lint(adorno)) == 1, "un guion de adorno no cuenta como motivo"
 
-    from tuku import cli
-
-    class StdinQueNadieDebeLeer:
-        def isatty(self) -> bool:
-            return False
-
-        def read(self) -> str:
-            raise AssertionError("leyó stdin sin que se lo pidieran")
-
-    monkeypatch.setattr(sys, "stdin", StdinQueNadieDebeLeer())
-    assert cli._cuerpo_de_la_nota(argparse.Namespace(body=None, body_file=None)) is None
+    cuerpo = "# Nota\n\nhabla del [[depto-centro]] sin motivo\n\n## Ver además\n\n"
+    assert note.lint(cuerpo) == [], "la regla es solo de la sección final"

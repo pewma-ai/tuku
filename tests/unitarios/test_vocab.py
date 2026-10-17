@@ -38,21 +38,7 @@ def test_leer_vocabulario_incompleto_lanza_excepcion() -> None:
         leer(libro)
 
 
-def test_formatear_con_terminos_declarados() -> None:
-    datos = {
-        "clasificaciones": ["reunión", "foco"],
-        "horizontes": ["hoy"],
-    }
-    salida = formatear(datos)
+def test_formatear_lista_los_terminos_o_dice_que_no_hay() -> None:
+    salida = formatear({"clasificaciones": ["reunión", "foco"], "horizontes": []})
     assert "clasificaciones: reunión, foco" in salida
-    assert "horizontes: hoy" in salida
-
-
-def test_formatear_sin_terminos_muestra_ninguno_declarado() -> None:
-    datos: dict[str, list[str]] = {
-        "clasificaciones": [],
-        "tipos-de-nota": [],
-    }
-    salida = formatear(datos)
-    assert "clasificaciones: (ninguno declarado)" in salida
-    assert "tipos-de-nota: (ninguno declarado)" in salida
+    assert "horizontes: (ninguno declarado)" in salida

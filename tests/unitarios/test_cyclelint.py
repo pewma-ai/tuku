@@ -21,38 +21,23 @@ def test_ahora_sano_no_tiene_hallazgos() -> None:
     assert formatear([]) == "cycle lint: sin hallazgos."
 
 
-def test_frontmatter_sin_resolver_es_error() -> None:
+def test_un_defecto_del_frontmatter_o_del_dia_es_un_hallazgo_que_lo_nombra() -> None:
     sin_fechas = SANO.replace("2026-09-07", "AAAA-MM-DD").replace("2026-09-13", "AAAA-MM-DD")
-
     assert any("frontmatter" in h.defecto for h in lint(sin_fechas))
 
+    [fuera] = lint(SANO.replace("## Lunes 7 de septiembre", "## Lunes 21 de septiembre"))
+    assert "fuera del ciclo abierto" in fuera.defecto
 
-def test_dia_fuera_del_ciclo_es_error() -> None:
-    hallazgos = lint(SANO.replace("## Lunes 7 de septiembre", "## Lunes 21 de septiembre"))
+    [sin_type] = lint(SANO.replace(f"type: {TYPE_DEL_CICLO}\n", ""))
+    assert "no declara `type`" in sin_type.defecto
+    assert TYPE_DEL_CICLO in sin_type.correccion
 
-    assert len(hallazgos) == 1
-    assert "fuera del ciclo abierto" in hallazgos[0].defecto
-
-
-def test_falta_el_type() -> None:
-    hallazgos = lint(SANO.replace(f"type: {TYPE_DEL_CICLO}\n", ""))
-
-    assert len(hallazgos) == 1
-    assert "no declara `type`" in hallazgos[0].defecto
-    assert TYPE_DEL_CICLO in hallazgos[0].correccion
-
-
-def test_un_ciclo_archivado_no_es_el_ciclo_abierto() -> None:
-    hallazgos = lint(SANO.replace(f"status: {STATUS_ABIERTO}", "status: stable"))
-
-    assert len(hallazgos) == 1
-    assert "status: stable" in hallazgos[0].defecto
+    [archivado] = lint(SANO.replace(f"status: {STATUS_ABIERTO}", "status: stable"))
+    assert "status: stable" in archivado.defecto
 
 
 def test_sin_frontmatter_reporta_todo_lo_que_falta() -> None:
-    hallazgos = lint("# Actividad diaria\n\n## Lunes 7 de septiembre\n")
-
-    defectos = " ".join(h.defecto for h in hallazgos)
-    assert "frontmatter" in defectos
-    assert "`type`" in defectos
-    assert "`status`" in defectos
+    defectos = " ".join(
+        h.defecto for h in lint("# Actividad diaria\n\n## Lunes 7 de septiembre\n")
+    )
+    assert "frontmatter" in defectos and "`type`" in defectos and "`status`" in defectos

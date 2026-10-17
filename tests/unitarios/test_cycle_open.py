@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from tuku.cli import EXITO, main
 from tuku.cycle import CicloEnCurso, open_cycle, tiene_registros
 from tuku.init import init
 
@@ -19,24 +20,15 @@ def _vault(tmp: Path) -> Path:
     return init(tmp / "v", desde=SEMANA_1, home=RAIZ_REPO)
 
 
-def test_tiene_registros_distingue_el_ciclo_vacio() -> None:
+def test_abrir_un_ciclo_es_idempotente_y_un_ciclo_vacio_se_regenera(tmp_path: Path) -> None:
     assert not tiene_registros("## Lunes 7 de septiembre\n\n## Martes 8 de septiembre\n")
     assert tiene_registros("## Lunes 7 de septiembre\n- 09:00 - **nota**: cuerpo\n")
 
-
-def test_abrir_el_mismo_ciclo_es_idempotente(tmp_path: Path) -> None:
     vault = _vault(tmp_path)
-
     _, creado = open_cycle(vault, SEMANA_1)
-
     assert not creado
 
-
-def test_un_ciclo_vacio_se_regenera(tmp_path: Path) -> None:
-    vault = _vault(tmp_path)
-
     _, creado = open_cycle(vault, SEMANA_2)
-
     assert creado
     assert "from: 2026-09-14" in (vault / "AHORA.md").read_text(encoding="utf-8")
 
@@ -59,23 +51,62 @@ def test_un_ciclo_con_registros_no_se_pisa(tmp_path: Path) -> None:
     assert "no se pierde" in ahora.read_text(encoding="utf-8")
 
 
-def test_sin_ahora_lo_crea_desde_la_plantilla_con_la_semana_completa(tmp_path: Path) -> None:
-    vault = _vault(tmp_path)
+def test_la_semana_se_siembra_de_lunes_a_domingo_desde_cualquier_dia(tmp_path: Path) -> None:
+    vault = _vault(tmp_path / "a")
     (vault / "AHORA.md").unlink()
-
     _, creado = open_cycle(vault, date(2026, 9, 9))
-
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
     assert creado
     assert "from: 2026-09-07" in ahora and "to: 2026-09-13" in ahora
     assert "## Lunes 7 de septiembre" in ahora and "## Domingo 13 de septiembre" in ahora
     assert "AAAA-MM-DD" not in ahora
 
-
-def test_init_con_un_dia_cualquiera_siembra_de_lunes_a_domingo(tmp_path: Path) -> None:
-    vault = init(tmp_path / "v", desde=date(2026, 9, 9), home=RAIZ_REPO)
-
-    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    assert "from: 2026-09-07" in ahora and "to: 2026-09-13" in ahora
-    _, creado = open_cycle(vault, date(2026, 9, 9))
+    sembrado = init(tmp_path / "b", desde=date(2026, 9, 9), home=RAIZ_REPO)
+    assert "from: 2026-09-07" in (sembrado / "AHORA.md").read_text(encoding="utf-8")
+    _, creado = open_cycle(sembrado, date(2026, 9, 9))
     assert not creado, "init y cycle open no abren la misma semana"
+
+
+# --- El pendiente de revisar la bitácora anterior --------------------------------
+
+REVISAR = "revisar la bitácora anterior"
+
+
+def _filas(vault: Path) -> list[str]:
+    return [
+        linea
+        for linea in (vault / "PENDIENTES.md").read_text(encoding="utf-8").splitlines()
+        if linea.startswith("| ") and "Horizonte" not in linea and "---" not in linea
+    ]
+
+
+def _cerrar_a_mano(vault: Path) -> None:
+    """Lo que hace el autor para cerrar el ciclo: AHORA.md pasa a `bitacoras/`."""
+    destino = vault / "bitacoras"
+    destino.mkdir()
+    (vault / "AHORA.md").rename(destino / "bitacora-2026-09-07-2026-09-13.md")
+
+
+def test_el_pendiente_de_revisar_la_bitacora_anterior_se_abre_una_sola_vez(
+    tmp_path: Path,
+) -> None:
+    sin_bitacora = _vault(tmp_path / "a")
+    assert _filas(sin_bitacora) == [], "el primer ciclo no trae pendiente de revisión"
+    assert main(["cycle", "open", "--at", "2026-09-14", "--vault", str(sin_bitacora)]) == EXITO
+    assert _filas(sin_bitacora) == []
+
+    vault = _vault(tmp_path / "b")
+    _cerrar_a_mano(vault)
+    assert main(["cycle", "open", "--at", "2026-09-14", "--vault", str(vault)]) == EXITO
+
+    (fila,) = _filas(vault)
+    assert REVISAR in fila
+    assert "2026-09-14" in fila
+    lunes = (
+        (vault / "AHORA.md").read_text(encoding="utf-8").split("## Lunes 14 de septiembre")[1]
+    )
+    assert REVISAR in lunes.split("## Martes")[0]
+
+    antes = (vault / "PENDIENTES.md").read_bytes()
+    assert main(["cycle", "open", "--at", "2026-09-14", "--vault", str(vault)]) == EXITO
+    assert (vault / "PENDIENTES.md").read_bytes() == antes

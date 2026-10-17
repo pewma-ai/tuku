@@ -30,44 +30,34 @@ COMPLETO = (
 )
 
 
-def test_el_libro_completo_no_tiene_errores() -> None:
-    assert [h for h in style.lint(COMPLETO) if h.grado == ERROR] == []
+def _errores(texto: str) -> list[style.HallazgoEstilo]:
+    return [h for h in style.lint(texto) if h.grado == ERROR]
 
 
-def test_falta_el_marcador_del_autor() -> None:
-    sin_marcador = COMPLETO.replace("**Nombre del autor:** por declarar", "")
+def test_el_libro_completo_no_tiene_errores_y_falta_el_marcador_del_autor() -> None:
+    assert _errores(COMPLETO) == []
 
-    errores = [h for h in style.lint(sin_marcador) if h.grado == ERROR]
-
-    assert len(errores) == 1
-    assert "Nombre del autor" in errores[0].defecto
-    assert "tuku init --author" in errores[0].correccion
+    [error] = _errores(COMPLETO.replace("**Nombre del autor:** por declarar", ""))
+    assert "Nombre del autor" in error.defecto
+    assert "tuku init --author" in error.correccion
 
 
-@pytest.mark.parametrize(
-    "encabezado", ["### Clasificaciones", "### Horizontes", "### Tipos de nota"]
-)
-def test_falta_un_encabezado_de_contrato(encabezado: str) -> None:
-    sin_encabezado = COMPLETO.replace(f"{encabezado}\n", "")
+def test_falta_un_encabezado_de_contrato() -> None:
+    for encabezado in ("### Clasificaciones", "### Horizontes", "### Tipos de nota"):
+        errores = _errores(COMPLETO.replace(f"{encabezado}\n", ""))
+        assert any(encabezado in h.defecto for h in errores), encabezado
 
-    errores = [h for h in style.lint(sin_encabezado) if h.grado == ERROR]
-
-    assert any(encabezado in h.defecto for h in errores), [h.defecto for h in errores]
+    assert len(_errores("# Libro de estilo\n")) >= 4, (
+        "el libro vacío reporta el autor y los tres"
+    )
 
 
 def test_una_tabla_sin_terminos_es_pregunta_y_no_error() -> None:
     """Vocabulario del autor: el sistema pregunta qué significa, no rechaza."""
-    vacia = COMPLETO.replace("| `progreso` | avance |\n", "", 1)
-
-    hallazgos = style.lint(vacia)
+    hallazgos = style.lint(COMPLETO.replace("| `progreso` | avance |\n", "", 1))
 
     assert any(h.grado == PREGUNTA and "Clasificaciones" in h.defecto for h in hallazgos)
     assert [h for h in hallazgos if h.grado == ERROR] == []
-
-
-def test_un_libro_vacio_reporta_el_autor_y_los_tres_encabezados() -> None:
-    errores = [h for h in style.lint("# Libro de estilo\n") if h.grado == ERROR]
-    assert len(errores) >= 4
 
 
 def test_ningun_hallazgo_queda_sin_defecto_ni_correccion() -> None:

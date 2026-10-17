@@ -69,7 +69,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
 
     scope_lint_p = scope_v.add_parser(
         "lint",
-        help="revisa que ningún registro apunte a una categoría",
+        help="revisa categorías, transclusiones y callouts de los ámbitos",
         description=(
             "Revisa que ningún registro de `AHORA.md` apunte a una categoría (carpeta de "
             "`ambitos/` sin página propia), que cada página de ámbito transcluya sus "

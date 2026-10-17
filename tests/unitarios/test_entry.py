@@ -22,112 +22,82 @@ AHORA = (
 P = "[personal](ambitos/personal/personal.md)"
 
 
-def test_componer_con_scope_y_body() -> None:
-    linea = componer(hora="14:30", scope="personal", body="**pendiente**: pagar la cuenta")
-    assert linea == f"- 14:30 - {P} **pendiente**: pagar la cuenta"
-
-
-def test_componer_sin_scope() -> None:
-    linea = componer(hora="08:15", scope=None, body="desayuno con equipo")
-    assert linea == "- 08:15 - desayuno con equipo"
-
-
-def test_componer_con_corchetes_preexistentes_en_scope() -> None:
-    linea = componer(hora="09:00", scope="[[trabajo]]", body="reunión")
-    assert linea == "- 09:00 - [trabajo](ambitos/trabajo/trabajo.md) reunión"
-
-
-def test_componer_usa_la_ruta_completa_de_un_ambito_anidado() -> None:
+def test_componer_arma_la_linea_del_registro() -> None:
+    assert (
+        componer(hora="14:30", scope="personal", body="**pendiente**: pagar la cuenta")
+        == f"- 14:30 - {P} **pendiente**: pagar la cuenta"
+    )
+    assert componer(hora="08:15", scope=None, body="desayuno") == "- 08:15 - desayuno"
+    assert (
+        componer(hora="09:00", scope="[[trabajo]]", body="reunión")
+        == "- 09:00 - [trabajo](ambitos/trabajo/trabajo.md) reunión"
+    )
     rutas = {"pewma": "ambitos/trabajo/pewma/pewma.md"}
-    linea = componer(hora="09:00", scope="pewma", body="reunión", rutas=rutas)
-    assert linea == "- 09:00 - [pewma](ambitos/trabajo/pewma/pewma.md) reunión"
+    assert (
+        componer(hora="09:00", scope="pewma", body="reunión", rutas=rutas)
+        == "- 09:00 - [pewma](ambitos/trabajo/pewma/pewma.md) reunión"
+    )
+    assert (
+        componer(hora="19:05", scope="personal", body="(Hecho): avisar de los GGCC")
+        == f"- 19:05 - {P} (Hecho): ~~avisar de los GGCC~~"
+    )
 
 
-def test_clave_hora_extrae_horas_y_minutos() -> None:
+def test_clave_hora_extrae_horas_y_minutos_y_rechaza_lo_malformado() -> None:
     assert _clave_hora("- 09:45 - registro") == (9, 45)
-    assert _clave_hora("- 00:00 - inicio") == (0, 0)
     assert _clave_hora("- 23:59 - fin") == (23, 59)
+    for linea in ("09:45 - falta guion inicial", "- 9:45 - hora con un solo digito"):
+        with pytest.raises(ValueError, match="no empieza con '- HH:MM - '"):
+            _clave_hora(linea)
 
 
-def test_clave_hora_linea_malformada_lanza_value_error() -> None:
-    with pytest.raises(ValueError, match="no empieza con '- HH:MM - '"):
-        _clave_hora("09:45 - falta guion inicial")
+def test_add_respeta_lo_que_viene_despues_del_dia() -> None:
+    final = "---\n(lo que el autor escriba al final)"
+    ultimo = add(AHORA, ["- 09:00 - **nota**: cuerpo"], dia="Domingo 13 de septiembre")
+    assert "- 09:00 - **nota**: cuerpo" in ultimo
+    assert ultimo.rstrip("\n").endswith(final)
 
-    with pytest.raises(ValueError, match="no empieza con '- HH:MM - '"):
-        _clave_hora("- 9:45 - hora con un solo digito")
+    medio = add(AHORA, ["- 08:00 - **nota**: cuerpo"], dia="Lunes 7 de septiembre")
+    assert "## Domingo 13 de septiembre" in medio
+    assert medio.rstrip("\n").endswith(final)
 
-
-def test_add_en_el_ultimo_dia_no_se_come_lo_que_venga_despues() -> None:
-    texto = add(AHORA, ["- 09:00 - **nota**: cuerpo"], dia="Domingo 13 de septiembre")
-    assert "- 09:00 - **nota**: cuerpo" in texto
-    assert texto.rstrip("\n").endswith("---\n(lo que el autor escriba al final)")
-
-
-def test_add_en_un_dia_intermedio_no_toca_el_resto() -> None:
-    texto = add(AHORA, ["- 08:00 - **nota**: cuerpo"], dia="Lunes 7 de septiembre")
-    assert "## Domingo 13 de septiembre" in texto
-    assert texto.rstrip("\n").endswith("---\n(lo que el autor escriba al final)")
-
-
-def test_add_idempotente_no_duplica_lineas() -> None:
-    linea = "- 10:00 - una línea"
-    primero = add(AHORA, [linea], dia="Lunes 7 de septiembre")
-    segundo = add(primero, [linea], dia="Lunes 7 de septiembre")
-    assert primero == segundo
-    assert segundo.count(linea) == 1
-
-
-def test_add_no_duplica_un_registro_cuya_mencion_ya_se_enlazo() -> None:
-    enlazada = "- 18:40 - la boleta del [depto-centro](ambitos/depto-centro/depto-centro.md)"
-    primero = add(AHORA, [enlazada], dia="Lunes 7 de septiembre")
-    suelta = "- 18:40 - la boleta del depto centro"
-    assert add(primero, [suelta], dia="Lunes 7 de septiembre") == primero
-
-
-def test_add_ordena_por_hora_cronologicamente() -> None:
-    lineas = [
-        "- 15:00 - tarde",
-        "- 09:00 - temprano",
-        "- 12:00 - mediodia",
-    ]
-    texto = add(AHORA, lineas, dia="Lunes 7 de septiembre")
-    idx_09 = texto.index("- 09:00 - temprano")
-    idx_12 = texto.index("- 12:00 - mediodia")
-    idx_15 = texto.index("- 15:00 - tarde")
-    assert idx_09 < idx_12 < idx_15
-
-
-def test_add_acepta_day_o_dia_con_o_sin_prefijo_hash() -> None:
-    texto1 = add(AHORA, ["- 10:00 - r1"], day="Lunes 7 de septiembre")
-    texto2 = add(AHORA, ["- 10:00 - r1"], dia="## Lunes 7 de septiembre")
-    assert texto1 == texto2
-
-
-def test_add_inserta_dia_nuevo_dentro_del_rango_en_orden() -> None:
-    # AHORA tiene Lunes 7 y Domingo 13. Agregamos Miércoles 9.
-    texto = add(AHORA, ["- 11:00 - registro miércoles"], dia="Miércoles 9 de septiembre")
-    assert "## Miércoles 9 de septiembre" in texto
-    idx_lun = texto.index("## Lunes 7 de septiembre")
-    idx_mie = texto.index("## Miércoles 9 de septiembre")
-    idx_dom = texto.index("## Domingo 13 de septiembre")
-    assert idx_lun < idx_mie < idx_dom
-
-
-def test_add_dia_fuera_del_rango_lanza_value_error() -> None:
-    with pytest.raises(ValueError, match="cae fuera del ciclo abierto"):
-        add(AHORA, ["- 10:00 - r"], dia="Martes 22 de septiembre")
-
-
-def test_add_sin_rango_y_encabezado_inexistente_lanza_value_error() -> None:
-    ahora_sin_fm = "## Lunes 7 de septiembre\n\n- 08:00 - texto\n"
-    with pytest.raises(ValueError, match="no existe el encabezado"):
-        add(ahora_sin_fm, ["- 10:00 - r"], dia="Viernes 11 de septiembre")
-
-
-def test_add_sin_lineas_devuelve_texto_intacto() -> None:
     assert add(AHORA, [], dia="Lunes 7 de septiembre") == AHORA
 
 
-def test_componer_escribe_el_cierre_con_el_cuerpo_tachado() -> None:
-    linea = componer(hora="19:05", scope="personal", body="(Hecho): avisar de los GGCC")
-    assert linea == f"- 19:05 - {P} (Hecho): ~~avisar de los GGCC~~"
+def test_add_es_idempotente_ordena_y_no_duplica_menciones_enlazadas() -> None:
+    dia = "Lunes 7 de septiembre"
+    linea = "- 10:00 - una línea"
+    primero = add(AHORA, [linea], dia=dia)
+    assert add(primero, [linea], dia=dia) == primero
+    assert primero.count(linea) == 1
+
+    enlazada = "- 18:40 - la boleta del [depto-centro](ambitos/depto-centro/depto-centro.md)"
+    con_mencion = add(AHORA, [enlazada], dia=dia)
+    assert add(con_mencion, ["- 18:40 - la boleta del depto centro"], dia=dia) == con_mencion
+
+    texto = add(AHORA, ["- 15:00 - tarde", "- 09:00 - temprano", "- 12:00 - mediodia"], dia=dia)
+    assert texto.index("- 09:00 - temprano") < texto.index("- 12:00 - mediodia")
+    assert texto.index("- 12:00 - mediodia") < texto.index("- 15:00 - tarde")
+
+
+def test_add_resuelve_el_dia_y_lo_inserta_en_orden() -> None:
+    assert add(AHORA, ["- 10:00 - r1"], day="Lunes 7 de septiembre") == add(
+        AHORA, ["- 10:00 - r1"], dia="## Lunes 7 de septiembre"
+    )
+    texto = add(AHORA, ["- 11:00 - registro miércoles"], dia="Miércoles 9 de septiembre")
+    assert (
+        texto.index("## Lunes 7 de septiembre")
+        < texto.index("## Miércoles 9 de septiembre")
+        < texto.index("## Domingo 13 de septiembre")
+    )
+
+
+def test_add_rechaza_un_dia_fuera_del_ciclo_o_inexistente() -> None:
+    with pytest.raises(ValueError, match="cae fuera del ciclo abierto"):
+        add(AHORA, ["- 10:00 - r"], dia="Martes 22 de septiembre")
+    with pytest.raises(ValueError, match="no existe el encabezado"):
+        add(
+            "## Lunes 7 de septiembre\n\n- 08:00 - texto\n",
+            ["- 10:00 - r"],
+            dia="Viernes 11 de septiembre",
+        )

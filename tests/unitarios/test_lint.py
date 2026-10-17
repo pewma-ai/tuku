@@ -36,129 +36,71 @@ to: 2026-08-17
 """
 
 
-def test_lint_texto_valido_sin_hallazgos() -> None:
+CABECERA = "---\ntype: Logbook\nstatus: draft\nfrom: 2026-08-11\nto: 2026-08-17\n---\n\n"
+
+
+def test_lint_de_lo_valido_o_sin_registros_no_tiene_hallazgos() -> None:
     hallazgos = lint.lint(AHORA_VALIDO, abiertos=["reunión"])
     assert hallazgos == []
     assert formatear(hallazgos) == "entry lint: sin hallazgos."
-
-
-def test_lint_texto_vacio_sin_hallazgos() -> None:
     assert lint.lint("", abiertos=[]) == []
+    assert lint.lint("# Solo comentarios\n\nTexto libre sin horas.\n", abiertos=[]) == []
+    assert {"**pendiente**", "(Hecho)", "**cadencia**"} <= set(CERRADA)
 
 
-def test_lint_sin_registros_sin_hallazgos() -> None:
-    texto = "# Solo comentarios\n\nTexto libre sin horas.\n"
-    assert lint.lint(texto, abiertos=[]) == []
-
-
-def test_ontologia_cerrada_reconoce_todas_las_marcas_canonicas() -> None:
-    assert "**pendiente**" in CERRADA
-    assert "(Hecho)" in CERRADA
-    assert "**cadencia**" in CERRADA
-
-
-def test_marca_cerrada_con_variacion_de_mayusculas_es_error() -> None:
-    texto = """---
-type: Logbook
-status: draft
-from: 2026-08-11
-to: 2026-08-17
----
-
-## Martes 11 de agosto
-- 09:00 - **Pendiente**: comprar pan
-- 10:00 - (hecho): ~~comprar pan~~
-- 10:30 - ~~(hecho)~~: comprar pan
-- 11:00 - **Cadencia**: semanal
-"""
-    hallazgos = lint.lint(texto, abiertos=[])
-    errores = [h for h in hallazgos if h.grado == ERROR]
+def test_una_marca_cerrada_mal_escrita_es_error_y_dice_como_escribirla() -> None:
+    texto = (
+        CABECERA + "## Martes 11 de agosto\n"
+        "- 09:00 - **Pendiente**: comprar pan\n"
+        "- 10:00 - (hecho): ~~comprar pan~~\n"
+        "- 10:30 - ~~(hecho)~~: comprar pan\n"
+        "- 11:00 - **Cadencia**: semanal\n"
+    )
+    errores = [h for h in lint.lint(texto, abiertos=[]) if h.grado == ERROR]
     assert len(errores) == 4
-    assert any("**Pendiente**" in e.defecto for e in errores)
-    assert any("(hecho)" in e.defecto for e in errores)
-    assert any("~~(hecho)~~" in e.defecto for e in errores)
-    assert any("**Cadencia**" in e.defecto for e in errores)
+    for marca in ("**Pendiente**", "(hecho)", "~~(hecho)~~", "**Cadencia**"):
+        assert any(marca in e.defecto for e in errores), marca
     assert all("ontología cerrada" in e.defecto for e in errores)
     assert all("Escríbela exactamente" in e.correccion for e in errores)
 
+    tachada = (
+        f"{CABECERA}## Martes 11 de agosto\n- 10:00 - [[personal]] ~~(Hecho)~~: comprar pan\n"
+    )
+    [h] = lint.lint(tachada, abiertos=[])
+    assert h.grado == ERROR and "Escríbela exactamente (Hecho)" in h.correccion
 
-def test_vocabulario_abierto_no_declarado_es_pregunta() -> None:
-    texto = """---
-type: Logbook
-status: draft
-from: 2026-08-11
-to: 2026-08-17
----
 
-## Martes 11 de agosto
-- 09:00 - **llamada**: con don Rodolfo
-"""
-    hallazgos = lint.lint(texto, abiertos=["reunión"])
-    assert len(hallazgos) == 1
-    h = hallazgos[0]
+def test_un_vocabulario_abierto_no_declarado_es_pregunta_y_declarado_no_dice_nada() -> None:
+    [h] = lint.lint(
+        f"{CABECERA}## Martes 11 de agosto\n- 09:00 - **llamada**: con don Rodolfo\n",
+        abiertos=["reunión"],
+    )
     assert h.grado == PREGUNTA
     assert "**llamada**" in h.defecto
     assert "no está en el libro de estilo" in h.defecto
     assert "Se acepta igual" in h.correccion
 
-
-def test_vocabulario_abierto_declarado_no_genera_hallazgo() -> None:
-    texto = """---
-type: Logbook
-status: draft
-from: 2026-08-11
-to: 2026-08-17
----
-
-## Martes 11 de agosto
-- 09:00 - **Llamada**: con don Rodolfo
-"""
-    # case-insensitive
-    hallazgos = lint.lint(texto, abiertos=["llamada"])
-    assert hallazgos == []
+    declarado = f"{CABECERA}## Martes 11 de agosto\n- 09:00 - **Llamada**: con don Rodolfo\n"
+    assert lint.lint(declarado, abiertos=["llamada"]) == [], "sin distinguir mayúsculas"
 
 
-def test_registro_fuera_del_ciclo_abierto_es_error() -> None:
-    texto = """---
-type: Logbook
-status: draft
-from: 2026-08-11
-to: 2026-08-17
----
-
-## Martes 25 de agosto
-- 09:00 - registro fuera de ciclo
-"""
-    hallazgos = lint.lint(texto, abiertos=[])
-    errores = [h for h in hallazgos if h.grado == ERROR]
-    assert len(errores) == 1
-    assert "fuera del ciclo abierto" in errores[0].defecto
-    assert "Muévelo al ciclo que le corresponde" in errores[0].correccion
+def test_un_registro_fuera_del_ciclo_abierto_es_error() -> None:
+    texto = f"{CABECERA}## Martes 25 de agosto\n- 09:00 - registro fuera de ciclo\n"
+    [error] = [h for h in lint.lint(texto, abiertos=[]) if h.grado == ERROR]
+    assert "fuera del ciclo abierto" in error.defecto
+    assert "Muévelo al ciclo que le corresponde" in error.correccion
 
 
-def test_formatear_con_errores_y_preguntas() -> None:
-    hallazgos = [
-        Hallazgo(10, ERROR, "defecto error", "corregir error"),
-        Hallazgo(15, PREGUNTA, "defecto pregunta", "corregir pregunta"),
-    ]
-    reporte = formatear(hallazgos)
+def test_formatear_y_str_de_los_hallazgos() -> None:
+    reporte = formatear(
+        [
+            Hallazgo(10, ERROR, "defecto error", "corregir error"),
+            Hallazgo(15, PREGUNTA, "defecto pregunta", "corregir pregunta"),
+        ]
+    )
     assert "AHORA.md:10: error: defecto error. corregir error" in reporte
     assert "AHORA.md:15: pregunta: defecto pregunta. corregir pregunta" in reporte
     assert "entry lint: 1 error(es), 1 pregunta(s)." in reporte
-
-
-def test_hallazgo_str() -> None:
-    h = Hallazgo(5, ERROR, "defecto", "corrección")
-    assert str(h) == "AHORA.md:5: error: defecto. corrección"
-
-    h_preg = Hallazgo(6, PREGUNTA, "pregunta", "corrección")
-    assert str(h_preg) == "AHORA.md:6: pregunta: pregunta. corrección"
-
-
-def test_la_marca_tachada_es_error_y_dice_como_escribirla() -> None:
-    texto = (
-        "---\ntype: Logbook\nfrom: 2026-08-11\nto: 2026-08-17\n---\n\n"
-        "## Martes 11 de agosto\n- 10:00 - [[personal]] ~~(Hecho)~~: comprar pan\n"
+    assert str(Hallazgo(5, ERROR, "defecto", "corrección")) == (
+        "AHORA.md:5: error: defecto. corrección"
     )
-    [h] = lint.lint(texto, abiertos=[])
-    assert h.grado == ERROR and "Escríbela exactamente (Hecho)" in h.correccion

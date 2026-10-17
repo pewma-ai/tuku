@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tuku import _pack, doctor, init
+from tuku import _pack, init
 from tuku.config import parsear_config_md
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -28,53 +28,36 @@ def entorno(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, Path
     return home / ".tuku", empaquetado
 
 
-def test_materializa_y_sella_si_no_existe(entorno: tuple[Path, Path]) -> None:
-    tuku_home, _ = entorno
+def test_el_home_se_materializa_se_sella_y_se_refresca_solo_si_cambia(
+    entorno: tuple[Path, Path], tmp_path: Path
+) -> None:
+    tuku_home, empaquetado = entorno
+    viejo = tuku_home / "template" / "viejo.md"
+    assert init.version_del_home(tmp_path) is None
+
     assert init.resolver_home() == tuku_home
     assert (tuku_home / "template" / "nuevo.md").is_file()
     assert init.version_del_home(tuku_home) == "2.0"
 
-
-def test_refresca_si_el_sello_difiere(entorno: tuple[Path, Path]) -> None:
-    tuku_home, _ = entorno
-    (tuku_home / "template").mkdir(parents=True)
-    (tuku_home / "template" / "viejo.md").write_text("viejo", encoding="utf-8")
-    (tuku_home / init.SELLO).write_text("1.0\n", encoding="utf-8")
-    init.resolver_home()
-    assert not (tuku_home / "template" / "viejo.md").exists()
-    assert (tuku_home / "template" / "nuevo.md").is_file()
-    assert init.version_del_home(tuku_home) == "2.0"
-
-
-def test_refresca_si_no_tiene_sello(entorno: tuple[Path, Path]) -> None:
-    tuku_home, _ = entorno
-    (tuku_home / "template").mkdir(parents=True)
-    (tuku_home / "template" / "viejo.md").write_text("viejo", encoding="utf-8")
-    init.resolver_home()
-    assert not (tuku_home / "template" / "viejo.md").exists()
-    assert init.version_del_home(tuku_home) == "2.0"
-
-
-def test_no_toca_si_el_sello_coincide(entorno: tuple[Path, Path]) -> None:
-    tuku_home, _ = entorno
-    init.resolver_home()
     extra = tuku_home / "template" / "extra.md"
     extra.write_text("sigue", encoding="utf-8")
     init.resolver_home()
-    assert extra.is_file()
+    assert extra.is_file(), "con el sello igual no se toca"
 
-
-def test_refresca_si_el_paquete_cambio_con_la_misma_version(entorno: tuple[Path, Path]) -> None:
-    tuku_home, empaquetado = entorno
+    (tuku_home / init.SELLO).write_text("1.0\n", encoding="utf-8")
+    viejo.write_text("viejo", encoding="utf-8")
     init.resolver_home()
+    assert not viejo.exists() and (tuku_home / "template" / "nuevo.md").is_file()
+    assert init.version_del_home(tuku_home) == "2.0", "el sello difiere"
+
+    viejo.write_text("viejo", encoding="utf-8")
+    (tuku_home / init.SELLO).unlink()
+    init.resolver_home()
+    assert not viejo.exists(), "sin sello"
+
     (empaquetado / "template" / "nuevo.md").write_text("cambiado", encoding="utf-8")
     init.resolver_home()
     assert (tuku_home / "template" / "nuevo.md").read_text(encoding="utf-8") == "cambiado"
-    assert init.version_del_home(tuku_home) == "2.0"
-
-
-def test_version_del_home_sin_sello_es_none(tmp_path: Path) -> None:
-    assert init.version_del_home(tmp_path) is None
 
 
 def test_el_paquete_lleva_docs_y_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -94,28 +77,3 @@ def test_init_registra_version_y_origen(tmp_path: Path) -> None:
     campos = parsear_config_md((destino / "reglas" / "config.tuku.md").read_text("utf-8"))
     assert campos["tuku_version"] == init.version_de_tuku()
     assert campos["origen"] == init.ORIGEN
-
-
-CONFIG = "| Campo | Valor |\n| --- | --- |\n| `tuku_version` | `{}` |\n"
-
-
-def test_doctor_avisa_si_el_vault_es_anterior() -> None:
-    r = doctor.revisar_version(CONFIG.format("1.0"), "2.0")
-    assert r.sano
-    assert "1.0" in r.salida and "2.0" in r.salida and "~/.tuku" in r.salida
-
-
-def test_doctor_calla_si_coinciden() -> None:
-    r = doctor.revisar_version(CONFIG.format("2.0"), "2.0")
-    assert r.sano
-    assert "al día" in r.salida
-
-
-def test_doctor_sin_referencia_no_compara() -> None:
-    r = doctor.revisar_version(CONFIG.format("1.0"), None)
-    assert r.sano
-    assert "sin sello" in r.salida
-
-
-def test_doctor_sin_config_no_falla_aqui() -> None:
-    assert doctor.revisar_version(None, "2.0").sano

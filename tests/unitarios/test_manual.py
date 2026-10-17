@@ -19,52 +19,38 @@ def _parser() -> argparse.ArgumentParser:
     return raiz
 
 
-def test_cada_sustantivo_entra_con_sus_verbos_anidados() -> None:
-    arbol = [(e.nombre, e.nivel, e.invocable) for e in manual.entradas(_parser())]
-    assert arbol == [
+def test_cada_sustantivo_entra_con_sus_verbos_anidados_y_descripcion_normalizada() -> None:
+    entradas = manual.entradas(_parser())
+    assert [(e.nombre, e.nivel, e.invocable) for e in entradas] == [
         ("tuku init", 1, True),
         ("tuku entry", 1, False),
         ("tuku entry add", 2, True),
         ("tuku entry lint", 2, True),
     ]
+    assert entradas[0].que_hace == "Siembra un vault."
 
 
-def test_el_documento_anida_los_verbos_bajo_su_sustantivo() -> None:
-    texto = manual.documento(manual.entradas(_parser()))
+def test_el_documento_es_determinista_anida_y_dice_lo_que_falta() -> None:
+    entradas = manual.entradas(_parser())
+    texto = manual.documento(entradas)
+    assert texto == manual.documento(entradas)
+    assert texto.startswith("---\ntype: Config\n---\n")
     assert "\n## tuku entry\n\nRegistros.\n" in texto
     assert "\n### tuku entry add\n\nEscribe un registro.\n" in texto
-
-
-def test_la_entrada_normaliza_espacios() -> None:
-    assert manual.entradas(_parser())[0].que_hace == "Siembra un vault."
-
-
-def test_lo_que_falta_se_dice_en_vez_de_omitirse() -> None:
-    texto = manual.documento(manual.entradas(_parser()))
     assert "### tuku entry lint\n\nSin descripción.\n" in texto
 
-
-def test_el_documento_es_determinista_y_lleva_type() -> None:
-    lista = manual.entradas(_parser())
-    texto = manual.documento(lista)
-    assert texto == manual.documento(lista)
-    assert texto.startswith("---\ntype: Config\n---\n")
-
-
-def test_un_parser_vacio_deja_solo_el_encabezado() -> None:
-    assert manual.documento([]).startswith("---\ntype: Config\n---\n")
-    assert "## " not in manual.documento([])
+    vacio = manual.documento([])
+    assert vacio.startswith("---\ntype: Config\n---\n") and "## " not in vacio
 
 
 def test_toda_ayuda_dice_que_archivos_del_vault_toca() -> None:
     """Principio 1: la ayuda alcanza para hacerlo sin `tuku`, y sin jerga de código."""
     archivos = (".md", "ambitos/", "notas/", "reglas/", "template/")
     jerga = ("def ", "import ", "module", "function", "class ")
-    for e in manual.entradas(cli._construir_parser()):
-        texto = e.que_hace
-        if not e.invocable:
-            assert texto, f"{e.nombre} no tiene descripción"
-            continue
-        assert texto, f"{e.nombre} no tiene descripción"
-        assert any(a in texto for a in archivos), f"{e.nombre} no nombra archivos del vault"
-        assert not any(j in texto for j in jerga), f"{e.nombre} usa jerga de código"
+    entradas = manual.entradas(cli._construir_parser())
+    assert len(entradas) > 20
+    for e in entradas:
+        assert e.que_hace.strip(), f"{e.nombre} no tiene descripción"
+        if e.invocable:
+            assert any(a in e.que_hace for a in archivos), f"{e.nombre} no nombra archivos"
+            assert not any(j in e.que_hace for j in jerga), f"{e.nombre} usa jerga de código"

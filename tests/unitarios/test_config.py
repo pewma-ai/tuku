@@ -18,7 +18,7 @@ from tuku.config import (
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 
 
-def test_parsear_config_md_lee_la_tabla() -> None:
+def test_parsear_la_config_y_el_autor() -> None:
     texto = (
         "# Configuración\n\n"
         "Prosa explicativa que no debe interferir.\n\n"
@@ -37,14 +37,9 @@ def test_parsear_config_md_lee_la_tabla() -> None:
         "cycle_type": "semanal",
         "Campo extra": "valor personalizado",
     }
-
-
-def test_parsear_config_md_vacio() -> None:
     assert parsear_config_md("") == {}
     assert parsear_config_md("Solo prosa sin formato.") == {}
 
-
-def test_parsear_autor() -> None:
     assert parsear_autor("**Nombre del autor:** Juan Pérez") == "Juan Pérez"
     assert parsear_autor("**Nombre del autor:** por declarar. El instalador...") is None
     assert parsear_autor("**Nombre del autor:**") is None
@@ -110,22 +105,15 @@ def test_leer_config_en_memoria_sin_disco(tmp_path: Path) -> None:
     assert cfg.plantilla_ahora == "PLANTILLA PERSONALIZADA"
 
 
-def test_archivo_vault_y_vault_invalido(tmp_path: Path) -> None:
+def test_se_exige_un_vault_y_se_nombra_lo_que_falta(tmp_path: Path) -> None:
     with pytest.raises(VaultInvalido) as exc:
         archivo_vault(tmp_path, "LIBRO-DE-ESTILO.md")
     assert "no parece un vault de TUKU" in str(exc.value)
 
-
-def test_exigir_vault_rechaza_un_directorio_cualquiera(tmp_path: Path) -> None:
     with pytest.raises(VaultInvalido, match="no es un vault de TUKU"):
         exigir_vault(tmp_path)
-
-
-def test_exigir_vault_rechaza_un_directorio_inexistente(tmp_path: Path) -> None:
     with pytest.raises(VaultInvalido):
         exigir_vault(tmp_path / "no-existe")
 
-
-def test_exigir_vault_acepta_un_vault_incompleto(tmp_path: Path) -> None:
     (tmp_path / "AHORA.md").write_text("", encoding="utf-8")
-    exigir_vault(tmp_path)
+    exigir_vault(tmp_path)  # un vault incompleto se acepta

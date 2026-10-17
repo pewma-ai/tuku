@@ -30,62 +30,57 @@ def _ahora(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(opciones, "datetime", Ahora)
 
 
-@pytest.mark.parametrize(
-    ("valor", "dia", "hora"),
-    [
+def test_at_acepta_fecha_con_hora_solo_fecha_o_solo_hora_y_rechaza_el_resto() -> None:
+    for valor, dia, hora in [
         ("2026-08-10 09:12", date(2026, 8, 10), "09:12"),
         ("2026-08-10 9:12", date(2026, 8, 10), "09:12"),
         ("2026-08-10", date(2026, 8, 10), None),
         ("9:12", None, "09:12"),
-    ],
-)
-def test_at_acepta_fecha_con_hora_solo_fecha_o_solo_hora(
-    valor: str, dia: date | None, hora: str | None
-) -> None:
-    m = momento_pasado(valor)
-    assert (m.dia, m.hora, m.propuesto) == (dia, hora, None)
+    ]:
+        m = momento_pasado(valor)
+        assert (m.dia, m.hora, m.propuesto) == (dia, hora, None), valor
 
+    for valor in [
+        "",
+        "mañana",
+        "11-08-2026",
+        "2026-08-10 09:12 x",
+        "09:12 2026-08-10",
+        "2026-02-30",
+    ]:
+        with pytest.raises(argparse.ArgumentTypeError):
+            momento_pasado(valor)
 
-@pytest.mark.parametrize(
-    "valor",
-    ["", "mañana", "11-08-2026", "2026-08-10 09:12 x", "09:12 2026-08-10", "2026-02-30"],
-)
-def test_lo_que_no_es_ninguna_de_las_tres_formas_se_rechaza(valor: str) -> None:
+    for valor in ["-08-10", "mañana", "2026/08/10"]:
+        with pytest.raises(argparse.ArgumentTypeError, match="AAAA-MM-DD"):
+            momento_pasado(valor)
+
+    assert momento_con_hora("2026-08-10 09:12").hora == "09:12"
     with pytest.raises(argparse.ArgumentTypeError):
-        momento_pasado(valor)
+        momento_con_hora("2026-08-10")
 
 
-def test_due_con_solo_hora_es_la_proxima_vez_que_llega() -> None:
+def test_due_con_solo_hora_es_la_proxima_vez_que_llega_y_la_celda_de_vence() -> None:
     assert momento_futuro("22:00").celda() == "2026-08-11 22:00"
     assert momento_futuro("09:00").celda() == "2026-08-12 09:00"
     assert momento_futuro("21:30").celda() == "2026-08-12 21:30"
-
-
-def test_la_celda_de_vence() -> None:
     assert momento_futuro("2026-08-12").celda() == "2026-08-12"
     assert momento_futuro("2026-08-12 9:00").celda() == "2026-08-12 09:00"
     assert Momento().celda() == ""
 
 
-@pytest.mark.parametrize(
-    ("valor", "at", "due"),
-    [
+def test_sin_anio_se_propone_el_mas_cercano_y_el_error_ofrece_el_comando_con_anio(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    for valor, at, due in [
         ("08-11", date(2026, 8, 11), date(2026, 8, 11)),
         ("08-10", date(2026, 8, 10), date(2027, 8, 10)),
         ("08-12", date(2025, 8, 12), date(2026, 8, 12)),
         ("02-29", date(2024, 2, 29), date(2028, 2, 29)),
-    ],
-)
-def test_sin_anio_se_propone_el_mas_cercano_hacia_atras_o_hacia_adelante(
-    valor: str, at: date, due: date
-) -> None:
-    assert momento_pasado(valor).propuesto == at
-    assert momento_futuro(valor).propuesto == due
+    ]:
+        assert momento_pasado(valor).propuesto == at, valor
+        assert momento_futuro(valor).propuesto == due, valor
 
-
-def test_sin_anio_falla_y_ofrece_el_comando_con_anio(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
     argv = ["todo", "open", "--at", "08-10 9:12", "--due", "08-12", "--body", "pagar la luz"]
     assert main(argv) == USO
     err = capsys.readouterr().err
@@ -94,15 +89,3 @@ def test_sin_anio_falla_y_ofrece_el_comando_con_anio(
     assert (
         "tuku todo open --at '2026-08-10 09:12' --due 2026-08-12 --body 'pagar la luz'" in err
     )
-
-
-def test_un_registro_que_ya_existe_se_ubica_con_hora() -> None:
-    assert momento_con_hora("2026-08-10 09:12").hora == "09:12"
-    with pytest.raises(argparse.ArgumentTypeError):
-        momento_con_hora("2026-08-10")
-
-
-@pytest.mark.parametrize("valor", ["-08-10", "mañana", "2026/08/10"])
-def test_lo_que_no_parece_hora_dice_las_tres_formas_y_no_pide_una_hora(valor: str) -> None:
-    with pytest.raises(argparse.ArgumentTypeError, match="AAAA-MM-DD"):
-        momento_pasado(valor)

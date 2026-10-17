@@ -11,17 +11,12 @@ def test_scope_lint_vault_sano(tmp_path: Path) -> None:
     ambitos_dir = tmp_path / "ambitos"
     personal_dir = ambitos_dir / "personal"
     personal_dir.mkdir(parents=True)
-    (ambitos_dir / "AGENTS.md").write_text("", encoding="utf-8")
-    (ambitos_dir / "CADENCIAS.md").write_text("", encoding="utf-8")
-    (personal_dir / "AGENTS.md").write_text("", encoding="utf-8")
-    (personal_dir / "CADENCIAS.md").write_text("", encoding="utf-8")
     (personal_dir / "personal.md").write_text(
         "---\ntype: Scope\n---\n# personal\n\n![[../PENDIENTES-AMBITOS.md#^personal]]\n",
         encoding="utf-8",
     )
     callout_esperado = (
-        "---\ntype: Derived\n---\n\n"
-        "> [!todo] Pendientes en **Personal** ^personal\n> SIN PENDIENTES\n"
+        "---\ntype: Derived\n---\n\n> [!todo] Pendientes en **Personal** ^personal\n"
     )
     (ambitos_dir / "PENDIENTES-AMBITOS.md").write_text(
         callout_esperado,
@@ -36,50 +31,25 @@ def test_scope_lint_vault_sano(tmp_path: Path) -> None:
     assert not hallazgos
 
 
-def test_scope_lint_falta_transclusion(tmp_path: Path) -> None:
+def test_scope_lint_nombra_transclusion_callout_y_archivo_que_faltan(tmp_path: Path) -> None:
     ambitos_dir = tmp_path / "ambitos"
     personal_dir = ambitos_dir / "personal"
     personal_dir.mkdir(parents=True)
+
+    assert "error: falta el archivo" in scope.lint_callouts(tmp_path)[0]
+
     (personal_dir / "personal.md").write_text(
-        "---\ntype: Scope\n---\n# personal\n\nTexto sin transclusión.\n",
-        encoding="utf-8",
+        "---\ntype: Scope\n---\n# personal\n\nTexto sin transclusión.\n", encoding="utf-8"
     )
     (ambitos_dir / "PENDIENTES-AMBITOS.md").write_text(
-        "> [!todo] Pendientes en **Personal** ^personal\n> SIN PENDIENTES\n",
-        encoding="utf-8",
+        "---\ntype: Derived\n---\n\n# Pendientes\n", encoding="utf-8"
     )
+    [sin_transclusion] = scope.lint_transclusiones(tmp_path)
+    assert "falta la transclusión a PENDIENTES-AMBITOS.md" in sin_transclusion
+    assert "PENDIENTES-AMBITOS.md#^personal" in sin_transclusion
 
-    hallazgos = scope.lint_transclusiones(tmp_path)
-    assert len(hallazgos) == 1
-    assert "falta la transclusión a PENDIENTES-AMBITOS.md" in hallazgos[0]
-    assert "PENDIENTES-AMBITOS.md#^personal" in hallazgos[0]
-
-
-def test_scope_lint_falta_callout_en_pendientes_ambitos(tmp_path: Path) -> None:
-    ambitos_dir = tmp_path / "ambitos"
-    personal_dir = ambitos_dir / "personal"
-    personal_dir.mkdir(parents=True)
-    (personal_dir / "personal.md").write_text(
-        "---\ntype: Scope\n---\n# personal\n\n![[../PENDIENTES-AMBITOS.md#^personal]]\n",
-        encoding="utf-8",
-    )
-    # PENDIENTES-AMBITOS sin el callout de personal
-    (ambitos_dir / "PENDIENTES-AMBITOS.md").write_text(
-        "---\ntype: Derived\n---\n\n# Pendientes\n",
-        encoding="utf-8",
-    )
-
-    hallazgos = scope.lint_callouts(tmp_path)
-    assert len(hallazgos) == 1
-    assert "falta el callout para el ámbito 'personal'" in hallazgos[0]
-
-
-def test_scope_lint_falta_archivo_pendientes_ambitos(tmp_path: Path) -> None:
-    ambitos_dir = tmp_path / "ambitos"
-    ambitos_dir.mkdir(parents=True)
-    hallazgos = scope.lint_callouts(tmp_path)
-    assert len(hallazgos) == 1
-    assert "error: falta el archivo" in hallazgos[0]
+    [sin_callout] = scope.lint_callouts(tmp_path)
+    assert "falta el callout para el ámbito 'personal'" in sin_callout
 
 
 def test_scope_lint_registro_apunta_a_categoria(tmp_path: Path) -> None:
@@ -96,17 +66,10 @@ def test_scope_lint_registro_apunta_a_categoria(tmp_path: Path) -> None:
     assert any("categoría" in h for h in hallazgos)
 
 
-def test_normalizar_pasa_espacios_a_guion() -> None:
+def test_normalizar_pasa_espacios_a_guion_y_respeta_lo_que_esta_bien() -> None:
     assert scope.normalizar("depto centro") == "depto-centro"
     assert scope.normalizar("  depto   centro ") == "depto-centro"
     assert scope.normalizar("[[depto centro]]") == "depto-centro"
-
-
-def test_normalizar_respeta_lo_que_ya_esta_bien() -> None:
     assert scope.normalizar("personal") == "personal"
     assert scope.normalizar("depto-centro") == "depto-centro"
-
-
-def test_normalizar_vacio() -> None:
-    assert scope.normalizar("") == ""
-    assert scope.normalizar("   ") == ""
+    assert scope.normalizar("") == scope.normalizar("   ") == ""

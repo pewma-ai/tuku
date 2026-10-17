@@ -40,76 +40,58 @@ def _parsear(comando: str, *argv: str) -> argparse.Namespace:
 # --- En memoria: lo que decide argparse ---------------------------------------
 
 
-@pytest.mark.parametrize("comando", COMANDOS)
-def test_sin_opciones_el_vault_es_el_directorio_actual(comando: str) -> None:
-    args = _parsear(comando)
-    assert (args.vault, args.scope, args.at) == (Path("."), None, Momento())
-
-
-@pytest.mark.parametrize("comando", COMANDOS)
-def test_cada_opcion_llega_con_su_tipo(comando: str) -> None:
-    args = _parsear(comando, "--vault", "v", "--scope", "casa", "--at", f"{HOY} 9:12")
-    assert (args.vault, args.scope, args.at.dia, args.at.hora, args.body) == (
-        Path("v"),
-        "casa",
-        date(2026, 8, 11),
-        "09:12",
-        CUERPO,
-    )
-
-
-@pytest.mark.parametrize("comando", COMANDOS)
-def test_los_alias_en_castellano_son_las_mismas_opciones(comando: str) -> None:
-    ingles = ("--scope", "casa", "--at", f"{HOY} 09:12", "--body", CUERPO)
-    castellano = ("--ambito", "casa", "--cuando", f"{HOY} 09:12", "--cuerpo", CUERPO)
+def test_las_opciones_llegan_con_su_tipo_y_sus_alias_en_los_tres_comandos() -> None:
     parser = cli._construir_parser()
-    assert parser.parse_args([*comando.split(), *ingles]) == parser.parse_args(
-        [*comando.split(), *castellano]
-    )
+    for comando in COMANDOS:
+        args = _parsear(comando)
+        assert (args.vault, args.scope, args.at) == (Path("."), None, Momento()), comando
 
+        args = _parsear(comando, "--vault", "v", "--scope", "casa", "--at", f"{HOY} 9:12")
+        assert (args.vault, args.scope, args.at.dia, args.at.hora, args.body) == (
+            Path("v"),
+            "casa",
+            date(2026, 8, 11),
+            "09:12",
+            CUERPO,
+        )
 
-@pytest.mark.parametrize("comando", COMANDOS)
-def test_un_at_mal_escrito_es_error_de_uso(
-    comando: str, capsys: pytest.CaptureFixture[str]
-) -> None:
-    with pytest.raises(SystemExit) as e:
-        _parsear(comando, "--at", "11-08-2026")
-    assert e.value.code == USO
-    assert "11-08-2026" in capsys.readouterr().err
+        ingles = ("--scope", "casa", "--at", f"{HOY} 09:12", "--body", CUERPO)
+        castellano = ("--ambito", "casa", "--cuando", f"{HOY} 09:12", "--cuerpo", CUERPO)
+        assert parser.parse_args([*comando.split(), *ingles]) == parser.parse_args(
+            [*comando.split(), *castellano]
+        )
 
+    for comando in ("todo open", "todo close"):
+        assert _parsear(comando, "--no-propagate").no_propagate
+        assert not _parsear(comando).no_propagate
 
-@pytest.mark.parametrize("comando", COMANDOS)
-@pytest.mark.parametrize("cuerpo", ["", "   ", "dos\nlíneas"])
-def test_un_cuerpo_vacio_o_de_varias_lineas_es_error_de_uso(comando: str, cuerpo: str) -> None:
-    with pytest.raises(SystemExit) as e:
-        cli._construir_parser().parse_args([*comando.split(), "--body", cuerpo])
-    assert e.value.code == USO
-
-
-def test_todo_open_due_y_horizon() -> None:
     assert _parsear("todo open", "--vence", f"{HOY} 09:00").due.celda() == f"{HOY} 09:00"
     assert _parsear("todo open", "--horizonte", "próxima semana").horizon == "próxima semana"
     sin = _parsear("todo open")
     assert (sin.due, sin.horizon) == (Momento(), None)
 
 
-def test_due_y_horizon_juntos_es_error_de_uso(capsys: pytest.CaptureFixture[str]) -> None:
+def test_los_errores_de_opciones_son_error_de_uso(capsys: pytest.CaptureFixture[str]) -> None:
+    parser = cli._construir_parser()
+    for comando in COMANDOS:
+        with pytest.raises(SystemExit) as e:
+            _parsear(comando, "--at", "11-08-2026")
+        assert e.value.code == USO
+        assert "11-08-2026" in capsys.readouterr().err
+
+        for cuerpo in ["", "   ", "dos\nlíneas"]:
+            with pytest.raises(SystemExit) as e:
+                parser.parse_args([*comando.split(), "--body", cuerpo])
+            assert e.value.code == USO, (comando, cuerpo)
+
     with pytest.raises(SystemExit) as e:
         _parsear("todo open", "--due", HOY, "--horizon", "fin de mes")
     assert e.value.code == USO
     assert "--horizon" in capsys.readouterr().err
 
-
-def test_entry_rename_exige_la_hora() -> None:
     with pytest.raises(SystemExit) as e:
-        cli._construir_parser().parse_args(["entry", "rename", "--at", HOY, "--body", "x"])
+        parser.parse_args(["entry", "rename", "--at", HOY, "--body", "x"])
     assert e.value.code == USO
-
-
-@pytest.mark.parametrize("comando", ("todo open", "todo close"))
-def test_no_propagate(comando: str) -> None:
-    assert _parsear(comando, "--no-propagate").no_propagate
-    assert not _parsear(comando).no_propagate
 
 
 # --- En disco: lo que necesita un vault ----------------------------------------
@@ -170,18 +152,16 @@ def test_sin_day_ni_hour_es_hoy_y_ahora(
     assert _martes(vault) == [f"- 16:45 - {PERSONAL} {REGISTRO[comando]}"]
 
 
-def test_vault_desde_otro_directorio(
+def test_el_vault_viene_de_la_opcion_y_sin_scope_default_el_registro_no_lleva_ambito(
     vault: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.chdir(tmp_path)
     assert _correr("entry add", "--vault", str(vault), "--at", f"{HOY} 09:12") == EXITO
     assert _martes(vault) == [f"- 09:12 - {PERSONAL} {CUERPO}"]
 
-
-def test_sin_scope_default_el_registro_no_lleva_ambito(vault: Path) -> None:
     _config(vault, lambda t: "\n".join(x for x in t.splitlines() if "`scope_default`" not in x))
-    assert _correr("entry add", "--at", f"{HOY} 09:12") == EXITO
-    assert _martes(vault) == [f"- 09:12 - {CUERPO}"]
+    assert _correr("entry add", "--vault", str(vault), "--at", f"{HOY} 10:00") == EXITO
+    assert _martes(vault)[-1] == f"- 10:00 - {CUERPO}"
 
 
 def test_un_scope_default_que_no_existe_nombra_scope_create(
