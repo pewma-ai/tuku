@@ -21,7 +21,7 @@ y al regenerar la reemplaza entera, prosa suelta incluida.
 **El archivo por ámbito** es generado, no un reporte: los reportes llevan fecha
 en el nombre y este no, porque siempre dice el estado de ahora. Tiene un callout
 por cada ámbito que exista en `ambitos/`, tenga pendientes o no, y el que no
-tiene lleva `SIN PENDIENTES`. Que el callout exista siempre es el punto: la
+tiene queda solo con su título. Que el callout exista siempre es el punto: la
 transclusión `![[PENDIENTES-AMBITOS.md#^personal.md]]` de cada página de ámbito
 nunca queda apuntando a un ancla que no existe, que es la falla silenciosa que
 este rediseño persigue.
@@ -53,8 +53,6 @@ from tuku.config import FORMATO_FECHA, fecha_corta, formato_fecha
 _REGISTRO = re.compile(r"^- \d{2}:\d{2} - ")
 
 ARCHIVO_AMBITOS = Path("ambitos") / "PENDIENTES-AMBITOS.md"
-
-SIN_PENDIENTES = "SIN PENDIENTES"
 
 _ENCABEZADO_AMBITOS = (
     "---\n"
@@ -164,11 +162,11 @@ def callout(
 
     El ancla existe siempre, con o sin pendientes: una transclusión que apunta a
     un ancla ausente falla en silencio, y ese es justo el modo de falla que este
-    archivo elimina.
+    archivo elimina. Un ámbito sin pendientes lleva solo el título.
     """
     disp = display_name or ambito.replace("-", " ").title()
     lineas = [f"> [!todo] Pendientes en **{disp}** ^{ambito}"]
-    lineas += [f"> - {c}" for c in cuerpos] or [f"> {SIN_PENDIENTES}"]
+    lineas += [f"> - {c}" for c in cuerpos]
     return "\n".join(lineas)
 
 
@@ -223,11 +221,20 @@ def documento_ambitos(
 def documento_del_vault(vault: Path, pendientes: str) -> str:
     """El `ambitos/PENDIENTES-AMBITOS.md` que corresponde al árbol y a la tabla."""
     ambitos_objs = scope.leer(vault)
-    disp_map: dict[str, str] = {}
-    for a in ambitos_objs:
-        pag = a.directorio / f"{a.nombre}.md"
-        texto_pag = pag.read_text(encoding="utf-8") if pag.is_file() else None
-        disp_map[a.nombre] = display_name(a.nombre, texto_pag)
+    raiz = vault / "ambitos"
+
+    def titulo(directorio: Path) -> str:
+        pag = directorio / f"{directorio.name}.md"
+        return display_name(
+            directorio.name, pag.read_text(encoding="utf-8") if pag.is_file() else None
+        )
+
+    def camino(directorio: Path) -> str:
+        partes = directorio.relative_to(raiz).parts
+        return " / ".join(titulo(raiz.joinpath(*partes[: i + 1])) for i in range(len(partes)))
+
+    # Un ámbito anidado lleva en el título el camino hasta él: `Faena / Faena Ai`.
+    disp_map = {a.nombre: camino(a.directorio) for a in ambitos_objs}
     return documento_ambitos(
         pendientes,
         [a.nombre for a in ambitos_objs],

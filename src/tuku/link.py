@@ -60,6 +60,9 @@ _LECTOR = re.compile(
 
 _EXTERNO = re.compile(r"^(?:[a-zA-Z][a-zA-Z0-9+.-]*:|#|/|//)")
 
+#: Una transclusión de Obsidian: `![[ruta.md#^ancla]]`.
+_TRANSCLUSION = re.compile(r"!\[\[(?P<ruta>[^\]#|\n]+)(?P<resto>[#|][^\]\n]*)?\]\]")
+
 
 def _sin_codigo(texto: str) -> str:
     """El texto con el código reemplazado por espacios, para que los offsets coincidan."""
@@ -345,6 +348,50 @@ def rebasar(texto: str, desde: str, hacia: str) -> str:
         return md(m.group("texto"), f"{href}#{ancla}" if ancla else href)
 
     return _MD.sub(cambiar, texto)
+
+
+def reubicar(
+    texto: str, desde_viejo: str, desde_nuevo: str, movidos: Mapping[str, str]
+) -> str:
+    """Recalcula las rutas de los links de `texto` cuando algo cambia de lugar.
+
+    El archivo que contiene el texto pasa de `desde_viejo` a `desde_nuevo` (puede
+    ser el mismo), y las carpetas de `movidos` (ruta vieja → ruta nueva, relativas
+    al vault) cambian de lugar. Un link que apuntaba dentro de una carpeta movida
+    sigue su destino, y uno que sale de un archivo movido se recalcula desde el
+    lugar nuevo. Vale también para la transclusión. Los links externos, los de
+    ancla y el código quedan como están.
+    """
+
+    def destino_nuevo(local: str) -> str:
+        for viejo, nuevo in movidos.items():
+            if local == viejo or local.startswith(f"{viejo}/"):
+                return nuevo + local[len(viejo) :]
+        return local
+
+    oculto = _sin_codigo(texto)
+    reemplazos: list[tuple[int, int, str]] = []
+    for m in _MD.finditer(oculto):
+        local = _ruta_local(m.group("destino"), desde_viejo)
+        if local is None:
+            continue
+        ruta, _, ancla = m.group("destino").partition("#")
+        href = relativa(desde_nuevo, destino_nuevo(local))
+        if href != unquote(ruta):
+            nuevo = md(m.group("texto"), f"{href}#{ancla}" if ancla else href)
+            reemplazos.append((m.start(), m.end(), nuevo))
+    for m in _TRANSCLUSION.finditer(oculto):
+        local = _ruta_local(m.group("ruta"), desde_viejo)
+        if local is None:
+            continue
+        href = relativa(desde_nuevo, destino_nuevo(local))
+        if href != m.group("ruta"):
+            reemplazos.append((m.start(), m.end(), f"![[{href}{m.group('resto') or ''}]]"))
+
+    salida = texto
+    for inicio, fin, nuevo in sorted(reemplazos, reverse=True):
+        salida = salida[:inicio] + nuevo + salida[fin:]
+    return salida
 
 
 # ---------------------------------------------------------------------------

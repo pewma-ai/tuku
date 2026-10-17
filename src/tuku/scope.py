@@ -13,15 +13,19 @@ De ahí la única regla verificable sin un árbol profundo, y la que `scope lint
 comprueba: **los registros apuntan a una actividad o a un ámbito, nunca a una
 categoría.** Una categoría agrupa y no tiene de qué hablar.
 
-`AGENTS.md` y `CADENCIAS.md` son obligatorios en cada directorio aunque queden
-vacíos: el costo son dos archivos por carpeta y la ganancia es que ningún
-comando tiene que manejar el caso "no existe". `CAPACIDAD.md` no se crea, porque
-es opcional en todas partes.
+Un ámbito nuevo lleva solo su página. `AGENTS.md`, `CADENCIAS.md` y
+`CAPACIDAD.md` de una carpeta existen cuando el autor les pone su primera regla,
+cadencia o costo: ausente significa vacío.
 
-**Qué lee y escribe:** crea directorios y archivos bajo `ambitos/`. `lint` solo
-lee, y además `AHORA.md`.
-**A mano:** crear la carpeta con sus tres archivos, y poner el nombre en
-`keywords:` de la página propia.
+Los ámbitos se anidan: `crear` acepta un padre y `mover_en_vault` cambia un
+ámbito de lugar. Un registro nombra el ámbito por su nombre, sin ruta, así que
+los nombres son únicos en todo el árbol.
+
+**Qué lee y escribe:** crea y mueve directorios bajo `ambitos/`, y al moverlos
+reescribe los links del vault que los nombran. `lint` solo lee, y además
+`AHORA.md`.
+**A mano:** crear la carpeta con su página (dentro de la del padre, si lo hay), y
+poner el nombre en `keywords:` de la página propia.
 """
 
 from __future__ import annotations
@@ -37,8 +41,6 @@ from tuku import link
 from tuku.resultado import Resultado
 
 _KEYWORDS = re.compile(r"^keywords:\s*\[(?P<lista>[^\]]*)\]\s*$", re.M)
-
-OBLIGATORIOS = ("AGENTS.md", "CADENCIAS.md")
 
 
 @dataclass(frozen=True)
@@ -139,6 +141,14 @@ def carpeta(vault: Path, nombre: str) -> Path:
     return vault / "ambitos" / nombre
 
 
+def directorio_de(vault: Path, nombre: str) -> Path | None:
+    """La carpeta de un ámbito o de una categoría, donde esté bajo `ambitos/`."""
+    raiz = vault / "ambitos"
+    if not raiz.is_dir():
+        return None
+    return next((p for p in sorted(raiz.rglob("*")) if p.is_dir() and p.name == nombre), None)
+
+
 def rechazo_si_no_existe(vault: Path, nombre: str) -> Resultado | None:
     """Rechaza un ámbito que no existe. Crearlo es decisión del autor, no del comando."""
     if nombre in nombres(vault):
@@ -159,6 +169,13 @@ def _rechazo_de_nombre(nombre: str) -> Resultado | None:
     return None
 
 
+def _sin_padre(padre: str) -> str:
+    return (
+        f"no existe el ámbito {padre!r} para ponerlo de padre. "
+        f"Créalo con `tuku scope create {padre}` si el autor lo pide."
+    )
+
+
 def keywords(pagina: str) -> list[str]:
     """Las `keywords` del frontmatter de una página de ámbito."""
     m = _KEYWORDS.search(pagina)
@@ -167,23 +184,15 @@ def keywords(pagina: str) -> list[str]:
     return [k.strip() for k in m.group("lista").split(",") if k.strip()]
 
 
-def crear(vault: Path, name: str) -> Path:
-    """Crea el ámbito `name` bajo `ambitos/`. Idempotente.
+def crear(vault: Path, name: str, padre: Path | None = None) -> Path:
+    """Crea el ámbito `name` en la carpeta `padre`, o bajo `ambitos/`. Idempotente.
 
     Si ya existe no toca nada: `spec/ambitos.md` no admite dos ámbitos con el
     mismo nombre, y volver a crearlo no es un error del autor.
     """
     valor = normalizar(name)
-    directorio = vault / "ambitos" / valor
+    directorio = (padre or vault / "ambitos") / valor
     directorio.mkdir(parents=True, exist_ok=True)
-
-    libro = os.path.relpath(vault / "LIBRO-DE-ESTILO.md", directorio)
-    for archivo in OBLIGATORIOS:
-        ruta = directorio / archivo
-        if not ruta.exists():
-            ruta.write_text(
-                _plantilla_obligatorio(archivo, valor, libro=libro), encoding="utf-8"
-            )
 
     pagina = _pagina(directorio)
     if not pagina.exists():
@@ -326,28 +335,6 @@ def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
     return None
 
 
-def _plantilla_obligatorio(archivo: str, nombre: str, *, libro: str) -> str:
-    """El contenido inicial de un archivo obligatorio, igual al que siembra `init`.
-
-    Un ámbito creado por comando es indistinguible de uno sembrado por
-    `tuku init`, y eso incluye el frontmatter: `CADENCIAS.md` es un `Cadence`
-    como cualquier otro, y sin su `type` el `doctor` reporta un archivo que TUKU
-    acaba de escribir.
-    """
-    if archivo == "AGENTS.md":
-        return (
-            f"# Reglas de {nombre}\n\n"
-            "Reglas que valen solo para este ámbito y lo que cuelgue de él.\n\n"
-            "Puede quedar vacío.\n"
-        )
-    return (
-        "---\ntype: Cadence\n---\n\n"
-        f"# Cadencias de {nombre}\n\n"
-        "Lo que se repite dentro de este ámbito. Todavía no hay ninguna.\n\n"
-        f"Cómo se escribe una cadencia: [libro de estilo]({libro}#Cadencias).\n"
-    )
-
-
 def leer(vault: Path) -> list[Ambito]:
     """Los ámbitos del árbol: los directorios que tienen página propia."""
     raiz = vault / "ambitos"
@@ -465,7 +452,12 @@ def registro_de_constancia(
 
 
 def crear_con_enlazado(
-    vault: Path, nombre: str, *, day: date | None = None, hour: str | None = None
+    vault: Path,
+    nombre: str,
+    *,
+    parent: str | None = None,
+    day: date | None = None,
+    hour: str | None = None,
 ) -> Resultado:
     """Crea el ámbito, enlaza las menciones sueltas que ya había y deja constancia.
 
@@ -481,6 +473,9 @@ def crear_con_enlazado(
     **Se rechaza antes de tocar nada:** lo que haría fallar la propagación, o un
     día fuera del ciclo abierto, se revisa antes de crear la carpeta, para que un
     rechazo no deje un ámbito a medias.
+
+    Con `parent`, el ámbito va dentro de la carpeta de otro, que debe existir. Si
+    el ámbito ya existe en otro lugar se rechaza y se nombra `scope move`.
     """
     from datetime import datetime
 
@@ -495,6 +490,18 @@ def crear_con_enlazado(
             f"ya existe el ámbito {otro!r}, y los nombres no distinguen mayúsculas. "
             f"Usa {otro!r}, o elige otro nombre."
         )
+    padre: Path | None = None
+    if parent:
+        parent = canonico(vault, parent)
+        padre = directorio_de(vault, parent)
+        if padre is None:
+            return Resultado.rechazo(_sin_padre(parent))
+    existente = next((a.directorio for a in leer(vault) if a.nombre == nombre), None)
+    if existente is not None and padre is not None and existente.parent != padre:
+        return Resultado.rechazo(
+            f"el ámbito {nombre!r} ya existe en {existente.relative_to(vault).as_posix()}. "
+            f"Para ponerlo bajo {parent!r}: `tuku scope move {nombre} --parent {parent}`."
+        )
     pendientes = vault / "PENDIENTES.md"
     if pendientes.is_file():
         try:
@@ -503,7 +510,7 @@ def crear_con_enlazado(
             return Resultado.rechazo(str(e))
 
     ahora_path = vault / "AHORA.md"
-    nuevo = not (vault / "ambitos" / nombre).exists()
+    nuevo = existente is None
     dia = encabezado_de(day or date.today())
     hora = hour or datetime.now().strftime("%H:%M")
     if nuevo and ahora_path.is_file():
@@ -512,7 +519,7 @@ def crear_con_enlazado(
         except ValueError as e:
             return Resultado.rechazo(str(e))
 
-    directorio = crear(vault, nombre)
+    directorio = crear(vault, nombre, existente.parent if existente is not None else padre)
     menciones = 0
     pagina_path = directorio / f"{nombre}.md"
     if ahora_path.is_file() and pagina_path.is_file():
@@ -541,7 +548,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     """Renombra un ámbito y arregla todo lo que lo nombraba.
 
     Un ámbito no es una carpeta: es una carpeta, una página, un ancla de
-    transclusión, las cabeceras de sus archivos obligatorios y cada enlace
+    transclusión, las cabeceras de sus archivos y cada enlace
     del vault que apunta a él. Renombrar a mano cualquiera de esas piezas por
     separado deja el resto colgando, y el vault no avisa hasta que algo hace
     falta.
@@ -555,12 +562,10 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     viejo, nuevo = canonico(vault, viejo), normalizar(nuevo)
     if (rechazo := _rechazo_de_nombre(nuevo)) is not None:
         return rechazo
-    origen = vault / "ambitos" / viejo
-    destino = vault / "ambitos" / nuevo
-    if not origen.is_dir():
-        return Resultado.rechazo(
-            f"no existe el ámbito {viejo!r}. Míralos en ambitos/."
-        )
+    origen = directorio_de(vault, viejo)
+    if origen is None:
+        return Resultado.rechazo(f"no existe el ámbito {viejo!r}. Míralos en ambitos/.")
+    destino = origen.parent / nuevo
     if viejo == nuevo:
         return Resultado.hecho(f"el ámbito ya se llama {nuevo!r}: nada que hacer.")
     if (otro := _choque(vault, nuevo, salvo=viejo)) is not None or (
@@ -603,6 +608,82 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
 
     detalle = f" ({enlaces} enlace(s) actualizado(s))" if enlaces else ""
     return Resultado.hecho(f"ámbito {viejo!r} renombrado a {nuevo!r}{detalle}.")
+
+
+def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Resultado:
+    """Mueve un ámbito dentro de otro (o a la raíz de `ambitos/`) y arregla sus links.
+
+    Un ámbito movido cambia de ruta, y la ruta está en cada link que lo nombra,
+    en los links de sus propios archivos hacia afuera y en la transclusión de su
+    página. Se recalculan todos, también en las bitácoras cerradas: reparar un
+    link que dejaría de resolver no es enriquecer el pasado (`spec/ambitos.md`).
+
+    **Se rechaza antes de tocar nada:** un ámbito o un padre que no existen, un
+    padre que cuelga del propio ámbito, un destino ocupado o una tabla de
+    pendientes rota. Moverlo donde ya está no escribe nada.
+    """
+    from tuku import link, propagate
+
+    nombre = canonico(vault, nombre)
+    origen = directorio_de(vault, nombre)
+    if origen is None:
+        return Resultado.rechazo(f"no existe el ámbito {nombre!r}. Míralos en ambitos/.")
+    if parent:
+        parent = canonico(vault, parent)
+        padre = directorio_de(vault, parent)
+        if padre is None:
+            return Resultado.rechazo(_sin_padre(parent))
+        if padre == origen or origen in padre.parents:
+            return Resultado.rechazo(
+                f"{nombre!r} no puede ir dentro de sí mismo: {parent!r} cuelga de él. "
+                f"Elige otro padre."
+            )
+    else:
+        padre = vault / "ambitos"
+    destino = padre / origen.name
+    if destino == origen:
+        return Resultado.hecho(f"el ámbito {nombre!r} ya está ahí: nada que hacer.")
+    if destino.exists():
+        return Resultado.rechazo(
+            f"ya existe {destino.relative_to(vault).as_posix()}. Elige otro padre, o mueve "
+            f"a mano lo que quieras conservar de {nombre!r}."
+        )
+    pendientes = vault / "PENDIENTES.md"
+    if pendientes.is_file():
+        from tuku import todo
+
+        try:
+            todo.filas(pendientes.read_text(encoding="utf-8"))
+        except todo.SinTabla as e:
+            return Resultado.rechazo(str(e))
+
+    def rel(ruta: Path) -> str:
+        return ruta.relative_to(vault).as_posix()
+
+    viejo_dir, nuevo_dir = rel(origen), rel(destino)
+    textos = {
+        p: p.read_text(encoding="utf-8")
+        for p in sorted(vault.rglob("*.md"))
+        if not any(parte.startswith(".") for parte in p.relative_to(vault).parts)
+    }
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    origen.rename(destino)
+
+    cambiados = 0
+    for ruta, texto in textos.items():
+        antes = rel(ruta)
+        despues = (
+            nuevo_dir + antes[len(viejo_dir) :] if antes.startswith(f"{viejo_dir}/") else antes
+        )
+        salida = link.reubicar(texto, antes, despues, {viejo_dir: nuevo_dir})
+        if salida != texto:
+            (vault / despues).write_text(salida, encoding="utf-8")
+            cambiados += 1
+
+    if pendientes.is_file():
+        propagate.propagar(vault)
+    detalle = f" ({cambiados} archivo(s) con links actualizados)" if cambiados else ""
+    return Resultado.hecho(f"ámbito {nombre!r} movido a {nuevo_dir}{detalle}.")
 
 
 def lint_del_vault(vault: Path) -> Resultado:

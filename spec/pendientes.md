@@ -131,14 +131,13 @@ La página del ámbito lo transcluye con ruta relativa:
 
 Se transcluye por **ancla de bloque sobre un callout, y no por encabezado**. El archivo lo genera TUKU, así que puede tener exactamente la estructura que la transclusión necesita, y el callout `> [!todo] Pendientes en **<Nombre>** ^<ambito>` se explica solo en los dos lugares: en el archivo generado y dentro de la página del ámbito que lo transcluye.
 
-El ancla es el nombre del ámbito (sin `.md`). **Hay un callout por cada ámbito del árbol**, no solo por los que tienen pendientes, y un ámbito limpio lleva el suyo con el texto `SIN PENDIENTES`:
+El ancla es el nombre del ámbito (sin `.md`). **Hay un callout por cada ámbito del árbol**, no solo por los que tienen pendientes, en el orden del árbol: un ámbito va antes que los que cuelgan de él. Cada callout lleva solo los pendientes de su propio ámbito, y el de un ámbito anidado lleva en el título el camino hasta él (`Faena / Faena Ai`). Un ámbito limpio lleva solo su título:
 
 ```markdown
 > [!todo] Pendientes en **Depto Centro** ^depto-centro
-> SIN PENDIENTES
 ```
 
-Eso es lo más importante del diseño: el ancla existe **siempre**, así que ninguna página de ámbito queda apuntando a un ancla que no existe. Esa era exactamente la falla silenciosa que este rediseño persigue, la de una vista que desaparece sin avisar. Un callout que dice `SIN PENDIENTES` es información y no ausencia: le confirma al autor que ese ámbito está limpio, en vez de dejarlo dudando si la vista se rompió.
+Eso es lo más importante del diseño: el ancla existe **siempre**, así que ninguna página de ámbito queda apuntando a un ancla que no existe. Esa era exactamente la falla silenciosa que este rediseño persigue, la de una vista que desaparece sin avisar. El callout con solo su título le dice al autor que ese ámbito está limpio, y su ancla sigue ahí.
 
 Esa transclusión es **permanente**, no de ciclo, así que no se aplana nunca. El aplanado de [`ciclo.md`](ciclo.md) es de las vistas del ciclo.
 

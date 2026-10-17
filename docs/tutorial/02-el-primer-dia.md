@@ -75,7 +75,7 @@ Abre `AHORA.md` y mira el link al inicio de cada línea, `[personal](ambitos/per
 
 ### Mira la carpeta `ambitos/`
 
-Apareció `ambitos/colegio-los-robles/` con su página `colegio-los-robles.md`, su `AGENTS.md` y su `CADENCIAS.md`.
+Apareció `ambitos/colegio-los-robles/` con su página `colegio-los-robles.md`.
 
 ### Vuelve a `AHORA.md`
 

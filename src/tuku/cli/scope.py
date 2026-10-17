@@ -11,8 +11,16 @@ from tuku.cli.opciones import Opciones
 
 def _cmd_scope_create(args: argparse.Namespace) -> int:
     return traducir(
-        scope.crear_con_enlazado(args.vault, args.name, day=args.at.dia, hour=args.at.hora),
+        scope.crear_con_enlazado(
+            args.vault, args.name, parent=args.parent, day=args.at.dia, hour=args.at.hora
+        ),
         "tuku scope create",
+    )
+
+
+def _cmd_scope_move(args: argparse.Namespace) -> int:
+    return traducir(
+        scope.mover_en_vault(args.vault, args.name, parent=args.parent), "tuku scope move"
     )
 
 
@@ -33,8 +41,9 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         description=(
             "Un ámbito es un frente de actividad del autor con identidad propia (un "
             "trabajo, una casa, un proyecto): una carpeta de `ambitos/` con su página. Una "
-            "carpeta sin página es una categoría y solo agrupa. Estos comandos crean y "
-            "renombran ámbitos sin romper sus links, y revisan el árbol."
+            "carpeta sin página es una categoría y solo agrupa. Un ámbito puede ir dentro "
+            "de otro. Estos comandos crean, mueven y renombran ámbitos sin romper sus "
+            "links, y revisan el árbol."
         ),
     )
     scope_v = scope_p.add_subparsers(dest="verb", required=True)
@@ -43,16 +52,33 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "create",
         help="crea un ámbito bajo ambitos/",
         description=(
-            "Crea `ambitos/<nombre>/` con `AGENTS.md`, `CADENCIAS.md` y la página "
-            "`<nombre>.md` (`type: Scope`, `keywords: [<nombre>]` y la transclusión de su "
-            "callout en `ambitos/PENDIENTES-AMBITOS.md`). Convierte en link las menciones "
-            "del ámbito que ya había en `AHORA.md` y registra ahí "
-            "`**nota**: abrí el ámbito`. Sobre un ámbito existente no escribe nada."
+            "Crea `ambitos/<nombre>/` con su página `<nombre>.md` (`type: Scope`, "
+            "`keywords: [<nombre>]` y la transclusión de su callout en "
+            "`ambitos/PENDIENTES-AMBITOS.md`). Con `--parent`, la carpeta va dentro de la "
+            "del ámbito padre, que debe existir. Convierte en link las menciones del ámbito "
+            "que ya había en `AHORA.md` y registra ahí `**nota**: abrí el ámbito`. Sobre "
+            "un ámbito existente no escribe nada."
         ),
     )
     scope_create_p.add_argument("name", help="nombre del ámbito")
+    Opciones(scope_create_p).parent()
     Opciones(scope_create_p).at("cuándo se abre, para la constancia; lo que falte, hoy y ahora")
     Opciones(scope_create_p).vault("vault a modificar")
+
+    scope_move_p = scope_v.add_parser(
+        "move",
+        help="mueve un ámbito dentro de otro y arregla lo que lo enlazaba",
+        description=(
+            "Mueve la carpeta `ambitos/<nombre>/` dentro de la del ámbito `--parent`, o a la "
+            "raíz de `ambitos/` si no se da. Recalcula la ruta de cada link del vault que "
+            "apunta al ámbito, la de los links de sus propios archivos y la transclusión de "
+            "su página. Si algo lo impide, rechaza sin tocar nada; si ya está ahí, no "
+            "escribe nada."
+        ),
+    )
+    scope_move_p.add_argument("name", help="nombre del ámbito a mover")
+    Opciones(scope_move_p).parent()
+    Opciones(scope_move_p).vault("vault a modificar")
 
     scope_rename_p = scope_v.add_parser(
         "rename",
@@ -81,6 +107,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
 
     return {
         ("scope", "create"): _cmd_scope_create,
+        ("scope", "move"): _cmd_scope_move,
         ("scope", "rename"): _cmd_scope_rename,
         ("scope", "lint"): _cmd_scope_lint,
     }

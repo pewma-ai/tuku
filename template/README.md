@@ -25,13 +25,13 @@ Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2:
 | `AHORA.md` | Los días del primer ciclo sembrados, sin registros |
 | `PENDIENTES.md` | Los callouts de horizonte, vacíos |
 | `ambitos/AGENTS.md`, `ambitos/CADENCIAS.md` | Reglas y cadencias de toda la rama |
-| `ambitos/personal/` | La única rama inicial: `AGENTS.md`, `CADENCIAS.md`, `CAPACIDAD.md`, `personal.md` |
+| `ambitos/personal/` | La única rama inicial: `CAPACIDAD.md`, `personal.md` |
 | `notas/AGENTS.md` | Reglas del zettelkasten |
 | `reglas/config.tuku.md` | `TZ`, `cycle_type`, `tuku_template`, `tuku_version` y `origen`, en una tabla |
 
 La tabla es la referencia, no un inventario cerrado: lo que importa es que cualquier cosa que se agregue supone algo sobre el autor y hay que justificarlo.
 
-`CADENCIAS.md` y `CAPACIDAD.md` de `personal/` se siembran **sin un solo dato**, diciendo que todavía no se ha declarado nada y por qué conviene hacerlo. Son opcionales y deseables, no requisitos (ver [`../spec/ambitos.md`](../spec/ambitos.md)): el vault opera sin ninguno de los dos. Existen en el estado cero porque un archivo que se explica solo es la forma barata de que el autor sepa que puede escribirlo, y no rompe el principio 2 mientras no le pida declarar nada para empezar.
+`CAPACIDAD.md` de `personal/` se siembra **sin un solo dato**, diciendo que todavía no se ha declarado nada y por qué conviene hacerlo. Es opcional y deseable, no un requisito (ver [`../spec/ambitos.md`](../spec/ambitos.md)): el vault opera sin él. El `AGENTS.md` y el `CADENCIAS.md` de un ámbito se crean cuando el autor declara su primera regla o cadencia. Existen en el estado cero porque un archivo que se explica solo es la forma barata de que el autor sepa que puede escribirlo, y no rompe el principio 2 mientras no le pida declarar nada para empezar.
 
 ## Instalar a mano
 

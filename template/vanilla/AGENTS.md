@@ -26,6 +26,7 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 | deja algo por hacer: "hay que", "recuérdame", "para el lunes" | `reglas/bitacora.tuku.md` | `tuku todo open` |
 | da por hecho algo que estaba pendiente: "ya pagué", "listo lo de" | `reglas/bitacora.tuku.md` | `tuku todo close` |
 | nombra un frente que todavía no existe | `ambitos/AGENTS.md` | `tuku scope create` |
+| dice que un frente es parte de otro: "va dentro de" | `ambitos/AGENTS.md` | `tuku scope move` |
 | pide guardar una idea que no es de un día | `reglas/notas.tuku.md` | `tuku note create` |
 | empieza el ciclo | nada | `tuku cycle open` |
 | corrige algo ya escrito: "no era eso", "cámbiale el nombre" | nada | `tuku entry rename`, `scope rename`, `note rename` |

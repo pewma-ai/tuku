@@ -26,7 +26,7 @@
 | `reportes/` | Lo generado que el autor lee: resúmenes de ciclo, cadencias, pendientes por actividad. |
 | `archivado/` | Ramas cerradas, con sus enlaces todavía resolviendo. |
 | `AGENTS.md` | Reglas que aplican a un directorio y a todo lo que cuelga de él. Uno por carpeta. |
-| `CADENCIAS.md` | Las cadencias de un directorio. Uno por carpeta. |
+| `CADENCIAS.md` | Las cadencias de un directorio. Existe donde se declaró la primera. |
 | `CAPACIDAD.md` | Lo que cuesta sostener un ámbito. Opcional y deseable: solo donde hay algo que declarar. El bruto, si se declara, va en `ambitos/personal/`. |
 | `LIBRO-DE-ESTILO.md` | Un archivo único con las reglas de escritura y organización del autor, en prosa. De aquí nacen los comandos. No confundir con el vault, que es el repositorio entero. |
 

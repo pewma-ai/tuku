@@ -73,8 +73,6 @@ TOCADOS = {
     "PENDIENTES.md",
     "ambitos/PENDIENTES-AMBITOS.md",
     "ambitos/personal/personal.md",
-    "ambitos/depto-centro/AGENTS.md",
-    "ambitos/depto-centro/CADENCIAS.md",
     "ambitos/depto-centro/depto-centro.md",
 }
 

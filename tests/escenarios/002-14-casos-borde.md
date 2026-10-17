@@ -68,7 +68,6 @@ Y el segundo `tuku todo lint` sale limpio
 Dado una subcarpeta `gastos/` de `depto-centro` sin página propia, es decir, una categoría
 ```bash
 mkdir ambitos/depto-centro/gastos
-touch ambitos/depto-centro/gastos/AGENTS.md ambitos/depto-centro/gastos/CADENCIAS.md
 ```
 Cuando se escribe un registro a `gastos` y se revisa
 ```bash

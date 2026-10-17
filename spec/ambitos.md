@@ -16,37 +16,34 @@ Regla operativa y verificable por comando: **los registros apuntan a una activid
 
 ## Qué carga cada directorio
 
-Todo directorio desde `ambitos/` hacia abajo, ese incluido, lleva dos archivos obligatorios:
+Un directorio de `ambitos/` puede llevar tres archivos, y los tres son opcionales:
 
 ```text
 ambitos/
 ├── AGENTS.md
 ├── CADENCIAS.md
 └── trabajo/
-    ├── AGENTS.md
-    ├── CADENCIAS.md
     ├── trabajo.md            <- página propia: esto lo hace ámbito
-    └── clientes/
-        ├── AGENTS.md
-        ├── CADENCIAS.md      <- sin página propia: es categoría
+    ├── AGENTS.md             <- solo si tiene reglas propias
+    └── clientes/             <- sin página: es categoría
         └── juanito_perez.md  <- actividad
 ```
 
-Obligatorios aunque estén vacíos. El costo son dos archivos por carpeta. La ganancia es que ningún comando tiene que manejar el caso "no existe", y el autor siempre sabe dónde escribir una regla sin preguntar.
+**Ausente significa vacío.** Un ámbito nuevo lleva solo su página: `AGENTS.md`, `CADENCIAS.md` y `CAPACIDAD.md` existen desde que el autor les pone su primera regla, cadencia o costo. El costo de no sembrarlos es una búsqueda hacia arriba: quien necesita las reglas de un ámbito sube por el árbol y toma lo que encuentra, y un archivo que falta no aporta nada y no es un error. Se evita así una pareja de archivos vacíos por cada carpeta, que además hay que mover y renombrar con ella.
 
 **`AGENTS.md` prevalece, `CADENCIAS.md` se acumula.** Una regla escrita más adentro afina la de arriba sin repetirla, que es el principio 7. Una cadencia no afina nada: es algo que vuelve, y que `trabajo/turnos/` declare la suya no cancela la de `trabajo/`. Estar más adentro acota a quién le toca, no a qué se hereda.
 
-## `CAPACIDAD.md`, el tercero y el opcional
+## `CAPACIDAD.md`, el costo de un ámbito
 
 Un ámbito puede declarar lo que cuesta sostenerlo, en un `CAPACIDAD.md` propio. Es lo que permite dimensionar el trabajo del ciclo antes de planificarlo, y su formato y uso están en [`ciclo.md`](ciclo.md).
 
-**Es opcional en todas partes, incluida `ambitos/personal/`.** Deseable donde ayude, como muchas cadencias: TUKU se opera sin ninguno de los dos. El estado cero siembra uno en `ambitos/personal/`, sin datos: dice que todavía no se declaró nada y por qué conviene, igual que hace con `CADENCIAS.md` de esa rama. Sin `CAPACIDAD.md` el plan se propone igual, solo que sin contraste de cuánto cabe, y el autor hace ese contraste en su cabeza como lo hacía antes. Degrada, no rompe. Es la misma relación que con las cadencias: sin ellas el sistema registra, con ellas además anticipa.
+**Es opcional en todas partes, incluida `ambitos/personal/`.** Deseable donde ayude, como muchas cadencias: TUKU se opera sin ninguno de los dos. El estado cero siembra uno en `ambitos/personal/`, sin datos: dice que todavía no se declaró nada y por qué conviene. Sin `CAPACIDAD.md` el plan se propone igual, solo que sin contraste de cuánto cabe, y el autor hace ese contraste en su cabeza como lo hacía antes. Degrada, no rompe. Es la misma relación que con las cadencias: sin ellas el sistema registra, con ellas además anticipa.
 
 Cómo se comparan los tres archivos por directorio:
 
 | | `AGENTS.md` | `CADENCIAS.md` | `CAPACIDAD.md` |
 | --- | --- | --- | --- |
-| Presencia | Obligatorio en cada directorio, aunque vacío | Obligatorio en cada directorio, aunque vacío | Solo donde hay algo que declarar |
+| Presencia | Solo donde hay una regla | Solo donde hay una cadencia | Solo donde hay algo que declarar |
 | Combinación | La más cercana prevalece | Se acumulan | Se acumulan: el bruto menos la suma de los costos |
 
 **Se acumula en vez de prevalecer** porque no es una regla, es una cantidad. Que `trabajo/` declare un costo no anula el que declaró `trabajo/turnos/`: los dos consumen del mismo día. Lo mismo vale para las cadencias por el mismo motivo, y por eso **solo `AGENTS.md` prevalece**: es el único de los tres que es una regla.
@@ -87,6 +84,18 @@ Ante cualquier defecto, el linter informa y nunca repara por su cuenta: nombra l
 **Los espacios pasan a guion.** El autor dicta "depto centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry add`, `todo open`, `note create`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
 
 **Un ámbito que no existe se rechaza.** `entry add`, `todo open` y `note create` salen con `RECHAZO` sin escribir nada, y el mensaje nombra `tuku scope create <nombre>` como corrección. Crear un ámbito cambia dónde cae todo lo que venga después, y esa decisión es del autor: se le ofrece, no se toma por él. Una categoría sí existe, y apuntarle un registro lo reporta `scope lint`, no lo impide el comando.
+
+## Un ámbito dentro de otro
+
+Un ámbito puede ir dentro de otro: `ambitos/faena/faena-ai/faena-ai.md`.
+
+- **Los nombres son únicos en todo el árbol.** Un registro nombra el ámbito por su nombre, sin ruta (`--scope faena-ai`), y el link a su página lleva la ruta completa. Dos ámbitos no pueden llamarse igual aunque cuelguen de padres distintos.
+- **Cada ámbito muestra solo lo suyo.** La página y el callout de un padre llevan sus propios registros y pendientes, no los de sus hijos. Cada ámbito tiene su callout y su ancla en `PENDIENTES-AMBITOS.md`, en el orden del árbol y con el camino hasta él en el título (`Faena / Faena Ai`).
+- **`tuku scope create NOMBRE --parent PADRE`** crea el ámbito dentro de la carpeta del padre, que puede ser un ámbito o una categoría y debe existir. Un padre inexistente se rechaza nombrando `tuku scope create PADRE`: abrirlo es decisión del autor. Si el ámbito ya existe en otro lugar, se rechaza y se nombra `scope move`.
+- **`tuku scope move NOMBRE [--parent PADRE]`** cambia un ámbito de lugar, o lo lleva a la raíz de `ambitos/` sin `--parent`. Como los links son rutas relativas, recalcula la ruta de cada link que apunta a lo movido, la de los links de sus propios archivos y la transclusión de su página, en todo el vault y también en las bitácoras cerradas: reparar un link que dejaría de resolver no es enriquecer el pasado. Se rechaza antes de escribir si el ámbito o el padre no existen, si el padre cuelga del propio ámbito o si el destino está ocupado. Moverlo donde ya está no escribe nada.
+- **`tuku scope rename`** funciona igual sobre un ámbito anidado.
+
+Se descartó un campo `parent:` en la página, sin mover carpetas: mover sería trivial, pero la carpeta dejaría de decir dónde cae una regla (principio 7) y Obsidian mostraría un árbol distinto del lógico.
 
 ## Convención de mayúsculas
 

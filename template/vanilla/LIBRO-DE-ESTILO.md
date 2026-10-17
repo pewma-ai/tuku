@@ -70,7 +70,7 @@ Lo que TUKU genera se genera desde una plantilla, y las plantillas son del autor
 
 Una cadencia es algo que vuelve: se declara una vez y emite un pendiente con fecha cada vez que toca. Sin cadencias TUKU registra lo que le cuentas, pero no te avisa de nada.
 
-Viven en archivos `CADENCIAS.md`, uno por carpeta, y **se leen en cascada**: las de una carpeta valen para todo lo que cuelga de ella. Las de `ambitos/CADENCIAS.md` valen para todos los ámbitos; las de `ambitos/personal/CADENCIAS.md` valen solo dentro de ese ámbito. No hay que declarar el alcance dentro de la cadencia, lo dice la carpeta donde está escrita.
+Viven en archivos `CADENCIAS.md`, que se crean en la carpeta donde se declara la primera, y **se leen en cascada**: las de una carpeta valen para todo lo que cuelga de ella. Las de `ambitos/CADENCIAS.md` valen para todos los ámbitos; las del `CADENCIAS.md` de un ámbito valen solo dentro de él. No hay que declarar el alcance dentro de la cadencia, lo dice la carpeta donde está escrita.
 
 Cada cadencia es un encabezado `##` con tres campos de máquina y dos de persona:
 

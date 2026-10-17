@@ -52,19 +52,17 @@ ambitos/                      # el árbol de la vida
   CADENCIAS.md                # cadencias de toda la rama
   PENDIENTES-AMBITOS.md       # generado, un callout por ámbito, se transcluye
   personal/
-    AGENTS.md
-    CADENCIAS.md
     CAPACIDAD.md              # el bruto, si se declara. Opcional
     personal.md               # página propia: es ámbito
   trabajo/
-    AGENTS.md
-    CADENCIAS.md
-    CAPACIDAD.md              # costo fijo de este ámbito. Opcional
     trabajo.md
+    CAPACIDAD.md              # costo fijo de este ámbito. Opcional
+    AGENTS.md                 # solo si el ámbito tiene reglas propias
+    CADENCIAS.md              # solo si tiene cadencias propias
     clientes/                 # sin página: es categoría
-      AGENTS.md
-      CADENCIAS.md
       juanito_perez.md        # hoja: recibe registros
+    jefatura/                 # un ámbito dentro de otro, con su propia página
+      jefatura.md
 
 notas/                        # zettelkasten, formato libre
 

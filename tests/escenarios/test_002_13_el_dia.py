@@ -164,12 +164,7 @@ def test_002_13_un_frente_nuevo_se_crea_y_enlaza_hacia_atras() -> None:
     vault = corrida.ruta("mi-vault")
     directorio = vault / "ambitos" / AMBITO
 
-    for archivo in (*scope.OBLIGATORIOS, f"{AMBITO}.md"):
-        assert (directorio / archivo).is_file(), f"falta {archivo}"
-    assert not (directorio / "CAPACIDAD.md").exists(), "CAPACIDAD.md es opcional"
-    cadencias = (directorio / "CADENCIAS.md").read_text(encoding="utf-8")
-    sembrado = _leer(corrida, "ambitos", "personal", "CADENCIAS.md")
-    assert cadencias == sembrado.replace("personal", AMBITO)
+    assert sorted(p.name for p in directorio.iterdir()) == [f"{AMBITO}.md"]
 
     pagina = (directorio / f"{AMBITO}.md").read_text(encoding="utf-8")
     assert f"![[../PENDIENTES-AMBITOS.md#^{AMBITO}]]" in pagina
@@ -178,7 +173,9 @@ def test_002_13_un_frente_nuevo_se_crea_y_enlaza_hacia_atras() -> None:
         "depto-centro a la administradora por WhatsApp" in pagina
     )
     ambitos = _leer(corrida, "ambitos", "PENDIENTES-AMBITOS.md")
-    assert f"> [!todo] Pendientes en **Depto Centro** ^{AMBITO}\n> SIN PENDIENTES" in ambitos
+    assert f"> [!todo] Pendientes en **Depto Centro** ^{AMBITO}" in [
+        b.strip() for b in ambitos.split("\n\n")
+    ]
     assert not scope.lint_transclusiones(vault) and not scope.lint_callouts(vault)
 
     ahora = _leer(corrida, "AHORA.md")
@@ -195,7 +192,6 @@ def test_002_13_un_frente_nuevo_se_crea_y_enlaza_hacia_atras() -> None:
         "AHORA.md",
         "ambitos/PENDIENTES-AMBITOS.md",
         f"ambitos/{AMBITO}/{AMBITO}.md",
-        *(f"ambitos/{AMBITO}/{a}" for a in scope.OBLIGATORIOS),
     }, tocados
 
 

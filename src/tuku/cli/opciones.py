@@ -155,6 +155,11 @@ class Opciones:
     ) -> None:
         self.parser.add_argument("--scope", "--ambito", dest="scope", default=None, help=ayuda)
 
+    def parent(
+        self, ayuda: str = "ámbito padre, que debe existir; por defecto, la raíz de `ambitos/`"
+    ) -> None:
+        self.parser.add_argument("--parent", "--padre", dest="parent", default=None, help=ayuda)
+
     def at(
         self,
         ayuda: str = "cuándo: AAAA-MM-DD HH:MM, AAAA-MM-DD o HH:MM; lo que falte, hoy y ahora",
