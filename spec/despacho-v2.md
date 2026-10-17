@@ -38,7 +38,7 @@ Vive en el `AGENTS.md` de la raíz y es lo que el ejecutor consulta antes de act
 | da por hecho algo que estaba pendiente | «ya pagué el arriendo» | `tuku todo close` |
 | nombra un frente que todavía no existe | «abre faena» | `tuku scope create` |
 | dice que un frente es parte de otro | «faena-ai va dentro de faena» | `tuku scope move` |
-| dice con qué palabras nombra un frente | «allá le decimos la planta» | `tuku scope keywords` |
+| dice qué palabras delatan un frente | «si te hablo de la planta o de FNA, es de faena» | `tuku scope keywords` |
 | pide guardar una idea que no es de un día | «guárdame esto: cómo se prorroga un arriendo» | `tuku note create` |
 | empieza el ciclo | «empecemos la semana» | `tuku cycle open` |
 | corrige algo ya escrito | «no era eso, cámbiale el nombre» | `tuku entry rename`, `scope rename`, `note rename` |

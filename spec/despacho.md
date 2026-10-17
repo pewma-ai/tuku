@@ -47,7 +47,7 @@ La raíz elige el destino. El `AGENTS.md` del destino manda sobre cómo se escri
 Nada de eso viaja en el contexto base, y hay dos formas de cargarlo tarde que no compiten:
 
 - **`AGENTS.md` por directorio** cuando la regla se define por dónde se escribe: `ambitos/`, `notas/`, una rama concreta del árbol. Se carga al entrar ahí.
-- **`reglas/<consecuencia>.tuku.md`** cuando la consecuencia no tiene directorio propio, como las propuestas o las cadencias. Se abre solo cuando el paso 3 del flujo detectó que esa consecuencia aplica ([flujo-informacion.md](flujo-informacion.md)), así que un registro sin consecuencias no carga ninguna.
+- **`reglas/<consecuencia>.tuku.md`** cuando la consecuencia no tiene directorio propio, como las propuestas o las cadencias. Se abre solo cuando lo escrito dispara esa consecuencia ([flujo-informacion.md](flujo-informacion.md)), así que un registro sin consecuencias no carga ninguna.
 
 Es lo que permite que la lista de reglas crezca sin encarecer cada sesión: se paga solo por la que se usa. Un directorio sin regla propia deja su `AGENTS.md` vacío, para que quien escriba una regla sepa dónde ponerla sin preguntar.
 

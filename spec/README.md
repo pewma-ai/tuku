@@ -23,7 +23,7 @@ Igual que las fases de implementación, se lee de lo que no depende de nada a lo
 
 | # | Documento | Qué especifica |
 | --- | --- | --- |
-| 1 | [flujo-informacion.md](flujo-informacion.md) | El marco: la frontera entre registrar y aplicar consecuencias, los cinco pasos, y la segunda vía de entrada (sin bitácora) |
+| 1 | [flujo-informacion.md](flujo-informacion.md) | El marco: el camino del autor desde una intención hasta los comandos que escriben, las familias de entrada, las entidades subordinadas que mantienen el corpus y la ambigüedad |
 | 2 | [bitacora.md](bitacora.md) | El registro: formato de línea, ontología cerrada (`**pendiente**`, `(Hecho)`, `**cadencia**`) y abierta, reglas de redacción |
 | 3 | [pendientes.md](pendientes.md) | `PENDIENTES.md`: tabla única, escalera de horizontes, y cómo llega cada vista (propagación y transclusión) |
 | 4 | [ambitos.md](ambitos.md) | El árbol de ámbitos: los tres roles, qué carga cada directorio, qué prevalece y qué se acumula, archivado |
@@ -158,7 +158,7 @@ Cada spec declara su propio "no entra" en la sección correspondiente. A nivel d
   4. **Los lectores aceptan los dos formatos y los escritores solo producen Markdown.** Un vault con wikilinks sigue funcionando hasta que se corre `tuku fix link`.
   5. **El template no trae `.obsidian`.** Obsidian, con su configuración por defecto, escribe wikilinks cuando el autor enlaza a mano, así que `doctor link` y `fix link` son un flujo recurrente y no una migración única.
   6. **`fix link` alcanza todo el vault, incluidos los ciclos cerrados.** Cambia el formato sin agregar enlaces: es reparar, no enriquecer el pasado ([ambitos.md](ambitos.md)).
-  7. **`tuku link backfill` y el sustantivo `link` desaparecen.** `tuku scope create` ya enlaza hacia atrás y es idempotente.
+  7. **`tuku link backfill` y el sustantivo `link` desaparecen.** Nada enlaza hacia atrás de forma automática: crear un ámbito solo deja su constancia y es idempotente.
 
 ## Decisiones abiertas
 
