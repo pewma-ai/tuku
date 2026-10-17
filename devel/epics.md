@@ -59,6 +59,9 @@ Registrar un hecho produce texto en la bitácora. Todo lo demás (abrir o cerrar
 
 Ambas vías terminan en invocaciones de `tuku`. No hay una tercera forma de cambiar el vault.
 
+> [!tip] Mirar en VAULT cuando se endurezca el parser
+> [`VAULT/scratchpad/tuku-docs/corpus-regresion/contrato-de-regeneracion.md`](VAULT/scratchpad/tuku-docs/corpus-regresion/contrato-de-regeneracion.md) propone un subconjunto congelado con casos límite deliberados (viñetas malformadas, tipos desconocidos, enlaces rotos, entradas sin hora) contra el que corre todo cambio al parser. Hoy [`corpus/`](../corpus/README.md) tiene dictados de referencia, pero no casos adversarios del parser.
+
 ### Transiciones de estado y escalera de fixtures
 
 Toda prueba afirma el diff (`delta`) entre el estado inicial y el resultante, nunca un árbol congelado. Dentro de un epic los escenarios se encadenan en [`playground/`](../playground/README.md).
@@ -112,6 +115,11 @@ Replica, y nada más. Un turno, un dictado, el mismo vault de salida. La convers
 - **Entregable:** el `AGENTS.md` del vault que hace que cualquier arnés opere igual ([`../spec/despacho.md`](../spec/despacho.md)), la evidencia de que con él un agente vivo reproduce el día uno, y **el método para probarlo**. El arnés no es andamiaje de este epic: es lo que permite que el 004 y los siguientes afirmen algo sobre un agente en vez de mirarlo funcionar, y un método frágil no da un resultado dudoso, da uno falso.
 - **Detalle completo:** [`../tests/escenarios/003-00-el-dia-uno-dictado.md`](../tests/escenarios/003-00-el-dia-uno-dictado.md).
 
+> [!tip] Mirar en VAULT al cerrar el epic
+> - [`VAULT/agentes.md`](VAULT/agentes.md), sección "Motores": lista de arneses validados y umbral de referencia por modelo. El brief sacó esa lista y dejó un `#REVISAR` pidiendo destino; este epic es el momento de moverla a [`entorno-devel.md`](entorno-devel.md) o a [`spec/agente.md`](../spec/agente.md).
+> - [`VAULT/agentes.md`](VAULT/agentes.md), sección "Economía de contexto": contexto pertinente, sesión nueva tras una hora de inactividad y degradación entre 100 y 300 reglas. Sirve para medir el piso de la cascada de `AGENTS.md` (ver [`TODO.md`](../TODO.md)).
+> - [`VAULT/scratchpad/Comportamiento esperado de TUKU.md`](VAULT/scratchpad/Comportamiento%20esperado%20de%20TUKU.md): Hermes necesita configuración base (SOUL, lectura de `AGENTS.md`) que debe sembrar `tuku init`.
+
 ## Epic 004. La conversación
 
 El autor deja de dictar y conversa: el agente delibera, pregunta, cambia de rumbo a media sesión y solo al final ejecuta. Es donde los `AGENTS.md` del vault se refinan contra fricción real, y donde se construye el conductor que sostiene una sesión de varios turnos con un adaptador por arnés.
@@ -121,11 +129,21 @@ Se prueba con dos agentes, uno del lado del autor y otro del lado de TUKU. No ag
 - **Entregable:** conductor de sesión multi-turno reutilizable, límites del vault verificables como diff vacío, y los `AGENTS.md` corregidos por lo que la conversación rompa.
 - **Criterio de salida:** una conversación en que el autor se contradice y rectifica deja el vault en el estado que pidió al final, y ninguna prohibición de la tabla de límites se rompe en el camino.
 
+> [!tip] Mirar en VAULT al construir el conductor
+> - [`VAULT/research/Configuraciones de Tools.md`](VAULT/research/Configuraciones%20de%20Tools.md), sección "Hermes": perfiles paralelos, un gateway por perfil, y el API Server con `conversation` fijo para sostener una misma sesión entre llamadas. Es un adaptador ya probado a mano.
+> - [`VAULT/old/decisiones/0018-hermes-subproceso-por-perfil.md`](VAULT/old/decisiones/0018-hermes-subproceso-por-perfil.md): aislamiento de estado por perfil con `HERMES_HOME`.
+> - [`VAULT/agentes.md`](VAULT/agentes.md), sección "Modelos del autor": la voz solo se destila de lo que el autor le dice al agente, no de la bitácora. Obliga a que el historial conversacional persista en Markdown; conviene decidirlo aquí, porque desde este epic hay conversaciones que guardar.
+
 ## Epic 005. El día ciento cincuenta
 
 Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumulado (ámbitos poblados, notas escritas, historial de pendientes). Segunda vuelta de capacidades donde aparecen enlaces automáticos desde el primer día, autoasignación de pendientes, notas con "Ver además" y versiones completas de ámbitos y destilados. Cubre fases 3 y 5 completas, y resto de la 4.
 
 - **Criterio de salida:** inyectar un ciclo de `mac-jpgil` sobre un vault poblado produce enlaces, asignación a ámbitos y notas tejidas sin intervención.
+
+> [!tip] Mirar en VAULT al abrir el epic
+> - [`VAULT/scratchpad/tuku-docs/corpus-regresion/contrato-de-regeneracion.md`](VAULT/scratchpad/tuku-docs/corpus-regresion/contrato-de-regeneracion.md): tabla de artefactos con su criterio de igualdad (idéntico si lo produce un proceso determinista, equivalente si lo redacta un agente). Es la base para convertir el principio 9 en un test sobre un vault poblado.
+> - [`VAULT/spec/notas.md`](VAULT/spec/notas.md): las tres clases de nota (libre, de estructura, de inducción) y la pregunta que decide el "Ver además": ¿la página se revisita y se cura, o se escribe una vez?
+> - [`VAULT/spec/entidades.md`](VAULT/spec/entidades.md): prácticas heredadas por tipo, y el patrón de proponer una página en blanco cuando un nombre se repite.
 
 ## Epic 006. Abrir y cerrar el ciclo
 
@@ -133,15 +151,33 @@ Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo 
 
 - **Criterio de salida:** abrir dos veces no duplica; cerrar dos veces no vuelve a mover; prueba que falla a propósito si se aplana antes del resumen. Plan calcula capacidad contra lo declarado.
 
+> [!tip] Mirar en VAULT al diseñar cadencias y cierre
+> - [`VAULT/spec/cadencias.md`](VAULT/spec/cadencias.md): los cinco disparadores, en particular la cadencia por ausencia de actividad ("un cliente sin contacto hace cuatro semanas"), la más valiosa y la única que ningún cuaderno tiene. Y "el reporte es la memoria": lo que se conserva de un período largo es su relato.
+> - [`VAULT/old/decisiones/0006-regla-muere-emitido-sobrevive.md`](VAULT/old/decisiones/0006-regla-muere-emitido-sobrevive.md): al borrar una cadencia o su ámbito, lo ya emitido sobrevive y la referencia colgante no es error. Verificar que [`spec/cadencias.md`](../spec/cadencias.md) lo diga.
+> - [`VAULT/old/decisiones/0010-friccion-no-se-declara.md`](VAULT/old/decisiones/0010-friccion-no-se-declara.md): la fricción no se etiqueta al escribir, se descubre en el cierre contrastando plan y actividad. Evidencia: 59 hitos, 22 decisiones y 0 fricciones en 8 ciclos reales. Útil para el resumen del cierre.
+> - [`VAULT/old/decisiones/0007-plan-es-calendario.md`](VAULT/old/decisiones/0007-plan-es-calendario.md) y [`VAULT/spec/old/artefactos-ciclo.md`](VAULT/spec/old/artefactos-ciclo.md): plan y reporte del ciclo en el modelo anterior.
+
 ## Epic 007. Que note lo que nadie pidió
 
 El agente deja de responder y empieza a observar: infiere ámbitos y notas tipadas desde el histórico, detecta recurrencias que nadie declaró como cadencia y propone sin ejecutar. Cubre fase 9.
 
 - **Criterio de salida:** la prueba dura es negativa: rechazar una propuesta no deja rastro en ninguna primitiva (principio 3).
 
+> [!tip] Mirar en VAULT al diseñar la inferencia
+> - [`VAULT/agentes.md`](VAULT/agentes.md), "Autonomía calibrada": medir la tasa de aceptación y corrección de las propuestas pasadas, por tipo de entidad, en un archivo que el autor pueda leer y editar (aceptable que el agente cree solo la página de un proyecto, no la de una persona).
+> - [`VAULT/agentes.md`](VAULT/agentes.md), "El agente silencioso": un proceso de fondo con silencio absoluto (`[SILENT]`) salvo que la conclusión madure y aporte valor.
+> - [`VAULT/spec/entidades.md`](VAULT/spec/entidades.md): "sembrar y corregir" y nunca decirle "entidad" al autor.
+> - [`VAULT/spec/corpus.md`](VAULT/spec/corpus.md), "Autoría y procedencia": toda inferencia externa lleva modelo y fecha, y la marca se reclasifica cuando el autor edita a mano.
+
 ## Wishlist
 
 Lo que hay que hacer y no bloquea a nadie vive en [`TODO.md`](../TODO.md).
+
+> [!tip] Mirar en VAULT para lo que ya tiene investigación
+> - Publicación web con Quartz: [`VAULT/research/Herramientas para TUKU.md`](VAULT/research/Herramientas%20para%20TUKU.md) y [`VAULT/research/Configuraciones de Tools.md`](VAULT/research/Configuraciones%20de%20Tools.md) (ocultar carpetas con prefijo, vault como submódulo de git).
+> - Captura móvil por Telegram: la misma nota, sección "Gateway con API y Telegram" (variables, allowlist y un bot token por perfil).
+> - Transclusión editable en Obsidian: [`VAULT/research/obsidian_notes.md`](VAULT/research/obsidian_notes.md). Es una prueba de concepto frágil; sirve para saber qué no apoyar encima.
+> - Sincronización entre máquinas: [`VAULT/scratchpad/tuku-docs/decisiones/0001-fuente-de-verdad-y-sincronizacion.md`](VAULT/scratchpad/tuku-docs/decisiones/0001-fuente-de-verdad-y-sincronizacion.md). Git manda y se asume un único escritor concurrente.
 
 ## Apéndice: referencia de mac-jpgil
 
