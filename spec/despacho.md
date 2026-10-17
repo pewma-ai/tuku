@@ -8,6 +8,8 @@ Es el único documento que se lee entero en toda sesión, así que es el más ca
 
 Todo lo que dice **cómo** se hace algo vive donde se hace y se carga al llegar ahí: el `AGENTS.md` del directorio de destino, o el archivo de reglas de la consecuencia. Una regla que solo aplica a las notas escrita en la raíz se paga en cada sesión que no toca notas.
 
+**Medido, la raíz lleva además lo que evita abrir otros archivos.** Cada archivo que el agente abre antes de escribir cuesta una llamada al modelo (3 a 4 s con `gemini-3.8-flash-low`). Con "Lee antes" para todo, un turno que escribe promediaba 9,7 llamadas y 53 s. Con las reglas de ejecución (un pedido, un comando; no leer ni verificar de más), los campos de los comandos y un ejemplo de cada uno en la raíz, promedia 3,6 llamadas y 22 s. Lo que ahí entra es lo que el agente necesita en casi toda sesión; el detalle sigue abajo.
+
 De ahí la prueba para saber si una línea pertenece a la raíz: si la respuesta cambia el destino, va en la raíz; si solo cambia la ejecución una vez elegido el destino, va abajo.
 
 ## Las tres vías
