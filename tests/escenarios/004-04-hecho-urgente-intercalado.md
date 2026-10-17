@@ -6,6 +6,8 @@
 
 ---
 
+El turno del agente declara `TUKU_NOW="2026-08-12 10:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
+
 ## Estado inicial
 
 El vault resultante de la aclaración en [`004-03`](004-03-desambiguacion-en-dos-turnos.md).
@@ -21,7 +23,7 @@ cp -r ../../004-03-desambiguacion-en-dos-turnos/el-agente-pregunta-en-el-turno-1
 Dado un diálogo donde se venía discutiendo el pedido de marzo con la Importadora Andina
 Cuando el autor interrumpe abruptamente con un hecho urgente ocurrido en el momento
 
-```agente
+```agente TUKU_NOW="2026-08-12 10:00"
 Espérate, me acaba de timbrar el flete con las cajas de témperas. Llegaron tres cajas rotas y manchadas, voy a tener que reclamar al proveedor.
 ```
 

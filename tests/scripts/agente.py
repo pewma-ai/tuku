@@ -195,7 +195,7 @@ TIMEOUT = 600
 #: ubica un registro. Dos invocaciones del mismo verbo sobre el mismo
 #: sujeto, **seguidas**, son un intento y su corrección. Separadas por otro
 #: comando, no: ahí el agente ya siguió adelante y volver es otra cosa.
-_UBICAN = ("--at", "--cuando")
+_UBICAN = ("--at", "--cuando", "--due", "--vence")
 
 
 def _sujeto(argv: list[str]) -> tuple[str, ...]:
@@ -317,9 +317,7 @@ class Turno:
         """
         largo = len(verbo)
         return [
-            argv
-            for argv in self.traza
-            if tuple(argv[:largo]) == verbo and not es_ayuda(argv)
+            argv for argv in self.traza if tuple(argv[:largo]) == verbo and not es_ayuda(argv)
         ]
 
     @property
@@ -486,17 +484,27 @@ def disponible() -> bool:
 _SHIM = """#!{python}
 import json, os, sys
 sys.path.insert(0, {src!r})
+sys.path.insert(0, {scripts!r})
 try:
     cwd = os.getcwd()
 except Exception:
     cwd = os.environ.get("PWD", "")
-anotacion = {{"argv": sys.argv[1:], "cwd": cwd}}
+from tuku.cli import main
+import tiempo
+ahora = os.environ.get("TUKU_NOW")
+if ahora:
+    print("nota: la fecha de hoy en este entorno es " + ahora + " (simulada)", file=sys.stderr)
+try:
+    with tiempo.congelar(ahora):
+        codigo = main(sys.argv[1:])
+except SystemExit as e:
+    codigo = e.code if isinstance(e.code, int) else 1
 traza_path = os.environ.get("TUKU_TRAZA")
 if traza_path:
+    anotacion = {{"argv": sys.argv[1:], "cwd": cwd, "codigo": codigo}}
     with open(traza_path, "a", encoding="utf-8") as f:
         f.write(json.dumps(anotacion, ensure_ascii=False) + "\\n")
-from tuku.cli import main
-sys.exit(main(sys.argv[1:]))
+sys.exit(codigo)
 """
 
 
@@ -519,7 +527,12 @@ def _sembrar_shim(dir: Path) -> Path:
     """Deja un `tuku` ejecutable en `dir` y devuelve el archivo de traza."""
     shim = dir / "tuku"
     shim.write_text(
-        _SHIM.format(python=sys.executable, src=str(RAIZ_REPO / "src")), encoding="utf-8"
+        _SHIM.format(
+            python=sys.executable,
+            src=str(RAIZ_REPO / "src"),
+            scripts=str(Path(__file__).parent),
+        ),
+        encoding="utf-8",
     )
     shim.chmod(0o755)
     (dir / "shim.bash").write_text(_FUNCION_SHIM.format(shim=shim), encoding="utf-8")
@@ -530,7 +543,9 @@ def _leer_traza(traza: Path) -> list[list[str]]:
     if not traza.is_file():
         return []
     lineas = traza.read_text(encoding="utf-8").splitlines()
-    return [json.loads(linea)["argv"] for linea in lineas if linea.strip()]
+    anotaciones = [json.loads(linea) for linea in lineas if linea.strip()]
+    # Un comando que salió con error no escribió nada: no es parte de la traducción.
+    return [x["argv"] for x in anotaciones if x.get("codigo", 0) == 0]
 
 
 def _conversacion(arnes: Arnes, vault: Path, entorno: dict[str, str]) -> str:
@@ -556,12 +571,18 @@ def _conversacion(arnes: Arnes, vault: Path, entorno: dict[str, str]) -> str:
     return p.stdout if p.returncode == 0 else f"(el export salió {p.returncode})\n{p.stderr}"
 
 
-def turno(vault: Path, prompt: str, timeout: int | None = None) -> Turno:
+def turno(
+    vault: Path, prompt: str, timeout: int | None = None, ahora: str | None = None
+) -> Turno:
     """Un turno del agente dentro de `vault`, con la traza de lo que ejecutó.
 
     El agente corre **dentro del vault**, que es como se opera en la vida real:
     lee su `AGENTS.md` porque está ahí, no porque el prompt se lo pegue. Un prompt
     que explique lo que el `AGENTS.md` ya dice invalida el escenario.
+
+    `ahora` (`AAAA-MM-DD HH:MM`) es la fecha simulada: el shim la aplica a cada
+    `tuku` que el agente ejecuta y la anuncia por `stderr`, así el agente sabe
+    que ese es el día de hoy.
     """
     motivo = motivo_no_disponible()
     if motivo is not None:
@@ -576,6 +597,7 @@ def turno(vault: Path, prompt: str, timeout: int | None = None) -> Turno:
             "PATH": f"{bin}{os.pathsep}{_path_sin_venv()}",
             "TUKU_TRAZA": str(traza),
             "TUKU_HOME": str(RAIZ_REPO),
+            **({"TUKU_NOW": ahora} if ahora else {}),
             # Lo que bash no-interactivo sourcea al arrancar. Es por dónde entra
             # la función del shim en los arneses que ejecutan por shell de login.
             "BASH_ENV": str(bin / "shim.bash"),

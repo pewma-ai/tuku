@@ -6,6 +6,8 @@ Verifica la portabilidad agéntica ejecutando el mismo dictado simple bajo un te
 
 `claude` no descubre solo el documento del vault (busca `CLAUDE.md`, no `AGENTS.md`), así que el arnés le antepone un preámbulo que dice dónde mirar, no qué dice. Si el `AGENTS.md` no alcanzara, el turno fallaría igual.
 
+El turno del agente declara `TUKU_NOW="2026-08-11 22:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
+
 ## Estado inicial
 
 ```bash
@@ -16,7 +18,7 @@ tuku init mi-vault --at 2026-08-11
 
 Dado un vault recién sembrado
 Cuando el autor dicta el hecho más simple
-```agente
+```agente TUKU_NOW="2026-08-11 22:00"
 A las nueve y doce me di cuenta de que la administradora responde los mensajes con varios días de atraso.
 ```
 Entonces la traducción coincide con la obtenida en el arnés de referencia

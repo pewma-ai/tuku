@@ -6,6 +6,8 @@
 
 ---
 
+El turno del agente declara `TUKU_NOW="2026-08-11 22:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
+
 ## Estado inicial
 
 Un vault poblado con el día uno y compromisos abiertos en `PENDIENTES.md`, el de la cadena determinista del 002. Un escenario con agente no va en la base de una cadena ([`devel/epics.md`](../../devel/epics.md)).
@@ -21,7 +23,7 @@ cp -r ../../002-13-el-dia/repetir-el-dia-no-cambia-nada/mi-vault .
 Dado un vault con pendientes abiertos del día
 Cuando el autor plantea un dilema de negocio y consulta qué tiene pendiente antes de decidir
 
-```agente
+```agente TUKU_NOW="2026-08-11 22:00"
 Tengo que decidir si le confirmo a la Importadora Andina el pedido de marzo. Es mucha plata y la línea de crédito del banco todavía no está aprobada. ¿Qué compromisos me quedaban para hoy antes de meterme en eso?
 ```
 

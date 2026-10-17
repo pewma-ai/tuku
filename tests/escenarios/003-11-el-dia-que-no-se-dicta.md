@@ -4,6 +4,8 @@
 
 El autor dicta una hora y no un día. El día se deriva del vault, con la regla de [`reglas/bitacora.tuku.md`](../../template/vanilla/reglas/bitacora.tuku.md): si HOY cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros.
 
+El turno del agente declara `TUKU_NOW="2026-08-20 10:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
+
 ## Estado inicial
 
 El día uno de la cadena determinista del 002, con dos pendientes escritos el miércoles 12. No hereda de un escenario con agente ([`devel/epics.md`](../../devel/epics.md)).
@@ -18,7 +20,7 @@ tuku todo open --vault mi-vault --at "2026-08-12 09:30" --scope depto-centro --b
 
 Dado un vault cuyo último día con registros es el miércoles 12, y un HOY fuera del ciclo
 Cuando el autor dicta un hecho con hora y sin día
-```agente
+```agente TUKU_NOW="2026-08-20 10:00"
 A las diez y cuarto llegó el certificado de dominio vigente del depto centro.
 ```
 Entonces esa frase se traduce en un solo comando

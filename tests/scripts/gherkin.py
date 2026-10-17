@@ -38,20 +38,13 @@ import shutil
 import subprocess
 import sys
 import unicodedata
-from collections.abc import Iterator
 from contextlib import (
-    ExitStack,
-    contextmanager,
     redirect_stderr,
     redirect_stdout,
-    suppress,
 )
 from dataclasses import dataclass, field
-from datetime import date as real_date
 from datetime import datetime as real_datetime
 from pathlib import Path
-from typing import Any
-from unittest.mock import patch
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ_REPO / "src"))
@@ -59,6 +52,7 @@ sys.path.insert(0, str(RAIZ_REPO / "src"))
 sys.path.insert(0, str(RAIZ_REPO / "tests" / "scripts"))
 
 import agente  # noqa: E402
+import tiempo  # noqa: E402
 import vault  # noqa: E402
 
 ESCENARIOS = RAIZ_REPO / "tests" / "escenarios"
@@ -67,7 +61,7 @@ ESCENARIOS = RAIZ_REPO / "tests" / "escenarios"
 #: heredan su tipo, como en cualquier Gherkin.
 _PALABRAS = ("Dado", "Cuando", "Entonces", "Y", "Pero")
 _PASO = re.compile(rf"^({'|'.join(_PALABRAS)})\b(.*)$")
-_FENCE = re.compile(r"^```(\w*)\s*$")
+_FENCE = re.compile(r'^```(\w*)(?:\s+TUKU_NOW="([^"]*)")?\s*$')
 _TITULO = re.compile(r"^##\s+Escenario:\s*(.+?)\s*$")
 _CD = re.compile(r"^cd\s+(\S+)$")
 
@@ -93,6 +87,7 @@ class Paso:
     texto: str
     comandos: list[str] = field(default_factory=list)
     agente: list[str] = field(default_factory=list)
+    ahora: str | None = None  # `TUKU_NOW` del fence ```agente
 
 
 @dataclass
@@ -236,7 +231,12 @@ def leer_escenarios(slug: str) -> list[Escenario]:
     for linea in ruta.read_text(encoding="utf-8").splitlines():
         fence = _FENCE.match(linea)
         if fence:
-            lenguaje = None if lenguaje is not None else fence.group(1)
+            abre = lenguaje is None
+            lenguaje = fence.group(1) if abre else None
+            if abre and lenguaje == "agente" and fence.group(2):
+                destino = fondo if en_fondo else pasos
+                if destino:
+                    destino[-1].ahora = fence.group(2)
             continue
         if lenguaje is not None:
             # Dentro de un fence: solo cuentan los que el escenario ejecuta, y
@@ -418,55 +418,6 @@ def _separar_entorno(partes: list[str]) -> tuple[dict[str, str], list[str]]:
     return entorno, partes
 
 
-@contextmanager
-def _congelar_tiempo(tuku_now: str | None) -> Iterator[None]:
-    """Congela deterministamente date.today() y datetime.now() en tuku para tests."""
-    if not tuku_now:
-        yield
-        return
-
-    val = tuku_now.strip().replace(" ", "T")
-    if "T" in val:
-        partes = val.split("T")
-        fecha_parte = partes[0]
-        hora_parte = partes[1]
-        if len(hora_parte.split(":")) == 2:
-            hora_parte += ":00"
-        dt = real_datetime.fromisoformat(f"{fecha_parte}T{hora_parte}")
-    else:
-        dt = real_datetime.fromisoformat(f"{val}T00:00:00")
-    d = dt.date()
-
-    class FakeDate(real_date):
-        @classmethod
-        def today(cls) -> Any:
-            return d
-
-    class FakeDatetime(real_datetime):
-        @classmethod
-        def now(cls, tz: Any = None) -> Any:
-            if tz is not None:
-                return dt.astimezone(tz) if dt.tzinfo else dt.replace(tzinfo=tz)
-            return dt
-
-    modulos = [
-        "tuku.entry",
-        "tuku.todo",
-        "tuku.note",
-        "tuku.cycle",
-        "tuku.init",
-        "tuku.scope",
-        "tuku.cli.opciones",
-    ]
-    with ExitStack() as stack:
-        for mod in modulos:
-            with suppress(AttributeError, ModuleNotFoundError):
-                stack.enter_context(patch(f"{mod}.date", FakeDate))
-            with suppress(AttributeError, ModuleNotFoundError):
-                stack.enter_context(patch(f"{mod}.datetime", FakeDatetime))
-        yield
-
-
 def _correr_tuku(argv: list[str], entorno: dict[str, str]) -> tuple[int, str, str]:
     from tuku.cli import main
 
@@ -475,7 +426,7 @@ def _correr_tuku(argv: list[str], entorno: dict[str, str]) -> tuple[int, str, st
     out, err = io.StringIO(), io.StringIO()
     tuku_now = entorno.get("TUKU_NOW")
     try:
-        with _congelar_tiempo(tuku_now), redirect_stdout(out), redirect_stderr(err):
+        with tiempo.congelar(tuku_now), redirect_stdout(out), redirect_stderr(err):
             try:
                 codigo = main(argv)
             except SystemExit as e:
@@ -511,7 +462,7 @@ def _correr_agente(paso: Paso, dir: Path) -> agente.Turno:
             f"en {dir}. El agente corre dentro del vault, así que el escenario "
             f"tiene que haberlo sembrado en su `## Estado inicial`."
         )
-    turno = agente.turno(vault, prompt)
+    turno = agente.turno(vault, prompt, ahora=paso.ahora)
     _dejar_a_la_vista(turno, dir)
     if turno.codigo != 0:
         raise PasoFallido(

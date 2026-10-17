@@ -6,6 +6,8 @@ El criterio de salida del epic en un solo turno: el autor dicta el día uno ente
 
 El día que se deriva del vault, sin dictarlo, está en el [`003-11`](003-11-el-dia-que-no-se-dicta.md).
 
+El turno del agente declara `TUKU_NOW="2026-08-11 22:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
+
 ## Estado inicial
 
 ```bash
@@ -16,7 +18,7 @@ tuku init mi-vault --at 2026-08-11
 
 Dado un vault sembrado y vacío de registros
 Cuando el autor le cuenta el día de una vez, con una consulta antes y dos pedidos que no puede resolver solo al final
-```agente
+```agente TUKU_NOW="2026-08-11 22:00"
 Una pregunta antes de lo de hoy: si te dijera que hay que renovar el pase escolar, ¿qué anotarías y en qué archivo? Eso no lo anotes, solo dime.
 A las nueve y doce me di cuenta de que la administradora responde los mensajes con varios días de atraso.
 A las once y media hice la consulta presencial por el standing desk.

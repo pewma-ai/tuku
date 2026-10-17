@@ -6,6 +6,8 @@
 
 ---
 
+El turno del agente declara `TUKU_NOW="2026-08-12 10:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
+
 ## Estado inicial
 
 El vault resultante tras el rechazo limpio en [`004-05`](004-05-propuesta-y-rechazo-limpio.md).
@@ -21,7 +23,7 @@ cp -r ../../004-05-propuesta-y-rechazo-limpio/el-agente-propone-una-estructura/m
 Dado el final de una sesión de conversación con acuerdos decantados
 Cuando el autor sintetiza la decisión final en un solo turno de ratificación
 
-```agente
+```agente TUKU_NOW="2026-08-12 10:00"
 Ya, en resumen: anota que el viernes a las diez voy al banco a firmar la ampliación de la línea, y que después de eso llamo a Andina para cerrar el pedido.
 ```
 

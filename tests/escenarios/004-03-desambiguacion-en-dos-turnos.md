@@ -6,6 +6,8 @@
 
 ---
 
+El turno del agente declara `TUKU_NOW="2026-08-12 10:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
+
 ## Estado inicial
 
 El vault del escenario anterior, sembrado además con dos compromisos abiertos que comparten estructura:
@@ -27,7 +29,7 @@ Dos pendientes abiertos sobre transferir anticipos a profesoras.
 Dado un vault con dos pendientes abiertos que compiten por la misma descripción
 Cuando el autor dicta una confirmación ambigua en el primer turno
 
-```agente
+```agente TUKU_NOW="2026-08-12 10:00"
 Ah, y ya le transferí el anticipo a la profe.
 ```
 
@@ -37,7 +39,7 @@ Y el delta del vault en este primer turno es vacío
 
 Cuando el autor aclara la referencia en el segundo turno
 
-```agente
+```agente TUKU_NOW="2026-08-12 10:00"
 A la Marcela, lo de los talleres de arte.
 ```
 

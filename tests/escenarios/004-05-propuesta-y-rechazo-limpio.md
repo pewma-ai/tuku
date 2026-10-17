@@ -6,6 +6,8 @@
 
 ---
 
+El turno del agente declara `TUKU_NOW="2026-08-12 10:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
+
 ## Estado inicial
 
 El vault dejado por [`004-04`](004-04-hecho-urgente-intercalado.md).
@@ -21,14 +23,14 @@ cp -r ../../004-04-hecho-urgente-intercalado/un-hecho-imprevisto-se-asienta/mi-v
 Dado el hilo de conversación retomado sobre la negociación con la Importadora Andina
 Cuando el autor describe un proceso que se extenderá por semanas
 
-```agente
+```agente TUKU_NOW="2026-08-12 10:00"
 Bueno, volviendo a lo de Andina: el pedido grande va a tomar varias semanas de negociación.
 ```
 
 Y el agente propone proactivamente crear un nuevo ámbito para el proveedor
 Y el autor rechaza explícitamente la propuesta en el turno siguiente
 
-```agente
+```agente TUKU_NOW="2026-08-12 10:00"
 No, son solo un proveedor de insumos, no amerita ámbito propio: déjalo dentro de personal.
 ```
 

@@ -96,6 +96,8 @@ Para probar fallbacks a la fecha de hoy y hora actual sin depender del reloj del
   ```
 - El arnés [`scripts/gherkin.py`](scripts/gherkin.py) intercepta `TUKU_NOW` y congela `date.today()` y `datetime.now()` en los módulos de `tuku` exclusivamente durante esa llamada en proceso.
 
+Un turno de agente declara su fecha en el fence: ```` ```agente TUKU_NOW="AAAA-MM-DD HH:MM" ````. El shim del `tuku` que ejecuta el agente aplica esa fecha a cada llamada y la anuncia por `stderr`; los escenarios agénticos que dependen de "hoy" la declaran siempre.
+
 ## Reglas para tests unitarios (`tests/unitarios/`)
 
 - Destinados a funciones puras (por ejemplo: `tuku.ahora`, `tuku.todo.parsear`, `tuku.lint`).
