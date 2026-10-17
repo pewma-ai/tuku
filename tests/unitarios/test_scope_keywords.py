@@ -1,0 +1,112 @@
+"""Las keywords de un ámbito: `scope create` las pide y `scope keywords` las suma."""
+
+from __future__ import annotations
+
+from datetime import date
+from pathlib import Path
+
+import pytest
+
+from tuku import init, scope
+from tuku.cli import EXITO, RECHAZO, main
+
+RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
+HOY = "2026-08-11"
+
+
+@pytest.fixture
+def vault(tmp_path: Path) -> Path:
+    return init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+
+
+def _tuku(vault: Path, *argv: str) -> int:
+    return main([*argv, "--vault", str(vault)])
+
+
+def _crear(vault: Path, nombre: str, *extra: str) -> int:
+    return _tuku(vault, "scope", "create", nombre, "--at", f"{HOY} 18:45", *extra)
+
+
+def _keywords(vault: Path, *ruta: str) -> list[str]:
+    return scope.keywords(vault.joinpath("ambitos", *ruta).read_text(encoding="utf-8"))
+
+
+def _ahora(vault: Path) -> str:
+    return (vault / "AHORA.md").read_text(encoding="utf-8")
+
+
+def test_crear_un_ambito_sin_keywords_le_pide_al_agente_preguntarlas(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert _crear(vault, "paranal") == EXITO
+    salida = capsys.readouterr().out
+    assert "Pregunta al autor" in salida
+    assert "tuku scope keywords paranal PALABRA..." in salida
+    assert _keywords(vault, "paranal", "paranal.md") == ["paranal"]
+
+
+def test_crear_un_ambito_con_keywords_las_deja_en_la_pagina_y_no_vuelve_a_pedirlas(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert _crear(vault, "paranal", "--keyword", "vlti", "--keyword", "LCU") == EXITO
+    assert "Pregunta al autor" not in capsys.readouterr().out
+    assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "vlti", "LCU"]
+
+
+def test_crear_sobre_un_ambito_existente_no_vuelve_a_pedir_keywords(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert _crear(vault, "paranal") == EXITO
+    capsys.readouterr()
+    assert _crear(vault, "paranal") == EXITO
+    assert "Pregunta al autor" not in capsys.readouterr().out
+
+
+def test_keywords_suma_las_nuevas_sin_repetir_y_enlaza_las_menciones_sueltas(
+    vault: Path,
+) -> None:
+    assert _crear(vault, "paranal") == EXITO
+    assert (
+        _tuku(
+            vault, "entry", "add", "--at", f"{HOY} 19:00", "--scope", "personal",
+            "--body", "revisé el LCU del VLTI",
+        )
+        == EXITO
+    )  # fmt: skip
+    assert _tuku(vault, "scope", "keywords", "paranal", "lcu", "vlti", "TCS") == EXITO
+    assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "lcu", "vlti", "TCS"]
+    assert "revisé el [paranal](ambitos/paranal/paranal.md) del [paranal](" in _ahora(vault)
+
+    assert _tuku(vault, "scope", "keywords", "paranal", "LCU", "tcs") == EXITO
+    assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "lcu", "vlti", "TCS"]
+    assert _tuku(vault, "doctor") == EXITO
+
+
+def test_keywords_repetida_con_otra_grafia_no_escribe_nada(vault: Path) -> None:
+    assert _crear(vault, "paranal", "--keyword", "casa matriz") == EXITO
+    antes = (vault / "ambitos" / "paranal" / "paranal.md").read_bytes()
+    assert _tuku(vault, "scope", "keywords", "paranal", "casa-matriz") == EXITO
+    assert (vault / "ambitos" / "paranal" / "paranal.md").read_bytes() == antes
+
+
+def test_keywords_rechaza_lo_que_no_cabe_o_no_existe(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert _crear(vault, "paranal") == EXITO
+    capsys.readouterr()
+    casos = [
+        (("scope", "keywords", "nada", "x"), "no existe el ámbito"),
+        (("scope", "keywords", "paranal", "a,b"), "comas o corchetes"),
+        (("scope", "keywords", "paranal", " "), "faltan las palabras"),
+    ]
+    for argv, dice in casos:
+        assert _tuku(vault, *argv) == RECHAZO, argv
+        assert dice in capsys.readouterr().err, argv
+    assert _keywords(vault, "paranal", "paranal.md") == ["paranal"]
+
+
+def test_renombrar_un_ambito_conserva_sus_otras_keywords(vault: Path) -> None:
+    assert _crear(vault, "paranal", "--keyword", "vlti", "--keyword", "LCU") == EXITO
+    assert _tuku(vault, "scope", "rename", "paranal", "cerro") == EXITO
+    assert _keywords(vault, "cerro", "cerro.md") == ["cerro", "vlti", "LCU"]
+    assert _tuku(vault, "doctor") == EXITO

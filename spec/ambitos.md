@@ -70,7 +70,7 @@ La constancia la deja solo quien crea la carpeta. Un día fuera del ciclo abiert
 
 ### Idempotencia y reparación con el comando original
 
-`tuku scope create` es estrictamente idempotente: ejecutarlo sobre un ámbito ya existente no sobreescribe sus reglas ni duplica callouts en `PENDIENTES-AMBITOS.md`, y no escribe otra constancia en `AHORA.md`, ni en este ciclo ni en uno posterior.
+`tuku scope create` es estrictamente idempotente: ejecutarlo sobre un ámbito ya existente no sobreescribe sus reglas ni duplica callouts en `PENDIENTES-AMBITOS.md`, y no escribe otra constancia en `AHORA.md`, ni en este ciclo ni en uno posterior. Con `--keyword` suma esas keywords, como `scope keywords`.
 
 El comando `tuku scope lint` (y `tuku doctor`) verifica estructuralmente:
 1. Que ningún registro en `AHORA.md` apunte a una categoría.
@@ -78,6 +78,14 @@ El comando `tuku scope lint` (y `tuku doctor`) verifica estructuralmente:
 3. Que en `ambitos/PENDIENTES-AMBITOS.md` exista el callout con su ancla `^<ambito>` correspondiente a cada ámbito del árbol.
 
 Ante cualquier defecto, el linter informa y nunca repara por su cuenta: nombra la discrepancia e indica el comando original correspondiente para reparar la consistencia.
+
+## Las keywords de un ámbito
+
+La línea `keywords: [nombre, vlti, LCU]` del frontmatter de la página lista los nombres con que el autor se refiere al ámbito. Sirve a dos lectores: el enlazado, que convierte en link cada mención, y el agente, que la lee para saber de qué frente es algo que no nombra el ámbito.
+
+- **`tuku scope create NOMBRE`** pide las keywords en su salida cuando el ámbito es nuevo y no recibió ninguna: el agente las pregunta al autor y no las inventa. `--keyword PALABRA`, repetible, las pone en el mismo comando.
+- **`tuku scope keywords NOMBRE PALABRA...`** las suma a la lista y enlaza las menciones sueltas de `AHORA.md`. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con comas o corchetes.
+- **`tuku scope rename`** cambia el nombre dentro de la lista y conserva las demás.
 
 ## El nombre de un ámbito
 
