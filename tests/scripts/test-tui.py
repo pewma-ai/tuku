@@ -70,7 +70,7 @@ def main(argv: list[str]) -> int:
                 break
             vista.damian(frase)
         else:
-            prompt = tui.prompt_de_damian(plan, historia, n)
+            prompt = tui.prompt_de_damian(plan, historia, n, zona=tui.zona_del_vault(v))
             inicio = time.monotonic()
             frase = tui.frase_de_damian(prompt, args.modelo_damian, args.esfuerzo_damian)
             vista.damian(frase, time.monotonic() - inicio)

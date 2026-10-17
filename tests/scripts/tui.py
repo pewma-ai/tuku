@@ -117,8 +117,30 @@ def _esperado(celda: str) -> Esperado:
     return Esperado(True, comandos, celda)
 
 
+def zona_del_vault(vault: Path) -> str | None:
+    """El campo `TZ` de `reglas/config.tuku.md` del vault, o `None` si no lo dice."""
+    from tuku.config import parsear_config_md
+
+    ruta = vault / "reglas" / "config.tuku.md"
+    if not ruta.is_file():
+        return None
+    zona = parsear_config_md(ruta.read_text(encoding="utf-8")).get("TZ", "").strip("`")
+    return zona or None
+
+
+def _lugar(zona: str | None) -> str:
+    """Cómo se le dice al modelo en qué español escribe: que lo infiera de la zona horaria."""
+    if not zona:
+        return "natural"
+    return f"natural del país que corresponde a la zona horaria {zona}"
+
+
 def prompt_de_damian(
-    plan: Plan, historia: list[tuple[str, str]], n: int, persona: str | None = None
+    plan: Plan,
+    historia: list[tuple[str, str]],
+    n: int,
+    persona: str | None = None,
+    zona: str | None = None,
 ) -> str:
     """Lo que se le pide a quien hace de Damián en el turno `n`.
 
@@ -134,8 +156,8 @@ def prompt_de_damian(
         f"Lo que ya se dijo:\n{dicho}\n\n"
         f"Ahora, en el turno {n}, lo que debes decir es esto (en tus palabras, sin "
         f"agregar nada que no esté acá):\n{plan.pasos[n - 1]}\n\n"
-        "Escribe SOLO lo que Damián le dice al agente: una o dos frases en español "
-        "chileno natural, como las diría al chat, sin comillas, sin etiquetas como "
+        f"Escribe SOLO lo que Damián le dice al agente: una o dos frases en español "
+        f"{_lugar(zona)}, como las diría al chat, sin comillas, sin etiquetas como "
         "«Ratificado:», sin explicar y sin mencionar que sigues un plan. Si lo que "
         "debes decir responde algo que el agente preguntó, apóyate en su última "
         "respuesta.\n\n"
@@ -441,6 +463,14 @@ def evaluar(plan: Plan, turnos: list[dict[str, Any]], doctor: tuple[int, str]) -
             chequeos.append(
                 (True, f"Turno {n}: escribió lo que dice la tabla ({esperado.texto})")
             )
+    salidas = [(n, t["fuera"]) for n, t in enumerate(turnos, 1) if t.get("fuera")]
+    for n, fuera in salidas:
+        vistas = ", ".join(f"`{f}`" for f in fuera[:3]) + (" …" if len(fuera) > 3 else "")
+        chequeos.append(
+            (False, f"Turno {n}: el agente salió del vault ({vistas}); el turno no prueba nada")
+        )
+    if not salidas:
+        chequeos.append((True, "El agente no salió del vault"))
     sin_comando = [n for n, t in enumerate(turnos, 1) if t["delta"] and not t["escribe"]]
     for n in sin_comando:
         chequeos.append((False, f"Turno {n}: el vault cambió sin un comando tuku en la traza"))

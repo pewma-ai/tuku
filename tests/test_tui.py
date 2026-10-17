@@ -15,6 +15,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
+import agente
 import tui
 
 
@@ -115,6 +116,19 @@ def test_damian_recibe_solo_el_paso_que_toca() -> None:
     assert "Agente: ¿qué tal?" in prompt
 
 
+def test_damian_escribe_en_el_español_de_la_zona_del_vault(tmp_path: Path) -> None:
+    config = tmp_path / "reglas" / "config.tuku.md"
+    config.parent.mkdir()
+    config.write_text("| Campo | Valor |\n| --- | --- |\n| `TZ` | `America/Bogota` |\n")
+    zona = tui.zona_del_vault(tmp_path)
+    assert zona == "America/Bogota"
+    plan = tui.leer_plan("004-03")
+    prompt = tui.prompt_de_damian(plan, [], 1, persona="Damián", zona=zona)
+    assert "zona horaria America/Bogota" in prompt
+    assert "chileno" not in prompt
+    assert "zona horaria" not in tui.prompt_de_damian(plan, [], 1, persona="Damián")
+
+
 def test_la_frase_de_damian_sale_de_las_etiquetas() -> None:
     sucio = "Ojo, lo que me pides es otra cosa:\n<damian>Mejor el viernes.</damian>"
     assert tui.extraer_frase(sucio) == "Mejor el viernes."
@@ -165,8 +179,16 @@ def test_el_stderr_sale_en_rojo_y_solo_si_lo_hay() -> None:
     assert salida.getvalue() == "\033[31magy stderr: aviso del arnés\033[0m\n"
 
 
-def _turno(delta: dict[str, str], escribe: list[str], codigo: int = 0) -> dict[str, object]:
-    return {"agente": "ok", "delta": delta, "escribe": escribe, "codigo": codigo}
+def _turno(
+    delta: dict[str, str], escribe: list[str], codigo: int = 0, fuera: list[str] | None = None
+) -> dict[str, object]:
+    return {
+        "agente": "ok",
+        "delta": delta,
+        "escribe": escribe,
+        "codigo": codigo,
+        "fuera": fuera or [],
+    }
 
 
 def test_la_tabla_del_escenario_dice_que_turnos_cambian_el_vault() -> None:
@@ -213,3 +235,51 @@ def test_la_conclusion_dice_por_que_no_funciono() -> None:
     assert "Turno 4" in motivos and "esperaba" in motivos and "todo open" in motivos
     assert "Turno 4" in motivos and "salió 124" in motivos
     assert "doctor" in motivos
+
+
+def test_salir_del_vault_invalida_el_turno_aunque_escriba_bien() -> None:
+    plan = tui.leer_plan("004-03")
+    turnos = [
+        _turno({}, []),
+        _turno({}, []),
+        _turno({}, []),
+        _turno(
+            {"AHORA.md": "modificado"},
+            ["tuku todo open --body x"],
+            fuera=["view_file /repo/tests/escenarios/004-03.md"],
+        ),
+    ]
+    c = tui.evaluar(plan, turnos, (0, "doctor: el vault está sano."))
+    assert not c.ok
+    motivos = "\n".join(t for ok, t in c.chequeos if not ok)
+    assert "Turno 4" in motivos and "salió del vault" in motivos and "004-03.md" in motivos
+
+
+def _stream(**parametros: str) -> str:
+    return _paso(
+        step_index=1,
+        step_type="tool",
+        state="DONE",
+        tool_name="run_command",
+        tool_info={"parameters": parametros},
+    )
+
+
+def test_fuera_del_vault_ve_rutas_ajenas_y_no_las_del_vault(tmp_path: Path) -> None:
+    v = tmp_path / "mi-vault"
+    v.mkdir()
+    dentro = _stream(CommandLine=f"grep -r pendiente {v}/ambitos")
+    assert agente.fuera_del_vault(dentro, v) == []
+    for comando in (
+        "grep -rn 004-03 /Users/jgil/Code/tuku/tests",
+        "cat ~/.gitconfig",
+        "ls ../trazas",
+        "find /tmp -name x",
+    ):
+        assert agente.fuera_del_vault(_stream(CommandLine=comando), v), comando
+
+
+def test_una_barra_suelta_o_una_fecha_no_son_rutas(tmp_path: Path) -> None:
+    v = tmp_path / "mi-vault"
+    cuerpo = "tuku todo open --body 'pagar / avisar y/o cobrar' --due 2026-08-17 --at 21:00"
+    assert agente.fuera_del_vault(_stream(CommandLine=cuerpo), v) == []

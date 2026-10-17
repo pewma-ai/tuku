@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shlex
 import shutil
 import socketserver
@@ -366,6 +367,38 @@ def pasos_de(stdout: str) -> str:
         f"total {total:.1f} s, {len(lineas)} pasos" if isinstance(total, int | float) else ""
     )
     return "\n".join([*lineas, cierre]).strip()
+
+
+#: Una ruta en un parámetro de herramienta: absoluta, del hogar o que sube con `..`.
+#: Una `/` suelta (un «sí / no» en un cuerpo) no es una ruta.
+_RUTA = re.compile(r"""(?<![\w.:/-])(~?/[^\s'"`;|&<>()]+|\.\./[^\s'"`;|&<>()]*)""")
+
+
+def fuera_del_vault(stdout: str, vault: Path) -> list[str]:
+    """Lo que el agente tocó fuera de `vault` en un turno: la herramienta y la ruta.
+
+    Mira los parámetros de cada herramienta del `stream-json`. Un agente que
+    sale del vault puede encontrar el escenario que lo evalúa y copiar la
+    respuesta, así que el turno que lo hizo no prueba nada, escriba lo que
+    escriba. Vacío si la salida no es un `stream-json`.
+    """
+    raices = {str(vault), str(vault.resolve())}
+    fuera: list[str] = []
+    for e in _eventos(stdout):
+        paso = e.get("step_update")
+        if not isinstance(paso, dict) or paso.get("state") != "DONE":
+            continue
+        if paso.get("step_type") != "tool":
+            continue
+        info = paso.get("tool_info") or {}
+        for valor in (info.get("parameters") or {}).values():
+            for ruta in _RUTA.findall(str(valor)):
+                if ruta == "/dev/null" or any(
+                    ruta == r or ruta.startswith(r + "/") for r in raices
+                ):
+                    continue
+                fuera.append(f"{paso.get('tool_name')} {ruta}")
+    return list(dict.fromkeys(fuera))
 
 
 @dataclass(frozen=True)

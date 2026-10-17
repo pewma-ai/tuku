@@ -125,6 +125,11 @@ def renderizar(estado: dict[str, Any], titulo: str) -> str:
             "**Delta del vault:**" + (" vacío" if delta == "vacío" else ""),
             "",
             *([delta, ""] if delta != "vacío" else []),
+            *(
+                ["**Salió del vault:**", "", *(f"- `{f}`" for f in t["fuera"]), ""]
+                if t.get("fuera")
+                else []
+            ),
         ]
     return "\n".join(lineas)
 
@@ -182,6 +187,7 @@ def turno(
     turno_registrado = registro(
         frase, resultado, vault.delta(antes, vault.instantanea(v)), enviado, respondido
     )
+    turno_registrado["fuera"] = agente.fuera_del_vault(resultado.crudo, v)
     arnes = agente.configurado()
     estado.update(
         id=sesion.id,
