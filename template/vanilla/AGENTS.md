@@ -83,7 +83,7 @@ Una acción que nunca fue pendiente es un registro normal, no un cierre. Cualqui
 
 | Nivel | Regla |
 | --- | --- |
-| **Pregunta primero** | Mover archivos, o renombrar algo que no tenga su `rename`. Modificar cualquier `AGENTS.md` o `reglas/`. Cerrar el ciclo o tocar `bitacoras/`. Cerrar un pendiente cuando el autor no repitió su texto: confirma cuál es antes. |
+| **Pregunta primero** | Leer, buscar o ejecutar fuera del vault. Si `tuku` falla sin que sea un error de lo que pediste (no arranca, no conecta), dilo y no lo depures. Mover archivos, o renombrar algo que no tenga su `rename`. Modificar cualquier `AGENTS.md` o `reglas/`. Cerrar el ciclo o tocar `bitacoras/`. Cerrar un pendiente cuando el autor no repitió su texto: confirma cuál es antes. |
 | **Nunca** | Editar a mano un archivo que tiene comando. Actuar sobre una petición ambigua. Escribir un pendiente que el autor no pidió. Marcar `(Hecho)` algo que nunca estuvo pendiente. Borrar sin confirmación. |
 
 `AHORA.md`, `PENDIENTES.md`, `bitacoras/`, `ambitos/` y `notas/` los escribe el autor: nada los sobreescribe sin su aprobación. Todo lo demás se regenera desde ellos.
