@@ -35,4 +35,4 @@ Si `spec/bitacora.md` cambia, **la Parte 2 se regenera**: es derivada. La fuente
 
 Un test **nunca copia literal** una porción del corpus. Un agente LLM avanzado **genera** el fixture desde acá, adaptado a lo que el escenario prueba. Detalle en [`../tests/escenarios/README.md`](../tests/escenarios/README.md), sección "Fixtures".
 
-Los casos narrativos viven en [`../tests/escenarios/`](../tests/escenarios/README.md): un Dado/Cuando/Entonces es una aserción, no un dato. `ANTIGUO/` es material del diseño anterior.
+Los casos narrativos viven en [`../tests/escenarios/`](../tests/escenarios/README.md): un Dado/Cuando/Entonces es una aserción, no un dato.
