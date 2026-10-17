@@ -218,3 +218,110 @@ def test_renombrar_un_ambito_anidado_arrastra_todo(vault: Path) -> None:
     assert _colgando(vault, "faena-ai") == []
     assert "ambitos/faena/faena-ia/faena-ia.md" in _leer(vault, "AHORA.md")
     assert _tuku(vault, "doctor") == EXITO
+
+
+def _hijos(vault: Path, *ruta: str) -> list[str]:
+    """Las líneas del callout "En X:" de una página, o `[]` si no lo tiene."""
+    lineas = _leer(vault, *ruta).splitlines()
+    inicio = next((i for i, x in enumerate(lineas) if x.startswith("> [!abstract] En ")), None)
+    if inicio is None:
+        return []
+    fin = next((i for i in range(inicio, len(lineas)) if not lineas[i].startswith(">")), None)
+    return lineas[inicio:fin]
+
+
+def test_la_pagina_del_padre_lista_sus_hijos_directos_y_los_sigue_al_moverlos(
+    vault: Path,
+) -> None:
+    pagina = ("ambitos", "faena", "faena.md")
+    _con_faena(vault)
+    assert _crear(vault, "faena-uno", "--parent", "faena") == EXITO
+    assert _crear(vault, "nieto", "--parent", "faena-ai") == EXITO
+    assert _hijos(vault, *pagina) == [
+        "> [!abstract] En **Faena**:",
+        "> - [faena-ai](faena-ai/faena-ai.md)",
+        "> - [faena-uno](faena-uno/faena-uno.md)",
+    ]
+    assert _leer(vault, *pagina).index("![[") < _leer(vault, *pagina).index("> [!abstract]")
+    assert _hijos(vault, "ambitos", "faena", "faena-ai", "faena-ai.md") == [
+        "> [!abstract] En **Faena Ai**:",
+        "> - [nieto](nieto/nieto.md)",
+    ]
+    assert _hijos(vault, "ambitos", "personal", "personal.md") == []
+
+    antes = _foto(vault)
+    assert _crear(vault, "faena-uno", "--parent", "faena") == EXITO
+    assert _foto(vault) == antes
+
+    assert _tuku(vault, "scope", "rename", "faena-uno", "faena-dos") == EXITO
+    assert "> - [faena-dos](faena-dos/faena-dos.md)" in _hijos(vault, *pagina)
+
+    assert _tuku(vault, "scope", "move", "faena-dos", "--parent", "faena-ai") == EXITO
+    assert _hijos(vault, *pagina) == [
+        "> [!abstract] En **Faena**:",
+        "> - [faena-ai](faena-ai/faena-ai.md)",
+    ]
+    assert "> - [faena-dos](../faena-dos/faena-dos.md)" not in _hijos(vault, *pagina)
+    assert "> - [faena-dos](faena-dos/faena-dos.md)" in _hijos(
+        vault, "ambitos", "faena", "faena-ai", "faena-ai.md"
+    )
+
+    assert _tuku(vault, "scope", "move", "faena-ai") == EXITO
+    assert _tuku(vault, "scope", "move", "faena-dos") == EXITO
+    assert _hijos(vault, *pagina) == []
+    assert _tuku(vault, "doctor") == EXITO
+
+
+def test_renombrar_el_padre_retitula_su_callout(vault: Path) -> None:
+    _con_faena(vault)
+    assert _tuku(vault, "scope", "rename", "faena", "trabajo") == EXITO
+    assert _hijos(vault, "ambitos", "trabajo", "trabajo.md") == [
+        "> [!abstract] En **Trabajo**:",
+        "> - [faena-ai](faena-ai/faena-ai.md)",
+    ]
+
+
+def test_al_abrir_el_callout_entran_los_hijos_que_ya_tenia_el_padre(vault: Path) -> None:
+    _con_faena(vault)
+    pagina = vault / "ambitos" / "faena" / "faena.md"
+    texto = pagina.read_text(encoding="utf-8")
+    pagina.write_text("\n".join(x for x in texto.splitlines() if not x.startswith(">")) + "\n")
+    assert _hijos(vault, "ambitos", "faena", "faena.md") == []
+
+    assert _crear(vault, "faena-dos", "--parent", "faena") == EXITO
+    assert _hijos(vault, "ambitos", "faena", "faena.md") == [
+        "> [!abstract] En **Faena**:",
+        "> - [faena-ai](faena-ai/faena-ai.md)",
+        "> - [faena-dos](faena-dos/faena-dos.md)",
+    ]
+
+
+def test_regenerate_scope_recrea_la_lista_de_hijos_de_cada_padre(vault: Path) -> None:
+    _con_faena(vault)
+    assert _crear(vault, "faena-dos", "--parent", "faena") == EXITO
+    sano = _foto(vault)
+    padre = vault / "ambitos" / "faena" / "faena.md"
+    texto = padre.read_text(encoding="utf-8")
+    padre.write_text(
+        texto.replace(
+            "> - [faena-ai](faena-ai/faena-ai.md)\n", "> - [viejo](viejo/viejo.md)\n"
+        ),
+        encoding="utf-8",
+    )
+    hoja = vault / "ambitos" / "faena" / "faena-dos" / "faena-dos.md"
+    hoja.write_text(
+        hoja.read_text(encoding="utf-8").replace(
+            "## Esta semana",
+            "> [!abstract] En **Faena Dos**:\n> - [x](x/x.md)\n\n## Esta semana",
+        ),
+        encoding="utf-8",
+    )
+
+    assert _tuku(vault, "regenerate", "todo") == EXITO
+    assert "viejo" in _leer(vault, "ambitos", "faena", "faena.md")
+
+    assert _tuku(vault, "regenerate", "scope") == EXITO
+    assert _foto(vault) == sano
+
+    assert _tuku(vault, "regenerate", "scope") == EXITO
+    assert _foto(vault) == sano

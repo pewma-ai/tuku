@@ -72,7 +72,7 @@ Regenera lo derivado del conjunto canónico ([principio 9](../docs/principios.md
 | Tema | Regenera | Desde |
 | --- | --- | --- |
 | `todo` | El callout de cada día de `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md` | `PENDIENTES.md` y el árbol de `ambitos/` |
-| `scope` | La actividad de cada página de ámbito | Los registros de `AHORA.md` |
+| `scope` | La actividad de cada página de ámbito y su callout `En X:` de hijos | Los registros de `AHORA.md` y las carpetas de `ambitos/` |
 | `comandos` | `reglas/comandos.tuku.md` | La ayuda del `tuku` instalado |
 
 - **Un tema toca solo lo suyo.** `scope` lleva a las páginas de ámbito lo escrito a mano en `AHORA.md` y deja `reglas/` como está. El agente modifica `reglas/` solo tras preguntar ([`AGENTS.md`](../template/vanilla/AGENTS.md), Límites).

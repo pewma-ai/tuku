@@ -5,7 +5,8 @@ desde el conjunto canónico devuelve lo mismo byte a byte. Por tema:
 
 - `todo`: la región de cada día de `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md`,
   desde `PENDIENTES.md` y el árbol de `ambitos/`.
-- `scope`: la actividad de cada página de ámbito, desde `AHORA.md`.
+- `scope`: la actividad de cada página de ámbito, desde `AHORA.md`, y su lista
+  de hijos, desde las carpetas de `ambitos/`.
 - `comandos`: `reglas/comandos.tuku.md`, desde la ayuda del `tuku` instalado.
 - Sin tema: los tres.
 
@@ -76,6 +77,8 @@ def regenerar(
             return rechazo
         derivados = propagar(vault, vistas=tema != "scope", paginas=tema != "todo")
         cambiados += [p.relative_to(vault).as_posix() for p in derivados]
+        if tema != "todo":
+            cambiados += [p.relative_to(vault).as_posix() for p in scope.regenerar_hijos(vault)]
 
     if tema in (None, "comandos") and comandos is not None and (vault / "reglas").is_dir():
         ruta = vault / COMANDOS

@@ -219,7 +219,8 @@ def registrar(
             "de `AHORA.md`, el callout con los pendientes de esa fecha, y en "
             "`ambitos/PENDIENTES-AMBITOS.md`, un callout por ámbito con sus filas de "
             "`PENDIENTES.md`. Tema `scope`: la actividad de cada página de ámbito, "
-            "tomada de los registros de `AHORA.md`. Tema `comandos`: "
+            "tomada de los registros de `AHORA.md`, y el callout `En X:` de cada "
+            "ámbito con las carpetas de sus ámbitos hijos, rehecho entero. Tema `comandos`: "
             "`reglas/comandos.tuku.md`, desde esta ayuda. Sin tema, los tres. Solo "
             "escribe lo que cambió; sobre un vault al día no toca nada."
         ),

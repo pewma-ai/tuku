@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import os
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -184,11 +184,42 @@ def keywords(pagina: str) -> list[str]:
     return [k.strip() for k in m.group("lista").split(",") if k.strip()]
 
 
-def crear(vault: Path, name: str, padre: Path | None = None) -> Path:
+def _clave(keyword: str) -> str:
+    """La keyword como la compara el enlazado: guiones y espacios valen lo mismo."""
+    return re.sub(r"[-\s]+", " ", keyword).strip().casefold()
+
+
+def _sumar(previas: list[str], nuevas: Sequence[str]) -> list[str]:
+    """`previas` y, detrás, las `nuevas` que ninguna anterior repite."""
+    salida = list(previas)
+    vistas = {_clave(k) for k in salida}
+    for k in nuevas:
+        k = " ".join(k.split())
+        if k and _clave(k) not in vistas:
+            salida.append(k)
+            vistas.add(_clave(k))
+    return salida
+
+
+def _rechazo_de_keywords(nuevas: Sequence[str]) -> Resultado | None:
+    """Una keyword vive en una lista `[a, b]` de una línea: sin comas ni corchetes."""
+    malas = [k for k in nuevas if re.search(r"[,\[\]\n]", k)]
+    if malas:
+        return Resultado.rechazo(
+            f"la keyword {malas[0]!r} lleva comas o corchetes y no cabe en la lista del "
+            f"frontmatter. Pasa cada palabra por separado."
+        )
+    return None
+
+
+def crear(
+    vault: Path, name: str, padre: Path | None = None, palabras: Sequence[str] = ()
+) -> Path:
     """Crea el ámbito `name` en la carpeta `padre`, o bajo `ambitos/`. Idempotente.
 
     Si ya existe no toca nada: `spec/ambitos.md` no admite dos ámbitos con el
-    mismo nombre, y volver a crearlo no es un error del autor.
+    mismo nombre, y volver a crearlo no es un error del autor. Las `palabras`
+    van en las `keywords` de la página nueva, detrás del nombre.
     """
     valor = normalizar(name)
     directorio = (padre or vault / "ambitos") / valor
@@ -198,7 +229,8 @@ def crear(vault: Path, name: str, padre: Path | None = None) -> Path:
     if not pagina.exists():
         rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", directorio)
         rel = rel.replace(os.sep, "/")
-        base = f"---\ntype: Scope\nkeywords: [{valor}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n"
+        lista = ", ".join(_sumar([valor], palabras))
+        base = f"---\ntype: Scope\nkeywords: [{lista}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n"
         ahora_file = vault / "AHORA.md"
         ahora_texto = ahora_file.read_text(encoding="utf-8") if ahora_file.is_file() else ""
         texto = actualizar_contenido_pagina(
@@ -212,6 +244,143 @@ def crear(vault: Path, name: str, padre: Path | None = None) -> Path:
         propagate.propagar(vault)
 
     return directorio
+
+
+#: El título del callout con los hijos directos, que lleva la página del padre.
+_HIJOS = "> [!abstract] En "
+
+
+def _bloque_de_hijos(lineas: list[str]) -> tuple[int, int] | None:
+    """Dónde está el callout de hijos en las líneas de una página: `[inicio, fin)`."""
+    inicio = next((i for i, x in enumerate(lineas) if x.startswith(_HIJOS)), None)
+    if inicio is None:
+        return None
+    fin = inicio + 1
+    while fin < len(lineas) and lineas[fin].startswith(">"):
+        fin += 1
+    return inicio, fin
+
+
+def _titulo_de_hijos(padre: Path, texto: str) -> str:
+    from tuku import propagate
+
+    return f"{_HIJOS}**{propagate.display_name(padre.name, texto)}**:"
+
+
+def _item_de_hijo(padre: Path, hijo: Path) -> str:
+    href = os.path.relpath(_pagina(hijo), padre).replace(os.sep, "/")
+    return f"> - {link.md(hijo.name, href)}"
+
+
+def _hijos_de(padre: Path) -> list[Path]:
+    """Los ámbitos que cuelgan directo de `padre`, por nombre."""
+    return sorted(h for h in padre.iterdir() if _pagina(h).is_file())
+
+
+def _sin_bloque(lineas: list[str], inicio: int, fin: int) -> None:
+    """Quita el bloque `[inicio, fin)` y la línea en blanco que lo separaba."""
+    antes = inicio - 1 if inicio > 0 and not lineas[inicio - 1].strip() else inicio
+    del lineas[antes:fin]
+
+
+def _con_hijos(padre: Path, texto: str, hijos: list[Path]) -> str:
+    """El texto de la página con el callout de hijos hecho de `hijos`, o sin callout."""
+    lineas = texto.splitlines()
+    bloque = _bloque_de_hijos(lineas)
+    if not hijos:
+        if bloque is not None:
+            _sin_bloque(lineas, *bloque)
+    else:
+        callout = [_titulo_de_hijos(padre, texto), *(_item_de_hijo(padre, h) for h in hijos)]
+        if bloque is not None:
+            lineas[bloque[0] : bloque[1]] = callout
+        else:
+            ancla = next((i for i, x in enumerate(lineas) if x.startswith("![[")), None)
+            if ancla is None:
+                ancla = next(
+                    (i for i, x in enumerate(lineas) if x.startswith("# ")), len(lineas) - 1
+                )
+            nuevo = ["", *callout]
+            if ancla + 1 < len(lineas) and lineas[ancla + 1].strip():
+                nuevo.append("")
+            lineas[ancla + 1 : ancla + 1] = nuevo
+    return "\n".join(lineas) + "\n"
+
+
+def anotar_hijo(padre: Path, hijo: Path) -> None:
+    """Pone a `hijo` en el callout de hijos de la página de `padre`, si la tiene.
+
+    El autor escribe ese callout a mano: esto lo ayuda. Sin callout lo abre bajo la
+    transclusión de pendientes, con todos los hijos que el padre ya tenía. Un hijo
+    que ya figura no se repite.
+    """
+    pagina = _pagina(padre)
+    if not pagina.is_file():
+        return
+    texto = pagina.read_text(encoding="utf-8")
+    lineas = texto.splitlines()
+    bloque = _bloque_de_hijos(lineas)
+    if bloque is None:
+        salida = _con_hijos(padre, texto, _hijos_de(padre))
+    else:
+        if any(x.startswith(f"> - [{hijo.name}](") for x in lineas[bloque[0] : bloque[1]]):
+            return
+        lineas.insert(bloque[1], _item_de_hijo(padre, hijo))
+        salida = "\n".join(lineas) + "\n"
+    pagina.write_text(salida, encoding="utf-8")
+
+
+def quitar_hijo(padre: Path, hijo: str) -> None:
+    """Saca a `hijo` del callout de la página de `padre`; sin hijos el callout se va."""
+    pagina = _pagina(padre)
+    if not pagina.is_file():
+        return
+    lineas = pagina.read_text(encoding="utf-8").splitlines()
+    bloque = _bloque_de_hijos(lineas)
+    if bloque is None:
+        return
+    inicio, fin = bloque
+    resto = [x for x in lineas[inicio + 1 : fin] if not x.startswith(f"> - [{hijo}](")]
+    if len(resto) == fin - inicio - 1:
+        return
+    if any(x.startswith("> -") for x in resto):
+        lineas[inicio:fin] = [lineas[inicio], *resto]
+    else:
+        _sin_bloque(lineas, inicio, fin)
+    pagina.write_text("\n".join(lineas) + "\n", encoding="utf-8")
+
+
+def regenerar_hijos(vault: Path) -> list[Path]:
+    """Recrea el callout de hijos de cada ámbito desde las carpetas. Devuelve lo que cambió.
+
+    Es la forma de repararlo: se rehace entero, sin conservar lo que el autor
+    hubiera puesto a mano en él. Un ámbito sin hijos queda sin callout.
+    """
+    cambiados: list[Path] = []
+    for a in leer(vault):
+        pagina = _pagina(a.directorio)
+        if not pagina.is_file():
+            continue
+        texto = pagina.read_text(encoding="utf-8")
+        salida = _con_hijos(a.directorio, texto, _hijos_de(a.directorio))
+        if salida != texto:
+            pagina.write_text(salida, encoding="utf-8")
+            cambiados.append(pagina)
+    return cambiados
+
+
+def retitular_hijos(directorio: Path) -> None:
+    """Pone al callout de hijos el nombre que tiene ahora el ámbito."""
+    pagina = _pagina(directorio)
+    if not pagina.is_file():
+        return
+    texto = pagina.read_text(encoding="utf-8")
+    lineas = texto.splitlines()
+    bloque = _bloque_de_hijos(lineas)
+    if bloque is None:
+        return
+    lineas[bloque[0]] = _titulo_de_hijos(directorio, texto)
+    pagina.write_text("\n".join(lineas) + "\n", encoding="utf-8")
 
 
 def extraer_actividad_ambito(
@@ -458,6 +627,7 @@ def crear_con_enlazado(
     parent: str | None = None,
     day: date | None = None,
     hour: str | None = None,
+    palabras: Sequence[str] = (),
 ) -> Resultado:
     """Crea el ámbito, enlaza las menciones sueltas que ya había y deja constancia.
 
@@ -476,6 +646,10 @@ def crear_con_enlazado(
 
     Con `parent`, el ámbito va dentro de la carpeta de otro, que debe existir. Si
     el ámbito ya existe en otro lugar se rechaza y se nombra `scope move`.
+
+    Las `palabras` son las `keywords` con que el autor nombra el ámbito sin decir
+    su nombre. Si no vienen, la salida le pide al agente que las pregunte: el
+    agente las lee de la página para saber de qué frente es algo que no lo nombra.
     """
     from datetime import datetime
 
@@ -484,6 +658,8 @@ def crear_con_enlazado(
 
     nombre = normalizar(nombre)
     if (rechazo := _rechazo_de_nombre(nombre)) is not None:
+        return rechazo
+    if (rechazo := _rechazo_de_keywords(palabras)) is not None:
         return rechazo
     if (otro := _choque(vault, nombre)) is not None:
         return Resultado.rechazo(
@@ -519,9 +695,15 @@ def crear_con_enlazado(
         except ValueError as e:
             return Resultado.rechazo(str(e))
 
-    directorio = crear(vault, nombre, existente.parent if existente is not None else padre)
+    directorio = crear(
+        vault, nombre, existente.parent if existente is not None else padre, palabras
+    )
+    if padre is not None:
+        anotar_hijo(padre, directorio)
     menciones = 0
     pagina_path = directorio / f"{nombre}.md"
+    if not nuevo and palabras:
+        return agregar_keywords(vault, nombre, palabras)
     if ahora_path.is_file() and pagina_path.is_file():
         original = ahora_path.read_text(encoding="utf-8")
         texto, menciones = link.backfill(
@@ -537,11 +719,75 @@ def crear_con_enlazado(
             ahora_path.write_text(texto, encoding="utf-8")
         actualizar_pagina(vault, nombre)
 
-    if menciones > 0:
-        return Resultado.hecho(
-            f"ámbito creado en {directorio} ({menciones} mención(es) enlazada(s))."
+    enlazadas = f" ({menciones} mención(es) enlazada(s))" if menciones > 0 else ""
+    mensaje = f"ámbito creado en {directorio}{enlazadas}."
+    if nuevo and not palabras:
+        mensaje += "\n" + _pedir_keywords(nombre)
+    return Resultado.hecho(mensaje)
+
+
+def _pedir_keywords(nombre: str) -> str:
+    """Lo que la salida de `scope create` le pide al agente que haga con el autor."""
+    return (
+        f"Pregunta al autor con qué palabras nombra {nombre!r} sin decir {nombre!r}: "
+        f"siglas, sistemas, personas, proyectos (para `paranal`: vlti, gravity, LCU, TCS, "
+        f"VLT). No las inventes. Regístralas con `tuku scope keywords {nombre} PALABRA...`: "
+        f"quedan en el frontmatter de la página y cada mención suelta se enlaza al ámbito."
+    )
+
+
+def agregar_keywords(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
+    """Suma `nuevas` a las `keywords` de la página del ámbito y enlaza sus menciones.
+
+    Las menciones sueltas de `AHORA.md` pasan a link, como al crear el ámbito.
+    Idempotente: lo que ya estaba (sin distinguir mayúsculas, guiones ni espacios)
+    no se repite, y si nada es nuevo no escribe nada.
+    """
+    nombre = canonico(vault, nombre)
+    if (rechazo := rechazo_si_no_existe(vault, nombre)) is not None:
+        return rechazo
+    if (rechazo := _rechazo_de_keywords(nuevas)) is not None:
+        return rechazo
+    if not [k for k in nuevas if k.strip()]:
+        return Resultado.rechazo(
+            f"faltan las palabras. Uso: `tuku scope keywords {nombre} PALABRA...`."
         )
-    return Resultado.hecho(f"ámbito creado en {directorio}.")
+    pagina = _pagina(carpeta(vault, nombre))
+    texto = pagina.read_text(encoding="utf-8")
+    if _KEYWORDS.search(texto) is None:
+        return Resultado.rechazo(
+            f"la página de {nombre!r} no declara `keywords:` en su frontmatter. "
+            f"Agrega la línea `keywords: [{nombre}]` a mano y vuelve a correrlo."
+        )
+    previas = keywords(texto)
+    todas = _sumar(previas, nuevas)
+    if todas == previas:
+        return Resultado.hecho(f"{nombre!r} ya tenía esas keywords: {', '.join(previas)}.")
+    pagina.write_text(
+        _KEYWORDS.sub(lambda _m: f"keywords: [{', '.join(todas)}]", texto, count=1),
+        encoding="utf-8",
+    )
+    menciones = 0
+    ahora_path = vault / "AHORA.md"
+    if ahora_path.is_file():
+        original = ahora_path.read_text(encoding="utf-8")
+        enlazado, menciones = link.backfill(
+            original, scope=nombre, keywords=todas, rutas=rutas(vault)
+        )
+        if enlazado != original:
+            ahora_path.write_text(enlazado, encoding="utf-8")
+        actualizar_pagina(vault, nombre)
+    enlazadas = f" ({menciones} mención(es) enlazada(s))" if menciones else ""
+    return Resultado.hecho(f"keywords de {nombre!r}: {', '.join(todas)}{enlazadas}.")
+
+
+def _renombrar_keyword(pagina: str, viejo: str, nuevo: str) -> str:
+    """La página con `viejo` cambiado por `nuevo` en su lista de `keywords`."""
+    lista = keywords(pagina)
+    if viejo not in lista:
+        return pagina
+    lista = _sumar([], [nuevo if k == viejo else k for k in lista])
+    return _KEYWORDS.sub(lambda _m: f"keywords: [{', '.join(lista)}]", pagina, count=1)
 
 
 def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
@@ -592,7 +838,8 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
         salida, n = rename.renombrar_enlaces(texto, viejo, nuevo)
         enlaces += n
         salida, _ = rename.renombrar_ancla(salida, viejo, nuevo)
-        salida = salida.replace(f"keywords: [{viejo}]", f"keywords: [{nuevo}]")
+        if ruta == destino / f"{nuevo}.md":
+            salida = _renombrar_keyword(salida, viejo, nuevo)
         if ruta.parent == destino:
             salida = salida.replace(f"de {viejo}", f"de {nuevo}")
             if ruta.name == f"{nuevo}.md":
@@ -604,6 +851,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     # y quien sabe componerlo es la propagación: se regenera en vez de parchear.
     if (vault / "PENDIENTES.md").is_file():
         propagate.propagar(vault)
+    retitular_hijos(destino)
     actualizar_pagina(vault, nuevo)
 
     detalle = f" ({enlaces} enlace(s) actualizado(s))" if enlaces else ""
@@ -680,6 +928,10 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
             (vault / despues).write_text(salida, encoding="utf-8")
             cambiados += 1
 
+    if origen.parent != vault / "ambitos":
+        quitar_hijo(origen.parent, nombre)
+    if padre != vault / "ambitos":
+        anotar_hijo(padre, destino)
     if pendientes.is_file():
         propagate.propagar(vault)
     detalle = f" ({cambiados} archivo(s) con links actualizados)" if cambiados else ""
