@@ -2,7 +2,7 @@
 
 > **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/despacho.md`](../../spec/despacho.md), [`spec/agente.md`](../../spec/agente.md), [`spec/pendientes.md`](../../spec/pendientes.md)
 
-Damián cuenta su miércoles en nueve turnos: consulta, aclara, piensa en voz alta, se interrumpe, descarta una idea y ratifica al final. El vault queda como lo deja el dictado directo de lo ratificado.
+Damián cuenta su miércoles en diez turnos: consulta, aclara, piensa en voz alta, se interrumpe, descarta una idea, ratifica y, al final, reordena sus frentes. El vault queda como lo deja el dictado directo de lo ratificado.
 
 Los turnos declaran `TUKU_NOW="2026-08-12 21:00"` en el fence ```autor```: Damián y el `tuku` del agente usan esa fecha como hoy.
 
@@ -25,7 +25,8 @@ Cuando Damián conversa con el agente de TUKU según este plan
 6. Vuelves a Carla y preguntas si el viernes será una buena idea. Cuentas que a las tres de la tarde le presentaste a Fabina el marco de casos de uso con Azure LLM.
 7. Preguntas si Casa Matriz amerita un ámbito propio.
 8. Respondes que el tema queda en transformación digital.
-9. Ratificas: el viernes hablas con Carla Fuentes por las presentaciones resumen. Cierras la sesión.
+9. Ratificas: el viernes hablas con Carla Fuentes por las presentaciones resumen.
+10. Antes de irte te das cuenta de que faena es un frente aparte de lo personal. Pides que lo abra y que ponga adentro faena-ai, la tesis de Javier Castro y transformación digital.
 ```
 Entonces cada turno deja el delta de esta tabla
 
@@ -40,11 +41,12 @@ Entonces cada turno deja el delta de esta tabla
 | 7 | Pregunta por un ámbito | vacío |
 | 8 | Deja el tema en transformación digital | vacío |
 | 9 | Ratifica | un pendiente con vencimiento el viernes 14 |
+| 10 | Pide abrir `faena` y poner adentro sus tres frentes | `scope create faena` y tres `scope move`; los links de los registros ya escritos siguen resolviendo |
 
 Y el vault final coincide con la tabla de verdad
-Y `ambitos/` conserva las cinco carpetas del vault de partida
+Y `ambitos/` queda con `faena`, `personal` y `tuku`, y `faena` con `faena-ai`, `tesis-javier-castro` y `transformacion-digital`
 Y cada cambio del vault tiene su comando `tuku` en la traza
-Y `notas/conversation-log.md` contiene los nueve turnos
+Y `notas/conversation-log.md` contiene los diez turnos
 Y `tuku doctor` confirma la coherencia total del vault
 ```bash
 tuku doctor --vault mi-vault
@@ -63,8 +65,9 @@ Lo que el dictado directo agrega al vault de partida, todo bajo el miércoles 12
 | 11:45 | `transformacion-digital` | ninguna |
 | 15:00 | `faena-ai` | `(Hecho)` |
 | la del turno | `tesis-javier-castro` | `**pendiente**`, vence 2026-08-14 |
+| la del turno | `faena` | ninguna (la constancia de ámbito abierto) |
 
-`PENDIENTES.md` queda con tres filas: la de `tuku`, la de ODIP en `transformacion-digital` y la de Carla Fuentes en `tesis-javier-castro`, con fecha 2026-08-14.
+`PENDIENTES.md` queda con tres filas: la de `tuku`, la de ODIP en `transformacion-digital` y la de Carla Fuentes en `tesis-javier-castro`, con fecha 2026-08-14. Los registros de `tesis-javier-castro`, `transformacion-digital` y `faena-ai` enlazan su página en `ambitos/faena/<nombre>/<nombre>.md`.
 
 ## Qué se mira a mano
 
@@ -73,3 +76,4 @@ La conversación completa está en `playground/004-01-el-dia-conversado/damian-c
 - Las respuestas de los turnos 1, 2 y 7 son breves y contestan lo preguntado.
 - La pregunta del turno 2 nombra los dos pendientes reales de Fabina.
 - En los turnos 4 y 6 el agente delibera con Damián y espera su decisión.
+- En el turno 10 el agente abre `faena` y mueve los tres frentes sin volver a preguntar lo que Damián ya pidió.
