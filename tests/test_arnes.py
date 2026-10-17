@@ -15,6 +15,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
 import agente
+import gherkin
 import vault
 
 #: Sembrar el vault con el CLI del checkout, sin depender de que TUKU esté
@@ -121,6 +123,102 @@ def test_el_agente_configurado_escribe_de_verdad() -> None:
         assert "09:12" in (v / "AHORA.md").read_text(encoding="utf-8"), (
             f"el agente ejecutó {turno.comandos} y el vault no cambió: el arnés no persiste"
         )
+
+
+def test_el_modelo_barato_de_agy_es_flash_en_esfuerzo_bajo(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    lista = (
+        "Fetching available models...\n"
+        "gemini-4-argon-medium\tGemini 4 Argon (Medium)\n"
+        "gemini-4-argon-low\tGemini 4 Argon (Low)\n"
+        "gemini-3.8-flash-high\tGemini 3.8 Flash (High)\n"
+        "gemini-3.8-flash-low\tGemini 3.8 Flash (Low)\n"
+        "claude-opus-5-5-low\tClaude Opus 5.5 (Low)\n"
+        "gpt-oss-120b-medium\tGPT-OSS 120B (Medium)\n"
+    )
+    monkeypatch.setattr(agente, "_MODELOS", {})
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout=lista, stderr=""),
+    )
+    assert agente.modelo_barato("agy", "agy") == "gemini-3.8-flash-low"
+
+
+@pytest.mark.parametrize(
+    ("titulo", "prepara"),
+    [("preparar el ambiente del epic", True), ("el vault de partida", False)],
+)
+def test_el_00_solo_prepara_el_epic_si_su_escenario_lo_dice(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, titulo: str, prepara: bool
+) -> None:
+    (tmp_path / "999-00-prueba.md").write_text(
+        f"# Epic 999\n\n## Escenario: {titulo}\n\nCuando se corre\n```bash\ntrue\n```\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(gherkin, "ESCENARIOS", tmp_path)
+    assert (gherkin._escenario_de_preparacion("999") is not None) is prepara
+
+
+def _agy() -> agente.Arnes:
+    return agente.Arnes(nombre="agy", ejecutable="agy", modelo="m")
+
+
+def test_un_turno_sin_sesion_no_pide_json_ni_conversacion() -> None:
+    argv = _agy().argv("hola")
+    assert "--output-format" not in argv
+    assert "--conversation" not in argv
+
+
+def test_el_primer_turno_de_una_sesion_pide_json() -> None:
+    argv = _agy().argv("hola", agente.Sesion())
+    assert argv[argv.index("--output-format") + 1] == "json"
+    assert "--conversation" not in argv
+
+
+def test_los_turnos_siguientes_retoman_la_conversacion_por_id() -> None:
+    argv = _agy().argv("hola", agente.Sesion("abc"))
+    assert argv[argv.index("--conversation") + 1] == "abc"
+
+
+def test_un_arnes_que_no_sabe_continuar_lo_dice() -> None:
+    hermes = agente.Arnes(nombre="hermes", ejecutable="hermes", modelo="m")
+    with pytest.raises(agente.ArnesNoDisponible, match="hermes"):
+        hermes.argv("hola", agente.Sesion())
+
+
+def test_la_respuesta_json_deja_el_id_en_la_sesion() -> None:
+    sesion = agente.Sesion()
+    texto = agente.leer_sesion('{"conversation_id": "abc", "response": "ok\\n"}', sesion)
+    assert (texto, sesion.id) == ("ok\n", "abc")
+
+
+def test_una_salida_que_no_es_json_se_devuelve_tal_cual() -> None:
+    sesion = agente.Sesion()
+    assert agente.leer_sesion("hola", sesion) == "hola"
+    assert sesion.id is None
+
+
+@pytest.mark.agentic
+def test_la_sesion_continua_entre_turnos() -> None:
+    """El segundo turno retoma la conversación del primero, con el mismo id."""
+    motivo = agente.motivo_no_disponible()
+    if motivo is not None:
+        pytest.skip(motivo)
+    palabra = uuid.uuid4().hex[:8]
+    with tempfile.TemporaryDirectory(dir=vault.BANCO, prefix="arnes-") as caja:
+        v = Path(caja) / "mi-vault"
+        _sembrar(v)
+        sesion = agente.Sesion()
+        agente.turno(v, f"La palabra clave es {palabra}. Responde solo: ok", sesion=sesion)
+        primero = sesion.id
+        assert primero, "el primer turno no devolvió el id de la conversación"
+        segundo = agente.turno(
+            v, "¿Cuál era la palabra clave? Responde solo la palabra.", sesion=sesion
+        )
+        assert sesion.id == primero, "el segundo turno abrió otra conversación"
+        assert palabra in segundo.stdout
 
 
 def test_la_ayuda_abreviada_no_cuenta_como_traduccion() -> None:

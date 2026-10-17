@@ -12,8 +12,9 @@ Dos piezas:
   real. El agente no coopera ni sabe que está siendo observado, y lo que queda es
   una lista de comandos que se relee, se compara y se vuelve a correr.
 
-El turno es uno solo. Sostener una conversación de varios turnos es el epic 004
-([`../escenarios/003-00-el-dia-uno-dictado.md`](../escenarios/003-00-el-dia-uno-dictado.md)).
+Cada llamada es un turno. Una `Sesion` encadena varios sobre la misma
+conversación del arnés, que es lo que necesita el epic 004
+([`../escenarios/004-00-la-conversacion.md`](../escenarios/004-00-la-conversacion.md)).
 """
 
 from __future__ import annotations
@@ -34,7 +35,9 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 #: los argumentos de `modelo` se omiten enteros si no hay modelo configurado.
 #:
 #: Verificado contra `agy` real: `agy -p "..."` deja la respuesta en stdout y sale
-#: 0. Su `--conversation` es lo que sostiene una sesión, y por eso no aparece acá.
+#: 0. Su `--conversation <id>` retoma una conversación (verificado: el segundo
+#: turno recuerda el primero y conserva el id), y `--output-format json` entrega
+#: el `conversation_id` y la respuesta en `response`. Eso es `continuar` y `json`.
 #:
 #: **`aislar` no es opcional y no es cosmético.** Un arnés moderno resuelve un
 #: "proyecto" a partir de la máquina y no del `cwd`, así que un turno lanzado
@@ -133,6 +136,8 @@ ARNESES: dict[str, dict[str, list[str]]] = {
         "modelo": ["--model", "{modelo}"],
         "esfuerzo": ["--effort", "{esfuerzo}"],
         "listar": ["models"],
+        "continuar": ["--conversation", "{id}"],
+        "json": ["--output-format", "json"],
     },
     "hermes": {
         "aislar": ["-p", "{perfil}", "chat", "--oneshot", "--quiet", "--yolo"],
@@ -268,6 +273,35 @@ class ArnesNoDisponible(RuntimeError):
     """No hay con qué correr el turno. El escenario se salta, no falla."""
 
 
+@dataclass
+class Sesion:
+    """La conversación de un arnés entre turnos.
+
+    Nace sin `id`; el primer turno lo recibe del arnés y los siguientes retoman
+    esa conversación por él.
+    """
+
+    id: str | None = None
+
+
+def leer_sesion(stdout: str, sesion: Sesion) -> str:
+    """El texto de la respuesta, y el id de la conversación guardado en `sesion`.
+
+    Una salida que no es el JSON esperado vuelve tal cual y deja la sesión como
+    estaba: el turno falla por lo que dijo el agente, no por el formato.
+    """
+    try:
+        dato = json.loads(stdout)
+    except json.JSONDecodeError:
+        return stdout
+    if not isinstance(dato, dict):
+        return stdout
+    if isinstance(dato.get("conversation_id"), str):
+        sesion.id = dato["conversation_id"]
+    respuesta = dato.get("response")
+    return respuesta if isinstance(respuesta, str) else stdout
+
+
 @dataclass(frozen=True)
 class Arnes:
     """Qué se ejecuta y cómo se le entrega el turno."""
@@ -278,9 +312,15 @@ class Arnes:
     perfil: str = PERFIL
     esfuerzo: str = ESFUERZO
 
-    def argv(self, prompt: str) -> list[str]:
+    def argv(self, prompt: str, sesion: Sesion | None = None) -> list[str]:
         plantilla = ARNESES[self.nombre]
+        if sesion is not None and "continuar" not in plantilla:
+            raise ArnesNoDisponible(f"{self.nombre} no sabe retomar una conversación")
         partes = [self.ejecutable, *(a.format(perfil=self.perfil) for a in plantilla["aislar"])]
+        if sesion is not None:
+            partes += plantilla["json"]
+            if sesion.id:
+                partes += [a.format(id=sesion.id) for a in plantilla["continuar"]]
         modelo = self.modelo or modelo_barato(self.nombre, self.ejecutable)
         if modelo:
             partes += [a.format(modelo=modelo) for a in plantilla["modelo"]]
@@ -406,7 +446,8 @@ def modelo_barato(nombre: str, ejecutable: str) -> str | None:
             [ejecutable, *plantilla["listar"]], capture_output=True, text=True, timeout=60
         )
         ids = [x.split()[0] for x in salida.stdout.splitlines() if x.split()]
-        baratos = [x for x in ids if any(b in x.lower() for b in BARATOS)]
+        # Por segmento del identificador: `mini` está dentro de `gemini`.
+        baratos = [x for x in ids if any(b in x.lower().split("-") for b in BARATOS)]
         # Algunos arneses codifican el esfuerzo en el propio identificador
         # (`gemini-3.8-flash-low`), y ahí la lista viene de mayor a menor: sin
         # esta preferencia se elige el más caro de la familia más barata.
@@ -572,7 +613,11 @@ def _conversacion(arnes: Arnes, vault: Path, entorno: dict[str, str]) -> str:
 
 
 def turno(
-    vault: Path, prompt: str, timeout: int | None = None, ahora: str | None = None
+    vault: Path,
+    prompt: str,
+    timeout: int | None = None,
+    ahora: str | None = None,
+    sesion: Sesion | None = None,
 ) -> Turno:
     """Un turno del agente dentro de `vault`, con la traza de lo que ejecutó.
 
@@ -583,6 +628,9 @@ def turno(
     `ahora` (`AAAA-MM-DD HH:MM`) es la fecha simulada: el shim la aplica a cada
     `tuku` que el agente ejecuta y la anuncia por `stderr`, así el agente sabe
     que ese es el día de hoy.
+
+    Con `sesion`, el turno retoma la conversación del anterior y deja en ella el
+    id del arnés.
     """
     motivo = motivo_no_disponible()
     if motivo is not None:
@@ -606,7 +654,7 @@ def turno(
         espera = timeout or int(os.environ.get("TUKU_AGENTE_TIMEOUT", TIMEOUT))
         try:
             p = subprocess.run(
-                arnes.argv(prompt),
+                arnes.argv(prompt, sesion),
                 cwd=vault,
                 env=entorno,
                 capture_output=True,
@@ -622,10 +670,11 @@ def turno(
                 stderr=f"el turno pasó de {espera}s sin terminar",
                 traza=_leer_traza(traza),
             )
+        stdout = leer_sesion(p.stdout, sesion) if sesion is not None else p.stdout
         return Turno(
             prompt=prompt,
             codigo=p.returncode,
-            stdout=p.stdout,
+            stdout=stdout,
             stderr=p.stderr,
             traza=_leer_traza(traza),
             conversacion=_conversacion(arnes, vault, entorno),

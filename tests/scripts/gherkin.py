@@ -310,18 +310,26 @@ _CORRIDAS: dict[tuple[str, str], Corrida] = {}
 _FALLIDAS: dict[tuple[str, str], Exception] = {}
 
 
+#: El título con que un `XXX-00` declara su escenario de preparación.
+TITULO_PREPARACION = "preparar el ambiente del epic"
+
+
 def epic_de(slug: str) -> str:
     """Los tres dígitos con los que abre el nombre de un escenario."""
     return slug.split("-", 1)[0]
 
 
 def _escenario_de_preparacion(epic: str) -> Escenario | None:
-    """El `## Escenario:` del `XXX-00`, que limpia el playground del epic."""
+    """El `## Escenario: preparar el ambiente del epic` del `XXX-00`, si lo tiene.
+
+    Los demás escenarios de un `XXX-00` son escenarios como cualquiera.
+    """
     candidatos = sorted(ESCENARIOS.glob(f"{epic}-00-*.md"))
     if not candidatos:
         return None
-    escenarios = leer_escenarios(candidatos[0].stem)
-    return escenarios[0] if escenarios else None
+    return next(
+        (e for e in leer_escenarios(candidatos[0].stem) if e.titulo == TITULO_PREPARACION), None
+    )
 
 
 def _podar(epic: str) -> None:
