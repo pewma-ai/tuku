@@ -65,6 +65,21 @@ De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa
 - **La fecha de modificación se conserva cuando el cambio es solo de forma.** Convertir `[[x]]` en `[x](ruta)` no es una edición del autor, y esa fecha es la que Obsidian y el sistema de archivos usan para ordenar lo reciente.
 - **Cuándo entra un tema nuevo.** Un tema existe cuando tiene un `fix` que hacer. Las demás revisiones de `tuku doctor` salen sin tema y su corrección sigue siendo el comando original o una tarea del autor. Un tema nuevo entra cuando un epic encuentra un caso real que lo pida. Hoy: `link` y `todo`.
 
+## `tuku regenerate [TEMA]`
+
+Regenera lo derivado del conjunto canónico ([principio 9](../docs/principios.md#L79)). Cada tema regenera una derivación; sin tema, las tres.
+
+| Tema | Regenera | Desde |
+| --- | --- | --- |
+| `todo` | El callout de cada día de `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md` | `PENDIENTES.md` y el árbol de `ambitos/` |
+| `scope` | La actividad de cada página de ámbito | Los registros de `AHORA.md` |
+| `comandos` | `reglas/comandos.tuku.md` | La ayuda del `tuku` instalado |
+
+- **Un tema toca solo lo suyo.** `scope` lleva a las páginas de ámbito lo escrito a mano en `AHORA.md` y deja `reglas/` como está. El agente modifica `reglas/` solo tras preguntar ([`AGENTS.md`](../template/vanilla/AGENTS.md), Límites).
+- **Valida antes de escribir.** `todo` y `scope` rechazan sin escribir si `PENDIENTES.md` o `ambitos/` están rotos. `comandos` depende solo de la versión instalada.
+- **Es idempotente.** Escribe lo que cambió; sobre un vault al día informa y deja todo igual.
+- **Un tema desconocido** es error de uso (código 2).
+
 ## La ayuda explica para qué existe cada comando
 
 Todo sustantivo y todo verbo lleva en `tuku … -h`, antes de las opciones, un párrafo en español (la `description` de argparse). En un comando invocable ese párrafo dice qué archivos del vault lee o escribe y cómo, con precisión suficiente para hacerlo con un editor: es su equivalente manual, el que pide el principio 1, y no va en un campo aparte. Un test recorre el árbol de argparse y exige que ninguno quede sin descripción y que todo comando invocable nombre archivos del vault.

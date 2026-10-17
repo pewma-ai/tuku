@@ -236,37 +236,40 @@ def documento_del_vault(vault: Path, pendientes: str) -> str:
     )
 
 
-def propagar(vault: Path, *, paginas: bool = True) -> list[Path]:
-    """Regenera las dos vistas del vault. Devuelve los archivos que cambiaron.
+def propagar(vault: Path, *, vistas: bool = True, paginas: bool = True) -> list[Path]:
+    """Regenera lo derivado del vault. Devuelve los archivos que cambiaron.
 
     Escribe solo lo que difiere: sobre un vault ya cuadrado no toca ningún
-    archivo, y la lista vuelve vacía. Con `paginas`, regenera además la
-    actividad de cada página de ámbito, que se deriva de `AHORA.md`.
+    archivo, y la lista vuelve vacía. Con `vistas`, las dos vistas de
+    `PENDIENTES.md`. Con `paginas`, la actividad de cada página de ámbito, que
+    se deriva de `AHORA.md`.
     """
     from tuku.config import archivo_vault
 
-    pendientes = archivo_vault(vault, "PENDIENTES.md").read_text(encoding="utf-8")
-    cambiados = []
+    cambiados: list[Path] = []
 
-    ruta_ahora = archivo_vault(vault, "AHORA.md")
-    texto = propagar_ahora(
-        ruta_ahora.read_text(encoding="utf-8"), pendientes, scope.rutas(vault)
-    )
-    if texto != ruta_ahora.read_text(encoding="utf-8"):
-        ruta_ahora.write_text(texto, encoding="utf-8")
-        cambiados.append(ruta_ahora)
+    if vistas:
+        pendientes = archivo_vault(vault, "PENDIENTES.md").read_text(encoding="utf-8")
+        ruta_ahora = archivo_vault(vault, "AHORA.md")
+        texto = propagar_ahora(
+            ruta_ahora.read_text(encoding="utf-8"), pendientes, scope.rutas(vault)
+        )
+        if texto != ruta_ahora.read_text(encoding="utf-8"):
+            ruta_ahora.write_text(texto, encoding="utf-8")
+            cambiados.append(ruta_ahora)
 
     for a in scope.leer(vault) if paginas else []:
         pag_mod = scope.actualizar_pagina(vault, a.nombre)
         if pag_mod and pag_mod not in cambiados:
             cambiados.append(pag_mod)
 
-    ruta_ambitos = vault / ARCHIVO_AMBITOS
-    documento = documento_del_vault(vault, pendientes)
-    previo = ruta_ambitos.read_text(encoding="utf-8") if ruta_ambitos.is_file() else None
-    if documento != previo:
-        ruta_ambitos.parent.mkdir(parents=True, exist_ok=True)
-        ruta_ambitos.write_text(documento, encoding="utf-8")
-        cambiados.append(ruta_ambitos)
+    if vistas:
+        ruta_ambitos = vault / ARCHIVO_AMBITOS
+        documento = documento_del_vault(vault, pendientes)
+        previo = ruta_ambitos.read_text(encoding="utf-8") if ruta_ambitos.is_file() else None
+        if documento != previo:
+            ruta_ambitos.parent.mkdir(parents=True, exist_ok=True)
+            ruta_ambitos.write_text(documento, encoding="utf-8")
+            cambiados.append(ruta_ambitos)
 
     return cambiados

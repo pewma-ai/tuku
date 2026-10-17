@@ -5,11 +5,12 @@ desde el conjunto canónico devuelve lo mismo byte a byte. Por tema:
 
 - `todo`: la región de cada día de `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md`,
   desde `PENDIENTES.md` y el árbol de `ambitos/`.
-- Sin tema: lo de `todo`, la actividad de cada página de ámbito (desde
-  `AHORA.md`) y `reglas/comandos.tuku.md` (desde la ayuda del `tuku` instalado).
+- `scope`: la actividad de cada página de ámbito, desde `AHORA.md`.
+- `comandos`: `reglas/comandos.tuku.md`, desde la ayuda del `tuku` instalado.
+- Sin tema: los tres.
 
-Valida el canónico antes de escribir: con `PENDIENTES.md` o `ambitos/` rotos
-rechaza sin tocar nada.
+`todo` y `scope` validan el canónico antes de escribir: con `PENDIENTES.md` o
+`ambitos/` rotos rechazan sin tocar nada. `comandos` no depende del canónico.
 """
 
 from __future__ import annotations
@@ -22,7 +23,7 @@ from tuku.resultado import Resultado
 from tuku.todo import SinTabla
 
 #: Los temas que se regeneran por separado.
-TEMAS = ("todo",)
+TEMAS = ("todo", "scope", "comandos")
 
 COMANDOS = Path("reglas") / "comandos.tuku.md"
 
@@ -68,13 +69,15 @@ def regenerar(
     """
     from tuku.propagate import propagar
 
-    if (rechazo := _rechazo_del_canonico(vault)) is not None:
-        return rechazo
+    cambiados: list[str] = []
 
-    derivados = propagar(vault, paginas=tema is None)
-    cambiados = [p.relative_to(vault).as_posix() for p in derivados]
+    if tema != "comandos":
+        if (rechazo := _rechazo_del_canonico(vault)) is not None:
+            return rechazo
+        derivados = propagar(vault, vistas=tema != "scope", paginas=tema != "todo")
+        cambiados += [p.relative_to(vault).as_posix() for p in derivados]
 
-    if tema is None and comandos is not None and (vault / "reglas").is_dir():
+    if tema in (None, "comandos") and comandos is not None and (vault / "reglas").is_dir():
         ruta = vault / COMANDOS
         if not ruta.is_file() or ruta.read_text(encoding="utf-8") != comandos:
             ruta.write_text(comandos, encoding="utf-8")

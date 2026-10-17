@@ -218,8 +218,9 @@ def registrar(
             "Reescribe lo que el vault deriva del canónico. Tema `todo`: bajo cada día "
             "de `AHORA.md`, el callout con los pendientes de esa fecha, y en "
             "`ambitos/PENDIENTES-AMBITOS.md`, un callout por ámbito con sus filas de "
-            "`PENDIENTES.md`. Sin tema, además la actividad de cada página de ámbito, "
-            "tomada de `AHORA.md`, y `reglas/comandos.tuku.md`, desde esta ayuda. Solo "
+            "`PENDIENTES.md`. Tema `scope`: la actividad de cada página de ámbito, "
+            "tomada de los registros de `AHORA.md`. Tema `comandos`: "
+            "`reglas/comandos.tuku.md`, desde esta ayuda. Sin tema, los tres. Solo "
             "escribe lo que cambió; sobre un vault al día no toca nada."
         ),
     )
@@ -228,7 +229,7 @@ def registrar(
         nargs="?",
         choices=TEMAS_REGENERATE,
         default=None,
-        help="regenerar solo este tema; sin tema, todo",
+        help="regenerar solo este tema; sin tema, los tres",
     )
     Opciones(regenerate_p).vault("vault a regenerar")
 
