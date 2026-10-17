@@ -22,7 +22,7 @@ El autor conversa en vez de dictar: consulta, duda, cambia de rumbo, atiende un 
 Cada escenario copia el vault de partida y corre por su cuenta. Ninguno hereda del anterior.
 
 - [`004-01-el-dia-conversado.md`](004-01-el-dia-conversado.md): camino feliz. Consulta, pregunta del agente, hechos aclarados, deliberación, imprevisto, propuesta descartada y ratificación.
-- `004-02` Pensar en voz alta sin ratificar nunca: el delta es vacío durante toda la sesión.
+- [`004-02-pensar-en-voz-alta.md`](004-02-pensar-en-voz-alta.md): pensar en voz alta sin ratificar nunca. El delta es vacío durante toda la sesión.
 - `004-03` Ratificar tras tres giros: el vault queda como el dictado del último acuerdo.
 - `004-04` Cerrar lo que nunca se abrió: el hecho se registra sin pregunta y sin pendiente inventado.
 - `004-05` La pregunta que la respuesta no resuelve: ningún pendiente se cierra mientras la ambigüedad persiste.
