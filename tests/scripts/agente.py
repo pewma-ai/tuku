@@ -219,21 +219,27 @@ def _sujeto(argv: list[str]) -> tuple[str, ...]:
     return verbo + posicionales + ubicacion
 
 
-#: Los comandos que tocan el vault. Los demás (`lint`, `doctor`, `vocab show`,
-#: y cualquiera con `--help`) leen, y un agente que los corre antes de escribir
-#: hace lo correcto: mira la ayuda para no inventarse una opción, y se verifica
-#: al terminar. La traducción de un dictado es la secuencia de los que escriben.
-ESCRIBEN = (
-    ("init",),
-    ("entry", "add"),
-    ("todo", "open"),
-    ("todo", "close"),
-    ("regenerate",),
-    ("cycle", "open"),
-    ("scope", "create"),
-    ("note", "create"),
-    ("fix",),
-)
+#: Los comandos que solo leen: `doctor`, `vocab`, `style` y todo `lint`. Cualquier
+#: otro toca el vault, así que un comando nuevo cuenta como escritura sin
+#: registrarlo acá. Un agente que corre un `--help` antes de escribir, o un
+#: `tuku doctor` al terminar, hace lo correcto, y tampoco entra en la
+#: traducción de un dictado: esa es la secuencia de los que escriben.
+LEEN = ("doctor", "vocab", "style")
+
+#: Los comandos con subcomando: su verbo son dos palabras (`entry add`).
+GRUPOS = ("cycle", "entry", "todo", "scope", "note")
+
+
+def escribe(argv: list[str]) -> bool:
+    """`argv` toca el vault: no es ayuda, ni un comando de lectura, ni un `lint`."""
+    if not argv or es_ayuda(argv):
+        return False
+    return argv[0] not in LEEN and argv[1:2] != ["lint"]
+
+
+def verbo(argv: list[str]) -> str:
+    """El comando sin sus argumentos: `scope move`, o `regenerate`."""
+    return " ".join(argv[:2] if argv[0] in GRUPOS else argv[:1])
 
 
 def es_ayuda(argv: list[str]) -> bool:
@@ -373,15 +379,7 @@ class Turno:
         Deja fuera lo que solo lee. Un `tuku entry add --help` antes de usarlo, o
         un `tuku doctor` al terminar, no son parte de la traducción.
         """
-        secuencia: list[str] = []
-        for argv in self.traza:
-            if es_ayuda(argv):
-                continue
-            for verbo in ESCRIBEN:
-                if tuple(argv[: len(verbo)]) == verbo:
-                    secuencia.append(" ".join(verbo))
-                    break
-        return secuencia
+        return [verbo(argv) for argv in self.traza if escribe(argv)]
 
     @property
     def reintentos(self) -> list[str]:

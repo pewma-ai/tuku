@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
@@ -10,7 +11,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 import agente
 import conversar
 
+from tuku import init
 from tuku.cli import EXITO, main
+
+RAIZ_REPO = Path(__file__).resolve().parent.parent
 
 
 def _turno(traza: list[list[str]], stdout: str = "listo") -> agente.Turno:
@@ -83,8 +87,7 @@ def test_el_log_lista_comandos_y_delta_cuando_los_hay() -> None:
 
 
 def test_el_log_es_una_nota_que_el_doctor_acepta(tmp_path: Path) -> None:
-    v = tmp_path / "mi-vault"
-    assert main(["init", str(v), "--at", "2026-08-11"]) == EXITO
+    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
     estado = {"ahora": "2026-08-12 21:00", "modelo": "m", "turnos": []}
     (v / conversar.LOG).write_text(
         conversar.renderizar(estado, "Conversación"), encoding="utf-8"

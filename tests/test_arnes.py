@@ -225,3 +225,22 @@ def test_la_ayuda_abreviada_no_cuenta_como_traduccion() -> None:
     traza = [["note", "create", "--h"], ["note", "create", "x"], ["todo", "open", "--help"]]
     turno = agente.Turno(prompt="", codigo=0, stdout="", stderr="", traza=traza)
     assert turno.traduccion == ["note create"]
+
+
+def test_la_traduccion_cuenta_todo_lo_que_no_es_lectura() -> None:
+    traza = [
+        ["doctor"],
+        ["scope", "lint"],
+        ["vocab", "show"],
+        ["scope", "create", "faena"],
+        ["scope", "move", "faena-ai", "--parent", "faena"],
+        ["entry", "rename", "--body", "x"],
+        ["regenerate", "todo"],
+    ]
+    turno = agente.Turno(prompt="", codigo=0, stdout="", stderr="", traza=traza)
+    assert turno.traduccion == [
+        "scope create",
+        "scope move",
+        "entry rename",
+        "regenerate",
+    ]

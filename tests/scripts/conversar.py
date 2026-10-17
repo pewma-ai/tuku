@@ -44,12 +44,7 @@ def _cargar(v: Path) -> dict[str, Any]:
 
 def resumir(turno: agente.Turno, delta: dict[str, str]) -> dict[str, Any]:
     """Lo que el log guarda de un turno: qué respondió, qué escribió y qué cambió."""
-    escriben = [
-        argv
-        for argv in turno.traza
-        if not agente.es_ayuda(argv)
-        and any(tuple(argv[: len(verbo)]) == verbo for verbo in agente.ESCRIBEN)
-    ]
+    escriben = [argv for argv in turno.traza if agente.escribe(argv)]
     return {
         "agente": turno.stdout.strip(),
         "escribe": [shlex.join(["tuku", *a]) for a in escriben],
