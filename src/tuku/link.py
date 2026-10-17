@@ -50,9 +50,7 @@ _INLINE = re.compile(r"`[^`\n]+`")
 
 #: Un enlace en cualquiera de los dos formatos, para los lectores que solo
 #: necesitan saber a qué apunta. Sin transclusiones.
-ENLACE = (
-    r"(?:(?<!!)\[\[[^\[\]\n]+\]\]|(?<!!)\[[^\]\n]*\]\([^)\s]+\))"
-)
+ENLACE = r"(?:(?<!!)\[\[[^\[\]\n]+\]\]|(?<!!)\[[^\]\n]*\]\([^)\s]+\))"
 
 _LECTOR = re.compile(
     r"\[\[(?P<wiki>[^\]|#\n]+)(?:[#|][^\]\n]*)?\]\]|\[[^\]\n]*\]\((?P<ruta>[^)\s]+)\)"
@@ -350,9 +348,7 @@ def rebasar(texto: str, desde: str, hacia: str) -> str:
     return _MD.sub(cambiar, texto)
 
 
-def reubicar(
-    texto: str, desde_viejo: str, desde_nuevo: str, movidos: Mapping[str, str]
-) -> str:
+def reubicar(texto: str, desde_viejo: str, desde_nuevo: str, movidos: Mapping[str, str]) -> str:
     """Recalcula las rutas de los links de `texto` cuando algo cambia de lugar.
 
     El archivo que contiene el texto pasa de `desde_viejo` a `desde_nuevo` (puede
@@ -392,68 +388,3 @@ def reubicar(
     for inicio, fin, nuevo in sorted(reemplazos, reverse=True):
         salida = salida[:inicio] + nuevo + salida[fin:]
     return salida
-
-
-# ---------------------------------------------------------------------------
-# Enlazar hacia atrás
-# ---------------------------------------------------------------------------
-
-#: Un enlace ya escrito, de cualquier formato. El texto se parte por acá para no
-#: enlazar dentro de él.
-_ENLACE_ESCRITO = re.compile(r"!?\[\[[^\]]*\]\]|\[[^\]\n]*\]\([^)\s]*\)")
-
-
-def _patron(keyword: str) -> re.Pattern[str]:
-    """Empareja la keyword con guiones y espacios como equivalentes."""
-    partes = [re.escape(p) for p in re.split(r"[-\s]+", keyword) if p]
-    if not partes:
-        return re.compile(r"(?!x)x")  # nunca empareja
-    cuerpo = r"[-\s]+".join(partes)
-    return re.compile(rf"(?<![\w-]){cuerpo}(?![\w-])", re.IGNORECASE)
-
-
-def backfill(
-    texto: str,
-    *,
-    scope: str = "",
-    ambito: str = "",
-    keywords: list[str],
-    desde: str = "AHORA.md",
-    rutas: Mapping[str, str] | None = None,
-) -> tuple[str, int]:
-    """Enlaza las menciones de `keywords` al ámbito. Devuelve el texto y cuántas.
-
-    **Empareja contra las `keywords` declaradas** en el frontmatter de la página
-    del ámbito, sin distinguir mayúsculas y tratando guiones y espacios como
-    equivalentes (`depto-centro` captura "depto centro"). Nada se adivina: lo
-    que se enlaza está escrito en un archivo que el autor lee y edita. Las
-    variantes morfológicas y los sinónimos quedan fuera a propósito: eso es
-    juicio, y el juicio no es del comando.
-
-    Idempotente: lo que ya está dentro de un enlace, en cualquiera de los dos
-    formatos, no se vuelve a enlazar.
-    """
-    valor_scope = scope or ambito
-    patrones = [_patron(k).pattern for k in keywords if k.strip()]
-    if not patrones:
-        return texto, 0
-
-    # Un solo patrón con todas las keywords: aplicarlas una tras otra permitiría
-    # que la segunda empareje dentro del enlace que puso la primera.
-    union = re.compile("|".join(f"(?:{p})" for p in patrones), re.IGNORECASE)
-    nuevo = enlace_ambito(valor_scope, desde, rutas)
-    escritos = _ENLACE_ESCRITO.findall(texto)
-    libres = _ENLACE_ESCRITO.split(texto)
-
-    cambios = 0
-    transformados = []
-    for tramo in libres:
-        tramo, n = union.subn(lambda _m: nuevo, tramo)
-        cambios += n
-        transformados.append(tramo)
-
-    salida = [transformados[0]]
-    for existente, tramo in zip(escritos, transformados[1:], strict=True):
-        salida.append(existente)
-        salida.append(tramo)
-    return "".join(salida), cambios

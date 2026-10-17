@@ -204,13 +204,13 @@ def test_003_10_lo_dirigido_al_agente_no_entra_al_dia() -> None:
 
 @pytest.mark.agentic
 @sin_arnes
-def test_003_10_el_ambito_enlaza_hacia_atras_y_deja_su_constancia() -> None:
-    """El frente se nombra antes de existir y se enlaza al crearse."""
+def test_003_10_el_ambito_deja_su_constancia_y_no_toca_lo_dictado() -> None:
+    """El frente se nombra antes de existir y, al crearse, no reescribe el registro."""
     corrida = _corrida()
     martes = _dia(corrida, MARTES)
     linea = _registros(martes)["18:40"]
-    assert "[depto-centro](ambitos/depto-centro/depto-centro.md)" in linea.split(") ", 1)[1], (
-        f"la mención al frente no quedó enlazada hacia atrás: {linea}"
+    assert "](ambitos/depto-centro/" not in linea.split(") ", 1)[1], (
+        f"crear el frente enlazó el body del registro: {linea}"
     )
     constancias = [x for x in martes.splitlines() if x.endswith(scope.CONSTANCIA)]
     assert len(constancias) == 1, f"se esperaba una constancia de scope create:\n{martes}"
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     test_003_10_los_de_manana_se_prometen_hoy_y_vencen_manana()
     test_003_10_la_consulta_no_escribe_y_nombra_los_dos_destinos()
     test_003_10_lo_dirigido_al_agente_no_entra_al_dia()
-    test_003_10_el_ambito_enlaza_hacia_atras_y_deja_su_constancia()
+    test_003_10_el_ambito_deja_su_constancia_y_no_toca_lo_dictado()
     test_003_10_los_cierres_encontraron_su_pareja_y_el_ambiguo_no_cerro_nada()
     test_003_10_el_agente_pregunta()
     test_003_10_no_cambio_nada_fuera_del_dia()

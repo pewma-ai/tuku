@@ -41,6 +41,9 @@ def test_crear_un_ambito_sin_keywords_le_pide_al_agente_preguntarlas(
     assert _crear(vault, "paranal") == EXITO
     salida = capsys.readouterr().out
     assert "Pregunta al autor" in salida
+    assert "indican que algo es de 'paranal'" in salida, (
+        "las keywords no son sinónimos del nombre"
+    )
     assert "tuku scope keywords paranal PALABRA..." in salida
     assert _keywords(vault, "paranal", "paranal.md") == ["paranal"]
 
@@ -62,9 +65,8 @@ def test_crear_sobre_un_ambito_existente_no_vuelve_a_pedir_keywords(
     assert "Pregunta al autor" not in capsys.readouterr().out
 
 
-def test_keywords_suma_las_nuevas_sin_repetir_y_enlaza_las_menciones_sueltas(
-    vault: Path,
-) -> None:
+def test_keywords_suma_las_nuevas_sin_repetir_y_no_toca_la_bitacora(vault: Path) -> None:
+    """Las keywords sirven para elegir el ámbito de lo que el autor dice, no para enlazar."""
     assert _crear(vault, "paranal") == EXITO
     assert (
         _tuku(
@@ -73,13 +75,27 @@ def test_keywords_suma_las_nuevas_sin_repetir_y_enlaza_las_menciones_sueltas(
         )
         == EXITO
     )  # fmt: skip
+    antes = _ahora(vault)
     assert _tuku(vault, "scope", "keywords", "paranal", "lcu", "vlti", "TCS") == EXITO
     assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "lcu", "vlti", "TCS"]
-    assert "revisé el [paranal](ambitos/paranal/paranal.md) del [paranal](" in _ahora(vault)
+    assert _ahora(vault) == antes, "una keyword no modifica ni enlaza el body"
 
     assert _tuku(vault, "scope", "keywords", "paranal", "LCU", "tcs") == EXITO
     assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "lcu", "vlti", "TCS"]
     assert _tuku(vault, "doctor") == EXITO
+
+
+def test_crear_un_ambito_no_enlaza_ni_modifica_lo_ya_escrito(vault: Path) -> None:
+    body = "hablé de arriendo con Viana en el depto centro"
+    assert (
+        _tuku(
+            vault, "entry", "add", "--at", f"{HOY} 17:00", "--scope", "personal", "--body", body
+        )
+        == EXITO
+    )
+    assert _crear(vault, "depto-centro", "--keyword", "arriendo", "--keyword", "viana") == EXITO
+    assert f") {body}\n" in _ahora(vault), "el body queda como lo dijo el autor"
+    assert "[depto centro]" not in _ahora(vault)
 
 
 def test_keywords_repetida_con_otra_grafia_no_escribe_nada(vault: Path) -> None:
@@ -109,4 +125,20 @@ def test_renombrar_un_ambito_conserva_sus_otras_keywords(vault: Path) -> None:
     assert _crear(vault, "paranal", "--keyword", "vlti", "--keyword", "LCU") == EXITO
     assert _tuku(vault, "scope", "rename", "paranal", "cerro") == EXITO
     assert _keywords(vault, "cerro", "cerro.md") == ["cerro", "vlti", "LCU"]
+    assert _tuku(vault, "doctor") == EXITO
+
+
+def test_un_pendiente_con_una_keyword_sigue_coincidiendo_con_su_fila(vault: Path) -> None:
+    """El body del pendiente queda como lo dijo el autor, así que se puede cerrar."""
+    assert _crear(vault, "depto-centro") == EXITO
+    assert (
+        _tuku(
+            vault, "todo", "open", "--at", f"{HOY} 19:00", "--scope", "personal",
+            "--body", "pagar los gastos comunes del depto centro",
+        )
+        == EXITO
+    )  # fmt: skip
+    assert _tuku(vault, "scope", "keywords", "depto-centro", "gastos comunes") == EXITO
+    assert "**pendiente**: pagar los gastos comunes del depto centro" in _ahora(vault)
+    assert _tuku(vault, "todo", "lint") == EXITO
     assert _tuku(vault, "doctor") == EXITO

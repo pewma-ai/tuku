@@ -11,7 +11,7 @@ from tuku.cli.opciones import Opciones
 
 def _cmd_scope_create(args: argparse.Namespace) -> int:
     return traducir(
-        scope.crear_con_enlazado(
+        scope.crear_con_constancia(
             args.vault,
             args.name,
             parent=args.parent,
@@ -66,10 +66,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "Crea `ambitos/<nombre>/` con su página `<nombre>.md` (`type: Scope`, "
             "`keywords: [<nombre>]` y la transclusión de su callout en "
             "`ambitos/PENDIENTES-AMBITOS.md`). Con `--parent`, la carpeta va dentro de la "
-            "del ámbito padre, que debe existir. Convierte en link las menciones del ámbito "
-            "que ya había en `AHORA.md` y registra ahí `**nota**: abrí el ámbito`. Sobre "
+            "del ámbito padre, que debe existir. Registra en `AHORA.md` "
+            "`**nota**: abrí el ámbito` y no cambia nada de lo ya escrito. Sobre "
             "un ámbito existente no escribe nada. Sin `--keyword`, la salida pide preguntar "
-            "al autor con qué palabras nombra el ámbito sin decir su nombre."
+            "al autor qué palabras, al mencionarlas, indican que algo es del ámbito."
         ),
     )
     scope_create_p.add_argument("name", help="nombre del ámbito")
@@ -86,13 +86,13 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
 
     scope_keywords_p = scope_v.add_parser(
         "keywords",
-        help="suma palabras a las keywords de un ámbito y enlaza sus menciones",
+        help="suma palabras a las keywords de un ámbito",
         description=(
             "Suma PALABRA... a las `keywords` del frontmatter de la página del ámbito, que "
-            "debe existir: siglas, sistemas, personas y proyectos con que el autor lo "
-            "nombra sin decir su nombre. Convierte en link las menciones sueltas que ya "
-            "había en `AHORA.md`. Lo que ya estaba no se repite, y si nada es nuevo no "
-            "escribe nada."
+            "debe existir: siglas, sistemas, personas y proyectos que, al mencionarlos, "
+            "indican que algo es de ese ámbito. Sirven para elegir el ámbito de lo que el "
+            "autor dice. Solo escribe la página del ámbito: `AHORA.md` y los registros no "
+            "cambian. Lo que ya estaba no se repite, y si nada es nuevo no escribe nada."
         ),
     )
     scope_keywords_p.add_argument("name", help="nombre del ámbito")

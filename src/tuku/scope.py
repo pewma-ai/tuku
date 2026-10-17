@@ -185,7 +185,7 @@ def keywords(pagina: str) -> list[str]:
 
 
 def _clave(keyword: str) -> str:
-    """La keyword como la compara el enlazado: guiones y espacios valen lo mismo."""
+    """La keyword como se compara: guiones y espacios valen lo mismo."""
     return re.sub(r"[-\s]+", " ", keyword).strip().casefold()
 
 
@@ -620,7 +620,7 @@ def registro_de_constancia(
     return f"- {hour} - {link.enlace_ambito(nombre, 'AHORA.md', rutas)} {CONSTANCIA}"
 
 
-def crear_con_enlazado(
+def crear_con_constancia(
     vault: Path,
     nombre: str,
     *,
@@ -629,11 +629,10 @@ def crear_con_enlazado(
     hour: str | None = None,
     palabras: Sequence[str] = (),
 ) -> Resultado:
-    """Crea el ámbito, enlaza las menciones sueltas que ya había y deja constancia.
+    """Crea el ámbito y deja constancia. No modifica nada de lo ya escrito.
 
-    El enlazado retroactivo es parte de crear, no un segundo paso: un ámbito que
-    nace sin recoger lo que el autor ya había escrito sobre él deja la mitad del
-    trabajo hecha y nadie se entera.
+    Lo que el autor ya había escrito sobre el frente queda como estaba: ningún
+    comando enlaza ni cambia un body por su cuenta.
 
     Crear un ámbito es una decisión del autor sobre su estructura, así que deja
     huella en `AHORA.md`, en el día `day` (HOY si falta) y a la hora `hour` (AHORA
@@ -700,18 +699,12 @@ def crear_con_enlazado(
     )
     if padre is not None:
         anotar_hijo(padre, directorio)
-    menciones = 0
     pagina_path = directorio / f"{nombre}.md"
     if not nuevo and palabras:
         return agregar_keywords(vault, nombre, palabras)
     if ahora_path.is_file() and pagina_path.is_file():
         original = ahora_path.read_text(encoding="utf-8")
-        texto, menciones = link.backfill(
-            original,
-            scope=nombre,
-            keywords=keywords(pagina_path.read_text(encoding="utf-8")),
-            rutas=rutas(vault),
-        )
+        texto = original
         if nuevo:
             constancia = registro_de_constancia(nombre, hour=hora, rutas=rutas(vault))
             texto = entry.add(texto, [constancia], day=dia)
@@ -719,8 +712,7 @@ def crear_con_enlazado(
             ahora_path.write_text(texto, encoding="utf-8")
         actualizar_pagina(vault, nombre)
 
-    enlazadas = f" ({menciones} mención(es) enlazada(s))" if menciones > 0 else ""
-    mensaje = f"ámbito creado en {directorio}{enlazadas}."
+    mensaje = f"ámbito creado en {directorio}."
     if nuevo and not palabras:
         mensaje += "\n" + _pedir_keywords(nombre)
     return Resultado.hecho(mensaje)
@@ -729,19 +721,21 @@ def crear_con_enlazado(
 def _pedir_keywords(nombre: str) -> str:
     """Lo que la salida de `scope create` le pide al agente que haga con el autor."""
     return (
-        f"Pregunta al autor con qué palabras nombra {nombre!r} sin decir {nombre!r}: "
-        f"siglas, sistemas, personas, proyectos (para `paranal`: vlti, gravity, LCU, TCS, "
-        f"VLT). No las inventes. Regístralas con `tuku scope keywords {nombre} PALABRA...`: "
-        f"quedan en el frontmatter de la página y cada mención suelta se enlaza al ámbito."
+        f"Pregunta al autor qué palabras, cuando las mencione, indican que algo es de "
+        f"{nombre!r}: siglas, sistemas, personas, proyectos (para `paranal`: vlti, gravity, "
+        f"LCU, TCS, VLT). No son otros nombres del ámbito, son lo que lo delata. "
+        f"No las inventes. Regístralas con `tuku scope keywords {nombre} PALABRA...`: "
+        f"quedan en el frontmatter de la página y sirven para elegir este ámbito cuando "
+        f"el autor las mencione, sin modificar lo que dice."
     )
 
 
 def agregar_keywords(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
-    """Suma `nuevas` a las `keywords` de la página del ámbito y enlaza sus menciones.
+    """Suma `nuevas` a las `keywords` de la página del ámbito.
 
-    Las menciones sueltas de `AHORA.md` pasan a link, como al crear el ámbito.
-    Idempotente: lo que ya estaba (sin distinguir mayúsculas, guiones ni espacios)
-    no se repite, y si nada es nuevo no escribe nada.
+    Una keyword sirve para elegir el ámbito de lo que el autor dice, y no modifica ni
+    enlaza lo que ya está escrito. Idempotente: lo que ya estaba, sin distinguir
+    mayúsculas, guiones ni espacios, no se repite, y si nada es nuevo no escribe nada.
     """
     nombre = canonico(vault, nombre)
     if (rechazo := rechazo_si_no_existe(vault, nombre)) is not None:
@@ -767,18 +761,7 @@ def agregar_keywords(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resulta
         _KEYWORDS.sub(lambda _m: f"keywords: [{', '.join(todas)}]", texto, count=1),
         encoding="utf-8",
     )
-    menciones = 0
-    ahora_path = vault / "AHORA.md"
-    if ahora_path.is_file():
-        original = ahora_path.read_text(encoding="utf-8")
-        enlazado, menciones = link.backfill(
-            original, scope=nombre, keywords=todas, rutas=rutas(vault)
-        )
-        if enlazado != original:
-            ahora_path.write_text(enlazado, encoding="utf-8")
-        actualizar_pagina(vault, nombre)
-    enlazadas = f" ({menciones} mención(es) enlazada(s))" if menciones else ""
-    return Resultado.hecho(f"keywords de {nombre!r}: {', '.join(todas)}{enlazadas}.")
+    return Resultado.hecho(f"keywords de {nombre!r}: {', '.join(todas)}.")
 
 
 def _renombrar_keyword(pagina: str, viejo: str, nuevo: str) -> str:

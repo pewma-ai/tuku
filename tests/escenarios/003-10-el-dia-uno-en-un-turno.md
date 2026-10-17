@@ -50,7 +50,7 @@ Y cada registro tiene su hora, su ámbito y su marca cerrada según la tabla de 
 Y los dos pendientes de mañana se prometen el martes 11 y vencen el miércoles 12 a las 09:00 y a las 09:30
 Y la consulta del pase escolar no deja nada escrito, y la respuesta nombra `AHORA.md` y `PENDIENTES.md`
 Y ni "recuérdame" ni la pregunta por los pendientes entran a `AHORA.md`
-Y el cuerpo del registro de las 18:40 enlaza a `depto-centro` de forma retroactiva, y el martes tiene la constancia de haberlo abierto
+Y el cuerpo del registro de las 18:40 queda como lo dictó el autor, sin links nuevos, y el martes tiene la constancia de haber abierto `depto-centro`
 Y los dos cierres de las 19:05 y las 19:10 encontraron su pareja, y como se abrieron ese mismo día, de cada uno queda solo el cierre
 Y "ya pagué" no cierra ninguno de los dos pendientes de mañana, y el agente pregunta cuál
 Y `notas/` sigue llamándose así, con la nota de las 21:15 adentro

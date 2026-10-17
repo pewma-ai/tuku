@@ -81,10 +81,10 @@ Ante cualquier defecto, el linter informa y nunca repara por su cuenta: nombra l
 
 ## Las keywords de un ámbito
 
-La línea `keywords: [nombre, vlti, LCU]` del frontmatter de la página lista los nombres con que el autor se refiere al ámbito. Sirve a dos lectores: el enlazado, que convierte en link cada mención, y el agente, que la lee para saber de qué frente es algo que no nombra el ámbito.
+La línea `keywords: [nombre, vlti, LCU]` del frontmatter de la página lista los nombres con que el autor se refiere al ámbito. Cuando lo que el autor dice menciona una de ellas, el ámbito es ese. Si `depto-centro` declara `viana`, `claudia` y `arriendo`, «hablé con Claudia por el arriendo» va a `depto-centro` aunque el autor no diga su nombre. Elige quien interpreta, leyendo las páginas, y el body queda como lo dijo el autor: una keyword no lo modifica ni lo enlaza.
 
 - **`tuku scope create NOMBRE`** pide las keywords en su salida cuando el ámbito es nuevo y no recibió ninguna: el agente las pregunta al autor y no las inventa. `--keyword PALABRA`, repetible, las pone en el mismo comando.
-- **`tuku scope keywords NOMBRE PALABRA...`** las suma a la lista y enlaza las menciones sueltas de `AHORA.md`. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con comas o corchetes.
+- **`tuku scope keywords NOMBRE PALABRA...`** las suma a la lista y no escribe nada más: ni `AHORA.md` ni ningún registro cambian. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con comas o corchetes.
 - **`tuku scope rename`** cambia el nombre dentro de la lista y conserva las demás.
 
 ## El nombre de un ámbito
@@ -132,11 +132,11 @@ La transclusión de pendientes `![[../PENDIENTES-AMBITOS.md#^personal]]` es una 
 
 **Renombrar un ámbito** actualiza el texto y la ruta de cada link que lo nombra.
 
-## El enlazado retroactivo llega hasta el ciclo en curso
+## Nada se enlaza solo
 
-Crear un ámbito convierte en enlaces las menciones sueltas que ya estaban escritas. Ese barrido alcanza **`AHORA.md` y nada más**: los ciclos cerrados de `bitacoras/` son inmutables y no se reescriben para agregarles enlaces que no tenían.
+Ni crear un ámbito ni sumarle keywords modifica lo que el autor ya escribió. Un registro lleva los links que se le escribieron al registrarlo, y el body queda como lo dijo el autor, con las palabras que usó. Si quiere enlazar una mención hacia atrás, lo hace él, a mano, o lo pide como una operación deliberada.
 
-La distinción es entre reparar y agregar. Al archivar una rama, un enlace que ya existía y dejaría de resolver sí se repara en una bitácora cerrada, porque lo contrario rompe el principio 1. Lo que nunca ocurre solo es enriquecer el pasado: si el autor quiere que un ámbito nuevo enlace hacia atrás en la historia, lo pide explícitamente y es una operación deliberada, como archivar.
+Lo que sí hace el comando es **reparar** lo que ya estaba enlazado: mover o renombrar un ámbito actualiza el texto y la ruta de cada link que lo nombra, y archivar una rama recalcula la ruta de los links de las bitácoras cerradas, porque lo contrario rompe el principio 1. Reparar un enlace existente no es enriquecer el pasado.
 
 ## No entra
 

@@ -35,7 +35,7 @@ def _clave_hora(linea: str) -> tuple[int, int]:
 
 
 def _sin_links(linea: str) -> str:
-    """La línea como se lee, con guion y espacio equivalentes, como `link.backfill`."""
+    """La línea como se lee, con guion y espacio equivalentes."""
     return link.sin_links(linea).replace("-", " ").casefold()
 
 
@@ -183,9 +183,7 @@ def add_al_vault(
     )
     marca = todo.parsear(linea)
     if marca is not None:
-        return Resultado.rechazo(
-            rechazo_de_marca(marca, scope=scope, day=day, hour=hour)
-        )
+        return Resultado.rechazo(rechazo_de_marca(marca, scope=scope, day=day, hour=hour))
     try:
         texto = add(ruta.read_text(encoding="utf-8"), [linea], day=dia)
     except ValueError as e:
@@ -265,15 +263,10 @@ def corregir_en_vault(
 
     ahora_path = vault / "AHORA.md"
     if not ahora_path.is_file():
-        return Resultado.rechazo(
-            f"no encuentro AHORA.md en {vault}. "
-            f"¿Es un vault de TUKU?"
-        )
+        return Resultado.rechazo(f"no encuentro AHORA.md en {vault}. ¿Es un vault de TUKU?")
     cuerpo = todo.canonizar(body)
     if not cuerpo:
-        return Resultado.rechazo(
-            "falta el cuerpo corregido. Pasa --body con el texto nuevo."
-        )
+        return Resultado.rechazo("falta el cuerpo corregido. Pasa --body con el texto nuevo.")
 
     texto = ahora_path.read_text(encoding="utf-8")
     encabezado = ahora_mod.encabezado_de(day or date.today())

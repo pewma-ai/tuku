@@ -29,7 +29,7 @@ CADENA = (
     "los registros caen en su día y en orden",
     "abrir los pendientes de hoy",
     "cerrarlos el mismo día deja solo el cierre",
-    "un frente nuevo se crea y enlaza hacia atrás",
+    "un frente nuevo se crea sin tocar lo ya escrito",
     "la nota del frente queda escrita y enlazada",
     "los pendientes de mañana y pasado llegan a su día",
     "repetir el día no cambia nada",
@@ -50,8 +50,6 @@ DIAS = (
 )
 GGCC = "avisar de los GGCC a la administradora"
 MALETA = "comprar una maleta"
-MENCION = "del depto centro"
-ENLAZADO = f"del {DEPTO}"
 CONSTANCIA_AMBITO = f"- 18:45 - {DEPTO} **nota**: abrí el ámbito"
 NOTA = "como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad"
 FIXTURE = Path(__file__).parent / "fixtures" / SLUG / "cuerpo-nota.md"
@@ -158,7 +156,7 @@ def test_002_13_cerrarlos_el_mismo_dia_deja_solo_el_cierre() -> None:
         assert f"(Hecho): ~~{MALETA}~~" in texto
 
 
-def test_002_13_un_frente_nuevo_se_crea_y_enlaza_hacia_atras() -> None:
+def test_002_13_un_frente_nuevo_se_crea_sin_tocar_lo_ya_escrito() -> None:
     corrida = _paso(CADENA[4])
     assert corrida.codigo == EXITO, corrida.stderr
     vault = corrida.ruta("mi-vault")
@@ -168,9 +166,8 @@ def test_002_13_un_frente_nuevo_se_crea_y_enlaza_hacia_atras() -> None:
 
     pagina = (directorio / f"{AMBITO}.md").read_text(encoding="utf-8")
     assert f"![[../PENDIENTES-AMBITOS.md#^{AMBITO}]]" in pagina
-    assert (
-        "- [personal](../personal/personal.md) le mandé la boleta de gastos comunes del "
-        "depto-centro a la administradora por WhatsApp" in pagina
+    assert "le mandé la boleta" not in pagina, (
+        "la mención suelta no mueve el registro a este ámbito"
     )
     ambitos = _leer(corrida, "ambitos", "PENDIENTES-AMBITOS.md")
     assert f"> [!todo] Pendientes en **Depto Centro** ^{AMBITO}" in [
@@ -183,9 +180,7 @@ def test_002_13_un_frente_nuevo_se_crea_y_enlaza_hacia_atras() -> None:
     antes = corrida.antes["mi-vault/AHORA.md"].decode("utf-8").splitlines()
     despues = ahora.splitlines()
     despues.remove(CONSTANCIA_AMBITO)
-    cambiadas = [(a, d) for a, d in zip(antes, despues, strict=True) if a != d]
-    assert [d for _, d in cambiadas] == [a.replace(MENCION, ENLAZADO) for a, _ in cambiadas]
-    assert len(cambiadas) == 1, cambiadas
+    assert despues == antes, "crear el ámbito no modifica ninguna línea ya escrita"
 
     tocados = set(corrida.delta_de("mi-vault"))
     assert tocados == {
