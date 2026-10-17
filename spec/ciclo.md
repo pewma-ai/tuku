@@ -86,7 +86,7 @@ El resumen es la excepción y va como enlace: es un documento de decisión compl
 
 ## Abrir un ciclo
 
-De los comandos de esta sección y de las siguientes, hoy existen `tuku cycle open`, `tuku cycle lint` y `tuku regenerate todo`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `cycle open` hace los pasos 1 y 2.
+De los comandos de esta sección y de las siguientes, hoy existen `tuku cycle open`, `tuku cycle lint` y `tuku regenerate todo`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `cycle open` hace los pasos 1 y 2, y el pendiente de revisar la bitácora anterior.
 
 En este orden:
 
@@ -98,6 +98,12 @@ En este orden:
 6. Propagar los pendientes a cada día → `regenerate todo`
 
 Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
+
+### El primer día se revisa la bitácora anterior
+
+Un ciclo que sigue a otro cerrado abre con el pendiente `revisar la bitácora anterior`, con vencimiento el primer día: aparece en el callout de ese día y en `PENDIENTES.md` con su fecha. Revisar lo vivido antes de planificar lo que viene es lo que fuerza el aprendizaje, y por eso el comando lo abre y no queda a la memoria del autor.
+
+Lo abre `cycle open` cuando crea el ciclo y `bitacoras/` tiene una bitácora. El primer ciclo de un vault no tiene nada que revisar y no lo trae. Es un pendiente como cualquiera: se cierra con `tuku todo close`, y abrir el ciclo otra vez no lo duplica. Si no se puede abrir, el ciclo queda abierto y el motivo sale como aviso.
 
 ### La estructura del ciclo sale de una plantilla
 
