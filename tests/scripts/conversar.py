@@ -20,6 +20,7 @@ import json
 import shlex
 import shutil
 import sys
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -66,6 +67,7 @@ def registro(
         "enviado": enviado.isoformat(timespec="seconds"),
         "respondido": respondido.isoformat(timespec="seconds"),
         "segundos": round((respondido - enviado).total_seconds()),
+        "codigo": turno.codigo,
         **resumir(turno, delta),
     }
 
@@ -162,12 +164,20 @@ def dejar_traza(v: Path, numero: int, resultado: agente.Turno) -> None:
         )
 
 
-def turno(v: Path, frase: str, ahora: str) -> dict[str, Any]:
+def turno(
+    v: Path,
+    frase: str,
+    ahora: str,
+    en_vivo: Callable[[str], None] | None = None,
+    en_error: Callable[[str], None] | None = None,
+) -> dict[str, Any]:
     estado = _cargar(v)
     sesion = agente.Sesion(estado["id"])
     antes = vault.instantanea(v)
     enviado = datetime.now()
-    resultado = agente.turno(v, frase, ahora=ahora, sesion=sesion)
+    resultado = agente.turno(
+        v, frase, ahora=ahora, sesion=sesion, en_vivo=en_vivo, en_error=en_error
+    )
     respondido = datetime.now()
     turno_registrado = registro(
         frase, resultado, vault.delta(antes, vault.instantanea(v)), enviado, respondido

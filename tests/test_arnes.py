@@ -11,10 +11,12 @@ primeras están en el método del [`003-00`](escenarios/003-00-el-dia-uno-dictad
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
 import tempfile
+import time
 import uuid
 from pathlib import Path
 
@@ -279,3 +281,93 @@ def test_la_traduccion_cuenta_todo_lo_que_no_es_lectura() -> None:
         "entry rename",
         "regenerate",
     ]
+
+
+def test_el_turno_entrega_cada_evento_cuando_llega(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`en_vivo` recibe las líneas del arnés mientras corre y no al final."""
+    falso = tmp_path / "agy-falso"
+    falso.write_text(
+        "#!/usr/bin/env python3\n"
+        "import sys, time\n"
+        "for linea in (\n"
+        '    \'{"event":"init","conversation_id":"abc"}\',\n'
+        '    \'{"event":"step_update","step_update":{"step_type":"tool"}}\',\n'
+        '    \'{"event":"result","result":{"conversation_id":"abc",'
+        '"response":"Listo."}}\',\n'
+        "):\n"
+        "    print(linea, flush=True)\n"
+        "    time.sleep(0.4)\n",
+        encoding="utf-8",
+    )
+    falso.chmod(0o755)
+    monkeypatch.setenv("TUKU_AGENTE", "agy")
+    monkeypatch.setenv("TUKU_AGENTE_BIN", str(falso))
+    monkeypatch.setenv("TUKU_AGENTE_MODELO", "falso")
+    llegadas: list[tuple[float, str]] = []
+    inicio = time.monotonic()
+
+    def anotar(linea: str) -> None:
+        llegadas.append((time.monotonic() - inicio, linea))
+
+    t = agente.turno(tmp_path, "hola", en_vivo=anotar)
+    assert [json.loads(x)["event"] for _, x in llegadas] == ["init", "step_update", "result"]
+    assert llegadas[-1][0] - llegadas[0][0] > 0.6, "las líneas llegaron juntas, al final"
+    assert t.stdout == "Listo."
+
+
+def test_el_stderr_del_arnes_llega_a_en_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    falso = tmp_path / "agy-falso"
+    falso.write_text(
+        "#!/usr/bin/env python3\n"
+        "import sys\n"
+        "print('aviso del arnés', file=sys.stderr, flush=True)\n"
+        'print(\'{"event":"result","result":{"conversation_id":"abc","response":"Listo."}}\')\n',
+        encoding="utf-8",
+    )
+    falso.chmod(0o755)
+    monkeypatch.setenv("TUKU_AGENTE", "agy")
+    monkeypatch.setenv("TUKU_AGENTE_BIN", str(falso))
+    monkeypatch.setenv("TUKU_AGENTE_MODELO", "falso")
+    errores: list[str] = []
+    t = agente.turno(tmp_path, "hola", en_vivo=lambda _: None, en_error=errores.append)
+    assert errores == ["aviso del arnés"]
+    assert "aviso del arnés" in t.stderr
+
+
+def test_si_el_turno_se_interrumpe_el_arnes_no_queda_corriendo(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Un Ctrl-C a mitad de turno no deja al agente escribiendo en el vault."""
+    pid_archivo = tmp_path / "pid"
+    falso = tmp_path / "agy-falso"
+    falso.write_text(
+        "#!/usr/bin/env python3\n"
+        "import os, time\n"
+        f"open({str(pid_archivo)!r}, 'w').write(str(os.getpid()))\n"
+        'print(\'{"event":"init"}\', flush=True)\n'
+        "time.sleep(60)\n",
+        encoding="utf-8",
+    )
+    falso.chmod(0o755)
+    monkeypatch.setenv("TUKU_AGENTE", "agy")
+    monkeypatch.setenv("TUKU_AGENTE_BIN", str(falso))
+    monkeypatch.setenv("TUKU_AGENTE_MODELO", "falso")
+
+    def interrumpir(_: str) -> None:
+        raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        agente.turno(tmp_path, "hola", en_vivo=interrumpir)
+    pid = int(pid_archivo.read_text())
+    for _ in range(20):
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return
+        time.sleep(0.1)
+    os.kill(pid, 9)
+    pytest.fail("el arnés siguió corriendo después de la interrupción")

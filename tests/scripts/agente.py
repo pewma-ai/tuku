@@ -28,6 +28,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -759,12 +760,78 @@ def con_reloj(prompt: str, ahora: str | None) -> str:
     return f"(Hoy es {ahora}.)\n{prompt}" if ahora else prompt
 
 
+def _correr_en_vivo(
+    argv: list[str],
+    cwd: Path,
+    entorno: dict[str, str],
+    espera: int,
+    en_vivo: Callable[[str], None] | None,
+    en_error: Callable[[str], None] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    """Corre el arnés y entrega cada línea de `stdout` a `en_vivo` y de `stderr` a `en_error`.
+
+    Si pasa de `espera` segundos lo mata y levanta `TimeoutExpired` con lo que
+    alcanzó a salir, igual que `subprocess.run`.
+    """
+    p = subprocess.Popen(
+        argv,
+        cwd=cwd,
+        env=entorno,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1,
+    )
+    assert p.stdout is not None and p.stderr is not None
+    stdout, stderr = p.stdout, p.stderr
+    vencio = threading.Event()
+
+    def _matar() -> None:
+        vencio.set()
+        p.kill()
+
+    errores: list[str] = []
+
+    def _leer_errores() -> None:
+        for linea in stderr:
+            errores.append(linea)
+            if en_error is not None:
+                en_error(linea.rstrip("\n"))
+
+    lector = threading.Thread(target=_leer_errores, daemon=True)
+    lector.start()
+    reloj = threading.Timer(espera, _matar)
+    reloj.start()
+    salida: list[str] = []
+    try:
+        for linea in stdout:
+            salida.append(linea)
+            if en_vivo is not None:
+                en_vivo(linea.rstrip("\n"))
+        p.wait()
+    except BaseException:
+        # Un Ctrl-C a mitad de turno no puede dejar al agente escribiendo en el vault.
+        p.kill()
+        p.wait()
+        raise
+    finally:
+        reloj.cancel()
+        lector.join(timeout=5)
+        stdout.close()
+        stderr.close()
+    if vencio.is_set():
+        raise subprocess.TimeoutExpired(argv, espera, output="".join(salida))
+    return subprocess.CompletedProcess(argv, p.returncode, "".join(salida), "".join(errores))
+
+
 def turno(
     vault: Path,
     prompt: str,
     timeout: int | None = None,
     ahora: str | None = None,
     sesion: Sesion | None = None,
+    en_vivo: Callable[[str], None] | None = None,
+    en_error: Callable[[str], None] | None = None,
 ) -> Turno:
     """Un turno del agente dentro de `vault`, con la traza de lo que ejecutó.
 
@@ -777,7 +844,8 @@ def turno(
     que ese es el día de hoy.
 
     Con `sesion`, el turno retoma la conversación del anterior y deja en ella el
-    id del arnés.
+    id del arnés. Con `en_vivo` y `en_error`, cada línea que el arnés escribe por
+    `stdout` y por `stderr` llega a esas funciones cuando sale y no al final del turno.
     """
     motivo = motivo_no_disponible()
     if motivo is not None:
@@ -808,15 +876,19 @@ def turno(
         espera = timeout or int(os.environ.get("TUKU_AGENTE_TIMEOUT", TIMEOUT))
         try:
             with Puente(bin, base):
-                p = subprocess.run(
-                    arnes.argv(con_reloj(prompt, ahora), sesion),
-                    cwd=vault,
-                    env=entorno,
-                    capture_output=True,
-                    text=True,
-                    timeout=espera,
-                    check=False,
-                )
+                argv = arnes.argv(con_reloj(prompt, ahora), sesion)
+                if en_vivo is not None or en_error is not None:
+                    p = _correr_en_vivo(argv, vault, entorno, espera, en_vivo, en_error)
+                else:
+                    p = subprocess.run(
+                        argv,
+                        cwd=vault,
+                        env=entorno,
+                        capture_output=True,
+                        text=True,
+                        timeout=espera,
+                        check=False,
+                    )
         except subprocess.TimeoutExpired as e:
             parcial = (
                 e.stdout.decode("utf-8", "replace") if isinstance(e.stdout, bytes) else e.stdout
