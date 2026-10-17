@@ -1,44 +1,65 @@
 # Epic 004 · La conversación
 
-> El autor deja de dictar hechos consumados y conversa: delibera, consulta el estado, cambia de rumbo a media sesión, atiende urgencias y solo al final ratifica. El vault final debe contener únicamente lo resuelto.
+> **Marco:** [Brief de TUKU](../../docs/brief.md) · [Principios normativos](../../docs/principios.md) · [Especificaciones](../../spec/README.md)
 
-Este epic mide la **resistencia del sistema al diálogo humano**: varias idas y vueltas donde pensar en voz alta no debe ensuciar el conjunto canónico ([principio 3](../../docs/principios.md#3-el-agente-es-un-secretario-no-un-dueno)), las dudas se aclaran con preguntas directas y los límites de [`AGENTS.md`](../../template/vanilla/AGENTS.md) se sostienen bajo acumulación de contexto.
-
----
+El autor conversa en vez de dictar: consulta, duda, cambia de rumbo, atiende un imprevisto y ratifica al final. El vault contiene lo que ratificó. El agente delibera con él y escribe solo mediante comandos `tuku` ([P3, secretario, no dueño](../../docs/principios.md#L25)).
 
 ## Qué entrega el epic
 
-1. **El conductor de sesión multi-turno:** La infraestructura de pruebas capaz de sostener un diálogo de varios turnos sobre el arnés sin perder la sesión ni contaminar el entorno.
-2. **Refinamiento de [`AGENTS.md`](../../template/vanilla/AGENTS.md):** Ajuste de las reglas de despacho y límites ante la fricción real de una conversación (deliberación, interrupciones, desambiguación interactiva).
-3. **Validación fuerte de los Límites:** Afirmación de que ninguna prohibición de la tabla se vulnera a lo largo de una interacción prolongada (cero edición manual, cero supuestos ante ambigüedad, cero rastro tras propuestas rechazadas).
+1. **El conductor de sesión:** sostiene un diálogo de varios turnos entre el agente del autor y el de TUKU, con un adaptador por arnés, y anota el delta del vault tras cada turno.
+2. **Los `AGENTS.md` del vault** corregidos por lo que la conversación rompa.
+3. **Los Límites verificados como delta:** vacío mientras se delibera, y el comando de cada hecho una vez aclarado.
 
----
+## Qué se verifica
 
-## La escalera de escenarios
+- **Dos agentes.** El autor es un agente que interpreta a Damián Ulloa, de [`referencia-faena.md`](../../corpus/referencia/referencia-faena.md), y sigue el plan de cada escenario. El otro es el agente de TUKU, con el arnés por defecto.
+- **Cada turno** deja un delta del vault que el escenario declara.
+- **Al cierre** el vault coincide con el que deja el dictado directo de lo ratificado: hora, ámbito, marca cerrada y filas de `PENDIENTES.md`.
+- **Los Límites** de la tabla de [`AGENTS.md`](../../template/vanilla/AGENTS.md) se comprueban en todos los escenarios: cada cambio del vault tiene su comando `tuku` en la traza y `tuku doctor` confirma la coherencia.
 
-| Escenario | Fenómeno dialógico | Qué afirma |
-| --- | --- | --- |
-| `004-01` | [Deliberación y consulta](004-01-deliberacion-y-consulta.md) | Evaluar opciones y consultar radar sin escribir nada (**diff cero**). |
-| `004-02` | [Rectificación y marcha atrás](004-02-rectificacion-y-marcha-atras.md) | Orden tentativa descartada en el turno siguiente no deja rastro. |
-| `004-03` | [Desambiguación en dos turnos](004-03-desambiguacion-en-dos-turnos.md) | El agente pregunta ante ambigüedad y el autor resuelve; cierre fuerte del pendiente correcto. |
-| `004-04` | [Hecho urgente intercalado](004-04-hecho-urgente-intercalado.md) | Incidente fortuito registrado al vuelo sin perder el hilo de la deliberación previa. |
-| `004-05` | [Propuesta y rechazo limpio](004-05-propuesta-y-rechazo-limpio.md) | Curiosidad operativa del agente rechazada sin dejar marcas ni expedientes. |
-| `004-06` | [Ratificación compuesta](004-06-ratificacion-compuesta.md) | Resumen final destilado exactamente a los comandos necesarios. |
-| `004-07` | [Invariante de límites en sesión larga](004-07-invariante-de-limites-en-sesion-larga.md) | Sesión de 6 turnos sin tocar archivos a mano y con `tuku doctor` sano. |
+## Escenarios del epic
 
----
+Cada escenario copia el vault de partida y corre por su cuenta. Ninguno hereda del anterior.
 
-## Cómo se observa la conversación
+- [`004-01-el-dia-conversado.md`](004-01-el-dia-conversado.md): camino feliz. Consulta, pregunta del agente, hechos aclarados, deliberación, imprevisto, propuesta descartada y ratificación.
+- `004-02` Pensar en voz alta sin ratificar nunca: el delta es vacío durante toda la sesión.
+- `004-03` Ratificar tras tres giros: el vault queda como el dictado del último acuerdo.
+- `004-04` Cerrar lo que nunca se abrió: el hecho se registra sin pregunta y sin pendiente inventado.
+- `004-05` La pregunta que la respuesta no resuelve: ningún pendiente se cierra mientras la ambigüedad persiste.
 
-A diferencia del turno único del 003, un escenario del 004 encadena múltiples turnos donde el arnés preserva el identificador de sesión.
+## Estado inicial común
 
-Se vigilan tres momentos:
-- **Durante la deliberación:** el `delta` del vault debe permanecer estrictamente vacío.
-- **Ante la interrupción o desambiguación:** el comando ejecutado debe limitarse exactamente al hecho o cierre aclarado.
-- **Al cierre:** el estado final del vault debe ser idéntico al que habría producido un dictado directo de los acuerdos ratificados, sin residuos de las alternativas descartadas.
+Todos los escenarios parten del martes 11 de agosto de [`referencia-faena.md`](../../corpus/referencia/referencia-faena.md): cuatro frentes con un pendiente abierto cada uno. Dos son de Fabina Méndez (el marco de Azure y el diccionario de MetricDB), lo que permite el cierre ambiguo. El reloj de todos los turnos es `TUKU_NOW="2026-08-12 21:00"`, el miércoles por la noche.
 
----
+## Escenario: el vault de partida
+
+Dado un directorio vacío
+Cuando se siembra el vault y se abren cuatro frentes, cada uno con su pendiente del martes 11
+```bash
+tuku init mi-vault --at 2026-08-11
+cd mi-vault
+tuku scope create tuku --at "2026-08-11 09:15"
+tuku scope create transformacion-digital --at "2026-08-11 10:00"
+tuku scope create faena-ai --at "2026-08-11 11:00"
+tuku scope create tesis-javier-castro --at "2026-08-11 12:50"
+tuku todo open --at "2026-08-11 09:20" --scope tuku --body "investigar cómo minimizar las reglas de MaC aprovechando el aprendizaje nativo de los agentes"
+tuku todo open --at "2026-08-11 10:05" --scope transformacion-digital --body "reunirse con Víctor Lagos para dividir las interfaces de ODIP en tareas manejables"
+tuku todo open --at "2026-08-11 11:05" --scope faena-ai --body "presentar a Fabina Méndez la propuesta de marco de casos de uso con Azure LLM"
+tuku todo open --at "2026-08-11 12:55" --due 2026-08-12 --scope tesis-javier-castro --body "conversar el diccionario de MetricDB con Fabina Méndez"
+```
+Entonces `PENDIENTES.md` tiene cuatro filas: tres en `esta semana` y una con fecha, que vence el 2026-08-12
+Y `AHORA.md` tiene bajo el martes 11 las cuatro constancias de ámbito abierto y los cuatro pendientes
+Y `tuku doctor` confirma la coherencia total del vault
+```bash
+tuku doctor
+```
+
+## El registro de la conversación
+
+Cada escenario deja la conversación completa en `notas/conversation-log.md` del vault que queda en `playground/`, donde se lee desde Obsidian. Lleva el frontmatter `type: Note` y, por turno, lo que dijo Damián, lo que respondió el agente, los comandos `tuku` que ejecutó y el delta del vault.
+
+El conductor lo escribe al terminar la sesión, también cuando el escenario falla, de modo que el agente conversa sin verlo. El delta y la verificación de la traza lo excluyen.
 
 ## Criterio de salida
 
-Una conversación humana donde el autor duda, se contradice, atiende un imprevisto y rectifica termina con el vault en el estado neto ratificado al final, sin mutaciones manuales y sin violar ninguna prohibición de la tabla de Límites.
+Una conversación en que el autor duda, se contradice, atiende un imprevisto y rectifica deja el vault en el estado que ratificó al final, y todas las filas de la tabla de Límites se cumplen en el camino.

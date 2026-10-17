@@ -186,6 +186,8 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`003-01-el-vault-dice-a-donde-va.md`](003-01-el-vault-dice-a-donde-va.md) | Epic 003 | `tuku doctor` verifica que la tabla de despacho del `AGENTS.md` no nombre comandos que no existen. Sin agente |
 | [`003-10-el-dia-uno-en-un-turno.md`](003-10-el-dia-uno-en-un-turno.md) | Epic 003 | El día uno dictado en un turno, con lo que no se anota: deja el vault del epic 002 |
 | [`003-11-el-dia-que-no-se-dicta.md`](003-11-el-dia-que-no-se-dicta.md) | Epic 003 | Un hecho con hora y sin día cae en el último día con registros |
+| [`004-00-la-conversacion.md`](004-00-la-conversacion.md) | Epic 004 | Qué se verifica con dos agentes conversando, los escenarios del epic y el vault de partida que todos copian |
+| [`004-01-el-dia-conversado.md`](004-01-el-dia-conversado.md) | Epic 004 | Camino feliz: Damián consulta, aclara, delibera, se interrumpe y ratifica; el vault queda como el dictado directo de lo ratificado |
 
 ## Escenarios encadenados, desde el epic 002
 
