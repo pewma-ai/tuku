@@ -23,11 +23,14 @@ import json
 import os
 import shlex
 import shutil
+import socketserver
 import subprocess
 import sys
 import tempfile
+import threading
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 
@@ -137,7 +140,7 @@ ARNESES: dict[str, dict[str, list[str]]] = {
         "esfuerzo": ["--effort", "{esfuerzo}"],
         "listar": ["models"],
         "continuar": ["--conversation", "{id}"],
-        "json": ["--output-format", "json"],
+        "json": ["--output-format", "stream-json"],
     },
     "hermes": {
         "aislar": ["-p", "{perfil}", "chat", "--oneshot", "--quiet", "--yolo"],
@@ -290,22 +293,78 @@ class Sesion:
     id: str | None = None
 
 
-def leer_sesion(stdout: str, sesion: Sesion) -> str:
-    """El texto de la respuesta, y el id de la conversación guardado en `sesion`.
-
-    Una salida que no es el JSON esperado vuelve tal cual y deja la sesión como
-    estaba: el turno falla por lo que dijo el agente, no por el formato.
-    """
+def _eventos(stdout: str) -> list[dict[str, Any]]:
+    """Los objetos JSON de la salida, de una línea cada uno (`stream-json`) o entera."""
     try:
         dato = json.loads(stdout)
     except json.JSONDecodeError:
-        return stdout
-    if not isinstance(dato, dict):
-        return stdout
-    if isinstance(dato.get("conversation_id"), str):
-        sesion.id = dato["conversation_id"]
-    respuesta = dato.get("response")
+        dato = None
+    if isinstance(dato, dict):
+        return [dato]
+    salida = []
+    for linea in stdout.splitlines():
+        try:
+            d = json.loads(linea)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(d, dict):
+            salida.append(d)
+    return salida
+
+
+def leer_sesion(stdout: str, sesion: Sesion) -> str:
+    """El texto de la respuesta, y el id de la conversación guardado en `sesion`.
+
+    Entiende la salida entera en un JSON y el `stream-json`, donde la respuesta
+    viene en el evento `result`. Una salida que no es ninguna de las dos vuelve
+    tal cual y deja la sesión como estaba: el turno falla por lo que dijo el
+    agente, no por el formato.
+    """
+    respuesta: object = None
+    for evento in _eventos(stdout):
+        interno = evento.get("result")
+        dato: dict[str, Any] = interno if isinstance(interno, dict) else evento
+        if isinstance(dato.get("conversation_id"), str):
+            sesion.id = dato["conversation_id"]
+        if isinstance(dato.get("response"), str):
+            respuesta = dato["response"]
     return respuesta if isinstance(respuesta, str) else stdout
+
+
+def pasos_de(stdout: str) -> str:
+    """Los pasos que dio el agente en un turno, uno por línea y con lo que tardó.
+
+    Sale del `stream-json` sin filtrar nada: cada llamada al modelo y cada
+    herramienta, para ver en qué se fue el tiempo. Vacío si la salida no es un
+    `stream-json`.
+    """
+    lineas: list[str] = []
+    final: dict[str, Any] = {}
+    for e in _eventos(stdout):
+        if e.get("event") == "result" and isinstance(e.get("result"), dict):
+            final = e["result"]
+        paso = e.get("step_update")
+        if not isinstance(paso, dict) or paso.get("state") != "DONE":
+            continue
+        tipo, segundos = paso.get("step_type"), paso.get("duration_seconds") or 0
+        if tipo == "agent_response":
+            uso = paso.get("usage") or {}
+            entrada, salida = uso.get("input_tokens", 0), uso.get("output_tokens", 0)
+            que = f"modelo ({entrada} tokens de entrada, {salida} de salida)"
+        elif tipo == "tool":
+            info = paso.get("tool_info") or {}
+            parametros = " ".join(str(v) for v in (info.get("parameters") or {}).values())
+            que = f"{paso.get('tool_name')} {parametros}"[:240]
+        else:
+            continue
+        lineas.append(f"{paso.get('step_index', 0):>3}  {segundos:5.1f} s  {que}")
+    if not lineas:
+        return ""
+    total = final.get("duration_seconds")
+    cierre = (
+        f"total {total:.1f} s, {len(lineas)} pasos" if isinstance(total, int | float) else ""
+    )
+    return "\n".join([*lineas, cierre]).strip()
 
 
 @dataclass(frozen=True)
@@ -322,7 +381,10 @@ class Arnes:
         plantilla = ARNESES[self.nombre]
         if sesion is not None and "continuar" not in plantilla:
             raise ArnesNoDisponible(f"{self.nombre} no sabe retomar una conversación")
-        partes = [self.ejecutable, *(a.format(perfil=self.perfil) for a in plantilla["aislar"])]
+        partes = [
+            self.ejecutable,
+            *(a.format(perfil=self.perfil) for a in plantilla["aislar"]),
+        ]
         if sesion is not None:
             partes += plantilla["json"]
             if sesion.id:
@@ -347,6 +409,7 @@ class Turno:
     stderr: str
     traza: list[list[str]] = field(default_factory=list)
     conversacion: str = ""  #: los turnos intermedios, si el arnés sabe darlos
+    crudo: str = ""  #: la salida del arnés sin filtrar
 
     @property
     def comandos(self) -> list[str]:
@@ -520,7 +583,7 @@ def disponible() -> bool:
 #: dependía de que el `python3` del `PATH` fuera el de la suite, y dejó de serlo
 #: en cuanto el arnés empezó a limpiarle el entorno al agente: el shim reventaba
 #: sin dependencias y el agente, con razón, se iba a buscar otro `tuku`.
-_SHIM = """#!{python}
+_EJECUTOR = """#!{python}
 import json, os, sys
 sys.path.insert(0, {src!r})
 sys.path.insert(0, {scripts!r})
@@ -547,6 +610,31 @@ sys.exit(codigo)
 """
 
 
+#: Lo que el agente ejecuta cuando escribe `tuku`: reenvía la llamada al puente.
+#:
+#: El sandbox del arnés impide leer el checkout y escribir en el vault desde un
+#: comando de shell, así que un `tuku` que hiciera el trabajo ahí dentro
+#: fallaría en su primera llamada y el agente, creyendo que no existe, lo
+#: depuraría o editaría a mano. Este cliente solo necesita la biblioteca estándar
+#: y un socket; el trabajo lo hace el puente, fuera del sandbox.
+_CLIENTE = """#!{python}
+import json, os, socket, sys
+s = socket.socket(socket.AF_UNIX)
+s.connect({socket!r})
+s.sendall(json.dumps({{"argv": sys.argv[1:], "cwd": os.getcwd()}}).encode() + b"\\n")
+datos = b""
+while True:
+    trozo = s.recv(65536)
+    if not trozo:
+        break
+    datos += trozo
+r = json.loads(datos)
+sys.stdout.write(r["stdout"])
+sys.stderr.write(r["stderr"])
+sys.exit(r["codigo"])
+"""
+
+
 #: Una función de shell que llama al shim por ruta absoluta, para los arneses
 #: que ejecutan en **shell de login**.
 #:
@@ -563,19 +651,71 @@ _FUNCION_SHIM = 'tuku() {{ "{shim}" "$@"; }}\nexport -f tuku 2>/dev/null || true
 
 
 def _sembrar_shim(dir: Path) -> Path:
-    """Deja un `tuku` ejecutable en `dir` y devuelve el archivo de traza."""
-    shim = dir / "tuku"
-    shim.write_text(
-        _SHIM.format(
+    """Deja en `dir` el `tuku` del agente y el ejecutor real, y devuelve el archivo de traza."""
+    ejecutor = dir / "ejecutor.py"
+    ejecutor.write_text(
+        _EJECUTOR.format(
             python=sys.executable,
             src=str(RAIZ_REPO / "src"),
             scripts=str(Path(__file__).parent),
         ),
         encoding="utf-8",
     )
+    shim = dir / "tuku"
+    shim.write_text(
+        _CLIENTE.format(
+            python=getattr(sys, "_base_executable", sys.executable),
+            socket=str(dir / "puente.sock"),
+        ),
+        encoding="utf-8",
+    )
     shim.chmod(0o755)
     (dir / "shim.bash").write_text(_FUNCION_SHIM.format(shim=shim), encoding="utf-8")
     return dir / "traza.jsonl"
+
+
+class Puente:
+    """Ejecuta los `tuku` del agente fuera de su sandbox y le devuelve la salida.
+
+    Escucha en `puente.sock`, dentro del directorio del shim. Cada llamada corre
+    el ejecutor con el entorno de la prueba y en el directorio desde el que la
+    hizo el agente.
+    """
+
+    def __init__(self, dir: Path, entorno: dict[str, str]) -> None:
+        self.ejecutor = dir / "ejecutor.py"
+        self.entorno = entorno
+        self.servidor = socketserver.ThreadingUnixStreamServer(
+            str(dir / "puente.sock"), self._manejador()
+        )
+        self.servidor.daemon_threads = True
+
+    def _manejador(self) -> type[socketserver.StreamRequestHandler]:
+        puente = self
+
+        class Manejador(socketserver.StreamRequestHandler):
+            def handle(self) -> None:
+                pedido = json.loads(self.rfile.readline())
+                p = subprocess.run(
+                    [sys.executable, str(puente.ejecutor), *pedido["argv"]],
+                    cwd=pedido["cwd"],
+                    env=puente.entorno,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                respuesta = {"codigo": p.returncode, "stdout": p.stdout, "stderr": p.stderr}
+                self.wfile.write(json.dumps(respuesta).encode())
+
+        return Manejador
+
+    def __enter__(self) -> Puente:
+        threading.Thread(target=self.servidor.serve_forever, daemon=True).start()
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.servidor.shutdown()
+        self.servidor.server_close()
 
 
 def _leer_traza(traza: Path) -> list[list[str]]:
@@ -610,6 +750,15 @@ def _conversacion(arnes: Arnes, vault: Path, entorno: dict[str, str]) -> str:
     return p.stdout if p.returncode == 0 else f"(el export salió {p.returncode})\n{p.stderr}"
 
 
+def con_reloj(prompt: str, ahora: str | None) -> str:
+    """El turno precedido por la fecha y hora simuladas, como las da un cliente real.
+
+    El agente no ve el `TUKU_NOW` del shim hasta que corre un `tuku`, y para
+    entonces ya eligió el día y la hora de `--at` con el reloj de la máquina.
+    """
+    return f"(Hoy es {ahora}.)\n{prompt}" if ahora else prompt
+
+
 def turno(
     vault: Path,
     prompt: str,
@@ -634,16 +783,23 @@ def turno(
     if motivo is not None:
         raise ArnesNoDisponible(motivo)
     arnes = configurado()
+    plantilla = ARNESES[arnes.nombre]
+    if sesion is None and "json" in plantilla and "continuar" in plantilla:
+        # Salida estructurada aunque nadie retome la conversación: deja la traza.
+        sesion = Sesion()
 
     with tempfile.TemporaryDirectory(prefix="tuku-shim-") as tmp:
         bin = Path(tmp)
         traza = _sembrar_shim(bin)
-        entorno = {
+        base = {
             **{k: v for k, v in os.environ.items() if k not in DEL_RUNNER},
-            "PATH": f"{bin}{os.pathsep}{_path_sin_venv()}",
             "TUKU_TRAZA": str(traza),
             "TUKU_HOME": str(RAIZ_REPO),
             **({"TUKU_NOW": ahora} if ahora else {}),
+        }
+        entorno = {
+            **base,
+            "PATH": f"{bin}{os.pathsep}{_path_sin_venv()}",
             # Lo que bash no-interactivo sourcea al arrancar. Es por dónde entra
             # la función del shim en los arneses que ejecutan por shell de login.
             "BASH_ENV": str(bin / "shim.bash"),
@@ -651,22 +807,28 @@ def turno(
         }
         espera = timeout or int(os.environ.get("TUKU_AGENTE_TIMEOUT", TIMEOUT))
         try:
-            p = subprocess.run(
-                arnes.argv(prompt, sesion),
-                cwd=vault,
-                env=entorno,
-                capture_output=True,
-                text=True,
-                timeout=espera,
-                check=False,
+            with Puente(bin, base):
+                p = subprocess.run(
+                    arnes.argv(con_reloj(prompt, ahora), sesion),
+                    cwd=vault,
+                    env=entorno,
+                    capture_output=True,
+                    text=True,
+                    timeout=espera,
+                    check=False,
+                )
+        except subprocess.TimeoutExpired as e:
+            parcial = (
+                e.stdout.decode("utf-8", "replace") if isinstance(e.stdout, bytes) else e.stdout
             )
-        except subprocess.TimeoutExpired:
             return Turno(
                 prompt=prompt,
                 codigo=124,
                 stdout="",
                 stderr=f"el turno pasó de {espera}s sin terminar",
                 traza=_leer_traza(traza),
+                conversacion=pasos_de(parcial or ""),
+                crudo=parcial or "",
             )
         stdout = leer_sesion(p.stdout, sesion) if sesion is not None else p.stdout
         return Turno(
@@ -675,7 +837,8 @@ def turno(
             stdout=stdout,
             stderr=p.stderr,
             traza=_leer_traza(traza),
-            conversacion=_conversacion(arnes, vault, entorno),
+            conversacion=_conversacion(arnes, vault, entorno) or pasos_de(p.stdout),
+            crudo=p.stdout,
         )
 
 

@@ -71,23 +71,24 @@ def test_el_shim_escribe_en_el_vault_con_el_entorno_que_recibe_el_agente() -> No
                 "TUKU_TRAZA": str(traza),
                 "TUKU_HOME": str(vault.RAIZ_REPO),
             }
-            p = subprocess.run(
-                [
-                    "tuku",
-                    "entry",
-                    "add",
-                    "--at",
-                    "2026-08-11 09:12",
-                    "--scope",
-                    "personal",
-                    "--body",
-                    "**señal**: el arnés mide",
-                ],
-                cwd=v,
-                env=entorno,
-                capture_output=True,
-                text=True,
-            )
+            with agente.Puente(bin, {**entorno, "PATH": os.environ["PATH"]}):
+                p = subprocess.run(
+                    [
+                        "tuku",
+                        "entry",
+                        "add",
+                        "--at",
+                        "2026-08-11 09:12",
+                        "--scope",
+                        "personal",
+                        "--body",
+                        "**señal**: el arnés mide",
+                    ],
+                    cwd=v,
+                    env=entorno,
+                    capture_output=True,
+                    text=True,
+                )
             assert p.returncode == 0, p.stderr
             assert traza.is_file(), "el shim no anotó: el agente no pasaría por él"
         escrito = (v / "AHORA.md").read_text(encoding="utf-8")
@@ -173,7 +174,7 @@ def test_un_turno_sin_sesion_no_pide_json_ni_conversacion() -> None:
 
 def test_el_primer_turno_de_una_sesion_pide_json() -> None:
     argv = _agy().argv("hola", agente.Sesion())
-    assert argv[argv.index("--output-format") + 1] == "json"
+    assert argv[argv.index("--output-format") + 1] == "stream-json"
     assert "--conversation" not in argv
 
 
@@ -192,6 +193,40 @@ def test_la_respuesta_json_deja_el_id_en_la_sesion() -> None:
     sesion = agente.Sesion()
     texto = agente.leer_sesion('{"conversation_id": "abc", "response": "ok\\n"}', sesion)
     assert (texto, sesion.id) == ("ok\n", "abc")
+
+
+STREAM = "\n".join(
+    [
+        '{"event":"init","conversation_id":"abc"}',
+        '{"event":"step_update","step_update":{"step_index":1,"state":"DONE","step_type":"agent_response",'
+        '"duration_seconds":3.5,"usage":{"input_tokens":14526,"output_tokens":57}}}',
+        '{"event":"step_update","step_update":{"step_index":2,"state":"ACTIVE","step_type":"tool","tool_name":"view_file"}}',
+        '{"event":"step_update","step_update":{"step_index":2,"state":"DONE","step_type":"tool","tool_name":"view_file",'
+        '"duration_seconds":0.5,"tool_info":{"parameters":{"AbsolutePath":"/v/AHORA.md"}}}}',
+        '{"event":"result","result":{"conversation_id":"abc","response":"Listo.","duration_seconds":4.2}}',
+    ]
+)
+
+
+def test_el_turno_lleva_la_fecha_simulada_delante() -> None:
+    assert (
+        agente.con_reloj("Pagué.", "2026-08-12 21:00") == "(Hoy es 2026-08-12 21:00.)\nPagué."
+    )
+    assert agente.con_reloj("Pagué.", None) == "Pagué."
+
+
+def test_el_stream_deja_la_respuesta_y_el_id_de_la_sesion() -> None:
+    sesion = agente.Sesion()
+    assert agente.leer_sesion(STREAM, sesion) == "Listo."
+    assert sesion.id == "abc"
+
+
+def test_los_pasos_cuentan_cada_llamada_con_lo_que_tardo() -> None:
+    pasos = agente.pasos_de(STREAM).splitlines()
+    assert pasos[0].endswith("3.5 s  modelo (14526 tokens de entrada, 57 de salida)")
+    assert pasos[1].endswith("0.5 s  view_file /v/AHORA.md")
+    assert pasos[2] == "total 4.2 s, 2 pasos"
+    assert agente.pasos_de("texto plano") == ""
 
 
 def test_una_salida_que_no_es_json_se_devuelve_tal_cual() -> None:

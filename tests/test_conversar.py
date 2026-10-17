@@ -49,8 +49,8 @@ def test_un_turno_sin_cambios_se_lee_vacio() -> None:
         ],
     }
     texto = conversar.renderizar(estado, "Conversación")
-    assert "**Damián:** ¿Qué me queda?" in texto
-    assert "> Cuatro cosas." in texto
+    assert "> [!question] Damián\n> ¿Qué me queda?" in texto
+    assert "> [!info] Agente\n> Cuatro cosas." in texto
     assert "**Comandos que escriben:** ninguno" in texto
     assert "**Delta del vault:** vacío" in texto
 
@@ -72,8 +72,10 @@ def test_el_log_muestra_la_hora_de_cada_turno_y_cuanto_demoro() -> None:
         ],
     }
     texto = conversar.renderizar(estado, "Conversación")
-    assert "**Damián** (23:41:07): Pagué." in texto
-    assert "**Agente** (23:41:44, 37 s):" in texto
+    assert (
+        "> [!question] Damián (23:41:07)\n> Pagué.\n\n> [!info] Agente (23:41:44, 37 s)\n"
+        in texto
+    )
 
 
 def test_el_log_lista_comandos_y_delta_cuando_los_hay() -> None:
@@ -128,7 +130,7 @@ def test_un_escenario_agentico_deja_su_conversacion_en_el_vault(
 
     texto = (v / conversar.LOG).read_text(encoding="utf-8")
     assert "El autor es el texto del escenario." in texto
-    assert "**Autor** (" in texto
+    assert "> [!question] Autor (" in texto
     assert "- `tuku entry add --body x`" in texto
     assert "- `borrador.txt`: nuevo" in texto
     assert main(["doctor", "--vault", str(v)]) == EXITO
@@ -153,3 +155,36 @@ def test_el_log_no_deja_links_de_la_respuesta_que_el_doctor_lea(tmp_path: Path) 
     }
     conversar.escribir_log(v, estado, "Conversación")
     assert main(["doctor", "--vault", str(v)]) == EXITO
+
+
+def test_cada_turno_deja_junto_al_vault_lo_que_devolvio_el_arnes_sin_filtrar(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    v = init.init(tmp_path / "esc" / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
+
+    def _turno(vault: Path, prompt: str, **_: object) -> agente.Turno:
+        return agente.Turno(
+            prompt=prompt,
+            codigo=0,
+            stdout="Listo.",
+            stderr="",
+            conversacion="  1    2.0 s  modelo (10 tokens de entrada, 5 de salida)",
+            crudo='{"event":"result"}\n',
+        )
+
+    monkeypatch.setattr(agente, "turno", _turno)
+    monkeypatch.setattr(
+        agente, "configurado", lambda: agente.Arnes(nombre="agy", ejecutable="agy", modelo="m")
+    )
+    conversar.turno(v, "Hola", "2026-08-12 21:00")
+    conversar.turno(v, "Otra vez", "2026-08-12 21:00")
+
+    trazas = v.parent / conversar.TRAZAS
+    assert sorted(p.name for p in trazas.iterdir()) == [
+        "turno-01.jsonl",
+        "turno-01.txt",
+        "turno-02.jsonl",
+        "turno-02.txt",
+    ]
+    assert (trazas / "turno-01.jsonl").read_text(encoding="utf-8") == '{"event":"result"}\n'
+    assert "modelo (10 tokens" in (trazas / "turno-02.txt").read_text(encoding="utf-8")

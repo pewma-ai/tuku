@@ -28,6 +28,7 @@ import agente
 import vault
 
 ESTADO = "conversacion.json"
+TRAZAS = "trazas"
 LOG = Path("notas") / "conversation-log.md"
 
 
@@ -78,11 +79,12 @@ def _sin_links(texto: str) -> str:
     return texto.replace("](", "]\\(").replace("[[", "[\\[")
 
 
-def _quien(nombre: str, hora_iso: str | None, extra: str = "") -> str:
-    """`**Nombre** (HH:MM:SS, 37 s):`, o `**Nombre:**` si el turno no trae hora."""
-    if not hora_iso:
-        return f"**{nombre}:**"
-    return f"**{nombre}** ({hora_iso[11:19]}{extra}):"
+def _callout(
+    tipo: str, nombre: str, hora_iso: str | None, texto: str, extra: str = ""
+) -> list[str]:
+    """`> [!tipo] Nombre (HH:MM:SS, 37 s)` y debajo el texto citado."""
+    titulo = f"{nombre} ({hora_iso[11:19]}{extra})" if hora_iso else nombre
+    return [f"> [!{tipo}] {titulo}", *(f"> {x}".rstrip() for x in texto.splitlines())]
 
 
 def renderizar(estado: dict[str, Any], titulo: str) -> str:
@@ -105,13 +107,14 @@ def renderizar(estado: dict[str, Any], titulo: str) -> str:
         lineas += [
             f"## Turno {n}",
             "",
-            f"{_quien(autor, t.get('enviado'))} {t['damian']}",
+            *_callout("question", autor, t.get("enviado"), t["damian"]),
             "",
-            _quien("Agente", t.get("respondido"), f", {t.get('segundos', 0)} s"),
-            "",
-            *(
-                f"> {x}".rstrip()
-                for x in _sin_links(t["agente"] or "(sin respuesta)").splitlines()
+            *_callout(
+                "info",
+                "Agente",
+                t.get("respondido"),
+                _sin_links(t["agente"] or "(sin respuesta)"),
+                f", {t.get('segundos', 0)} s",
             ),
             "",
             "**Comandos que escriben:**" + (" ninguno" if escribe == "ninguno" else ""),
@@ -144,6 +147,21 @@ def preparar(base: Path, slug: str, escenario: str) -> Path:
     return destino / "mi-vault"
 
 
+def dejar_traza(v: Path, numero: int, resultado: agente.Turno) -> None:
+    """Deja junto al vault lo que el arnés devolvió, sin filtrar, y los pasos que dio.
+
+    Va fuera del vault, en `trazas/turno-NN.jsonl` y `.txt`: es la evidencia para
+    ver en qué se fue el tiempo de un turno y qué leyó el agente antes de escribir.
+    """
+    carpeta = v.parent / TRAZAS
+    carpeta.mkdir(exist_ok=True)
+    (carpeta / f"turno-{numero:02d}.jsonl").write_text(resultado.crudo, encoding="utf-8")
+    if resultado.conversacion.strip():
+        (carpeta / f"turno-{numero:02d}.txt").write_text(
+            resultado.conversacion.strip() + "\n", encoding="utf-8"
+        )
+
+
 def turno(v: Path, frase: str, ahora: str) -> dict[str, Any]:
     estado = _cargar(v)
     sesion = agente.Sesion(estado["id"])
@@ -162,6 +180,7 @@ def turno(v: Path, frase: str, ahora: str) -> dict[str, Any]:
         or arnes.modelo
         or agente.modelo_barato(arnes.nombre, arnes.ejecutable),
     )
+    dejar_traza(v, len(estado["turnos"]) + 1, resultado)
     estado["turnos"].append(turno_registrado)
     _ruta_estado(v).write_text(
         json.dumps(estado, ensure_ascii=False, indent=1), encoding="utf-8"

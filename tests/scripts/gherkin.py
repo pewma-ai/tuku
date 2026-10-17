@@ -546,6 +546,8 @@ def _dejar_a_la_vista(turno: agente.Turno, dir: Path) -> None:
         bloques.append(f"## La sesión entera\n\n{turno.conversacion.strip()}")
     salida = dir.parent / f"{arnes}.{cuando}.txt"
     salida.write_text("\n\n".join(bloques) + "\n", encoding="utf-8")
+    if turno.crudo:
+        salida.with_suffix(".jsonl").write_text(turno.crudo, encoding="utf-8")
 
 
 def _exigir_que_la_traza_explique(
