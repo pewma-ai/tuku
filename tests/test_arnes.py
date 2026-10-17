@@ -371,3 +371,42 @@ def test_si_el_turno_se_interrumpe_el_arnes_no_queda_corriendo(
         time.sleep(0.1)
     os.kill(pid, 9)
     pytest.fail("el arnés siguió corriendo después de la interrupción")
+
+
+def _ajustes_de_agy(home: Path, permitidas: list[str] | None) -> None:
+    ruta = home / ".gemini" / "antigravity-cli" / "settings.json"
+    ruta.parent.mkdir(parents=True)
+    if permitidas is not None:
+        ruta.write_text(json.dumps({"permissions": {"allow": permitidas}}), encoding="utf-8")
+
+
+def test_agy_sin_la_regla_de_tuku_no_esta_disponible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    _ajustes_de_agy(tmp_path, ["command(echo)"])
+    motivo = agente._falta_permiso("agy")
+    assert motivo is not None and "command(tuku)" in motivo and "settings.json" in motivo
+
+
+def test_agy_sin_ajustes_tampoco_esta_disponible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    assert agente._falta_permiso("agy") is not None
+
+
+def test_agy_con_la_regla_de_tuku_esta_disponible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    _ajustes_de_agy(tmp_path, ["command(echo)", "command(tuku)"])
+    assert agente._falta_permiso("agy") is None
+    assert agente._falta_permiso("hermes") is None
+
+
+def test_ningun_arnes_auto_aprueba_toda_herramienta() -> None:
+    """`--dangerously-skip-permissions` deja al agente salir del sandbox para lo que quiera."""
+    agy = agente.ARNESES["agy"]["aislar"]
+    assert "--sandbox" in agy
+    assert "--dangerously-skip-permissions" not in agy

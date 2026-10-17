@@ -52,12 +52,15 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 #: un agente que mira otro vault tampoco toca este. Sin aislamiento, el epic mide
 #: la configuración de la máquina y no el `AGENTS.md` que dice medir.
 #:
-#: Ahí va también lo que deja al agente **ejecutar**. En modo headless no hay a
-#: quién pedirle permiso, así que el arnés auto-aprueba dentro de un sandbox. Es
-#: deliberado y tiene su precio: se auto-aprueba toda herramienta, no solo `tuku`.
-#: A cambio, la suite no depende de la configuración de la máquina, que es lo que
-#: pide el `003-00`, y el agente opera sobre un vault desechable de `playground/`.
-#: Si un arnés ofreciera una regla acotada a un solo ejecutable, ese es el cambio.
+#: Ahí va también lo que deja al agente **ejecutar**. Un `tuku` del agente corre
+#: fuera de su sandbox, porque el shim necesita un socket y el sandbox bloquea toda
+#: red, y escribir el vault desde un comando también. Auto-aprobar toda herramienta
+#: (`--dangerously-skip-permissions`) dejaba al agente saltarse el sandbox para lo
+#: que quisiera: en el `004-03` leyó el escenario que lo evalúa. Por eso el arnés
+#: **no** auto-aprueba: en headless todo comando que no esté en `permissions.allow`
+#: se rechaza, y el agente solo puede salir del sandbox con `tuku`. Eso exige la
+#: regla `command(tuku)` en los ajustes del arnés, y `motivo_no_disponible` avisa
+#: cuando falta (`_REGLA_DE_PERMISO`).
 #:
 #: `sesion` es opcional y dice cómo pedirle al arnés **la conversación entera**,
 #: no solo el texto final. Lo que un turno devuelve por stdout es su conclusión;
@@ -136,7 +139,7 @@ _MODELOS: dict[str, str | None] = {}
 
 ARNESES: dict[str, dict[str, list[str]]] = {
     "agy": {
-        "aislar": ["--new-project", "--sandbox", "--dangerously-skip-permissions"],
+        "aislar": ["--new-project", "--sandbox"],
         "prompt": ["-p", "{prompt}"],
         "modelo": ["--model", "{modelo}"],
         "esfuerzo": ["--effort", "{esfuerzo}"],
@@ -591,6 +594,31 @@ def configurado() -> Arnes:
     )
 
 
+#: Dónde guarda cada arnés sus reglas de permiso y la que necesita el shim. Sin ella,
+#: el primer `tuku` del agente se rechaza en headless y el turno termina vacío.
+_REGLA_DE_PERMISO = {
+    "agy": (Path(".gemini") / "antigravity-cli" / "settings.json", "command(tuku)"),
+}
+
+
+def _falta_permiso(nombre: str) -> str | None:
+    """Por qué el arnés no dejaría correr `tuku`, o `None` si la regla está."""
+    if nombre not in _REGLA_DE_PERMISO:
+        return None
+    ajustes, regla = _REGLA_DE_PERMISO[nombre]
+    ruta = Path.home() / ajustes
+    try:
+        permitidas = json.loads(ruta.read_text(encoding="utf-8"))["permissions"]["allow"]
+    except OSError, ValueError, KeyError, TypeError:
+        permitidas = []
+    if regla in permitidas:
+        return None
+    return (
+        f"{nombre} no puede ejecutar `tuku` sin pedir permiso. Agrega {regla!r} a "
+        f"permissions.allow en ~/{ajustes}."
+    )
+
+
 def motivo_no_disponible() -> str | None:
     """Por qué no se puede correr un turno, o `None` si sí se puede."""
     try:
@@ -602,7 +630,7 @@ def motivo_no_disponible() -> str | None:
             f"no hay {arnes.ejecutable!r} en el PATH. Instálalo, o apunta a otro arnés "
             f"con TUKU_AGENTE (hay: {', '.join(sorted(ARNESES))})."
         )
-    return None
+    return _falta_permiso(arnes.nombre)
 
 
 def disponible() -> bool:
