@@ -95,6 +95,24 @@ def region_del_dia(
     ]
 
 
+def region_de_la_semana(
+    filas: list[todo.Fila], rutas: Mapping[str, str] | None = None
+) -> list[str]:
+    """Las líneas propagadas bajo el título: callout `[!todo] Pendientes de esta semana`.
+
+    Lleva los pendientes del primer horizonte, los del ciclo en curso que no tienen
+    fecha. Si no hay ninguno, la región queda vacía.
+    """
+    items = [
+        linea_del_dia(f, rutas)
+        for f in filas
+        if todo.slug(f.horizonte) == todo.slug(todo.ESTA_SEMANA)
+    ]
+    if not items:
+        return []
+    return [f"> [!todo] Pendientes de {todo.ESTA_SEMANA}", *(f"> {item}" for item in items)]
+
+
 def _fin_de_seccion(lineas: list[str], ini: int) -> int:
     """Índice donde termina la sección del día que empieza en `ini`."""
     return next(
@@ -107,10 +125,8 @@ def _fin_de_seccion(lineas: list[str], ini: int) -> int:
     )
 
 
-def propagar_ahora(
-    ahora: str, pendientes: str, rutas: Mapping[str, str] | None = None
-) -> str:
-    """`AHORA.md` con la región de cada día regenerada desde la tabla.
+def propagar_ahora(ahora: str, pendientes: str, rutas: Mapping[str, str] | None = None) -> str:
+    """`AHORA.md` con la región de cada día y la de la semana regeneradas desde la tabla.
 
     Reemplaza la región entera, así que propagar dos veces no duplica ninguna
     línea. Un día cuyo encabezado no se puede fechar (el ciclo sin `from`/`to`
@@ -135,6 +151,15 @@ def propagar_ahora(
             lineas[ini + 1 : fin] = [*callout_lineas, "", *resto]
         else:
             lineas[ini + 1 : fin] = resto or [""]
+
+    # Bajo `# Actividad diaria`, antes del primer día, va el callout de la semana. Se hace al
+    # final porque los índices de `dias()` son sobre el texto original.
+    titulo = next((i for i, x in enumerate(lineas) if x.strip() == "# Actividad diaria"), None)
+    if titulo is not None:
+        semana = region_de_la_semana(todas, rutas)
+        lineas[titulo + 1 : _fin_de_seccion(lineas, titulo)] = (
+            ["", *semana, ""] if semana else [""]
+        )
 
     texto = "\n".join(lineas)
     return texto + "\n" if ahora.endswith("\n") and not texto.endswith("\n") else texto

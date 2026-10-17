@@ -24,6 +24,9 @@ to: 2026-08-30
 
 # Actividad diaria
 
+> [!todo] Pendientes de esta semana
+> - [personal](ambitos/personal/personal.md) - comprar una maleta
+
 ## Martes 25 de agosto
 
 > [!todo] Pendientes del día
@@ -38,7 +41,7 @@ to: 2026-08-30
 > - [personal](ambitos/personal/personal.md) - pagar la sesión con el psicólogo
 ```
 
-Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku regenerate todo`. Se distingue sin marca: los registros empiezan por `- HH:MM - `.
+Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku regenerate todo`. También lo es el callout de la semana, bajo `# Actividad diaria` y antes del primer día ([`pendientes.md`](pendientes.md)). Se distingue sin marca: los registros empiezan por `- HH:MM - `.
 
 **No tiene resumen.** El resumen se genera al cerrar, así que no existe mientras el ciclo está abierto.
 
@@ -72,7 +75,7 @@ to: 2026-08-30
 | Bloque | Abierto | Cerrado |
 | --- | --- | --- |
 | Plan | transclusión desde `planes/` | texto aplanado |
-| Pendientes del día | propagados desde `PENDIENTES.md` | ya son texto, no cambian |
+| Pendientes del día y de la semana | propagados desde `PENDIENTES.md` | ya son texto, no cambian |
 | Registros | canónicos | sin cambios |
 | Resumen | no existe | enlace a `reportes/` |
 

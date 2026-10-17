@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from datetime import date
 
-from tuku.propagate import documento_ambitos, propagar_ahora, region_del_dia
+from tuku.propagate import (
+    documento_ambitos,
+    propagar_ahora,
+    region_de_la_semana,
+    region_del_dia,
+)
 from tuku.todo import filas
 
 P = "[personal](ambitos/personal/personal.md)"
@@ -46,11 +51,41 @@ def test_region_del_dia_solo_lleva_los_de_esa_fecha() -> None:
     ], "sin ámbito va sin enlace"
 
 
+def test_region_de_la_semana_lleva_los_de_esta_semana_y_ninguno_con_fecha() -> None:
+    assert region_de_la_semana(filas(PENDIENTES)) == [
+        "> [!todo] Pendientes de esta semana",
+        f"> - {P} - comprar una maleta",
+    ]
+    assert region_de_la_semana(filas(PENDIENTES, "con fecha")) == []
+
+
+def test_la_region_de_la_semana_va_bajo_el_titulo_y_se_rehace_entera() -> None:
+    una = propagar_ahora(AHORA, PENDIENTES)
+    lineas = una.splitlines()
+    i = lineas.index("# Actividad diaria")
+    assert lineas[i + 1 : i + 5] == [
+        "",
+        "> [!todo] Pendientes de esta semana",
+        f"> - {P} - comprar una maleta",
+        "",
+    ]
+    assert lineas[i + 5] == "## Lunes 7 de septiembre"
+
+    sin_maleta = PENDIENTES.replace(f"| esta semana |  | {P} | comprar una maleta |\n", "")
+    texto = propagar_ahora(una, sin_maleta)
+    assert "Pendientes de esta semana" not in texto
+    sin = texto.splitlines()
+    assert sin[sin.index("# Actividad diaria") + 1 :][:2] == ["", "## Lunes 7 de septiembre"]
+    assert propagar_ahora(una, PENDIENTES) == una
+
+
 def test_propagar_ahora_reemplaza_la_region_entera_antes_del_primer_registro() -> None:
     una = propagar_ahora(AHORA, PENDIENTES)
-    assert "comprar una maleta" not in una, "un pendiente sin fecha no aparece en ningún día"
-
     lineas = una.splitlines()
+    assert lineas.count(f"> - {P} - comprar una maleta") == 1, "solo en el callout de la semana"
+    assert lineas.index("## Lunes 7 de septiembre") > lineas.index(
+        f"> - {P} - comprar una maleta"
+    )
     i = lineas.index("## Martes 8 de septiembre")
     assert lineas[i + 1] == "> [!todo] Pendientes del día"
     assert lineas[i + 2] == f"> - {P} - pagar la sesión con el psicólogo"

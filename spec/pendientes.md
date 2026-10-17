@@ -111,6 +111,10 @@ No hay marca que la delimite, y es a propósito: los registros empiezan siempre 
 
 **Consecuencia directa:** no se escribe prosa suelta bajo el encabezado de un día. Lo que quede ahí lo reemplaza la siguiente propagación.
 
+### La región de la semana
+
+Bajo `# Actividad diaria`, antes del primer día, el comando es dueño de **lo que va hasta el primer `## <día>`**. Ahí escribe los pendientes sin fecha del primer horizonte (`esta semana` en el template vanilla) dentro de un callout `> [!todo] Pendientes de esta semana` (únicamente si hay alguno), y al regenerar reemplaza esa región entera. Cada línea es `- [ámbito](ruta) - detalle`, en el orden de la tabla. Los pendientes de `próxima semana` y `fin de mes` no aparecen: todavía no son de este ciclo. Cerrar o agendar un pendiente lo saca del callout.
+
 ### El archivo por ámbito
 
 `ambitos/PENDIENTES-AMBITOS.md` es generado y agrupa por ámbito, un callout por cada uno. Vive en `ambitos/` y no en `reportes/` porque no es un reporte: los reportes son documentos fechados, uno por ciclo, que el autor lee y archiva. Este no lleva fecha, se regenera entero cada vez y existe para ser transcluido, así que vive junto a lo que lo consume. MAYÚSCULAS porque lo escribe TUKU.
