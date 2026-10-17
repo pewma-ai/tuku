@@ -35,6 +35,7 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 | pregunta, delibera o pide investigar | nada | ninguno: se responde, no se escribe |
 
 - **Contarlo es pedirlo.** Si el autor cuenta algo, ejecuta el comando de su fila. No preguntes qué hacer con eso ni ofrezcas alternativas.
+- **Lo tentativo espera.** Un compromiso con el día, la hora o la forma sin decidir ("quizás el jueves", "mejor el viernes", "todavía no sé") no se abre. Conversa con el autor y ejecuta `tuku todo open` cuando lo ratifique ("quedamos así"), con el último acuerdo y no con los anteriores.
 - **Abre "Lee antes" antes de ejecutar.** Ahí están los campos, las fechas y los casos.
 - **Un hecho, un comando.** El comando ya escribe su registro: `tuku todo open`, `tuku todo close`, `tuku note create` y `tuku scope create` lo dejan en la bitácora, así que no corras además `tuku entry add`.
 - **Respeta el orden del dictado.** Cada hecho se registra en el vault tal como estaba en ese momento: un frente que el autor pide abrir más adelante no se crea antes.

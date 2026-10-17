@@ -69,6 +69,15 @@ def registro(
     }
 
 
+def _sin_links(texto: str) -> str:
+    """El texto con sus links vueltos literales.
+
+    La respuesta del agente cita links relativos a la raíz del vault, y desde
+    `notas/` no resuelven: el doctor los marcaría como rotos.
+    """
+    return texto.replace("](", "]\\(").replace("[[", "[\\[")
+
+
 def _quien(nombre: str, hora_iso: str | None, extra: str = "") -> str:
     """`**Nombre** (HH:MM:SS, 37 s):`, o `**Nombre:**` si el turno no trae hora."""
     if not hora_iso:
@@ -100,7 +109,10 @@ def renderizar(estado: dict[str, Any], titulo: str) -> str:
             "",
             _quien("Agente", t.get("respondido"), f", {t.get('segundos', 0)} s"),
             "",
-            *(f"> {x}".rstrip() for x in (t["agente"] or "(sin respuesta)").splitlines()),
+            *(
+                f"> {x}".rstrip()
+                for x in _sin_links(t["agente"] or "(sin respuesta)").splitlines()
+            ),
             "",
             "**Comandos que escriben:**" + (" ninguno" if escribe == "ninguno" else ""),
             "",

@@ -138,3 +138,18 @@ def test_sin_turnos_el_escenario_no_deja_log(tmp_path: Path) -> None:
     v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
     gherkin._dejar_la_conversacion(tmp_path, {"ahora": None, "turnos": []}, "dicta")
     assert not (v / conversar.LOG).exists()
+
+
+def test_el_log_no_deja_links_de_la_respuesta_que_el_doctor_lea(tmp_path: Path) -> None:
+    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    respuesta = (
+        "Quedó en [tesis](ambitos/no-existe/no-existe.md) y en [[otra-nota-que-no-existe]].\n"
+        "```markdown\n- [x](ambitos/no-existe/no-existe.md)\n```"
+    )
+    estado = {
+        "ahora": "2026-08-12 21:00",
+        "modelo": "m",
+        "turnos": [{"damian": "Pagué.", "agente": respuesta, "escribe": [], "delta": {}}],
+    }
+    conversar.escribir_log(v, estado, "Conversación")
+    assert main(["doctor", "--vault", str(v)]) == EXITO

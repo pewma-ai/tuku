@@ -43,7 +43,7 @@ tuku doctor --vault mi-vault
 
 ## Qué se mira a mano
 
-La conversación completa está en `playground/004-02-pensar-en-voz-alta/damian-piensa-en-voz-alta/mi-vault/notas/conversation-log.md`.
+La conversación completa está en `playground/004-02-pensar-en-voz-alta/damian-duda-toda-la-noche-y-no/mi-vault/notas/conversation-log.md`.
 
 - El agente delibera con Damián y no cambia de tema ni presiona por una decisión.
 - Ninguna respuesta ofrece abrir un pendiente ni anotar nada, salvo para decir que no lo hará.
