@@ -12,7 +12,7 @@ tuku init -h
 ```
 
 Entonces sale con código 0
-Y el texto nombra `dir`, `--variante`, `--author` y `--force`
+Y el texto nombra `dir`, `--variant`, `--author` y `--force`
 
 ## Escenario: un entorno roto no se confunde con un error de uso
 

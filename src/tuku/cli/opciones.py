@@ -142,7 +142,6 @@ class Opciones:
     def body(self, ayuda: str, *, requerido: bool = True, una_linea: bool = True) -> None:
         self.parser.add_argument(
             "--body",
-            "--cuerpo",
             dest="body",
             required=requerido,
             default=None,
@@ -153,12 +152,12 @@ class Opciones:
     def scope(
         self, ayuda: str = "ámbito, sin corchetes; por defecto, `scope_default` de la config"
     ) -> None:
-        self.parser.add_argument("--scope", "--ambito", dest="scope", default=None, help=ayuda)
+        self.parser.add_argument("--scope", dest="scope", default=None, help=ayuda)
 
     def parent(
         self, ayuda: str = "ámbito padre, que debe existir; por defecto, la raíz de `ambitos/`"
     ) -> None:
-        self.parser.add_argument("--parent", "--padre", dest="parent", default=None, help=ayuda)
+        self.parser.add_argument("--parent", dest="parent", default=None, help=ayuda)
 
     def at(
         self,
@@ -168,7 +167,6 @@ class Opciones:
     ) -> None:
         self.parser.add_argument(
             "--at",
-            "--cuando",
             dest="at",
             required=con_hora,
             default=Momento(),
@@ -179,7 +177,6 @@ class Opciones:
     def due(self, grupo: argparse._MutuallyExclusiveGroup | None = None) -> None:
         (grupo or self.parser).add_argument(
             "--due",
-            "--vence",
             dest="due",
             default=Momento(),
             type=momento_futuro,

@@ -123,14 +123,12 @@ def registrar(
     )
     init_p.add_argument(
         "--variant",
-        "--variante",
         dest="variant",
         default="vanilla",
         help="variante de template/ a copiar",
     )
     init_p.add_argument(
         "--author",
-        "--autor",
         dest="author",
         default=None,
         help="nombre del autor para LIBRO-DE-ESTILO.md; opcional",

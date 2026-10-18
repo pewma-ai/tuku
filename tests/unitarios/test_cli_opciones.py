@@ -40,8 +40,7 @@ def _parsear(comando: str, *argv: str) -> argparse.Namespace:
 # --- En memoria: lo que decide argparse ---------------------------------------
 
 
-def test_las_opciones_llegan_con_su_tipo_y_sus_alias_en_los_tres_comandos() -> None:
-    parser = cli._construir_parser()
+def test_las_opciones_llegan_con_su_tipo_en_los_tres_comandos() -> None:
     for comando in COMANDOS:
         args = _parsear(comando)
         assert (args.vault, args.scope, args.at) == (Path("."), None, Momento()), comando
@@ -55,20 +54,30 @@ def test_las_opciones_llegan_con_su_tipo_y_sus_alias_en_los_tres_comandos() -> N
             CUERPO,
         )
 
-        ingles = ("--scope", "casa", "--at", f"{HOY} 09:12", "--body", CUERPO)
-        castellano = ("--ambito", "casa", "--cuando", f"{HOY} 09:12", "--cuerpo", CUERPO)
-        assert parser.parse_args([*comando.split(), *ingles]) == parser.parse_args(
-            [*comando.split(), *castellano]
-        )
-
     for comando in ("todo open", "todo close"):
         assert _parsear(comando, "--no-propagate").no_propagate
         assert not _parsear(comando).no_propagate
 
-    assert _parsear("todo open", "--vence", f"{HOY} 09:00").due.celda() == f"{HOY} 09:00"
-    assert _parsear("todo open", "--horizonte", "próxima semana").horizon == "próxima semana"
+    assert _parsear("todo open", "--due", f"{HOY} 09:00").due.celda() == f"{HOY} 09:00"
+    assert _parsear("todo open", "--horizon", "próxima semana").horizon == "próxima semana"
     sin = _parsear("todo open")
     assert (sin.due, sin.horizon) == (Momento(), None)
+
+
+def test_cada_opcion_tiene_una_sola_forma_en_ingles(capsys: pytest.CaptureFixture[str]) -> None:
+    """Sin alias en español: la sintaxis se estabiliza con un nombre por opción."""
+    parser = cli._construir_parser()
+    casos = (
+        ("todo open --body x", "--cuerpo", "--ambito", "--cuando", "--vence", "--horizonte"),
+        ("scope create x", "--padre"),
+        ("note create x", "--cuerpo-archivo", "--sin-constancia"),
+        ("init", "--variante", "--autor"),
+    )
+    for comando, *alias in casos:
+        for opcion in alias:
+            with pytest.raises(SystemExit):
+                parser.parse_args([*comando.split(), opcion, "x"])
+            assert opcion in capsys.readouterr().err, (comando, opcion)
 
 
 def test_los_errores_de_opciones_son_error_de_uso(capsys: pytest.CaptureFixture[str]) -> None:

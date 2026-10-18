@@ -97,7 +97,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             o.due(plazo)
             plazo.add_argument(
                 "--horizon",
-                "--horizonte",
                 dest="horizon",
                 default=None,
                 help=(

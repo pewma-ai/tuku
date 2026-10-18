@@ -208,7 +208,7 @@ TIMEOUT = 600
 #: ubica un registro. Dos invocaciones del mismo verbo sobre el mismo
 #: sujeto, **seguidas**, son un intento y su corrección. Separadas por otro
 #: comando, no: ahí el agente ya siguió adelante y volver es otra cosa.
-_UBICAN = ("--at", "--cuando", "--due", "--vence")
+_UBICAN = ("--at", "--due")
 
 
 def _sujeto(argv: list[str]) -> tuple[str, ...]:

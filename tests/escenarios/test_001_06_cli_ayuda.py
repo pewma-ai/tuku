@@ -25,7 +25,7 @@ SLUG = "001-06-cli-ayuda"
 def test_tuku_init_menos_h_lista_lo_que_anade_el_epic_001() -> None:
     corrida = gherkin.correr(SLUG, "lista las opciones que añade el epic 001")
     assert corrida.codigo == EXITO, "`tuku init -h` no salió con código 0"
-    for pieza in ("dir", "--variante", "--author", "--force"):
+    for pieza in ("dir", "--variant", "--author", "--force"):
         assert pieza in corrida.stdout, f"`tuku init -h` no nombra {pieza}"
 
 

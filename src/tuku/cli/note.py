@@ -79,7 +79,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     crear.body("cuerpo de la nota", requerido=False, una_linea=False)
     note_create_p.add_argument(
         "--body-file",
-        "--cuerpo-archivo",
         dest="body_file",
         default=None,
         type=Path,
@@ -89,7 +88,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     crear.at("cuándo se escribe, para la nota y su constancia; lo que falte, hoy y ahora")
     note_create_p.add_argument(
         "--no-record",
-        "--sin-constancia",
         dest="no_record",
         action="store_true",
         help="no agrega registro de constancia en AHORA.md",
