@@ -10,7 +10,9 @@ import pytest
 
 from tuku import cli
 from tuku.cli import EXITO, RECHAZO, main
+from tuku.cli.helpers import traducir
 from tuku.lint import lint
+from tuku.resultado import Resultado
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
 PERSONAL = "[personal](ambitos/personal/personal.md)"
@@ -66,3 +68,11 @@ def test_el_cuerpo_no_se_busca_en_stdin_sin_pedirlo(monkeypatch: pytest.MonkeyPa
 
     monkeypatch.setattr(sys, "stdin", StdinQueNadieDebeLeer())
     assert cli._cuerpo_de_la_nota(argparse.Namespace(body=None, body_file=None)) is None
+
+
+def test_los_avisos_proceden_y_alertan_por_stderr(capsys: pytest.CaptureFixture[str]) -> None:
+    r = Resultado.hecho("cierre escrito: x", avisos=("no había ningún pendiente",))
+    assert traducir(r, "tuku todo close") == EXITO
+    salida = capsys.readouterr()
+    assert salida.out == "cierre escrito: x\n"
+    assert salida.err == "tuku todo close: warning: no había ningún pendiente\n"

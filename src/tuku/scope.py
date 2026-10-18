@@ -34,7 +34,7 @@ import os
 import re
 import unicodedata
 from collections.abc import Mapping, Sequence
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from tuku import archivo, link
@@ -173,14 +173,19 @@ def resolver_padre(vault: Path, parent: str) -> Path | Resultado:
 
 
 def crear(
-    vault: Path, name: str, padre: Path | None = None, palabras: Sequence[str] = ()
+    vault: Path,
+    name: str,
+    padre: Path | None = None,
+    palabras: Sequence[str] = (),
+    today: date | None = None,
 ) -> Path:
     """Crea el ámbito `name` en la carpeta `padre`, o bajo `ambitos/`. Idempotente.
 
     Si ya existe no toca nada: `spec/ambitos.md` no admite dos ámbitos con el
     mismo nombre, y volver a crearlo no es un error del autor. Las `palabras`
     son las `keywords` de la página nueva; el nombre no va en la lista, porque ya es
-    el de la carpeta.
+    el de la carpeta. `today` fecha la sección de actividad cuando `AHORA.md` no trae
+    ciclo del que tomarla.
     """
     valor = normalizar(name)
     directorio = (padre or vault / "ambitos") / valor
@@ -195,7 +200,7 @@ def crear(
         ahora_file = vault / "AHORA.md"
         ahora_texto = archivo.leer(ahora_file) if ahora_file.is_file() else ""
         texto = actualizar_contenido_pagina(
-            base, ahora_texto, valor, pagina=pagina.relative_to(vault).as_posix()
+            base, ahora_texto, valor, pagina=pagina.relative_to(vault).as_posix(), hoy=today
         )
         archivo.escribir(pagina, texto)
 
@@ -545,14 +550,15 @@ def actualizar_contenido_pagina(
     seccion_semana = formatear_esta_semana(actividad).strip()
 
     limites = rango(ahora_texto) if ahora_texto else None
-    fecha_ref = limites[0] if limites else date.today()
-    mes_str = MESES[fecha_ref.month - 1].capitalize()
-    mes_anio = f"{mes_str} {fecha_ref.year}"
+    fecha_ref = limites[0] if limites else hoy
+    vacia = "## Actividad reciente"
+    if fecha_ref is not None:
+        vacia += f"\n### {MESES[fecha_ref.month - 1].capitalize()} {fecha_ref.year}"
 
     partes_semana = contenido_actual.split("## Esta semana", 1)
     base = partes_semana[0].rstrip()
 
-    if cerradas is not None:
+    if cerradas is not None and fecha_ref is not None:
         destino = pagina or f"ambitos/{nombre_ambito}/{nombre_ambito}.md"
         seccion_reciente = actividad_reciente(
             cerradas, nombre_ambito, pagina=destino, hoy=hoy or fecha_ref
@@ -560,11 +566,11 @@ def actualizar_contenido_pagina(
     elif "## Actividad reciente" in contenido_actual:
         parte_reciente = contenido_actual.split("## Actividad reciente", 1)[1].rstrip()
         if not parte_reciente.strip():
-            seccion_reciente = f"## Actividad reciente\n### {mes_anio}"
+            seccion_reciente = vacia
         else:
             seccion_reciente = f"## Actividad reciente{parte_reciente}"
     else:
-        seccion_reciente = f"## Actividad reciente\n### {mes_anio}"
+        seccion_reciente = vacia
 
     return f"{base}\n\n{seccion_semana}\n\n{seccion_reciente}\n"
 
@@ -741,6 +747,7 @@ def crear_con_constancia(
     hour: str | None = None,
     palabras: Sequence[str] = (),
     since: str | None = None,
+    now: datetime,
 ) -> Resultado:
     """Crea el ámbito y deja constancia. No modifica nada de lo ya escrito.
 
@@ -767,8 +774,6 @@ def crear_con_constancia(
     que nombran al nuevo (`registros_que_nombran`), para moverlos con `tuku entry move`.
     Sobre un ámbito que ya existe vuelve a listar sin crear nada.
     """
-    from datetime import datetime
-
     from tuku import context, entry, todo_core
 
     nombre = normalizar(nombre)
@@ -777,7 +782,7 @@ def crear_con_constancia(
     if (rechazo := reject_bad_keywords(palabras)) is not None:
         return rechazo
     try:
-        inicio = context.desde(since, date.today(), DESDE_POR_DEFECTO)
+        inicio = context.desde(since, now.date(), DESDE_POR_DEFECTO)
     except ValueError as e:
         return Resultado.rechazo(str(e))
     palabras = palabras_de(palabras)
@@ -807,15 +812,19 @@ def crear_con_constancia(
 
     ahora_path = vault / "AHORA.md"
     nuevo = existente is None
-    when = day or date.today()
-    hora = hour or datetime.now().strftime("%H:%M")
+    when = day or now.date()
+    hora = hour or now.strftime("%H:%M")
     if nuevo and ahora_path.is_file():
         fits = entry.stamp(archivo.leer(ahora_path), [], day=when)
         if isinstance(fits, Resultado):
             return fits
 
     directorio = crear(
-        vault, nombre, existente.parent if existente is not None else padre, palabras
+        vault,
+        nombre,
+        existente.parent if existente is not None else padre,
+        palabras,
+        today=now.date(),
     )
     if padre is not None:
         refrescar_hijos(padre)

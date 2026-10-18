@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from conftest import AHORA
 from tuku import _pack, init
 from tuku.config import parsear_config_md
 
@@ -73,7 +74,7 @@ def test_el_paquete_lleva_docs_y_spec(tmp_path: Path, monkeypatch: pytest.Monkey
 
 
 def test_init_registra_version_y_origen(tmp_path: Path) -> None:
-    destino = init.init(tmp_path / "vault", home=RAIZ_REPO)
+    destino = init.init(tmp_path / "vault", home=RAIZ_REPO, desde=AHORA.date())
     campos = parsear_config_md((destino / "reglas" / "config.tuku.md").read_text("utf-8"))
     assert campos["tuku_version"] == init.version_de_tuku()
     assert campos["origen"] == init.ORIGEN

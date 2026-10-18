@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import os
-from datetime import date
 from pathlib import Path
 
 import pytest
 
-from tuku import archivo, cli, init
+from tuku import archivo, cli
 from tuku.cli import RECHAZO
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -95,7 +94,9 @@ def test_sin_nada_escrito_lo_dice() -> None:
 def test_el_cli_rechaza_con_el_mensaje_de_lo_que_falto(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    vault = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    vault = tmp_path / "v"
+    vault.mkdir()
+    (vault / "AHORA.md").write_text("", encoding="utf-8")
 
     def choca(_: object) -> int:
         raise archivo.SinReintentos(vault / "PENDIENTES.md", (vault / "AHORA.md",))

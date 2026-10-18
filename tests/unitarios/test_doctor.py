@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from conftest import AHORA
 from tuku import doctor, entry, init
 from tuku.cli import EXITO, main
 from tuku.doctor import (
@@ -111,7 +112,7 @@ VALIDOS = ["Config", "Logbook", "Scope", "Style Guide", "Todo"]
 
 
 def test_el_vault_sembrado_y_una_pregunta_del_lint_no_fallan(tmp_path: Path) -> None:
-    sembrado = init.init(tmp_path / "limpio", home=RAIZ_REPO)
+    sembrado = init.init(tmp_path / "limpio", home=RAIZ_REPO, desde=AHORA.date())
     r = doctor.revisar_vault(sembrado)
     assert r.ok
     assert r.mensaje.splitlines()[-1] == "doctor: el vault está sano."
@@ -124,6 +125,7 @@ def test_el_vault_sembrado_y_una_pregunta_del_lint_no_fallan(tmp_path: Path) -> 
         scope="personal",
         day=date(2026, 8, 11),
         hour="12:05",
+        now=AHORA,
     )
     corto = doctor.revisar_vault(vault)
     largo = doctor.revisar_vault(vault, verbose=True)

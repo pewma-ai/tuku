@@ -87,13 +87,15 @@ def nombres(vault: Path) -> set[str]:
 class Tree:
     """What `ambitos/` holds, read once so a command does not walk it again.
 
-    `names` is everything a record can name (`nombres`) and `paths` maps each name
-    to its path relative to the vault (`rutas`).
+    `names` is everything a record can name (`nombres`), `paths` maps each name
+    to its path relative to the vault (`rutas`) and `scopes` are the names that
+    have a page of their own.
     """
 
     vault: Path
     names: frozenset[str]
     paths: Mapping[str, str]
+    scopes: frozenset[str] = frozenset()
 
 
 def read_tree(vault: Path) -> Tree:
@@ -101,17 +103,20 @@ def read_tree(vault: Path) -> Tree:
     root = vault / "ambitos"
     names: set[str] = set()
     paths: dict[str, str] = {}
+    scopes: set[str] = set()
     if root.is_dir():
         for p in sorted(root.rglob("*")):
             if p.is_dir():
                 names.add(p.name)
+                if page_of(p).is_file():
+                    scopes.add(p.name)
                 target = page_of(p) if page_of(p).is_file() else p
                 paths.setdefault(p.name, target.relative_to(vault).as_posix())
             elif p.suffix == ".md" and not p.stem.isupper():
                 names.add(p.stem)
                 if p.stem != p.parent.name:
                     paths.setdefault(p.stem, p.relative_to(vault).as_posix())
-    return Tree(vault, frozenset(names), paths)
+    return Tree(vault, frozenset(names), paths, frozenset(scopes))
 
 
 def resolve_scope(tree: Tree, name: str) -> str | Resultado:
@@ -119,7 +124,7 @@ def resolve_scope(tree: Tree, name: str) -> str | Resultado:
     resolved = _canonical(tree.names, name)
     if resolved in tree.names:
         return resolved
-    return _missing_scope(tree.vault, resolved)
+    return _missing_scope(tree.scopes, resolved)
 
 
 def rutas(vault: Path) -> dict[str, str]:
@@ -153,11 +158,11 @@ def rechazo_si_no_existe(vault: Path, nombre: str) -> Resultado | None:
     """Rechaza un ámbito que no existe. Crearlo es decisión del autor, no del comando."""
     if nombre in nombres(vault):
         return None
-    return _missing_scope(vault, nombre)
+    return _missing_scope({a.nombre for a in leer(vault)}, nombre)
 
 
-def _missing_scope(vault: Path, nombre: str) -> Resultado:
-    existentes = ", ".join(sorted(a.nombre for a in leer(vault))) or "ninguno"
+def _missing_scope(scopes: Iterable[str], nombre: str) -> Resultado:
+    existentes = ", ".join(sorted(scopes)) or "ninguno"
     return Resultado.rechazo(
         f"no existe el ámbito {nombre!r}. Créalo con `tuku scope create {nombre}` "
         f"si el autor lo pide, o usa uno que exista: {existentes}."

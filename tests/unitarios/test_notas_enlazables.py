@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
 
+from conftest import AHORA
 from tuku import context, entry, init, note, todo, vocab
 from tuku.config import limite_de_notas
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
-HOY = date(2026, 8, 12)
+HOY = AHORA.date()
 
 LIBRO = """### Tipos de nota
 
@@ -53,12 +54,19 @@ def vault(tmp_path: Path) -> Path:
 
 def test_los_comandos_no_enlazan_solos(vault: Path) -> None:
     """Qué nota enlazar lo decide el agente con `tuku context note`, no el comando."""
-    entry.add_al_vault(vault, body="hablé con don Rodolfo", day=date(2026, 8, 11), hour="07:41")
+    entry.add_al_vault(
+        vault,
+        body="hablé con don Rodolfo",
+        day=date(2026, 8, 11),
+        hour="07:41",
+        now=AHORA,
+    )
     r = todo.abrir_en_vault(
         vault,
         body="mandarle el contrato a Rodolfo Cifuentes",
         day=date(2026, 8, 11),
         hour="09:00",
+        now=AHORA,
     )
     assert r.ok and not r.avisos
     for nombre in ("AHORA.md", "PENDIENTES.md"):
@@ -72,6 +80,7 @@ def test_note_create_lista_en_ver_ademas_los_links_del_cuerpo(vault: Path) -> No
         body="Lo redactó [don Rodolfo](rodolfo-cifuentes.md) y [Rodolfo](rodolfo-cifuentes.md)",
         day=date(2026, 8, 11),
         hour="10:00",
+        now=AHORA,
     )
     assert r.ok
     texto = (vault / "notas" / "contrato-del-colegio.md").read_text(encoding="utf-8")
@@ -81,7 +90,12 @@ def test_note_create_lista_en_ver_ademas_los_links_del_cuerpo(vault: Path) -> No
 
 def test_subtype_se_escribe_si_la_tabla_lo_lista_y_se_rechaza_si_no(vault: Path) -> None:
     r = note.crear_con_constancia(
-        vault, title="Patricia Lillo", body="Jefa de UTP.", subtype="persona", record=False
+        vault,
+        title="Patricia Lillo",
+        body="Jefa de UTP.",
+        subtype="persona",
+        record=False,
+        now=AHORA,
     )
     assert r.ok
     texto = (vault / "notas" / "patricia-lillo.md").read_text(encoding="utf-8")
@@ -90,7 +104,9 @@ def test_subtype_se_escribe_si_la_tabla_lo_lista_y_se_rechaza_si_no(vault: Path)
     assert note.subtype(texto) == "persona"
 
     antes = sorted(p.name for p in (vault / "notas").iterdir())
-    r = note.crear_con_constancia(vault, title="Un cliente", body="x", subtype="cliente")
+    r = note.crear_con_constancia(
+        vault, title="Un cliente", body="x", subtype="cliente", now=AHORA
+    )
     assert not r.ok and "no es un tipo de nota" in r.mensaje and "`persona`" in r.mensaje
     assert "agrega una fila" in r.mensaje
     assert sorted(p.name for p in (vault / "notas").iterdir()) == antes
@@ -106,7 +122,7 @@ def _actualizada(v: Path, nombre: str, dia: str) -> None:
 
 
 def test_context_note_lista_por_tipo_enlazable_con_nombres_y_aliases(vault: Path) -> None:
-    assert context.del_vault(vault, "note", hoy=HOY).mensaje == (
+    assert context.del_vault(vault, "note", now=AHORA).mensaje == (
         "## persona\n\n- notas/rodolfo-cifuentes.md: Rodolfo Cifuentes; aliases: don Rodolfo"
     )
 
@@ -123,7 +139,7 @@ def test_context_note_trae_las_ultimas_modificadas_hasta_el_limite(vault: Path) 
         config.read_text(encoding="utf-8").replace("| `25` |", "| `3` |"),
         encoding="utf-8",
     )
-    salida = context.del_vault(vault, "note", hoy=HOY).mensaje
+    salida = context.del_vault(vault, "note", now=AHORA).mensaje
     assert salida.splitlines()[2:] == [
         "- notas/carla.md: Carla",
         "- notas/beto.md: Beto",
@@ -151,16 +167,23 @@ def test_context_note_sin_tipos_enlazables_lo_dice(vault: Path) -> None:
     libro.write_text(
         libro.read_text(encoding="utf-8").replace("| sí |", "| no |"), encoding="utf-8"
     )
-    assert context.del_vault(vault, "note", hoy=HOY).mensaje == (
+    assert context.del_vault(vault, "note", now=AHORA).mensaje == (
         "sin tipos enlazables en `### Tipos de nota`."
     )
 
 
 def test_updated_se_mueve_al_renombrar_y_created_queda(vault: Path) -> None:
     note.crear_con_constancia(
-        vault, title="Ana Pérez", body="Jefa de UTP.", day=date(2026, 8, 11), record=False
+        vault,
+        title="Ana Pérez",
+        body="Jefa de UTP.",
+        day=date(2026, 8, 11),
+        record=False,
+        now=AHORA,
     )
-    r = note.renombrar_en_vault(vault, "Ana Pérez", "Ana Pérez Soto", hoy=date(2026, 8, 20))
+    r = note.renombrar_en_vault(
+        vault, "Ana Pérez", "Ana Pérez Soto", now=AHORA + timedelta(days=8)
+    )
     assert r.ok
     texto = (vault / "notas" / "ana-perez-soto.md").read_text(encoding="utf-8")
     assert note.campo(texto, "updated") == "2026-08-20"

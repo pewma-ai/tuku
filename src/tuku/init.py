@@ -315,7 +315,7 @@ def init(
     variante: str | None = None,
     author: str | None = None,
     autor: str | None = None,
-    desde: date | None = None,
+    desde: date,
     force: bool = False,
     home: Path | str | None = None,
     comandos: str | None = None,
@@ -324,8 +324,8 @@ def init(
 
     Sembrar en un directorio que ya tiene contenido se rechaza con
     `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. El ciclo
-    sembrado es la semana de lunes a domingo que contiene `desde` (por defecto,
-    hoy). `author`, si
+    sembrado es la semana de lunes a domingo que contiene `desde`, que quien
+    invoca resuelve con su reloj. `author`, si
     se pasa y no viene vacío, se escribe en `LIBRO-DE-ESTILO.md`. `comandos`, si
     se pasa, es `reglas/comandos.tuku.md`: lo compone la capa del CLI, que es la
     que conoce los comandos.
@@ -350,7 +350,7 @@ def init(
 
     shutil.copytree(variante_dir, destino, dirs_exist_ok=True)
 
-    desde = lunes_de_esta_semana(desde or date.today())
+    desde = lunes_de_esta_semana(desde)
     ahora = destino / "AHORA.md"
     plantilla_ahora = destino / "reglas" / "plantilla" / "AHORA.md"
     if plantilla_ahora.is_file():

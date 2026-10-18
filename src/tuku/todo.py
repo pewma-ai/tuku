@@ -32,6 +32,10 @@ from datetime import date, datetime
 from pathlib import Path
 
 from tuku import archivo
+from tuku import scope_tree as ambitos
+from tuku.config import ambito_por_defecto, archivo_vault, leer_config
+from tuku.entry import componer, stamp
+from tuku.plan import Change, State, apply
 from tuku.resultado import Resultado
 from tuku.todo_core import (
     ABRE as ABRE,
@@ -134,7 +138,9 @@ from tuku.todo_core import (
 )
 
 
-def avisos_de_plazo(due: str, day: date | None, hour: str | None) -> tuple[str, ...]:
+def avisos_de_plazo(
+    due: str, day: date | None, hour: str | None, now: datetime
+) -> tuple[str, ...]:
     """Lo raro de un vencimiento, que no lo impide: ya pasó, o es anterior a la promesa.
 
     Registrar algo que ya venció es legítimo ("se me pasó pagar la luz"), y
@@ -143,15 +149,14 @@ def avisos_de_plazo(due: str, day: date | None, hour: str | None) -> tuple[str, 
     """
     if not due:
         return ()
-    ahora = datetime.now()
     dia, _, h = due.partition(" ")
     vence = datetime.fromisoformat(f"{dia} {h or '23:59'}")
     prometido = datetime.fromisoformat(
-        f"{(day or ahora.date()).isoformat()} {hour or ahora.strftime('%H:%M')}"
+        f"{(day or now.date()).isoformat()} {hour or now.strftime('%H:%M')}"
     )
     if (day or hour) and vence < prometido:
         return (f"vence el {due}, antes de {prometido:%Y-%m-%d %H:%M}, cuando se promete.",)
-    if vence < ahora:
+    if vence < now:
         return (f"vence el {due}, que ya pasó: el pendiente nace atrasado.",)
     return ()
 
@@ -170,6 +175,61 @@ def is_registered(logbook: str, mark: Marca) -> bool:
     )
 
 
+def plan_open(
+    state: State,
+    *,
+    body: str,
+    scope: str | None,
+    horizon: str | None,
+    due: str,
+    day: date | None,
+    hour: str | None,
+    now: datetime,
+) -> Change | Resultado:
+    """The change of `tuku todo open`: the record and the row, or the rejection."""
+    if day is not None and day > now.date():
+        return Resultado.rechazo(
+            f"el {day.isoformat()} todavía no llega: `--at` es cuándo se prometió. "
+            f"Para que venza ese día: --due {day.isoformat()}"
+        )
+    limpio_scope = None
+    if scope and ambitos.normalizar(scope):
+        resolved = ambitos.resolve_scope(state.tree, scope)
+        if isinstance(resolved, Resultado):
+            return resolved
+        limpio_scope = resolved
+    marca = Marca(ABRE, limpio_scope, body.strip())
+    escalera = escalera_de(state.horizons)
+    horizon = CON_FECHA if due else canonico(horizon or escalera[0], escalera)
+
+    logbook = state.logbook
+    if not is_registered(logbook, marca):
+        linea = componer(
+            hora=hour or now.strftime("%H:%M"),
+            scope=limpio_scope,
+            body=f"{ABRE}: {marca.cuerpo}",
+            rutas=state.tree.paths,
+        )
+        stamped = stamp(logbook, [linea], day=day or now.date())
+        if isinstance(stamped, Resultado):
+            return stamped
+        logbook = stamped
+    rows = abrir(
+        state.todo,
+        marca,
+        horizon=horizon,
+        due=due,
+        escalera=escalera,
+        rutas=state.tree.paths,
+    )
+    return Change(
+        {"AHORA.md": logbook, "PENDIENTES.md": rows},
+        f"pendiente abierto en «{horizon}»: {marca.cuerpo}",
+        warnings=avisos_de_plazo(due, day, hour, now),
+        regenerate=("AHORA.md", "PENDIENTES.md"),
+    )
+
+
 def abrir_en_vault(
     vault: Path,
     *,
@@ -180,6 +240,7 @@ def abrir_en_vault(
     regenerar: bool = True,
     day: date | None = None,
     hour: str | None = None,
+    now: datetime,
 ) -> Resultado:
     """Abre un pendiente, estampa huella en la bitácora y regenera las vistas.
 
@@ -195,64 +256,79 @@ def abrir_en_vault(
 
     `day` y `hour` son cuándo se prometió y `due`, para cuándo es, como se
     escribe en la columna `Vence`: `AAAA-MM-DD` o `AAAA-MM-DD HH:MM`
-    (`spec/pendientes.md`). Un `day` posterior a HOY se rechaza: el registro
-    de algo que todavía no se dijo no existe, y la fecha del pendiente va en
-    `due`. Con `due`, el horizonte es `con fecha`; sin ninguno de los dos, el
-    primer escalón del autor.
+    (`spec/pendientes.md`). Un `day` posterior a HOY (el de `now`) se rechaza: el
+    registro de algo que todavía no se dijo no existe, y la fecha del pendiente va
+    en `due`. Con `due`, el horizonte es `con fecha`; sin ninguno de los dos, el
+    primer escalón del autor. La decisión es de `plan_open`.
     """
-    from tuku import scope_tree as ambitos
-    from tuku.config import archivo_vault, leer_config
-    from tuku.entry import componer, stamp
-    from tuku.regenerate import rehacer
+    state = State(
+        ambitos.read_tree(vault),
+        logbook=archivo.leer(archivo_vault(vault, "AHORA.md")),
+        todo=archivo.leer(archivo_vault(vault, "PENDIENTES.md")),
+        horizons=tuple(leer_config(vault).horizontes),
+    )
+    plan = plan_open(
+        state, body=body, scope=scope, horizon=horizon, due=due, day=day, hour=hour, now=now
+    )
+    return apply(vault, plan, skip=() if regenerar else ("todo",))
 
-    if day is not None and day > date.today():
-        return Resultado.rechazo(
-            f"el {day.isoformat()} todavía no llega: `--at` es cuándo se prometió. "
-            f"Para que venza ese día: --due {day.isoformat()}"
-        )
-    tree = ambitos.read_tree(vault)
-    limpio_scope = None
-    if scope and ambitos.normalizar(scope):
-        resolved = ambitos.resolve_scope(tree, scope)
+
+def plan_close(
+    state: State,
+    *,
+    body: str,
+    scope: str | None,
+    day: date | None,
+    hour: str | None,
+    now: datetime,
+) -> Change | Resultado:
+    """The change of `tuku todo close`: the closing record and the row, or a rejection."""
+    if scope:
+        resolved = ambitos.resolve_scope(state.tree, scope)
         if isinstance(resolved, Resultado):
             return resolved
-        limpio_scope = resolved
-    marca = Marca(ABRE, limpio_scope, body.strip())
-    escalera = escalera_de(leer_config(vault).horizontes)
-    horizon = CON_FECHA if due else canonico(horizon or escalera[0], escalera)
+        scope = resolved
+    marca = Marca(CIERRA, None, body.strip())
+    found = next(
+        (f.ambito for f in filas(state.todo) if clave(f.cuerpo) == clave(marca.cuerpo)), None
+    )
 
-    ahora_path = archivo_vault(vault, "AHORA.md")
-    ahora_actual = archivo.leer(ahora_path)
-    if not is_registered(ahora_actual, marca):
-        hora = hour or datetime.now().strftime("%H:%M")
+    if scope is None and found is None and state.default_scope:
+        resolved = ambitos.resolve_scope(state.tree, state.default_scope)
+        if isinstance(resolved, Resultado):
+            return resolved
+        scope = resolved
+
+    rows, paired = cerrar(state.todo, marca)
+
+    logbook = state.logbook
+    if not is_registered(logbook, marca):
         linea = componer(
-            hora=hora,
-            scope=limpio_scope,
-            body=f"{ABRE}: {marca.cuerpo}",
-            rutas=tree.paths,
+            hora=hour or now.strftime("%H:%M"),
+            scope=scope if scope is not None else found,
+            body=cierre(marca.cuerpo),
+            rutas=state.tree.paths,
         )
-        stamped = stamp(ahora_actual, [linea], day=day or date.today())
+        stamped = stamp(logbook, [linea], day=day or now.date())
         if isinstance(stamped, Resultado):
             return stamped
-        archivo.escribir(ahora_path, stamped)
+        logbook = stamped
+    logbook = quitar_aperturas_cerradas(logbook, marca.cuerpo)
 
-    ruta = archivo_vault(vault, "PENDIENTES.md")
-    archivo.escribir(
-        ruta,
-        abrir(
-            archivo.leer(ruta),
-            marca,
-            horizon=horizon,
-            due=due,
-            escalera=escalera,
-            rutas=tree.paths,
-        ),
-    )
-    rehacer(vault, ["AHORA.md", "PENDIENTES.md"], salvo=() if regenerar else ("todo",))
-    return Resultado.hecho(
-        f"pendiente abierto en «{horizon}»: {marca.cuerpo}",
-        avisos=avisos_de_plazo(due, day, hour),
-    )
+    files = {"AHORA.md": logbook, "PENDIENTES.md": rows}
+    regenerate = ("AHORA.md", "PENDIENTES.md")
+    if not paired:
+        return Change(
+            files,
+            f"cierre escrito: {marca.cuerpo}",
+            warnings=(
+                f"no había ningún pendiente abierto con el cuerpo {marca.cuerpo!r}, "
+                f"así que no se borró nada. Si esperabas cerrarlo, revisa que el texto "
+                f"coincida palabra por palabra.",
+            ),
+            regenerate=regenerate,
+        )
+    return Change(files, f"pendiente cerrado: {marca.cuerpo}", regenerate=regenerate)
 
 
 def cerrar_en_vault(
@@ -263,6 +339,7 @@ def cerrar_en_vault(
     day: date | None = None,
     hour: str | None = None,
     scope: str | None = None,
+    now: datetime,
 ) -> Resultado:
     """Cierra un pendiente por su cuerpo, estampando su huella en la bitácora.
 
@@ -273,74 +350,17 @@ def cerrar_en_vault(
 
     **El cierre cae en el ámbito donde estaba el pendiente.** Sin `scope`, el
     registro toma el de la fila que cierra; solo si la fila no tiene, el
-    `scope_default` de la config. Con `scope`, manda `scope`.
+    `scope_default` de la config. Con `scope`, manda `scope`. La decisión es de
+    `plan_close`.
     """
-    from tuku import scope_tree as ambitos
-    from tuku.config import ambito_por_defecto, archivo_vault
-    from tuku.entry import componer, stamp
-    from tuku.regenerate import rehacer
-
-    tree = ambitos.read_tree(vault)
-    if scope:
-        resolved = ambitos.resolve_scope(tree, scope)
-        if isinstance(resolved, Resultado):
-            return resolved
-        scope = resolved
-    marca = Marca(CIERRA, None, body.strip())
-    ruta = archivo_vault(vault, "PENDIENTES.md")
-    pendientes_texto = archivo.leer(ruta)
-
-    ambito_encontrado: str | None = None
-    for f in filas(pendientes_texto):
-        if clave(f.cuerpo) == clave(marca.cuerpo):
-            ambito_encontrado = f.ambito
-            break
-
-    if (
-        scope is None
-        and ambito_encontrado is None
-        and (por_defecto := ambito_por_defecto(vault))
-    ):
-        resolved = ambitos.resolve_scope(tree, por_defecto)
-        if isinstance(resolved, Resultado):
-            return resolved
-        scope = resolved
-
-    texto, hubo_pareja = cerrar(pendientes_texto, marca)
-
-    ahora_path = archivo_vault(vault, "AHORA.md")
-    ahora_actual = archivo.leer(ahora_path)
-    if not is_registered(ahora_actual, marca):
-        ambito_final = scope if scope is not None else ambito_encontrado
-        hora = hour or datetime.now().strftime("%H:%M")
-        linea = componer(
-            hora=hora,
-            scope=ambito_final,
-            body=cierre(marca.cuerpo),
-            rutas=tree.paths,
-        )
-        stamped = stamp(ahora_actual, [linea], day=day or date.today())
-        if isinstance(stamped, Resultado):
-            return stamped
-        ahora_actual = stamped
-    ahora_texto = quitar_aperturas_cerradas(ahora_actual, marca.cuerpo)
-    if ahora_texto != archivo.leer(ahora_path):
-        archivo.escribir(ahora_path, ahora_texto)
-
-    if hubo_pareja:
-        archivo.escribir(ruta, texto)
-    rehacer(vault, ["AHORA.md", "PENDIENTES.md"], salvo=() if regenerar else ("todo",))
-
-    if not hubo_pareja:
-        return Resultado.hecho(
-            f"cierre escrito: {marca.cuerpo}",
-            avisos=(
-                f"no había ningún pendiente abierto con el cuerpo {marca.cuerpo!r}, "
-                f"así que no se borró nada. Si esperabas cerrarlo, revisa que el texto "
-                f"coincida palabra por palabra.",
-            ),
-        )
-    return Resultado.hecho(f"pendiente cerrado: {marca.cuerpo}")
+    state = State(
+        ambitos.read_tree(vault),
+        logbook=archivo.leer(archivo_vault(vault, "AHORA.md")),
+        todo=archivo.leer(archivo_vault(vault, "PENDIENTES.md")),
+        default_scope=ambito_por_defecto(vault),
+    )
+    plan = plan_close(state, body=body, scope=scope, day=day, hour=hour, now=now)
+    return apply(vault, plan, skip=() if regenerar else ("todo",))
 
 
 def hallazgos_del_vault(vault: Path) -> list[str]:

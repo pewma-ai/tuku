@@ -434,11 +434,11 @@ def _correr_tuku(argv: list[str], entorno: dict[str, str]) -> tuple[int, str, st
     previos = {k: os.environ.get(k) for k in entorno}
     os.environ.update(entorno)
     out, err = io.StringIO(), io.StringIO()
-    tuku_now = entorno.get("TUKU_NOW")
+    ahora = tiempo.instante(entorno.get("TUKU_NOW"))
     try:
-        with tiempo.congelar(tuku_now), redirect_stdout(out), redirect_stderr(err):
+        with redirect_stdout(out), redirect_stderr(err):
             try:
-                codigo = main(argv)
+                codigo = main(argv, now=ahora)
             except SystemExit as e:
                 codigo = e.code if isinstance(e.code, int) else 1
     finally:

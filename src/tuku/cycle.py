@@ -18,7 +18,7 @@ abrir `revisar la bitácora anterior` con `tuku todo open --due <el lunes>`.
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from tuku import archivo
@@ -69,7 +69,7 @@ def tiene_registros(ahora: str) -> bool:
     return bool(registros(ahora))
 
 
-def open_cycle(vault: Path, fecha: date | None = None) -> tuple[Path, bool]:
+def open_cycle(vault: Path, fecha: date) -> tuple[Path, bool]:
     """Verifica si `AHORA.md` cubre `fecha`; si no, lo crea desde la plantilla.
 
     Devuelve la ruta a `AHORA.md` y un booleano indicando si fue creado (`True`)
@@ -83,7 +83,6 @@ def open_cycle(vault: Path, fecha: date | None = None) -> tuple[Path, bool]:
     regenera, porque no hay nada que perder.
     """
     vault = Path(vault)
-    fecha = fecha or date.today()
     ahora_path = vault / "AHORA.md"
 
     if ahora_path.is_file():
@@ -119,15 +118,16 @@ def hay_bitacora_anterior(vault: Path) -> bool:
     return any((vault / "bitacoras").glob("bitacora-*.md"))
 
 
-def abrir_en_vault(vault: Path, fecha: date | None = None) -> Resultado:
+def abrir_en_vault(vault: Path, fecha: date | None = None, *, now: datetime) -> Resultado:
     """Abre el ciclo en `AHORA.md`, o confirma que ya cubre la fecha.
 
     Un ciclo nuevo que sigue a una bitácora cerrada abre el pendiente de
     revisarla, con vencimiento el primer día. Si ese pendiente no se puede abrir,
-    el ciclo queda abierto y el motivo sale como aviso.
+    el ciclo queda abierto y el motivo sale como aviso. Sin `fecha` es la de `now`.
     """
     from tuku import todo
 
+    fecha = fecha or now.date()
     try:
         ahora_path, creado = open_cycle(vault, fecha)
     except CicloEnCurso as e:
@@ -139,9 +139,9 @@ def abrir_en_vault(vault: Path, fecha: date | None = None) -> Resultado:
         return Resultado.hecho(mensaje)
 
     limites = rango(archivo.leer(ahora_path))
-    desde = limites[0] if limites else calcular_rango_semanal(fecha or date.today())[0]
+    desde = limites[0] if limites else calcular_rango_semanal(fecha)[0]
     apertura = todo.abrir_en_vault(
-        vault, body=REVISAR_BITACORA, due=desde.isoformat(), day=fecha or date.today()
+        vault, body=REVISAR_BITACORA, due=desde.isoformat(), day=fecha, now=now
     )
     if not apertura.ok:
         return Resultado.hecho(

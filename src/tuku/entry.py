@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from tuku import archivo, link
+from tuku.plan import Change, State, apply
 from tuku.resultado import Resultado
 
 if TYPE_CHECKING:
@@ -177,6 +178,58 @@ def componer(
     return f"- {inicio}{ambito}{todo_core.canonizar(body)}"
 
 
+def plan_add(
+    state: State,
+    *,
+    body: str,
+    scope: str | None,
+    day: date | None,
+    hour: str | None,
+    now: datetime,
+) -> Change | Resultado:
+    """The change of `tuku entry create`: one record in `AHORA.md`, or the rejection.
+
+    Without `day` it is today; without `hour`, now if the day is today. A past day
+    without `hour` stays without an hour, at the end of the day: the hour of now
+    would be made up.
+    """
+    from tuku import scope_tree as ambitos
+    from tuku import todo_core
+    from tuku.ahora import encabezado_de
+
+    today = now.date()
+    if day is not None and day > today:
+        return Resultado.rechazo(
+            f"el {day.isoformat()} todavía no llega: un registro cuenta lo que ya pasó. "
+            f"Si es un compromiso, ábrelo con `tuku todo open --due {day.isoformat()}`."
+        )
+    if scope:
+        resolved = ambitos.resolve_scope(state.tree, scope)
+        if isinstance(resolved, Resultado):
+            return resolved
+        scope = resolved
+
+    when = day or today
+    dia = encabezado_de(when)
+    linea = componer(
+        hora=hour or ("" if day is not None and day < today else now.strftime("%H:%M")),
+        scope=scope,
+        body=body,
+        rutas=state.tree.paths,
+    )
+    marca = todo_core.parsear(linea)
+    if marca is not None:
+        return Resultado.rechazo(rechazo_de_marca(marca, scope=scope, day=day, hour=hour))
+    stamped = stamp(state.logbook, [linea], day=when)
+    if isinstance(stamped, Resultado):
+        return stamped
+    return Change(
+        {"AHORA.md": stamped},
+        f"{linea}\nen {dia.removeprefix('## ')}.",
+        regenerate=("AHORA.md",),
+    )
+
+
 def add_al_vault(
     vault: Path,
     *,
@@ -184,6 +237,7 @@ def add_al_vault(
     scope: str | None = None,
     day: date | None = None,
     hour: str | None = None,
+    now: datetime,
 ) -> Resultado:
     """Escribe un registro en `AHORA.md` y propaga lo que se deriva de él.
 
@@ -194,50 +248,15 @@ def add_al_vault(
 
     Recibe los campos, no la línea: el encabezado `## Martes 11 de agosto` se
     calcula desde `2026-08-11`, y la línea se compone. Un registro por llamada.
-
-    Sin `day` es hoy; sin `hour`, ahora si el día es hoy. Un día pasado sin `hour`
-    queda sin hora, al final del día: la de ahora sería inventada.
+    La decisión es de `plan_add`; acá solo se lee el vault y se aplica.
     """
     from tuku import scope_tree as ambitos
-    from tuku import todo_core
-    from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
-    if day is not None and day > date.today():
-        return Resultado.rechazo(
-            f"el {day.isoformat()} todavía no llega: un registro cuenta lo que ya pasó. "
-            f"Si es un compromiso, ábrelo con `tuku todo open --due {day.isoformat()}`."
-        )
-    tree = ambitos.read_tree(vault)
-    if scope:
-        resolved = ambitos.resolve_scope(tree, scope)
-        if isinstance(resolved, Resultado):
-            return resolved
-        scope = resolved
-
-    ruta = archivo_vault(vault, "AHORA.md")
-    when = day or date.today()
-    dia = encabezado_de(when)
-    linea = componer(
-        hora=hour
-        or ("" if day is not None and day < date.today() else datetime.now().strftime("%H:%M")),
-        scope=scope,
-        body=body,
-        rutas=tree.paths,
+    state = State(
+        ambitos.read_tree(vault), logbook=archivo.leer(archivo_vault(vault, "AHORA.md"))
     )
-    marca = todo_core.parsear(linea)
-    if marca is not None:
-        return Resultado.rechazo(rechazo_de_marca(marca, scope=scope, day=day, hour=hour))
-    stamped = stamp(archivo.leer(ruta), [linea], day=when)
-    if isinstance(stamped, Resultado):
-        return stamped
-
-    archivo.escribir(ruta, stamped)
-
-    from tuku import regenerate
-
-    regenerate.rehacer(vault, ["AHORA.md"])
-    return Resultado.hecho(f"{linea}\nen {dia.removeprefix('## ')}.")
+    return apply(vault, plan_add(state, body=body, scope=scope, day=day, hour=hour, now=now))
 
 
 def rechazo_de_marca(

@@ -23,11 +23,16 @@ from __future__ import annotations
 import re
 import unicodedata
 from collections.abc import Mapping, Sequence
-from datetime import date
+from dataclasses import dataclass
+from datetime import date, datetime
 from pathlib import Path
 
 from tuku import archivo, link
+from tuku.config import leer_config
+from tuku.entry import stamp
+from tuku.plan import Change, apply
 from tuku.resultado import Resultado
+from tuku.scope_tree import Tree, read_tree, resolve_scope
 
 VER_ADEMAS = "## Ver además"
 
@@ -133,21 +138,17 @@ def slug(titulo: str) -> str:
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", plano.lower())).strip("-")
 
 
-def crear(
-    vault: Path,
+def compose(
     *,
     title: str,
     body: str,
     scope: str | None = None,
-    today: date | None = None,
+    today: date,
     rutas: Mapping[str, str] | None = None,
     subtype: str | None = None,
     menciones: Sequence[tuple[str, str]] = (),
-) -> Path:
-    """Escribe la nota en `notas/` y devuelve su ruta. Idempotente.
-
-    Si el archivo ya existe no lo toca: repetir la operación no duplica ni
-    reescribe lo que el autor pueda haber editado a mano.
+) -> str:
+    """The text of a new note.
 
     El frontmatter lleva `type: Note`, que `reglas/types.md` asigna a todo lo de
     `notas/` y `spec/vault.md` exige en cualquier archivo que guarde
@@ -159,13 +160,9 @@ def crear(
     `## Ver además` con un motivo mecánico, porque esa sección lista todos los
     enlaces salientes de la nota.
     """
-    ruta = vault / "notas" / f"{slug(title)}.md"
-    if ruta.exists():
-        return ruta
-
     items = []
     if scope is not None:
-        enlace = link.enlace_ambito(scope, f"notas/{ruta.name}", rutas)
+        enlace = link.enlace_ambito(scope, f"notas/{slug(title)}.md", rutas)
         items.append(f"* {enlace} — el ámbito al que pertenece lo que esta nota explica.")
     items += [
         f"* [{texto}]({destino}) — mencionada en el cuerpo." for texto, destino in menciones
@@ -173,14 +170,11 @@ def crear(
     ver_ademas = f"\n{VER_ADEMAS}\n\n" + "\n".join(items) + "\n" if items else ""
 
     marca_subtype = f"subtype: {subtype}\n" if subtype else ""
-    ruta.parent.mkdir(parents=True, exist_ok=True)
-    creada = (today or date.today()).isoformat()
-    contenido = (
+    creada = today.isoformat()
+    return (
         f"---\ntype: Note\n{marca_subtype}created: {creada}\nupdated: {creada}\n---\n\n"
         f"# {title}\n\n{body.strip()}\n{ver_ademas}"
     )
-    archivo.escribir(ruta, contenido)
-    return ruta
 
 
 def registro_de_constancia(
@@ -245,11 +239,8 @@ def _enlaces_sin_listar(lineas: list[str], ini: int) -> list[str]:
     return hallazgos
 
 
-def _rechazo_de_subtype(vault: Path, subtype: str) -> Resultado | None:
+def _rechazo_de_subtype(tipos: Sequence[str], subtype: str) -> Resultado | None:
     """El rechazo de un `--subtype` que `### Tipos de nota` no lista, o `None` si sirve."""
-    from tuku.config import leer_config
-
-    tipos = leer_config(vault).tipos_nota
     if subtype in tipos:
         return None
     hay = ", ".join(f"`{t}`" for t in tipos) or "ninguno"
@@ -258,6 +249,82 @@ def _rechazo_de_subtype(vault: Path, subtype: str) -> Resultado | None:
         f"LIBRO-DE-ESTILO.md son: {hay}. Elige uno, o agrega una fila a esa tabla para "
         "crear el tipo nuevo."
     )
+
+
+@dataclass(frozen=True)
+class NoteState:
+    """What `plan_create` reads: the scopes, `AHORA.md` if the vault has one, and `notas/`.
+
+    `note_types` are the rows of `### Tipos de nota`, read only when a `subtype` is passed.
+    """
+
+    tree: Tree
+    logbook: str | None
+    notes: frozenset[str]
+    note_types: tuple[str, ...] = ()
+
+
+def plan_create(
+    state: NoteState,
+    *,
+    title: str,
+    body: str,
+    scope: str | None,
+    day: date | None,
+    hour: str | None,
+    record: bool,
+    subtype: str | None,
+    now: datetime,
+) -> Change | Resultado:
+    """The change of `tuku note create`: the note and its record in `AHORA.md`, or a rejection.
+
+    **Nada se escribe hasta que todo cabe.** La constancia se compone y se prueba
+    contra `AHORA.md` en memoria antes de tocar el disco, porque si el día cae
+    fuera del ciclo abierto la operación se rechaza entera. Escribir la nota
+    primero dejaba el vault a medias, con una nota que nada registra, y el
+    rechazo salía como traceback.
+    """
+    if not slug(title):
+        return Resultado.rechazo(
+            f"{title!r} no sirve de título: sin letras ni números no hay nombre de archivo."
+        )
+    if subtype is not None:
+        subtype = subtype.strip().lower()
+        if (rechazo := _rechazo_de_subtype(state.note_types, subtype)) is not None:
+            return rechazo
+    if scope:
+        resolved = resolve_scope(state.tree, scope)
+        if isinstance(resolved, Resultado):
+            return resolved
+        scope = resolved
+
+    hoy = day or now.date()
+    hora = hour or now.strftime("%H:%M")
+    nombre = f"{slug(title)}.md"
+    ruta = f"notas/{nombre}"
+    files: dict[str, str] = {}
+    if nombre not in state.notes:
+        files[ruta] = compose(
+            title=title,
+            body=body,
+            scope=scope,
+            today=hoy,
+            rutas=state.tree.paths,
+            subtype=subtype,
+            menciones=_links_del_cuerpo(body, ruta),
+        )
+    pages: tuple[str, ...] = ()
+    if record and state.logbook is not None:
+        constancia = registro_de_constancia(
+            Path(nombre), hour=hora, scope=scope, rutas=state.tree.paths
+        )
+        if constancia not in state.logbook:
+            stamped = stamp(state.logbook, [constancia], day=hoy)
+            if isinstance(stamped, Resultado):
+                return stamped
+            files["AHORA.md"] = stamped
+            pages = (scope,) if scope else ()
+    return Change(files, f"nota creada en {state.tree.vault / ruta}.", pages=pages)
 
 
 def crear_con_constancia(
@@ -270,6 +337,7 @@ def crear_con_constancia(
     hour: str | None = None,
     record: bool = True,
     subtype: str | None = None,
+    now: datetime,
 ) -> Resultado:
     """Escribe la nota y deja constancia en la bitácora. Idempotente.
 
@@ -282,67 +350,31 @@ def crear_con_constancia(
     es la línea, y por eso la constancia va acá y no en un comando aparte.
 
     Repetir la operación no duplica nada: la nota no se reescribe si ya existe, y
-    la constancia solo se añade si no estaba. `record=False` la omite.
-
-    **Nada se escribe hasta que todo cabe.** La constancia se compone y se prueba
-    contra `AHORA.md` en memoria antes de tocar el disco, porque si el día cae
-    fuera del ciclo abierto la operación se rechaza entera. Escribir la nota
-    primero dejaba el vault a medias, con una nota que nada registra, y el
-    rechazo salía como traceback.
+    la constancia solo se añade si no estaba. `record=False` la omite. La decisión
+    es de `plan_create`.
     """
-    from datetime import datetime
-
-    from tuku import scope as scope_mod
-    from tuku.entry import stamp
-
-    if not slug(title):
-        return Resultado.rechazo(
-            f"{title!r} no sirve de título: sin letras ni números no hay nombre de archivo."
-        )
-    if subtype is not None:
-        subtype = subtype.strip().lower()
-        if (rechazo := _rechazo_de_subtype(vault, subtype)) is not None:
-            return rechazo
-    tree = scope_mod.read_tree(vault)
-    if scope:
-        resolved = scope_mod.resolve_scope(tree, scope)
-        if isinstance(resolved, Resultado):
-            return resolved
-        scope = resolved
-
-    hoy = day or date.today()
-    hora = hour or datetime.now().strftime("%H:%M")
-    ruta = vault / "notas" / f"{slug(title)}.md"
-    desde = f"notas/{ruta.name}"
-    menciones = _links_del_cuerpo(body, desde)
-
+    dir_notas = vault / "notas"
     ahora_path = vault / "AHORA.md"
-    pendiente: str | None = None
-    if record and ahora_path.is_file():
-        texto = archivo.leer(ahora_path)
-        constancia = registro_de_constancia(ruta, hour=hora, scope=scope, rutas=tree.paths)
-        if constancia not in texto:
-            stamped = stamp(texto, [constancia], day=hoy)
-            if isinstance(stamped, Resultado):
-                return stamped
-            pendiente = stamped
-
-    crear(
-        vault,
+    state = NoteState(
+        read_tree(vault),
+        logbook=archivo.leer(ahora_path) if ahora_path.is_file() else None,
+        notes=frozenset(p.name for p in dir_notas.glob("*.md"))
+        if dir_notas.is_dir()
+        else frozenset(),
+        note_types=tuple(leer_config(vault).tipos_nota) if subtype is not None else (),
+    )
+    plan = plan_create(
+        state,
         title=title,
         body=body,
         scope=scope,
-        today=hoy,
-        rutas=tree.paths,
+        day=day,
+        hour=hour,
+        record=record,
         subtype=subtype,
-        menciones=menciones,
+        now=now,
     )
-    if pendiente is not None:
-        archivo.escribir(ahora_path, pendiente)
-        if scope:
-            scope_mod.actualizar_pagina(vault, scope)
-
-    return Resultado.hecho(f"nota creada en {ruta}.")
+    return apply(vault, plan)
 
 
 def lint_del_vault(vault: Path, nota: Path | None = None) -> Resultado:
@@ -364,9 +396,7 @@ def lint_del_vault(vault: Path, nota: Path | None = None) -> Resultado:
     return Resultado.rechazo("\n".join(hallazgos), error=False)
 
 
-def renombrar_en_vault(
-    vault: Path, viejo: str, nuevo: str, hoy: date | None = None
-) -> Resultado:
+def renombrar_en_vault(vault: Path, viejo: str, nuevo: str, *, now: datetime) -> Resultado:
     """Renombra una nota y arregla lo que la enlazaba.
 
     El caso de uso de `tuku note rename`. Una nota se nombra en tres lugares a
@@ -397,7 +427,7 @@ def renombrar_en_vault(
 
     origen.rename(destino)
     renombrada = rename.renombrar_titulo(archivo.leer(destino), nuevo.strip())
-    archivo.escribir(destino, con_updated(renombrada, hoy or date.today()))
+    archivo.escribir(destino, con_updated(renombrada, now.date()))
 
     # Los enlaces apuntan al nombre del archivo, no al título: `notas/<slug>.md`.
     enlaces = 0

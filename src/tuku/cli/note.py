@@ -37,6 +37,7 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
             hour=args.at.hora,
             record=not args.no_record,
             subtype=args.subtype,
+            now=args.now,
         ),
         "tuku note create",
     )
@@ -44,7 +45,8 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
 
 def _cmd_note_rename(args: argparse.Namespace) -> int:
     return traducir(
-        note.renombrar_en_vault(args.vault, args.title, args.nuevo), "tuku note rename"
+        note.renombrar_en_vault(args.vault, args.title, args.nuevo, now=args.now),
+        "tuku note rename",
     )
 
 

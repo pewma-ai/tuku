@@ -94,7 +94,7 @@ Para probar fallbacks a la fecha de hoy y hora actual sin depender del reloj del
   ```bash
   TUKU_NOW="2026-08-11 15:30" tuku todo open --vault mi-vault --scope personal --body "comprar café"
   ```
-- El arnés [`scripts/gherkin.py`](scripts/gherkin.py) intercepta `TUKU_NOW` y congela `date.today()` y `datetime.now()` en los módulos de `tuku` exclusivamente durante esa llamada en proceso.
+- El arnés [`scripts/gherkin.py`](scripts/gherkin.py) intercepta `TUKU_NOW` y se lo pasa a `cli.main` como `now`, el instante que baja a los casos de uso en esa llamada. `main` es el único que lee el reloj; los casos de uso reciben `now` y los tests unitarios le pasan la constante `AHORA` de [`conftest.py`](conftest.py).
 
 Un turno de agente declara su fecha en el fence: ```` ```agente TUKU_NOW="AAAA-MM-DD HH:MM" ````. El shim del `tuku` que ejecuta el agente aplica esa fecha a cada llamada y la anuncia por `stderr`; los escenarios agénticos que dependen de "hoy" la declaran siempre.
 

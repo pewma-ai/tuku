@@ -18,6 +18,7 @@ def _cmd_entry_create(args: argparse.Namespace) -> int:
             scope=args.scope or ambito_por_defecto(args.vault),
             day=args.at.dia,
             hour=args.at.hora,
+            now=args.now,
         ),
         "tuku entry create",
     )

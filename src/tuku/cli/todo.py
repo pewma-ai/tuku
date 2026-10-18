@@ -21,6 +21,7 @@ def _cmd_todo_open(args: argparse.Namespace) -> int:
             regenerar=not args.no_regenerate,
             day=args.at.dia,
             hour=args.at.hora,
+            now=args.now,
         ),
         "tuku todo open",
     )
@@ -35,6 +36,7 @@ def _cmd_todo_close(args: argparse.Namespace) -> int:
             day=args.at.dia,
             hour=args.at.hora,
             scope=args.scope,
+            now=args.now,
         ),
         "todo close",
     )

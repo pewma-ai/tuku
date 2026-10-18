@@ -20,7 +20,7 @@ de `ambitos/`, la tabla de `PENDIENTES.md` y las tablas del libro de estilo.
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from tuku import archivo
@@ -169,12 +169,12 @@ def del_vault(
     vault: Path,
     tema: str | None = None,
     since: str | None = None,
-    hoy: date | None = None,
     *,
+    now: datetime,
     late: bool = False,
 ) -> Resultado:
     """El contexto del `tema`, o de todos, como texto para leer de una vez."""
-    hoy = hoy or date.today()
+    hoy = now.date()
     try:
         inicio = desde(since, hoy)
     except ValueError as e:

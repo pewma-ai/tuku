@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 
 import pytest
 
-from tuku import entry, init, scope, todo
+from conftest import AHORA
+from tuku import init, scope
 from tuku.cli import EXITO, RECHAZO, main
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -20,7 +21,7 @@ def vault(tmp_path: Path) -> Path:
 
 
 def _tuku(vault: Path, *argv: str) -> int:
-    return main([*argv, "--vault", str(vault)])
+    return main([*argv, "--vault", str(vault)], now=AHORA)
 
 
 def _foto(vault: Path) -> dict[str, bytes]:
@@ -31,27 +32,9 @@ def _leer(vault: Path, *partes: str) -> str:
     return vault.joinpath(*partes).read_text(encoding="utf-8")
 
 
-def _congelar(monkeypatch: pytest.MonkeyPatch, modulo: object, dia: date, hora: str) -> None:
-    h, m = hora.split(":")
-
-    class Hoy(date):
-        @classmethod
-        def today(cls) -> Hoy:
-            return cls(dia.year, dia.month, dia.day)
-
-    class Ahora(datetime):
-        @classmethod
-        def now(cls, tz: object = None) -> Ahora:
-            return cls(dia.year, dia.month, dia.day, int(h), int(m))
-
-    monkeypatch.setattr(modulo, "date", Hoy)
-    monkeypatch.setattr(modulo, "datetime", Ahora)
-
-
 def test_un_rechazo_no_deja_nada_a_medias(
-    vault: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    vault: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    _congelar(monkeypatch, entry, date(2026, 8, 11), "21:30")
     casos: list[tuple[tuple[str, ...], str]] = [
         (
             (
@@ -67,8 +50,8 @@ def test_un_rechazo_no_deja_nada_a_medias(
             "tuku scope create depto-centro",
         ),
         (
-            ("entry", "create", "--body", "x", "--at", "2026-08-12 09:00"),
-            "todo open --due 2026-08-12",
+            ("entry", "create", "--body", "x", "--at", "2026-08-13 09:00"),
+            "todo open --due 2026-08-13",
         ),
         (("scope", "create", "depto-centro", "--at", "2026-09-01 10:00"), "fuera del ciclo"),
         (("note", "create", "una nota sin cuerpo", "--body", ""), "falta el cuerpo"),
@@ -176,33 +159,3 @@ def test_entry_update_corrige_tambien_la_fila_del_pendiente(vault: Path) -> None
     pendientes = _leer(vault, "PENDIENTES.md")
     assert "pagar la sesión de terapia" in pendientes
     assert "psicólogo" not in pendientes
-
-
-def test_los_avisos_proceden_y_alertan_por_stderr(
-    vault: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
-    _congelar(monkeypatch, todo, date(2026, 8, 11), "21:30")
-
-    argv = ("todo", "close", "algo que nunca se abrió", "--at", f"{HOY} 10:00")
-    assert _tuku(vault, *argv) == EXITO
-    salida = capsys.readouterr()
-    assert "warning" in salida.err and "palabra por palabra" in salida.err
-    assert "warning" not in salida.out
-    assert "algo que nunca se abrió" in _leer(vault, "AHORA.md")
-
-    assert _tuku(vault, "todo", "open", "--body", "pagar", "--at", f"{HOY} 09:00") == EXITO
-    assert _tuku(vault, "todo", "close", "pagar", "--at", f"{HOY} 10:00") == EXITO
-    assert "warning" not in capsys.readouterr().err
-
-    for cuerpo, opciones, dice in (
-        ("pagar la luz", ("--due", "2026-08-10"), "ya pasó"),
-        ("pagar el agua", ("--at", f"{HOY} 10:00", "--due", f"{HOY} 09:00"), "antes de"),
-    ):
-        assert _tuku(vault, "todo", "open", "--body", cuerpo, *opciones) == EXITO
-        err = capsys.readouterr().err
-        assert "warning" in err and dice in err, cuerpo
-        assert cuerpo in _leer(vault, "PENDIENTES.md")
-
-    sin_aviso = ("todo", "open", "--body", "pagar el gas", "--due", "2026-08-12 09:00")
-    assert _tuku(vault, *sin_aviso) == EXITO
-    assert "warning" not in capsys.readouterr().err

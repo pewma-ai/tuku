@@ -36,7 +36,7 @@ def _cmd_init(args: argparse.Namespace) -> int:
             args.dir,
             variant=args.variant,
             author=args.author,
-            desde=args.at.dia,
+            desde=args.at.dia or args.now.date(),
             force=args.force,
             comandos=manual.del_cli(),
         )
@@ -57,7 +57,7 @@ def _crear_cmd_context(parser: argparse.ArgumentParser) -> Handler:
         if args.late and args.tema != "todo":
             parser.error("--late solo vale con el tema `todo`: `tuku context todo --late`")
         return traducir(
-            context.del_vault(args.vault, args.tema, args.since, late=args.late),
+            context.del_vault(args.vault, args.tema, args.since, now=args.now, late=args.late),
             "tuku context",
         )
 
@@ -73,7 +73,9 @@ def _cmd_process(args: argparse.Namespace) -> int:
 def _cmd_process_cycle(args: argparse.Namespace) -> int:
     from tuku import cycle
 
-    return traducir(cycle.abrir_en_vault(args.vault, args.at.dia), "tuku process cycle")
+    return traducir(
+        cycle.abrir_en_vault(args.vault, args.at.dia, now=args.now), "tuku process cycle"
+    )
 
 
 def _crear_cmd_doctor(

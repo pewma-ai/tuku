@@ -679,8 +679,7 @@ ahora = os.environ.get("TUKU_NOW")
 if ahora:
     print("nota: la fecha de hoy en este entorno es " + ahora + " (simulada)", file=sys.stderr)
 try:
-    with tiempo.congelar(ahora):
-        codigo = main(sys.argv[1:])
+    codigo = main(sys.argv[1:], now=tiempo.instante(ahora))
 except SystemExit as e:
     codigo = e.code if isinstance(e.code, int) else 1
 traza_path = os.environ.get("TUKU_TRAZA")

@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
 
+from conftest import AHORA
 from tuku import context, entry, init, scope, todo
 from tuku.cli import EXITO, main
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
-HOY = date(2026, 8, 12)
+HOY = AHORA.date()
 DIA = date(2026, 8, 10)
 
 
@@ -35,6 +36,7 @@ def vault(tmp_path: Path) -> Path:
         scope="colegio-los-robles",
         day=date(2026, 8, 11),
         hour="07:41",
+        now=AHORA,
     )
     todo.abrir_en_vault(
         v,
@@ -43,6 +45,7 @@ def vault(tmp_path: Path) -> Path:
         due="2026-08-11",
         day=date(2026, 8, 10),
         hour="09:00",
+        now=AHORA,
     )
     return v
 
@@ -56,19 +59,22 @@ def test_since_es_un_numero_de_dias_o_una_fecha() -> None:
 
 
 def test_entry_lee_los_dias_desde_since_tambien_en_un_ciclo_cerrado(vault: Path) -> None:
-    salida = context.del_vault(vault, "entry", "3", hoy=HOY).mensaje
+    salida = context.del_vault(vault, "entry", "3", now=AHORA).mensaje
     assert "## Domingo 9 de agosto\n- 18:00 - revisé las cuentas" in salida
     assert "llamé a [don Rodolfo]" in salida
     assert "entregué los cuadernos" not in salida
 
 
 def test_scope_todo_y_note(vault: Path) -> None:
-    assert "- colegio-los-robles: don-rodolfo, lr" in context.del_vault(vault, "scope").mensaje
-    pendientes = context.del_vault(vault, "todo", hoy=HOY).mensaje
+    assert (
+        "- colegio-los-robles: don-rodolfo, lr"
+        in context.del_vault(vault, "scope", now=AHORA).mensaje
+    )
+    pendientes = context.del_vault(vault, "todo", now=AHORA).mensaje
     assert (
         "- con fecha, vence 2026-08-11, atrasado: enviar la cotización (personal)" in pendientes
     )
-    notas = context.del_vault(vault, "note", hoy=HOY).mensaje
+    notas = context.del_vault(vault, "note", now=AHORA).mensaje
     assert notas == "## persona\n\n- notas/rodolfo-cifuentes.md: Rodolfo Cifuentes"
 
 
@@ -80,22 +86,28 @@ def test_late_deja_solo_los_pendientes_cuyo_vence_ya_paso(vault: Path) -> None:
         due="2026-08-12",
         day=date(2026, 8, 10),
         hour="09:05",
+        now=AHORA,
     )
     todo.abrir_en_vault(
-        vault, body="ordenar el archivo", scope="personal", day=DIA, hour="09:10"
+        vault,
+        body="ordenar el archivo",
+        scope="personal",
+        day=DIA,
+        hour="09:10",
+        now=AHORA,
     )
 
-    todos = context.del_vault(vault, "todo", hoy=HOY).mensaje
+    todos = context.del_vault(vault, "todo", now=AHORA).mensaje
     assert "recibir la cartulina" in todos and "ordenar el archivo" in todos
 
-    tarde = context.del_vault(vault, "todo", hoy=HOY, late=True).mensaje
+    tarde = context.del_vault(vault, "todo", now=AHORA, late=True).mensaje
     assert tarde == "- con fecha, vence 2026-08-11, atrasado: enviar la cotización (personal)"
 
-    mañana = context.del_vault(vault, "todo", hoy=date(2026, 8, 13), late=True).mensaje
+    mañana = context.del_vault(vault, "todo", now=AHORA + timedelta(days=1), late=True).mensaje
     assert "recibir la cartulina" in mañana and "ordenar el archivo" not in mañana
 
     assert (
-        context.del_vault(vault, "todo", hoy=date(2026, 8, 10), late=True).mensaje
+        context.del_vault(vault, "todo", now=AHORA - timedelta(days=2), late=True).mensaje
         == "sin pendientes atrasados."
     )
 
@@ -111,7 +123,7 @@ def test_late_sin_el_tema_todo_es_un_error_de_uso(
 
 
 def test_sin_tema_trae_todos_y_since_malo_rechaza(vault: Path) -> None:
-    todo_junto = context.del_vault(vault, hoy=HOY).mensaje
+    todo_junto = context.del_vault(vault, now=AHORA).mensaje
     for titulo in (
         "# Registros desde",
         "# Ámbitos",
@@ -120,5 +132,5 @@ def test_sin_tema_trae_todos_y_since_malo_rechaza(vault: Path) -> None:
         "# Notas",
     ):
         assert titulo in todo_junto
-    assert not context.del_vault(vault, since="ayer", hoy=HOY).ok
+    assert not context.del_vault(vault, since="ayer", now=AHORA).ok
     assert main(["context", "scope", "--vault", str(vault)]) == EXITO

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from conftest import AHORA
 from tuku import entry, init, scope, todo
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -65,7 +66,12 @@ def test_lee_los_registros_y_ubica_el_ultimo_que_calza_sin_mayusculas_ni_tildes(
 
 def test_update_corrige_el_ultimo_registro_la_fila_y_conserva_la_marca(vault: Path) -> None:
     todo.abrir_en_vault(
-        vault, body="enviar la cotización", scope="personal", day=DIA, hour="09:00"
+        vault,
+        body="enviar la cotización",
+        scope="personal",
+        day=DIA,
+        hour="09:00",
+        now=AHORA,
     )
     r = entry.actualizar_en_vault(
         vault, match="cotización", body="**pendiente**: enviar el presupuesto"
@@ -82,7 +88,12 @@ def test_update_corrige_el_ultimo_registro_la_fila_y_conserva_la_marca(vault: Pa
     assert otra.ok and "ya decía eso" in otra.mensaje
 
     todo.abrir_en_vault(
-        vault, body="llamar a la administradora", scope="personal", day=DIA, hour="09:00"
+        vault,
+        body="llamar a la administradora",
+        scope="personal",
+        day=DIA,
+        hour="09:00",
+        now=AHORA,
     )
     r = entry.actualizar_en_vault(vault, match="administradora", body="llamar por el reajuste")
     assert r.ok
@@ -92,6 +103,25 @@ def test_update_corrige_el_ultimo_registro_la_fila_y_conserva_la_marca(vault: Pa
         "llamar por el reajuste",
     ]
     assert entry.actualizar_en_vault(vault, match="reajuste", body="llamar por el reajuste").ok
+
+    con_link = "avisar a [Carmen](notas/carmen.md) de los GGCC"
+    todo.abrir_en_vault(
+        vault, body=con_link, scope="personal", day=DIA, hour="14:20", now=AHORA
+    )
+    pendientes = vault / "PENDIENTES.md"
+    pendientes.write_text(
+        pendientes.read_text(encoding="utf-8").replace(con_link, "avisar a Carmen de los GGCC"),
+        encoding="utf-8",
+    )
+    r = entry.actualizar_en_vault(
+        vault, match="GGCC", body="**pendiente**: avisar a Carmen de los GGCC hoy"
+    )
+    assert "su fila en PENDIENTES.md" in r.mensaje, (
+        "la fila se encuentra aunque difieran los links"
+    )
+    assert "avisar a Carmen de los GGCC hoy" in todo.cuerpos(
+        pendientes.read_text(encoding="utf-8")
+    )
 
 
 def test_update_rechaza_sin_registro_que_calce_y_fuera_del_ciclo(vault: Path) -> None:
@@ -105,7 +135,12 @@ def test_update_rechaza_sin_registro_que_calce_y_fuera_del_ciclo(vault: Path) ->
 
 def test_move_cambia_el_ambito_y_la_fila_del_pendiente_abierto(vault: Path) -> None:
     todo.abrir_en_vault(
-        vault, body="enviar la cotización", scope="personal", day=DIA, hour="09:00"
+        vault,
+        body="enviar la cotización",
+        scope="personal",
+        day=DIA,
+        hour="09:00",
+        now=AHORA,
     )
     r = entry.mover_en_vault(vault, match="cotización", scope="colegio-los-robles")
     assert r.ok and "su fila en PENDIENTES.md" in r.mensaje
@@ -146,10 +181,9 @@ def test_move_rechaza_un_ambito_que_no_existe_y_un_dia_sin_ciclo(vault: Path) ->
 
 
 def test_create_en_un_dia_pasado_sin_hora_no_inventa_una(vault: Path) -> None:
-    hoy = date.today()
     pasado = date(2026, 8, 10)
-    if hoy <= pasado:
-        pytest.skip("el reloj de la máquina está antes del ciclo de prueba")
-    r = entry.add_al_vault(vault, body="llamé a Rodolfo", scope="personal", day=pasado)
+    r = entry.add_al_vault(
+        vault, body="llamé a Rodolfo", scope="personal", day=pasado, now=AHORA
+    )
     assert r.ok
     assert "- [personal](ambitos/personal/personal.md) llamé a Rodolfo" in _ahora(vault)

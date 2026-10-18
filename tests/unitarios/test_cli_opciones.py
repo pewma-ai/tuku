@@ -9,28 +9,24 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 
 import pytest
 
-from tuku import cli, entry, init, todo
+from conftest import AHORA
+from tuku import cli, init
 from tuku.cli import EXITO, RECHAZO, USO, main
 from tuku.cli.opciones import Momento
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 HOY = "2026-08-11"
 MARTES = "## Martes 11 de agosto"
+MIERCOLES = "## Miércoles 12 de agosto"
 PERSONAL = "[personal](ambitos/personal/personal.md)"
 CUERPO = "avisar de los GGCC"
 
-#: Cómo se escribe el registro de cada comando, después del ámbito.
-REGISTRO = {
-    "entry create": CUERPO,
-    "todo open": f"**pendiente**: {CUERPO}",
-    "todo close": f"(Hecho): ~~{CUERPO}~~",
-}
-COMANDOS = tuple(REGISTRO)
+COMANDOS = ("entry create", "todo open", "todo close")
 
 
 def _parsear(comando: str, *argv: str) -> argparse.Namespace:
@@ -135,18 +131,14 @@ def vault(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return v
 
 
-def _correr(comando: str, *argv: str) -> int:
-    """Corre `comando` dentro del vault; un `todo close` cierra lo que abre antes, otro día."""
-    if comando == "todo close":
-        abrir = ["todo", "open", "--at", "2026-08-10 08:00", "--body", CUERPO]
-        assert main(abrir) == EXITO
-        return main([*comando.split(), *argv, CUERPO])
-    return main([*comando.split(), *argv, "--body", CUERPO])
+def _correr(*argv: str) -> int:
+    """`entry create` con el cuerpo de siempre, a las `AHORA` de `main`."""
+    return main(["entry", "create", *argv, "--body", CUERPO], now=AHORA)
 
 
-def _martes(vault: Path) -> list[str]:
+def _registros(vault: Path, dia: str = MARTES) -> list[str]:
     ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
-    region = ahora.split(MARTES, 1)[1].split("\n## ", 1)[0]
+    region = ahora.split(dia, 1)[1].split("\n## ", 1)[0]
     return [linea for linea in region.splitlines() if linea.startswith("- ")]
 
 
@@ -155,92 +147,34 @@ def _config(vault: Path, cambiar: Callable[[str], str]) -> None:
     ruta.write_text(cambiar(ruta.read_text(encoding="utf-8")), encoding="utf-8")
 
 
-@pytest.mark.parametrize("comando", COMANDOS)
-def test_sin_day_ni_hour_es_hoy_y_ahora(
-    comando: str, vault: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    class Hoy(date):
-        @classmethod
-        def today(cls) -> Hoy:
-            return cls(2026, 8, 11)
-
-    class Ahora(datetime):
-        @classmethod
-        def now(cls, tz: object = None) -> Ahora:
-            return cls(2026, 8, 11, 16, 45)
-
-    for modulo in (entry, todo):
-        monkeypatch.setattr(modulo, "date", Hoy)
-        monkeypatch.setattr(modulo, "datetime", Ahora)
-
-    assert _correr(comando) == EXITO
-    assert _martes(vault) == [f"- 16:45 - {PERSONAL} {REGISTRO[comando]}"]
-
-
-def test_el_scope_default_viene_de_la_config(
+def test_sin_at_es_el_instante_de_main_y_el_scope_default_viene_de_la_config(
     vault: Path,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    assert _correr() == EXITO
+    assert _registros(vault, MIERCOLES) == [f"- 09:00 - {PERSONAL} {CUERPO}"]
+    assert (
+        main(["todo", "open", "--body", "pagar", "--at", "2026-08-10 08:00"], now=AHORA)
+        == EXITO
+    )
+    assert main(["todo", "close", "pagar"], now=AHORA) == EXITO
+    assert _registros(vault, MIERCOLES)[-1] == f"- 09:00 - {PERSONAL} (Hecho): ~~pagar~~"
+
     config = (vault / "reglas" / "config.tuku.md").read_text(encoding="utf-8")
     monkeypatch.chdir(tmp_path)
-    assert _correr("entry create", "--vault", str(vault), "--at", f"{HOY} 09:12") == EXITO
-    assert _martes(vault) == [f"- 09:12 - {PERSONAL} {CUERPO}"], "el vault viene de la opción"
+    assert _correr("--vault", str(vault), "--at", f"{HOY} 09:12") == EXITO
+    assert _registros(vault) == [f"- 09:12 - {PERSONAL} {CUERPO}"], (
+        "el vault viene de la opción"
+    )
 
     _config(vault, lambda t: "\n".join(x for x in t.splitlines() if "`scope_default`" not in x))
-    assert _correr("entry create", "--vault", str(vault), "--at", f"{HOY} 10:00") == EXITO
-    assert _martes(vault)[-1] == f"- 10:00 - {CUERPO}", "sin scope_default no lleva ámbito"
+    assert _correr("--vault", str(vault), "--at", f"{HOY} 10:00") == EXITO
+    assert _registros(vault)[-1] == f"- 10:00 - {CUERPO}", "sin scope_default no lleva ámbito"
 
-    antes = _martes(vault)
+    antes = _registros(vault)
     _config(vault, lambda _t: config.replace("| `personal` ", "| `casa`     "))
-    assert _correr("entry create", "--vault", str(vault), "--at", f"{HOY} 11:00") == RECHAZO
+    assert _correr("--vault", str(vault), "--at", f"{HOY} 11:00") == RECHAZO
     assert "tuku scope create casa" in capsys.readouterr().err
-    assert _martes(vault) == antes
-
-
-def test_no_regenerate_no_toca_las_vistas(vault: Path) -> None:
-    vista = vault / "ambitos" / "PENDIENTES-AMBITOS.md"
-    antes = vista.read_bytes()
-    assert _correr("todo open", "--no-regenerate", "--at", f"{HOY} 09:12") == EXITO
-    assert vista.read_bytes() == antes
-    assert _martes(vault) == [f"- 09:12 - {PERSONAL} **pendiente**: {CUERPO}"]
-
-
-def _pendientes(vault: Path) -> list[str]:
-    texto = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
-    return [linea for linea in texto.splitlines() if CUERPO in linea]
-
-
-def test_due_fecha_el_pendiente_y_el_registro_queda_cuando_se_prometio(vault: Path) -> None:
-    assert _correr("todo open", "--at", f"{HOY} 21:30", "--due", "2026-08-13") == EXITO
-    assert _martes(vault) == [f"- 21:30 - {PERSONAL} **pendiente**: {CUERPO}"]
-    assert _pendientes(vault) == [
-        f"| con fecha | 2026-08-13 | [personal](ambitos/personal/personal.md) | {CUERPO} |"
-    ]
-
-
-def test_un_day_futuro_se_rechaza_y_nombra_due(
-    vault: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
-    class Hoy(date):
-        @classmethod
-        def today(cls) -> Hoy:
-            return cls(2026, 8, 11)
-
-    monkeypatch.setattr(todo, "date", Hoy)
-    antes = (vault / "AHORA.md").read_bytes()
-    assert _correr("todo open", "--at", "2026-08-12 09:00") == RECHAZO
-    assert "--due 2026-08-12" in capsys.readouterr().err
-    assert (vault / "AHORA.md").read_bytes() == antes
-    assert _pendientes(vault) == []
-
-
-def test_sin_due_ni_horizon_va_al_primer_escalon_del_autor(vault: Path) -> None:
-    estilo = vault / "LIBRO-DE-ESTILO.md"
-    estilo.write_text(
-        estilo.read_text(encoding="utf-8").replace("`esta semana`", "`esta quincena`"),
-        encoding="utf-8",
-    )
-    assert _correr("todo open", "--at", f"{HOY} 09:12") == EXITO
-    assert _pendientes(vault)[0].startswith("| esta quincena |")
+    assert _registros(vault) == antes

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from conftest import AHORA
 from tuku import doctor, fix, init
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -23,7 +24,9 @@ def _vault(tmp_path: Path, archivos: dict[str, str]) -> Path:
 def test_doctor_link_reporta_wikilinks_y_rotos_e_ignora_transclusiones_y_codigo(
     tmp_path: Path,
 ) -> None:
-    assert doctor.revisar_links(init.init(tmp_path / "v", home=RAIZ_REPO)).sano
+    assert doctor.revisar_links(
+        init.init(tmp_path / "v", home=RAIZ_REPO, desde=AHORA.date())
+    ).sano
 
     wiki = doctor.revisar_links(
         _vault(

@@ -15,7 +15,7 @@ from __future__ import annotations
 import argparse
 import re
 import shlex
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -31,12 +31,31 @@ class Momento:
 
     `propuesto` es el día que se habría entendido de una fecha escrita sin año:
     no se usa, se ofrece.
+
+    Parsear no lee el reloj. Lo que depende de hoy queda pendiente (`mes_dia`, una
+    fecha sin año, o `adelante` con solo la hora) y `con_reloj` lo completa con el
+    `now` que `cli.main` calculó una vez.
     """
 
     dia: date | None = None
     hora: str | None = None
     texto: str = ""
     propuesto: date | None = None
+    mes_dia: tuple[int, int] | None = None
+    adelante: bool = False
+
+    def con_reloj(self, now: datetime) -> Momento:
+        """Completa lo que dependía de hoy: el día de una hora sola o de una fecha sin año."""
+        if self.mes_dia is not None:
+            mes, dia = self.mes_dia
+            return replace(
+                self, propuesto=_con_anio(mes, dia, self.texto, self.adelante, now.date())
+            )
+        if self.adelante and self.dia is None and self.hora is not None:
+            hoy = now.date()
+            llega = hoy if self.hora > now.strftime("%H:%M") else hoy + timedelta(1)
+            return replace(self, dia=llega)
+        return self
 
     def celda(self) -> str:
         """Como se escribe en la columna `Vence`: `AAAA-MM-DD` o `AAAA-MM-DD HH:MM`."""
@@ -71,24 +90,19 @@ def _dia(anio: int, mes: int, dia: int, valor: str) -> date:
 def _momento(valor: str, *, hacia_adelante: bool) -> Momento:
     m, h = _leer(valor)
     if m is None:
-        if not hacia_adelante:
-            return Momento(hora=h, texto=valor)
-        ahora = datetime.now()
-        hoy = ahora.date()
-        llega = hoy if str(h) > ahora.strftime("%H:%M") else hoy + timedelta(1)
-        return Momento(llega, h, valor)
+        return Momento(hora=h, texto=valor, adelante=hacia_adelante)
     mes, dia = int(m.group("mes")), int(m.group("dia"))
     if m.group("anio"):
         return Momento(_dia(int(m.group("anio")), mes, dia, valor), h, valor)
-    return Momento(hora=h, texto=valor, propuesto=_con_anio(mes, dia, valor, hacia_adelante))
+    _dia(2024, mes, dia, valor)  # un 29 de febrero existe en algún año; un 30 no
+    return Momento(hora=h, texto=valor, mes_dia=(mes, dia), adelante=hacia_adelante)
 
 
-def _con_anio(mes: int, dia: int, valor: str, hacia_adelante: bool) -> date:
+def _con_anio(mes: int, dia: int, valor: str, hacia_adelante: bool, hoy: date) -> date:
     """El `MM-DD` más cercano a hoy hacia adelante o hacia atrás, hoy incluido.
 
     Ocho años alcanzan para encontrar un 29 de febrero.
     """
-    hoy = date.today()
     paso = 1 if hacia_adelante else -1
     for anio in range(hoy.year, hoy.year + 9 * paso, paso):
         try:
@@ -189,6 +203,14 @@ class Opciones:
                 "llega); el horizonte pasa a `con fecha`"
             ),
         )
+
+
+def completar(args: argparse.Namespace, now: datetime) -> None:
+    """Completa `--at` y `--due` con el `now` del comando, una vez parseados."""
+    for opcion in ("at", "due"):
+        m = getattr(args, opcion, None)
+        if isinstance(m, Momento):
+            setattr(args, opcion, m.con_reloj(now))
 
 
 def sin_anio(args: argparse.Namespace, argv: list[str]) -> str | None:

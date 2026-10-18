@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import functools
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from tuku import archivo
@@ -27,7 +28,7 @@ from tuku.cli.helpers import (
 from tuku.cli.helpers import (
     cuerpo_de_la_nota as _cuerpo_de_la_nota,
 )
-from tuku.cli.opciones import sin_anio
+from tuku.cli.opciones import completar, sin_anio
 from tuku.config import VaultInvalido, exigir_vault
 from tuku.init import MarcadorAutorFaltante
 from tuku.todo import SinTabla
@@ -90,9 +91,16 @@ def _construir_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, *, now: datetime | None = None) -> int:
+    """Corre un comando. El reloj se lee acá, una vez, y baja como `args.now`.
+
+    `now` lo fijan quienes necesitan un día determinado (el arnés de escenarios, con
+    `TUKU_NOW`); sin él es la hora local.
+    """
     argv = sys.argv[1:] if argv is None else argv
     args = _construir_parser().parse_args(argv)
+    args.now = now or datetime.now()
+    completar(args, args.now)
     if error := sin_anio(args, argv):
         print(f"tuku: {error}", file=sys.stderr)
         return USO

@@ -19,6 +19,7 @@ def _cmd_scope_create(args: argparse.Namespace) -> int:
             hour=args.at.hora,
             palabras=args.keyword,
             since=args.since,
+            now=args.now,
         ),
         "tuku scope create",
     )

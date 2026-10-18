@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 import pytest
 
 
@@ -33,3 +35,7 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
 
         config.hook.pytest_deselected(items=deseleccionados)
         items[:] = seleccionados
+
+
+#: El instante que los tests le dan a los casos de uso: miércoles 12 de agosto de 2026, 09:00.
+AHORA = datetime(2026, 8, 12, 9, 0)
