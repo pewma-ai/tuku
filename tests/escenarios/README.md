@@ -188,6 +188,13 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`003-11-el-dia-que-no-se-dicta.md`](003-11-el-dia-que-no-se-dicta.md) | Epic 003 | Un hecho con hora y sin día cae en el último día con registros |
 | [`004-00-la-conversacion.md`](004-00-la-conversacion.md) | Epic 004 | Qué se verifica con dos agentes conversando, los escenarios del epic y el vault de partida que todos copian |
 | [`004-01-el-dia-conversado.md`](004-01-el-dia-conversado.md) | Epic 004 | Camino feliz: Damián consulta, aclara, delibera, se interrumpe y ratifica; el vault queda como el dictado directo de lo ratificado |
+| [`005-00-el-dia-ciento-cincuenta.md`](005-00-el-dia-ciento-cincuenta.md) | Epic 005 | Qué se verifica sobre un vault poblado, cómo se leyó el corpus de la Pyme y lo que el epic encontró en las specs |
+| [`005-01-las-dos-semanas-de-andrea.md`](005-01-las-dos-semanas-de-andrea.md) | Epic 005 | El árbol de la Pyme, dos semanas del corpus con un comando por hecho y la primera archivada a mano en `bitacoras/` |
+| [`005-02-lo-derivado-se-reconstruye.md`](005-02-lo-derivado-se-reconstruye.md) | Epic 005 | Borrar lo derivado y regenerar devuelve el mismo vault (principio 9) |
+| [`005-03-reorganizar-con-historia.md`](005-03-reorganizar-con-historia.md) | Epic 005 | Mover y renombrar ámbitos anidados con una bitácora cerrada que los enlaza |
+| [`005-04-los-atrasados-se-calculan.md`](005-04-los-atrasados-se-calculan.md) | Epic 005 | Un comando informa qué venció, con cada fila donde estaba |
+| [`005-05-las-notas-de-la-pyme.md`](005-05-las-notas-de-la-pyme.md) | Epic 005 | Notas con `## Ver además` verificable y la primera nota tipada (una persona) |
+| [`005-06-el-agente-con-historia.md`](005-06-el-agente-con-historia.md) | Epic 005 | La Patricia y las dos Paulas: el agente elige el ámbito por las keywords y espera al autor ante dos candidatas. Agéntico |
 
 ## Escenarios encadenados, desde el epic 002
 

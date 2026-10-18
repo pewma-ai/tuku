@@ -1,0 +1,1 @@
+Una cotización lleva el detalle por línea, el margen de cada línea y las condiciones de pago según el tipo de cliente. Se envía el mismo día en que se pide y se llama a los dos días hábiles si nadie contesta: ahí es donde se pierden las ventas.

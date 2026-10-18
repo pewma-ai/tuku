@@ -1,0 +1,1 @@
+Encargada de adquisiciones del Liceo Técnico Andes. Las compras pasan por el consejo, que se reúne los lunes. Cambiaron de proveedor por precio y no quedaron conformes con los plazos de entrega, por eso pidieron cotizar de nuevo. Conviene llamarla por la mañana y llevar el plazo de entrega por escrito.

@@ -1,0 +1,1 @@
+Colegio particular, a treinta días. Convenio municipal, a sesenta. Revendedor, contra entrega. Feria, al contado. Antes de aceptar un pedido por convenio municipal se mira el flujo de las semanas siguientes.
