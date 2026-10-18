@@ -44,7 +44,7 @@ Las entradas se clasifican por lo que producen y no por cómo llegan. Hay seis f
 | Familia | Qué produce | Ejemplo |
 | --- | --- | --- |
 | Hechos | un registro en la bitácora, y si el hecho abre o cierra un pendiente, también el pendiente | «a las once me reuní con Rodrigo Álvarez», «recuérdame renovar el seguro», «ya pagué el arriendo» |
-| Decisiones del autor | un cambio en su estructura o en sus compromisos, con constancia en la bitácora: ámbitos, notas, ciclo, cadencias, correcciones | «faena es un frente aparte», «guárdame esto como nota», «empecemos la semana», «los gastos comunes se revisan el día 10» |
+| Decisiones del autor | un cambio en su estructura o en sus compromisos, con constancia en la bitácora: ámbitos, notas, ciclo, cadencias. Una corrección arregla lo escrito en su lugar | «faena es un frente aparte», «guárdame esto como nota», «empecemos la semana», «los gastos comunes se revisan el día 10» |
 | Conversación | una respuesta y nada escrito | «¿qué me quedaba abierto hoy?», «¿tú crees que Casa Matriz amerita un ámbito?» |
 | Sin camino | una petición que ningún comando cubre se reformula, espera el sí y se hace entera; un proceso nombrado se ejecuta | «junta estos tres ámbitos en uno», «corre el cierre de mes» |
 | A mano | el vault sigue siendo válido | el autor agrega una línea en `AHORA.md` con el editor |
@@ -52,11 +52,11 @@ Las entradas se clasifican por lo que producen y no por cómo llegan. Hay seis f
 
 Las dos primeras escriben por un comando `tuku`. Las demás no lo necesitan, o lo necesitan después de una decisión del autor.
 
-La estrategia son tres reglas:
+Para clasificar una entrada:
 
-- **Las entradas se reconocen en el habla del autor y no en el vocabulario del sistema.** Nadie ratifica por él (principio 3).
-- **Cada familia tiene un camino único hasta un comando o hasta una respuesta.** La tabla que une las familias con sus comandos, y que el agente consulta para despachar, es [despacho.md](despacho.md).
-- **Una entrada cuyo comando todavía no existe sigue la misma familia.** Cambia el comando, no el modelo. Las cadencias y el cierre del ciclo son decisiones del autor aunque hoy no tengan comando.
+- **Se reconoce por cómo habla el autor.** Dice «ya pagué el arriendo», no «cierra el pendiente». No tiene que aprender el vocabulario del sistema.
+- **Cada familia lleva a un solo destino:** un comando o una respuesta. La tabla de [despacho.md](despacho.md) dice qué comando corresponde a cada una.
+- **Si el comando todavía no existe, la familia no cambia.** «Los gastos comunes se revisan el día 10» es una decisión del autor aunque hoy no haya comando de cadencias. Cuando exista, cambia el comando, no la clasificación.
 
 ## Entidades subordinadas
 
@@ -129,15 +129,9 @@ Un día podría verse así (ilustrativo, la forma exacta la define la spec que l
 
 El autor lee primero lo tercero, después lo segundo, y casi nunca lo primero. Lo tercero es una propuesta pendiente y sigue la regla de no ratificar. El log todavía no existe.
 
-### Por definir: la comunicación entre el autor y las entidades
+### La comunicación con el autor
 
-Hoy el flujo dice qué devuelve cada entidad (una alerta, un reporte, una propuesta) y que la respuesta del autor entra como una entrada más. No dice por dónde viaja nada de eso, y queda por definir:
-
-- **De la entidad al autor.** Dónde aparece una alerta o una propuesta para que el autor la vea sin ir a buscarla: un archivo del vault, un mensaje en el canal de conversación, ambos.
-- **Del autor a la entidad.** Cómo responde a una propuesta («sí, abre la página de Carla») y cómo encarga algo a una entidad («repórtame el avance del mes»), sin que cada rol invente su propia forma.
-- **Entre entidades.** Si una entidad puede pedirle algo a otra (el análisis que le pide un dato al reporte) o todas hablan solo con el vault.
-
-Mientras no se defina, el vault es el único punto de encuentro: las entidades escriben en su log y el autor las lee ahí.
+Por dónde viajan las alertas, las propuestas y las respuestas del autor es una decisión abierta ([README.md](README.md), "Decisiones abiertas"). Mientras no se tome, el vault es el único punto de encuentro: las entidades escriben en su log y el autor las lee ahí.
 
 El detalle de cada rol (cuándo se dispara, qué toca, con qué comandos) vive en la spec de la primitiva que atiende.
 
@@ -160,7 +154,7 @@ El autor habla como habla y quien interpreta no lo frena para que precise. Tres 
 - **Lo que no se puede resolver se escribe tal cual lo dijo el autor.** «Recuérdame a fin de mes renovar el seguro» abre el pendiente en el horizonte `fin de mes`, sin fecha. No se inventa un «31 de octubre». El horizonte es una ambigüedad escrita: dice «para fin de mes» y nada más preciso.
 - **Se resuelve cuando hay que decidir sobre ella.** El pendiente de `fin de mes` sigue así hasta que el autor lo agenda y necesita un día. «Quedamos al día con Fabina», con dos pendientes de Fabina abiertos, se registra como lo que el autor contó y no cierra ninguno: cerrar es la decisión que pide saber cuál. Hasta que el autor la tome, los dos pendientes siguen abiertos.
 
-Las preguntas sirven para decidir, no para precisar por si acaso, y una pregunta no frena el resto del dictado: lo demás se atiende en orden mientras ella espera. Quién la plantea y cuándo (en la misma respuesta o más tarde, por una entidad) queda por definir junto con la comunicación entre el autor y las entidades.
+Las preguntas sirven para decidir, no para precisar por si acaso, y una pregunta no frena el resto del dictado: lo demás se atiende en orden mientras ella espera. Quién la plantea y cuándo es parte de la comunicación entre el autor y las entidades, que sigue abierta ([README.md](README.md), "Decisiones abiertas").
 
 **Supuesto de diseño: los agentes resolverán cada vez mejor.** La spec no fija cuánto se resuelve al registrar. Fija qué queda escrito cuando no se resuelve y cuándo hay que decidir. Un agente flojo deja más cosas tal cual las dijo el autor, y uno mejor las precisa al registrar. El vault es válido en los dos casos y su formato no cambia. Como lo ambiguo conserva las palabras del autor, nada se pierde: un agente mejor, o una entidad, lo precisa después, cuando una decisión lo exija. Por eso los casos de arriba («el viernes» es el próximo viernes) ilustran lo que un agente puede resolver y no son un contrato, y las heurísticas que un modelo mejor ya no necesita no se escriben como reglas del vault.
 
@@ -172,12 +166,12 @@ El detalle (cierres, horas, ámbitos, vocabularios) lo especifican [agente.md](a
 
 Toda consecuencia sale del texto del registro, no de la conversación. Cerrar un pendiente necesita su cuerpo y nada más. Si una consecuencia exige recordar lo que se dijo, o al registro le falta información, o esa operación no pertenece a este flujo.
 
-Y viaja dentro del mismo comando que escribe, nunca en un paso aparte que alguien deba recordar. En el vault que antecede a TUKU la regla «regenerar el índice después de escribir una nota» se olvidaba aun escrita en mayúsculas, y terminó en un cron cada diez minutos. Acá la consecuencia no se pide: ocurre en la llamada.
+Y viaja dentro del mismo comando que escribe, nunca en un paso aparte que alguien deba recordar: la consecuencia no se pide, ocurre en la llamada.
 
 | Consecuencia | Qué cambia | Comando |
 | --- | --- | --- |
 | Pendientes | alta o baja en `PENDIENTES.md` y las vistas que se derivan de él | `todo open`, `todo close`, `regenerate todo` |
-| Ámbitos | su página, su jerarquía y las keywords con que se elige; lo ya escrito no cambia | `scope create`, `scope move`, `scope update` |
+| Ámbitos | su página, su jerarquía, las keywords con que se elige y el ámbito de los registros que ya hablaban de él | `scope create`, `scope move`, `scope update`, `entry move` (todavía no existe) |
 | Notas | la nota en `notas/` y su constancia en la bitácora | `note create`, `note lint` |
 | Cadencias | alta o cambio de una cadencia en su ámbito | `cadence …` (todavía no existe) |
 | Ciclo | apertura, cierre y archivo de la bitácora | `cycle open`, `cycle close` (todavía no existe) |
@@ -185,16 +179,9 @@ Y viaja dentro del mismo comando que escribe, nunca en un paso aparte que alguie
 
 La lista es abierta. Agregar una consecuencia es agregar su regla y su comando, sin tocar el flujo. La propuesta es la única que no se ejecuta: se muestra y espera, y una rechazada no deja nada que limpiar. `tuku doctor` comprueba que lo derivado coincide con lo canónico y que el despacho nombra solo comandos que existen.
 
-## Despacho: lo que el agente aprende y lo que no
+## Despacho
 
-Un agente aprende a **despachar**: reconocer la entrada, interpretar los hechos y elegir el comando. Escribir lo hace el comando. De ahí sale la regla que mantiene acotado su `AGENTS.md`:
-
-- Una funcionalidad nueva agrega una fila a la tabla o un comando. Cuando entró `scope keywords`, el `AGENTS.md` ganó una fila y nada más, porque `scope create` ya pide las keywords en su salida.
-- Lo que se puede decir en la salida de un comando (el rechazo con corrección, el pedido de lo que falta) se dice ahí. Si el comando puede guiar al agente, la regla no se escribe en el `AGENTS.md`.
-- Una regla de interpretación, como las de arriba, sí se escribe, una sola vez y en el idioma del autor.
-- Una entidad lanzada con un nombre ejecuta lo nombrado sin volver a despachar, y su detalle vive en el proceso y no en el `AGENTS.md`.
-
-La tabla de despacho, el enrutamiento por directorio y los límites están en [despacho.md](despacho.md).
+Un agente aprende a **despachar**: reconocer la entrada, interpretar los hechos y elegir el comando. Escribir lo hace el comando. Qué lleva su `AGENTS.md` y qué no, la tabla de despacho, el enrutamiento por directorio y los límites están en [despacho.md](despacho.md).
 
 ## A mano
 

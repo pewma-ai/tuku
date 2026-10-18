@@ -1,37 +1,18 @@
 # Reglas de todos los ámbitos
 
-Un ámbito es un frente de la vida del autor. Lo que escribas aquí vale para todo lo que cuelgue de `ambitos/`, y cuando una regla valga solo para una rama, va en el `AGENTS.md` de esa rama: ante dos reglas que aplican, gana la más cercana.
+Vale para todo lo que cuelga de `ambitos/`. Una regla de una sola rama va en el `AGENTS.md` de esa carpeta, y gana la más cercana.
 
-## Cuál ámbito lleva un registro
+## Crear un ámbito
 
-Cada registro dice a qué frente pertenece. Va en `--scope`, sin corchetes.
-
-Usa uno que exista como carpeta o archivo aquí. Si ninguno calza, es `personal`, que siempre está.
-
-El `keywords:` del frontmatter de cada página lista las palabras que delatan el ámbito: siglas, sistemas, personas y proyectos que, al mencionarlos, indican que algo es de él. El nombre del ámbito no va en la lista: ya es el de su carpeta. Un hecho que menciona una keyword es de ese ámbito, aunque parezca no tener relación: pásalo con `--scope` de ese ámbito y deja el cuerpo tal como lo dijo el autor, sin links.
-
-Si el autor nombra un frente que todavía no existe, **no lo crees por tu cuenta ni antes de tiempo**: escríbelo en el cuerpo del registro bajo `personal`, en palabras, y sigue. En un dictado con varios hechos, procesa cada uno en su orden cronológico sin anticipar la creación de frentes nombrados más adelante. El momento de crearlo es cuando la narración llega a esa petición. Al crearse, lo ya escrito queda como estaba.
-
-## Cuándo se crea un ámbito
-
-Cuando el autor lo pide. `tuku scope create` arma la carpeta y su página y deja la constancia en la bitácora: no escribas otro registro para eso. El nombre se pasa tal como lo dijo el autor: el comando lo pasa a minúsculas y cambia los espacios por guiones. El día y la hora de la constancia se pasan como en un registro, con `--at`.
-
-Al crearlo, la salida del comando pide las keywords. Pregúntaselas al autor con sus propias palabras, sin inventarlas, y regístralas con `tuku scope update paranal --keyword vlti,gravity,LCU`. Si ya las dio al pedir el ámbito, pásalas en el mismo comando: `tuku scope create paranal --keyword vlti,LCU`. Cada `--keyword` admite varias palabras separadas por coma, y una palabra va en kebab-case: minúsculas y guiones en lugar de espacios (`los-robles`). Las keywords te dicen de qué ámbito es lo que el autor menciona; no cambian ni enlazan lo ya escrito. Para sumar otras después, el mismo `scope update`.
-
-Si un comando rechaza un ámbito porque no existe, ofrécele al autor crearlo y espera el sí.
-
-Un frente que aparece dos veces en la semana probablemente merece página, y eso se propone; no se crea sin el sí. Crear un ámbito cambia dónde va a caer todo lo que venga después, y esa decisión es del autor.
+- **Cuando el autor lo pide** («ábrelo aparte»), en el punto del dictado donde lo pide: lo que contó antes se registra en el ámbito que correspondía en ese momento. Si algo aparece seguido sin página, propónselo y espera el sí.
+- **`tuku scope create NOMBRE`**, con el nombre como lo dijo el autor y `--at` como en un registro. El comando deja la constancia en la bitácora.
+- **Las keywords** son las palabras que delatan el ámbito sin nombrarlo: personas, siglas, lugares. La salida del comando las pide: pregúntaselas al autor y súmalas con `tuku scope update colegio-los-robles --keyword "don Rodolfo",LR`. Si ya las dijo, van en el mismo `scope create`.
+- **Si un comando rechaza un ámbito que no existe**, ofrécele al autor crearlo y espera el sí.
 
 ## Un ámbito dentro de otro
 
-Un frente puede ser parte de otro: `faena-ai` es parte de `faena`. Si el autor lo dice al pedirlo, pasa `--parent`: `tuku scope create faena-ai --parent faena`. Si el frente ya existe suelto, `tuku scope move faena-ai --parent faena` lo cambia de lugar y arregla sus links; sin `--parent` lo devuelve a la raíz de `ambitos/`.
-
-El padre tiene que existir. Si no, ofrécele al autor crearlo y espera el sí. Los registros nombran el ámbito por su nombre, sin ruta: `--scope faena-ai`.
+`--parent` al crearlo (`tuku scope create bodega --parent negocio`), o `tuku scope move bodega --parent negocio` si ya existe; sin `--parent`, `move` lo lleva a la raíz de `ambitos/`. El padre tiene que existir: si falta, ofrécele al autor crearlo. Los registros nombran el ámbito sin ruta: `--scope bodega`.
 
 ## Reglas y cadencias de un ámbito
 
-Un ámbito no trae `AGENTS.md` ni `CADENCIAS.md`: existen cuando el autor les pone su primera regla o cadencia. Una regla que vale solo para un ámbito va en el `AGENTS.md` de su carpeta. Si falta, créalo después de preguntar, como con cualquier `AGENTS.md`.
-
-## A mano
-
-Crear la carpeta con su página del mismo nombre dentro (dentro de la carpeta del padre, si lo tiene), enlazar con `[nombre](ambitos/nombre/nombre.md)` (ruta relativa al archivo donde va, con las carpetas del padre en medio si es anidado) los registros que lo mencionen, y registrar en `AHORA.md` `- HH:MM - [nombre](ambitos/nombre/nombre.md) **nota**: abrí el ámbito`, y listar en `keywords: [nombre, otra]` del frontmatter las palabras con que el autor lo nombra. Si tiene padre, sumarlo a la lista `> [!abstract] En **Padre**:` de la página del padre, con un link relativo a su página.
+Un ámbito trae solo su página. Su `AGENTS.md` o su `CADENCIAS.md` se crean con la primera regla o cadencia, después de preguntarle al autor.

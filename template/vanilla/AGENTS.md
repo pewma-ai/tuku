@@ -34,14 +34,15 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 | cuenta algo que pasó: "hablé con", "llegó", "quedó listo" | `PENDIENTES.md`; si el comando rechaza el día, `reglas/bitacora.tuku.md` | `tuku entry create` |
 | deja algo por hacer: "hay que", "recuérdame", "para el lunes" | nada | `tuku todo open` |
 | da por hecho algo que estaba pendiente: "ya pagué", "listo lo de" | `PENDIENTES.md` | `tuku todo close` |
-| nombra un frente que todavía no existe | `ambitos/AGENTS.md` | `tuku scope create` |
-| dice que un frente es parte de otro: "va dentro de" | `ambitos/AGENTS.md` | `tuku scope move` |
-| pide guardar una idea que no es de un día | `reglas/notas.tuku.md` | `tuku note create` |
-| empieza el ciclo | nada | `tuku cycle open` |
+| nombra algo nuevo de lo que va a seguir hablando, un cliente, un proveedor, un proyecto: "ábrelo aparte" | `ambitos/AGENTS.md` | `tuku scope create` |
+| dice que una cosa es parte de otra: "va dentro de" | `ambitos/AGENTS.md` | `tuku scope move` |
+| dice con qué otras palabras nombra algo: "si te hablo de don Rodolfo, es Los Robles" | `ambitos/AGENTS.md` | `tuku scope update` |
+| pide guardar una idea que no es de un día: "guárdame esto" | `reglas/notas.tuku.md` | `tuku note create` |
+| empieza el ciclo: "empecemos la semana" | nada | `tuku cycle open` |
 | corrige algo ya escrito: "no era eso", "cámbiale el nombre" | nada | `tuku entry rename`, `scope rename`, `note rename` |
-| nombra un proceso del vault | ese proceso | el que el proceso diga |
-| pide algo que ninguna fila cubre | nada | ninguno: [reformula y confirma](#lo-que-no-tiene-comando) |
-| pregunta, delibera o pide investigar | nada | ninguno: se responde, no se escribe |
+| nombra un proceso del vault: "corre el cierre de mes" | ese proceso | el que el proceso diga |
+| pide algo que ninguna fila cubre | nada | se [reformula y se confirma](#lo-que-no-tiene-comando) |
+| pregunta, delibera o pide investigar | nada | se responde |
 
 ```bash
 tuku entry create --scope personal --body "revisé el contrato del arriendo" --at 10:30
@@ -52,7 +53,7 @@ tuku scope create "casa de playa"
 tuku note create "cómo se prorroga un arriendo" --scope personal --body "…" --at 21:15
 ```
 
-- **Los campos.** `--scope` es el nombre de una carpeta de `ambitos/` (`grep -r '^keywords:' ambitos` las lista con sus palabras; si ninguno calza, `personal`). `--at "2026-08-11 09:12"` (o solo `09:12`) es cuándo pasó, cuándo prometió algo el autor o cuándo lo dio por hecho ("a la una, tengo que…", "a las siete, listo lo de…"), también en `todo open` y `todo close`; sin él el comando usa hoy y ahora. `--due "2026-08-14 09:00"` es solo para cuándo vence un pendiente ("el viernes a las nueve", "mañana"), con la hora si el autor la dijo.
+- **Los campos.** `--scope` es el nombre de una carpeta de `ambitos/` (`grep -r '^keywords:' ambitos` las lista con sus palabras; si ninguno calza, `personal`). Un hecho que nombra una keyword es de ese ámbito aunque parezca no tener relación, y el cuerpo queda como lo dijo el autor. `--at "2026-08-11 09:12"` (o solo `09:12`) es cuándo pasó, cuándo prometió algo el autor o cuándo lo dio por hecho ("a la una, tengo que…", "a las siete, listo lo de…"), también en `todo open` y `todo close`; sin él el comando usa hoy y ahora. `--due "2026-08-14 09:00"` es solo para cuándo vence un pendiente ("el viernes a las nueve", "mañana"), con la hora si el autor la dijo.
 - **El cuerpo (`--body`).** Es el hecho, no la conversación: lo dirigido a ti ("recuérdame", "anota", "guárdame") se queda fuera, con todo lo que lo acompaña. No agregues lo que el autor no dijo. El pendiente va en infinitivo, sin mayúscula inicial ("pagar la sesión con el psicólogo"), y `todo close` repite ese texto sin reescribirlo. En `entry create` puede abrir con una clasificación: `**progreso**`, `**decisión**`, `**fricción**`, `**señal**` o `**nota**`.
 - **Contarlo es pedirlo.** Si el autor cuenta algo, ejecuta el comando de su fila. No preguntes qué hacer con eso ni ofrezcas alternativas.
 - **Lo tentativo espera.** Un compromiso con el día, la hora o la forma sin decidir ("quizás el jueves", "mejor el viernes", "todavía no sé") no se abre. Conversa con el autor y ejecuta `tuku todo open` cuando lo ratifique ("quedamos así"), con el último acuerdo y no con los anteriores.

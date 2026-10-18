@@ -26,7 +26,7 @@ ambitos/
     ├── trabajo.md            <- página propia: esto lo hace ámbito
     ├── AGENTS.md             <- solo si tiene reglas propias
     └── clientes/             <- sin página: es categoría
-        └── juanito_perez.md  <- actividad
+        └── juanito-perez.md  <- actividad
 ```
 
 **Ausente significa vacío.** Un ámbito nuevo lleva solo su página: `AGENTS.md`, `CADENCIAS.md` y `CAPACIDAD.md` existen desde que el autor les pone su primera regla, cadencia o costo. El costo de no sembrarlos es una búsqueda hacia arriba: quien necesita las reglas de un ámbito sube por el árbol y toma lo que encuentra, y un archivo que falta no aporta nada y no es un error. Se evita así una pareja de archivos vacíos por cada carpeta, que además hay que mover y renombrar con ella.
@@ -72,7 +72,7 @@ La constancia la deja solo quien crea la carpeta. Un día fuera del ciclo abiert
 
 ### Idempotencia y reparación con el comando original
 
-`tuku scope create` es estrictamente idempotente: ejecutarlo sobre un ámbito ya existente no sobreescribe sus reglas ni duplica callouts en `PENDIENTES-AMBITOS.md`, y no escribe otra constancia en `AHORA.md`, ni en este ciclo ni en uno posterior. Con `--keyword` suma esas keywords, como `scope keywords`.
+`tuku scope create` es estrictamente idempotente: ejecutarlo sobre un ámbito ya existente no sobreescribe sus reglas ni duplica callouts en `PENDIENTES-AMBITOS.md`, y no escribe otra constancia en `AHORA.md`, ni en este ciclo ni en uno posterior. Con `--keyword` suma esas keywords, como `scope update`.
 
 El comando `tuku scope lint` (y `tuku doctor`) verifica estructuralmente:
 1. Que ningún registro en `AHORA.md` apunte a una categoría.
@@ -88,6 +88,36 @@ La línea `keywords: [vlti, LCU]` del frontmatter de la página lista las palabr
 - **`tuku scope create NOMBRE`** pide las keywords en su salida cuando el ámbito es nuevo y no recibió ninguna: el agente las pregunta al autor y no las inventa. `--keyword`, repetible o con varias palabras separadas por coma, las pone en el mismo comando.
 - **`tuku scope update NOMBRE --keyword PALABRA`** las suma a la lista y no escribe nada más: ni `AHORA.md` ni ningún registro cambian. `--keyword` es repetible y admite varias palabras separadas por coma (`--keyword viana,claudia`). Una palabra va en kebab-case, como el nombre de un ámbito: minúsculas y con guiones en lugar de espacios, así que `Los Robles` se guarda `los-robles`. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con corchetes.
 - **`tuku scope rename`** no toca las keywords, porque el nombre no está entre ellas.
+
+## La página de un ámbito
+
+Lo que el autor escribe en la página va arriba. Debajo, la transclusión de sus pendientes, el callout de sus hijos si los tiene, y dos secciones derivadas que los comandos reescriben enteras:
+
+| Sección | Qué trae | Desde |
+| --- | --- | --- |
+| `## Esta semana` | Los registros del ámbito en el ciclo abierto, bajo su día | `AHORA.md` |
+| `## Actividad reciente` | Los registros del ámbito en los ciclos cerrados, bajo `### Octubre 2026`, del mes más reciente al más antiguo, cada línea con su día: `- 12 - entregué 40 cuadernos` | `bitacoras/` |
+
+Un registro es del ámbito cuando su línea lo enlaza. Las dos secciones las reescriben los comandos que escriben o mueven un registro (`entry create`, `todo open`, `todo close`, `note create`, `entry move`) y `tuku regenerate scope`, que las rehace desde cero: un vault armado comando a comando es idéntico al regenerado (principio 9). Lo escrito a mano dentro de ellas se pierde en el siguiente comando.
+
+## Lo escrito antes de abrir un ámbito
+
+Un ámbito se abre cuando ya hay registros que hablan de él. Andrea dice «Colegio Los Robles es un cliente, ábrelo aparte» después de una mañana de registros en `personal`:
+
+```text
+- 09:10 - [personal](ambitos/personal/personal.md) **progreso**: entregué 40 cuadernos al Colegio Los Robles
+- 09:40 - [personal](ambitos/personal/personal.md) **pendiente**: enviar la factura a Los Robles
+```
+
+Esos registros pasan al ámbito nuevo: cambia el link del ámbito al inicio de la línea y el cuerpo queda como lo dictó. La página de `colegio-los-robles` muestra su historia desde el primer registro, el pendiente aparece en su callout y el cierre lo sigue encontrando, porque su texto es el mismo.
+
+Se reparte entre el comando y quien interpreta:
+
+- **`tuku scope create`** lista en su salida los registros de otros ámbitos que nombran al nuevo con su nombre o una keyword, sin distinguir mayúsculas, guiones ni espacios. Busca en `AHORA.md`, y con `--since AAAA-MM-DD` también en las bitácoras cerradas desde esa fecha. Si hay bitácoras cerradas, la salida dice cuántas y pide preguntarle al autor hasta cuándo buscar. Sobre un ámbito que ya existe, vuelve a listar sin crear nada.
+- **Quien interpreta decide** cuáles son del ámbito: «le conté a la Paula lo de Los Robles» nombra al colegio y es de otro ámbito. Los dudosos se le preguntan al autor.
+- **`tuku entry move --at AAAA-MM-DD HH:MM --scope NOMBRE`** cambia el ámbito de un registro, en `AHORA.md` o en la bitácora cerrada que lo tiene. Si es un pendiente abierto, cambia también el ámbito de su fila en `PENDIENTES.md` y regenera las vistas. Es una corrección: cómo ubica el registro y qué conserva está en [bitacora.md](bitacora.md), "Corregir un registro ya escrito".
+
+Las bitácoras cerradas admiten este cambio: el texto del autor queda igual y el registro pasa a vivir en su ámbito.
 
 ## El nombre de un ámbito
 
@@ -123,12 +153,6 @@ Un ámbito puede ir dentro de otro: `ambitos/faena/faena-ai/faena-ai.md`.
 
 Se descartó que `parent:` mande, moviendo un ámbito con solo editar el campo: la carpeta dejaría de decir dónde cae una regla (principio 7) y Obsidian mostraría un árbol distinto del lógico.
 
-## Convención de mayúsculas
-
-Los archivos de TUKU van en MAYÚSCULAS: `AHORA.md`, `PENDIENTES.md`, `AGENTS.md`, `CADENCIAS.md`, `CAPACIDAD.md`. El contenido del autor va en minúsculas: `trabajo.md`, `juanito_perez.md`, las notas.
-
-Se ve de un vistazo qué es del sistema y qué es del autor, sin abrir nada.
-
 ## Archivar es caro
 
 Archivar una actividad o un ámbito no es mover archivos, es una operación con cascada. Por eso **el sistema nunca la inicia solo**: propone, y el autor delibera.
@@ -143,17 +167,7 @@ Las dos primeras son decisiones y se resuelven conversando. La tercera es trabaj
 
 ## Cómo se enlaza un ámbito
 
-El enlace a un ámbito es un link Markdown con ruta relativa al archivo que lo contiene ([README.md](README.md), "Decidido (2026-10-16)"). Se escribe `[nombre](ruta/hasta/nombre.md)` con la ruta desde el archivo donde va, por ejemplo `[personal](../personal/personal.md)` desde una página de ámbito hermana.
-
-La transclusión de pendientes `![[../PENDIENTES-AMBITOS.md#^personal]]` es una extensión de Obsidian aceptada: es el único wikilink admitido y se reconoce por el `!` inicial.
-
-**Renombrar un ámbito** actualiza el texto y la ruta de cada link que lo nombra.
-
-## Nada se enlaza solo
-
-Ni crear un ámbito ni sumarle keywords modifica lo que el autor ya escribió. Un registro lleva los links que se le escribieron al registrarlo, y el body queda como lo dijo el autor, con las palabras que usó. Si quiere enlazar una mención hacia atrás, lo hace él, a mano, o lo pide como una operación deliberada.
-
-Lo que sí hace el comando es **reparar** lo que ya estaba enlazado: mover o renombrar un ámbito actualiza el texto y la ruta de cada link que lo nombra, y archivar una rama recalcula la ruta de los links de las bitácoras cerradas, porque lo contrario rompe el principio 1. Reparar un enlace existente no es enriquecer el pasado.
+Como cualquier enlace del vault, con un link Markdown de ruta relativa ([markdown.md](markdown.md), "Enlaces"). Mover, renombrar o archivar un ámbito repara los links que lo nombran, texto y ruta. Crearlo o sumarle keywords deja el cuerpo de los registros como está; los que ya hablaban de él cambian de ámbito con `entry move` (arriba).
 
 ## No entra
 

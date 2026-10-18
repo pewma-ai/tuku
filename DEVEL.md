@@ -36,8 +36,8 @@ Antes de cambiar un artefacto del vault, esta tabla dice qué más se toca. La p
 | `ambitos/<nombre>/<nombre>.md` | [`ambitos.md`](spec/ambitos.md) | [`scope.py`](src/tuku/scope.py), [`link.py`](src/tuku/link.py) | `tuku scope create`, `tuku scope rename`; la actividad, `tuku regenerate` (tema `scope`) |
 | `notas/<slug>.md` | [`notas.md`](spec/notas.md) | [`note.py`](src/tuku/note.py) | `tuku note create` |
 | `LIBRO-DE-ESTILO.md` | [`bitacora.md`](spec/bitacora.md) | [`style.py`](src/tuku/style.py), [`vocab.py`](src/tuku/vocab.py) | el autor; se lee con `tuku vocab show` |
-| `reglas/config.tuku.md` | [`README.md`](spec/README.md) | [`config.py`](src/tuku/config.py), [`init.py`](src/tuku/init.py) | `tuku init` |
-| `reglas/types.md` | [`README.md`](spec/README.md) | [`doctor.py`](src/tuku/doctor.py) | el autor; lo valida `tuku doctor` |
+| `reglas/config.tuku.md` | [`vault.md`](spec/vault.md) | [`config.py`](src/tuku/config.py), [`init.py`](src/tuku/init.py) | `tuku init` |
+| `reglas/types.md` | [`vault.md`](spec/vault.md) | [`doctor.py`](src/tuku/doctor.py) | el autor; lo valida `tuku doctor` |
 | `AGENTS.md` | [`despacho.md`](spec/despacho.md), [`agente.md`](spec/agente.md) | [`doctor.py`](src/tuku/doctor.py) | el autor; lo revisa `tuku doctor` |
 
 Las cadencias y la capacidad todavía no tienen módulo (epic 006).
@@ -47,6 +47,7 @@ Las cadencias y la capacidad todavía no tienen módulo (epic 006).
 1. **Unidad de entrega y cortes:** Los epics cortan por **estado del vault** (`vacio`, `primer-dia`, `ciclo-en-curso`, etc.) y las fases técnicas cortan por **primitiva** interna ([`devel/epics.md`](devel/epics.md)). Se construye siempre de lo determinista a lo agéntico, de lo simple a lo complejo, y del caso feliz a los casos borde.
 2. **Escalera de fixtures e idempotencia:** En los escenarios de vault, el estado final de un paso es el estado inicial del siguiente. Los tests comparan el `diff` exacto entre instantáneas en `playground/`. Toda operación sobre el vault debe ser idempotente: una segunda corrida debe arrojar un delta vacío.
 3. **Registro obligatorio de iteración:** Toda sesión de trabajo inicia leyendo la última iteración y finaliza actualizando [`devel/iteraciones/AAAA-MM-DD.md`](devel/iteraciones/README.md). Se registran las tareas completadas, las decisiones tomadas con su justificación, los pendientes detectados y el estado de la suite de pruebas. Las decisiones que quedan en el chat se pierden.
+4. **Decisiones abiertas:** Lo que el diseño todavía no decide vive en una sola lista, [Decisiones abiertas](spec/README.md#decisiones-abiertas), y se lee al iniciar la sesión junto con la última iteración. Un epic que toca uno de esos temas lo decide, lo escribe en la spec que corresponde y lo saca de la lista.
 
 ## Reglas de implementación (`src/`)
 
@@ -54,7 +55,7 @@ Las cadencias y la capacidad todavía no tienen módulo (epic 006).
 - **Contrato de CLI ([`spec/cli.md`](spec/cli.md)):** Los códigos de salida son contrato y viven en su tabla. Toda salida de error o rechazo debe nombrar explícitamente el defecto y la acción correctiva sugerida. Una sola salida en prosa humana (sin flags como `--json`).
 - **Tres capas, y `tuku/cli/` es solo la de arriba.** El núcleo son funciones puras de texto a texto, sin disco, y es donde vive la lógica: `entry.add`, `todo.abrir`, `note.lint`. Encima, un caso de uso por comando en el módulo de su noun (`entry.add_al_vault`, `todo.cerrar_en_vault`, `note.crear_con_constancia`), que lee, llama al núcleo, escribe y devuelve un [`Resultado`](src/tuku/resultado.py). Arriba del todo, [`tuku/cli/`](src/tuku/cli/), un módulo por noun: argparse y la traducción de ese `Resultado` a texto y código de salida, nada más. Una regla del sistema que termine dentro de un `_cmd_*` está en la capa equivocada, y la señal es que solo se puede probar con un escenario E2E.
 - **Centralización de lecturas:** Ningún comando lee archivos de configuración o reglas por su cuenta. Toda lectura de `config.tuku.md`, `LIBRO-DE-ESTILO.md`, plantillas u otros elementos de configuración se delega a [`src/tuku/config.py`](src/tuku/config.py).
-- **Transparencia en Markdown:** No usar comentarios HTML para almacenar metadatos o estados ocultos. Los datos legibles por máquinas viven en secciones declaradas (pares clave-valor en negrita o tablas formales).
+- **Markdown:** Todo lo que se escribe en el vault sigue [`spec/markdown.md`](spec/markdown.md): el dialecto admitido, los datos de máquina en estructura visible y nunca comentarios HTML.
 
 ## Verificación y pruebas (`tests/`)
 

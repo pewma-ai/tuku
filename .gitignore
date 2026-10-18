@@ -78,6 +78,8 @@ Thumbs.db
 *.swo
 uv.lock
 .obsidian
+# La semilla del template sí se versiona (spec/markdown.md).
+!template/vanilla/.obsidian
 .ruff_cache/
 .mypy_cache/
 .claude

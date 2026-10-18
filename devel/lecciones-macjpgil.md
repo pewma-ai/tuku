@@ -114,7 +114,7 @@ Es la evidencia más fuerte a favor del enrutador corto: el documento que se lee
 
 El primer eje es de dominio: bitácora inline, todo lo demás a subproceso. El segundo lo agregó el autor el 2026-08-12 y está fechado en el archivo: **cualquier tarea que modifique archivos corre como subproceso**, para que el chat conteste de inmediato y la ejecución quede atrás.
 
-Que el segundo eje llegue tres meses después, con fecha y con justificación de latencia, dice que no es un requisito de diseño sino una respuesta a presión de uso. TUKU no lo necesita el día uno, y por eso [`../spec/despacho.md`](../spec/despacho.md) lo deja anotado y fuera. Si reaparece, será en el epic 004, que es el primero con sesiones lo bastante largas para sentir la latencia.
+Que el segundo eje llegue tres meses después, con fecha y con justificación de latencia, dice que no es un requisito de diseño sino una respuesta a presión de uso. TUKU no lo necesita el día uno, y queda anotado acá como la respuesta conocida si aparece la presión de latencia. Si reaparece, será en el epic 004, que es el primero con sesiones lo bastante largas para sentir la latencia.
 
 ### 15. El despacho necesita una regla de recursión, y es justo el caso del test
 

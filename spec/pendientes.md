@@ -107,7 +107,7 @@ Lo que se gana al propagar en vez de transcluir es que la vista no depende de qu
 
 Dentro de cada `## <día>` de `AHORA.md`, el comando es dueño de **lo que va entre el encabezado y el primer registro**. Ahí escribe los pendientes con fecha de ese día dentro de un callout `> [!todo] Pendientes del día` (únicamente si ese día tiene pendientes en `PENDIENTES.md`), y al regenerar reemplaza esa región entera.
 
-No hay marca que la delimite, y es a propósito: los registros empiezan siempre por `- HH:MM - `, así que la frontera es estructura visible. Un comentario invisible se rompe al editar el archivo y nadie se entera.
+No hay marca que la delimite: los registros empiezan siempre por `- HH:MM - `, así que la frontera es estructura visible ([markdown.md](markdown.md)).
 
 **Consecuencia directa:** no se escribe prosa suelta bajo el encabezado de un día. Lo que quede ahí lo reemplaza la siguiente propagación.
 
@@ -125,7 +125,7 @@ Bajo `# Actividad diaria`, antes del primer día, el comando es dueño de **lo q
 > - comprar una maleta
 ```
 
-Un pendiente con fecha lleva el día al principio, con el `date_format` de `reglas/config.tuku.md` ([README.md](README.md)), y no lleva el ámbito porque el callout ya es el suyo. Van primero los que tienen fecha, de la más próxima a la más lejana, y después los demás en el orden de la tabla.
+Un pendiente con fecha lleva el día al principio, con el `date_format` de `reglas/config.tuku.md` ([vault.md](vault.md)), y no lleva el ámbito porque el callout ya es el suyo. Van primero los que tienen fecha, de la más próxima a la más lejana, y después los demás en el orden de la tabla.
 
 La página del ámbito lo transcluye con ruta relativa:
 

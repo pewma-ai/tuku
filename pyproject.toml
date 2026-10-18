@@ -22,7 +22,8 @@ where = ["src"]
 # `_home/` lo llena el build (ver setup.py): es el árbol que `tuku init` copia
 # cuando TUKU se instaló por pipx / uv tool install y no hay checkout a la vista.
 [tool.setuptools.package-data]
-tuku = ["_home/**/*"]
+# `*` no calza con archivos ocultos: `.gitignore` y `.obsidian/` van aparte.
+tuku = ["_home/**/*", "_home/**/.*", "_home/**/.*/*"]
 
 [project.optional-dependencies]
 dev = [

@@ -79,7 +79,7 @@ Apareció `ambitos/colegio-los-robles/` con su página `colegio-los-robles.md`.
 
 ### Vuelve a `AHORA.md`
 
-Los registros de hace veinte minutos que decían "Colegio Los Robles" ahora lo enlazan como `[colegio-los-robles](ambitos/colegio-los-robles/colegio-los-robles.md)`. Los que decían "Los Robles" quedaron con el texto original: se enlaza el nombre del frente y los apodos se dejan como los escribiste, porque reconocer un apodo sería adivinar. Las demás líneas se mantienen igual.
+Los registros de esta mañana sobre el colegio ahora empiezan con `[colegio-los-robles](ambitos/colegio-los-robles/colegio-los-robles.md)`: cambiaron de ámbito y el texto quedó como lo dictaste. Si alguno era dudoso, tu agente te preguntó. Abre `colegio-los-robles.md`: ahí está la historia del cliente desde el primer registro.
 
 Así [la organización emerge del uso](../principios.md): registras primero, ordenas cuando el patrón madura, y el ciclo en curso se actualiza solo.
 

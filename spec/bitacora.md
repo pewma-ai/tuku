@@ -21,7 +21,7 @@ Todo lo demás son ejemplos.
 
 Ámbito y clasificación son opcionales según el contexto. La marca de la ontología cerrada va en la misma posición, antes de la clasificación abierta.
 
-El ámbito es un **link Markdown cuya ruta es relativa al archivo que contiene la línea**, y la calcula `tuku` a partir del árbol de `ambitos/`: un ámbito anidado lleva su ruta completa (`ambitos/trabajo/pewma/pewma.md`). Quien dicta pasa el nombre; nadie escribe la ruta. Sin `--scope`, `tuku entry create`, `tuku todo open` y `tuku todo close` usan el `scope_default` de `reglas/config.tuku.md`. En `AHORA.md`, que vive en la raíz, es `[arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md)`. Los lectores aceptan también el wikilink `[[ambito]]` hasta que `tuku fix link` lo convierte ([cli.md](cli.md)).
+El ámbito es un **link Markdown cuya ruta es relativa al archivo que contiene la línea**, y la calcula `tuku` a partir del árbol de `ambitos/`: un ámbito anidado lleva su ruta completa (`ambitos/trabajo/pewma/pewma.md`). Quien dicta pasa el nombre; nadie escribe la ruta. Sin `--scope`, `tuku entry create`, `tuku todo open` y `tuku todo close` usan el `scope_default` de `reglas/config.tuku.md`. En `AHORA.md`, que vive en la raíz, es `[arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md)`. Los lectores aceptan también el wikilink `[[ambito]]` hasta que `tuku fix link` lo convierte ([markdown.md](markdown.md)).
 
 ### De dónde salen el día y la hora
 
@@ -88,7 +88,7 @@ Formalizar un tipo nuevo es agregar una fila bajo el encabezado que corresponda,
 
 Ese contrato es el que hay y **no crece**. Los tres vocabularios viven en el libro de estilo porque son estilo: lo que el autor elige para escribir. Cualquier **dato nuevo que una automatización necesite** no se agrega aquí, va a la sección de datos de `reglas/config.tuku.md`, y el libro de estilo lo transcluye si el autor necesita verlo mientras escribe. Así el dato tiene un solo lugar donde se edita y el libro de estilo sigue leyéndose como prosa.
 
-Lo que no se hace nunca es marcar el libro de estilo con comentarios HTML o marcas invisibles para que una automatización encuentre algo. Un documento en prosa con contrato invisible se rompe al editarlo y nadie se entera. Si hay que leerlo, se lee su estructura visible, y la ausencia del encabezado es un error ruidoso.
+El comando lee la estructura visible del libro de estilo, nunca una marca invisible ([markdown.md](markdown.md), "Datos de máquina en estructura visible"), y la ausencia del encabezado es un error ruidoso.
 
 Consecuencia directa para el linter: `tuku entry lint` valida la ontología cerrada de forma **estricta** y la abierta de forma **permisiva**. Un tipo desconocido se reporta para preguntar más adelante, nunca se rechaza como error. Un linter que rechaza vocabulario nuevo impide que la organización emerja, que es justo lo que el diseño busca.
 
@@ -107,6 +107,17 @@ Que compartan zona no las mezcla: se distinguen por su forma. `(Hecho)` y `**pen
 **En el cierre, la marca queda a la vista y lo tachado es el cuerpo:** `(Hecho): ~~avisar de los GGCC~~`. Lo tachado es lo que ya se hizo. Quien cierra pasa `(Hecho): avisar de los GGCC` y el comando escribe la tachadura, para que a quien dicta no le toque saber dónde va. La marca tachada, `~~(Hecho)~~: cuerpo`, no es válida: `tuku entry lint` la reporta con su corrección.
 
 El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. **Los links no cuentan al encontrarlo:** el mismo pendiente puede llevar `[Carmen](notas/carmen.md)` en la bitácora y `Carmen` en la tabla, o al revés, y se busca comparando el texto que queda al quitar los links. Ninguna de las dos operaciones interpreta nada. Si el cierre cae el mismo día que la apertura, queda solo el cierre. El detalle de esa doble escritura está en [pendientes.md](pendientes.md).
+
+## Corregir un registro ya escrito
+
+Un registro se ubica por su día y su hora, `--at AAAA-MM-DD HH:MM`. Varios registros en el mismo minuto son lo normal cuando una frase trae varios hechos, como los dos de las 18:40 en los ejemplos de arriba. En ese caso el comando rechaza, lista los registros de ese minuto y pide `--match TEXTO`, un fragmento del cuerpo actual que calce con uno solo. Con `--match` el registro se ubica aunque esté solo en su minuto.
+
+| Comando | Cambia | Conserva | Dónde |
+| --- | --- | --- | --- |
+| `tuku entry rename --at … --body …` | el cuerpo, y la fila de `PENDIENTES.md` si es un pendiente, para que el cierre lo siga encontrando | la hora y el ámbito | `AHORA.md` |
+| `tuku entry move --at … --scope …` | el ámbito, y el de la fila de `PENDIENTES.md` si es un pendiente abierto ([ambitos.md](ambitos.md), "Lo escrito antes de abrir un ámbito") | la hora y el cuerpo | `AHORA.md` y las bitácoras cerradas |
+
+Los dos son correcciones: arreglan el registro en su lugar, la bitácora queda con el registro corregido y nada más, y el historial de git guarda la versión anterior. Los dos son idempotentes: si el registro ya dice eso, lo informan y salen con 0.
 
 ## No entra
 

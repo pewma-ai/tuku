@@ -14,7 +14,7 @@ Es el primero de los dos comandos que corres tú.
 
 ## Mira la carpeta
 
-Ábrela con el Finder, tu editor u Obsidian. Son archivos de texto y cualquier programa los lee.
+Son archivos de texto y cualquier programa los lee. Para mirarlos, la mejor opción es [Obsidian](https://obsidian.md): muestra los recuadros de pendientes y lo que una página trae de otra, y el vault ya viene configurado para que Obsidian escriba igual que TUKU.
 
 Unos nombres van en MAYÚSCULAS y otros en minúsculas. Los de MAYÚSCULAS son de TUKU y los de minúsculas son tuyos. `AGENTS.md` lo explica.
 

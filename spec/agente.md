@@ -17,7 +17,7 @@ Al **inicio de sesión**, una sola vez y solo cuando se va a registrar algo en u
 - El **contexto reciente**, generado por comando desde `AHORA.md`.
 - El **vocabulario del autor**, generado por comando desde los frontmatter de `ambitos/`.
 
-Ninguno de los dos es un archivo: son la salida de un comando que se ejecuta en ese momento (ver [`README.md`](README.md), árbol de directorios). Esos comandos todavía no existen: hoy el agente lee `AHORA.md` y el árbol de `ambitos/` directamente ([`../TODO.md`](../TODO.md)). Quedan en **caché de sesión** y no se releen en cada turno. Una sesión que no va a escribir bitácora no necesita ninguno de los dos.
+Ninguno de los dos es un archivo: son la salida de un comando que se ejecuta en ese momento (ver [`vault.md`](vault.md), árbol de directorios). Esos comandos todavía no existen: hoy el agente lee `AHORA.md` y el árbol de `ambitos/` directamente ([`../TODO.md`](../TODO.md)). Quedan en **caché de sesión** y no se releen en cada turno. Una sesión que no va a escribir bitácora no necesita ninguno de los dos.
 
 Si el arnés no sabe ejecutar comandos y solo lee archivos, hay que materializarlos, y ahí reaparece el problema de que envejecen. Eso es limitación del arnés, no del diseño, y por eso vive en esta spec y no en [`flujo-informacion.md`](flujo-informacion.md).
 

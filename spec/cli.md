@@ -73,7 +73,7 @@ Regenera lo derivado del conjunto canónico ([principio 9](../docs/principios.md
 | Tema | Regenera | Desde |
 | --- | --- | --- |
 | `todo` | El callout de cada día de `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md` | `PENDIENTES.md` y el árbol de `ambitos/` |
-| `scope` | La actividad de cada página de ámbito y su callout `En X:` de hijos | Los registros de `AHORA.md` y las carpetas de `ambitos/` |
+| `scope` | La actividad de cada página de ámbito (`## Esta semana` y `## Actividad reciente`) y su callout `En X:` de hijos | Los registros de `AHORA.md` y de `bitacoras/`, y las carpetas de `ambitos/` |
 | `comandos` | `reglas/comandos.tuku.md` | La ayuda del `tuku` instalado |
 
 - **Un tema toca solo lo suyo.** `scope` lleva a las páginas de ámbito lo escrito a mano en `AHORA.md` y deja `reglas/` como está. El agente modifica `reglas/` solo tras preguntar ([`AGENTS.md`](../template/vanilla/AGENTS.md), Límites).
@@ -85,7 +85,7 @@ Regenera lo derivado del conjunto canónico ([principio 9](../docs/principios.md
 
 Todo sustantivo y todo verbo lleva en `tuku … -h`, antes de las opciones, un párrafo en español (la `description` de argparse). En un comando invocable ese párrafo dice qué archivos del vault lee o escribe y cómo, con precisión suficiente para hacerlo con un editor: es su equivalente manual, el que pide el principio 1, y no va en un campo aparte. Un test recorre el árbol de argparse y exige que ninguno quede sin descripción y que todo comando invocable nombre archivos del vault.
 
-Ese párrafo, el de cada sustantivo con sus verbos anidados debajo, es también el que `tuku init` copia en `reglas/comandos.tuku.md`, para que el vault diga qué hace cada comando aunque `tuku` no esté instalado ([README.md](README.md), "Dónde viven los comandos").
+Ese párrafo, el de cada sustantivo con sus verbos anidados debajo, es también el que `tuku init` copia en `reglas/comandos.tuku.md`, para que el vault diga qué hace cada comando aunque `tuku` no esté instalado ([vault.md](vault.md), "Dónde viven los comandos").
 
 ## No entra
 

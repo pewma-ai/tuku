@@ -53,7 +53,7 @@
 | **Escalera de horizontes** | El recorrido de un pendiente al concretarse: esta semana, próxima semana o fin de mes, con fecha, cerrado. |
 | **Atrasado** | Un pendiente cuya fecha o cuyo horizonte ya pasó. Se calcula desde su fila: en `PENDIENTES.md` no se mueve nada. |
 | **Callout** | El bloque `> [!todo]` que agrupa pendientes: los del día bajo cada día de `AHORA.md`, y los de cada ámbito en `ambitos/PENDIENTES-AMBITOS.md`. |
-| **Transclusión** | Mostrar un texto en otro archivo sin copiarlo, con `![[archivo#^ancla]]`. Se usa cuando el origen ya agrupa contiguo lo que el destino muestra. Es la extensión de Obsidian que TUKU admite y el único wikilink que escribe: se reconoce por el `!` inicial, y los demás enlaces son links Markdown. |
+| **Transclusión** | Mostrar un texto en otro archivo sin copiarlo, con `![[archivo#^ancla]]`. Se usa cuando el origen ya agrupa contiguo lo que el destino muestra. Es una de las tres extensiones de Obsidian que TUKU admite ([`../spec/markdown.md`](../spec/markdown.md)) y el único wikilink que escribe: se reconoce por el `!` inicial, y los demás enlaces son links Markdown. |
 | **Propagación** | Escribir una copia derivada donde hace falta, cuando el origen no agrupa contiguo lo que el destino muestra. Un comando la produce y la regenera; si discrepa de la fuente, la que está mal es la copia. |
 | **Ciclo** | La ventana de tiempo que se abre, se planifica y se cierra. Semanal por defecto, o el turno real del autor. |
 | **Cadencia** | Una regla que emite un pendiente con fecha cada cierto tiempo. Vive en el `CADENCIAS.md` del ámbito al que pertenece. |
