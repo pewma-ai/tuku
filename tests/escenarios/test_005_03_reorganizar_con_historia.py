@@ -96,8 +96,8 @@ def test_005_03_las_keywords_siguen_a_su_ambito() -> None:
         "mi-vault", "ambitos", "negocio", "clientes", "liceo-andes", "liceo-andes.md"
     ).read_text(encoding="utf-8")
     linea = next(x for x in pagina.splitlines() if x.startswith("keywords:"))
-    assert "liceo-andes" in linea and "liceo-tecnico-andes" not in linea
-    # «Liceo-Andes» ya es el nombre nuevo, sin distinguir mayúsculas ni guiones: no se repite
+    # el nombre no vive en las keywords: renombrar no las toca
+    assert "liceo-tecnico-andes" not in linea
     for palabra in ("Patricia", "Lillo"):
         assert palabra in linea
 

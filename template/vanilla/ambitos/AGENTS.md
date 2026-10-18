@@ -8,7 +8,7 @@ Cada registro dice a qué frente pertenece. Va en `--scope`, sin corchetes.
 
 Usa uno que exista como carpeta o archivo aquí. Si ninguno calza, es `personal`, que siempre está.
 
-El `keywords:` del frontmatter de cada página lista las palabras que delatan el ámbito: siglas, sistemas, personas y proyectos que, al mencionarlos, indican que algo es de él. Un hecho que menciona una keyword es de ese ámbito, aunque parezca no tener relación: pásalo con `--scope` de ese ámbito y deja el cuerpo tal como lo dijo el autor, sin links.
+El `keywords:` del frontmatter de cada página lista las palabras que delatan el ámbito: siglas, sistemas, personas y proyectos que, al mencionarlos, indican que algo es de él. El nombre del ámbito no va en la lista: ya es el de su carpeta. Un hecho que menciona una keyword es de ese ámbito, aunque parezca no tener relación: pásalo con `--scope` de ese ámbito y deja el cuerpo tal como lo dijo el autor, sin links.
 
 Si el autor nombra un frente que todavía no existe, **no lo crees por tu cuenta ni antes de tiempo**: escríbelo en el cuerpo del registro bajo `personal`, en palabras, y sigue. En un dictado con varios hechos, procesa cada uno en su orden cronológico sin anticipar la creación de frentes nombrados más adelante. El momento de crearlo es cuando la narración llega a esa petición. Al crearse, lo ya escrito queda como estaba.
 

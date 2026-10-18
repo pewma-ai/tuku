@@ -26,7 +26,7 @@ tuku scope create jardin-semillita --parent clientes --at "2026-08-10 07:42" --k
 tuku scope create liceo-tecnico-andes --parent clientes --at "2026-08-10 07:43" --keyword "Liceo Andes" --keyword Patricia --keyword Lillo
 tuku scope create libreria-el-compas --parent clientes --at "2026-08-10 07:44" --keyword Compás --keyword Óscar --keyword Tapia
 tuku scope create escuela-los-maitenes --parent clientes --at "2026-08-10 07:45" --keyword Maitenes --keyword Sonia --keyword Cárdenas --keyword "Paula Reyes"
-tuku scope create importadora-andina --parent proveedores --at "2026-08-10 07:46" --keyword Gloria --keyword "Importadora Andina"
+tuku scope create importadora-andina --parent proveedores --at "2026-08-10 07:46" --keyword Gloria --keyword Andina
 tuku scope create papelera-del-sur --parent proveedores --at "2026-08-10 07:47" --keyword Papelera --keyword Iván --keyword Zamora
 tuku scope create bodega --parent negocio --at "2026-08-10 07:48" --keyword stock --keyword inventario
 tuku scope create temporada-marzo --parent negocio --at "2026-08-10 07:49" --keyword temporada --keyword mercadería

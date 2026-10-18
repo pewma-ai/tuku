@@ -25,7 +25,7 @@ los nombres son únicos en todo el árbol.
 reescribe los links del vault que los nombran. `lint` solo lee, y además
 `AHORA.md`.
 **A mano:** crear la carpeta con su página (dentro de la del padre, si lo hay), y
-poner el nombre en `keywords:` de la página propia.
+poner la línea `keywords: []` en su frontmatter.
 """
 
 from __future__ import annotations
@@ -200,10 +200,13 @@ def palabras_de(valores: Sequence[str]) -> list[str]:
     return [p for p in palabras if p]
 
 
-def _sumar(previas: list[str], nuevas: Sequence[str]) -> list[str]:
-    """`previas` y, detrás, las `nuevas` que ninguna anterior repite."""
+def _sumar(previas: list[str], nuevas: Sequence[str], nombre: str = "") -> list[str]:
+    """`previas` y, detrás, las `nuevas` que ninguna anterior ni el `nombre` repiten.
+
+    El nombre del ámbito ya es el de su carpeta: una keyword que lo repite no aporta.
+    """
     salida = list(previas)
-    vistas = {_clave(k) for k in salida}
+    vistas = {_clave(k) for k in salida} | ({_clave(nombre)} if nombre else set())
     for k in palabras_de(nuevas):
         if k and _clave(k) not in vistas:
             salida.append(k)
@@ -228,7 +231,8 @@ def crear(
 
     Si ya existe no toca nada: `spec/ambitos.md` no admite dos ámbitos con el
     mismo nombre, y volver a crearlo no es un error del autor. Las `palabras`
-    van en las `keywords` de la página nueva, detrás del nombre.
+    son las `keywords` de la página nueva; el nombre no va en la lista, porque ya es
+    el de la carpeta.
     """
     valor = normalizar(name)
     directorio = (padre or vault / "ambitos") / valor
@@ -238,7 +242,7 @@ def crear(
     if not pagina.exists():
         rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", directorio)
         rel = rel.replace(os.sep, "/")
-        lista = ", ".join(_sumar([valor], palabras))
+        lista = ", ".join(_sumar([], palabras, valor))
         base = f"---\ntype: Scope\nkeywords: [{lista}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n"
         ahora_file = vault / "AHORA.md"
         ahora_texto = ahora_file.read_text(encoding="utf-8") if ahora_file.is_file() else ""
@@ -761,10 +765,10 @@ def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
     if _KEYWORDS.search(texto) is None:
         return Resultado.rechazo(
             f"la página de {nombre!r} no declara `keywords:` en su frontmatter. "
-            f"Agrega la línea `keywords: [{nombre}]` a mano y vuelve a correrlo."
+            f"Agrega la línea `keywords: []` a mano y vuelve a correrlo."
         )
     previas = keywords(texto)
-    todas = _sumar(previas, nuevas)
+    todas = _sumar(previas, nuevas, nombre)
     if todas == previas:
         return Resultado.hecho(f"{nombre!r} ya tenía esas keywords: {', '.join(previas)}.")
     pagina.write_text(
@@ -772,15 +776,6 @@ def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
         encoding="utf-8",
     )
     return Resultado.hecho(f"keywords de {nombre!r}: {', '.join(todas)}.")
-
-
-def _renombrar_keyword(pagina: str, viejo: str, nuevo: str) -> str:
-    """La página con `viejo` cambiado por `nuevo` en su lista de `keywords`."""
-    lista = keywords(pagina)
-    if viejo not in lista:
-        return pagina
-    lista = _sumar([], [nuevo if k == viejo else k for k in lista])
-    return _KEYWORDS.sub(lambda _m: f"keywords: [{', '.join(lista)}]", pagina, count=1)
 
 
 def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
@@ -821,18 +816,16 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     if pagina_vieja.is_file():
         pagina_vieja.rename(destino / f"{nuevo}.md")
 
-    # El nombre viejo vive en las cabeceras de los archivos del ámbito, en su
-    # `keywords`, en el ancla que transcluye sus pendientes y en los enlaces de
-    # todo el vault. Se recorre el vault entero una vez y se escribe solo lo que
-    # cambió, que es lo que hace la operación idempotente.
+    # El nombre viejo vive en las cabeceras de los archivos del ámbito, en el ancla
+    # que transcluye sus pendientes y en los enlaces de todo el vault. Se recorre
+    # el vault entero una vez y se escribe solo lo que cambió, que es lo que hace
+    # la operación idempotente.
     enlaces = 0
     for ruta in sorted(vault.rglob("*.md")):
         texto = ruta.read_text(encoding="utf-8")
         salida, n = rename.renombrar_enlaces(texto, viejo, nuevo)
         enlaces += n
         salida, _ = rename.renombrar_ancla(salida, viejo, nuevo)
-        if ruta == destino / f"{nuevo}.md":
-            salida = _renombrar_keyword(salida, viejo, nuevo)
         if ruta.parent == destino:
             salida = salida.replace(f"de {viejo}", f"de {nuevo}")
             if ruta.name == f"{nuevo}.md":

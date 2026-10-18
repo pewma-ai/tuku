@@ -35,7 +35,7 @@ Cuando se regenera lo derivado
 tuku regenerate
 ```
 Entonces el diff del vault es vacío: mover y renombrar ya dejaron todo como lo dejaría `tuku regenerate`
-Y las keywords del liceo llevan el nombre nuevo en lugar del viejo y conservan las demás palabras con que Andrea lo nombra
+Y las keywords del liceo quedan como estaban: el nombre del ámbito no vive en ellas
 Y la bitácora cerrada enlaza las páginas nuevas con la ruta desde `bitacoras/`
 
 ## Escenario: repetir la reorganización deja el vault igual

@@ -62,7 +62,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help="crea un ámbito bajo ambitos/",
         description=(
             "Crea `ambitos/<nombre>/` con su página `<nombre>.md` (`type: Scope`, "
-            "`keywords: [<nombre>]` y la transclusión de su callout en "
+            "`keywords: []` y la transclusión de su callout en "
             "`ambitos/PENDIENTES-AMBITOS.md`). Con `--parent`, la carpeta va dentro de la "
             "del ámbito padre, que debe existir. Registra en `AHORA.md` "
             "`**nota**: abrí el ámbito` y no cambia nada de lo ya escrito. Sobre "

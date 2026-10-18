@@ -1,6 +1,6 @@
 ---
 type: Scope
-keywords: [personal]
+keywords: []
 ---
 # personal
 

@@ -45,7 +45,7 @@ def test_crear_un_ambito_sin_keywords_le_pide_al_agente_preguntarlas(
         "las keywords no son sinónimos del nombre"
     )
     assert "tuku scope update paranal --keyword PALABRA" in salida
-    assert _keywords(vault, "paranal", "paranal.md") == ["paranal"]
+    assert _keywords(vault, "paranal", "paranal.md") == []
 
 
 def test_crear_un_ambito_con_keywords_las_deja_en_la_pagina_y_no_vuelve_a_pedirlas(
@@ -53,7 +53,7 @@ def test_crear_un_ambito_con_keywords_las_deja_en_la_pagina_y_no_vuelve_a_pedirl
 ) -> None:
     assert _crear(vault, "paranal", "--keyword", "vlti", "--keyword", "LCU") == EXITO
     assert "Pregunta al autor" not in capsys.readouterr().out
-    assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "vlti", "LCU"]
+    assert _keywords(vault, "paranal", "paranal.md") == ["vlti", "LCU"]
 
 
 def test_crear_sobre_un_ambito_existente_no_vuelve_a_pedir_keywords(
@@ -80,14 +80,14 @@ def test_keywords_suma_las_nuevas_sin_repetir_y_no_toca_la_bitacora(vault: Path)
         _tuku(vault, "scope", "update", "paranal", "--keyword", "lcu,vlti", "--keyword", "TCS")
         == EXITO
     )
-    assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "lcu", "vlti", "TCS"]
+    assert _keywords(vault, "paranal", "paranal.md") == ["lcu", "vlti", "TCS"]
     assert _ahora(vault) == antes, "una keyword no modifica ni enlaza el body"
 
     assert (
         _tuku(vault, "scope", "update", "paranal", "--keyword", "LCU", "--keyword", "tcs")
         == EXITO
     )
-    assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "lcu", "vlti", "TCS"]
+    assert _keywords(vault, "paranal", "paranal.md") == ["lcu", "vlti", "TCS"]
     assert _tuku(vault, "doctor") == EXITO
 
 
@@ -133,13 +133,13 @@ def test_keywords_rechaza_lo_que_no_cabe_o_no_existe(
     for argv, dice in casos:
         assert _tuku(vault, *argv) == RECHAZO, argv
         assert dice in capsys.readouterr().err, argv
-    assert _keywords(vault, "paranal", "paranal.md") == ["paranal"]
+    assert _keywords(vault, "paranal", "paranal.md") == []
 
 
-def test_renombrar_un_ambito_conserva_sus_otras_keywords(vault: Path) -> None:
+def test_renombrar_un_ambito_deja_sus_keywords_como_estaban(vault: Path) -> None:
     assert _crear(vault, "paranal", "--keyword", "vlti", "--keyword", "LCU") == EXITO
     assert _tuku(vault, "scope", "rename", "paranal", "cerro") == EXITO
-    assert _keywords(vault, "cerro", "cerro.md") == ["cerro", "vlti", "LCU"]
+    assert _keywords(vault, "cerro", "cerro.md") == ["vlti", "LCU"]
     assert _tuku(vault, "doctor") == EXITO
 
 
@@ -169,7 +169,6 @@ def test_una_keyword_admite_varias_palabras_separadas_por_coma_y_los_espacios_pa
         == EXITO
     )
     assert _keywords(vault, "paranal", "paranal.md") == [
-        "paranal",
         "Los-Robles",
         "vlti",
         "gravity",
@@ -185,3 +184,10 @@ def test_scope_keywords_ya_no_existe(vault: Path, capsys: pytest.CaptureFixture[
     with pytest.raises(SystemExit):
         _tuku(vault, "scope", "keywords", "paranal", "vlti")
     assert "invalid choice" in capsys.readouterr().err
+
+
+def test_una_keyword_que_repite_el_nombre_del_ambito_no_entra(vault: Path) -> None:
+    assert _crear(vault, "casa-matriz", "--keyword", "Casa Matriz, sede") == EXITO
+    assert _keywords(vault, "casa-matriz", "casa-matriz.md") == ["sede"]
+    assert _tuku(vault, "scope", "update", "casa-matriz", "--keyword", "CASA-MATRIZ") == EXITO
+    assert _keywords(vault, "casa-matriz", "casa-matriz.md") == ["sede"]

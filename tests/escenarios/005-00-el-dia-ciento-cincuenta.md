@@ -72,6 +72,7 @@ La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usa
 | A1 | La lista de hijos de un ámbito sale en orden de creación con `scope create` y `scope move`, y alfabético con `tuku regenerate`. Un vault armado comando a comando no es igual al regenerado, y se rompe el principio 9. Hay que elegir un orden y que los dos caminos lo compartan | `005-01` repetir, `005-02` ×2, `005-03` regenerar |
 | A2 | `tuku note lint` sin archivo sale con error en un vault recién sembrado: revisa `notas/AGENTS.md`, que es del sistema y no una nota | `005-05` lint sin archivo |
 | A3 | `note lint` no mira los enlaces del cuerpo. `spec/notas.md` pide que la nota cierre con la lista de sus enlaces salientes, cada uno con motivo, y un enlace del cuerpo ausente de esa lista pasa | `005-05` enlace sin motivo |
+| ~~A4~~ | ~~Las keywords de un ámbito repetían su nombre: `keywords: [importadora-andina, Gloria]`.~~ Resuelto el 2026-10-17 (lo vio el autor): el nombre ya es el de la carpeta y no va en la lista, que nace vacía (`keywords: []`) si no se dieron palabras, y una keyword que repite el nombre no entra. `scope rename` ya no toca las keywords | `tests/unitarios/test_scope_keywords.py` |
 
 ### B. Lo que la spec promete y no existe
 
