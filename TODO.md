@@ -16,6 +16,7 @@ La gramática está en [`spec/cli.md`](spec/cli.md), "Sustantivo, verbo y parám
 Hecho el 2026-10-18 ([`devel/iteraciones/2026-10-18.md`](devel/iteraciones/2026-10-18.md)): escritura atómica con reintentos, `regenerate` con su tabla de dependencias, `entry update` y `entry move`, registros sin hora, `tuku context`, `tuku process`, el `AGENTS.md` de dos invocadores, enlazar al registrar con la columna "Enlazable", los `lint` pasados a `doctor TEMA`, `todo close TEXTO`, `Actividad reciente` de doce meses, `scope create --since`, el retiro de `cycle open` y `vocab show`, y los ejemplos en la ayuda ([`ejemplos.py`](src/tuku/cli/ejemplos.py)). Falta:
 
 - **Medir el `AGENTS.md` de dos invocadores** con la cadena agéntica del epic 003: cambió la tabla (`tuku context` al empezar, filas de corrección separadas, `process cycle`, `todo close TEXTO`) y la suite no agéntica no lo cubre.
+- **Bajar un pendiente por la escalera de horizontes (B4 de [`005-00`](tests/escenarios/005-00-el-dia-ciento-cincuenta.md)).** [`spec/pendientes.md`](spec/pendientes.md) nombra las «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`. Falta el nombre y la forma. Propuesta: `tuku todo update "Llamar a Fabina" --horizon "próxima semana"`, sin verbo nuevo, igual que `entry update`. Modifica un comando, así que se hace donde se trabaja la superficie del CLI.
 - **Cada cambio de esta lista toca [`spec/tuku.md`](spec/tuku.md):** se quita el `# pendiente` de lo implementado y la línea de "Lo que se retira" de lo que sale del CLI. [`tests/unitarios/test_superficie.py`](tests/unitarios/test_superficie.py) falla y dice qué línea cambiar si se olvida.
 
 ## Ciclos con nombre, config y libro de estilo (conversación del 2026-10-18)
@@ -89,6 +90,9 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
 
 ## Agente
 
+- **Revisar qué prompts de `procesos/` y del arnés necesitan la marca `MAINTENANCE MODE`.** Un prompt sin la marca es una interacción natural y carga `tuku context` ([`spec/despacho.md`](spec/despacho.md)). Los tests del modo son el epic 008.
+- **Detectar menciones sin enlace.** Los comandos no enlazan solos: si el agente olvida enlazar una nota que `tuku context note` le ofreció, nada lo avisa. Un chequeo de `tuku doctor` que lo nombre como pregunta, sin fallar, queda por decidir.
+- **`updated` de las notas editadas a mano.** Solo lo mueven los comandos que reescriben la nota (`note rename`). Una edición en Obsidian no lo toca, y la nota sale tarde en `tuku context note`. Queda por decidir si `doctor` lo avisa.
 - **El contexto que se inyecta al agente.** Decidido el 2026-10-18: `tuku context [TEMA] [--since]`, en [Superficie del CLI](#superficie-del-cli-decidida-el-2026-10-18).
 
 ## Reglas del vault
@@ -118,6 +122,7 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
 
 ## Suite de escenarios
 
+- **Marcar el reintento por sandbox de `agy`.** La primera llamada a `tuku` de cada turno falla por el sandbox y el modelo reintenta con `BypassSandbox: true` (una llamada y unos 16.000 tokens de más por turno). Hoy solo está anotado en [`tests/scripts/agente.py`](tests/scripts/agente.py): falta que el arnés lo reconozca y no lo cuente como llamada del producto.
 - **Resuelto (2026-09-10): tests en Epic 002 para entradas y pendientes sin fecha (fallback a hoy):** Se implementó `_congelar_tiempo` en [`tests/scripts/gherkin.py`](tests/scripts/gherkin.py) para interceptar `TUKU_NOW="AAAA-MM-DD HH:MM"` en bloques bash y congelar deterministamente `date.today()` y `datetime.now()` durante llamadas en proceso a `cli.main`, sin tocar el código de producción. Probado en `002-02-registro-en-su-dia`.
 
 - **Resuelto (2026-09-10): cobertura de comandos directos para pendientes:** Se incorporaron escenarios BDD en `002-04` (`tuku todo open`) y `002-05` (`tuku todo close`) verificando que operan de forma idempotente, actualizan `PENDIENTES.md` y estampan su huella cronológica en `AHORA.md` respetando la regla normativa de huella obligatoria.

@@ -88,7 +88,7 @@ Actualizado el 2026-10-16.
 | 002 | El día uno, a mano | `vacio` → `primer-dia` | cerrado | cerrado el 2026-09-19; doce escenarios deterministas en verde y aceptación humana en playground/002-09 completada |
 | 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | cinco escenarios: `003-01` determinista; `003-10`, el día uno entero en un turno (fundió del `003-02` al `003-07` el 2026-10-16), y `003-11`, el día derivado, en verde con `agy`; `003-08` (`hermes`) y `003-09` (`claude`) en verde el 2026-09-20, sin repetir desde entonces. Falta revisión a mano de los turnos de `playground/003-*/` contra criterio de salida |
 | 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
-| 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | ocho documentos en `tests/escenarios/005-*`: 20 de 31 tests deterministas en verde y 11 en rojo, más 5 agénticos (3 en verde, 1 en rojo y 1 que se salta). Los rojos son hallazgos: cada uno está en la tabla de `005-00` (lista de hijos en dos órdenes, `doctor note`, atrasados, nota tipada, agente que adivina) |
+| 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | ocho documentos en `tests/escenarios/005-*`: 33 tests deterministas y 7 agénticos, todos en verde. Lo que sigue abierto está en la tabla de `005-00`: S5 y S8 caen con la conversación del config, E2 con el epic 006 y B4 está en `TODO.md` |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
 | 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
 | 008 | MAINTENANCE MODE | por definir | por definir | sin detalles aún: tests del modo de mantenimiento del `AGENTS.md` del vault |
@@ -137,7 +137,7 @@ Se prueba con dos agentes, uno del lado del autor y otro del lado de TUKU. No ag
 
 ## Epic 005. El día ciento cincuenta
 
-Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumulado (ámbitos poblados, notas escritas, historial de pendientes). Segunda vuelta de capacidades donde aparecen enlaces automáticos desde el primer día, autoasignación de pendientes, notas con "Ver además" y versiones completas de ámbitos y destilados. Cubre fases 3 y 5 completas, y resto de la 4.
+Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumulado (ámbitos poblados, notas escritas, historial de pendientes). Segunda vuelta de capacidades donde aparecen las notas con "Ver además" que el agente enlaza desde el primer día a partir de `tuku context`, los pendientes asignados a su ámbito y las versiones completas de los ámbitos. Cubre fases 3 y 5 completas. Las cadencias van en el 006 y los destilados en el 007 (fase 9).
 
 - **Criterio de salida:** inyectar un ciclo de `mac-jpgil` sobre un vault poblado produce registros con su ámbito, enlazados a las notas que `tuku context` ofrece, y notas tejidas, sin intervención del autor.
 
