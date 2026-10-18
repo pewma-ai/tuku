@@ -40,14 +40,14 @@ Hecho en la sesión anterior, commiteado y pusheado:
 
 ## Los pasos, en el orden decidido
 
-El autor decidió este orden. Los pasos 5 a 9 no se empiezan sin una conversación previa sobre la configuración, que el autor tiene con el agente.
+El autor decidió este orden. Los pasos 5 a 9 no se empiezan sin una conversación previa sobre la configuración, que el autor tiene con el agente. Los pasos 3 y 4 están hechos: la sesión que los hizo se detuvo aquí.
 
 | # | Paso | Estado |
 | --- | --- | --- |
 | 1 | Spec de ciclos, libro, horizontes y cadencias | Hecho |
 | 2 | Refactor del CLI del autor, que coincide con `spec/tuku.md` | Hecho |
-| 3 | Reconciliar `005-00` con el CLI nuevo | Siguiente |
-| 4 | El resto de los pendientes de `005-00` | Después del 3 |
+| 3 | Reconciliar `005-00` con el CLI nuevo | Hecho el 2026-10-18 |
+| 4 | El resto de los pendientes de `005-00` | Hecho salvo B4 (falta el nombre del verbo de postergar), D1 y D2 (los reserva el autor) y E2 (espera al paso 7); C1 espera medirse con `005-06` |
 | | **Detenerse aquí.** El autor conversa con el agente sobre `reglas/config.tuku.md` | |
 | 5 | Conversación sobre `config.tuku` | Del autor con el agente |
 | 6 | Ciclo con nombre en código | Depende del 5 |
