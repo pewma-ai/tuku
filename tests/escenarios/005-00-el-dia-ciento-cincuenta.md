@@ -95,14 +95,14 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 
 ### D. Documentos que se contradicen
 
-| Id | Pendiente | Dónde |
-| --- | --- | --- |
-| D1 | [`devel/epics.md`](../../devel/epics.md) describe el 005 con «enlaces automáticos desde el primer día» y asignación de ámbito «sin intervención». [`spec/ambitos.md`](../../spec/ambitos.md), «Nada se enlaza solo», dice que el cuerpo nunca se modifica ni se enlaza, y que elige el ámbito quien interpreta, leyendo las keywords | `devel/epics.md`, criterio de salida del 005 |
-| D2 | El epic dice «resto de la fase 4» (cadencias) y «destilados». La tabla de fases pone las cadencias en el 006, y `spec/notas.md` deja el destilado fuera, para la fase 9 | `devel/epics.md` |
-| D3 | La página de un ámbito muestra solo el ciclo abierto: al archivar la primera semana desaparece el hilo de la cotización de Los Robles. `## Esta semana` y `## Actividad reciente` no están en ninguna spec | `scope.py`, `spec/ambitos.md` |
-| D4 | Un ámbito padre lista a sus hijos directos y los clientes de `negocio` cuelgan de la categoría `clientes`: ninguna página dice dónde están | `spec/ambitos.md` |
-| D5 | El corpus de la Pyme contradice a la spec: `AGENTS.md` y `CADENCIAS.md` «obligatorios en cada directorio» (la spec: ausente es vacío), registros sobre categorías y personas, 17 de 29 `(Hecho)` sin pendiente abierto, un horizonte `sin fecha` que la spec descarta, y una Parte 3 que contiene pendientes que la Parte 2 no abre | `corpus/referencia/referencia-pyme.md` |
-| D6 | El pendiente que abre `process cycle` («revisar la bitácora anterior») nace sin ámbito y con la hora del reloj, y su cierre cae en `personal`: apertura y cierre quedan en ámbitos distintos | `spec/ciclo.md`, `spec/pendientes.md` |
+| Id  | Pendiente                                                                                                                                                                                                                                                                                                                            | Dónde                                        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| D1  | [`devel/epics.md`](../../devel/epics.md) describe el 005 con «enlaces automáticos desde el primer día» y asignación de ámbito «sin intervención». [`spec/ambitos.md`](../../spec/ambitos.md), «Nada se enlaza solo», dice que el cuerpo nunca se modifica ni se enlaza, y que elige el ámbito quien interpreta, leyendo las keywords | `devel/epics.md`, criterio de salida del 005 |
+| D2  | El epic dice «resto de la fase 4» (cadencias) y «destilados». La tabla de fases pone las cadencias en el 006, y `spec/notas.md` deja el destilado fuera, para la fase 9                                                                                                                                                              | `devel/epics.md`                             |
+| D3  | La página de un ámbito muestra solo el ciclo abierto: al archivar la primera semana desaparece el hilo de la cotización de Los Robles. `## Esta semana` y `## Actividad reciente` no están en ninguna spec                                                                                                                           | `scope.py`, `spec/ambitos.md`                |
+| D4  | Un ámbito padre lista a sus hijos directos y los clientes de `negocio` cuelgan de la categoría `clientes`: ninguna página dice dónde están                                                                                                                                                                                           | `spec/ambitos.md`                            |
+| D5  | El corpus de la Pyme contradice a la spec: `AGENTS.md` y `CADENCIAS.md` «obligatorios en cada directorio» (la spec: ausente es vacío), registros sobre categorías y personas, 17 de 29 `(Hecho)` sin pendiente abierto, un horizonte `sin fecha` que la spec descarta, y una Parte 3 que contiene pendientes que la Parte 2 no abre  | `corpus/referencia/referencia-pyme.md`       |
+| D6  | El pendiente que abre `process cycle` («revisar la bitácora anterior») nace sin ámbito y con la hora del reloj, y su cierre cae en `personal`: apertura y cierre quedan en ámbitos distintos                                                                                                                                         | `spec/ciclo.md`, `spec/pendientes.md`        |
 
 ### E. De las pruebas mismas
 
@@ -120,9 +120,9 @@ Tomadas al escribir los escenarios, para poder escribirlos. Cada una se confirma
 | --- | --- | --- |
 | ~~X1~~ | ~~`tuku doctor todo` informa los atrasados como aviso, con código 0.~~ Cambiada el 2026-10-18: un atraso es un hecho del tiempo y no un defecto del vault, así que lo dice `tuku context todo --late`, no `doctor`. Sin verbo `list` | B1, `005-04` |
 | ~~X2~~ | ~~`note create --subtype persona` y `reglas/tipos/persona.md` sembrado por `tuku init`.~~ Confirmada el 2026-10-18 con dos cambios: la carpeta se llama `reglas/subtipos/` (el archivo, `persona.tuku.md`) para no confundirse con `reglas/types.md`, y la tabla del libro de estilo es la única fuente de si un tipo es enlazable | B2, `005-05` |
-| X3 | El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea | B5, `005-01` |
-| X4 | El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos | C1, `005-06` |
-| X5 | Los escenarios usan la sintaxis de hoy aunque esté en revisión (S): al cambiar un nombre se cambian sus líneas `tuku` y los tests no se tocan | todos |
+| ~~X3~~ | ~~El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea~~ Confirmada el 2026-10-18 | B5, `005-01` |
+| ~~X4~~ | ~~El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos~~ Confirmada el 2026-10-18 | C1, `005-06` |
+| ~~X5~~ | ~~Los escenarios usan la sintaxis de hoy aunque esté en revisión (S): al cambiar un nombre se cambian sus líneas `tuku` y los tests no se tocan~~ Confirmada el 2026-10-18 | todos |
 
 ## Escenario: preparar el ambiente del epic
 
