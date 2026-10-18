@@ -33,15 +33,13 @@ Cuando Andrea nombra a una Paula sin decir cuál
 ```agente TUKU_NOW="2026-08-23 22:30"
 Le mandé el catálogo a la Paula.
 ```
-Entonces el agente deja sin elegir el ámbito de las dos Paulas
-Y si pregunta cuál, la pregunta nombra a las dos; si en cambio escribe, lo hace en el ámbito que las contiene y con las palabras de Andrea
-Y los pendientes quedan como estaban
+Entonces el agente pregunta a cuál Paula se refiere, nombrando a las dos
+Y no escribe nada hasta que Andrea conteste
 
 ## Qué se mira a mano
 
 - La respuesta a «Hablé con la Patricia del precio» es breve: dice qué quedó escrito y dónde, sin repetir cómo.
 - Cuando el agente pregunta por la Paula, la pregunta cabe en una línea y deja a Andrea contestar con un nombre.
-- **Decisión pendiente de diseño:** el [capítulo 4](../../docs/tutorial/04-una-semana-despues.md) y el `AGENTS.md` del vault dicen que ante dos candidatos el agente pregunta («Nunca actuar sobre una petición ambigua»), y [`flujo-informacion.md`](../../spec/flujo-informacion.md) dice que la ambigüedad se deja escrita tal como la dijo el autor y se resuelve cuando una decisión lo exige, sin interrumpirlo. El test acepta las dos conductas y rechaza la que ambas prohíben: adivinar.
 
 ## Aceptación humana (en Obsidian)
 

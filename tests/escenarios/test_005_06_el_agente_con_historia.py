@@ -88,20 +88,15 @@ def test_005_06_el_registro_de_la_patricia_toca_solo_el_ciclo_y_la_pagina_del_li
 
 @pytest.mark.agentic
 @sin_arnes
-def test_005_06_la_paula_queda_sin_ambito_de_ninguna_de_las_dos() -> None:
+def test_005_06_la_paula_no_escribe_nada_hasta_que_andrea_conteste() -> None:
     turno = _correr(PAULA).turno
-    for argv in turno.invocaciones_de("entry", "create"):
-        assert _flag(argv, "--scope") not in ("catalogo-marzo", "escuela-los-maitenes"), argv
-    assert not turno.invocaciones_de("todo", "open")
-    assert not turno.invocaciones_de("todo", "close")
+    for comando in (("entry", "create"), ("todo", "open"), ("todo", "close")):
+        assert not turno.invocaciones_de(*comando), comando
 
 
 @pytest.mark.agentic
 @sin_arnes
-def test_005_06_si_el_agente_pregunta_por_la_paula_nombra_a_las_dos() -> None:
-    corrida = _correr(PAULA)
-    if corrida.turno.invocaciones_de("entry", "create"):
-        pytest.skip("el agente registró en el ámbito común en vez de preguntar")
-    respuesta = corrida.turno.stdout
+def test_005_06_la_pregunta_por_la_paula_nombra_a_las_dos() -> None:
+    respuesta = _correr(PAULA).turno.stdout
     assert "?" in respuesta, respuesta
     assert "Ibáñez" in respuesta and "Reyes" in respuesta, respuesta

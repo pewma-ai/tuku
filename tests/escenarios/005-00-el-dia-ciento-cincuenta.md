@@ -91,7 +91,7 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 
 | Id | Pendiente | Test |
 | --- | --- | --- |
-| C1 | Ante «le mandé el catálogo a la Paula», con dos Paulas en la historia, el agente eligió `catalogo-marzo` sin preguntar. Dos documentos prescriben conductas distintas (el capítulo 4 y el `AGENTS.md` del vault: preguntar; `flujo-informacion.md`: dejarlo escrito sin interrumpir), y hay que elegir una antes de corregir el `AGENTS.md` del template. Depende de X4 y de B3 | `005-06` Paula (1 rojo, 1 saltado) |
+| C1 | Ante «le mandé el catálogo a la Paula», con dos Paulas en la historia, el agente eligió `catalogo-marzo` sin preguntar. Las specs ya dicen que se pregunta (X4). Falta que el `AGENTS.md` del template lo diga con un caso general, y medirlo con `005-06`, que es agéntico | `005-06` Paula (1 rojo, 1 saltado) |
 
 ### D. Documentos que se contradicen
 
@@ -121,7 +121,7 @@ Tomadas al escribir los escenarios, para poder escribirlos. Cada una se confirma
 | ~~X1~~ | ~~`tuku doctor todo` informa los atrasados como aviso, con código 0.~~ Cambiada el 2026-10-18: un atraso es un hecho del tiempo y no un defecto del vault, así que lo dice `tuku context todo --late`, no `doctor`. Sin verbo `list` | B1, `005-04` |
 | ~~X2~~ | ~~`note create --subtype persona` y `reglas/tipos/persona.md` sembrado por `tuku init`.~~ Confirmada el 2026-10-18 con dos cambios: la carpeta se llama `reglas/subtipos/` (el archivo, `persona.tuku.md`) para no confundirse con `reglas/types.md`, y la tabla del libro de estilo es la única fuente de si un tipo es enlazable | B2, `005-05` |
 | ~~X3~~ | ~~El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea~~ Confirmada el 2026-10-18 | B5, `005-01` |
-| ~~X4~~ | ~~El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos~~ Confirmada el 2026-10-18 | C1, `005-06` |
+| ~~X4~~ | ~~El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos) y rechaza elegir una de las dos.~~ Cambiada el 2026-10-18 por el autor: ante una ambigüedad de intención con consecuencias más allá de una línea en la bitácora, el agente pregunta y no escribe hasta que el autor conteste. `spec/flujo-informacion.md`, `spec/despacho.md` y el tutorial lo dicen así | C1, `005-06` |
 | ~~X5~~ | ~~Los escenarios usan la sintaxis de hoy aunque esté en revisión (S): al cambiar un nombre se cambian sus líneas `tuku` y los tests no se tocan~~ Confirmada el 2026-10-18 | todos |
 
 ## Escenario: preparar el ambiente del epic

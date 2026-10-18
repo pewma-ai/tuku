@@ -18,7 +18,7 @@ El registro queda escrito con tus palabras, bajo el ámbito del Liceo Técnico A
 
 ## Mira qué hace
 
-Si tus registros tienen dos personas llamadas Paula, o ninguna con certeza, el agente no elige por ti: pregunta, o deja el registro con tus palabras en el ámbito que contiene a las dos.
+Si tus registros tienen dos personas llamadas Paula, o ninguna con certeza, el agente no elige por ti: te pregunta a cuál te refieres y no escribe nada hasta que contestes.
 
 Asumir en silencio la opción más reciente deja registros erróneos en un historial que casi nadie audita.
 

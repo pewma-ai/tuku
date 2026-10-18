@@ -43,7 +43,7 @@ Un proceso es una rutina con nombre, y hay dos clases: los de `tuku`, determinis
 
 ## Los límites
 
-La raíz cierra con una tabla de dos niveles, **pregunta primero** y **nunca**. Desde el primer día lleva editar a mano un archivo que tiene comando, actuar sobre una petición ambigua y tocar cualquier `AGENTS.md`. Cada límite es verificable: se pide algo que cae en **nunca** y el diff queda vacío. Escribir una petición ambigua tal cual la dijo el autor está permitido; lo prohibido es decidir por él.
+La raíz cierra con una tabla de dos niveles, **pregunta primero** y **nunca**. Desde el primer día lleva editar a mano un archivo que tiene comando, actuar sobre una petición ambigua y tocar cualquier `AGENTS.md`. Cada límite es verificable: se pide algo que cae en **nunca** y el diff queda vacío. Una petición ambigua se consulta antes de escribir; lo prohibido es decidir por el autor.
 
 ## Verificación
 
