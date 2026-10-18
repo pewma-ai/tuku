@@ -45,6 +45,23 @@ def test_el_cierre_queda_con_la_marca_a_la_vista_y_el_cuerpo_tachado(vault: Path
     assert _tabla(vault) == []
 
 
+def test_el_cierre_cae_en_el_ambito_donde_estaba_el_pendiente(vault: Path) -> None:
+    from tuku import scope
+    from tuku.cli import EXITO, main
+
+    scope.crear_con_constancia(vault, "bodega", day=DIA, hour="14:00")
+    todo.abrir_en_vault(vault, body="contar el stock", scope="bodega", day=DIA, hour="14:20")
+    todo.abrir_en_vault(vault, body="llamar a Ana", day=DIA, hour="14:25")
+
+    for texto, hora in (("contar el stock", "09:00"), ("llamar a Ana", "09:05")):
+        cierre = ["todo", "close", texto, "--vault", str(vault), "--at", f"2026-08-12 {hora}"]
+        assert main(cierre) == EXITO
+
+    miercoles = _ahora(vault).split("## Miércoles 12 de agosto", 1)[1]
+    assert "[bodega](ambitos/bodega/bodega.md) (Hecho): ~~contar el stock~~" in miercoles
+    assert "[personal](ambitos/personal/personal.md) (Hecho): ~~llamar a Ana~~" in miercoles
+
+
 def test_cierra_aunque_solo_el_registro_o_solo_la_tabla_lleve_el_link(vault: Path) -> None:
     _abre(vault, SIN_LINK)
     todo.cerrar_en_vault(vault, body=CON_LINK, scope="personal", day=DIA, hour="19:05")

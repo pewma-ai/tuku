@@ -86,6 +86,8 @@ Esto ataja el escalón: un pendiente puede nacer en `con fecha` sin pasar por ni
 
 **Toda acción sobre un pendiente deja huella en la bitácora.** Abrir un compromiso (`tuku todo open`), cerrarlo (`tuku todo close`) o moverlo de escalón (postergación) son decisiones deliberadas del autor sobre sus compromisos. Cada operación estampa su constancia cronológica en `AHORA.md` (con fecha actual **HOY** y hora actual **AHORA** en `TZ` por defecto) a la vez que sincroniza `PENDIENTES.md`.
 
+**El cierre cae en el ámbito del pendiente.** Sin `--scope`, `tuku todo close` escribe el `(Hecho)` en el ámbito de la fila que cierra, para que apertura y cierre queden juntos en la página del ámbito. Solo si la fila no tiene ámbito usa el `scope_default` de la config, y un `--scope` explícito manda sobre los dos.
+
 ### Idempotencia y reparación con el comando original
 
 Toda operación sobre pendientes (`tuku todo open`, `tuku todo close`, postergaciones) es estrictamente idempotente:

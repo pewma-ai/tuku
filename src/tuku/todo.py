@@ -689,10 +689,14 @@ def cerrar_en_vault(
     (`devel/epics.md`). Se reporta, el registro queda escrito y `PENDIENTES.md`
     no se toca, porque inventar el pendiente que falta dejaría el archivo
     mintiendo.
+
+    **El cierre cae en el ámbito donde estaba el pendiente.** Sin `scope`, el
+    registro toma el de la fila que cierra; solo si la fila no tiene, el
+    `scope_default` de la config. Con `scope`, manda `scope`.
     """
     from tuku import scope as ambitos
     from tuku.ahora import encabezado_de
-    from tuku.config import archivo_vault
+    from tuku.config import ambito_por_defecto, archivo_vault
     from tuku.entry import add as entry_add
     from tuku.entry import componer
     from tuku.regenerate import rehacer
@@ -710,6 +714,15 @@ def cerrar_en_vault(
         if clave(f.cuerpo) == clave(marca.cuerpo):
             ambito_encontrado = f.ambito
             break
+
+    if (
+        scope is None
+        and ambito_encontrado is None
+        and (por_defecto := ambito_por_defecto(vault))
+    ):
+        scope = ambitos.canonico(vault, por_defecto)
+        if (rechazo := ambitos.rechazo_si_no_existe(vault, scope)) is not None:
+            return rechazo
 
     texto, hubo_pareja = cerrar(pendientes_texto, marca)
 

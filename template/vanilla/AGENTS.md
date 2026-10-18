@@ -4,17 +4,22 @@ Un vault de TUKU: la bitácora de la vida de su autor, en archivos de texto que 
 
 Este archivo dice **a dónde va cada cosa**. El cómo está en el archivo que nombra la columna "Lee antes".
 
-## Quién te invoca
+## Cómo te invocan
 
-| Si… | Haces |
+Mira cómo empieza el primer prompt de la sesión. Hay dos casos y no hay un tercero.
+
+| El primer prompt... | Haces |
 | --- | --- |
-| conversas con el autor | Empiezas con `tuku context` y despachas lo que dice con la tabla de abajo. |
-| otro agente o un cron te lanzó para algo concreto: `tuku doctor`, `tuku regenerate`, `tuku process cycle`, un proceso de `procesos/` | Lo ejecutas sin volver a despachar y sin preguntar. Lo que pide una decisión del autor queda sin escribir y va en tu respuesta final, que quien te lanzó le hace llegar. |
+| empieza con `MAINTENANCE MODE`, en mayúsculas | No cargues nada más: ni `tuku context` ni ningún otro archivo. Sigue las instrucciones del prompt tal como están, sin despachar y sin preguntar. Lo que pide una decisión del autor queda sin escribir y va en tu respuesta final. Los Límites del final valen igual. |
+| empieza con cualquier otra cosa | Es una interacción natural con el autor. Empieza con `tuku context` y despacha lo que dice con la tabla de abajo. |
+
+`maintenance mode` en minúsculas, o la frase en medio del texto, no activa nada: es una interacción natural.
 
 ## Cómo trabajas con el autor
 
 - **Al empezar, `tuku context`.** Trae los últimos días, los ámbitos con sus keywords, los pendientes abiertos y el vocabulario del autor: con eso decides, sin abrir esos archivos.
 - **Un pedido, un comando.** Ejecuta el comando de la fila con los campos que dio el autor. El comando valida, rechaza con la corrección y escribe todo lo derivado.
+- **Si lo que dijo el autor puede querer decir dos cosas, pregunta.** No escribas hasta que conteste. «Quedamos al día con Fabina», con dos pendientes de Fabina abiertos: ¿es un registro, o cierra uno de los dos? «Le mandé el catálogo a la Paula», con dos Paulas: ¿a cuál? Una pregunta en una línea con las opciones; lo demás del dictado sigue su curso.
 - **Atiende todo lo que el autor dijo, en su orden:** cada cosa que cuenta o pide es un comando o una respuesta. No termines con una sin atender.
 - **Antes de registrar lo que el autor hizo, mira los pendientes de `tuku context`.** Si calza con un pendiente abierto es un cierre (`tuku todo close`); si calzan varios, pregunta cuál y no escribas nada (si la respuesta tampoco lo aclara, vuelve a preguntar: lo que solo el autor sabe no se busca en el vault); si ninguno, es un registro (`tuku entry create`). Fuera de eso no leas el vault: el comando conoce el formato, el día y el orden. Abre solo el archivo que la fila nombra en "Lee antes".
 - **Los comandos están en la tabla y en los ejemplos de abajo,** así que no consultes `-h` antes de ejecutar. Si uno rechaza, haz lo que su mensaje dice; solo si no basta, `tuku <comando> -h`.

@@ -34,7 +34,7 @@ def _cmd_todo_close(args: argparse.Namespace) -> int:
             regenerar=not args.no_regenerate,
             day=args.at.dia,
             hour=args.at.hora,
-            scope=args.scope or ambito_por_defecto(args.vault),
+            scope=args.scope,
         ),
         "todo close",
     )

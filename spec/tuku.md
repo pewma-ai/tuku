@@ -175,7 +175,8 @@ flowchart LR
     TO -.->|"título y aliases de las notas<br/>de tipo enlazable, para el link"| NO
     TC -->|"registro (Hecho) tachado;<br/>borra el pendiente si se abrió<br/>ese mismo día"| AH
     TC -->|"borra la fila cuyo texto es TEXTO"| PE
-    TO & TC -.->|"sin --scope, scope_default"| CF
+    TO -.->|"sin --scope, scope_default"| CF
+    TC -.->|"sin --scope, el ámbito de la fila;<br/>si no tiene, scope_default"| CF
     TO & TC -->|"rehace"| DER
 
     classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
