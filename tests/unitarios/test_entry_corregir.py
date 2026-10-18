@@ -84,6 +84,19 @@ def test_update_corrige_el_ultimo_registro_y_la_fila_del_pendiente(vault: Path) 
     assert otra.ok and "ya decía eso" in otra.mensaje
 
 
+def test_update_conserva_la_marca_del_pendiente_cuando_el_body_no_la_trae(vault: Path) -> None:
+    todo.abrir_en_vault(
+        vault, body="llamar a la administradora", scope="personal", day=DIA, hour="09:00"
+    )
+    r = entry.actualizar_en_vault(vault, match="administradora", body="llamar por el reajuste")
+    assert r.ok
+    assert "personal.md) **pendiente**: llamar por el reajuste" in _ahora(vault)
+    assert todo.cuerpos((vault / "PENDIENTES.md").read_text(encoding="utf-8")) == [
+        "llamar por el reajuste"
+    ]
+    assert entry.actualizar_en_vault(vault, match="reajuste", body="llamar por el reajuste").ok
+
+
 def test_update_rechaza_sin_registro_que_calce_y_fuera_del_ciclo(vault: Path) -> None:
     antes = _ahora(vault)
     r = entry.actualizar_en_vault(vault, match="nada de esto", body="x")

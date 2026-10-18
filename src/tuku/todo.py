@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -170,6 +170,15 @@ def parsear(linea: str) -> Marca | None:
     if marca == CIERRA:
         cuerpo = _destachar(cuerpo)
     return Marca(marca, link.nombre_de(enlace) if enlace else None, cuerpo)
+
+
+_PREFIJO_DE_MARCA = re.compile(r"^(?:\*\*pendiente\*\*|\(Hecho\))(?: \*\*[^*\n]+\*\*)?: ")
+
+
+def prefijo_de_marca(cuerpo: str) -> str:
+    """La marca con que empieza el cuerpo de un registro (`**pendiente**: `), o `""`."""
+    m = _PREFIJO_DE_MARCA.match(cuerpo)
+    return m.group(0) if m else ""
 
 
 def _destachar(cuerpo: str) -> str:
@@ -500,6 +509,23 @@ def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]
     return faltan
 
 
+def huerfanas(pendientes: str, registros: Iterable[str]) -> list[Fila]:
+    """Las filas de la tabla que ningún registro `**pendiente**` abrió.
+
+    `registros` son los textos donde puede estar la apertura: `AHORA.md` y las
+    bitácoras cerradas, porque un pendiente arrastrado de un ciclo anterior
+    conserva su registro en la bitácora donde nació. Una fila sin apertura en
+    ninguno quedó así por una edición: el registro perdió su marca o se borró.
+    """
+    abiertos = {
+        clave(m.cuerpo)
+        for texto in registros
+        for linea in texto.splitlines()
+        if (m := parsear(linea)) is not None and m.marca == ABRE
+    }
+    return [f for f in filas(pendientes) if clave(f.cuerpo) not in abiertos]
+
+
 def duplicados(pendientes: str) -> list[str]:
     """Detalles que aparecen en más de una fila. Regla 1 de `spec/pendientes.md`.
 
@@ -734,10 +760,11 @@ def lint(
     ahora: str | None = None,
     *,
     vistas: Mapping[str, tuple[str | None, str]] | None = None,
+    historia: Iterable[str] = (),
 ) -> list[str]:
     """Los hallazgos de `tuku doctor todo`, cada uno con su corrección. No lee disco.
 
-    Cuatro revisiones:
+    Cinco revisiones:
 
     1. Un detalle en más de una fila (regla 1).
     2. Una marca de `ahora` que la tabla no refleja (`sin_consecuencia`). La
@@ -747,6 +774,8 @@ def lint(
        escribiría; si difieren, la que está mal es la vista.
     4. Un pendiente abierto y cerrado el mismo día: sobra el registro que lo
        abrió, y lo quita `tuku fix todo`.
+    5. Una fila sin registro `**pendiente**` en `ahora` ni en `historia` (los
+       textos de las bitácoras cerradas): `huerfanas`.
     """
     hallazgos = [
         f"PENDIENTES.md: error: {cuerpo!r} aparece en más de una fila. "
@@ -764,6 +793,13 @@ def lint(
             f"AHORA.md:{a.linea}: error: {a.cuerpo!r} se abrió y se cerró el {a.dia}: "
             "sobra el registro que lo abrió. Corre `tuku fix todo`."
             for a in cerrados_el_mismo_dia(ahora)
+        ]
+    if ahora is not None:
+        hallazgos += [
+            f"PENDIENTES.md: error: la fila {f.cuerpo!r} no tiene registro "
+            f"{ABRE} en AHORA.md ni en las bitácoras. "
+            f"Corre `{comando_de(ABRE, f.cuerpo, ambito=f.ambito)}`."
+            for f in huerfanas(pendientes, [ahora, *historia])
         ]
     for vista, (actual, esperado) in (vistas or {}).items():
         if actual != esperado:
@@ -793,7 +829,8 @@ def hallazgos_del_vault(vault: Path) -> list[str]:
         archivo.leer(ambitos_path) if ambitos_path.is_file() else None,
         regenerate.documento_del_vault(vault, pendientes),
     )
-    return lint(pendientes, ahora, vistas=vistas)
+    historia = [archivo.leer(b) for b in sorted((vault / "bitacoras").glob("*.md"))]
+    return lint(pendientes, ahora, vistas=vistas, historia=historia)
 
 
 def lint_del_vault(vault: Path) -> Resultado:

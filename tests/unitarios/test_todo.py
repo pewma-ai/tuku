@@ -301,6 +301,40 @@ def test_lint_de_la_tabla_sana_y_de_duplicados() -> None:
     assert hallazgo.startswith("PENDIENTES.md: error:") and "una sola" in hallazgo
 
 
+def test_huerfanas_son_las_filas_sin_registro_pendiente_en_ahora_ni_en_la_historia() -> None:
+    tabla = _tabla("enviar la cotización", "avisar de los GGCC", "pagar la patente")
+    ahora = "## Martes 11 de agosto\n- 09:00 - **pendiente**: enviar la cotización\n"
+    bitacora = (
+        "## Lunes 3 de agosto\n- 08:00 - [[personal]] **pendiente**: avisar de los GGCC\n"
+    )
+
+    assert [f.cuerpo for f in todo.huerfanas(tabla, [ahora])] == [
+        "avisar de los GGCC",
+        "pagar la patente",
+    ]
+    assert [f.cuerpo for f in todo.huerfanas(tabla, [ahora, bitacora])] == ["pagar la patente"]
+    assert todo.huerfanas(_tabla(), [ahora]) == []
+
+
+def test_lint_nombra_la_fila_huerfana_con_el_comando_que_le_devuelve_el_registro() -> None:
+    ahora = (
+        "---\nfrom: 2026-08-10\nto: 2026-08-16\n---\n"
+        "## Martes 11 de agosto\n\n- 09:00 - llamar\n"
+    )
+    (hallazgo,) = todo.lint(_tabla("llamar a la administradora"), ahora)
+    assert hallazgo.startswith("PENDIENTES.md: error:")
+    assert "llamar a la administradora" in hallazgo
+    assert "tuku todo open --scope personal --body 'llamar a la administradora'" in hallazgo
+    assert (
+        todo.lint(
+            _tabla("llamar a la administradora"),
+            ahora,
+            historia=["- 09:00 - **pendiente**: llamar a la administradora\n"],
+        )
+        == []
+    )
+
+
 def test_lint_nombra_el_comando_que_corrige_cada_hallazgo() -> None:
     ahora = (
         "---\nfrom: 2026-08-10\nto: 2026-08-16\n---\n"

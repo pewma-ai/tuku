@@ -384,8 +384,7 @@ def actualizar_en_vault(
     from tuku.config import archivo_vault
 
     ahora_path = archivo_vault(vault, "AHORA.md")
-    cuerpo = todo.canonizar(body)
-    if not cuerpo:
+    if not todo.canonizar(body):
         return Resultado.rechazo("falta el cuerpo corregido. Pasa --body con el texto nuevo.")
     texto = archivo.leer(ahora_path)
     limites = rango(texto)
@@ -398,6 +397,10 @@ def actualizar_en_vault(
     r = ubicar(texto, match, dia=dia, hora=hour)
     if r is None:
         return _no_calza(match, "AHORA.md", dia, hour)
+    # La marca (`**pendiente**:`) es de la ontología cerrada y la corrección no la
+    # cambia: `--body` dice el texto, y el registro conserva lo que es.
+    marca = "" if todo.prefijo_de_marca(body) else todo.prefijo_de_marca(r.cuerpo)
+    cuerpo = todo.canonizar(marca + body)
     if r.cuerpo == cuerpo:
         return Resultado.hecho(f"el registro {_donde(r)} ya decía eso: nada que corregir.")
 
