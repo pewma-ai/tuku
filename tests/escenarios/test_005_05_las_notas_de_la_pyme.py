@@ -110,7 +110,7 @@ def test_005_05_una_nota_tipada_declara_su_subtype() -> None:
 
 def test_005_05_el_tipo_persona_tiene_su_archivo_de_reglas() -> None:
     corrida = _correr(TIPADA)
-    assert corrida.ruta("mi-vault", "reglas", "tipos", "persona.md").is_file()
+    assert corrida.ruta("mi-vault", "reglas", "subtipos", "persona.tuku.md").is_file()
 
 
 def test_005_05_con_la_nota_tipada_el_vault_sigue_sano() -> None:

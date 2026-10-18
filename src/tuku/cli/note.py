@@ -36,6 +36,7 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
             day=args.at.dia,
             hour=args.at.hora,
             record=not args.no_record,
+            subtype=args.subtype,
         ),
         "tuku note create",
     )
@@ -70,9 +71,9 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help="crea una nota y deja constancia en la bitácora",
         description=(
             "Escribe `notas/<título sin tildes, en minúsculas y con guiones>.md` con "
-            "frontmatter "
-            "(`type: Note`, `created`), el cuerpo, el link a su ámbito y la sección "
-            "`## Ver además`, y registra en `AHORA.md` "
+            "frontmatter (`type: Note`, `subtype` si se pasa, `created`), el cuerpo y la "
+            "sección `## Ver además`, que lista el ámbito y los links que el comando puso "
+            "en el cuerpo al enlazar a las personas. Registra en `AHORA.md` "
             "`**nota**: escribí la nota [título](notas/...)`. Una nota que ya existe no "
             "se reescribe."
         ),
@@ -88,6 +89,14 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help="archivo con el cuerpo de la nota; `-` lo lee de stdin",
     )
     crear.scope("ámbito al que pertenece la nota")
+    note_create_p.add_argument(
+        "--subtype",
+        default=None,
+        help=(
+            "tipo de la nota, una fila de `### Tipos de nota` del libro de estilo "
+            "(por ejemplo `persona`); agrega `subtype` al frontmatter"
+        ),
+    )
     crear.at("cuándo se escribe, para la nota y su constancia; lo que falte, hoy y ahora")
     note_create_p.add_argument(
         "--no-record",

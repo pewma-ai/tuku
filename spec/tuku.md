@@ -240,7 +240,7 @@ flowchart LR
 ## note
 
 ```text
-tuku note create TÍTULO (--body | --body-file) [--scope] [--at] [--no-record]
+tuku note create TÍTULO (--body | --body-file) [--scope] [--subtype] [--at] [--no-record]
 tuku note rename TÍTULO NUEVO
 tuku note archive TÍTULO                                            # pendiente
 ```
@@ -250,19 +250,21 @@ tuku note archive TÍTULO                                            # pendiente
 flowchart LR
     subgraph CMD["tuku note"]
         direction TB
-        NC["note create TÍTULO<br/>--body o --body-file<br/>--scope --at --no-record"]
+        NC["note create TÍTULO<br/>--body o --body-file<br/>--scope --subtype --at --no-record"]
         NR["note rename TÍTULO NUEVO"]
         NA["note archive TÍTULO"]
     end
     subgraph VAULT["Vault"]
         direction TB
         NO["notas/TITULO-EN-SLUG.md"]
+        LE["LIBRO-DE-ESTILO.md"]
         AH["AHORA.md"]
         VA["Todo el vault"]
         DER["Lo derivado: actividad<br/>de la página del ámbito"]
     end
 
-    NC -->|"frontmatter con created de --at,<br/>cuerpo, link a --scope<br/>y Ver además"| NO
+    NC -->|"frontmatter con subtype y created de --at,<br/>cuerpo y Ver además con --scope<br/>y los links que enlazó"| NO
+    NC -.->|"--subtype debe ser una fila<br/>de Tipos de nota"| LE
     NC -.->|"título y aliases de las notas<br/>de tipo enlazable, para el link"| NO
     NC -->|"constancia en la bitácora,<br/>salvo --no-record"| AH
     NC -->|"con --scope, rehace"| DER
@@ -275,7 +277,7 @@ flowchart LR
     classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
     class NC,NR escribe
     class NA pendiente
-    class NO,AH,VA archivo
+    class NO,LE,AH,VA archivo
     class DER derivado
 ```
 

@@ -86,6 +86,8 @@ def test_note_create_enlaza_a_otra_persona_y_no_a_si_misma(vault: Path) -> None:
     assert r.ok
     texto = (vault / "notas" / "contrato-del-colegio.md").read_text(encoding="utf-8")
     assert "Lo redactó [don Rodolfo](rodolfo-cifuentes.md)." in texto
+    assert "* [don Rodolfo](rodolfo-cifuentes.md) — mencionada en el cuerpo." in texto
+    assert note.lint(texto) == [], "el link que puso el comando está en Ver además"
 
     note.crear_con_constancia(
         vault,
@@ -97,6 +99,22 @@ def test_note_create_enlaza_a_otra_persona_y_no_a_si_misma(vault: Path) -> None:
     )
     propia = (vault / "notas" / "ana-perez.md").read_text(encoding="utf-8")
     assert "Ana Pérez es la jefa de UTP." in propia
+
+
+def test_subtype_se_escribe_si_la_tabla_lo_lista_y_se_rechaza_si_no(vault: Path) -> None:
+    r = note.crear_con_constancia(
+        vault, title="Patricia Lillo", body="Jefa de UTP.", subtype="persona", record=False
+    )
+    assert r.ok
+    texto = (vault / "notas" / "patricia-lillo.md").read_text(encoding="utf-8")
+    assert texto.startswith("---\ntype: Note\nsubtype: persona\ncreated: ")
+    assert note.subtype(texto) == "persona"
+
+    antes = sorted(p.name for p in (vault / "notas").iterdir())
+    r = note.crear_con_constancia(vault, title="Un cliente", body="x", subtype="cliente")
+    assert not r.ok and "no es un tipo de nota" in r.mensaje and "`persona`" in r.mensaje
+    assert "agrega una fila" in r.mensaje
+    assert sorted(p.name for p in (vault / "notas").iterdir()) == antes
 
 
 def test_un_nombre_de_dos_personas_queda_sin_link_y_avisa(vault: Path) -> None:

@@ -53,7 +53,7 @@ reglas/                       # la prosa de cada automatismo, y la configuració
   enlaces.tuku.md             # todavía no existe
   cadencias.tuku.md           # todavía no existe (epic 006)
   propuestas.tuku.md          # todavía no existe (epic 007)
-  tipos/                      # una por tipo de nota. Todavía no existe
+  subtipos/                   # una por subtipo de nota, con su plantilla y qué inferir
     persona.tuku.md
 
 procesos/                     # los que el autor invoca por su nombre. Aparece con el primero

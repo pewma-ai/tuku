@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import date
 from pathlib import Path
 
@@ -138,6 +138,8 @@ def crear(
     scope: str | None = None,
     today: date | None = None,
     rutas: Mapping[str, str] | None = None,
+    subtype: str | None = None,
+    menciones: Sequence[tuple[str, str]] = (),
 ) -> Path:
     """Escribe la nota en `notas/` y devuelve su ruta. Idempotente.
 
@@ -148,23 +150,30 @@ def crear(
     `notas/` y `spec/vault.md` exige en cualquier archivo que guarde
     conocimiento. Es distinto de `subtype`, la lista abierta que subdivide ese
     `Note` en las notas tipadas (`spec/notas.md`): solo lo declaran algunas, y
-    TUKU todavía no lo escribe.
+    se escribe si se pasa `subtype`.
+
+    `menciones` son los links que `enlazar` puso en el cuerpo, como (texto,
+    destino): cada uno entra a `## Ver además` con un motivo mecánico, porque esa
+    sección lista todos los enlaces salientes de la nota.
     """
     ruta = vault / "notas" / f"{slug(title)}.md"
     if ruta.exists():
         return ruta
 
-    ver_ademas = ""
+    items = []
     if scope is not None:
         enlace = link.enlace_ambito(scope, f"notas/{ruta.name}", rutas)
-        ver_ademas = (
-            f"\n{VER_ADEMAS}\n\n"
-            f"* {enlace} — el ámbito al que pertenece lo que esta nota explica.\n"
-        )
+        items.append(f"* {enlace} — el ámbito al que pertenece lo que esta nota explica.")
+    items += [
+        f"* [{texto}]({destino}) — mencionada en el cuerpo." for texto, destino in menciones
+    ]
+    ver_ademas = f"\n{VER_ADEMAS}\n\n" + "\n".join(items) + "\n" if items else ""
 
+    marca_subtype = f"subtype: {subtype}\n" if subtype else ""
     ruta.parent.mkdir(parents=True, exist_ok=True)
+    creada = (today or date.today()).isoformat()
     contenido = (
-        f"---\ntype: Note\ncreated: {(today or date.today()).isoformat()}\n---\n\n"
+        f"---\ntype: Note\n{marca_subtype}created: {creada}\n---\n\n"
         f"# {title}\n\n{body.strip()}\n{ver_ademas}"
     )
     archivo.escribir(ruta, contenido)
@@ -233,6 +242,21 @@ def _enlaces_sin_listar(lineas: list[str], ini: int) -> list[str]:
     return hallazgos
 
 
+def _rechazo_de_subtype(vault: Path, subtype: str) -> Resultado | None:
+    """El rechazo de un `--subtype` que `### Tipos de nota` no lista, o `None` si sirve."""
+    from tuku.config import leer_config
+
+    tipos = leer_config(vault).tipos_nota
+    if subtype in tipos:
+        return None
+    hay = ", ".join(f"`{t}`" for t in tipos) or "ninguno"
+    return Resultado.rechazo(
+        f"{subtype!r} no es un tipo de nota. Los de `### Tipos de nota` en "
+        f"LIBRO-DE-ESTILO.md son: {hay}. Elige uno, o agrega una fila a esa tabla para "
+        "crear el tipo nuevo."
+    )
+
+
 def crear_con_constancia(
     vault: Path,
     *,
@@ -242,8 +266,13 @@ def crear_con_constancia(
     day: date | None = None,
     hour: str | None = None,
     record: bool = True,
+    subtype: str | None = None,
 ) -> Resultado:
     """Escribe la nota y deja constancia en la bitácora. Idempotente.
+
+    Con `subtype` la nota es tipada: debe ser una fila de `### Tipos de nota` del
+    libro de estilo, y si no lo es se rechaza nombrando los que hay. Agregar un
+    tipo es agregar una fila a esa tabla.
 
     Crear una nota es un hecho de la vida del autor, que la pidió, así que se
     registra; mover un pendiente de escalón es del sistema y no se registra. Esa
@@ -268,6 +297,10 @@ def crear_con_constancia(
         return Resultado.rechazo(
             f"{title!r} no sirve de título: sin letras ni números no hay nombre de archivo."
         )
+    if subtype is not None:
+        subtype = subtype.strip().lower()
+        if (rechazo := _rechazo_de_subtype(vault, subtype)) is not None:
+            return rechazo
     if scope:
         scope = scope_mod.canonico(vault, scope)
         if (rechazo := scope_mod.rechazo_si_no_existe(vault, scope)) is not None:
@@ -277,7 +310,10 @@ def crear_con_constancia(
     hora = hour or datetime.now().strftime("%H:%M")
     ruta = vault / "notas" / f"{slug(title)}.md"
     desde = f"notas/{ruta.name}"
+    original = body
     body, avisos = enlazar(vault, body, desde, salvo=desde)
+    previos = {r for _, _, r, _ in link.salientes(original, desde)}
+    menciones = [(tx, d) for _, tx, r, d in link.salientes(body, desde) if r not in previos]
 
     ahora_path = vault / "AHORA.md"
     pendiente: str | None = None
@@ -292,7 +328,16 @@ def crear_con_constancia(
             except ValueError as e:
                 return Resultado.rechazo(str(e))
 
-    crear(vault, title=title, body=body, scope=scope, today=hoy, rutas=scope_mod.rutas(vault))
+    crear(
+        vault,
+        title=title,
+        body=body,
+        scope=scope,
+        today=hoy,
+        rutas=scope_mod.rutas(vault),
+        subtype=subtype,
+        menciones=menciones,
+    )
     if pendiente is not None:
         archivo.escribir(ahora_path, pendiente)
         if scope:

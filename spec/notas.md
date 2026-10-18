@@ -12,7 +12,7 @@ Algunas notas no son libres: son sobre algo que se repite en la bitácora y que 
 
 **"Persona" no es una entidad del diseño.** Serlo la volvería un caso especial, y en cuanto apareciera el segundo concepto inferido habría que abrir otro. El concepto general es la **nota tipada**: una nota que declara `subtype` en su frontmatter y que por eso tiene plantilla y procedimiento de destilado.
 
-La lista de tipos es **abierta**, igual que las clasificaciones y los horizontes (ver [`bitacora.md`](bitacora.md)). Vive en `LIBRO-DE-ESTILO.md` bajo `### Tipos de nota` y crece cuando el uso revela uno nuevo. Cada tipo tiene su archivo en `reglas/tipos/`, que todavía no existe: lo crea el epic que escriba la primera nota tipada.
+La lista de tipos es **abierta**, igual que las clasificaciones y los horizontes (ver [`bitacora.md`](bitacora.md)). Vive en `LIBRO-DE-ESTILO.md` bajo `### Tipos de nota` y crece cuando el uso revela uno nuevo. Cada tipo tiene su archivo en `reglas/subtipos/` (`persona.tuku.md`), con lo que declara abajo; la tabla del libro es la única fuente del resto, entre ello si es enlazable. `tuku note create --subtype persona` escribe el campo y rechaza un tipo que la tabla no lista, con la lista de los que sí: agregar un tipo es agregar una fila.
 
 ## El destilado no depende del tipo
 
@@ -35,7 +35,7 @@ El paso 3 es caro y conviene aislarlo: barrer meses de bitácoras no cabe dentro
 | Qué barrer | Dónde buscar menciones |
 | Qué inferir | Qué se sintetiza y qué se deja como hecho crudo |
 | Cómo enlazar | Cómo se nombra el archivo y cómo se referencia |
-| Enlazable | Si sus notas se enlazan solas al registrar (ver abajo) |
+| Enlazable | Si sus notas se enlazan solas al registrar (ver abajo). Es la columna de la tabla del libro, no una línea del archivo |
 
 Los tipos y su columna "Enlazable" están en `### Tipos de nota` del libro de estilo: `persona` es enlazable, `idea` no. Se decide por tipo y no nota por nota, para que ninguna quede olvidada.
 
@@ -66,6 +66,8 @@ Toda nota cierra con una sección `## Ver además`: la lista de sus enlaces sali
 
 * [Nota relacionada](nota-relacionada.md) — para qué sirve esa conexión, en una frase.
 ```
+
+`tuku note create` agrega a esta sección, con el motivo «mencionada en el cuerpo», cada link que puso al enlazar a las notas de un tipo enlazable, para que la regla valga sin excepciones. El motivo es mecánico; el autor puede mejorarlo.
 
 Sin el motivo, el enlace es un dato; con él, es una decisión que alguien más puede evaluar sin abrir la otra nota. Dos niveles de exigencia, y son de naturaleza distinta:
 

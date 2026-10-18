@@ -43,6 +43,8 @@ EJEMPLOS: dict[str, tuple[str, ...]] = {
     "note create": (
         'tuku note create "Reunión con Viana" --body "Quedamos en revisar la cotización." '
         "--scope negocio",
+        'tuku note create "Patricia Lillo" --subtype persona --body-file patricia.md '
+        "--scope liceo-tecnico-andes",
     ),
     "note rename": ('tuku note rename "Reunión con Viana" "Reunión con Viana, marzo"',),
     "context": (

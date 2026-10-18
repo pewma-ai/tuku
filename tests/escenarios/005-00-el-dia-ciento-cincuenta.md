@@ -82,7 +82,7 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 | Id | Pendiente | Test |
 | --- | --- | --- |
 | ~~B1~~ | ~~Ningún comando informaba los atrasados: `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo.~~ Resuelto el 2026-10-18: `tuku context todo --late` deja solo los pendientes con `Vence` anterior a hoy. El atraso por horizonte expirado sigue en E2 | ~~`005-04` (2 rojos y 2 guardas)~~ |
-| B2 | No existe una nota tipada: `note create` no tiene `--subtype` y no se siembra `reglas/tipos/persona.md`, que `spec/notas.md` promete «el epic que escriba la primera nota tipada». Depende de X2 | `005-05` tipada (3 rojos) |
+| ~~B2~~ | ~~No existía una nota tipada: `note create` no tenía `--subtype` y no se sembraba el archivo de reglas del tipo.~~ Resuelto el 2026-10-18: `note create --subtype persona` escribe el campo y rechaza un tipo que `### Tipos de nota` no lista; `tuku init` siembra `reglas/subtipos/persona.tuku.md`; y los links que `note create` pone al enlazar entran a `## Ver además` con el motivo «mencionada en el cuerpo» | ~~`005-05` tipada (3 rojos)~~ |
 | B3 | Las keywords repetidas entre ámbitos pasan sin aviso: `scope update escuela-los-maitenes --keyword Paula` sale con 0 y `tuku doctor` dice que el vault está sano, con `Paula` ya en `catalogo-marzo`. Es lo que hace ambigua a la Paula del `005-06`. Falta decidir si avisa `scope keywords`, `doctor` o los dos, y depende de S2 | sin test |
 | B4 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se baja con un comando. Falta el nombre y la forma | sin test: se escribe cuando B4 tenga nombre |
 | ~~B5~~ | ~~El rechazo de `process cycle` con un ciclo con registros decía «mueve AHORA.md a bitacoras/…». Quien lo seguía al pie de la letra dejaba 9 links rotos en la bitácora (están a un nivel más adentro) y `doctor` fallaba sin que `fix link` pudiera repararlos.~~ Resuelto el 2026-10-18: el rechazo de `process cycle` y el de `entry create` fuera del ciclo dicen cómo archivar a mano (`ahora.como_cerrar`): copiar a la bitácora, `status: stable` y bajar un nivel los links (`](ambitos/` pasa a `](../ambitos/`). Mientras archivar el ciclo sea del epic 006 | ~~unitario `test_cycle_open`; `005-01` lo hace a mano~~ |
@@ -110,7 +110,7 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 | --- | --- |
 | ~~E1~~ | ~~Dos tests del `005-04` pasaban sin probar nada hasta que existiera B1.~~ Resuelto el 2026-10-18 con B1 |
 | E2 | Falta el atraso por horizonte expirado (los cinco `esta semana` que siguen en `PENDIENTES.md` pasada la semana). Depende de cómo ruede un horizonte, que es del epic 006 |
-| E3 | Cuatro tests del `005-05` caen en cascada de otros: el escenario de la nota tipada aborta en su primer `Entonces`. Se resuelven con B2 |
+| ~~E3~~ | ~~Cuatro tests del `005-05` caían en cascada de otros.~~ Resuelto el 2026-10-18 con A3 y B2 |
 
 ## Decisiones por confirmar
 
@@ -119,7 +119,7 @@ Tomadas al escribir los escenarios, para poder escribirlos. Cada una se confirma
 | Id | Decisión | Usa |
 | --- | --- | --- |
 | ~~X1~~ | ~~`tuku doctor todo` informa los atrasados como aviso, con código 0.~~ Cambiada el 2026-10-18: un atraso es un hecho del tiempo y no un defecto del vault, así que lo dice `tuku context todo --late`, no `doctor`. Sin verbo `list` | B1, `005-04` |
-| X2 | `note create --subtype persona`, con el campo que `spec/notas.md` ya llama `subtype`, y `reglas/tipos/persona.md` sembrado por `tuku init` | B2, `005-05` |
+| ~~X2~~ | ~~`note create --subtype persona` y `reglas/tipos/persona.md` sembrado por `tuku init`.~~ Confirmada el 2026-10-18 con dos cambios: la carpeta se llama `reglas/subtipos/` (el archivo, `persona.tuku.md`) para no confundirse con `reglas/types.md`, y la tabla del libro de estilo es la única fuente de si un tipo es enlazable | B2, `005-05` |
 | X3 | El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea | B5, `005-01` |
 | X4 | El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos | C1, `005-06` |
 | X5 | Los escenarios usan la sintaxis de hoy aunque esté en revisión (S): al cambiar un nombre se cambian sus líneas `tuku` y los tests no se tocan | todos |
