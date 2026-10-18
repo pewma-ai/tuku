@@ -104,12 +104,6 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
 
 ## Tutorial
 
-- **La historia de Andrea no es coherente entre capítulos** ([`docs/tutorial/`](docs/tutorial/README.md), revisión del 2026-10-16):
-  - En el capítulo 2, la sección "Cuando quedó mal dicho" pide fusionar Liceo Los Robles con `personal` y no le dice al lector que lo rechace. Si confirma, `personal` desaparece y los capítulos siguientes dejan de funcionar.
-  - El capítulo 3 cierra el anticipo de una profesora Marcela que ningún capítulo anterior abrió, y usa un ámbito `compras` que no existe.
-  - El capítulo 5 espera un seguimiento a "Los Robles", que en el capítulo 2 se renombró y quizás se fusionó.
-  - En el capítulo 2, "cambiaron de categoría" usa en sentido coloquial una palabra que en TUKU es un término técnico (directorio sin página propia), y la línea 117 tiene un em dash.
-  - El capítulo 2 anuncia resultados ("la fila desapareció", "las cuatro frases se desglosaron"), aunque el README del tutorial promete no anticiparlos.
 
 ## Sistema
 
@@ -148,6 +142,4 @@ Anotado desde el chat de specs el 2026-10-18. Lo de comandos y tests vive ademá
 - **El nombre de la bitácora cerrada lleva el ciclo** (`bitacora-DESDE-HASTA-CICLO.md`) cuando exista `cycle close`.
 
 ### Epics
-
-- **Capítulos 3 y 4 con aviso "Todavía no funciona":** la tabla de estado dice que el epic 004 está sin empezar, pero hay escenarios `004-01` a `004-05` y un conductor de conversación. Si ya funcionan, el epic quita el aviso de los capítulos 3 y 4 y actualiza la tabla.
-- **Correr el tutorial con `test-tui`** (propuesta del chat de specs). Los `> [!tip]` del capítulo 2 son frases literales: un escenario con bloques `agente` que las copie corre hoy con [`test-tui.py`](tests/scripts/test-tui.py) sin cambiar el arnés, y un test unitario compara esas frases con los callouts de [`docs/tutorial/02-el-primer-dia.md`](docs/tutorial/02-el-primer-dia.md) para que no diverjan. Falta soportar pasos que no son del agente (`tuku doctor`, "borra una fila a mano") entre turnos, y un reloj fijo por frase. Los capítulos 3 a 6 parten de un vault con historia (dos profesoras, Importadora Andina, el ámbito Liceo Técnico Andes) que el capítulo 2 no crea: cada uno necesita su vault base, como los de `005-*`, o el capítulo 2 debe sembrar esos datos.
+- **Epic 010, el tutorial entero** (el tutorial se rehízo el 2026-10-18; ver [`tests/escenarios/010-00-el-tutorial.md`](tests/escenarios/010-00-el-tutorial.md)). Falta en `tests/scripts/`: un extractor que lea un capítulo de [`docs/tutorial/`](docs/tutorial/README.md) y devuelva un plan para `test-tui` (`> [!tip]` son frases literales, `> [!check]` son afirmaciones tras el paso), pasos que no son del agente entre turnos (`tuku doctor`, editar o borrar a mano), un reloj fijo por paso y un juez de cada `check` contra el delta del vault. Los capítulos 7 a 10 prometen lo que dependen de los epics 004, 006 y 007: el flujo del lunes (rechazo de `entry create`, aviso, cierre, `process cycle`), `cycle close`, la cadencia declarada que emite lo que falta de la semana en curso, y `tuku context todo --late`.

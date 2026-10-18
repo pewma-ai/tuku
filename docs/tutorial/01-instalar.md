@@ -1,5 +1,7 @@
 # 1. Instalar
 
+> Qué quedó en disco, qué es tuyo y qué es de TUKU.
+
 Necesitas [`uv`](https://docs.astral.sh/uv/) o `pipx`, cualquiera de los dos.
 
 ```bash
@@ -10,17 +12,29 @@ uv tool install --force "git+https://github.com/pewma-ai/tuku.git@devel"
 tuku init mi-vault
 ```
 
-Es el primero de los dos comandos que corres tú.
+Es el primero de los dos comandos que corres tú. Crea una carpeta, el **vault**, con todo lo que TUKU necesita para empezar. No pide configurar nada.
 
 ## Mira la carpeta
 
-Son archivos de texto y cualquier programa los lee. Para mirarlos, la mejor opción es [Obsidian](https://obsidian.md): muestra los recuadros de pendientes y lo que una página trae de otra, y el vault ya viene configurado para que Obsidian escriba igual que TUKU.
+Todo son archivos de texto y cualquier programa los lee. Para mirarlos conviene [Obsidian](https://obsidian.md): muestra los recuadros de pendientes y lo que una página trae de otra, y el vault ya viene configurado para que Obsidian escriba igual que TUKU.
 
-Unos nombres van en MAYÚSCULAS y otros en minúsculas. Los de MAYÚSCULAS son de TUKU y los de minúsculas son tuyos. `AGENTS.md` lo explica.
+| Archivo | Qué guarda |
+| --- | --- |
+| `AHORA.md` | Lo que pasó, con su hora. Un encabezado por cada día de la semana en curso |
+| `PENDIENTES.md` | Lo que sigue abierto y cuándo vence |
+| `AGENTS.md` | Lo que tu agente sabe y cómo debe actuar |
+| `LIBRO-DE-ESTILO.md` | Tu vocabulario: clasificaciones, horizontes y tipos de nota |
+| `ambitos/` | Tus frentes: trabajo, casa, un cliente |
+| `notas/` | Lo que sabes y no es de un día |
 
-Abre `AHORA.md`. Tiene siete días con su fecha, ya escritos por `tuku init`.
+Los nombres en MAYÚSCULAS son de TUKU y los de minúsculas son tuyos.
 
-Abre `AGENTS.md`. Son las instrucciones que va a leer tu agente. Léelas también: en dos minutos sabes todo lo que él sabe, porque el vault no guarda otras instrucciones.
+> [!check] Qué debería pasar
+> - `AHORA.md` tiene siete encabezados, de lunes a domingo, con la fecha de la semana en que instalaste.
+> - `ambitos/` tiene una sola carpeta, `personal`.
+> - `PENDIENTES.md` está vacío.
+
+Abre `AGENTS.md` y léelo: en dos minutos sabes todo lo que tu agente sabe, porque el vault no guarda otras instrucciones.
 
 ## Abre tu agente
 
@@ -28,8 +42,6 @@ Abre `AGENTS.md`. Son las instrucciones que va a leer tu agente. Léelas tambié
 
 > Claude Code, agy, Antigravity o el escritorio que uses. Sirve cualquiera que pueda leer la carpeta y correr comandos.
 
-Empieza a hablarle. Todas las instrucciones ya están en la carpeta.
+Empieza a hablarle. Si necesitas explicarle algo para que funcione, el vault tiene un defecto: anótalo.
 
-Si necesitas explicarle algo para que funcione, el vault tiene un defecto. Anótalo: el tutorial sirve para encontrar esos defectos.
-
-Siguiente: [2. El primer día](02-el-primer-dia.md).
+Siguiente: [2. Registrar](02-registrar.md).

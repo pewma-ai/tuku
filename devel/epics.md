@@ -91,6 +91,7 @@ Actualizado el 2026-10-16.
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | ocho documentos en `tests/escenarios/005-*`: 33 tests deterministas y 7 agénticos, todos en verde. Lo que sigue abierto está en la tabla de `005-00`: S5 y S8 caen con la conversación del config, E2 con el epic 006 y B4 está en `TODO.md` |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
 | 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
+| 010 | El tutorial entero | `vacio` → `ciclo-en-curso` | propuesto | corre [`docs/tutorial/`](../docs/tutorial/README.md) de principio a fin; los capítulos 1 a 6 ya describen lo que TUKU hace, del 7 al 10 dependen de los epics 004, 006 y 007 |
 
 ## Epic 001. Un TUKU mínimo instalable
 
@@ -150,7 +151,7 @@ Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumul
 Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo valga la pena leerlo. Las cadencias entran acá porque emiten en la apertura del ciclo. Cubre fases 6 y 7, más lo restante de la 4. La mecánica determinista (abrir, promover pendientes, aplanar transclusiones, archivar ciclos, ramas de ámbitos y notas) se prueba con archivos inyectados antes de conectar el LLM para plan y resumen.
 
 - **Criterio de salida:** abrir dos veces no duplica; cerrar dos veces no vuelve a mover; prueba que falla a propósito si se aplana antes del resumen. Plan calcula capacidad contra lo declarado.
-- **El cambio de ciclo:** el lunes, un `entry create` fuera del ciclo abierto se rechaza (ya existe) y el flujo sigue: el agente avisa al autor, cierra el ciclo que terminó, abre el siguiente (si el nombre no es `semana`, pregunta el rango) y recién escribe el registro. Pedir abrir el ciclo ya abierto solo verifica. Falta `cycle close`, que es de comandos ([`TODO.md`](../TODO.md)), y el escenario del flujo completo (rechazo, aviso, cierre, `process cycle`, registro), que es la promesa del [capítulo 5 del tutorial](../docs/tutorial/05-cerrar-la-semana.md).
+- **El cambio de ciclo:** el lunes, un `entry create` fuera del ciclo abierto se rechaza (ya existe) y el flujo sigue: el agente avisa al autor, cierra el ciclo que terminó, abre el siguiente (si el nombre no es `semana`, pregunta el rango) y recién escribe el registro. Pedir abrir el ciclo ya abierto solo verifica. Falta `cycle close`, que es de comandos ([`TODO.md`](../TODO.md)), y el escenario del flujo completo (rechazo, aviso, cierre, `process cycle`, registro), que es la promesa del [capítulo 5 del tutorial](../docs/tutorial/09-cerrar-la-semana.md).
 - **Horizontes vencidos:** al abrir el ciclo siguiente, un pendiente cuyo horizonte ya pasó (los `esta semana` de la semana cerrada) se marca atrasado en `tuku context todo`, sin moverlo de escalón. El autor decide si lo posterga; TUKU no corre un compromiso por su cuenta.
 
 > [!tip] Mirar en VAULT al diseñar cadencias y cierre
@@ -170,6 +171,16 @@ El agente deja de responder y empieza a observar: infiere ámbitos y notas tipad
 > - [`VAULT/agentes.md`](VAULT/agentes.md), "El agente silencioso": un proceso de fondo con silencio absoluto (`[SILENT]`) salvo que la conclusión madure y aporte valor.
 > - [`VAULT/spec/entidades.md`](VAULT/spec/entidades.md): "sembrar y corregir" y nunca decirle "entidad" al autor.
 > - [`VAULT/spec/corpus.md`](VAULT/spec/corpus.md), "Autoría y procedencia": toda inferencia externa lleva modelo y fecha, y la marca se reclasifica cuando el autor edita a mano.
+
+## Epic 010. El tutorial entero
+
+Que alguien pueda seguir el [tutorial](../docs/tutorial/README.md) de principio a fin sobre un vault vacío y que cada paso haga lo que el capítulo dice. El tutorial es la promesa a quien va a usar TUKU; este epic es la prueba de que se cumple, y marca qué capítulos faltan construir.
+
+- **Los pasos no se copian.** Cada capítulo es un escenario (`010-NN`, con `NN` el número del capítulo). Su fuente es el capítulo: los bloques `> [!tip]` son lo que el autor dicta, tal cual y en orden, y los `> [!check]` son lo que se afirma después de cada paso. Los escenarios solo nombran el capítulo y su estado inicial; si el tutorial cambia, la prueba cambia con él.
+- **Qué se verifica sin leer:** las invariantes de siempre en cada paso (cada cambio del vault tiene su comando `tuku`, el agente no sale del vault, `tuku doctor` sano). Cada `check` se juzga contra el delta del vault del paso; lo que ningún archivo muestra, como la pregunta del agente, lo juzga quien lee.
+- **Entregable:** el arnés que extrae pasos y `check` de un capítulo y los corre con `test-tui`, y la corrida completa en cadena de los diez capítulos, con el vault de cada uno archivado en `playground/`.
+- **Criterio de salida:** los diez capítulos en verde con un agente real sobre un vault que parte del `tuku init` del capítulo 1.
+- **Detalle completo:** [`../tests/escenarios/010-00-el-tutorial.md`](../tests/escenarios/010-00-el-tutorial.md).
 
 ## Wishlist
 

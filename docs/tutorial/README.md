@@ -1,33 +1,47 @@
 # Tutorial
 
-> Una semana de trabajo, dictada a un agente. Cada capítulo indica qué pedir y qué archivo mirar.
+> Una semana de trabajo de Andrea, dictada a un agente. Cada paso dice qué decirle, qué debería pasar y por qué.
 
-Vas a instalar TUKU, abrir un agente sobre una carpeta y hablarle con naturalidad.
-
-Cada capítulo indica dónde mirar y deja que descubras el resultado. Descubrirlo es más rápido que leerlo y se recuerda mejor.
+Vas a instalar TUKU, abrir un agente sobre una carpeta y hablarle como le hablarías a un secretario. Tú hablas. El agente decide qué comando `tuku` corresponde. El comando escribe los archivos.
 
 Toma menos de una hora. Puedes pausar en cualquier capítulo: lo que lleves escrito queda utilizable.
 
+## Cómo se lee cada capítulo
+
+Cada paso tiene tres partes:
+
+> [!tip] Dile a tu agente
+> Lo que dices, tal cual. Si prefieres tu propio día, cambia los nombres y deja la forma.
+
+> [!check] Qué debería pasar
+> Lo que vas a encontrar en los archivos. Ábrelos y compruébalo.
+
+Y debajo, una o dos líneas con el porqué.
+
+**Este tutorial describe cómo debe funcionar TUKU.** Si algo de un `check` no pasa, es un defecto del sistema o del tutorial: anótalo. Por eso sirve también de prueba.
+
 ## Sobre el comando `tuku`
 
-Tu agente lo usa por debajo y tú casi nunca lo escribes. Por eso el tutorial te pide hablar. Ejecutas tú dos comandos: instalar (`tuku init`) y revisar (`tuku doctor`), el primero y el último del día uno.
+Tu agente lo usa por debajo y tú casi nunca lo escribes. Tú corres solo dos: instalar (`tuku init`) y revisar (`tuku doctor`).
 
-## Qué vas a decir
+## Quién es Andrea
 
-Los ejemplos siguen el lunes de Andrea, que vende insumos escolares a colegios y trabaja sola. Su día te da frases listas para dictar.
-
-Si prefieres tu propio día, úsalo. Las indicaciones de cada capítulo aplican igual.
+Vende insumos escolares a colegios y trabaja sola. Sus clientes son Los Robles y el Liceo Andes, compra a la Importadora Andina y tiene una hija, la Emilia. Su lunes te da las frases para dictar, y cada capítulo sigue en el vault del anterior.
 
 ## Capítulos
 
-| | Capítulo | Qué descubres |
+| | Capítulo | Qué aprendes |
 |---|---|---|
-| 1 | [Instalar](01-instalar.md) | Qué quedó en disco y qué es tuyo |
-| 2 | [El primer día](02-el-primer-dia.md) | La jornada completa dictada: registros, frentes, pendientes, notas y revisión |
-| 3 | [Conversar](03-conversar.md) | Deliberar con el agente sin que escriba nada |
-| 4 | [Una semana después](04-una-semana-despues.md) | El agente entiende de qué hablas con el contexto de las semanas anteriores |
-| 5 | [Cerrar la semana](05-cerrar-la-semana.md) | Cómo cambia el ciclo, qué sobrevive al cierre, las cadencias y la idempotencia |
-| 6 | [Lo que nadie pidió](06-lo-que-nadie-pidio.md) | El agente nota patrones que tú no notaste y respeta tus rechazos |
-| | [Conclusión](99-conclusion.md) | Cierre y principios de diseño |
+| 1 | [Instalar](01-instalar.md) | Qué quedó en disco, qué es tuyo y qué es de TUKU |
+| 2 | [Registrar](02-registrar.md) | Dictar lo que pasó: el comando pone la hora, el ámbito y el formato |
+| 3 | [Pendientes](03-pendientes.md) | Abrir, fechar, posponer y cerrar un compromiso |
+| 4 | [Frentes y notas](04-frentes-y-notas.md) | Separar tu vida en frentes y guardar lo que sabes de una persona |
+| 5 | [Corregir y revisar](05-corregir-y-revisar.md) | Arreglar lo mal dicho, y qué revisa `tuku doctor` |
+| 6 | [El día completo](06-el-dia-completo.md) | Una jornada dictada de corrido |
+| 7 | [Conversar](07-conversar.md) | Deliberar sin que se escriba nada hasta que ratifiques |
+| 8 | [Una semana después](08-una-semana-despues.md) | El agente entiende de qué hablas con el historial |
+| 9 | [Cerrar la semana](09-cerrar-la-semana.md) | Cambiar de ciclo sin perder nada, y lo que vuelve solo |
+| 10 | [Lo que nadie pidió](10-lo-que-nadie-pidio.md) | Propuestas del agente y rechazos sin rastro |
+| | [Conclusión](99-conclusion.md) | Lo que hiciste y por qué funciona |
 
-Los capítulos 3 al 6 todavía no funcionan. Describen la promesa de TUKU y, cuando se implementen, servirán de prueba.
+Qué capítulos se cumplen hoy y cuáles faltan construir lo dice el [epic 010](../../devel/epics.md), que corre este tutorial entero como prueba.
