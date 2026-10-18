@@ -15,14 +15,20 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 import threading
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, TextIO
+
+import conversar
+import gherkin
+import vault as banco
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 ESCENARIOS = RAIZ_REPO / "tests" / "escenarios"
@@ -60,16 +66,96 @@ class Plan:
     base: tuple[str, str] | None  #: carpeta y escenario del vault de partida
     esperado: dict[int, Esperado]  #: la columna «Delta del vault» de la tabla, por turno
     a_mano: list[str]  #: lo que el escenario deja para juzgar leyendo
+    literal: bool = False  #: las frases son las del escenario (```agente```), sin Damián
+    ahoras: list[str] = field(default_factory=list)  #: el `TUKU_NOW` de cada frase literal
+    preparacion: list[str] = field(default_factory=list)  #: comandos que arman el vault
+    entonces: list[str] = field(default_factory=list)  #: lo que el escenario afirma al final
+
+    def ahora_en(self, n: int) -> str:
+        """El reloj simulado del turno `n`: el de su fence, o el del plan."""
+        return (self.ahoras[n - 1] if n <= len(self.ahoras) else "") or self.ahora
 
 
-def leer_plan(id: str) -> Plan:
-    """El plan del escenario `id` (por ejemplo `004-03`), leído de su `.md`."""
+def _archivo(id: str) -> Path:
     hallados = sorted(ESCENARIOS.glob(f"{id}-*.md"))
     if len(hallados) != 1:
         raise EscenarioNoEncontrado(
             f"hay {len(hallados)} escenarios que empiezan con {id!r} en {ESCENARIOS}"
         )
-    archivo = hallados[0]
+    return hallados[0]
+
+
+def _a_mano(archivo: Path) -> list[str]:
+    """Las viñetas de `## Qué se mira a mano`."""
+    lineas: list[str] = []
+    en_mano = False
+    for linea in archivo.read_text(encoding="utf-8").splitlines():
+        if linea.startswith("## "):
+            en_mano = linea.startswith("## Qué se mira a mano")
+        elif en_mano and linea.startswith("- "):
+            lineas.append(linea[2:].strip())
+    return lineas
+
+
+def leer_planes(id: str) -> list[Plan]:
+    """Los planes que `id` corre en pantalla: uno si es una conversación, o uno por
+    escenario agéntico si dicta frases literales en bloques ```agente```.
+    """
+    archivo = _archivo(id)
+    texto = archivo.read_text(encoding="utf-8")
+    if any(_AUTOR.match(x) for x in texto.splitlines()):
+        return [leer_plan(id)]
+    planes = [
+        _plan_literal(archivo, e)
+        for e in gherkin.leer_escenarios(archivo.stem)
+        if e.es_agentico
+    ]
+    if not planes:
+        raise EscenarioNoEncontrado(
+            f"{archivo.name} no es agéntico: no tiene un plan ```autor``` ni un bloque "
+            "```agente```"
+        )
+    return planes
+
+
+def _plan_literal(archivo: Path, escenario: gherkin.Escenario) -> Plan:
+    """El plan de un escenario cuyas frases están escritas en sus bloques ```agente```."""
+    frases: list[str] = []
+    ahoras: list[str] = []
+    preparacion: list[str] = []
+    entonces: list[str] = []
+    base: tuple[str, str] | None = None
+    visto = False
+    for paso in escenario.todos_los_pasos:
+        if paso.agente:
+            visto = True
+            frases.append("\n".join(paso.agente))
+            ahoras.append(paso.ahora or "")
+        elif visto and paso.tipo == "Entonces":
+            entonces.append(paso.texto)
+        for comando in paso.comandos:
+            if m := _COPIA.match(comando):
+                base = (m.group(1), m.group(2))
+            elif not visto:
+                preparacion.append(comando)
+    return Plan(
+        archivo,
+        escenario.titulo,
+        next((a for a in ahoras if a), ""),
+        frases,
+        base,
+        {},
+        _a_mano(archivo),
+        literal=True,
+        ahoras=ahoras,
+        preparacion=preparacion,
+        entonces=entonces,
+    )
+
+
+def leer_plan(id: str) -> Plan:
+    """El plan del escenario `id` (por ejemplo `004-03`), leído de su `.md`."""
+    archivo = _archivo(id)
     titulo, ahora, pasos, base = "", "", [], None
     esperado: dict[int, Esperado] = {}
     a_mano: list[str] = []
@@ -264,9 +350,9 @@ class Vista:
         self._linea()
         self._linea(f"━━ Turno {n}/{total} · {ahora} ━━", "negrita")
 
-    def damian(self, frase: str, segundos: float | None = None) -> None:
+    def damian(self, frase: str, segundos: float | None = None, quien: str = "Damián") -> None:
         cuanto = f" ({segundos:.1f} s)" if segundos is not None else ""
-        self._linea(f"Damián{cuanto}", "amarillo", "negrita")
+        self._linea(f"{quien}{cuanto}", "amarillo", "negrita")
         for x in frase.splitlines() or [""]:
             self._linea(f"  {x}", "amarillo")
 
@@ -372,15 +458,31 @@ class Vista:
             self._linea(f"  {'✓' if ok else '✗'} {texto}", "verde" if ok else "rojo")
         malos = sum(1 for ok, _ in c.chequeos if not ok)
         parcial = " (corrida parcial: faltan turnos del plan)" if c.parcial else ""
-        if c.ok:
+        if c.ok and plan.literal:
+            self._linea(
+                f"SIN FALLAS GENERALES{parcial}: lo que el escenario afirma lo mide pytest",
+                "verde",
+                "negrita",
+            )
+        elif c.ok:
             self._linea(f"FUNCIONÓ{parcial}", "verde", "negrita")
         else:
             self._linea(f"NO FUNCIONÓ: {malos} chequeo(s) fallaron{parcial}", "rojo", "negrita")
+        if plan.entonces:
+            self._linea("El escenario espera (lo afirma pytest, `-m agentic`):", "tenue")
+            for x in plan.entonces:
+                self._linea(f"  - {x}", "tenue")
         if plan.a_mano:
             self._linea("Queda por leer a mano (no se verifica solo):", "tenue")
             for x in plan.a_mano:
                 self._linea(f"  - {x}", "tenue")
         self._linea(f"  conversación: {log}", "tenue")
+
+    def resumen(self, resultados: list[tuple[str, bool]]) -> None:
+        self._linea()
+        self._linea("━━ Resumen ━━", "negrita")
+        for titulo, ok in resultados:
+            self._linea(f"  {'✓' if ok else '✗'} {titulo}", "verde" if ok else "rojo")
 
     def cierre(self, registro: dict[str, Any]) -> None:
         escribe = registro["escribe"]
@@ -518,6 +620,54 @@ def asegurar_base(plan: Plan) -> Path:
             raise EscenarioNoEncontrado(f"no sé cómo generar {base}")
         subprocess.run([sys.executable, "-m", "pytest", str(tests[0]), "-q"], check=True)
     return base
+
+
+def sembrar(plan: Plan, slug: str, escenario: str) -> Path:
+    """El vault donde corre un plan literal, armado como lo arma su `Dado`.
+
+    Con `cp -r` de otro escenario, parte de ese vault; el resto de los comandos
+    (`tuku init mi-vault --at …`) corren en el banco, con el CLI del checkout.
+    """
+    if plan.base is not None:
+        v = conversar.preparar(asegurar_base(plan), slug, escenario)
+        trabajo = v.parent
+    else:
+        banco.exigir_banco_limpio()
+        banco.enlazar_fixtures()
+        trabajo = banco.BANCO / slug / escenario
+        if trabajo.exists():
+            shutil.rmtree(trabajo)
+        trabajo.mkdir(parents=True)
+    for comando in plan.preparacion:
+        _correr_comando(comando, trabajo)
+    v = trabajo / "mi-vault"
+    if not v.is_dir():
+        raise EscenarioNoEncontrado(
+            f"{plan.archivo.name}: sus comandos de preparación no dejaron "
+            f"un mi-vault/ en {trabajo}"
+        )
+    return v
+
+
+def _correr_comando(comando: str, donde: Path) -> None:
+    """Un comando del `Dado`: `tuku …` con el CLI del checkout, o shell."""
+    entorno = {**os.environ, "TUKU_HOME": str(RAIZ_REPO)}
+    partes = shlex.split(comando)
+    while partes and "=" in partes[0] and not partes[0].startswith(("-", "/")):
+        nombre, _, valor = partes.pop(0).partition("=")
+        entorno[nombre] = valor
+    if partes and partes[0] == "tuku":
+        argv = [sys.executable, "-c", _ARRANQUE, *partes[1:]]
+    else:
+        argv = ["bash", "-c", comando]
+    p = subprocess.run(
+        argv, cwd=donde, env=entorno, capture_output=True, text=True, check=False
+    )
+    if p.returncode != 0:
+        raise EscenarioNoEncontrado(
+            f"`{comando}` salió {p.returncode} al preparar el vault: "
+            f"{(p.stderr or p.stdout).strip()}"
+        )
 
 
 def con_cronometro(f: Callable[[], str]) -> tuple[str, float]:

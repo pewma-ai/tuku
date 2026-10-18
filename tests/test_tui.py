@@ -283,3 +283,44 @@ def test_una_barra_suelta_o_una_fecha_no_son_rutas(tmp_path: Path) -> None:
     v = tmp_path / "mi-vault"
     cuerpo = "tuku todo open --body 'pagar / avisar y/o cobrar' --due 2026-08-17 --at 21:00"
     assert agente.fuera_del_vault(_stream(CommandLine=cuerpo), v) == []
+
+
+def test_un_escenario_con_frases_literales_se_lee_como_un_plan_por_escenario() -> None:
+    planes = tui.leer_planes("005-06")
+    assert [p.literal for p in planes] == [True, True]
+    patricia, paula = planes
+    assert patricia.pasos == ["Hablé con la Patricia del precio y quedó conforme."]
+    assert patricia.ahora_en(1) == "2026-08-23 22:30"
+    assert paula.pasos == ["Le mandé el catálogo a la Paula."]
+    assert paula.base == ("005-01-las-dos-semanas-de-andrea", "la-segunda-semana-cae-sobre-lo")
+    assert paula.preparacion == []
+    assert any("pregunta a cuál Paula" in x for x in paula.entonces)
+    assert any("pregunta por la Paula" in x for x in paula.a_mano)
+
+
+def test_un_escenario_sin_base_lleva_sus_comandos_de_preparacion() -> None:
+    [plan] = tui.leer_planes("003-10")
+    assert plan.base is None
+    assert plan.preparacion == ["tuku init mi-vault --at 2026-08-11"]
+    assert plan.ahora_en(1) == "2026-08-11 22:00"
+
+
+def test_una_conversacion_sigue_siendo_un_solo_plan_del_autor() -> None:
+    [plan] = tui.leer_planes("004-03")
+    assert not plan.literal and plan.pasos
+
+
+def test_un_escenario_que_no_es_agentico_lo_dice() -> None:
+    with pytest.raises(tui.EscenarioNoEncontrado, match="no es agéntico"):
+        tui.leer_planes("002-13")
+
+
+def test_sembrar_arma_el_vault_con_los_comandos_del_dado(tmp_path: Path) -> None:
+    [plan] = tui.leer_planes("003-10")
+    v = tui.sembrar(plan, "999-prueba-tui", "sembrar")
+    try:
+        assert (v / "AHORA.md").is_file() and (v / "AGENTS.md").is_file()
+    finally:
+        import shutil
+
+        shutil.rmtree(v.parent.parent, ignore_errors=True)
