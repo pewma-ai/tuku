@@ -43,31 +43,65 @@ La Parte 2 del corpus (la tabla de verdad) se tradujo a comandos con cuatro ajus
 
 La Parte 3 (el estado reconstruible) **no se usa como aserción**: contiene pendientes que ningún registro de la Parte 2 abre (renovar la patente, pedir cartulina, pagar el F29, evaluar un proveedor alternativo), porque los infiere quien la escribió. Las aserciones del `005-01` salen de aplicar la Parte 2 con la spec de hoy.
 
-## Lo que el epic encontró en las specs
+## Pendientes del epic
 
-Cada fila es algo que el diseño dice y no se cumple, o que dos documentos dicen distinto. Los marcados **falla** tienen un test rojo que lo prueba; el resto queda para decidir.
+Lo que los escenarios encontraron, jerarquizado y con un identificador estable. Se trabajan en el orden de las tablas, y cada uno que se completa se tacha (`~~así~~`) sin borrarlo: qué hacer con la lista al cerrar el epic se decide entonces.
 
-| # | Hallazgo | Dónde | Test |
-| --- | --- | --- | --- |
-| 1 | La lista de hijos de un ámbito sale en orden de creación con `scope create` y `scope move`, y alfabético con `tuku regenerate`. Dos caminos, dos resultados: se rompe el principio 9 | `scope.py` contra `spec/ambitos.md` | **falla** `005-01`, `005-02`, `005-03` |
-| 2 | `tuku note lint` sin archivo sale con error en un vault recién sembrado: revisa `notas/AGENTS.md`, que es del sistema y no una nota | `note.py` | **falla** `005-05` |
-| 3 | `note lint` no mira los enlaces del cuerpo: la spec pide que la nota cierre con la lista de sus enlaces salientes, cada uno con motivo, y un enlace del cuerpo ausente de esa lista pasa | `spec/notas.md` | **falla** `005-05` |
-| 4 | Ningún comando informa los atrasados. `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo, y `todo lint` y `doctor` no saben de fechas | `spec/pendientes.md` | **falla** `005-04` |
-| 5 | No existe una nota tipada: `note create` no tiene `--subtype`, y `reglas/tipos/persona.md` que `spec/notas.md` promete («lo crea el epic que escriba la primera nota tipada») no se siembra | `spec/notas.md`, `note.py` | **falla** `005-05` |
-| 6 | Ante «le mandé el catálogo a la Paula», con dos candidatas, el agente eligió una sin preguntar | `AGENTS.md` del template | **falla** `005-06` |
-| 7 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo` y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se puede bajar con un comando | `spec/pendientes.md` | sin test: el nombre del comando no está en la spec |
-| 8 | La página de un ámbito muestra solo el ciclo abierto: al archivar la primera semana, el hilo de la cotización de Los Robles desaparece de la página. `## Esta semana` y `## Actividad reciente` ni siquiera están en una spec | `scope.py`, `spec/ambitos.md` | se mira a mano |
-| 9 | Un ámbito padre lista a sus hijos directos y los clientes de `negocio` cuelgan de la categoría `clientes`: ninguna página dice dónde están | `spec/ambitos.md` | se mira a mano |
-| 10 | [`devel/epics.md`](../../devel/epics.md) describe el epic con «enlaces automáticos desde el primer día» y asignación de ámbito «sin intervención». [`spec/ambitos.md`](../../spec/ambitos.md), «Nada se enlaza solo», dice que el cuerpo nunca se modifica ni se enlaza, y la asignación de ámbito la hace quien interpreta, leyendo las keywords | `devel/epics.md` | el `005-06` prueba la versión de la spec |
-| 11 | El epic dice «resto de la fase 4» (cadencias) y «destilados». La tabla de fases pone las cadencias en el 006, y `spec/notas.md` deja el destilado fuera, para la fase 9 | `devel/epics.md` | ninguno: nada de eso es determinista hoy |
-| 12 | El corpus de la Pyme contradice a la spec en cuatro puntos: `AGENTS.md` y `CADENCIAS.md` «obligatorios en cada directorio» (la spec: ausente es vacío), registros sobre categorías y personas, 17 de 29 `(Hecho)` sin pendiente abierto, y un horizonte `sin fecha` que la spec descarta | `corpus/referencia/referencia-pyme.md` | `005-01` documenta cómo se lee |
-| 13 | El capítulo 4 del tutorial dice que ante dos Paulas el agente pregunta, y [`flujo-informacion.md`](../../spec/flujo-informacion.md) dice que la ambigüedad se deja escrita sin interrumpir al autor | `docs/tutorial/04-...`, `spec/flujo-informacion.md` | `005-06` acepta las dos y rechaza adivinar |
+El orden sigue dos criterios: primero lo que el diseño ya dice y el código no cumple (hay un test rojo que lo prueba y no hace falta decidir nada), después lo que pide una decisión mínima antes de escribir código, y al final los documentos que se contradicen. Cada fila nombra el test que la prueba, o dice por qué no lo tiene.
 
-## Decisiones tomadas al escribir los escenarios
+### A. Defectos: la spec ya lo dice y el CLI no lo cumple
 
-- **`todo lint` informa los atrasados como aviso, con código 0.** Es la forma que menos inventa: un comando que ya existe, y el patrón de `entry lint`, que informa preguntas sin fallar. Si el autor prefiere un comando propio, se cambia en `005-04` y en `spec/pendientes.md`.
-- **`note create --subtype persona`** para la nota tipada, con el campo que `spec/notas.md` ya llama `subtype`.
-- **El cierre de la primera semana reescribe los links con `../`.** Un link es una ruta relativa al archivo que lo contiene, y `bitacoras/` está un nivel más adentro: `spec/ambitos.md` dice que archivar recalcula la ruta de cada link, y el escenario lo hace con `sed` como lo haría Andrea.
+| Id | Pendiente | Test |
+| --- | --- | --- |
+| A1 | La lista de hijos de un ámbito sale en orden de creación con `scope create` y `scope move`, y alfabético con `tuku regenerate`. Un vault armado comando a comando no es igual al regenerado, y se rompe el principio 9. Hay que elegir un orden y que los dos caminos lo compartan | `005-01` repetir, `005-02` ×2, `005-03` regenerar |
+| A2 | `tuku note lint` sin archivo sale con error en un vault recién sembrado: revisa `notas/AGENTS.md`, que es del sistema y no una nota | `005-05` lint sin archivo |
+| A3 | `note lint` no mira los enlaces del cuerpo. `spec/notas.md` pide que la nota cierre con la lista de sus enlaces salientes, cada uno con motivo, y un enlace del cuerpo ausente de esa lista pasa | `005-05` enlace sin motivo |
+
+### B. Lo que la spec promete y no existe
+
+| Id | Pendiente | Test |
+| --- | --- | --- |
+| B1 | Ningún comando informa los atrasados. `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo y `todo lint` y `doctor` no saben de fechas. Depende de X1 | `005-04` (2 rojos y 2 guardas) |
+| B2 | No existe una nota tipada: `note create` no tiene `--subtype` y no se siembra `reglas/tipos/persona.md`, que `spec/notas.md` promete «el epic que escriba la primera nota tipada». Depende de X2 | `005-05` tipada (3 rojos) |
+| B3 | Las keywords repetidas entre ámbitos pasan sin aviso: `scope keywords escuela-los-maitenes Paula` sale con 0 y `tuku doctor` dice que el vault está sano, con `Paula` ya en `catalogo-marzo`. Es lo que hace ambigua a la Paula del `005-06`. Falta decidir si avisa `scope keywords`, `doctor` o los dos | sin test |
+| B4 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se baja con un comando. Falta el nombre y la forma | sin test: se escribe cuando B4 tenga nombre |
+| B5 | El rechazo de `cycle open` con un ciclo con registros dice «mueve AHORA.md a bitacoras/…». Quien lo sigue al pie de la letra deja 9 links rotos en la bitácora (están a un nivel más adentro) y `doctor` falla sin que `fix link` pueda repararlos. Mientras `cycle close` sea del epic 006, el mensaje tiene que decir que se reescriban los links con `../` | sin test: `005-01` lo hace a mano |
+
+### C. El agente
+
+| Id | Pendiente | Test |
+| --- | --- | --- |
+| C1 | Ante «le mandé el catálogo a la Paula», con dos Paulas en la historia, el agente eligió `catalogo-marzo` sin preguntar. Dos documentos prescriben conductas distintas (el capítulo 4 y el `AGENTS.md` del vault: preguntar; `flujo-informacion.md`: dejarlo escrito sin interrumpir), y hay que elegir una antes de corregir el `AGENTS.md` del template. Depende de X4 y de B3 | `005-06` Paula (1 rojo, 1 saltado) |
+
+### D. Documentos que se contradicen
+
+| Id | Pendiente | Dónde |
+| --- | --- | --- |
+| D1 | [`devel/epics.md`](../../devel/epics.md) describe el 005 con «enlaces automáticos desde el primer día» y asignación de ámbito «sin intervención». [`spec/ambitos.md`](../../spec/ambitos.md), «Nada se enlaza solo», dice que el cuerpo nunca se modifica ni se enlaza, y que elige el ámbito quien interpreta, leyendo las keywords | `devel/epics.md`, criterio de salida del 005 |
+| D2 | El epic dice «resto de la fase 4» (cadencias) y «destilados». La tabla de fases pone las cadencias en el 006, y `spec/notas.md` deja el destilado fuera, para la fase 9 | `devel/epics.md` |
+| D3 | La página de un ámbito muestra solo el ciclo abierto: al archivar la primera semana desaparece el hilo de la cotización de Los Robles. `## Esta semana` y `## Actividad reciente` no están en ninguna spec | `scope.py`, `spec/ambitos.md` |
+| D4 | Un ámbito padre lista a sus hijos directos y los clientes de `negocio` cuelgan de la categoría `clientes`: ninguna página dice dónde están | `spec/ambitos.md` |
+| D5 | El corpus de la Pyme contradice a la spec: `AGENTS.md` y `CADENCIAS.md` «obligatorios en cada directorio» (la spec: ausente es vacío), registros sobre categorías y personas, 17 de 29 `(Hecho)` sin pendiente abierto, un horizonte `sin fecha` que la spec descarta, y una Parte 3 que contiene pendientes que la Parte 2 no abre | `corpus/referencia/referencia-pyme.md` |
+| D6 | El pendiente que abre `cycle open` («revisar la bitácora anterior») nace sin ámbito y con la hora del reloj, y su cierre cae en `personal`: apertura y cierre quedan en ámbitos distintos | `spec/ciclo.md`, `spec/pendientes.md` |
+
+### E. De las pruebas mismas
+
+| Id | Pendiente |
+| --- | --- |
+| E1 | Dos tests del `005-04` pasan sin probar nada hasta que exista B1, porque afirman que algo queda fuera de una salida que hoy es siempre «sin hallazgos». Se vuelven reales con B1 |
+| E2 | Falta el atraso por horizonte expirado (los cinco `esta semana` que siguen en `PENDIENTES.md` pasada la semana). Depende de cómo ruede un horizonte, que es del epic 006 |
+| E3 | Cuatro tests del `005-05` caen en cascada de otros: el escenario de la nota tipada aborta en su primer `Entonces`. Se resuelven con B2 |
+
+## Decisiones por confirmar
+
+Tomadas al escribir los escenarios, para poder escribirlos. Cada una se confirma o se cambia aquí y en el escenario que la usa.
+
+| Id | Decisión | Usa |
+| --- | --- | --- |
+| X1 | `tuku todo lint` informa los atrasados como aviso, con código 0. Es la forma que menos inventa: un comando que ya existe, con el patrón de `entry lint`, que informa preguntas sin fallar. La alternativa es un comando propio | B1, `005-04` |
+| X2 | `note create --subtype persona`, con el campo que `spec/notas.md` ya llama `subtype`, y `reglas/tipos/persona.md` sembrado por `tuku init` | B2, `005-05` |
+| X3 | El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea | B5, `005-01` |
+| X4 | El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos | C1, `005-06` |
 
 ## Escenario: preparar el ambiente del epic
 
