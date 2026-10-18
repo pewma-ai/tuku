@@ -9,14 +9,25 @@ Antes de cerrar el ciclo, entrégale una regla recurrente:
 
 Es una regla ([cadencia](../glosario.md#pendientes-y-tiempo)), y el agente la guarda como tal. Revisa dónde la guarda y con qué marca queda tipificada.
 
-> [!tip] Ahora cierra el ciclo
+Llega el lunes y no cierras nada: dictas.
+
+> [!tip] Dile a tu agente, el lunes
+> Partí revisando la bodega, llegó el pedido de resmas.
+
+## Mira qué dijo el agente
+
+`AHORA.md` termina el domingo y no tiene el día de hoy, así que el registro se rechaza al primer intento. El agente te avisa de que el ciclo cambió, cierra el anterior, abre el siguiente y recién entonces escribe tu registro. Si tu ciclo no es la semana, por ejemplo un turno de 8 o 14 días, te pregunta hasta qué día va el nuevo. El rango lo decides tú.
+
+También puedes pedirlo sin esperar al lunes:
+
+> [!tip] O dile a tu agente
 > Cierra la semana y ábreme la siguiente.
 
 ## Mira qué apareció y qué se fue
 
-Aparece un directorio en `bitacoras/` con el ciclo previo congelado, con la fecha en su nombre.
+En `bitacoras/` hay un archivo con el ciclo previo congelado, con el rango y el nombre del ciclo en su nombre (`bitacora-2026-08-17-2026-08-23-semana.md`).
 
-`AHORA.md` queda preparado con los siete días del ciclo siguiente.
+`AHORA.md` tiene un día por cada fecha del ciclo siguiente, sin huecos con el anterior.
 
 Los compromisos sin resolver pasan al nuevo ciclo, cada uno una sola vez.
 
@@ -25,9 +36,9 @@ Los compromisos sin resolver pasan al nuevo ciclo, cada uno una sola vez.
 Trae la llamada de seguimiento a Los Robles, que la cadencia emitió al cumplirse el plazo. Esa es la promesa de TUKU ([*tukulpan*](../brief.md)): lo que entró vuelve solo cuando corresponde.
 
 > [!tip] Comprueba la idempotencia
-> Cierra la semana otra vez.
+> Abre el ciclo de esta semana otra vez.
 
-La segunda ejecución seguida deja todo igual ([principio 9](../principios.md)).
+Pedir el ciclo que ya está abierto solo lo verifica y deja todo igual ([principio 9](../principios.md)).
 
 ---
 

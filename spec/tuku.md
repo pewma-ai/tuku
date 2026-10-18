@@ -83,7 +83,8 @@ flowchart LR
     PC -.->|"pendiente: el rango de --from a --to;<br/>con semana, el que contiene --from"| AH
     PC -.->|"rechaza una fecha<br/>anterior a su from"| AH
     PC -.->|"pendiente: rechaza un --from que no sea<br/>el día siguiente al to del anterior,<br/>salvo repetir el ciclo abierto"| AH
-    PC -.->|"pendiente: el nombre avanza en cycle_name<br/>solo si --from empieza después del to;<br/>--name fuera de la lista, solo con --force"| CF
+    PC -.->|"pendiente: un --from anterior al del ciclo abierto<br/>es un ciclo histórico, sin verificar"| BI
+    PC -.->|"pendiente: el nombre avanza en cycle_name;<br/>repetir el ciclo abierto lo conserva;<br/>--name fuera de la lista, solo con --force"| CF
     PC -.->|"si hay una bitácora anterior"| BI
     PC -->|"con bitácora anterior, abre<br/>revisar la bitácora anterior<br/>como tuku todo open"| PE
 
@@ -128,6 +129,7 @@ flowchart LR
     EC -->|"en un día pasado sin hora,<br/>al final del día"| AH
     EC -.->|"sin --scope, scope_default"| CF
     EC -.->|"que exista el ámbito de --scope,<br/>y su ruta para el link"| AM
+    EC -.->|"rechaza un día fuera del ciclo abierto:<br/>el ciclo cambió, y el mensaje dice cómo<br/>cerrarlo y nombra process cycle"| AH
     EU -->|"el cuerpo del último registro<br/>que calza con --match"| AH
     EU & EM -->|"si es pendiente, su fila"| PE
     EM -->|"el ámbito del registro"| AH
@@ -285,7 +287,7 @@ Lo que el agente necesita para decidir, sin abrir archivos. Sin `TEMA`, todos.
 tuku context [TEMA] [--since] [--late]
 ```
 
-`--since` (2 días por defecto) acota los registros de `entry`. `context note` trae las últimas notas de cada tipo enlazable, tantas como diga `context_note_limit` en `reglas/config.tuku.md` (25 por defecto). `--late` solo vale con `todo` y deja únicamente los pendientes atrasados.
+`--since` (2 días por defecto) acota los registros de `entry`. `context note` trae las últimas notas de cada tipo enlazable, tantas como diga `context_note_limit` en `reglas/config.tuku.md` (25 por defecto). `--late` solo vale con `todo` y deja únicamente los pendientes atrasados. `context cadence` (pendiente) devuelve las cadencias vigentes de todo el árbol en un solo texto, cada una con el `CADENCIAS.md` de donde viene ([cadencias.md](cadencias.md)).
 
 ```mermaid
 %%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
@@ -310,6 +312,7 @@ flowchart LR
     CX -.->|"todo: abiertos y atrasados;<br/>con --late, solo los atrasados"| PE
     CX -.->|"style: clasificaciones,<br/>horizontes y tipos de nota"| LE
     CX -.->|"note: por tipo enlazable, las últimas<br/>con título y aliases"| NO
+    CX -.->|"pendiente: cadence: los CADENCIAS.md<br/>del árbol, en cascada"| AM
 
     classDef revisa fill:#fce7f3,color:#831843,stroke:#f9a8d4
     classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1

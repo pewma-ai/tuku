@@ -110,7 +110,7 @@ Hoy los comandos leen las tablas por su encabezado dentro del libro ([bitacora.m
 | Campo | Qué dice |
 | --- | --- |
 | `TZ` | La zona horaria, con su nombre IANA. Decide qué día es HOY y por lo tanto qué está atrasado |
-| `cycle_name` | Cómo se llama el ciclo: `semana` si falta, o una lista de nombres que se alternan en orden (`turno, descanso`). Cada ciclo declara cuál es en su frontmatter ([ciclo.md](ciclo.md)). Hoy el template siembra `cycle_type` y el código no lo usa |
+| `cycle_name` | Cómo se llama el ciclo: `semana` si falta, o una lista de nombres que se alternan en orden (`turno, descanso`). Cada ciclo declara cuál es en su frontmatter ([ciclo.md](ciclo.md)). El template siembra `semana`. Es opcional: `doctor config` no lo exige |
 | `tuku_template` | La variante de la que salió el vault |
 | `tuku_version` | La versión de TUKU con que se sembró. `tuku doctor` la compara con la de `~/.tuku` y avisa si el vault quedó atrás |
 | `origen` | La URL del repositorio, para saber dónde revisar cambios |

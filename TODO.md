@@ -2,6 +2,8 @@
 
 Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de los epics: [`devel/epics.md`](devel/epics.md) sigue siendo la única fuente de verdad sobre qué se construye y en qué estado está. Un ítem sale de aquí cuando entra a un epic o cuando se hace.
 
+**Quién toca qué.** El chat de specs y docs es dueño de `spec/` y `docs/`, y de lo que este archivo dice sobre ellos. Los comandos (`src/tuku/`, `tests/`, `template/`) y los epics son de otro chat: lo que el chat de specs note que hay que hacer allá se anota en "Para el chat de comandos y epics", al final de este archivo, y no se hace.
+
 ## Instalación y entorno
 
 - **Configuración del agente tras la instalación:** `uv tool install` y [`tuku init`](src/tuku/init.py) dejan el vault escrito, pero no dejan configurado al agente que lo va a leer. Falta un paso complementario que aplique la configuración del agente elegido por el autor. El caso real es Claude Code: hardcodea `CLAUDE.md` como archivo de memoria y no expone ninguna opción para renombrarlo, así que leer el [`AGENTS.md`](AGENTS.md) del vault exige un hook `SessionStart` que lo descubra e inyecte. Codex lee `AGENTS.md` de forma nativa y Gemini usa `GEMINI.md`. Queda por decidir la forma: `tuku init --agente claude`, un comando propio, o solo instrucciones documentadas que el autor ejecuta a mano. Sea cual sea, el principio 1 exige el equivalente "A mano".
@@ -25,7 +27,7 @@ Tres temas que salieron de revisar cómo se declara el ciclo del autor, que trab
 
 ### El ciclo tiene nombre y el largo no es fijo
 
-Hoy el ciclo es la semana de lunes a domingo, fija en el código. `cycle_type` es un campo requerido de la config ([`src/tuku/config.py`](src/tuku/config.py), [`src/tuku/doctor.py`](src/tuku/doctor.py)) que se lee y no se usa. El autor trabaja turnos de martes a martes (8 días) y descansa de miércoles a lunes (6 días), pero hay turnos de 10 o 14 días y vacaciones: en mac-jpgil cada fase es un ciclo y un agente le pregunta el rango al cambiar de ciclo, a partir de [`Capacidad.md`](../mac-jpgil/estrategia/Capacidad.md).
+Hoy el ciclo es la semana de lunes a domingo, fija en el código. `cycle_type` ya se reemplazó por `cycle_name` en la config, el template y el código ([`src/tuku/config.py`](src/tuku/config.py)), que lo lee como lista de nombres y todavía no lo usa para abrir ciclos. El autor trabaja turnos de martes a martes (8 días) y descansa de miércoles a lunes (6 días), pero hay turnos de 10 o 14 días y vacaciones: en mac-jpgil cada fase es un ciclo y un agente le pregunta el rango al cambiar de ciclo, a partir de [`Capacidad.md`](../mac-jpgil/estrategia/Capacidad.md).
 
 Lo decidido:
 
@@ -52,7 +54,9 @@ Lo decidido el 2026-10-18 sobre `tuku process cycle` ([`spec/ciclo.md`](spec/cic
 
 - `--at` se reemplaza por `--from` y `--to`, con el nombre de los campos del frontmatter. Con `semana`, `--from` es un día cualquiera de la semana y `--to` se deduce.
 - Sin `--from`, empieza el día siguiente al `to` del ciclo anterior (el abierto o, si ya se archivó, la bitácora más reciente).
-- Sin hoyos: un `from` distinto del día siguiente al `to` anterior se rechaza, salvo repetir el ciclo abierto con su mismo `from`, que solo verifica y, sin registros, lo regenera. El nombre avanza en `cycle_name` con cada ciclo nuevo y se conserva al repetir.
+- Sin hoyos: un `from` distinto del día siguiente al `to` anterior se rechaza, salvo repetir el ciclo abierto con su mismo `from`, que solo verifica y, sin registros, lo regenera. El nombre avanza en `cycle_name` con cada ciclo nuevo y se conserva al repetir. La regla vale para el `from` efectivo, el ya deducido con `semana`.
+- Un `--from` anterior al del ciclo abierto es un ciclo histórico: se escribe en `bitacoras/` sin verificar contra los vecinos, con `--name`, y `tuku doctor cycle` reporta los hoyos y solapes que queden.
+- El cambio de ciclo lo dispara el rechazo de `tuku entry create` ante un día fuera del ciclo abierto; ya existe, y el agente avisa al autor, cierra el ciclo si tiene registros y corre `process cycle`.
 - `--name` opcional. Fuera de `cycle_name` se rechaza con aviso y se repite con `--force` tras confirmarlo con el autor.
 - Al cambiar `--at` por `--from`, borrar la línea de "Lo que se retira" de [`spec/tuku.md`](spec/tuku.md) y los `# pendiente` de la firma, y actualizar los escenarios 002-13, 005-01 y `test_cycle_open.py`.
 
@@ -145,3 +149,22 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
 
 - **Publicación web:** visor estático con Quartz.
 - **Captura móvil:** integración ligera por Telegram.
+
+## Para el chat de comandos y epics
+
+Anotado desde el chat de specs el 2026-10-18. Lo de comandos y tests vive además en el bloque "Lo decidido el 2026-10-18 sobre `tuku process cycle`" de arriba.
+
+### Comandos
+
+- **`cycle_type` ya pasó a `cycle_name`, por un error de alcance.** El chat de specs lo hizo en [`config.py`](src/tuku/config.py) (`Configuracion.nombres_de_ciclo`, una tupla con `("semana",)` por defecto), en una línea de `CAMPOS_REQUERIDOS` de [`doctor.py`](src/tuku/doctor.py), en el template (`reglas/config.tuku.md` y su README) y en `test_config.py` y `test_init.py`. Revisarlo al integrar. Sigue sin uso: nada abre ciclos con él todavía.
+- **Vaults ya sembrados con `cycle_type`.** Ahora lo ignoran y usan `semana`. Decidir si `doctor config` avisa de la fila vieja.
+- **`process cycle`:** `--from`, `--to`, `--name`, `--force`, sin `--at`. Un `--from` anterior al del ciclo abierto escribe un ciclo histórico en `bitacoras/` con `--name` y sin verificar contra los vecinos ([`spec/ciclo.md`](spec/ciclo.md), "Abrir el siguiente ciclo").
+- **`doctor cycle` reporta hoyos y solapes** entre los ciclos de `bitacoras/`, sin rechazar nada. Hoy solo revisa `AHORA.md`.
+- **`context cadence`:** las cadencias vigentes de todo el árbol en un texto, cada una con su `CADENCIAS.md` ([`spec/cadencias.md`](spec/cadencias.md)). La firma de `context` no cambia.
+- **El nombre de la bitácora cerrada lleva el ciclo** (`bitacora-DESDE-HASTA-CICLO.md`) cuando exista `cycle close`.
+
+### Epics
+
+- **Epic 006, cerrar un ciclo:** el cambio de ciclo que dispara el rechazo de `entry create` supone poder cerrar el ciclo que terminó. El rechazo ya existe; falta `cycle close` y los escenarios del flujo completo (rechazo, aviso al autor, cierre, `process cycle`).
+- **Capítulo 5 del tutorial, promesa del epic 006:** el lunes, un `entry create` rechazado hace que el agente avise, cierre el ciclo, abra el siguiente (preguntando el rango si no es `semana`) y recién escriba el registro; pedir abrir el ciclo ya abierto solo verifica. Escenario del flujo completo pendiente ([`docs/tutorial/05-cerrar-la-semana.md`](docs/tutorial/05-cerrar-la-semana.md)).
+- **Capítulos 3 y 4 con aviso "Todavía no funciona":** la tabla de estado dice que el epic 004 está sin empezar, pero hay escenarios `004-01` a `004-05` y un conductor de conversación. Si ya funcionan, el epic quita el aviso de los capítulos 3 y 4 y actualiza la tabla.

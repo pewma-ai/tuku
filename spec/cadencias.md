@@ -8,7 +8,7 @@ Vive **donde aplica**: en el ámbito o subdirectorio al que pertenece. Una caden
 
 Poner el alcance en la carpeta evita declararlo dentro de cada cadencia. El árbol ya lo dice.
 
-**Verlas todas juntas es un comando, no un archivo.** Cada ámbito nuevo trae sus cadencias, así que una lista materializada envejece apenas se crea el siguiente. Un comando de solo lectura recorre los `CADENCIAS.md` del árbol, las combina en cascada y devuelve todas en un solo texto, cada una con el `CADENCIAS.md` de donde viene, para saber dónde editar su `Historia`. Su nombre lo fija [`cli.md`](cli.md) cuando exista (el candidato es `tuku context cadence`). El libro de estilo dice el mecanismo y manda a buscar en `ambitos/`: no lista ni transcluye las cadencias del autor.
+**Verlas todas juntas es un comando, no un archivo.** Cada ámbito nuevo trae sus cadencias, así que una lista materializada envejece apenas se crea el siguiente. Un comando de solo lectura recorre los `CADENCIAS.md` del árbol, las combina en cascada y devuelve todas en un solo texto, cada una con el `CADENCIAS.md` de donde viene, para saber dónde editar su `Historia`. Es `tuku context cadence`, un tema más de `context` ([tuku.md](tuku.md)). El libro de estilo dice el mecanismo y manda a buscar en `ambitos/`: no lista ni transcluye las cadencias del autor.
 
 Un comando recorre el árbol y colecta las cadencias vigentes del autor en una vista única. Esa vista es **derivada**: la fuente son los archivos por ámbito.
 

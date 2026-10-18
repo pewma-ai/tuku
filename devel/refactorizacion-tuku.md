@@ -4,16 +4,23 @@ Plan para simplificar la arquitectura del comando `tuku` y, después, acortar su
 
 ## Fases
 
-1. **Auditar `tuku`.** Diagnóstico de `src/tuku/` y propuesta de mejoras. No se toca código ni tests. Estado: diagnóstico y propuesta escritos abajo, a la espera de que el autor los apruebe.
+1. **Auditar `tuku`.** Diagnóstico de `src/tuku/` y propuesta de mejoras. Hecha el 2026-10-18.
 2. **Refactorizar `tuku`** según lo aprobado, **sin tocar los tests**. Los tests actuales son la red de seguridad: si el refactor es correcto, pasan tal cual.
-3. **Revisar los tests.** Con la arquitectura ya simplificada, decidir cuáles se combinan o acortan, y proponerlo al autor antes de editar.
+3. **Revisar los tests.** Con la arquitectura ya simplificada, fundir los que afirman lo mismo. Hecha el 2026-10-18 sobre 18 archivos; ver el resultado al final.
 
 ## Estado
 
 - [x] Fase 1: diagnóstico (2026-10-18).
-- [ ] Fase 1: el autor aprueba o corrige la propuesta y resuelve las decisiones abiertas.
-- [ ] Fase 2: P1 a P7, un paso a la vez.
-- [ ] Fase 3: tests (ver las hipótesis al final).
+- [x] Fase 1: el autor aprobó la propuesta y delegó las decisiones al agente (2026-10-18).
+- [x] Fase 2, P1 (2026-10-18): `entry.stamp` y `todo.is_registered`.
+- [x] Fase 2, P2 (2026-10-18): `scope.Tree`, `read_tree` y `resolve_scope`. Recorridos de `ambitos/`: `todo open` 6 a 3, `todo close` 5 a 3, `entry create` 7 a 5 (medido contra `HEAD`, e incluyen los de `regenerate`).
+- [x] Fase 2, P3 (2026-10-18): retirados cinco `lint_del_vault` sin llamador en `src`, `tests` ni docs.
+- [x] Fase 2, P4 (2026-10-18): `doctor.revisar_vault` es una tabla (`_CHECKS`) de revisiones; `doctor.TEMAS` sale de ella.
+- [x] Fase 2, P5 (2026-10-18): [`scope_tree.py`](../src/tuku/scope_tree.py) (231 líneas) y [`todo_core.py`](../src/tuku/todo_core.py) (601) salen de `scope.py` y `todo.py`, que los reexportan. `entry`, `todo`, `context`, `regenerate`, `fix` y `scope` importan el núcleo directamente. Ciclo de dependencias: de 11 módulos a 8. Imports dentro de funciones: de 85 a 76.
+- [x] Fase 2, P6 (2026-10-18): **revertido**. Ver la propuesta.
+- [x] Fase 2, P7 (2026-10-18): docstrings de `doctor`, `resultado` e `init`.
+- [x] Fase 3 (2026-10-18): 192 funciones de test unitario (antes 237) y 194 casos (antes 286), con **los mismos arcos de ramas ejecutados** y los 317 tests de la suite no agéntica en verde.
+- [ ] Pendiente: ver "Lo que queda" al final.
 
 ## Restricciones de la fase 2
 
@@ -21,6 +28,9 @@ Plan para simplificar la arquitectura del comando `tuku` y, después, acortar su
 - Las firmas públicas que los tests usan se mantienen: `todo.abrir_en_vault`, `todo.cerrar_en_vault`, `entry.add_al_vault`, `scope.crear_con_constancia`, `note.crear_con_constancia`, `scope.rutas`, `scope.nombres`, `scope.canonico`, entre otras.
 - **El reloj no se inyecta en esta fase.** Los tests congelan `date` y `datetime` parchando el módulo donde se leen (`entry`, `todo`, `scope`, `note`, `cycle`, `context`, `init`, `cli.opciones`; ver [`tests/scripts/tiempo.py`](../tests/scripts/tiempo.py) y `test_cli_opciones.py`). Quitar esas lecturas, o moverlas a otro módulo, rompe esos tests. Por la misma razón, el código que lee el reloj se queda en el módulo donde está hoy.
 - Dividir un módulo se hace sacando código a un módulo nuevo y reexportándolo desde el original, para que `scope.algo` siga existiendo.
+- **El código Python nuevo va en inglés** (identificadores, docstrings, comentarios), sin mezclar castellano. Lo existente no se renombra por esta regla. Los mensajes que ve quien invoca `tuku` siguen en español.
+- Otra sesión trabaja en la misma rama: antes de editar un archivo se vuelve a leer, y no se revierte lo que no es del refactor. Con dos sesiones, un `mypy` o un `pytest` pueden fallar por el trabajo a medias de la otra o por la caché compartida (`.mypy_cache`): se repite, y si persiste se prueba con `--cache-dir` propio antes de culpar al código.
+- Las decisiones de diseño que surjan en la fase 2 las toma el agente con criterio de buenas prácticas (autorizado por el autor el 2026-10-18). En un refactor eso significa conservar el comportamiento y anotar aquí lo que parezca un defecto.
 
 ## Línea base (2026-10-18)
 
@@ -75,27 +85,102 @@ Cinco `lint_del_vault` no tienen llamador directo según `grep`: `entry`, `scope
 
 Orden por retorno y riesgo. Cada paso se hace solo, con la verificación de arriba.
 
-- **P1. Un solo punto que estampa en `AHORA.md`.** Una función en [`entry.py`](../src/tuku/entry.py) recibe el texto de `AHORA.md` y los campos (hora, ámbito, cuerpo, día, rutas) y devuelve el texto nuevo o el rechazo, con una sola regla de idempotencia. Los cinco casos de uso la llaman. Lee el reloj quien la llama, como hoy.
-- **P2. Leer el árbol de ámbitos una vez.** Un `Arbol` inmutable (nombres, rutas, ámbitos con sus keywords) que cada comando construye al empezar y pasa hacia abajo. `resolver_ambito(arbol, nombre) -> str | Resultado` reemplaza las 8 copias de `canonico` más `rechazo_si_no_existe`. Las funciones actuales `nombres(vault)`, `rutas(vault)` y `leer(vault)` quedan como envoltorios de una línea sobre `Arbol`, para no tocar tests. Sin caché global: los tests llaman `main` muchas veces en un proceso.
-- **P3. Retirar los `lint_del_vault` sin llamador** (`entry`, `scope`, `style`, `cyclelint`, `todo`), tras confirmar con `grep` y `mypy` que nadie los usa.
-- **P4. `doctor` como tabla.** `REVISIONES = {tema: función}` reemplaza la cadena de `if quiere(...)`, y `doctor.TEMAS` se deriva de la tabla. No cambia ningún mensaje.
-- **P5. Romper el ciclo con capas explícitas.** Sacar el código puro a módulos nuevos, con reexport desde el original: el árbol de ámbitos (nombres, rutas, keywords, jerarquía de hijos) y la actividad de la página salen de `scope.py`; el parser de marcas y la tabla salen de `todo.py`. Los casos de uso que leen el reloj se quedan en su módulo. Meta: los imports locales pasan de 85 a una cifra que quede en el diario, y el ciclo de 11 módulos se parte.
-- **P6. Una sola capa para el ámbito por defecto.** Mover `args.scope or ambito_por_defecto(...)` de `cli/todo.py` y `cli/entry.py` al caso de uso, como ya hace `todo close`. Riesgo: un test que llame `abrir_en_vault` o `add_al_vault` sin `scope` y espere un registro sin ámbito cambiaría de resultado. Se verifica antes de aplicar; si algún test lo contradice, este paso pasa a la fase 3.
-- **P7. Corregir los docstrings desfasados** del punto 8. No cambia comportamiento.
+- **P1. Un solo punto que estampa en `AHORA.md`. Hecho, con menos alcance que el previsto.** Al leer los cinco casos de uso, lo común resultó ser menos de lo diagnosticado: el orden de las validaciones y la idempotencia difieren a propósito (`todo` compara por clave en todo el archivo, `entry.add` por día y sin links, `note` por texto literal). Unificarlas cambiaría comportamiento. Se unificó lo mecánico: [`entry.stamp`](../src/tuku/entry.py) (día a encabezado, `entry.add`, `ValueError` a rechazo) en los cinco sitios, y [`todo.is_registered`](../src/tuku/todo.py) en lugar de las dos copias de `ya_abierto` y `ya_cerrado`. Salen 3 imports locales de `ahora` y 2 de `entry.add`. Los 5 sitios siguen leyendo el reloj, por la restricción de arriba. Componer la línea (`componer`, `registro_de_constancia`) sigue distinto en cada caso.
+- **P2. Leer el árbol de ámbitos una vez. Hecho.** [`scope.Tree`](../src/tuku/scope.py) (nombres y rutas, inmutable) la arma `read_tree(vault)` con un solo recorrido; `resolve_scope(tree, name) -> str | Resultado` reemplaza `canonico` más `rechazo_si_no_existe` en `entry.add_al_vault`, `entry.mover_en_vault`, `todo.abrir_en_vault`, `todo.cerrar_en_vault` (dos veces), `note.crear_con_constancia` y `scope.actualizar`. `nombres(vault)` y `rutas(vault)` son envoltorios de `read_tree`, así que la lógica de recorrido existe una vez y los tests siguen igual. Sin caché global: los tests llaman `main` muchas veces en un proceso. Quedan sin migrar `canonico` en `resolver_padre`, `renombrar_en_vault` y `mover_en_vault` de `scope`, donde el árbol cambia durante la operación, y `scope.leer`, que carga también las keywords.
+  - **Inconsistencia encontrada, conservada:** `todo open --scope "  "` trata un ámbito en blanco como "sin ámbito" y abre el pendiente; `entry create`, `todo close` y `note create` lo rechazan con "no existe el ámbito ''". Se conservó el comportamiento por ser un refactor. Decisión de diseño pendiente, con recomendación: rechazar en todos (un valor dado y vacío es un error de uso, no una ausencia).
+- **P3. Retirar los `lint_del_vault` sin llamador. Hecho.** `grep` sobre todo el repo (no solo `src` y `tests`) confirmó que solo `note.lint_del_vault` tiene llamador (`doctor`). Se borraron las cinco restantes y `ruff` quitó 6 imports sin uso en `style.py` y `cyclelint.py`. `style.formatear` y `cyclelint.formatear` se conservan porque `doctor` los usa.
+- **P4. `doctor` como tabla. Hecho.** `_CHECKS` empareja los temas con su revisión (`cycle` y `entry` comparten una porque leen `AHORA.md`); `revisar_vault` es un filtro y un formato. Los mensajes no cambian.
+- **P5. Romper el ciclo con capas explícitas. Hecho en parte.** Se sacó lo que no lee el reloj ni escribe: el árbol de ámbitos (`scope_tree`: nombres, rutas, keywords, `Tree`) y el núcleo de `todo` (`todo_core`: marcas, tabla, lint en texto). Los casos de uso que leen el reloj se quedan en `scope` y `todo`. `vocab.mostrar_del_vault` pasó a `context`, que era su único llamador, y `vocab` ya no importa `config`. Quedan en el ciclo `config`, `context`, `doctor`, `entry`, `note`, `regenerate`, `scope` y `todo`: es la capa de casos de uso, que llaman a `regenerate.rehacer`. Romperla pide separar planificar de ejecutar, y eso cambia las firmas que usan los tests. `config` importa `doctor` solo por `ARCHIVOS_REQUERIDOS`; moverla a `config` rompería otro tramo, pero otra sesión está editando `config.py` y se deja para cuando termine.
+- **P6. Una sola capa para el ámbito por defecto. Revertido.** Se movió `args.scope or ambito_por_defecto(...)` de `cli/todo.py` y `cli/entry.py` a los casos de uso y falló el escenario [`005-01`](../tests/escenarios/005-01-las-dos-semanas-de-andrea.md): `tuku process cycle` abre «revisar la bitácora anterior» sin ámbito a propósito, y con el default dentro del caso de uso quedaba en `personal`. El default es una decisión de quien invoca desde la línea de comandos, no de la operación. La asimetría con `todo close` es intrínseca: cerrar consulta primero el ámbito de la fila.
+- **P7. Corregir los docstrings desfasados** del punto 8. Hecho para `doctor`, `resultado` e `init`.
 
 Diferido a la fase 3, porque obliga a editar tests: inyectar el reloj, renombrar los nombres duplicados del punto 7 y la separación completa entre planificar y ejecutar.
 
-## Decisiones abiertas para el autor
+## Decisiones tomadas
 
-1. ¿P5 con reexport? Mantiene `scope.algo` y los parches de tests, a cambio de módulos que conviven con su fachada hasta la fase 3.
-2. ¿P3 retira de verdad los `lint_del_vault` sin llamador? Si el autor prefiere conservarlos como API, P3 se descarta.
-3. ¿P6 en la fase 2? Puede cambiar un resultado que algún test observa; si pasa, se mueve a la fase 3.
+1. P5 con reexport: sí. Mantiene `scope.algo` y `todo.algo` para los tests y para quien importa.
+2. P3: se retiraron las cinco, sin llamador en ningún sitio.
+3. P6: se descarta (arriba). El ámbito en blanco de `todo open --scope "  "` sigue tratándose como «sin ámbito» mientras `entry create`, `todo close` y `note create` lo rechazan; queda como decisión de diseño pendiente, con la recomendación de rechazar en todos.
 
-## Hipótesis para la fase 3 (tests)
+## Análisis de la fase 3 (plan original)
 
-Se confirman o descartan al llegar; hoy son estimaciones sobre la lectura del código.
+Hoy hay 237 funciones de test unitario que se recogen como 286 casos. El análisis cruza dos fuentes: la lectura de nombres y cuerpos, y la cobertura de ramas de cada test por separado (solo `src/tuku/`). Con la cobertura, 106 de los 286 casos bastan para ejecutar los mismos arcos. Eso mide que las pruebas pasan por los mismos caminos, no que sobren: una fusión conserva cada aserción y solo une lo que afirma lo mismo sobre el mismo objeto con distinto dato.
 
-- Con P1 y P2, las reglas de rechazo y de idempotencia de los cinco casos de uso se pueden probar una vez sobre `Arbol` y el texto de `AHORA.md`, sin `init.init`.
-- Hoy 15 archivos unitarios siembran un vault; `test_scope_arbol` hace 43 llamadas a `main`, `test_scope_keywords` 23 y `test_cli_sobre_un_vault` 23.
-- Para `todo open`, `todo close` y `entry create`, 17 funciones con vault (en `test_cierre_vault`, `test_cli_opciones`, `test_cli_sobre_un_vault` y `test_archivo`) bajarían a 4, más unas 12 puras. Requiere separar planificar de ejecutar y el reloj inyectado.
-- `main` y los escenarios quedan para códigos de salida y delta, como pide [`tests/AGENTS.md`](../tests/AGENTS.md).
+### Firmes: leídos, 27 funciones menos
+
+| Archivo | Hoy | Después | Qué se une |
+|---|---|---|---|
+| [`test_scope_keywords.py`](../tests/unitarios/test_scope_keywords.py) | 15 | 6 | Pedir keywords (sin, con y sobre ámbito existente) en 1. Que una keyword no toca lo escrito (suma, crear, pendiente con keyword) en 1. Normalizar keywords (otra grafía, nombre propio, coma y espacios) en 1. Aviso por keyword repetida o por nombre de otro ámbito en 1. `rename` conserva keywords pasa a un `assert` de `scope rename` en `test_cli_sobre_un_vault`. `scope keywords ya no existe` se borra |
+| [`test_regenerate_vistas.py`](../tests/unitarios/test_regenerate_vistas.py) | 7 | 3 | Funciones puras de texto con la misma tabla `PENDIENTES`: región del día (con el registro sin hora), región de la semana (con `vistas_en_ahora` y su rehecho), documento de ámbitos (con el orden de fechados) |
+| [`test_scope_constancia.py`](../tests/unitarios/test_scope_constancia.py) | 2 | 1 | Misma función con y sin padre |
+| [`test_style.py`](../tests/unitarios/test_style.py) | 4 | 2 | El libro completo y el encabezado que falta en 1. El barrido «todo hallazgo lleva corrección» pasa a `test_cli_contrato`, donde se une con el suyo |
+| [`test_entry.py`](../tests/unitarios/test_entry.py) | 7 | 6 | Los dos tests de «sin hora» ordenan igual |
+| [`test_cli_opciones.py`](../tests/unitarios/test_cli_opciones.py) | 11 | 7 | Ámbito por defecto y «sin `--at` es hoy y ahora» en 1 parametrizado. `--vault` de la opción y `scope_default` inexistente en 1. `--due` y primer escalón en 1. Los errores de opciones pasan a `test_cli_contrato` |
+| [`test_cierre_vault.py`](../tests/unitarios/test_cierre_vault.py) | 6 | 3 | Cierre con marca a la vista, link en uno solo y abrir o cerrar dos veces en 1. `corregir` con links distintos pasa a `test_entry_corregir`, que ya lo cubre |
+| [`test_cli_contrato.py`](../tests/unitarios/test_cli_contrato.py) | 7 | 5 | Se borra `los_cuatro_codigos_son_distintos` (compara constantes escritas a mano) y `ningun_comando_escribe_una_propuesta` (negativo histórico, cubierto por `test_manual`). El uso incorrecto absorbe los errores de opciones y el barrido de correcciones absorbe el de `test_style` |
+| [`test_manual.py`](../tests/unitarios/test_manual.py) | 3 | 2 | Recorren el mismo manual y afirman sobre el mismo árbol |
+
+Las tres funciones que se borran caen bajo la regla de [`tests/AGENTS.md`](../tests/AGENTS.md): sin historia y sin tests de más.
+
+### Probables: 22 funciones menos, hay que leer el cuerpo antes de fundir
+
+Salen de los nombres y de la cobertura (pares con solape de arcos igual o mayor a 0,97). No se ha leído su cuerpo.
+
+| Archivo | Hoy | Después | Indicio |
+|---|---|---|---|
+| [`test_todo.py`](../tests/unitarios/test_todo.py) | 19 | 13 | Tres tests sobre «con y sin link es el mismo pendiente»; `parsear` dos veces; `canonico` y escalera; `cerrar` y `el cierre deja la marca`; dos de lint sobre la fila huérfana |
+| [`test_scope_arbol.py`](../tests/unitarios/test_scope_arbol.py) | 17 | 12 | Cuatro sobre `--parent` con ruta; seis sobre hijos y callouts, con pares de solape 0,97 |
+| [`test_link.py`](../tests/unitarios/test_link.py) | 11 | 8 | Tres de `convertir` y dos de `reubicar` sobre la misma función |
+| [`test_links_lectores.py`](../tests/unitarios/test_links_lectores.py) | 5 | 4 | `renombrar_cambia_texto_y_ruta` repite `test_rename` |
+| [`test_entry_corregir.py`](../tests/unitarios/test_entry_corregir.py) | 9 | 7 | Los dos `update` de la marca; `ubica` con `lee los registros` |
+| [`test_doctor.py`](../tests/unitarios/test_doctor.py) | 10 | 8 | `sin_verbose` está contenido en `el reporte nombra lo roto`; reporte de defectos repetido |
+| [`test_scope_lint.py`](../tests/unitarios/test_scope_lint.py) | 4 | 3 | `normalizar` es una función pura mal ubicada, va con las de ámbitos |
+| [`test_archivo.py`](../tests/unitarios/test_archivo.py) | 7 | 5 | Escribir y conservar fecha; los dos casos de archivo cambiado |
+
+[`test_notas_enlazables.py`](../tests/unitarios/test_notas_enlazables.py) (11, unos 3 de sobra en los `context note`) se deja para el final porque otra sesión lo está cambiando.
+
+### Resultado esperado
+
+- De 237 a unas 188 funciones (menos 49, un 21 %) y de 286 a unos 235 casos.
+- Si `test_ejemplos` (30 casos de una función) y `test_superficie` (22) pasan de parametrizados a un recorrido con el `argv` en el mensaje, bajan unos 50 casos más sin perder aserciones, a cambio de que un fallo se reporte como un caso y no como varios.
+- Reducción estructural, que depende de la fase 2 y de separar planificar de ejecutar: 17 funciones con vault (en `test_cierre_vault`, `test_cli_opciones`, `test_cli_sobre_un_vault` y `test_archivo`) bajarían a 4 más unas 12 puras. Hoy 15 archivos siembran un vault y `test_scope_arbol` hace 43 llamadas a `main`, `test_scope_keywords` 23 y `test_cli_sobre_un_vault` 23.
+- No se analizaron los escenarios de `tests/escenarios/`. Los de reglas deterministas que ya cubre un unitario son el siguiente candidato.
+
+### Cómo se ejecuta
+
+1. Un archivo a la vez, de menor a mayor riesgo, empezando por los firmes.
+2. Antes y después de cada archivo se mide el conjunto de arcos que ejecuta toda la capa unitaria: tiene que ser el mismo, o mayor. Es la red que dice que no se perdió un camino.
+3. Cada aserción de un test fundido sobrevive, salvo las de los tres tests que se borran.
+4. `pytest`, `ruff` y `mypy` en verde por archivo; commit solo si el autor lo pide.
+5. Si el análisis de cobertura debe repetirse, el plugin de `pytest` que registra los arcos de cada test es corto (un `hookwrapper` sobre `pytest_runtest_call` con `coverage.Coverage(include=["*/src/tuku/*"], config_file=False)`); no está versionado.
+
+## Resultado de la fase 3
+
+Medido con un plugin de `pytest` que registra los arcos de `src/tuku/` que ejecuta cada test. La unión de arcos de la capa unitaria es la misma antes y después (4572, ninguno perdido), y la suite no agéntica pasa entera (317 tests, escenarios incluidos).
+
+| Archivo | Antes | Después | Qué se unió |
+|---|---|---|---|
+| `test_scope_keywords.py` | 15 | 6 | pedir keywords; que una keyword no toca lo escrito; normalizar y no repetir; aviso por keyword repetida. `scope keywords ya no existe` se borró |
+| `test_todo.py` | 19 | 13 | `parsear`; `abrir`; horizonte y escalera; links y espacios al buscar un pendiente (tres tests); lint con comando |
+| `test_scope_arbol.py` | 17 | 13 | `--parent` con ruta (cuatro tests); renombrar el padre dentro del rename anidado |
+| `test_regenerate_vistas.py` | 7 | 3 | regiones; `vistas_en_ahora`; documento de ámbitos |
+| `test_cli_contrato.py` | 7 | 4 | se borraron `los_cuatro_codigos_son_distintos` y `ningun_comando_escribe_una_propuesta`; el uso incorrecto pasó a `test_cli_opciones` |
+| `test_cli_opciones.py` | 11 | 9 | recibió el uso incorrecto; salió `abrir_abreviado` (lo cubre `sin_day_ni_hour`); `scope_default` en 1 |
+| `test_entry_corregir.py` | 9 | 7 | `registros` y `ubicar`; dos `update` |
+| `test_link.py` | 11 | 9 | `convertir` (lo que deja intacto) y `reubicar` |
+| `test_doctor.py` | 10 | 8 | `formatear` (dos); vault completo y vault con defectos |
+| `test_cierre_vault.py` | 6 | 4 | cerrar y abrir con y sin link |
+| `test_archivo.py` | 7 | 5 | `escribir` (permisos y fecha); cambio ajeno dentro y fuera de un intento |
+| `test_style.py`, `test_scope_lint.py`, `test_cli_sobre_un_vault.py`, `test_links_lectores.py`, `test_manual.py`, `test_entry.py`, `test_scope_constancia.py` | 31 | 24 | una fusión cada uno; `normalizar` y los dos tests de nombre de ámbito pasaron a uno solo |
+| `test_ejemplos.py`, `test_superficie.py` | 52 casos | 2 casos | de parametrizado a recorrido, con el ejemplo o la ruta en el mensaje de fallo |
+
+La capa unitaria corre en unos 4 s (antes 4,5 s).
+
+## Lo que queda
+
+- **Planificar y ejecutar por separado, y reloj inyectado.** Es la reducción estructural (17 funciones con vault a unas 4 más unas 12 puras) y rompe las firmas que usan los tests de preparación; pide una fase propia.
+- **`test_notas_enlazables.py`** (11, unos 3 de sobra en los `context note`): otra sesión lo está cambiando.
+- **`config` importa `doctor`** por `ARCHIVOS_REQUERIDOS`: mover la constante a `config` cuando `config.py` deje de estar en edición.
+- **El ámbito en blanco** de `todo open --scope`: ver las decisiones tomadas.
+- **Escenarios de `tests/escenarios/`:** no se analizaron para fusionar.
+- **Tests que parchean el reloj** (`test_cli_opciones`, `test_cli_sobre_un_vault`) siguen dependiendo de que `entry`, `todo`, `scope` y `note` lean el reloj en su propio módulo.

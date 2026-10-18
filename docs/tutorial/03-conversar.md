@@ -63,7 +63,7 @@ Es un hecho consumado que acaba de ocurrir.
 
 ### Mira `AHORA.md`
 
-El agente registra el incidente de inmediato en `AHORA.md`, con su hora y la marca de pendiente para el reclamo, y **retoma el hilo** de la conversación sobre la Importadora Andina y el crédito bancario.
+El agente registra el incidente de inmediato en `AHORA.md`, con su hora, abre el pendiente del reclamo, y **retoma el hilo** de la conversación sobre la Importadora Andina y el crédito bancario.
 
 ---
 

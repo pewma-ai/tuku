@@ -26,7 +26,7 @@ Si prefieres tu propio día, úsalo. Las indicaciones de cada capítulo aplican 
 | 2 | [El primer día](02-el-primer-dia.md) | La jornada completa dictada: registros, frentes, pendientes, notas y revisión |
 | 3 | [Conversar](03-conversar.md) | Deliberar con el agente sin que escriba nada |
 | 4 | [Una semana después](04-una-semana-despues.md) | El agente entiende de qué hablas con el contexto de las semanas anteriores |
-| 5 | [Cerrar la semana](05-cerrar-la-semana.md) | Qué sobrevive al cierre, las cadencias y la idempotencia |
+| 5 | [Cerrar la semana](05-cerrar-la-semana.md) | Cómo cambia el ciclo, qué sobrevive al cierre, las cadencias y la idempotencia |
 | 6 | [Lo que nadie pidió](06-lo-que-nadie-pidio.md) | El agente nota patrones que tú no notaste y respeta tus rechazos |
 | | [Conclusión](99-conclusion.md) | Cierre y principios de diseño |
 

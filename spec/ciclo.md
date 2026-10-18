@@ -140,16 +140,18 @@ Un ciclo abierto **sin registros sí se regenera**, porque no hay nada que perde
 tuku process cycle [--from FECHA] [--to FECHA] [--name NOMBRE] [--force]
 ```
 
-`--from` y `--to` se llaman igual que `from` y `to` del frontmatter y dan el rango del ciclo; `--at` ya no existe en este comando, porque abrir un ciclo no cuenta cuándo pasó algo sino qué rango cubre. Con `semana` basta `--from` con un día cualquiera, que abre la semana que lo contiene, y `--to` se deduce. Con cualquier otro nombre `--to` es obligatorio. Sin `--from`, el ciclo empieza el día siguiente al `to` del anterior, y si no hay anterior, hoy.
+**El cambio de ciclo lo dispara un error de `tuku entry create`.** Un registro de hoy cuando `AHORA.md` no tiene el encabezado de hoy significa que el ciclo en curso ya terminó. `entry create` rechaza sin escribir y nombra `tuku process cycle`; el agente avisa al autor de que el ciclo cambió, pregunta el rango si el nombre que sigue no es `semana` (ver arriba), cierra el ciclo que terminó si tiene registros ("Cerrar un ciclo") y ejecuta el cambio. Sin `--from`, el ciclo nuevo empieza el día siguiente al `to` del anterior, y si no hay anterior, hoy.
+
+`--from` y `--to` se llaman igual que `from` y `to` del frontmatter y dan el rango del ciclo; `--at` ya no existe en este comando, porque abrir un ciclo no cuenta cuándo pasó algo sino qué rango cubre. Con `semana` basta `--from` con un día cualquiera, que abre la semana que lo contiene, y `--to` se deduce. Con cualquier otro nombre `--to` es obligatorio.
 
 Las reglas valen para el ciclo que se abre contra el **ciclo anterior**: el abierto en `AHORA.md` o, si ya se archivó, la bitácora más reciente de `bitacoras/`.
 
-- **Solo hay un `AHORA.md` abierto.** Abrir el siguiente supone que el anterior ya está archivado en `bitacoras/`; si tiene registros, se rechaza como dice "Un ciclo abierto con registros no se pisa".
-- **No quedan hoyos ni solapes.** El `from` del ciclo nuevo es el día siguiente al `to` del anterior, y cualquier otro se rechaza nombrando el que corresponde: uno posterior deja días sin ciclo (`el ciclo anterior termina el 2026-08-18: empieza el 2026-08-19`) y uno anterior pisaría días ya cubiertos. La única excepción es repetir el ciclo abierto con su mismo `from`, que no es otro ciclo.
+- **Solo hay un `AHORA.md` abierto.** Si el ciclo abierto tiene registros, se rechaza como dice "Un ciclo abierto con registros no se pisa".
+- **No quedan hoyos ni solapes.** El `from` efectivo del ciclo nuevo es el día siguiente al `to` del anterior, y cualquier otro se rechaza nombrando el que corresponde: uno posterior deja días sin ciclo (`el ciclo anterior termina el 2026-08-18: empieza el 2026-08-19`) y uno anterior pisaría días ya cubiertos. El `from` efectivo es el que queda después de deducir el rango: con `semana`, `--from 2026-08-26` (un miércoles) tras un ciclo que terminó el domingo 2026-08-23 abre la semana que empieza el lunes 2026-08-24, y es válido. La única excepción es repetir el ciclo abierto con su mismo `from`, que no es otro ciclo.
 - **El nombre avanza con cada ciclo nuevo.** Es el siguiente de `cycle_name`, y al llegar al final vuelve al primero. Repetir el ciclo abierto conserva su nombre: el comando solo verifica y, sin registros, lo regenera, que es como se corrige su `--to`.
 - **`--name` fija el nombre en vez de avanzar.** Un nombre de `cycle_name` se acepta tal cual. Uno que la lista no declara se rechaza sin escribir, con un aviso que nombra el nombre desconocido y la lista: el agente se lo confirma al autor y, si lo quiere, repite con `--force`, o lo agrega antes a `cycle_name` de la config para que deje de ser la excepción.
 
-**Un ciclo no se abre hacia atrás.** Una fecha anterior al `from` del ciclo abierto se rechaza siempre, tenga o no registros: con `AHORA.md` en la semana del 24 de agosto, `tuku process cycle --from 2026-07-06` rechaza y nombra el ciclo abierto. Lo vivido en una semana ya cerrada se agrega a mano en su bitácora de `bitacoras/`.
+**Un ciclo histórico no se verifica.** Un `--from` anterior al `from` del ciclo abierto guarda un ciclo pasado, por ejemplo para cargar el historial de un autor. No se compara con el anterior ni con el siguiente, no toca `AHORA.md` y se escribe en `bitacoras/` con la plantilla; como no hay ciclo anterior que haga avanzar el nombre, lo da `--name`. Los hoyos y solapes que queden entre los ciclos de `bitacoras/` los reporta `tuku doctor cycle`, sin rechazar nada.
 
 ## Cerrar un ciclo
 
@@ -158,7 +160,7 @@ En este orden:
 1. Generar el resumen en `reportes/`, que necesita el plan y los registros todavía vivos → `cycle extract` lo alimenta
 2. Aplanar el plan → `transclusion flatten`
 3. Dejar el enlace al resumen → `cycle close`
-4. Mover a `bitacoras/bitacora-DESDE-HASTA.md` y pasar el frontmatter a `status: stable` → `cycle close`
+4. Mover a `bitacoras/bitacora-DESDE-HASTA-CICLO.md` y pasar el frontmatter a `status: stable` → `cycle close`
 5. Dejar `AHORA.md` limpio para el ciclo siguiente → `cycle close`
 
 **El orden importa**: aplanar antes de generar el resumen lo deja sin de dónde leer.

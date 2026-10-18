@@ -77,6 +77,8 @@ Abre `AHORA.md` y mira el link al inicio de cada línea, `[personal](ambitos/per
 
 Apareció `ambitos/colegio-los-robles/` con su página `colegio-los-robles.md`.
 
+Tu agente te preguntó qué palabras, al mencionarlas, indican que algo es de ese frente: «Rodolfo», «Cifuentes», el nombre de un colegio hermano. Respóndele. Quedan en la línea `keywords` de la página, y el capítulo 4 las usa para elegir el frente sin que lo nombres.
+
 ### Vuelve a `AHORA.md`
 
 Los registros de esta mañana sobre el colegio ahora empiezan con `[colegio-los-robles](ambitos/colegio-los-robles/colegio-los-robles.md)`: cambiaron de ámbito y el texto quedó como lo dictaste. Si alguno era dudoso, tu agente te preguntó. Abre `colegio-los-robles.md`: ahí está la historia del cliente desde el primer registro.
