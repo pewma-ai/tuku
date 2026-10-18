@@ -88,10 +88,10 @@ def _entry(vault: Path, inicio: date) -> str:
 
 
 def _scope(vault: Path) -> str:
-    from tuku import scope
+    from tuku import scope_tree
 
     lineas = []
-    for a in scope.leer(vault):
+    for a in scope_tree.leer(vault):
         ruta = a.directorio.relative_to(vault / "ambitos").as_posix()
         palabras = f": {', '.join(a.keywords)}" if a.keywords else ""
         lineas.append(f"- {ruta}{palabras}")
@@ -100,13 +100,13 @@ def _scope(vault: Path) -> str:
 
 def _todo(vault: Path, hoy: date, late: bool = False) -> str:
     """Los pendientes abiertos; con `late`, solo los atrasados (`Vence` anterior a `hoy`)."""
-    from tuku import todo
+    from tuku import todo_core
 
     ruta = vault / "PENDIENTES.md"
     if not ruta.is_file():
         return "sin PENDIENTES.md."
     lineas = []
-    for f in todo.filas(archivo.leer(ruta)):
+    for f in todo_core.filas(archivo.leer(ruta)):
         vencido = f.dia is not None and f.dia < hoy
         if late and not vencido:
             continue
@@ -120,9 +120,11 @@ def _todo(vault: Path, hoy: date, late: bool = False) -> str:
 
 
 def _style(vault: Path) -> str:
+    """Los vocabularios que el autor declaró en su libro de estilo."""
     from tuku import vocab
+    from tuku.config import leer_config
 
-    return vocab.mostrar_del_vault(vault).mensaje
+    return vocab.formatear(leer_config(vault).vocabularios)
 
 
 def _note(vault: Path) -> str:

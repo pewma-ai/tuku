@@ -16,11 +16,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from pathlib import Path
 
-from tuku import archivo
 from tuku.lint import ERROR, PREGUNTA
-from tuku.resultado import Resultado
 from tuku.vocab import ENCABEZADOS
 
 _MARCADOR_AUTOR = "**Nombre del autor:**"
@@ -113,15 +110,3 @@ def formatear(hallazgos: list[HallazgoEstilo]) -> str:
     preguntas = len(hallazgos) - errores
     resumen = f"style lint: {errores} error(es), {preguntas} pregunta(s)."
     return "\n".join([*(str(h) for h in hallazgos), resumen])
-
-
-def lint_del_vault(vault: Path) -> Resultado:
-    """Revisa los contratos de `LIBRO-DE-ESTILO.md` y reporta; no escribe."""
-    from tuku.config import archivo_vault
-
-    libro = archivo.leer(archivo_vault(vault, "LIBRO-DE-ESTILO.md"))
-    hallazgos = lint(libro)
-    mensaje = formatear(hallazgos)
-    if any(h.grado == ERROR for h in hallazgos):
-        return Resultado.rechazo(mensaje, error=False)
-    return Resultado.hecho(mensaje)

@@ -14,7 +14,7 @@ ciclo en `AHORA.md`. **No toca la red:** es copia de archivos y nada más.
    árbol se copia a `~/.tuku`, para que quede a la vista y editable;
 5. la raíz del checkout, subiendo desde este archivo (desarrollo sin instalar).
 
-La lógica vive acá y es importable; `tuku/cli.py` es una capa fina de argparse
+La lógica vive acá y es importable; `tuku/cli/` es una capa fina de argparse
 encima. Los tests llaman a `init()` directo, sin subprocesos.
 """
 

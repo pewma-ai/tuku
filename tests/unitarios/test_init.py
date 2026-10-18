@@ -77,5 +77,5 @@ def test_init_sustituye_el_placeholder_por_la_zona_real(tmp_path: Path) -> None:
     config = vault / "reglas" / "config.tuku.md"
     campos = parsear_config_md(config.read_text(encoding="utf-8"))
     assert campos["TZ"] == "Pacific/Easter"
-    assert campos["cycle_type"] == "semanal"
+    assert campos["cycle_name"] == "semana"
     assert campos["tuku_template"] == "vanilla"

@@ -62,11 +62,11 @@ from collections.abc import Iterable, Mapping
 from datetime import date
 from pathlib import Path
 
-from tuku import archivo, link, scope, todo
+from tuku import archivo, link, scope, scope_tree, todo_core
 from tuku.ahora import dias
 from tuku.config import FORMATO_FECHA, archivo_vault, fecha_corta, formato_fecha
 from tuku.resultado import Resultado
-from tuku.todo import SinTabla
+from tuku.todo_core import SinTabla
 
 #: Los temas que se regeneran por separado.
 TEMAS = ("todo", "scope", "comandos")
@@ -83,7 +83,7 @@ def _rechazo_del_canonico(vault: Path) -> Resultado | None:
             "Corrige el archivo antes de regenerar."
         )
     try:
-        todo.filas(texto)
+        todo_core.filas(texto)
     except SinTabla:
         return Resultado.rechazo(
             "PENDIENTES.md: error: falta la tabla de pendientes. "
@@ -95,7 +95,7 @@ def _rechazo_del_canonico(vault: Path) -> Resultado | None:
             "Corrige el formato de la tabla antes de regenerar."
         )
     try:
-        scope.leer(vault)
+        scope_tree.leer(vault)
     except Exception as e:
         return Resultado.rechazo(
             f"ambitos: error al leer ámbitos ({e}). "
@@ -188,7 +188,7 @@ _ENCABEZADO_AMBITOS = (
 )
 
 
-def linea_del_dia(fila: todo.Fila, rutas: Mapping[str, str] | None = None) -> str:
+def linea_del_dia(fila: todo_core.Fila, rutas: Mapping[str, str] | None = None) -> str:
     """La fila, como línea de la región del día: `- [ambito](ruta) - detalle`.
 
     La región vive en `AHORA.md`, así que la ruta es relativa a ese archivo.
@@ -200,7 +200,7 @@ def linea_del_dia(fila: todo.Fila, rutas: Mapping[str, str] | None = None) -> st
 
 
 def region_del_dia(
-    filas: list[todo.Fila], dia: date, rutas: Mapping[str, str] | None = None
+    filas: list[todo_core.Fila], dia: date, rutas: Mapping[str, str] | None = None
 ) -> list[str]:
     """Las líneas propagadas de un día: callout `[!todo] Pendientes del día` si hay pendientes.
 
@@ -217,7 +217,7 @@ def region_del_dia(
 
 
 def region_de_la_semana(
-    filas: list[todo.Fila], rutas: Mapping[str, str] | None = None
+    filas: list[todo_core.Fila], rutas: Mapping[str, str] | None = None
 ) -> list[str]:
     """Las líneas propagadas bajo el título: callout `[!todo] Pendientes de esta semana`.
 
@@ -227,11 +227,14 @@ def region_de_la_semana(
     items = [
         linea_del_dia(f, rutas)
         for f in filas
-        if todo.slug(f.horizonte) == todo.slug(todo.ESTA_SEMANA)
+        if todo_core.slug(f.horizonte) == todo_core.slug(todo_core.ESTA_SEMANA)
     ]
     if not items:
         return []
-    return [f"> [!todo] Pendientes de {todo.ESTA_SEMANA}", *(f"> {item}" for item in items)]
+    return [
+        f"> [!todo] Pendientes de {todo_core.ESTA_SEMANA}",
+        *(f"> {item}" for item in items),
+    ]
 
 
 def _fin_de_seccion(lineas: list[str], ini: int) -> int:
@@ -253,7 +256,7 @@ def vistas_en_ahora(ahora: str, pendientes: str, rutas: Mapping[str, str] | None
     línea. Un día cuyo encabezado no se puede fechar (el ciclo sin `from`/`to`
     resueltos) se deja intacto: sin fecha no hay nada que derivar.
     """
-    todas = todo.filas(pendientes)
+    todas = todo_core.filas(pendientes)
     lineas = ahora.splitlines()
 
     # De atrás hacia adelante: reemplazar una sección corre los índices de las
@@ -316,11 +319,11 @@ def callout(
     return "\n".join(lineas)
 
 
-def _orden_en_el_ambito(fila: todo.Fila) -> tuple[int, str]:
+def _orden_en_el_ambito(fila: todo_core.Fila) -> tuple[int, str]:
     return (0, fila.vence) if fila.dia else (1, "")
 
 
-def linea_del_ambito(fila: todo.Fila, formato: str = FORMATO_FECHA) -> str:
+def linea_del_ambito(fila: todo_core.Fila, formato: str = FORMATO_FECHA) -> str:
     """La fila, como línea del callout de su ámbito: `<fecha> - detalle`, o solo el detalle.
 
     La fecha va con el `date_format` del vault y el ámbito no va, porque el
@@ -347,8 +350,8 @@ def documento_ambitos(
     próxima a la más lejana, y después los demás en el orden de la tabla.
     """
     nombres_display = display_names or {}
-    por_ambito: dict[str, list[todo.Fila]] = {nombre: [] for nombre in ambitos}
-    for fila in todo.filas(pendientes):
+    por_ambito: dict[str, list[todo_core.Fila]] = {nombre: [] for nombre in ambitos}
+    for fila in todo_core.filas(pendientes):
         if fila.ambito in por_ambito:
             por_ambito[fila.ambito].append(fila)
     bloques = [
@@ -366,7 +369,7 @@ def documento_ambitos(
 
 def documento_del_vault(vault: Path, pendientes: str) -> str:
     """El `ambitos/PENDIENTES-AMBITOS.md` que corresponde al árbol y a la tabla."""
-    ambitos_objs = scope.leer(vault)
+    ambitos_objs = scope_tree.leer(vault)
     raiz = vault / "ambitos"
 
     def titulo(directorio: Path) -> str:
@@ -399,12 +402,12 @@ def _rehacer(vault: Path, *, vistas: bool, paginas: bool) -> list[Path]:
     if vistas:
         pendientes = archivo.leer(archivo_vault(vault, "PENDIENTES.md"))
         ruta_ahora = archivo_vault(vault, "AHORA.md")
-        texto = vistas_en_ahora(archivo.leer(ruta_ahora), pendientes, scope.rutas(vault))
+        texto = vistas_en_ahora(archivo.leer(ruta_ahora), pendientes, scope_tree.rutas(vault))
         if texto != archivo.leer(ruta_ahora):
             archivo.escribir(ruta_ahora, texto)
             cambiados.append(ruta_ahora)
 
-    for a in scope.leer(vault) if paginas else []:
+    for a in scope_tree.leer(vault) if paginas else []:
         pag_mod = scope.actualizar_pagina(vault, a.nombre)
         if pag_mod and pag_mod not in cambiados:
             cambiados.append(pag_mod)

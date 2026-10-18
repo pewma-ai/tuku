@@ -61,7 +61,7 @@ class Configuracion:
     vault: Path
     # De reglas/config.tuku.md
     zona_horaria: str
-    tipo_ciclo: str
+    nombres_de_ciclo: tuple[str, ...]
     datos: dict[str, str]
     # De LIBRO-DE-ESTILO.md
     autor: str | None
@@ -178,7 +178,9 @@ def leer_config(
         texto_config = archivo.leer(ruta_config) if ruta_config.is_file() else ""
     datos = parsear_config_md(texto_config)
     zona_horaria = datos.get("TZ", "America/Santiago")
-    tipo_ciclo = datos.get("cycle_type", "semanal")
+    nombres_de_ciclo = tuple(
+        n.strip() for n in datos.get("cycle_name", "").split(",") if n.strip()
+    ) or ("semana",)
 
     # 2. LIBRO-DE-ESTILO.md
     if texto_libro is None:
@@ -199,7 +201,7 @@ def leer_config(
     return Configuracion(
         vault=vault,
         zona_horaria=zona_horaria,
-        tipo_ciclo=tipo_ciclo,
+        nombres_de_ciclo=nombres_de_ciclo,
         datos=datos,
         autor=autor,
         vocabularios=vocabs,

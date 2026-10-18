@@ -85,15 +85,15 @@ def fix_todo(vault: Path) -> Resultado:
     Queda solo el `(Hecho)`. Después regenera lo que se deriva de `AHORA.md`.
     Una segunda corrida no cambia nada.
     """
-    from tuku import regenerate, todo
+    from tuku import regenerate, todo_core
     from tuku.config import archivo_vault
 
     ruta = archivo_vault(vault, "AHORA.md")
     texto = archivo.leer(ruta)
-    quitados = todo.cerrados_el_mismo_dia(texto)
+    quitados = todo_core.cerrados_el_mismo_dia(texto)
     if not quitados:
         return Resultado.hecho("fix todo: nada que reparar.")
-    archivo.escribir(ruta, todo.quitar_aperturas_cerradas(texto))
+    archivo.escribir(ruta, todo_core.quitar_aperturas_cerradas(texto))
     regenerate.rehacer(vault, ["AHORA.md"])
     return Resultado.hecho(
         "\n".join(

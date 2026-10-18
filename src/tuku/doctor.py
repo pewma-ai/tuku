@@ -1,9 +1,9 @@
 """tuku doctor: ¿está sano el vault? Corre todos los lint y revisa las tablas.
 
-Los lint sueltos (`cycle`, `entry`, `todo`, `style`) siguen existiendo para uso
-fino. Este los junta y agrega lo que ninguno cubre: que las tablas de contrato
-existan y estén bien formadas. Es el comando de quien vuelve al vault después de
-un mes y no se acuerda de qué revisar.
+Es la única entrada de revisión: cada tema (`TEMAS`) es el nombre de una revisión,
+y sin tema corre todas. Junta los lint de cada archivo y agrega lo que ninguno
+cubre: que las tablas de contrato existan y estén bien formadas. Es el comando de
+quien vuelve al vault después de un mes y no se acuerda de qué revisar.
 
 Las tablas de `reglas/types.md` son distintas de las del libro de estilo. Las del
 libro son vocabulario del autor: una fila que no está no es error, es vocabulario
@@ -17,12 +17,13 @@ corregir son operaciones distintas (`spec/cli.md`), y el conjunto canónico no s
 sobreescribe sin que el autor lo apruebe (principio 3).
 
 **Qué lee y escribe:** lee todo lo anterior. **No escribe.**
-**A mano:** correr los cuatro lint y revisar que `reglas/types.md` tenga su tabla.
+**A mano:** revisar cada archivo contra su spec y que `reglas/types.md` tenga su tabla.
 """
 
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -30,7 +31,7 @@ from tuku import archivo
 from tuku.resultado import Resultado
 
 #: Los campos de `config.tuku.md` sin los cuales los comandos no pueden operar.
-CAMPOS_REQUERIDOS = ("TZ", "cycle_type", "tuku_template", "tuku_version")
+CAMPOS_REQUERIDOS = ("TZ", "tuku_template", "tuku_version")
 
 #: Los `type` sin los cuales un vault no se puede describir entero.
 TIPOS_REQUERIDOS = ("Logbook", "Todo", "Scope", "Note", "Cadence", "Config", "Style Guide")
@@ -314,25 +315,6 @@ def revisar_version(config_md: str | None, version_home: str | None) -> Revision
     )
 
 
-#: Los temas de `tuku doctor TEMA`: el nombre de cada revisión, en el orden en que corren.
-#: `link`, `todo` y `scope` son los mismos nombres que usan `tuku fix` y `tuku regenerate`.
-TEMAS = (
-    "config",
-    "version",
-    "types",
-    "files",
-    "frontmatter",
-    "dispatch",
-    "link",
-    "cycle",
-    "entry",
-    "todo",
-    "style",
-    "scope",
-    "note",
-)
-
-
 def archivos_md(vault: Path) -> list[str]:
     """Los `.md` del vault, relativos a él y con `/`, sin las carpetas ocultas."""
     return sorted(
@@ -456,6 +438,144 @@ def revisar_notas(vault: Path, nota: Path | None = None) -> Revision:
     )
 
 
+@dataclass(frozen=True)
+class _Check:
+    """What one topic needs to run: the vault and the arguments of `revisar_vault`."""
+
+    vault: Path
+    comandos: frozenset[str] | None
+    nota: Path | None
+
+    def read(self, relative: str) -> str | None:
+        return archivo_opcional(self.vault, relative)
+
+
+def _check_config(c: _Check) -> list[Revision]:
+    return [revisar_config(c.read("reglas/config.tuku.md"))]
+
+
+def _check_version(c: _Check) -> list[Revision]:
+    from tuku.init import TukuHomeInvalido, resolver_home, version_del_home
+
+    try:
+        version_home = version_del_home(resolver_home())
+    except TukuHomeInvalido:
+        version_home = None
+    return [revisar_version(c.read("reglas/config.tuku.md"), version_home)]
+
+
+def _check_types(c: _Check) -> list[Revision]:
+    return [revisar_tipos(c.read("reglas/types.md"))]
+
+
+def _check_files(c: _Check) -> list[Revision]:
+    return [revisar_archivos(c.vault)]
+
+
+def _check_frontmatter(c: _Check) -> list[Revision]:
+    types_md = c.read("reglas/types.md")
+    valid = tipos_declarados(types_md) if types_md else []
+    return [revisar_frontmatter(c.vault, tipos_validos=valid)]
+
+
+def _check_dispatch(c: _Check) -> list[Revision]:
+    if c.comandos is None:
+        return []
+    return [revisar_despacho(c.read("AGENTS.md"), c.comandos)]
+
+
+def _check_link(c: _Check) -> list[Revision]:
+    return [revisar_links(c.vault)]
+
+
+def _check_logbook(c: _Check) -> list[Revision]:
+    """`cycle` and `entry` read the same file, so they run together."""
+    from tuku import cyclelint
+    from tuku.config import leer_config
+    from tuku.lint import ERROR
+    from tuku.lint import formatear as format_records
+    from tuku.lint import lint as lint_records
+
+    ahora = c.read("AHORA.md")
+    if ahora is None:
+        return [ausente("cycle", "AHORA.md"), ausente("entry", "AHORA.md")]
+    cycle_findings = cyclelint.lint(ahora)
+    entry_findings = lint_records(ahora, abiertos=leer_config(c.vault).vocabularios_abiertos())
+    entry_ok = not any(h.grado == ERROR for h in entry_findings)
+    return [
+        Revision("cycle", cyclelint.formatear(cycle_findings), not cycle_findings),
+        Revision(
+            "entry",
+            format_records(entry_findings),
+            entry_ok,
+            aviso=entry_ok and bool(entry_findings),
+        ),
+    ]
+
+
+def _check_todo(c: _Check) -> list[Revision]:
+    if c.read("PENDIENTES.md") is None:
+        return [ausente("todo", "PENDIENTES.md")]
+    return [revisar_todo(c.vault)]
+
+
+def _check_style(c: _Check) -> list[Revision]:
+    from tuku import style
+    from tuku.lint import ERROR
+
+    libro = c.read("LIBRO-DE-ESTILO.md")
+    if libro is None:
+        return [ausente("style", "LIBRO-DE-ESTILO.md")]
+    findings = style.lint(libro)
+    ok = not any(h.grado == ERROR for h in findings)
+    return [Revision("style", style.formatear(findings), ok, aviso=ok and bool(findings))]
+
+
+def _check_scope(c: _Check) -> list[Revision]:
+    from tuku import scope
+
+    findings = scope.lint(c.vault)
+    questions = scope.keywords_repetidas(c.vault)
+    counts = [
+        *([f"scope: {len(findings)} error(es)."] if findings else []),
+        *([f"scope: {len(questions)} pregunta(s)."] if questions else []),
+    ]
+    return [
+        Revision(
+            "scope",
+            "\n".join([*findings, *questions, *counts]) or "scope: sin hallazgos.",
+            not findings,
+            aviso=not findings and bool(questions),
+        )
+    ]
+
+
+def _check_note(c: _Check) -> list[Revision]:
+    return [revisar_notas(c.vault, c.nota)]
+
+
+#: Each check with the topics that select it, in the order they run. The topic is
+#: the name of the revision it reports; `link`, `todo` and `scope` are the same
+#: names `tuku fix` and `tuku regenerate` use.
+_CHECKS: tuple[tuple[tuple[str, ...], Callable[[_Check], list[Revision]]], ...] = (
+    (("config",), _check_config),
+    (("version",), _check_version),
+    (("types",), _check_types),
+    (("files",), _check_files),
+    (("frontmatter",), _check_frontmatter),
+    (("dispatch",), _check_dispatch),
+    (("link",), _check_link),
+    (("cycle", "entry"), _check_logbook),
+    (("todo",), _check_todo),
+    (("style",), _check_style),
+    (("scope",), _check_scope),
+    (("note",), _check_note),
+)
+
+#: Los temas de `tuku doctor TEMA`: el nombre de cada revisión, en el orden en que corren.
+TEMAS = tuple(topic for topics, _ in _CHECKS for topic in topics)
+
+
 def revisar_vault(
     vault: Path,
     *,
@@ -482,106 +602,10 @@ def revisar_vault(
 
     Sin `verbose` el reporte trae solo los hallazgos y los avisos; ver `formatear`.
     """
-    from tuku import cyclelint, scope, style
-    from tuku.config import leer_config
-    from tuku.lint import ERROR
-    from tuku.lint import formatear as formatear_registros
-    from tuku.lint import lint as lint_registros
-
-    def leer(nombre: str) -> str | None:
-        return archivo_opcional(vault, nombre)
-
-    def quiere(*nombres: str) -> bool:
-        return tema is None or tema in nombres
-
-    revisiones: list[Revision] = []
-    types_md = leer("reglas/types.md")
-    if quiere("config"):
-        revisiones.append(revisar_config(leer("reglas/config.tuku.md")))
-    if quiere("version"):
-        from tuku.init import TukuHomeInvalido, resolver_home, version_del_home
-
-        try:
-            version_home = version_del_home(resolver_home())
-        except TukuHomeInvalido:
-            version_home = None
-        revisiones.append(revisar_version(leer("reglas/config.tuku.md"), version_home))
-    if quiere("types"):
-        revisiones.append(revisar_tipos(types_md))
-    if quiere("files"):
-        revisiones.append(revisar_archivos(vault))
-    if quiere("frontmatter"):
-        revisiones.append(
-            revisar_frontmatter(
-                vault, tipos_validos=tipos_declarados(types_md) if types_md else []
-            )
-        )
-    if comandos is not None and quiere("dispatch"):
-        revisiones.append(revisar_despacho(leer("AGENTS.md"), comandos))
-    if quiere("link"):
-        revisiones.append(revisar_links(vault))
-
-    if quiere("cycle", "entry"):
-        ahora = leer("AHORA.md")
-        if ahora is None:
-            revisiones.append(ausente("cycle", "AHORA.md"))
-            revisiones.append(ausente("entry", "AHORA.md"))
-        else:
-            h_cycle = cyclelint.lint(ahora)
-            revisiones.append(Revision("cycle", cyclelint.formatear(h_cycle), not h_cycle))
-
-            h_entry = lint_registros(ahora, abiertos=leer_config(vault).vocabularios_abiertos())
-            sano_entry = not any(h.grado == ERROR for h in h_entry)
-            revisiones.append(
-                Revision(
-                    "entry",
-                    formatear_registros(h_entry),
-                    sano_entry,
-                    aviso=sano_entry and bool(h_entry),
-                )
-            )
-
-    if quiere("todo"):
-        if leer("PENDIENTES.md") is None:
-            revisiones.append(ausente("todo", "PENDIENTES.md"))
-        else:
-            # `doctor todo` entero: duplicados, marcas sin su fila y vistas desactualizadas.
-            revisiones.append(revisar_todo(vault))
-
-    if quiere("style"):
-        libro = leer("LIBRO-DE-ESTILO.md")
-        if libro is None:
-            revisiones.append(ausente("style", "LIBRO-DE-ESTILO.md"))
-        else:
-            h_style = style.lint(libro)
-            sano_style = not any(h.grado == ERROR for h in h_style)
-            revisiones.append(
-                Revision(
-                    "style",
-                    style.formatear(h_style),
-                    sano_style,
-                    aviso=sano_style and bool(h_style),
-                )
-            )
-
-    if quiere("scope"):
-        h_scope = scope.lint(vault)
-        preguntas = scope.keywords_repetidas(vault)
-        cuentas = [
-            *([f"scope: {len(h_scope)} error(es)."] if h_scope else []),
-            *([f"scope: {len(preguntas)} pregunta(s)."] if preguntas else []),
-        ]
-        revisiones.append(
-            Revision(
-                "scope",
-                "\n".join([*h_scope, *preguntas, *cuentas]) or "scope: sin hallazgos.",
-                not h_scope,
-                aviso=not h_scope and bool(preguntas),
-            )
-        )
-
-    if quiere("note"):
-        revisiones.append(revisar_notas(vault, nota))
+    check = _Check(vault, comandos, nota)
+    revisiones = [
+        r for topics, run in _CHECKS if tema is None or tema in topics for r in run(check)
+    ]
 
     if tema is not None and not verbose and all(r.sano and not r.aviso for r in revisiones):
         return Resultado.hecho(f"doctor {tema}: sin hallazgos.")

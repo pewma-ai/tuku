@@ -27,14 +27,14 @@ def test_parsear_la_config_y_el_autor() -> None:
         "| Campo | Valor |\n"
         "| --- | --- |\n"
         "| `TZ` | `America/Santiago` |\n"
-        "| `cycle_type` | `semanal` |\n"
+        "| `cycle_name` | `semana` |\n"
         "| `Campo extra` | valor personalizado |\n\n"
         "## Otra sección\n"
     )
     datos = parsear_config_md(texto)
     assert datos == {
         "TZ": "America/Santiago",
-        "cycle_type": "semanal",
+        "cycle_name": "semana",
         "Campo extra": "valor personalizado",
     }
     assert parsear_config_md("") == {}
@@ -53,7 +53,7 @@ def test_leer_config_sobre_template_vanilla() -> None:
     assert cfg.vault == vanilla
     # En el template la zona es el placeholder; `tuku init` la sustituye al sembrar.
     assert cfg.zona_horaria == "TZ-DEL-SISTEMA"
-    assert cfg.tipo_ciclo == "semanal"
+    assert cfg.nombres_de_ciclo == ("semana",)
     assert cfg.autor is None
 
     assert "progreso" in cfg.clasificaciones
@@ -71,7 +71,8 @@ def test_leer_config_sobre_template_vanilla() -> None:
 
 def test_leer_config_en_memoria_sin_disco(tmp_path: Path) -> None:
     texto_cfg = (
-        "| Campo | Valor |\n| --- | --- |\n| `TZ` | `UTC` |\n| `cycle_type` | `mensual` |\n"
+        "| Campo | Valor |\n| --- | --- |\n"
+        "| `TZ` | `UTC` |\n| `cycle_name` | `turno, descanso` |\n"
     )
     texto_libro = (
         "## El autor\n\n"
@@ -99,7 +100,7 @@ def test_leer_config_en_memoria_sin_disco(tmp_path: Path) -> None:
         texto_plantilla_ahora=texto_plantilla,
     )
     assert cfg.zona_horaria == "UTC"
-    assert cfg.tipo_ciclo == "mensual"
+    assert cfg.nombres_de_ciclo == ("turno", "descanso")
     assert cfg.autor == "Test Bot"
     assert cfg.clasificaciones == ["alfa"]
     assert cfg.plantilla_ahora == "PLANTILLA PERSONALIZADA"

@@ -293,8 +293,7 @@ def crear_con_constancia(
     from datetime import datetime
 
     from tuku import scope as scope_mod
-    from tuku.ahora import encabezado_de
-    from tuku.entry import add
+    from tuku.entry import stamp
 
     if not slug(title):
         return Resultado.rechazo(
@@ -304,10 +303,12 @@ def crear_con_constancia(
         subtype = subtype.strip().lower()
         if (rechazo := _rechazo_de_subtype(vault, subtype)) is not None:
             return rechazo
+    tree = scope_mod.read_tree(vault)
     if scope:
-        scope = scope_mod.canonico(vault, scope)
-        if (rechazo := scope_mod.rechazo_si_no_existe(vault, scope)) is not None:
-            return rechazo
+        resolved = scope_mod.resolve_scope(tree, scope)
+        if isinstance(resolved, Resultado):
+            return resolved
+        scope = resolved
 
     hoy = day or date.today()
     hora = hour or datetime.now().strftime("%H:%M")
@@ -319,14 +320,12 @@ def crear_con_constancia(
     pendiente: str | None = None
     if record and ahora_path.is_file():
         texto = archivo.leer(ahora_path)
-        constancia = registro_de_constancia(
-            ruta, hour=hora, scope=scope, rutas=scope_mod.rutas(vault)
-        )
+        constancia = registro_de_constancia(ruta, hour=hora, scope=scope, rutas=tree.paths)
         if constancia not in texto:
-            try:
-                pendiente = add(texto, [constancia], day=encabezado_de(hoy))
-            except ValueError as e:
-                return Resultado.rechazo(str(e))
+            stamped = stamp(texto, [constancia], day=hoy)
+            if isinstance(stamped, Resultado):
+                return stamped
+            pendiente = stamped
 
     crear(
         vault,
@@ -334,7 +333,7 @@ def crear_con_constancia(
         body=body,
         scope=scope,
         today=hoy,
-        rutas=scope_mod.rutas(vault),
+        rutas=tree.paths,
         subtype=subtype,
         menciones=menciones,
     )

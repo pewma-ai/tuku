@@ -34,134 +34,76 @@ import os
 import re
 import unicodedata
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
 from tuku import archivo, link
 from tuku.resultado import Resultado
-
-_KEYWORDS = re.compile(r"^keywords:\s*\[(?P<lista>[^\]]*)\]\s*$", re.M)
-
+from tuku.scope_tree import (
+    KEYWORDS_LINE,
+)
+from tuku.scope_tree import (
+    Ambito as Ambito,
+)
+from tuku.scope_tree import (
+    Tree as Tree,
+)
+from tuku.scope_tree import (
+    canonico as canonico,
+)
+from tuku.scope_tree import (
+    carpeta as carpeta,
+)
+from tuku.scope_tree import (
+    case_clash as case_clash,
+)
+from tuku.scope_tree import (
+    directorio_de as directorio_de,
+)
+from tuku.scope_tree import (
+    igual_nombre as igual_nombre,
+)
+from tuku.scope_tree import (
+    keyword_key as keyword_key,
+)
+from tuku.scope_tree import (
+    keywords as keywords,
+)
+from tuku.scope_tree import (
+    leer as leer,
+)
+from tuku.scope_tree import (
+    merge_keywords as merge_keywords,
+)
+from tuku.scope_tree import (
+    nombres as nombres,
+)
+from tuku.scope_tree import (
+    normalizar as normalizar,
+)
+from tuku.scope_tree import (
+    page_of as page_of,
+)
+from tuku.scope_tree import (
+    palabras_de as palabras_de,
+)
+from tuku.scope_tree import (
+    read_tree as read_tree,
+)
+from tuku.scope_tree import (
+    rechazo_si_no_existe as rechazo_si_no_existe,
+)
+from tuku.scope_tree import (
+    reject_bad_keywords as reject_bad_keywords,
+)
+from tuku.scope_tree import (
+    resolve_scope as resolve_scope,
+)
+from tuku.scope_tree import (
+    rutas as rutas,
+)
 
 _PARENT = re.compile(r"^parent:[ \t]*(?P<ruta>.*?)[ \t]*$", re.M)
-
-
-@dataclass(frozen=True)
-class Ambito:
-    nombre: str
-    directorio: Path
-    keywords: list[str]
-
-
-def _pagina(directorio: Path) -> Path:
-    return directorio / f"{directorio.name}.md"
-
-
-def normalizar(nombre: str) -> str:
-    """El nombre de un ámbito tal como va en disco y en los enlaces: kebab-case.
-
-    En minúsculas y con los espacios en guion: el autor dicta "Depto Centro" y el
-    ámbito es `depto-centro`. Sin esto, cada agente elige su forma y el mismo frente
-    termina con dos nombres.
-    """
-    return re.sub(r"\s+", "-", nombre.strip().strip("[]").strip()).lower()
-
-
-def igual_nombre(a: str, b: str) -> bool:
-    """Dos nombres de ámbito son el mismo si solo difieren en mayúsculas.
-
-    En macOS y Windows el disco no las distingue, y un vault viaja entre
-    sistemas: dos carpetas que solo difieren en mayúsculas no pueden coexistir.
-    """
-    return a.casefold() == b.casefold()
-
-
-def canonico(vault: Path, nombre: str) -> str:
-    """El nombre normalizado, tal como está escrito el ámbito existente que calza.
-
-    `ñandú rojo` encuentra `Ñandú-Rojo`. Si no hay ninguno, el normalizado.
-    """
-    limpio = normalizar(nombre)
-    return next((n for n in sorted(nombres(vault)) if igual_nombre(n, limpio)), limpio)
-
-
-def _choque(vault: Path, nombre: str, *, salvo: str = "") -> str | None:
-    """Otro nombre de `ambitos/` que solo difiere de `nombre` en mayúsculas."""
-    return next(
-        (
-            n
-            for n in sorted(nombres(vault))
-            if igual_nombre(n, nombre) and n != nombre and n != salvo
-        ),
-        None,
-    )
-
-
-def nombres(vault: Path) -> set[str]:
-    """Todo lo que un registro puede nombrar en `ambitos/`.
-
-    Ámbitos, categorías y actividades. Que un registro apunte a una categoría es
-    un error que reporta `doctor scope`, no uno que impida escribirlo.
-    """
-    raiz = vault / "ambitos"
-    if not raiz.is_dir():
-        return set()
-    salida = set()
-    for p in raiz.rglob("*"):
-        if p.is_dir():
-            salida.add(p.name)
-        elif p.suffix == ".md" and not p.stem.isupper():
-            salida.add(p.stem)
-    return salida
-
-
-def rutas(vault: Path) -> dict[str, str]:
-    """Nombre → ruta relativa al vault de todo lo que un registro puede nombrar.
-
-    Es lo que `link` necesita para componer el enlace a un ámbito anidado con
-    su ruta completa: la página del ámbito, el archivo de una actividad, o la
-    carpeta de una categoría. Si dos nombres chocan manda el primero en orden,
-    y `spec/ambitos.md` no admite que choquen.
-    """
-    raiz = vault / "ambitos"
-    if not raiz.is_dir():
-        return {}
-    salida: dict[str, str] = {}
-    for p in sorted(raiz.rglob("*")):
-        if p.is_dir():
-            destino = _pagina(p) if _pagina(p).is_file() else p
-            salida.setdefault(p.name, destino.relative_to(vault).as_posix())
-        elif p.suffix == ".md" and not p.stem.isupper() and p.stem != p.parent.name:
-            salida.setdefault(p.stem, p.relative_to(vault).as_posix())
-    return salida
-
-
-def carpeta(vault: Path, nombre: str) -> Path:
-    """La carpeta del ámbito `nombre`, anidado o no. Plana si no se encuentra."""
-    for a in leer(vault):
-        if a.nombre == nombre:
-            return a.directorio
-    return vault / "ambitos" / nombre
-
-
-def directorio_de(vault: Path, nombre: str) -> Path | None:
-    """La carpeta de un ámbito o de una categoría, donde esté bajo `ambitos/`."""
-    raiz = vault / "ambitos"
-    if not raiz.is_dir():
-        return None
-    return next((p for p in sorted(raiz.rglob("*")) if p.is_dir() and p.name == nombre), None)
-
-
-def rechazo_si_no_existe(vault: Path, nombre: str) -> Resultado | None:
-    """Rechaza un ámbito que no existe. Crearlo es decisión del autor, no del comando."""
-    if nombre in nombres(vault):
-        return None
-    existentes = ", ".join(sorted(a.nombre for a in leer(vault))) or "ninguno"
-    return Resultado.rechazo(
-        f"no existe el ámbito {nombre!r}. Créalo con `tuku scope create {nombre}` "
-        f"si el autor lo pide, o usa uno que exista: {existentes}."
-    )
 
 
 def _rechazo_de_nombre(nombre: str) -> Resultado | None:
@@ -230,54 +172,6 @@ def resolver_padre(vault: Path, parent: str) -> Path | Resultado:
     return actual
 
 
-def keywords(pagina: str) -> list[str]:
-    """Las `keywords` del frontmatter de una página de ámbito."""
-    m = _KEYWORDS.search(pagina)
-    if m is None:
-        return []
-    return [k.strip() for k in m.group("lista").split(",") if k.strip()]
-
-
-def _clave(keyword: str) -> str:
-    """La keyword como se compara: guiones y espacios valen lo mismo."""
-    return re.sub(r"[-\s]+", " ", keyword).strip().casefold()
-
-
-def palabras_de(valores: Sequence[str]) -> list[str]:
-    """Las keywords que dicen `valores`: separadas por coma, en kebab-case.
-
-    `--keyword "Los Robles, Rodolfo"` son dos keywords, `los-robles` y `rodolfo`: la
-    misma regla de los nombres de ámbito (`normalizar`), así una keyword se escribe
-    igual dentro de la lista `[a, b]` del frontmatter, que separa con comas y espacios.
-    """
-    palabras = (re.sub(r"\s+", "-", p.strip()).lower() for v in valores for p in v.split(","))
-    return [p for p in palabras if p]
-
-
-def _sumar(previas: list[str], nuevas: Sequence[str], nombre: str = "") -> list[str]:
-    """`previas` y, detrás, las `nuevas` que ninguna anterior ni el `nombre` repiten.
-
-    El nombre del ámbito ya es el de su carpeta: una keyword que lo repite no aporta.
-    """
-    salida = list(previas)
-    vistas = {_clave(k) for k in salida} | ({_clave(nombre)} if nombre else set())
-    for k in palabras_de(nuevas):
-        if k and _clave(k) not in vistas:
-            salida.append(k)
-            vistas.add(_clave(k))
-    return salida
-
-
-def _rechazo_de_keywords(nuevas: Sequence[str]) -> Resultado | None:
-    """Una keyword vive en una lista `[a, b]` de una línea: sin corchetes."""
-    malas = [k for k in nuevas if re.search(r"[\[\]]", k)]
-    if malas:
-        return Resultado.rechazo(
-            f"la keyword {malas[0]!r} lleva corchetes y no cabe en la lista del frontmatter."
-        )
-    return None
-
-
 def crear(
     vault: Path, name: str, padre: Path | None = None, palabras: Sequence[str] = ()
 ) -> Path:
@@ -292,11 +186,11 @@ def crear(
     directorio = (padre or vault / "ambitos") / valor
     directorio.mkdir(parents=True, exist_ok=True)
 
-    pagina = _pagina(directorio)
+    pagina = page_of(directorio)
     if not pagina.exists():
         rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", directorio)
         rel = rel.replace(os.sep, "/")
-        lista = ", ".join(_sumar([], palabras, valor))
+        lista = ", ".join(merge_keywords([], palabras, valor))
         base = f"---\ntype: Scope\nkeywords: [{lista}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n"
         ahora_file = vault / "AHORA.md"
         ahora_texto = archivo.leer(ahora_file) if ahora_file.is_file() else ""
@@ -349,11 +243,11 @@ def _lineas_de_hijos(base: Path, carpeta: Path, nivel: int = 0) -> list[str]:
     marca = "> " * (nivel + 1)
     hijos = sorted(h for h in carpeta.iterdir() if h.is_dir() and not h.name.startswith("."))
     lineas = [
-        f"{marca}- {link.md(h.name, os.path.relpath(_pagina(h), base).replace(os.sep, '/'))}"
+        f"{marca}- {link.md(h.name, os.path.relpath(page_of(h), base).replace(os.sep, '/'))}"
         for h in hijos
-        if _pagina(h).is_file()
+        if page_of(h).is_file()
     ]
-    for categoria in (h for h in hijos if not _pagina(h).is_file()):
+    for categoria in (h for h in hijos if not page_of(h).is_file()):
         interior = _lineas_de_hijos(base, categoria, nivel + 1)
         if not interior:
             continue
@@ -406,8 +300,8 @@ def refrescar_hijos(carpeta: Path) -> None:
     for d in (carpeta, *carpeta.parents):
         if d.name == "ambitos":
             return
-        if _pagina(d).is_file():
-            pagina = _pagina(d)
+        if page_of(d).is_file():
+            pagina = page_of(d)
             texto = archivo.leer(pagina)
             salida = _con_hijos(d, texto)
             if salida != texto:
@@ -462,7 +356,7 @@ def regenerar_parent(vault: Path) -> list[Path]:
     """
     cambiados: list[Path] = []
     for a in leer(vault):
-        pagina = _pagina(a.directorio)
+        pagina = page_of(a.directorio)
         texto = archivo.leer(pagina)
         salida = _con_parent(texto, _parent_esperado(vault, a.directorio))
         if salida != texto:
@@ -479,7 +373,7 @@ def regenerar_hijos(vault: Path) -> list[Path]:
     """
     cambiados: list[Path] = []
     for a in leer(vault):
-        pagina = _pagina(a.directorio)
+        pagina = page_of(a.directorio)
         if not pagina.is_file():
             continue
         texto = archivo.leer(pagina)
@@ -492,7 +386,7 @@ def regenerar_hijos(vault: Path) -> list[Path]:
 
 def retitular_hijos(directorio: Path) -> None:
     """Pone al callout de hijos el nombre que tiene ahora el ámbito."""
-    pagina = _pagina(directorio)
+    pagina = page_of(directorio)
     if not pagina.is_file():
         return
     texto = archivo.leer(pagina)
@@ -677,7 +571,7 @@ def actualizar_contenido_pagina(
 
 def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
     """Regenera la actividad en la página del ámbito. Devuelve la ruta si cambió."""
-    pagina = _pagina(carpeta(vault, nombre))
+    pagina = page_of(carpeta(vault, nombre))
     if not pagina.is_file():
         return None
     ahora_path = vault / "AHORA.md"
@@ -702,31 +596,12 @@ def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
     return None
 
 
-def leer(vault: Path) -> list[Ambito]:
-    """Los ámbitos del árbol: los directorios que tienen página propia."""
-    raiz = vault / "ambitos"
-    if not raiz.is_dir():
-        return []
-    salida = []
-    for directorio in sorted(p for p in raiz.rglob("*") if p.is_dir()):
-        pagina = _pagina(directorio)
-        if pagina.is_file():
-            salida.append(
-                Ambito(
-                    directorio.name,
-                    directorio,
-                    keywords(archivo.leer(pagina)),
-                )
-            )
-    return salida
-
-
 def categorias(vault: Path) -> list[str]:
     """Los directorios de `ambitos/` sin página propia: agrupan y nada más."""
     raiz = vault / "ambitos"
     if not raiz.is_dir():
         return []
-    return sorted(d.name for d in raiz.rglob("*") if d.is_dir() and not _pagina(d).is_file())
+    return sorted(d.name for d in raiz.rglob("*") if d.is_dir() and not page_of(d).is_file())
 
 
 def lint_categorias(ahora: str, *, categorias: list[str]) -> list[str]:
@@ -764,7 +639,7 @@ def lint_parent(vault: Path) -> list[str]:
     """Comprueba que el `parent:` de cada página diga en qué carpeta está el ámbito."""
     hallazgos = []
     for a in leer(vault):
-        pagina = _pagina(a.directorio)
+        pagina = page_of(a.directorio)
         esperado = _parent_esperado(vault, a.directorio)
         actual = parent_de(archivo.leer(pagina))
         if actual != esperado:
@@ -851,7 +726,7 @@ def _donde_cuelga(vault: Path, carpeta: Path) -> tuple[Path | None, list[str]]:
     """
     categorias: list[str] = []
     raiz = vault / "ambitos"
-    while carpeta != raiz and not _pagina(carpeta).is_file():
+    while carpeta != raiz and not page_of(carpeta).is_file():
         categorias.insert(0, carpeta.name)
         carpeta = carpeta.parent
     return (None if carpeta == raiz else carpeta), categorias
@@ -894,20 +769,19 @@ def crear_con_constancia(
     """
     from datetime import datetime
 
-    from tuku import context, entry, todo
-    from tuku.ahora import encabezado_de
+    from tuku import context, entry, todo_core
 
     nombre = normalizar(nombre)
     if (rechazo := _rechazo_de_nombre(nombre)) is not None:
         return rechazo
-    if (rechazo := _rechazo_de_keywords(palabras)) is not None:
+    if (rechazo := reject_bad_keywords(palabras)) is not None:
         return rechazo
     try:
         inicio = context.desde(since, date.today(), DESDE_POR_DEFECTO)
     except ValueError as e:
         return Resultado.rechazo(str(e))
     palabras = palabras_de(palabras)
-    if (otro := _choque(vault, nombre)) is not None:
+    if (otro := case_clash(vault, nombre)) is not None:
         return Resultado.rechazo(
             f"ya existe el ámbito {otro!r}, y los nombres no distinguen mayúsculas. "
             f"Usa {otro!r}, o elige otro nombre."
@@ -927,19 +801,18 @@ def crear_con_constancia(
     pendientes = vault / "PENDIENTES.md"
     if pendientes.is_file():
         try:
-            todo.filas(archivo.leer(pendientes))
-        except todo.SinTabla as e:
+            todo_core.filas(archivo.leer(pendientes))
+        except todo_core.SinTabla as e:
             return Resultado.rechazo(str(e))
 
     ahora_path = vault / "AHORA.md"
     nuevo = existente is None
-    dia = encabezado_de(day or date.today())
+    when = day or date.today()
     hora = hour or datetime.now().strftime("%H:%M")
     if nuevo and ahora_path.is_file():
-        try:
-            entry.add(archivo.leer(ahora_path), [], day=dia)
-        except ValueError as e:
-            return Resultado.rechazo(str(e))
+        fits = entry.stamp(archivo.leer(ahora_path), [], day=when)
+        if isinstance(fits, Resultado):
+            return fits
 
     directorio = crear(
         vault, nombre, existente.parent if existente is not None else padre, palabras
@@ -970,7 +843,10 @@ def crear_con_constancia(
                         f", en {bajo}" if bajo else ""
                     )
             constancia = registro_de_constancia(nombre, hour=hora, rutas=mapa, bajo=bajo)
-            texto = entry.add(texto, [constancia], day=dia)
+            stamped = entry.stamp(texto, [constancia], day=when)
+            if isinstance(stamped, Resultado):
+                return stamped
+            texto = stamped
         if texto != original:
             archivo.escribir(ahora_path, texto)
         actualizar_pagina(vault, nombre)
@@ -1015,7 +891,7 @@ def registros_que_nombran(
     from tuku import context
     from tuku.ahora import rango
 
-    pagina = _pagina(carpeta(vault, nombre))
+    pagina = page_of(carpeta(vault, nombre))
     claves = {_plegar(nombre), *(_plegar(k) for k in keywords(archivo.leer(pagina)))}
     patron = re.compile(
         "|".join(rf"(?<!\w){re.escape(c)}(?!\w)" for c in sorted(claves, key=len, reverse=True))
@@ -1073,7 +949,10 @@ def _registros_previos(vault: Path, nombre: str, inicio: date) -> str:
 
 def _claves_de(vault: Path) -> dict[str, set[str]]:
     """Por ámbito, las palabras con que se lo nombra: su nombre y sus keywords."""
-    return {a.nombre: {_clave(a.nombre), *(_clave(k) for k in a.keywords)} for a in leer(vault)}
+    return {
+        a.nombre: {keyword_key(a.nombre), *(keyword_key(k) for k in a.keywords)}
+        for a in leer(vault)
+    }
 
 
 def _aviso_de_palabra(palabra: str, duenos: Sequence[str], de: str | None = None) -> str:
@@ -1095,7 +974,7 @@ def avisos_de_keywords(vault: Path, nombre: str, palabras: Sequence[str]) -> tup
     claves = _claves_de(vault)
     avisos = []
     for palabra in palabras:
-        duenos = [n for n, cs in claves.items() if n != nombre and _clave(palabra) in cs]
+        duenos = [n for n, cs in claves.items() if n != nombre and keyword_key(palabra) in cs]
         if duenos:
             avisos.append(_aviso_de_palabra(palabra, duenos, nombre))
     return tuple(avisos)
@@ -1112,7 +991,7 @@ def keywords_repetidas(vault: Path) -> list[str]:
     vistas: dict[str, str] = {}
     for a in ambitos:
         for k in a.keywords:
-            vistas.setdefault(_clave(k), k)
+            vistas.setdefault(keyword_key(k), k)
     salida = []
     for clave, palabra in vistas.items():
         duenos = [n for n, cs in claves.items() if clave in cs]
@@ -1140,28 +1019,29 @@ def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
     enlaza lo que ya está escrito. Idempotente: lo que ya estaba, sin distinguir
     mayúsculas, guiones ni espacios, no se repite, y si nada es nuevo no escribe nada.
     """
-    nombre = canonico(vault, nombre)
-    if (rechazo := rechazo_si_no_existe(vault, nombre)) is not None:
-        return rechazo
-    if (rechazo := _rechazo_de_keywords(nuevas)) is not None:
+    resolved = resolve_scope(read_tree(vault), nombre)
+    if isinstance(resolved, Resultado):
+        return resolved
+    nombre = resolved
+    if (rechazo := reject_bad_keywords(nuevas)) is not None:
         return rechazo
     if not palabras_de(nuevas):
         return Resultado.rechazo(
             f"nada que actualizar. Uso: `tuku scope update {nombre} --keyword PALABRA`."
         )
-    pagina = _pagina(carpeta(vault, nombre))
+    pagina = page_of(carpeta(vault, nombre))
     texto = archivo.leer(pagina)
-    if _KEYWORDS.search(texto) is None:
+    if KEYWORDS_LINE.search(texto) is None:
         return Resultado.rechazo(
             f"la página de {nombre!r} no declara `keywords:` en su frontmatter. "
             f"Agrega la línea `keywords: []` a mano y vuelve a correrlo."
         )
     previas = keywords(texto)
-    todas = _sumar(previas, nuevas, nombre)
+    todas = merge_keywords(previas, nuevas, nombre)
     if todas == previas:
         return Resultado.hecho(f"{nombre!r} ya tenía esas keywords: {', '.join(previas)}.")
     archivo.escribir(
-        pagina, _KEYWORDS.sub(lambda _m: f"keywords: [{', '.join(todas)}]", texto, count=1)
+        pagina, KEYWORDS_LINE.sub(lambda _m: f"keywords: [{', '.join(todas)}]", texto, count=1)
     )
     nuevas_palabras = [k for k in todas if k not in previas]
     return Resultado.hecho(
@@ -1194,7 +1074,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     destino = origen.parent / nuevo
     if viejo == nuevo:
         return Resultado.hecho(f"el ámbito ya se llama {nuevo!r}: nada que hacer.")
-    if (otro := _choque(vault, nuevo, salvo=viejo)) is not None or (
+    if (otro := case_clash(vault, nuevo, salvo=viejo)) is not None or (
         destino.exists() and not igual_nombre(viejo, nuevo)
     ):
         return Resultado.rechazo(
@@ -1288,11 +1168,11 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
         )
     pendientes = vault / "PENDIENTES.md"
     if pendientes.is_file():
-        from tuku import todo
+        from tuku import todo_core
 
         try:
-            todo.filas(archivo.leer(pendientes))
-        except todo.SinTabla as e:
+            todo_core.filas(archivo.leer(pendientes))
+        except todo_core.SinTabla as e:
             return Resultado.rechazo(str(e))
 
     def rel(ruta: Path) -> str:
@@ -1325,11 +1205,3 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
         regenerate.rehacer(vault, ["ambitos/", "AHORA.md", "bitacoras/"])
     detalle = f" ({cambiados} archivo(s) con links actualizados)" if cambiados else ""
     return Resultado.hecho(f"ámbito {nombre!r} movido a {nuevo_dir}{detalle}.")
-
-
-def lint_del_vault(vault: Path) -> Resultado:
-    """Revisa el árbol de ámbitos y reporta; no escribe."""
-    hallazgos = lint(vault)
-    if not hallazgos:
-        return Resultado.hecho("sin hallazgos.")
-    return Resultado.rechazo("\n".join(hallazgos), error=False)

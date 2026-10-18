@@ -24,7 +24,7 @@ from tuku import archivo, link
 from tuku.resultado import Resultado
 
 if TYPE_CHECKING:
-    from tuku.todo import Marca
+    from tuku.todo_core import Marca
 
 _HORA = re.compile(r"^- (\d{2}):(\d{2}) - ")
 
@@ -136,6 +136,21 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     return texto
 
 
+def stamp(logbook: str, lines: list[str], *, day: date) -> str | Resultado:
+    """`AHORA.md` text with `lines` under `day`, or the rejection if they do not fit.
+
+    `add` for the use cases: when the day falls outside the open cycle, or a line
+    is not a record, it returns the `Resultado` the command hands back as is.
+    It does no I/O; the caller decides when to write.
+    """
+    from tuku.ahora import encabezado_de
+
+    try:
+        return add(logbook, lines, day=encabezado_de(day))
+    except ValueError as e:
+        return Resultado.rechazo(str(e))
+
+
 def componer(
     *, hora: str, scope: str | None, body: str, rutas: Mapping[str, str] | None = None
 ) -> str:
@@ -152,14 +167,14 @@ def componer(
     Un cierre se escribe siempre igual, `(Hecho): ~~cuerpo~~`, venga como venga
     en `body`: a quien dicta no le toca saber dónde va la tachadura.
     """
-    from tuku import todo
+    from tuku import todo_core
 
     ambito = ""
     if scope:
         nombre = scope.strip().strip("[]")
         ambito = f"{link.enlace_ambito(nombre, 'AHORA.md', rutas)} "
     inicio = f"{hora} - " if hora else ""
-    return f"- {inicio}{ambito}{todo.canonizar(body)}"
+    return f"- {inicio}{ambito}{todo_core.canonizar(body)}"
 
 
 def add_al_vault(
@@ -183,8 +198,8 @@ def add_al_vault(
     Sin `day` es hoy; sin `hour`, ahora si el día es hoy. Un día pasado sin `hour`
     queda sin hora, al final del día: la de ahora sería inventada.
     """
-    from tuku import scope as ambitos
-    from tuku import todo
+    from tuku import scope_tree as ambitos
+    from tuku import todo_core
     from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
@@ -193,29 +208,31 @@ def add_al_vault(
             f"el {day.isoformat()} todavía no llega: un registro cuenta lo que ya pasó. "
             f"Si es un compromiso, ábrelo con `tuku todo open --due {day.isoformat()}`."
         )
+    tree = ambitos.read_tree(vault)
     if scope:
-        scope = ambitos.canonico(vault, scope)
-        if (rechazo := ambitos.rechazo_si_no_existe(vault, scope)) is not None:
-            return rechazo
+        resolved = ambitos.resolve_scope(tree, scope)
+        if isinstance(resolved, Resultado):
+            return resolved
+        scope = resolved
 
     ruta = archivo_vault(vault, "AHORA.md")
-    dia = encabezado_de(day or date.today())
+    when = day or date.today()
+    dia = encabezado_de(when)
     linea = componer(
         hora=hour
         or ("" if day is not None and day < date.today() else datetime.now().strftime("%H:%M")),
         scope=scope,
         body=body,
-        rutas=ambitos.rutas(vault),
+        rutas=tree.paths,
     )
-    marca = todo.parsear(linea)
+    marca = todo_core.parsear(linea)
     if marca is not None:
         return Resultado.rechazo(rechazo_de_marca(marca, scope=scope, day=day, hour=hour))
-    try:
-        texto = add(archivo.leer(ruta), [linea], day=dia)
-    except ValueError as e:
-        return Resultado.rechazo(str(e))
+    stamped = stamp(archivo.leer(ruta), [linea], day=when)
+    if isinstance(stamped, Resultado):
+        return stamped
 
-    archivo.escribir(ruta, texto)
+    archivo.escribir(ruta, stamped)
 
     from tuku import regenerate
 
@@ -235,35 +252,16 @@ def rechazo_de_marca(
     Nombra el comando entero, con los mismos campos, para que quien invoca
     solo tenga que correrlo.
     """
-    from tuku import todo
+    from tuku import todo_core
 
-    abre = marca.marca == todo.ABRE
-    comando = todo.comando_de(marca.marca, marca.cuerpo, ambito=scope, day=day, hour=hour)
+    abre = marca.marca == todo_core.ABRE
+    comando = todo_core.comando_de(marca.marca, marca.cuerpo, ambito=scope, day=day, hour=hour)
     que = "abre un pendiente" if abre else "cierra un pendiente"
     return (
         f"`{marca.marca}` {que}, y eso no lo escribe `tuku entry create`: "
         f"usa `{comando}`, que escribe el registro y la fila de "
         "`PENDIENTES.md` juntos."
     )
-
-
-def lint_del_vault(vault: Path) -> Resultado:
-    """Revisa los registros de `AHORA.md` y reporta; no escribe.
-
-    Solo la ontología cerrada mueve el resultado a rechazo: un tipo abierto que
-    nadie declaró es una pregunta sobre el vocabulario del autor, no un error
-    (`spec/bitacora.md`).
-    """
-    from tuku.config import archivo_vault, leer_config
-    from tuku.lint import ERROR, formatear
-    from tuku.lint import lint as lint_registros
-
-    ahora = archivo.leer(archivo_vault(vault, "AHORA.md"))
-    hallazgos = lint_registros(ahora, abiertos=leer_config(vault).vocabularios_abiertos())
-    mensaje = formatear(hallazgos)
-    if any(h.grado == ERROR for h in hallazgos):
-        return Resultado.rechazo(mensaje, error=False)
-    return Resultado.hecho(mensaje)
 
 
 @dataclass(frozen=True)
@@ -377,12 +375,12 @@ def actualizar_en_vault(
     repitiendo su texto. La hora y el ámbito no se tocan; el ámbito lo cambia
     `tuku entry move`.
     """
-    from tuku import regenerate, todo
+    from tuku import regenerate, todo_core
     from tuku.ahora import encabezado_de, rango
     from tuku.config import archivo_vault
 
     ahora_path = archivo_vault(vault, "AHORA.md")
-    if not todo.canonizar(body):
+    if not todo_core.canonizar(body):
         return Resultado.rechazo("falta el cuerpo corregido. Pasa --body con el texto nuevo.")
     texto = archivo.leer(ahora_path)
     limites = rango(texto)
@@ -397,8 +395,8 @@ def actualizar_en_vault(
         return _no_calza(match, "AHORA.md", dia, hour)
     # La marca (`**pendiente**:`) es de la ontología cerrada y la corrección no la
     # cambia: `--body` dice el texto, y el registro conserva lo que es.
-    marca = "" if todo.prefijo_de_marca(body) else todo.prefijo_de_marca(r.cuerpo)
-    cuerpo = todo.canonizar(marca + body)
+    marca = "" if todo_core.prefijo_de_marca(body) else todo_core.prefijo_de_marca(r.cuerpo)
+    cuerpo = todo_core.canonizar(marca + body)
     if r.cuerpo == cuerpo:
         return Resultado.hecho(f"el registro {_donde(r)} ya decía eso: nada que corregir.")
 
@@ -411,10 +409,10 @@ def actualizar_en_vault(
     filas = 0
     pendientes_path = vault / "PENDIENTES.md"
     if pendientes_path.is_file():
-        previa = todo.parsear(f"- 00:00 - {r.cuerpo}")
-        nueva = todo.parsear(f"- 00:00 - {cuerpo}")
+        previa = todo_core.parsear(f"- 00:00 - {r.cuerpo}")
+        nueva = todo_core.parsear(f"- 00:00 - {cuerpo}")
         if previa is not None and nueva is not None:
-            tabla, hubo = todo.reemplazar_cuerpo(
+            tabla, hubo = todo_core.reemplazar_cuerpo(
                 archivo.leer(pendientes_path), previa.cuerpo.strip(), nueva.cuerpo.strip()
             )
             if hubo:
@@ -447,14 +445,16 @@ def mover_en_vault(
     intacto. Un ciclo cerrado admite la corrección. Si el registro es un
     pendiente abierto, su fila en `PENDIENTES.md` cambia de ámbito con él.
     """
-    from tuku import regenerate, todo
-    from tuku import scope as ambitos
+    from tuku import regenerate, todo_core
+    from tuku import scope_tree as ambitos
     from tuku.ahora import encabezado_de, rango
     from tuku.config import archivo_vault
 
-    nombre = ambitos.canonico(vault, scope)
-    if (rechazo := ambitos.rechazo_si_no_existe(vault, nombre)) is not None:
-        return rechazo
+    tree = ambitos.read_tree(vault)
+    resolved = ambitos.resolve_scope(tree, scope)
+    if isinstance(resolved, Resultado):
+        return resolved
+    nombre = resolved
 
     ruta = archivo_vault(vault, "AHORA.md")
     if day is not None:
@@ -476,16 +476,15 @@ def mover_en_vault(
     if r.ambito == nombre:
         return Resultado.hecho(f"el registro {_donde(r)} ya era de {nombre}: nada que mover.")
 
-    rutas = ambitos.rutas(vault)
-    nueva = _linea(r, link.enlace_ambito(nombre, relativa, rutas))
+    nueva = _linea(r, link.enlace_ambito(nombre, relativa, tree.paths))
     archivo.escribir(ruta, _con_linea(texto, r.linea, nueva))
 
     filas = 0
     pendientes_path = vault / "PENDIENTES.md"
-    marca = todo.parsear(nueva)
-    if pendientes_path.is_file() and marca is not None and marca.marca == todo.ABRE:
-        tabla, hubo = todo.cambiar_ambito(
-            archivo.leer(pendientes_path), marca.cuerpo, nombre, rutas
+    marca = todo_core.parsear(nueva)
+    if pendientes_path.is_file() and marca is not None and marca.marca == todo_core.ABRE:
+        tabla, hubo = todo_core.cambiar_ambito(
+            archivo.leer(pendientes_path), marca.cuerpo, nombre, tree.paths
         )
         if hubo:
             archivo.escribir(pendientes_path, tabla)

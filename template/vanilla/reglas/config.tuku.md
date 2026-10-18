@@ -8,7 +8,7 @@ type: Config
 | Campo           | Valor              | Qué decide                                                             |
 | --------------- | ------------------ | ---------------------------------------------------------------------- |
 | `TZ`            | `TZ-DEL-SISTEMA`   | Qué día es HOY, y por lo tanto qué está atrasado                        |
-| `cycle_type`    | `semanal`          | El ritmo con el que abres y cierras. Cambiarlo renombra los horizontes  |
+| `cycle_name`    | `semana`           | Cómo se llama tu ciclo, o los nombres que se alternan en orden (`turno, descanso`). Los horizontes pueden nombrarse con él |
 | `tuku_template` | `vanilla`          | La variante de la que salió este vault                                  |
 | `tuku_version`  | `TUKU-VERSION`     | La versión de TUKU con la que se sembró. `tuku doctor` la compara con `~/.tuku` |
 | `origen`        | `TUKU-ORIGEN`      | De dónde sale TUKU, para saber dónde revisar cambios                    |

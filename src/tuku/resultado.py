@@ -6,7 +6,7 @@ se prueba con un `assert`; la segunda es del CLI, y son `print` y códigos de
 salida.
 
 `Resultado` es la costura entre las dos. Un caso de uso devuelve si la operación
-procedió y qué hay que decir; [`cli.py`](cli.py) traduce eso a texto y a un
+procedió y qué hay que decir; [`cli/`](cli/__init__.py) traduce eso a texto y a un
 código de `spec/cli.md`. La consecuencia práctica es que la regla se puede
 probar sin capturar `stdout` ni montar un escenario completo:
 
