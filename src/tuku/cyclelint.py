@@ -1,6 +1,6 @@
-"""tuku cycle lint: revisa la estructura de `AHORA.md` y reporta. Nunca escribe.
+"""tuku doctor cycle: revisa la estructura de `AHORA.md` y reporta. Nunca escribe.
 
-Es el complemento de `tuku entry lint`: aquel revisa los registros, este revisa
+Es el complemento de `tuku doctor entry`: aquel revisa los registros, este revisa
 el archivo que los contiene. Lo que verifica es lo que el resto de los comandos
 da por cierto sin comprobarlo, y que si falta produce fallas mudas más adelante:
 

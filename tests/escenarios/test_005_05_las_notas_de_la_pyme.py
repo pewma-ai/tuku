@@ -77,14 +77,20 @@ def test_005_05_note_lint_sin_archivo_revisa_solo_las_notas() -> None:
     assert "AGENTS.md" not in corrida.stdout + corrida.stderr
 
 
+def _doctor(corrida: gherkin.Corrida) -> int:
+    """El código del `tuku doctor` a secas: `de` no lo distingue de `tuku doctor note …`."""
+    [revision] = [r for r in corrida.resultados if r.comando.endswith("tuku doctor")]
+    return revision.codigo
+
+
 def test_005_05_cada_nota_pasa_su_lint() -> None:
     corrida = _correr(LIBRES)
-    lints = [r for r in corrida.resultados if "note lint" in r.comando]
+    lints = [r for r in corrida.resultados if "doctor note" in r.comando]
     assert len(lints) == 3 and all(r.codigo == EXITO for r in lints)
 
 
 def test_005_05_el_vault_con_notas_esta_sano() -> None:
-    assert _correr(LIBRES).de("tuku doctor").codigo == EXITO
+    assert _doctor(_correr(LIBRES)) == EXITO
 
 
 def test_005_05_un_enlace_del_cuerpo_que_ver_ademas_no_lista_se_nombra() -> None:
@@ -109,4 +115,4 @@ def test_005_05_el_tipo_persona_tiene_su_archivo_de_reglas() -> None:
 
 def test_005_05_con_la_nota_tipada_el_vault_sigue_sano() -> None:
     corrida = _correr(TIPADA)
-    assert corrida.de("tuku doctor").codigo == EXITO
+    assert _doctor(corrida) == EXITO

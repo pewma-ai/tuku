@@ -131,6 +131,8 @@ def renderizar(estado: dict[str, Any], titulo: str) -> str:
                 else []
             ),
         ]
+    # Toda nota cierra con `## Ver además` (`tuku doctor note` lo exige); el log no enlaza.
+    lineas += ["## Ver además", ""]
     return "\n".join(lineas)
 
 

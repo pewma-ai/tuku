@@ -26,7 +26,7 @@ PERSONAL = "[personal](ambitos/personal/personal.md)"
 def test_002_14_un_derivado_editado_se_detecta_y_se_regenera() -> None:
     corrida = gherkin.correr(SLUG, "un derivado editado a mano se detecta y se regenera")
 
-    lint = corrida.de("todo lint")
+    lint = corrida.de("doctor todo")
     assert lint.codigo == RECHAZO, lint.stdout
     assert "tuku regenerate todo" in lint.stdout, lint.stdout
 
@@ -47,7 +47,7 @@ def test_002_14_una_fila_borrada_la_nombra_todo_lint() -> None:
 def test_002_14_abierto_y_cerrado_el_mismo_dia_lo_repara_fix() -> None:
     corrida = gherkin.correr(SLUG, "abierto y cerrado a mano el mismo día")
 
-    antes, despues = [r for r in corrida.resultados if "tuku todo lint" in r.comando]
+    antes, despues = [r for r in corrida.resultados if "tuku doctor todo" in r.comando]
     assert antes.codigo == RECHAZO, antes.stdout
     assert "tuku fix todo" in antes.stdout, antes.stdout
     assert corrida.de("tuku fix todo").codigo == EXITO
@@ -62,7 +62,7 @@ def test_002_14_abierto_y_cerrado_el_mismo_dia_lo_repara_fix() -> None:
 def test_002_14_un_registro_a_una_categoria_lo_reporta_scope_lint() -> None:
     corrida = gherkin.correr(SLUG, "un registro a una categoría")
 
-    lint = corrida.de("scope lint")
+    lint = corrida.de("doctor scope")
     assert lint.codigo == RECHAZO, lint.stdout
     assert "gastos" in lint.stdout and "categoría" in lint.stdout, lint.stdout
     ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
@@ -72,7 +72,7 @@ def test_002_14_un_registro_a_una_categoria_lo_reporta_scope_lint() -> None:
 def test_002_14_una_marca_cerrada_mal_escrita_la_reporta_entry_lint() -> None:
     corrida = gherkin.correr(SLUG, "una marca cerrada mal escrita")
 
-    lint = corrida.de("entry lint")
+    lint = corrida.de("doctor entry")
     assert lint.codigo == RECHAZO, lint.stdout
     assert "**Cadencia**" in lint.stdout and "**cadencia**" in lint.stdout, lint.stdout
     ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")

@@ -40,9 +40,9 @@ tuku scope update personal --keyword Emilia,Vicente
 ```
 Entonces el negocio y la administración tienen sus ámbitos dentro, y `clientes/` y `proveedores/` son categorías sin página
 Y cada ámbito lleva en `keywords` los nombres con que Andrea lo menciona
-Y `tuku scope lint` y `tuku doctor` salen limpios
+Y `tuku doctor scope` y `tuku doctor` salen limpios
 ```bash
-tuku scope lint
+tuku doctor scope
 tuku doctor
 ```
 

@@ -51,7 +51,7 @@ El orden sigue tres criterios: primero la sintaxis del CLI, que está en revisi�
 
 ### S. La sintaxis del CLI está abierta
 
-La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usan la de hoy: el `.md` es la fuente ejecutable, así que un nombre nuevo cambia solo sus líneas `tuku`. Los nombres que este epic propone (`todo lint` para los atrasados, `note create --subtype`, el verbo de postergar) son provisionales hasta cerrar esta sección. Lo que sigue es el repaso de la superficie actual, con lo que cada punto cuesta cambiar: un nombre vive en el código, en `reglas/comandos.tuku.md`, en el `AGENTS.md` del template, en las specs y en los escenarios.
+La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usan la de hoy: el `.md` es la fuente ejecutable, así que un nombre nuevo cambia solo sus líneas `tuku`. Los nombres que este epic propone (`doctor todo` para los atrasados, `note create --subtype`, el verbo de postergar) son provisionales hasta cerrar esta sección. Lo que sigue es el repaso de la superficie actual, con lo que cada punto cuesta cambiar: un nombre vive en el código, en `reglas/comandos.tuku.md`, en el `AGENTS.md` del template, en las specs y en los escenarios.
 
 | Id | Pendiente |
 | --- | --- |
@@ -61,7 +61,7 @@ La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usa
 | ~~S4~~ | ~~Los alias en español cubrían la mitad de las opciones.~~ Resuelto el 2026-10-17 (lo decidió el autor): se quitan todos. Cada opción tiene una sola forma, en inglés (`--body`, `--scope`, `--at`, `--parent`, `--due`, `--horizon`, `--variant`, `--author`, `--body-file`, `--no-record`) |
 | S5 | `--at` significa tres cosas: cuándo ocurrió (`entry create`, `todo open`, `todo close`, `scope create`, `note create`), qué día abre el ciclo (`cycle open`) y qué registro corregir (`entry rename`). Con dos registros en el mismo minuto, `entry rename --at` corrige el primero sin avisar cuál: la spec pide informar ante la duda. Se rechaza con la lista de candidatos, o se elige por el cuerpo actual |
 | S6 | El CLI no tiene comandos de lectura: ni `todo list`, ni `scope list` o `scope tree`, ni `note list`. «Qué tengo pendiente» se responde leyendo archivos. B1 (los atrasados) y B4 (postergar) piden decidir si hay un verbo `list` (por ejemplo `todo list --late`) en vez de cargarle fechas a `lint`, que revisa defectos |
-| S7 | `note lint` acepta un archivo y `entry lint`, `todo lint` y `scope lint` no aceptan destino. `vocab` y `style` son nouns con un solo verbo cada uno (`show`, `lint`) |
+| S7 | `doctor note` acepta un archivo y `doctor entry`, `doctor todo` y `doctor scope` no aceptan destino. `vocab` y `style` son nouns con un solo verbo cada uno (`show`, `lint`) |
 | S8 | `tuku init` recibe el destino como posicional y `--variant`, y el resto usa `--vault`. En `reglas/config.tuku.md` el campo se llama `tuku_template` |
 | S9 | Falta un escenario de superficie para el CLI completo: [`devel/epics.md`](../../devel/epics.md) pide que todo epic que añada comandos fije su superficie con `tuku -h`, y hoy solo `001-06` cubre `tuku init -h`. Se escribe cuando S1 a S8 estén cerrados |
 | ~~S10~~ | ~~Los nombres de ámbito y las keywords conservaban las mayúsculas del dictado (`Los-Robles`).~~ Resuelto el 2026-10-17 (lo pidió el autor): todo nombre de carpeta o archivo que TUKU genera, y las keywords, van en kebab-case en minúsculas (`importadora-andina`). Un ámbito escrito en mayúsculas encuentra el existente. Las notas ya lo cumplían, además sin tildes |
@@ -71,8 +71,8 @@ La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usa
 | Id | Pendiente | Test |
 | --- | --- | --- |
 | ~~A1~~ | ~~La lista de hijos salía en orden de creación con `scope create` y `scope move`, y alfabética con `tuku regenerate`.~~ Resuelto el 2026-10-17: el callout de hijos se deriva siempre de las carpetas. Primero los ámbitos en orden alfabético, después cada categoría (`clientes/`, `proveedores/`) como callout interior plegable, separadas por `---`; `create`, `move` y `rename` lo dejan igual que `regenerate scope`. Antes las categorías no se veían: sus ámbitos no aparecían en la página de `negocio` | ~~`005-01` repetir, `005-02` ×2, `005-03` regenerar~~ |
-| A2 | `tuku note lint` sin archivo sale con error en un vault recién sembrado: revisa `notas/AGENTS.md`, que es del sistema y no una nota | `005-05` lint sin archivo |
-| A3 | `note lint` no mira los enlaces del cuerpo. `spec/notas.md` pide que la nota cierre con la lista de sus enlaces salientes, cada uno con motivo, y un enlace del cuerpo ausente de esa lista pasa | `005-05` enlace sin motivo |
+| A2 | `tuku doctor note` sin archivo sale con error en un vault recién sembrado: revisa `notas/AGENTS.md`, que es del sistema y no una nota | `005-05` lint sin archivo |
+| A3 | `doctor note` no mira los enlaces del cuerpo. `spec/notas.md` pide que la nota cierre con la lista de sus enlaces salientes, cada uno con motivo, y un enlace del cuerpo ausente de esa lista pasa | `005-05` enlace sin motivo |
 | ~~A4~~ | ~~Las keywords de un ámbito repetían su nombre: `keywords: [importadora-andina, Gloria]`.~~ Resuelto el 2026-10-17 (lo vio el autor): el nombre ya es el de la carpeta y no va en la lista, que nace vacía (`keywords: []`) si no se dieron palabras, y una keyword que repite el nombre no entra. `scope rename` ya no toca las keywords | `tests/unitarios/test_scope_keywords.py` |
 | ~~A5~~ | ~~`scope rename` de un ámbito con hijos dejaba rotos los links a los descendientes.~~ Resuelto el 2026-10-18: el rename recalcula con `link.reubicar` los links de los descendientes, como `scope move`. Lo cubre `test_scope_arbol` (renombrar `negocio` a `pyme` deja `doctor` sano) | ~~`test_scope_arbol` (sin escenario)~~ |
 
@@ -80,7 +80,7 @@ La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usa
 
 | Id | Pendiente | Test |
 | --- | --- | --- |
-| B1 | Ningún comando informa los atrasados. `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo y `todo lint` y `doctor` no saben de fechas. Depende de X1 y S6 | `005-04` (2 rojos y 2 guardas) |
+| B1 | Ningún comando informa los atrasados. `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo y `doctor todo` y `doctor` no saben de fechas. Depende de X1 y S6 | `005-04` (2 rojos y 2 guardas) |
 | B2 | No existe una nota tipada: `note create` no tiene `--subtype` y no se siembra `reglas/tipos/persona.md`, que `spec/notas.md` promete «el epic que escriba la primera nota tipada». Depende de X2 | `005-05` tipada (3 rojos) |
 | B3 | Las keywords repetidas entre ámbitos pasan sin aviso: `scope update escuela-los-maitenes --keyword Paula` sale con 0 y `tuku doctor` dice que el vault está sano, con `Paula` ya en `catalogo-marzo`. Es lo que hace ambigua a la Paula del `005-06`. Falta decidir si avisa `scope keywords`, `doctor` o los dos, y depende de S2 | sin test |
 | B4 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se baja con un comando. Falta el nombre y la forma, que dependen de S6 | sin test: se escribe cuando B4 tenga nombre |
@@ -117,7 +117,7 @@ Tomadas al escribir los escenarios, para poder escribirlos. Cada una se confirma
 
 | Id | Decisión | Usa |
 | --- | --- | --- |
-| X1 | `tuku todo lint` informa los atrasados como aviso, con código 0. Es la forma que menos inventa: un comando que ya existe, con el patrón de `entry lint`, que informa preguntas sin fallar. Las alternativas son un comando propio y un verbo `list` (S6) | B1, `005-04` |
+| X1 | `tuku doctor todo` informa los atrasados como aviso, con código 0. Es la forma que menos inventa: un comando que ya existe, con el patrón de `doctor entry`, que informa preguntas sin fallar. Las alternativas son un comando propio y un verbo `list` (S6) | B1, `005-04` |
 | X2 | `note create --subtype persona`, con el campo que `spec/notas.md` ya llama `subtype`, y `reglas/tipos/persona.md` sembrado por `tuku init` | B2, `005-05` |
 | X3 | El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea | B5, `005-01` |
 | X4 | El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos | C1, `005-06` |

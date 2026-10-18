@@ -38,10 +38,10 @@ def test_rechaza_fuera_de_un_vault_y_nombra_que_falta(
 ) -> None:
     for argv in (
         ["doctor"],
-        ["entry", "lint"],
+        ["doctor", "entry"],
         ["todo", "open", "--body", "x"],
         ["regenerate"],
-        ["note", "lint"],
+        ["doctor", "note"],
     ):
         assert main([*argv, "--vault", str(tmp_path)]) == RECHAZO, argv
         err = capsys.readouterr().err
@@ -55,7 +55,7 @@ def test_note_lint_de_un_archivo_suelto_no_exige_vault(
 ) -> None:
     nota = tmp_path / "nota.md"
     nota.write_text("# Nota\n\ncuerpo\n\n## Ver además\n\n", encoding="utf-8")
-    assert main(["note", "lint", str(nota), "--vault", str(tmp_path)]) in (EXITO, RECHAZO)
+    assert main(["doctor", "note", str(nota), "--vault", str(tmp_path)]) in (EXITO, RECHAZO)
     assert "no es un vault" not in capsys.readouterr().err
 
 

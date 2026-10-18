@@ -1,4 +1,4 @@
-"""tuku entry lint: revisa los registros de `AHORA.md` y reporta. Nunca escribe.
+"""tuku doctor entry: revisa los registros de `AHORA.md` y reporta. Nunca escribe.
 
 Fase 1 de `devel/epics.md`, criterio de salida. Las dos ontologías de
 `spec/bitacora.md` se tratan distinto en la misma zona de la línea:

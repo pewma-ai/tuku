@@ -71,13 +71,13 @@ Que se cumpla es verificable: la ayuda y los códigos de cada epic se fijan en u
 
 ## Fuera de un vault, ningún comando opera
 
-Todo comando que recibe `--vault` (por defecto, el directorio actual) rechaza con código 1 si ese directorio no tiene ninguno de los archivos requeridos de un vault, y no lee ni escribe nada. Sin la regla, `tuku doctor` invocado desde `~` recorría el disco entero. Basta con que exista uno: un vault al que le falta un archivo sigue siendo un vault y es justo lo que `tuku doctor` debe diagnosticar. `tuku note lint <archivo>` queda fuera porque revisa un archivo suelto. `tuku init` tampoco opera sobre un vault, pero tiene su propia regla: **rechaza con código 1 el home del usuario y todo directorio que lo contenga**, incluida la raíz del disco, aun con `--force`, que borra el destino antes de sembrar. Vale igual en Mac, Linux y Windows.
+Todo comando que recibe `--vault` (por defecto, el directorio actual) rechaza con código 1 si ese directorio no tiene ninguno de los archivos requeridos de un vault, y no lee ni escribe nada. Sin la regla, `tuku doctor` invocado desde `~` recorría el disco entero. Basta con que exista uno: un vault al que le falta un archivo sigue siendo un vault y es justo lo que `tuku doctor` debe diagnosticar. `tuku doctor note <archivo>` queda fuera porque revisa un archivo suelto. `tuku init` tampoco opera sobre un vault, pero tiene su propia regla: **rechaza con código 1 el home del usuario y todo directorio que lo contenga**, incluida la raíz del disco, aun con `--force`, que borra el destino antes de sembrar. Vale igual en Mac, Linux y Windows.
 
 ## Ante la duda, informar y no escribir
 
 Un comando que no puede determinar algo **no lo adivina y no escribe a medias**. Sale con el código que corresponde y dice qué le falta. Es el principio 3 de [`../docs/principios.md`](../docs/principios.md) aplicado a la capa determinista, y es lo que hace que la salida sirva como advertencia en vez de como registro de un daño ya hecho.
 
-De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa y nunca escribe. Verificar y corregir son operaciones distintas, y mezclarlas quita la oportunidad de revisar.
+De ahí la asimetría de `tuku doctor entry` ([bitacora.md](bitacora.md)): informa y nunca escribe. Verificar y corregir son operaciones distintas, y mezclarlas quita la oportunidad de revisar.
 
 **Ningún comando de verificación repara.** Vale para los `lint` y para `tuku doctor`, que los agrega y revisa además lo que ninguno cubre. Ante un hallazgo, el doctor o linter nombra el defecto y la acción correctiva, pero no modifica archivos.
 

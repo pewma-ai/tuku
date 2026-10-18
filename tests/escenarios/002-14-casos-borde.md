@@ -23,10 +23,10 @@ rm ambitos/PENDIENTES-AMBITOS.md.bak AHORA.md.bak
 ```
 Cuando se revisa y se regenera
 ```bash
-tuku todo lint
+tuku doctor todo
 tuku regenerate
 ```
-Entonces `tuku todo lint` sale con código 1 (`RECHAZO`) y nombra `tuku regenerate todo`
+Entonces `tuku doctor todo` sale con código 1 (`RECHAZO`) y nombra `tuku regenerate todo`
 Y `tuku regenerate` nombra cada archivo que reescribió
 Y el vault vuelve a ser idéntico a la referencia, byte a byte
 ```bash
@@ -41,7 +41,7 @@ sed -i.bak '/pagar la sesión con el psicólogo/d' PENDIENTES.md && rm PENDIENTE
 ```
 Cuando se revisa
 ```bash
-tuku todo lint
+tuku doctor todo
 ```
 Entonces sale con código 1 (`RECHAZO`) y nombra como corrección `tuku todo open`
 
@@ -55,13 +55,13 @@ sed -i.bak '/renovar el carnet/d' PENDIENTES.md && rm PENDIENTES.md.bak
 ```
 Cuando se revisa y se repara
 ```bash
-tuku todo lint
+tuku doctor todo
 tuku fix todo
-tuku todo lint
+tuku doctor todo
 ```
-Entonces el primer `tuku todo lint` sale con código 1 (`RECHAZO`) y nombra `tuku fix todo`
+Entonces el primer `tuku doctor todo` sale con código 1 (`RECHAZO`) y nombra `tuku fix todo`
 Y `tuku fix todo` quita el registro de las 15:00 de `AHORA.md` y de la página de `personal`, y deja el cierre de las 19:20
-Y el segundo `tuku todo lint` sale limpio
+Y el segundo `tuku doctor todo` sale limpio
 
 ## Escenario: un registro a una categoría lo reporta scope lint
 
@@ -72,9 +72,9 @@ mkdir ambitos/depto-centro/gastos
 Cuando se escribe un registro a `gastos` y se revisa
 ```bash
 tuku entry create --at "2026-08-11 20:00" --scope gastos --body "**progreso**: revisé el detalle del mes"
-tuku scope lint
+tuku doctor scope
 ```
-Entonces `tuku scope lint` sale con código 1 (`RECHAZO`) y explica que una categoría no recibe registros
+Entonces `tuku doctor scope` sale con código 1 (`RECHAZO`) y explica que una categoría no recibe registros
 Y el registro queda escrito en `AHORA.md`: un error del autor se informa, nunca se borra
 
 ## Escenario: una marca cerrada mal escrita la reporta entry lint
@@ -82,9 +82,9 @@ Y el registro queda escrito en `AHORA.md`: un error del autor se informa, nunca 
 Cuando se escribe `**Cadencia**` en vez de `**cadencia**` y se revisa
 ```bash
 tuku entry create --at "2026-08-11 13:30" --body "**Cadencia**: revisar la caldera"
-tuku entry lint
+tuku doctor entry
 ```
-Entonces `tuku entry lint` sale con código 1 (`RECHAZO`) y dice cómo se escribe la marca
+Entonces `tuku doctor entry` sale con código 1 (`RECHAZO`) y dice cómo se escribe la marca
 Y la línea queda intacta en `AHORA.md` y `PENDIENTES.md` no cambia
 
 ## Escenario: un canónico roto hace que regenerate no escriba

@@ -38,7 +38,7 @@ def test_rango_lee_el_frontmatter_del_ciclo() -> None:
 
 
 def test_fecha_del_dia_usa_el_rango_para_elegir_el_anio_no_para_filtrar() -> None:
-    """Un día fuera del ciclo igual se fecha: `entry lint` dice *qué* fecha quedó fuera."""
+    """Un día fuera del ciclo igual se fecha: `doctor entry` dice *qué* fecha quedó fuera."""
     desde, hasta = date(2026, 8, 11), date(2026, 8, 17)
     assert ahora.fecha_del_dia("## Martes 11 de agosto", desde, hasta) == date(2026, 8, 11)
     assert ahora.fecha_del_dia("## Lunes 17 de agosto", desde, hasta) == date(2026, 8, 17)

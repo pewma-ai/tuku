@@ -1,6 +1,6 @@
 """Lectura de `AHORA.md`: el rango del ciclo y los encabezados de día.
 
-Lo comparten `tuku entry lint` y `tuku cycle lint`, que necesitan lo
+Lo comparten `tuku doctor entry` y `tuku doctor cycle`, que necesitan lo
 mismo: saber qué día es cada `## <día>` y si cae dentro del ciclo abierto.
 
 El encabezado no lleva año a propósito (`## Martes 11 de agosto` se lee mejor),

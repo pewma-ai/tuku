@@ -22,11 +22,11 @@ tuku note create "Proveedores y sus plazos reales" --body-file ../plazos-de-los-
 ```
 Entonces `notas/` tiene las tres notas, cada una con `type: Note`, su cuerpo y un `## Ver además` que enlaza el ámbito con el motivo
 Y el domingo 23 gana tres constancias que enlazan a las notas
-Y `tuku note lint` sale limpio sobre cada una
+Y `tuku doctor note` sale limpio sobre cada una
 ```bash
-tuku note lint notas/como-cotizo.md
-tuku note lint notas/condiciones-de-pago-por-canal.md
-tuku note lint notas/proveedores-y-sus-plazos-reales.md
+tuku doctor note notas/como-cotizo.md
+tuku doctor note notas/condiciones-de-pago-por-canal.md
+tuku doctor note notas/proveedores-y-sus-plazos-reales.md
 ```
 Y `tuku doctor` dice que el vault está sano
 ```bash
@@ -42,7 +42,7 @@ cp -r ../las-notas-del-negocio-se/mi-vault .
 Cuando se revisan todas las notas de una vez
 ```bash
 cd mi-vault
-tuku note lint
+tuku doctor note
 ```
 Entonces el lint sale con código 0 y deja fuera `notas/AGENTS.md`, que es del sistema y no una nota
 
@@ -55,7 +55,7 @@ cp -r ../las-notas-del-negocio-se/mi-vault .
 Cuando se revisa `Proveedores y sus plazos reales`, que enlaza en su cuerpo a `Condiciones de pago por canal`
 ```bash
 cd mi-vault
-tuku note lint notas/proveedores-y-sus-plazos-reales.md
+tuku doctor note notas/proveedores-y-sus-plazos-reales.md
 ```
 Entonces el lint sale con error y nombra el enlace a `condiciones-de-pago-por-canal.md`, que la nota enlaza y su `## Ver además` no lista, con la corrección: agregarlo ahí con el motivo
 
@@ -73,9 +73,9 @@ tuku note create "Patricia Lillo" --subtype persona --body-file ../patricia-lill
 ```
 Entonces `notas/patricia-lillo.md` tiene `type: Note` y `subtype: persona`, y su `## Ver además` enlaza el ámbito del liceo con su motivo
 Y existe `reglas/tipos/persona.md`, el archivo de reglas del tipo, que `tuku init` siembra junto con los demás archivos del vault
-Y `tuku note lint` y `tuku doctor` salen limpios
+Y `tuku doctor note` y `tuku doctor` salen limpios
 ```bash
-tuku note lint notas/patricia-lillo.md
+tuku doctor note notas/patricia-lillo.md
 tuku doctor
 ```
 

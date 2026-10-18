@@ -1,5 +1,4 @@
-"""Comandos del sistema: `init`, `cycle`, `process`, `doctor`, `fix`, `regenerate`, `context`
-y `style`."""
+"""Comandos del sistema: `init`, `process`, `doctor`, `fix`, `regenerate`, `context`."""
 
 from __future__ import annotations
 
@@ -8,7 +7,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-from tuku import context, style
+from tuku import context
 from tuku.cli import manual
 from tuku.cli.helpers import (
     ENTORNO,
@@ -57,10 +56,6 @@ def _cmd_context(args: argparse.Namespace) -> int:
     return traducir(context.del_vault(args.vault, args.tema, args.since), "tuku context")
 
 
-def _cmd_style_lint(args: argparse.Namespace) -> int:
-    return traducir(style.lint_del_vault(args.vault), "tuku style lint")
-
-
 def _cmd_process(args: argparse.Namespace) -> int:
     from tuku import process
 
@@ -73,19 +68,21 @@ def _cmd_process_cycle(args: argparse.Namespace) -> int:
     return traducir(cycle.abrir_en_vault(args.vault, args.at.dia), "tuku process cycle")
 
 
-def _cmd_cycle_lint(args: argparse.Namespace) -> int:
-    from tuku import cyclelint
-
-    return traducir(cyclelint.lint_del_vault(args.vault), "tuku cycle lint")
-
-
-def _crear_cmd_doctor(comandos_fn: Callable[[], frozenset[str]]) -> Handler:
+def _crear_cmd_doctor(
+    comandos_fn: Callable[[], frozenset[str]], parser: argparse.ArgumentParser
+) -> Handler:
     def _cmd_doctor(args: argparse.Namespace) -> int:
         from tuku import doctor
 
+        if args.file is not None and args.tema != "note":
+            parser.error("ARCHIVO solo vale con el tema `note`: `tuku doctor note ARCHIVO`")
         return traducir(
             doctor.revisar_vault(
-                args.vault, comandos=comandos_fn(), tema=args.tema, verbose=args.verbose
+                args.vault,
+                comandos=comandos_fn(),
+                tema=args.tema,
+                verbose=args.verbose,
+                nota=args.file,
             ),
             "tuku doctor",
         )
@@ -147,26 +144,6 @@ def registrar(
         help="reemplaza el destino aunque ya tenga contenido",
     )
 
-    cycle_p = sub.add_parser(
-        "cycle",
-        help="gestión del ciclo en AHORA.md",
-        description=(
-            "Un ciclo es la ventana de tiempo que `AHORA.md` registra día por día; el "
-            "semanal va de lunes a domingo. Se abre con `tuku process cycle`; este "
-            "sustantivo revisa su estructura."
-        ),
-    )
-    cycle_v = cycle_p.add_subparsers(dest="verb", required=True)
-    cycle_lint_p = cycle_v.add_parser(
-        "lint",
-        help="revisa la estructura de AHORA.md y reporta; no escribe",
-        description=(
-            "Revisa el frontmatter de `AHORA.md` y que sus encabezados de día tengan "
-            "fechas consecutivas y bien escritas. No escribe nada."
-        ),
-    )
-    Opciones(cycle_lint_p).vault("vault a revisar")
-
     process_p = sub.add_parser(
         "process",
         help="las rutinas con nombre: las de tuku y las de procesos/",
@@ -208,6 +185,14 @@ def registrar(
         choices=TEMAS_DOCTOR,
         default=None,
         help="revisar solo este tema; sin tema, todo",
+    )
+    doctor_p.add_argument(
+        "file",
+        metavar="ARCHIVO",
+        nargs="?",
+        default=None,
+        type=Path,
+        help="solo con el tema `note`: la nota a revisar, aunque esté fuera de un vault",
     )
     doctor_p.add_argument(
         "-v",
@@ -283,35 +268,12 @@ def registrar(
     )
     Opciones(regenerate_p).vault("vault a regenerar")
 
-    style_p = sub.add_parser(
-        "style",
-        help="libro de estilo y contratos de autor",
-        description=(
-            "`LIBRO-DE-ESTILO.md` es el contrato del autor con el sistema: cómo escribe y "
-            "sus vocabularios. Este comando revisa que tenga lo que los demás comandos "
-            "leen."
-        ),
-    )
-    style_v = style_p.add_subparsers(dest="verb", required=True)
-    style_lint_p = style_v.add_parser(
-        "lint",
-        help="revisa contratos en LIBRO-DE-ESTILO.md",
-        description=(
-            "Revisa que `LIBRO-DE-ESTILO.md` tenga lo que leen los demás comandos: la "
-            "línea del autor y las tablas Clasificaciones, Horizontes y Tipos de nota. "
-            "No escribe nada."
-        ),
-    )
-    Opciones(style_lint_p).vault("vault a revisar")
-
     return {
         ("init", None): _cmd_init,
-        ("cycle", "lint"): _cmd_cycle_lint,
         ("process", None): _cmd_process,
         ("process", "cycle"): _cmd_process_cycle,
-        ("doctor", None): _crear_cmd_doctor(comandos_fn),
+        ("doctor", None): _crear_cmd_doctor(comandos_fn, doctor_p),
         ("fix", None): _cmd_fix,
         ("regenerate", None): _cmd_regenerate,
         ("context", None): _cmd_context,
-        ("style", "lint"): _cmd_style_lint,
     }

@@ -172,7 +172,7 @@ Y viaja dentro del mismo comando que escribe, nunca en un paso aparte que alguie
 | --- | --- | --- |
 | Pendientes | alta o baja en `PENDIENTES.md` y las vistas que se derivan de él | `todo open`, `todo close`, `regenerate todo` |
 | Ámbitos | su página, su jerarquía, las keywords con que se elige y el ámbito de los registros que ya hablaban de él | `scope create`, `scope move`, `scope update`, `entry move` (todavía no existe) |
-| Notas | la nota en `notas/` y su constancia en la bitácora | `note create`, `note lint` |
+| Notas | la nota en `notas/` y su constancia en la bitácora | `note create`, `doctor note` |
 | Cadencias | alta o cambio de una cadencia en su ámbito | `cadence …` (todavía no existe) |
 | Ciclo | apertura, cierre y archivo de la bitácora | `process cycle`, `cycle close` (todavía no existe) |
 | Propuesta | sugiere algo y espera aprobación | sin comando, a propósito |

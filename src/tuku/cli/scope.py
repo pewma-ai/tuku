@@ -40,10 +40,6 @@ def _cmd_scope_rename(args: argparse.Namespace) -> int:
     )
 
 
-def _cmd_scope_lint(args: argparse.Namespace) -> int:
-    return traducir(scope.lint_del_vault(args.vault), "scope lint")
-
-
 def _cmd_scope_archive(args: argparse.Namespace) -> int:
     return sin_implementar(
         "tuku scope archive",
@@ -151,18 +147,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     scope_rename_p.add_argument("nuevo", help="nombre nuevo")
     Opciones(scope_rename_p).vault("vault a modificar")
 
-    scope_lint_p = scope_v.add_parser(
-        "lint",
-        help="revisa categorías, transclusiones y callouts de los ámbitos",
-        description=(
-            "Revisa que ningún registro de `AHORA.md` apunte a una categoría (carpeta de "
-            "`ambitos/` sin página propia), que cada página de ámbito transcluya sus "
-            "pendientes y que cada ámbito tenga su callout en "
-            "`ambitos/PENDIENTES-AMBITOS.md`. No escribe nada."
-        ),
-    )
-    Opciones(scope_lint_p).vault("vault a revisar")
-
     scope_archive_p = scope_v.add_parser(
         "archive",
         help="archiva un ámbito (todavía no implementado)",
@@ -181,6 +165,5 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         ("scope", "update"): _cmd_scope_update,
         ("scope", "move"): _cmd_scope_move,
         ("scope", "rename"): _cmd_scope_rename,
-        ("scope", "lint"): _cmd_scope_lint,
         ("scope", "archive"): _cmd_scope_archive,
     }

@@ -98,7 +98,7 @@ def main(argv: list[str] | None = None) -> int:
         return USO
     comando = _COMANDOS[(args.noun, getattr(args, "verb", None))]
     try:
-        # `note lint <archivo>` revisa un archivo suelto y no lee el vault.
+        # `doctor note <archivo>` revisa un archivo suelto y no lee el vault.
         if getattr(args, "file", None) is None and (vault := getattr(args, "vault", None)):
             exigir_vault(vault)
         return archivo.con_reintentos(lambda: comando(args))

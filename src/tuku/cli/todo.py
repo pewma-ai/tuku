@@ -40,10 +40,6 @@ def _cmd_todo_close(args: argparse.Namespace) -> int:
     )
 
 
-def _cmd_todo_lint(args: argparse.Namespace) -> int:
-    return traducir(core_todo.lint_del_vault(args.vault), "todo lint")
-
-
 def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     todo_p = sub.add_parser(
         "todo",
@@ -111,19 +107,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                 ),
             )
 
-    todo_lint = todo_v.add_parser(
-        "lint",
-        help="revisa los pendientes y reporta; no escribe",
-        description=(
-            "Revisa que ningún pendiente esté en dos filas de `PENDIENTES.md`, que cada "
-            "`**pendiente**` de `AHORA.md` tenga su fila y que las vistas estén al día "
-            "con la tabla. No escribe nada."
-        ),
-    )
-    Opciones(todo_lint).vault("vault a revisar")
-
     return {
         ("todo", "open"): _cmd_todo_open,
         ("todo", "close"): _cmd_todo_close,
-        ("todo", "lint"): _cmd_todo_lint,
     }

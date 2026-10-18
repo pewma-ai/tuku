@@ -1,4 +1,4 @@
-"""tuku note create / tuku note lint: el zettelkasten, en su versión mínima.
+"""tuku note create / tuku doctor note: el zettelkasten, en su versión mínima.
 
 Fase 5 de `devel/epics.md`, mínima: crear una nota a petición y
 enlazarla. Las notas tipadas con plantilla y el destilado del histórico no
@@ -285,7 +285,8 @@ def lint_del_vault(vault: Path, nota: Path | None = None) -> Resultado:
     if nota is None:
         dir_notas = vault / "notas"
         if dir_notas.is_dir():
-            rutas = sorted(dir_notas.glob("*.md"))
+            # `AGENTS.md` instruye al agente que escribe en `notas/`: no es una nota.
+            rutas = sorted(r for r in dir_notas.glob("*.md") if r.name != "AGENTS.md")
     if not rutas:
         return Resultado.hecho("sin notas que revisar.")
 

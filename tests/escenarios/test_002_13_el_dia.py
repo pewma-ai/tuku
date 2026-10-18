@@ -116,7 +116,7 @@ def test_002_13_los_registros_caen_en_su_dia_y_en_orden() -> None:
     )
     assert PERSONAL not in pagina and "- 09:12 - " not in pagina
 
-    lint = corrida.de("entry lint")
+    lint = corrida.de("doctor entry")
     assert lint.codigo == EXITO, lint.stdout
     assert "cachureo" in lint.stdout, lint.stdout
 
@@ -208,7 +208,7 @@ def test_002_13_la_nota_del_frente_queda_escrita_y_enlazada() -> None:
         f"ambitos/{AMBITO}/{AMBITO}.md": "modificado",
         f"notas/{NOTA}.md": "nuevo",
     }
-    assert "sin hallazgos" in corrida.de("note lint").stdout
+    assert "sin hallazgos" in corrida.de("doctor note").stdout
 
 
 def test_002_13_los_pendientes_de_manana_y_pasado_llegan_a_su_dia() -> None:
@@ -252,7 +252,7 @@ def test_002_13_los_pendientes_de_manana_y_pasado_llegan_a_su_dia() -> None:
     depto = ambitos.split(f"^{AMBITO}\n", 1)[1].split("\n\n", 1)[0].splitlines()
     assert depto == ["> - Ago/12 - pagar los gastos comunes"]
 
-    assert corrida.de("todo lint").codigo == EXITO
+    assert corrida.de("doctor todo").codigo == EXITO
 
 
 def test_002_13_repetir_el_dia_no_cambia_nada() -> None:

@@ -74,7 +74,7 @@ La constancia la deja solo quien crea la carpeta. Un día fuera del ciclo abiert
 
 `tuku scope create` es estrictamente idempotente: ejecutarlo sobre un ámbito ya existente no sobreescribe sus reglas ni duplica callouts en `PENDIENTES-AMBITOS.md`, y no escribe otra constancia en `AHORA.md`, ni en este ciclo ni en uno posterior. Con `--keyword` suma esas keywords, como `scope update`.
 
-El comando `tuku scope lint` (y `tuku doctor`) verifica estructuralmente:
+El comando `tuku doctor scope` (y `tuku doctor`) verifica estructuralmente:
 1. Que ningún registro en `AHORA.md` apunte a una categoría.
 2. Que toda página de ámbito del árbol contenga la transclusión a su bloque en `PENDIENTES-AMBITOS.md`.
 3. Que en `ambitos/PENDIENTES-AMBITOS.md` exista el callout con su ancla `^<ambito>` correspondiente a cada ámbito del árbol.
@@ -123,7 +123,7 @@ Las bitácoras cerradas admiten este cambio: el texto del autor queda igual y el
 
 **Minúsculas y espacios en guion (kebab-case).** El autor dicta "Depto Centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry create`, `todo open`, `note create`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
 
-**Un ámbito que no existe se rechaza.** `entry create`, `todo open` y `note create` salen con `RECHAZO` sin escribir nada, y el mensaje nombra `tuku scope create <nombre>` como corrección. Crear un ámbito cambia dónde cae todo lo que venga después, y esa decisión es del autor: se le ofrece, no se toma por él. Una categoría sí existe, y apuntarle un registro lo reporta `scope lint`, no lo impide el comando.
+**Un ámbito que no existe se rechaza.** `entry create`, `todo open` y `note create` salen con `RECHAZO` sin escribir nada, y el mensaje nombra `tuku scope create <nombre>` como corrección. Crear un ámbito cambia dónde cae todo lo que venga después, y esa decisión es del autor: se le ofrece, no se toma por él. Una categoría sí existe, y apuntarle un registro lo reporta `doctor scope`, no lo impide el comando.
 
 ## Un ámbito dentro de otro
 
@@ -149,7 +149,7 @@ Un ámbito puede ir dentro de otro: `ambitos/faena/faena-ai/faena-ai.md`.
 > > - [importadora-andina](proveedores/importadora-andina/importadora-andina.md)
 ```
 
-**La página de un ámbito hijo declara `parent:`** en su frontmatter: la carpeta que lo contiene, escrita igual que en `--parent`, desde `ambitos/` (`parent: negocio/clientes`). Un ámbito en la raíz de `ambitos/` no lleva la línea. La carpeta manda y `parent` es su reflejo, para que Obsidian y cualquier lector de propiedades vean dónde cuelga el ámbito sin recorrer rutas: `scope create`, `scope move`, `scope rename` y `tuku regenerate scope` lo escriben, y `scope lint` reporta el que no coincide con la carpeta.
+**La página de un ámbito hijo declara `parent:`** en su frontmatter: la carpeta que lo contiene, escrita igual que en `--parent`, desde `ambitos/` (`parent: negocio/clientes`). Un ámbito en la raíz de `ambitos/` no lleva la línea. La carpeta manda y `parent` es su reflejo, para que Obsidian y cualquier lector de propiedades vean dónde cuelga el ámbito sin recorrer rutas: `scope create`, `scope move`, `scope rename` y `tuku regenerate scope` lo escriben, y `doctor scope` reporta el que no coincide con la carpeta.
 
 Se descartó que `parent:` mande, moviendo un ámbito con solo editar el campo: la carpeta dejaría de decir dónde cae una regla (principio 7) y Obsidian mostraría un árbol distinto del lógico.
 

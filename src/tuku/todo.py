@@ -159,7 +159,7 @@ def parsear(linea: str) -> Marca | None:
     """La marca de la ontología cerrada de una línea, o `None` si no lleva.
 
     Estricta a propósito: `**Pendiente**` no es `**pendiente**` y acá no se
-    reconoce, que es lo que `tuku entry lint` reporta por separado.
+    reconoce, que es lo que `tuku doctor entry` reporta por separado.
     """
     m = _REGISTRO.match(linea)
     if m is None:
@@ -503,7 +503,7 @@ def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]
 def duplicados(pendientes: str) -> list[str]:
     """Detalles que aparecen en más de una fila. Regla 1 de `spec/pendientes.md`.
 
-    Es lo que reporta `tuku todo lint`: un pendiente está en exactamente una
+    Es lo que reporta `tuku doctor todo`: un pendiente está en exactamente una
     fila, siempre. La misma tarea en dos horizontes es el error que el vault
     real tuvo que prohibir por escrito.
     """
@@ -735,7 +735,7 @@ def lint(
     *,
     vistas: Mapping[str, tuple[str | None, str]] | None = None,
 ) -> list[str]:
-    """Los hallazgos de `tuku todo lint`, cada uno con su corrección. No lee disco.
+    """Los hallazgos de `tuku doctor todo`, cada uno con su corrección. No lee disco.
 
     Cuatro revisiones:
 

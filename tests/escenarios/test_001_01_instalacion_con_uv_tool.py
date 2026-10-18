@@ -63,9 +63,7 @@ def _entorno_aislado() -> Iterator[tuple[Path, dict[str, str], Path]]:
 
 
 def _correr(argv: list[str], entorno: dict[str, str], *, timeout: int = 600) -> None:
-    proceso = subprocess.run(
-        argv, env=entorno, capture_output=True, text=True, timeout=timeout
-    )
+    proceso = subprocess.run(argv, env=entorno, capture_output=True, text=True, timeout=timeout)
     assert proceso.returncode == 0, (
         f"`{' '.join(argv)}` falló ({proceso.returncode}):\n{proceso.stderr}"
     )

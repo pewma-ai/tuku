@@ -134,7 +134,7 @@ def test_lee_comandos_metavars_y_piezas_pendientes() -> None:
 
 def test_la_spec_tiene_firmas_y_retiros() -> None:
     assert len(FIRMAS) > 15
-    assert "scope create" in FIRMAS and "cycle lint" in RETIRO
+    assert "scope create" in FIRMAS
 
 
 def test_todo_comando_del_cli_tiene_firma_o_se_retira() -> None:

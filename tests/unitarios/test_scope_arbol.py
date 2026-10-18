@@ -121,7 +121,7 @@ def test_un_ambito_bajo_otro_vive_en_su_carpeta_y_se_enlaza_con_su_ruta_completa
     argv = ("entry", "create", "--scope", "faena-ai", "--at", f"{HOY} 19:00", "--body", "x")
     assert _tuku(vault, *argv) == EXITO
     assert "[faena-ai](ambitos/faena/faena-ai/faena-ai.md) x" in _leer(vault, "AHORA.md")
-    assert _tuku(vault, "scope", "lint") == EXITO
+    assert _tuku(vault, "doctor", "scope") == EXITO
     assert _tuku(vault, "doctor") == EXITO
 
 
@@ -414,13 +414,13 @@ def test_cada_ambito_hijo_declara_en_su_frontmatter_la_carpeta_en_que_cuelga(
     texto = pagina.read_text(encoding="utf-8")
     pagina.write_text(texto.replace("parent: pyme", "parent: otro"), "utf-8")
     capsys.readouterr()
-    assert _tuku(vault, "scope", "lint") == RECHAZO
+    assert _tuku(vault, "doctor", "scope") == RECHAZO
     salida = capsys.readouterr()
     assert "parent: otro" in salida.err + salida.out
     assert "tuku regenerate scope" in salida.err + salida.out
     assert _tuku(vault, "regenerate", "scope") == EXITO
     assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "pyme"
-    assert _tuku(vault, "scope", "lint") == EXITO
+    assert _tuku(vault, "doctor", "scope") == EXITO
 
 
 def test_la_constancia_enlaza_al_ambito_padre_y_nombra_las_categorias_del_camino(

@@ -59,10 +59,6 @@ def _ubicacion(o: Opciones) -> None:
     )
 
 
-def _cmd_entry_lint(args: argparse.Namespace) -> int:
-    return traducir(entry.lint_del_vault(args.vault), "tuku entry lint")
-
-
 def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     entry_p = sub.add_parser(
         "entry",
@@ -123,22 +119,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     move_p.add_argument("--scope", required=True, help="el ámbito al que pasa el registro")
     move.vault()
 
-    lint_p = entry_v.add_parser(
-        "lint",
-        help="revisa los registros y reporta; no escribe",
-        description=(
-            "Revisa que cada registro de `AHORA.md` tenga la forma "
-            "`- HH:MM - [ámbito](ruta) **marca**: cuerpo` y que su marca exista en "
-            "`LIBRO-DE-ESTILO.md`. Una marca de la ontología cerrada mal escrita se "
-            "rechaza; un término abierto desconocido se reporta para preguntar al autor. "
-            "No escribe nada."
-        ),
-    )
-    Opciones(lint_p).vault("vault a revisar")
-
     return {
         ("entry", "create"): _cmd_entry_create,
         ("entry", "update"): _cmd_entry_update,
         ("entry", "move"): _cmd_entry_move,
-        ("entry", "lint"): _cmd_entry_lint,
     }

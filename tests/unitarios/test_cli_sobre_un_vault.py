@@ -139,7 +139,7 @@ def test_scope_rename_arrastra_carpeta_links_y_ancla(
     assert "#^depto-playa" in _leer(vault, "ambitos", "depto-playa", "depto-playa.md")
     assert "^depto-playa" in _leer(vault, "ambitos", "PENDIENTES-AMBITOS.md")
     capsys.readouterr()
-    assert _tuku(vault, "scope", "lint") == EXITO
+    assert _tuku(vault, "doctor", "scope") == EXITO
     assert "sin hallazgos" in capsys.readouterr().out
 
     # un nombre ocupado, también escrito en mayúsculas, no mueve nada

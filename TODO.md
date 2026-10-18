@@ -11,42 +11,10 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 
 La gramática está en [`spec/cli.md`](spec/cli.md), "Sustantivo, verbo y parámetro".
 
-### Quitar los `lint` y dejar solo `tuku doctor TEMA`
-
-Tarea mecánica: no cambia ninguna regla, solo por dónde se invoca. El 2026-10-18 los cinco `lint` y su `tuku doctor TEMA` dieron el mismo código y el mismo resultado sobre un vault recién sembrado.
-
-| Se borra | Se usa en su lugar |
-| --- | --- |
-| `tuku entry lint` | `tuku doctor entry` |
-| `tuku todo lint` | `tuku doctor todo` |
-| `tuku scope lint` | `tuku doctor scope` |
-| `tuku cycle lint` | `tuku doctor cycle` |
-| `tuku style lint` | `tuku doctor style` |
-| `tuku note lint [ARCHIVO]` | `tuku doctor note [ARCHIVO]`, un tema nuevo |
-
-1. Antes de tocar nada, corre `uv run pytest` y anota qué tests fallan. Hoy son 7: dos de `005-04` y cinco de `005-05`.
-2. Borra el subparser `lint` de cada sustantivo, su función `_cmd_<sustantivo>_lint` y su entrada en el diccionario de comandos, en [`src/tuku/cli/entry.py`](src/tuku/cli/entry.py), [`todo.py`](src/tuku/cli/todo.py), [`scope.py`](src/tuku/cli/scope.py), [`note.py`](src/tuku/cli/note.py) y [`system.py`](src/tuku/cli/system.py) (`cycle lint` y `style lint`). `style` queda sin verbos: borra también el sustantivo. `cycle` conserva `open`.
-3. En [`src/tuku/doctor.py`](src/tuku/doctor.py), agrega `"note"` al final de `TEMAS` y una revisión con la misma forma que las demás (`Revision("note", …)`) que llame a `note.lint_del_vault`.
-4. `tuku doctor` acepta un `ARCHIVO` opcional solo con el tema `note`. `tuku doctor note notas/reunion-con-viana.md` revisa ese archivo y funciona fuera de un vault, igual que hoy `tuku note lint ARCHIVO`. Con cualquier otro tema, un `ARCHIVO` es error de uso: `parser.error`, que sale con 2.
-5. Cambia cada texto que nombra `tuku X lint` por `tuku doctor X`: mensajes y ayudas de `src/tuku/`, `spec/`, `docs/`, `template/vanilla/` y `DEVEL.md`.
-6. En `tests/escenarios/*.md` y en los `tests/**/test_*.py` que invocan el CLI, cambia el comando y la salida esperada: donde decía `sin hallazgos.`, `todo lint: …` o `tuku entry lint: …`, ahora dice `doctor todo: …` o `doctor entry: …`. Los unit tests que llaman directo a `lint()` o `lint_del_vault()` quedan como están.
-7. Deja intacto: los nombres internos (`lint.py`, `cyclelint.py`, las funciones `lint` y `lint_del_vault`), `devel/iteraciones/`, `devel/VAULT/`, `src/tuku/_home/` (se genera) y `playground/`.
-
-8. En [`spec/tuku.md`](spec/tuku.md), "Lo que se retira", borra las seis líneas de los `lint`, y en "Mantención" quita "(pendiente, …)" del tema `note` y `# pendiente: ARCHIVO` de la firma de `doctor`.
-
-Queda hecho cuando:
-
-- `rg -n "(entry|todo|scope|cycle|note|style) lint" --glob '!devel/iteraciones/**' --glob '!devel/VAULT/**' --glob '!src/tuku/_home/**' --glob '!TODO.md'` solo encuentra nombres de funciones Python.
-- `uv run pytest` falla en los mismos tests del paso 1 y por la misma causa. Los de `005-05` cambian de comando y siguen rojos por lo suyo.
-- `uv run ruff check` y `uv run mypy src` pasan.
-
-Si algún `tuku doctor X` da otro código o reporta otros hallazgos que el `tuku X lint` que reemplaza, detente y repórtalo: no ajustes el test para que pase.
-
 ### El resto, por implementar
 
-Hecho el 2026-10-18 ([`devel/iteraciones/2026-10-18.md`](devel/iteraciones/2026-10-18.md)): escritura atómica con reintentos, `regenerate` con su tabla de dependencias, `entry update` y `entry move`, registros sin hora, `tuku context`, `tuku process`, el `AGENTS.md` de dos invocadores, enlazar al registrar con la columna "Enlazable", `todo close TEXTO`, `Actividad reciente` de doce meses, `scope create --since`, el retiro de `cycle open` y `vocab show`, y los ejemplos en la ayuda ([`ejemplos.py`](src/tuku/cli/ejemplos.py)). Falta:
+Hecho el 2026-10-18 ([`devel/iteraciones/2026-10-18.md`](devel/iteraciones/2026-10-18.md)): escritura atómica con reintentos, `regenerate` con su tabla de dependencias, `entry update` y `entry move`, registros sin hora, `tuku context`, `tuku process`, el `AGENTS.md` de dos invocadores, enlazar al registrar con la columna "Enlazable", los `lint` pasados a `doctor TEMA`, `todo close TEXTO`, `Actividad reciente` de doce meses, `scope create --since`, el retiro de `cycle open` y `vocab show`, y los ejemplos en la ayuda ([`ejemplos.py`](src/tuku/cli/ejemplos.py)). Falta:
 
-- **Retirar `tuku vocab show` y `cycle open` en los escenarios históricos** de [`005-00`](tests/escenarios/005-00-el-dia-ciento-cincuenta.md): es un análisis de esa fecha y se dejó como estaba.
 - **Medir el `AGENTS.md` de dos invocadores** con la cadena agéntica del epic 003: cambió la tabla (`tuku context` al empezar, filas de corrección separadas, `process cycle`, `todo close TEXTO`) y la suite no agéntica no lo cubre.
 - **Cada cambio de esta lista toca [`spec/tuku.md`](spec/tuku.md):** se quita el `# pendiente` de lo implementado y la línea de "Lo que se retira" de lo que sale del CLI. [`tests/unitarios/test_superficie.py`](tests/unitarios/test_superficie.py) falla y dice qué línea cambiar si se olvida.
 

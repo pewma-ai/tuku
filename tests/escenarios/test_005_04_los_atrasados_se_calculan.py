@@ -63,7 +63,7 @@ def test_005_04_informar_el_atraso_deja_las_filas_donde_estan() -> None:
 
 def test_005_04_vence_hoy_esta_al_dia_y_vence_ayer_esta_atrasado() -> None:
     corrida = _correr(VENCE_HOY)
-    lints = [r for r in corrida.resultados if r.comando.endswith("tuku todo lint")]
+    lints = [r for r in corrida.resultados if r.comando.endswith("tuku doctor todo")]
     hoy, manana = lints
     assert CARTULINA not in hoy.stdout + hoy.stderr
     assert CARTULINA in manana.stdout + manana.stderr

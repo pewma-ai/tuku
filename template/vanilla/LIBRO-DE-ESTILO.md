@@ -64,7 +64,7 @@ Las notas pueden ser libres. Algunas, sobre cosas que se repiten, conviene que s
 
 Lo que TUKU genera se genera desde una plantilla, y las plantillas son del autor: están en `reglas/plantilla/` y se editan como cualquier otro archivo del vault.
 
-`reglas/plantilla/AHORA.md` es la del ciclo: su frontmatter y los siete encabezados de día. Dónde termina el ciclo lo dice `to`, no hace falta marcarlo en el cuerpo. `tuku cycle lint` revisa ese frontmatter.
+`reglas/plantilla/AHORA.md` es la del ciclo: su frontmatter y los siete encabezados de día. Dónde termina el ciclo lo dice `to`, no hace falta marcarlo en el cuerpo. `tuku doctor cycle` revisa ese frontmatter.
 
 ## Cadencias
 

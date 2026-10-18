@@ -4,7 +4,7 @@
 
 ## Cómo se lee
 
-**La firma.** Un bloque por sección, y es lo normativo. `[x]` es opcional, `(a | b)` es uno de los dos y `…` es repetible. `--vault` vale en todos los comandos salvo `init` y no se repite. `# pendiente` marca un comando especificado y sin implementar; `# pendiente: ARCHIVO` marca las piezas que le faltan a uno que existe.
+**La firma.** Un bloque por sección, y es lo normativo. `[x]` es opcional, `(a | b)` es uno de los dos y `…` es repetible. `--vault` vale en todos los comandos salvo `init` y no se repite. `# pendiente` marca un comando especificado y sin implementar; `# pendiente: --opción` marca las piezas que le faltan a uno que existe.
 
 **El diagrama.** La línea continua escribe y la punteada lee. Un rótulo que empieza con "pendiente:" es comportamiento especificado y sin implementar.
 
@@ -320,14 +320,14 @@ flowchart LR
 Se distinguen por lo que escriben, y por eso se sabe cuál puede correr desatendido ([cli.md](cli.md)).
 
 ```text
-tuku doctor [TEMA] [ARCHIVO] [--verbose]                            # pendiente: ARCHIVO
+tuku doctor [TEMA] [ARCHIVO] [--verbose]
 tuku regenerate [TEMA]
 tuku fix TEMA
 ```
 
 | Comando | Escribe | Temas |
 | --- | --- | --- |
-| `doctor` | Nada | `config`, `version`, `types`, `files`, `frontmatter`, `dispatch`, `link`, `cycle`, `entry`, `todo`, `style`, `scope` y `note` (pendiente, el único que acepta `ARCHIVO`) |
+| `doctor` | Nada | `config`, `version`, `types`, `files`, `frontmatter`, `dispatch`, `link`, `cycle`, `entry`, `todo`, `style`, `scope` y `note`, el único que acepta `ARCHIVO` |
 | `regenerate` | Solo lo derivado | `todo`, `scope` y `comandos` |
 | `fix` | Lo canónico, solo lo determinista, y devuelve las decisiones del autor | `link` y `todo` |
 
@@ -375,11 +375,4 @@ flowchart LR
 
 Comandos y opciones que existen hoy y que la firma de arriba reemplaza. Una línea sale de aquí cuando sale del CLI ([`../TODO.md`](../TODO.md), "Superficie del CLI").
 
-```text
-tuku cycle lint                 → tuku doctor cycle
-tuku entry lint                 → tuku doctor entry
-tuku todo lint                  → tuku doctor todo
-tuku scope lint                 → tuku doctor scope
-tuku note lint                  → tuku doctor note
-tuku style lint                 → tuku doctor style
-```
+Nada por ahora. Cuando un comando se retire, se escribe aquí una línea por cada uno, en un bloque `text`, con el comando que lo reemplaza.

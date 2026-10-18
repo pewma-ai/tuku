@@ -157,7 +157,7 @@ def test_un_pendiente_con_una_keyword_sigue_coincidiendo_con_su_fila(vault: Path
         _tuku(vault, "scope", "update", "depto-centro", "--keyword", "gastos comunes") == EXITO
     )
     assert "**pendiente**: pagar los gastos comunes del depto centro" in _ahora(vault)
-    assert _tuku(vault, "todo", "lint") == EXITO
+    assert _tuku(vault, "doctor", "todo") == EXITO
     assert _tuku(vault, "doctor") == EXITO
 
 

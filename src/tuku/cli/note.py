@@ -47,10 +47,6 @@ def _cmd_note_rename(args: argparse.Namespace) -> int:
     )
 
 
-def _cmd_note_lint(args: argparse.Namespace) -> int:
-    return traducir(note.lint_del_vault(args.vault, args.file), "note lint")
-
-
 def _cmd_note_archive(args: argparse.Namespace) -> int:
     return sin_implementar(
         "tuku note archive", "Mientras tanto, la nota queda en `notas/` tal como está."
@@ -113,23 +109,6 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     note_rename_p.add_argument("nuevo", help="título nuevo")
     Opciones(note_rename_p).vault("vault a modificar")
 
-    note_lint_p = note_v.add_parser(
-        "lint",
-        help="revisa que la nota tenga 'Ver además' y motivos",
-        description=(
-            "Revisa que la nota cierre con `## Ver además` y que cada link saliente diga "
-            "para qué conecta. Sin archivo revisa todas las de `notas/`. No escribe nada."
-        ),
-    )
-    note_lint_p.add_argument(
-        "file",
-        nargs="?",
-        default=None,
-        type=Path,
-        help="archivo de nota a revisar (opcional)",
-    )
-    Opciones(note_lint_p).vault("vault a revisar")
-
     note_archive_p = note_v.add_parser(
         "archive",
         help="archiva una nota (todavía no implementado)",
@@ -144,6 +123,5 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     return {
         ("note", "create"): _cmd_note_create,
         ("note", "rename"): _cmd_note_rename,
-        ("note", "lint"): _cmd_note_lint,
         ("note", "archive"): _cmd_note_archive,
     }

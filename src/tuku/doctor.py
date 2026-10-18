@@ -329,6 +329,7 @@ TEMAS = (
     "todo",
     "style",
     "scope",
+    "note",
 )
 
 
@@ -429,16 +430,29 @@ def formatear(
 
 
 def revisar_todo(vault: Path) -> Revision:
-    """`todo lint` sobre el vault, como una revisión del doctor."""
+    """`doctor todo` sobre el vault, como una revisión del doctor."""
     from tuku import todo
 
     h_todo = todo.hallazgos_del_vault(vault)
     return Revision(
         "todo",
-        "todo lint: sin hallazgos."
+        "todo: sin hallazgos."
         if not h_todo
-        else "\n".join([*h_todo, f"todo lint: {len(h_todo)} error(es)."]),
+        else "\n".join([*h_todo, f"todo: {len(h_todo)} error(es)."]),
         not h_todo,
+    )
+
+
+def revisar_notas(vault: Path, nota: Path | None = None) -> Revision:
+    """`note`: cada nota cierra con `## Ver además` y dice para qué conecta cada link."""
+    from tuku import note
+
+    r = note.lint_del_vault(vault, nota)
+    if r.ok:
+        return Revision("note", f"note: {r.mensaje}", True)
+    hallazgos = r.mensaje.splitlines()
+    return Revision(
+        "note", "\n".join([*hallazgos, f"note: {len(hallazgos)} hallazgo(s)."]), False
     )
 
 
@@ -448,6 +462,7 @@ def revisar_vault(
     comandos: frozenset[str] | None = None,
     tema: str | None = None,
     verbose: bool = False,
+    nota: Path | None = None,
 ) -> Resultado:
     """Corre todos los lint sobre el vault y revisa lo que ninguno cubre.
 
@@ -459,6 +474,8 @@ def revisar_vault(
     Ante hallazgos nombra el template original que `resolver_home` encuentra,
     para reparar comparando. Nunca copia: verificar y corregir son operaciones
     distintas.
+
+    `nota` es un archivo de nota suelto, solo para el tema `note`: no lee el vault.
 
     Con `tema` informa solo esa revisión (`TEMAS`); el arreglo de los hallazgos de
     `link` y `todo` lo aplica `tuku fix TEMA`.
@@ -528,7 +545,7 @@ def revisar_vault(
         if leer("PENDIENTES.md") is None:
             revisiones.append(ausente("todo", "PENDIENTES.md"))
         else:
-            # `todo lint` entero: duplicados, marcas sin su fila y vistas desactualizadas.
+            # `doctor todo` entero: duplicados, marcas sin su fila y vistas desactualizadas.
             revisiones.append(revisar_todo(vault))
 
     if quiere("style"):
@@ -552,12 +569,15 @@ def revisar_vault(
         revisiones.append(
             Revision(
                 "scope",
-                "scope lint: sin hallazgos."
+                "scope: sin hallazgos."
                 if not h_scope
-                else "\n".join([*h_scope, f"scope lint: {len(h_scope)} error(es)."]),
+                else "\n".join([*h_scope, f"scope: {len(h_scope)} error(es)."]),
                 not h_scope,
             )
         )
+
+    if quiere("note"):
+        revisiones.append(revisar_notas(vault, nota))
 
     if tema is not None and not verbose and all(r.sano and not r.aviso for r in revisiones):
         return Resultado.hecho(f"doctor {tema}: sin hallazgos.")

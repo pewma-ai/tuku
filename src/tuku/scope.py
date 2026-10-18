@@ -1,4 +1,4 @@
-"""tuku scope create / tuku scope lint: el árbol de ámbitos.
+"""tuku scope create / tuku doctor scope: el árbol de ámbitos.
 
 Fase 3 de `devel/epics.md`, versión mínima. Lo que distingue a cada
 nodo de `ambitos/` es qué carga, no dónde está (`spec/ambitos.md`):
@@ -9,7 +9,7 @@ nodo de `ambitos/` es qué carga, no dónde está (`spec/ambitos.md`):
 | Categoría | Directorio **sin** página propia |
 | Actividad | Archivo `.md` en minúscula |
 
-De ahí la única regla verificable sin un árbol profundo, y la que `scope lint`
+De ahí la única regla verificable sin un árbol profundo, y la que `doctor scope`
 comprueba: **los registros apuntan a una actividad o a un ámbito, nunca a una
 categoría.** Una categoría agrupa y no tiene de qué hablar.
 
@@ -102,7 +102,7 @@ def nombres(vault: Path) -> set[str]:
     """Todo lo que un registro puede nombrar en `ambitos/`.
 
     Ámbitos, categorías y actividades. Que un registro apunte a una categoría es
-    un error que reporta `scope lint`, no uno que impida escribirlo.
+    un error que reporta `doctor scope`, no uno que impida escribirlo.
     """
     raiz = vault / "ambitos"
     if not raiz.is_dir():

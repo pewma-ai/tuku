@@ -275,7 +275,7 @@ def test_un_pipe_en_el_cuerpo_no_rompe_la_tabla() -> None:
     assert hubo_pareja and todo.cuerpos(sin_fila) == ["comprar pan"]
 
 
-# --- lint: lo que reporta `tuku todo lint` -----------------------------------
+# --- lint: lo que reporta `tuku doctor todo` -----------------------------------
 
 DIA_CERRADO = (
     "## Martes 11 de agosto\n"

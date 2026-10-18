@@ -1,4 +1,4 @@
-"""Tests unitarios de tuku scope lint y validaciones estructurales de ámbitos."""
+"""Tests unitarios de tuku doctor scope y validaciones estructurales de ámbitos."""
 
 from __future__ import annotations
 

@@ -14,7 +14,7 @@ grep -v '^### Horizontes$' mi-vault/LIBRO-DE-ESTILO.md > t && mv t mi-vault/LIBR
 Cuando se corren el lint y un comando que necesita ese vocabulario
 
 ```bash
-tuku style lint --vault mi-vault
+tuku doctor style --vault mi-vault
 tuku context style --vault mi-vault
 ```
 
@@ -34,7 +34,7 @@ mv libro.tmp mi-vault/LIBRO-DE-ESTILO.md
 Cuando se corre
 
 ```bash
-tuku style lint --vault mi-vault
+tuku doctor style --vault mi-vault
 ```
 
 Entonces reporta una pregunta y sale con código 0: una pregunta informa, no rechaza
@@ -47,4 +47,4 @@ uv run pytest tests/escenarios/ -k 001_07
 
 ## Qué se mira a mano
 
-- Leer la salida de `tuku style lint` con errores y verificar que cada mensaje diga el defecto y cómo corregirlo.
+- Leer la salida de `tuku doctor style` con errores y verificar que cada mensaje diga el defecto y cómo corregirlo.

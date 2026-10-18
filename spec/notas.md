@@ -69,7 +69,7 @@ Toda nota cierra con una sección `## Ver además`: la lista de sus enlaces sali
 
 Sin el motivo, el enlace es un dato; con él, es una decisión que alguien más puede evaluar sin abrir la otra nota. Dos niveles de exigencia, y son de naturaleza distinta:
 
-- **Que la sección exista y que cada enlace lleve motivo** es verificable sin juicio → `note lint`.
+- **Que la sección exista y que cada enlace lleve motivo** es verificable sin juicio → `doctor note`.
 - **Que el motivo sea pertinente y no relleno** solo lo evalúa quien lee → agente, juicio semántico.
 
 ## Inferir sobre terceros
@@ -93,7 +93,7 @@ Toda creación de nota mediante `tuku note create` deja huella en la bitácora:
 - Si el archivo ya existe en `notas/`, respeta su contenido y no lo sobreescribe a ciegas.
 - Si la constancia en `AHORA.md` ya existe, la omite y no la duplica.
 
-`tuku note lint` verifica la estructura de las notas (presencia de frontmatter OKF, existencia de la sección `## Ver además` y motivos en cada enlace saliente). El linter nunca repara por su cuenta: informa el defecto y nombra la corrección exacta, ejecutando los comandos originales para restaurar la consistencia.
+`tuku doctor note` verifica la estructura de las notas (presencia de frontmatter OKF, existencia de la sección `## Ver además` y motivos en cada enlace saliente). El linter nunca repara por su cuenta: informa el defecto y nombra la corrección exacta, ejecutando los comandos originales para restaurar la consistencia.
 
 ## No entra
 

@@ -92,7 +92,7 @@ Ese contrato es el que hay y **no crece**. Los tres vocabularios viven en el lib
 
 El comando lee la estructura visible del libro de estilo, nunca una marca invisible ([markdown.md](markdown.md), "Datos de máquina en estructura visible"), y la ausencia del encabezado es un error ruidoso.
 
-Consecuencia directa para el linter: `tuku entry lint` valida la ontología cerrada de forma **estricta** y la abierta de forma **permisiva**. Un tipo desconocido se reporta para preguntar más adelante, nunca se rechaza como error. Un linter que rechaza vocabulario nuevo impide que la organización emerja, que es justo lo que el diseño busca.
+Consecuencia directa para el linter: `tuku doctor entry` valida la ontología cerrada de forma **estricta** y la abierta de forma **permisiva**. Un tipo desconocido se reporta para preguntar más adelante, nunca se rechaza como error. Un linter que rechaza vocabulario nuevo impide que la organización emerja, que es justo lo que el diseño busca.
 
 **Las dos van en la misma posición**, después del ámbito. La marca cerrada primero, la clasificación abierta después, y ambas son opcionales:
 
@@ -106,7 +106,7 @@ Que compartan zona no las mezcla: se distinguen por su forma. `(Hecho)` y `**pen
 
 `**pendiente**` abre, `(Hecho)` cierra. Van en la misma posición, después del ámbito. En el cierre la clasificación abierta sigue disponible a continuación (`**Hito**`, `**decisión**`) o puede no ir, porque `(Hecho)` ya señala el cierre por sí solo.
 
-**En el cierre, la marca queda a la vista y lo tachado es el cuerpo:** `(Hecho): ~~avisar de los GGCC~~`. Lo tachado es lo que ya se hizo. Quien cierra pasa `(Hecho): avisar de los GGCC` y el comando escribe la tachadura, para que a quien dicta no le toque saber dónde va. La marca tachada, `~~(Hecho)~~: cuerpo`, no es válida: `tuku entry lint` la reporta con su corrección.
+**En el cierre, la marca queda a la vista y lo tachado es el cuerpo:** `(Hecho): ~~avisar de los GGCC~~`. Lo tachado es lo que ya se hizo. Quien cierra pasa `(Hecho): avisar de los GGCC` y el comando escribe la tachadura, para que a quien dicta no le toque saber dónde va. La marca tachada, `~~(Hecho)~~: cuerpo`, no es válida: `tuku doctor entry` la reporta con su corrección.
 
 El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PENDIENTES.md` y el registro que cierra. Abrir es copiarlo, cerrar es encontrarlo y borrarlo. **Los links no cuentan al encontrarlo:** el mismo pendiente puede llevar `[Carmen](notas/carmen.md)` en la bitácora y `Carmen` en la tabla, o al revés, y se busca comparando el texto que queda al quitar los links. Ninguna de las dos operaciones interpreta nada. Si el cierre cae el mismo día que la apertura, queda solo el cierre. El detalle de esa doble escritura está en [pendientes.md](pendientes.md).
 

@@ -1,6 +1,6 @@
 """Tests del escenario 001-07-lint-libro-de-estilo.
 
-Con qué código salen `tuku style lint` y `tuku context style` ante un libro de
+Con qué código salen `tuku doctor style` y `tuku context style` ante un libro de
 estilo roto. Los hallazgos del lint los prueban los unitarios de `tuku.style`.
 
 Ejecutable directo: `python3 tests/escenarios/test_001_07_lint_libro_de_estilo.py`
@@ -26,7 +26,7 @@ ENCABEZADO = "### Horizontes"
 def test_001_07_falta_encabezado_de_contrato() -> None:
     corrida = gherkin.correr(SLUG, "falta un encabezado de contrato")
 
-    lint = corrida.de("style lint")
+    lint = corrida.de("doctor style")
     assert lint.codigo == RECHAZO, lint.stdout
     assert ENCABEZADO in lint.stdout, lint.stdout
 

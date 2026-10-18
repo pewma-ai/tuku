@@ -89,7 +89,7 @@ El resumen es la excepción y va como enlace: es un documento de decisión compl
 
 ## Abrir un ciclo
 
-De los comandos de esta sección y de las siguientes, hoy existen `tuku process cycle`, `tuku cycle lint` y `tuku regenerate todo`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `process cycle` hace los pasos 1 y 2, y el pendiente de revisar la bitácora anterior.
+De los comandos de esta sección y de las siguientes, hoy existen `tuku process cycle`, `tuku doctor cycle` y `tuku regenerate todo`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `process cycle` hace los pasos 1 y 2, y el pendiente de revisar la bitácora anterior.
 
 En este orden:
 
@@ -132,7 +132,7 @@ En este orden:
 
 **El orden importa**: aplanar antes de generar el resumen lo deja sin de dónde leer.
 
-`status: stable` es lo que declara que el archivo dejó de tocarse. Mientras siga en `draft` es un ciclo abierto viviendo en el lugar equivocado, y eso lo reportará `tuku cycle lint` cuando exista `bitacoras/` (epic 006); hoy solo revisa `AHORA.md`.
+`status: stable` es lo que declara que el archivo dejó de tocarse. Mientras siga en `draft` es un ciclo abierto viviendo en el lugar equivocado, y eso lo reportará `tuku doctor cycle` cuando exista `bitacoras/` (epic 006); hoy solo revisa `AHORA.md`.
 
 Idempotencia: cerrar dos veces no vuelve a mover ni a duplicar.
 

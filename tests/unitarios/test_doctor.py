@@ -217,6 +217,6 @@ def test_doctor_scope_reporta_solo_el_lint_de_ambitos(tmp_path: Path) -> None:
     pagina.write_text("x [[roto]]\n", encoding="utf-8")
 
     con_tema = doctor.revisar_vault(vault, tema="scope")
-    assert "scope lint" in con_tema.mensaje
+    assert "scope: " in con_tema.mensaje
     assert "wikilink" not in con_tema.mensaje, "el wikilink es del tema link"
     assert "wikilink" in doctor.revisar_vault(vault, tema="link").mensaje
