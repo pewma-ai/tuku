@@ -78,7 +78,8 @@ def regenerar(
         derivados = propagar(vault, vistas=tema != "scope", paginas=tema != "todo")
         cambiados += [p.relative_to(vault).as_posix() for p in derivados]
         if tema != "todo":
-            cambiados += [p.relative_to(vault).as_posix() for p in scope.regenerar_hijos(vault)]
+            for p in (*scope.regenerar_hijos(vault), *scope.regenerar_parent(vault)):
+                cambiados.append(p.relative_to(vault).as_posix())
 
     if tema in (None, "comandos") and comandos is not None and (vault / "reglas").is_dir():
         ruta = vault / COMANDOS

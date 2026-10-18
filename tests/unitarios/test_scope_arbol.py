@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tuku import init
+from tuku import init, scope
 from tuku.cli import EXITO, RECHAZO, main
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -376,3 +376,48 @@ def test_el_callout_lista_los_ambitos_y_despues_las_categorias_anidadas_y_plegab
     )
     assert _tuku(vault, "regenerate", "scope") == EXITO
     assert _tuku(vault, "doctor") == EXITO
+
+
+def _parent(vault: Path, *ruta: str) -> str | None:
+    return scope.parent_de(_leer(vault, *ruta))
+
+
+def test_cada_ambito_hijo_declara_en_su_frontmatter_la_carpeta_en_que_cuelga(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert _crear(vault, "negocio") == EXITO
+    (vault / "ambitos" / "negocio" / "clientes").mkdir()
+    assert _crear(vault, "bodega", "--parent", "negocio") == EXITO
+    assert _crear(vault, "colegio", "--parent", "clientes") == EXITO
+
+    assert _parent(vault, "ambitos", "negocio", "negocio.md") is None
+    assert _parent(vault, "ambitos", "negocio", "bodega", "bodega.md") == "ambitos/negocio"
+    assert (
+        _parent(vault, "ambitos", "negocio", "clientes", "colegio", "colegio.md")
+        == "ambitos/negocio/clientes"
+    )
+    assert "parent:" not in _leer(vault, "ambitos", "personal", "personal.md")
+
+    # renombrar un ámbito cambia el parent de sus descendientes; mover, el del movido
+    assert _tuku(vault, "scope", "rename", "negocio", "pyme") == EXITO
+    assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "ambitos/pyme"
+    assert _tuku(vault, "scope", "move", "colegio", "--parent", "bodega") == EXITO
+    assert (
+        _parent(vault, "ambitos", "pyme", "bodega", "colegio", "colegio.md")
+        == "ambitos/pyme/bodega"
+    )
+    assert _tuku(vault, "scope", "move", "colegio") == EXITO
+    assert _parent(vault, "ambitos", "colegio", "colegio.md") is None
+
+    # el desfase se reporta y `regenerate scope` lo repara
+    pagina = vault / "ambitos" / "pyme" / "bodega" / "bodega.md"
+    texto = pagina.read_text(encoding="utf-8")
+    pagina.write_text(texto.replace("parent: ambitos/pyme", "parent: ambitos/otro"), "utf-8")
+    capsys.readouterr()
+    assert _tuku(vault, "scope", "lint") == RECHAZO
+    salida = capsys.readouterr()
+    assert "parent: ambitos/otro" in salida.err + salida.out
+    assert "tuku regenerate scope" in salida.err + salida.out
+    assert _tuku(vault, "regenerate", "scope") == EXITO
+    assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "ambitos/pyme"
+    assert _tuku(vault, "scope", "lint") == EXITO

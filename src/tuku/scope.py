@@ -43,6 +43,9 @@ from tuku.resultado import Resultado
 _KEYWORDS = re.compile(r"^keywords:\s*\[(?P<lista>[^\]]*)\]\s*$", re.M)
 
 
+_PARENT = re.compile(r"^parent:[ \t]*(?P<ruta>.*?)[ \t]*$", re.M)
+
+
 @dataclass(frozen=True)
 class Ambito:
     nombre: str
@@ -361,6 +364,58 @@ def refrescar_hijos(carpeta: Path) -> None:
             return
 
 
+def _frontmatter(texto: str) -> tuple[int, int] | None:
+    """El frontmatter de una página como `[inicio, fin)`, sin los `---`."""
+    if not texto.startswith("---\n"):
+        return None
+    fin = texto.find("\n---", 3)
+    return (4, fin) if fin != -1 else None
+
+
+def parent_de(pagina: str) -> str | None:
+    """El `parent:` del frontmatter de una página de ámbito, o `None` si no lo declara."""
+    rango = _frontmatter(pagina)
+    if rango is None:
+        return None
+    m = _PARENT.search(pagina[rango[0] : rango[1]])
+    return m.group("ruta") if m and m.group("ruta") else None
+
+
+def _parent_esperado(vault: Path, directorio: Path) -> str | None:
+    """La carpeta que contiene al ámbito, desde la raíz del vault; `None` en `ambitos/`."""
+    padre = directorio.parent
+    return None if padre == vault / "ambitos" else padre.relative_to(vault).as_posix()
+
+
+def _con_parent(texto: str, parent: str | None) -> str:
+    """La página con `parent:` en su frontmatter, al final; sin la línea si no hay padre."""
+    rango = _frontmatter(texto)
+    if rango is None:
+        return texto
+    inicio, fin = rango
+    lineas = [x for x in texto[inicio:fin].splitlines() if not x.startswith("parent:")]
+    if parent:
+        lineas.append(f"parent: {parent}")
+    return texto[:inicio] + "\n".join(lineas) + texto[fin:]
+
+
+def regenerar_parent(vault: Path) -> list[Path]:
+    """Pone en cada página de ámbito el `parent:` que dice su carpeta. Devuelve lo que cambió.
+
+    La carpeta manda: `parent` es su reflejo en el frontmatter, para que Obsidian y
+    cualquier lector de propiedades vean dónde cuelga el ámbito sin recorrer rutas.
+    """
+    cambiados: list[Path] = []
+    for a in leer(vault):
+        pagina = _pagina(a.directorio)
+        texto = pagina.read_text(encoding="utf-8")
+        salida = _con_parent(texto, _parent_esperado(vault, a.directorio))
+        if salida != texto:
+            pagina.write_text(salida, encoding="utf-8")
+            cambiados.append(pagina)
+    return cambiados
+
+
 def regenerar_hijos(vault: Path) -> list[Path]:
     """Recrea el callout de hijos de cada ámbito desde las carpetas. Devuelve lo que cambió.
 
@@ -573,6 +628,23 @@ def lint_transclusiones(vault: Path) -> list[str]:
     return hallazgos
 
 
+def lint_parent(vault: Path) -> list[str]:
+    """Comprueba que el `parent:` de cada página diga en qué carpeta está el ámbito."""
+    hallazgos = []
+    for a in leer(vault):
+        pagina = _pagina(a.directorio)
+        esperado = _parent_esperado(vault, a.directorio)
+        actual = parent_de(pagina.read_text(encoding="utf-8"))
+        if actual != esperado:
+            dice = f"`parent: {actual}`" if actual else "no declara `parent:`"
+            debe = f"`parent: {esperado}`" if esperado else "ningún `parent:`"
+            hallazgos.append(
+                f"{pagina.relative_to(vault)}: error: la página {dice} y su carpeta pide "
+                f"{debe}. Corre `tuku regenerate scope`."
+            )
+    return hallazgos
+
+
 def lint_callouts(vault: Path) -> list[str]:
     """Comprueba que en PENDIENTES-AMBITOS.md exista un callout por cada ámbito."""
     archivo = vault / "ambitos" / "PENDIENTES-AMBITOS.md"
@@ -616,6 +688,7 @@ def lint(
             lint_categorias(ahora_path.read_text(encoding="utf-8"), categorias=cats)
         )
     hallazgos.extend(lint_transclusiones(vault))
+    hallazgos.extend(lint_parent(vault))
     hallazgos.extend(lint_callouts(vault))
     return hallazgos
 
@@ -720,6 +793,7 @@ def crear_con_constancia(
     )
     if padre is not None:
         refrescar_hijos(padre)
+    regenerar_parent(vault)
     pagina_path = directorio / f"{nombre}.md"
     if not nuevo and palabras:
         return actualizar(vault, nombre, palabras)
@@ -854,6 +928,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
         propagate.propagar(vault)
     retitular_hijos(destino)
     refrescar_hijos(destino.parent)
+    regenerar_parent(vault)
     actualizar_pagina(vault, nuevo)
 
     detalle = f" ({enlaces} enlace(s) actualizado(s))" if enlaces else ""
@@ -932,6 +1007,7 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
 
     refrescar_hijos(origen.parent)
     refrescar_hijos(padre)
+    regenerar_parent(vault)
     if pendientes.is_file():
         propagate.propagar(vault)
     detalle = f" ({cambiados} archivo(s) con links actualizados)" if cambiados else ""

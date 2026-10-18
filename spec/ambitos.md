@@ -119,7 +119,9 @@ Un ámbito puede ir dentro de otro: `ambitos/faena/faena-ai/faena-ai.md`.
 > > - [importadora-andina](proveedores/importadora-andina/importadora-andina.md)
 ```
 
-Se descartó un campo `parent:` en la página, sin mover carpetas: mover sería trivial, pero la carpeta dejaría de decir dónde cae una regla (principio 7) y Obsidian mostraría un árbol distinto del lógico.
+**La página de un ámbito hijo declara `parent:`** en su frontmatter: la carpeta que lo contiene, desde la raíz del vault (`parent: ambitos/negocio/clientes`). Un ámbito en la raíz de `ambitos/` no lleva la línea. La carpeta manda y `parent` es su reflejo, para que Obsidian y cualquier lector de propiedades vean dónde cuelga el ámbito sin recorrer rutas: `scope create`, `scope move`, `scope rename` y `tuku regenerate scope` lo escriben, y `scope lint` reporta el que no coincide con la carpeta.
+
+Se descartó que `parent:` mande, moviendo un ámbito con solo editar el campo: la carpeta dejaría de decir dónde cae una regla (principio 7) y Obsidian mostraría un árbol distinto del lógico.
 
 ## Convención de mayúsculas
 
