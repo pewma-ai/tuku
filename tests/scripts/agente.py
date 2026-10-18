@@ -153,6 +153,18 @@ BARATOS = ("haiku", "flash", "mini", "lite", "small")
 
 _MODELOS: dict[str, str | None] = {}
 
+#: Lo que un arnés necesita en el entorno de su proceso, además de lo que hereda.
+#:
+#: `hermes` se niega a abrir la base de sesiones de un perfil real cuando lo lanza
+#: un runner de pruebas (mira el entorno y también los procesos padre), y sin ella
+#: el turno sale 1 y no guarda nada que exportar. El perfil `tuku` es el que este
+#: arnés usa para correr agentes, y guardar ahí la sesión del turno es el diseño:
+#: de ahí sale `sessions export`. La variable es la que el propio guard documenta
+#: para un hijo que necesita la base viva, y se pone solo en este arnés.
+ENTORNO_DEL_ARNES: dict[str, dict[str, str]] = {
+    "hermes": {"HERMES_STATE_DB_GUARD_BYPASS": "1"},
+}
+
 ARNESES: dict[str, dict[str, list[str]]] = {
     "agy": {
         "aislar": ["--new-project", "--sandbox"],
@@ -946,6 +958,7 @@ def turno(
         traza = _sembrar_shim(bin)
         base = {
             **{k: v for k, v in os.environ.items() if k not in DEL_RUNNER},
+            **ENTORNO_DEL_ARNES.get(arnes.nombre, {}),
             "TUKU_TRAZA": str(traza),
             "TUKU_HOME": str(RAIZ_REPO),
             **({"TUKU_NOW": ahora} if ahora else {}),
