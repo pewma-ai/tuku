@@ -52,8 +52,16 @@ def _cmd_init(args: argparse.Namespace) -> int:
     return EXITO
 
 
-def _cmd_context(args: argparse.Namespace) -> int:
-    return traducir(context.del_vault(args.vault, args.tema, args.since), "tuku context")
+def _crear_cmd_context(parser: argparse.ArgumentParser) -> Handler:
+    def _cmd_context(args: argparse.Namespace) -> int:
+        if args.late and args.tema != "todo":
+            parser.error("--late solo vale con el tema `todo`: `tuku context todo --late`")
+        return traducir(
+            context.del_vault(args.vault, args.tema, args.since, late=args.late),
+            "tuku context",
+        )
+
+    return _cmd_context
 
 
 def _cmd_process(args: argparse.Namespace) -> int:
@@ -209,9 +217,9 @@ def registrar(
             "Solo lee. `entry`: los registros desde `--since`, de `AHORA.md` y de las "
             "bitácoras de `bitacoras/` que cruza. `scope`: cada ámbito de `ambitos/` con "
             "su ruta y sus keywords. `todo`: los pendientes de `PENDIENTES.md`, con los "
-            "atrasados marcados. `style`: clasificaciones, horizontes y tipos de nota de "
-            "`LIBRO-DE-ESTILO.md`. `note`: las notas de `notas/` que enlazaron los "
-            "registros desde `--since`. Sin TEMA, todos."
+            "atrasados marcados (con `--late`, solo esos). `style`: clasificaciones, "
+            "horizontes y tipos de nota de `LIBRO-DE-ESTILO.md`. `note`: las notas de "
+            "`notas/` que enlazaron los registros desde `--since`. Sin TEMA, todos."
         ),
     )
     context_p.add_argument(
@@ -228,6 +236,11 @@ def registrar(
             f"desde cuándo leer: un número de días o AAAA-MM-DD; por defecto, "
             f"{context.DESDE_POR_DEFECTO} días"
         ),
+    )
+    context_p.add_argument(
+        "--late",
+        action="store_true",
+        help="solo con el tema `todo`: únicamente los pendientes atrasados",
     )
     Opciones(context_p).vault("vault a leer")
 
@@ -275,5 +288,5 @@ def registrar(
         ("doctor", None): _crear_cmd_doctor(comandos_fn, doctor_p),
         ("fix", None): _cmd_fix,
         ("regenerate", None): _cmd_regenerate,
-        ("context", None): _cmd_context,
+        ("context", None): _crear_cmd_context(context_p),
     }

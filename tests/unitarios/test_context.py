@@ -12,6 +12,7 @@ from tuku.cli import EXITO, main
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 HOY = date(2026, 8, 12)
+DIA = date(2026, 8, 10)
 
 
 @pytest.fixture
@@ -69,6 +70,44 @@ def test_scope_todo_y_note(vault: Path) -> None:
     )
     notas = context.del_vault(vault, "note", hoy=HOY).mensaje
     assert notas == "- notas/rodolfo-cifuentes.md (persona), mencionada el 2026-08-11"
+
+
+def test_late_deja_solo_los_pendientes_cuyo_vence_ya_paso(vault: Path) -> None:
+    todo.abrir_en_vault(
+        vault,
+        body="recibir la cartulina",
+        scope="personal",
+        due="2026-08-12",
+        day=date(2026, 8, 10),
+        hour="09:05",
+    )
+    todo.abrir_en_vault(
+        vault, body="ordenar el archivo", scope="personal", day=DIA, hour="09:10"
+    )
+
+    todos = context.del_vault(vault, "todo", hoy=HOY).mensaje
+    assert "recibir la cartulina" in todos and "ordenar el archivo" in todos
+
+    tarde = context.del_vault(vault, "todo", hoy=HOY, late=True).mensaje
+    assert tarde == "- con fecha, vence 2026-08-11, atrasado: enviar la cotización (personal)"
+
+    mañana = context.del_vault(vault, "todo", hoy=date(2026, 8, 13), late=True).mensaje
+    assert "recibir la cartulina" in mañana and "ordenar el archivo" not in mañana
+
+    assert (
+        context.del_vault(vault, "todo", hoy=date(2026, 8, 10), late=True).mensaje
+        == "sin pendientes atrasados."
+    )
+
+
+def test_late_sin_el_tema_todo_es_un_error_de_uso(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    with pytest.raises(SystemExit) as e:
+        main(["context", "scope", "--late", "--vault", str(vault)])
+    assert e.value.code == 2
+    assert "--late solo vale con el tema `todo`" in capsys.readouterr().err
+    assert main(["context", "todo", "--late", "--vault", str(vault)]) == EXITO
 
 
 def test_sin_tema_trae_todos_y_since_malo_rechaza(vault: Path) -> None:

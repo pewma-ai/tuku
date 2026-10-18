@@ -284,17 +284,17 @@ flowchart LR
 Lo que el agente necesita para decidir, sin abrir archivos. Sin `TEMA`, todos.
 
 ```text
-tuku context [TEMA] [--since]
+tuku context [TEMA] [--since] [--late]
 ```
 
-`--since` vale 2 días por defecto.
+`--since` vale 2 días por defecto. `--late` solo vale con `todo` y deja únicamente los pendientes atrasados.
 
 ```mermaid
 %%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
 flowchart LR
     subgraph CMD["tuku context"]
         direction TB
-        CX["context TEMA<br/>--since"]
+        CX["context TEMA<br/>--since --late"]
     end
     subgraph VAULT["Vault"]
         direction TB
@@ -309,7 +309,7 @@ flowchart LR
     CX -.->|"entry: los registros<br/>desde --since"| AH
     CX -.->|"entry: si --since cruza<br/>un ciclo cerrado"| BI
     CX -.->|"scope: el árbol con sus keywords"| AM
-    CX -.->|"todo: abiertos y atrasados"| PE
+    CX -.->|"todo: abiertos y atrasados;<br/>con --late, solo los atrasados"| PE
     CX -.->|"style: clasificaciones,<br/>horizontes y tipos de nota"| LE
     CX -.->|"note: las de tipo enlazable<br/>nombradas desde --since"| NO
 

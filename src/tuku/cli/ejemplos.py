@@ -48,6 +48,7 @@ EJEMPLOS: dict[str, tuple[str, ...]] = {
     "context": (
         "tuku context",
         "tuku context todo",
+        "tuku context todo --late",
         "tuku context entry --since 7",
     ),
     "doctor": ("tuku doctor", "tuku doctor todo"),

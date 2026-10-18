@@ -13,7 +13,7 @@ cp -r ../../005-01-las-dos-semanas-de-andrea/la-segunda-semana-cae-sobre-lo/mi-v
 Cuando se revisan los pendientes ese día
 ```bash
 cd mi-vault
-TUKU_NOW="2026-08-24 09:00" tuku doctor todo
+TUKU_NOW="2026-08-24 09:00" tuku context todo --late
 ```
 Entonces la salida nombra como atrasado `revisar la bitácora anterior`, que venció el lunes 17
 Y los pendientes vigentes quedan fuera de la lista
@@ -29,17 +29,13 @@ tuku todo open --at "2026-08-23 21:30" --scope bodega --due 2026-08-24 --body "r
 ```
 Cuando se revisan los pendientes el mismo lunes 24
 ```bash
-TUKU_NOW="2026-08-24 09:00" tuku doctor todo
+TUKU_NOW="2026-08-24 09:00" tuku context todo --late
 ```
 Entonces la salida deja fuera `recibir el pedido de cartulina de color`
 Y sí lo nombra el martes 25, porque «vence el día en que toca el pendiente y desde el siguiente está atrasado»
 ```bash
-TUKU_NOW="2026-08-25 09:00" tuku doctor todo
+TUKU_NOW="2026-08-25 09:00" tuku context todo --late
 ```
-
-## Qué se mira a mano
-
-- Qué comando debería informar los atrasados: hoy `tuku doctor todo` revisa la coherencia entre la tabla y los registros y no sabe de fechas, y la spec dice solo que «un comando lo informa». Este escenario lo pide a `doctor todo` como aviso con código 0; si el autor prefiere un comando propio, se cambia aquí y en `spec/pendientes.md`.
 
 ## Aceptación humana
 

@@ -7,7 +7,7 @@ todos, en este orden:
 | --- | --- | --- |
 | `entry` | Los registros desde `--since`, bajo su día | `AHORA.md` y las bitácoras que cruza |
 | `scope` | Cada ámbito con su ruta y sus keywords | `ambitos/` |
-| `todo` | Los pendientes abiertos, con los atrasados marcados | `PENDIENTES.md` |
+| `todo` | Los pendientes abiertos, atrasados marcados (`--late`: solo esos) | `PENDIENTES.md` |
 | `style` | Clasificaciones, horizontes y tipos de nota | `LIBRO-DE-ESTILO.md` |
 | `note` | Las notas enlazables nombradas desde `--since` | registros y `notas/` |
 
@@ -98,7 +98,8 @@ def _scope(vault: Path) -> str:
     return "\n".join(lineas) or "sin ámbitos."
 
 
-def _todo(vault: Path, hoy: date) -> str:
+def _todo(vault: Path, hoy: date, late: bool = False) -> str:
+    """Los pendientes abiertos; con `late`, solo los atrasados (`Vence` anterior a `hoy`)."""
     from tuku import todo
 
     ruta = vault / "PENDIENTES.md"
@@ -106,11 +107,16 @@ def _todo(vault: Path, hoy: date) -> str:
         return "sin PENDIENTES.md."
     lineas = []
     for f in todo.filas(archivo.leer(ruta)):
+        vencido = f.dia is not None and f.dia < hoy
+        if late and not vencido:
+            continue
         vence = f", vence {f.vence}" if f.vence else ""
-        atrasado = ", atrasado" if f.dia is not None and f.dia < hoy else ""
+        atrasado = ", atrasado" if vencido else ""
         ambito = f" ({f.ambito})" if f.ambito else ""
         lineas.append(f"- {f.horizonte}{vence}{atrasado}: {f.cuerpo}{ambito}")
-    return "\n".join(lineas) or "sin pendientes abiertos."
+    return "\n".join(lineas) or (
+        "sin pendientes atrasados." if late else "sin pendientes abiertos."
+    )
 
 
 def _style(vault: Path) -> str:
@@ -146,7 +152,12 @@ def _note(vault: Path, inicio: date) -> str:
 
 
 def del_vault(
-    vault: Path, tema: str | None = None, since: str | None = None, hoy: date | None = None
+    vault: Path,
+    tema: str | None = None,
+    since: str | None = None,
+    hoy: date | None = None,
+    *,
+    late: bool = False,
 ) -> Resultado:
     """El contexto del `tema`, o de todos, como texto para leer de una vez."""
     hoy = hoy or date.today()
@@ -157,7 +168,10 @@ def del_vault(
     secciones: dict[str, tuple[str, Callable[[], str]]] = {
         "entry": (f"Registros desde el {inicio.isoformat()}", lambda: _entry(vault, inicio)),
         "scope": ("Ámbitos y sus keywords", lambda: _scope(vault)),
-        "todo": ("Pendientes abiertos", lambda: _todo(vault, hoy)),
+        "todo": (
+            "Pendientes atrasados" if late else "Pendientes abiertos",
+            lambda: _todo(vault, hoy, late),
+        ),
         "style": ("Vocabulario del autor", lambda: _style(vault)),
         "note": ("Notas mencionadas", lambda: _note(vault, inicio)),
     }

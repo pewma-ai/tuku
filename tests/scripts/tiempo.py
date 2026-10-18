@@ -50,6 +50,7 @@ def congelar(tuku_now: str | None) -> Iterator[None]:
         "tuku.todo",
         "tuku.note",
         "tuku.cycle",
+        "tuku.context",
         "tuku.init",
         "tuku.scope",
         "tuku.cli.opciones",

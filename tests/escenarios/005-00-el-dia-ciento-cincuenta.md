@@ -51,7 +51,7 @@ El orden sigue tres criterios: primero la sintaxis del CLI, que está en revisi�
 
 ### S. La sintaxis del CLI está abierta
 
-La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md) y la compara [`test_superficie.py`](../unitarios/test_superficie.py). Los escenarios usan la de hoy: el `.md` es la fuente ejecutable, así que un nombre nuevo cambia solo sus líneas `tuku`. Los nombres que este epic propone (`doctor todo` para los atrasados, `note create --subtype`, el verbo de postergar) siguen provisionales. Un nombre vive en el código, en `reglas/comandos.tuku.md`, en el `AGENTS.md` del template, en las specs y en los escenarios.
+La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md) y la compara [`test_superficie.py`](../unitarios/test_superficie.py). Los escenarios usan la de hoy: el `.md` es la fuente ejecutable, así que un nombre nuevo cambia solo sus líneas `tuku`. Los nombres que este epic propone (`note create --subtype`, el verbo de postergar) siguen provisionales. Un nombre vive en el código, en `reglas/comandos.tuku.md`, en el `AGENTS.md` del template, en las specs y en los escenarios.
 
 | Id | Pendiente |
 | --- | --- |
@@ -81,7 +81,7 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 
 | Id | Pendiente | Test |
 | --- | --- | --- |
-| B1 | Sin comando propio de atrasados, por decisión del autor (2026-10-18): `PENDIENTES.md` ya los contiene y `tuku context todo` los marca. `doctor todo` no sabe de fechas y no lo necesita por ahora. Los escenarios `005-04` piden lo contrario y quedan en rojo hasta decidir qué se hace con ellos | `005-04` (2 rojos y 2 guardas) |
+| ~~B1~~ | ~~Ningún comando informaba los atrasados: `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo.~~ Resuelto el 2026-10-18: `tuku context todo --late` deja solo los pendientes con `Vence` anterior a hoy. El atraso por horizonte expirado sigue en E2 | ~~`005-04` (2 rojos y 2 guardas)~~ |
 | B2 | No existe una nota tipada: `note create` no tiene `--subtype` y no se siembra `reglas/tipos/persona.md`, que `spec/notas.md` promete «el epic que escriba la primera nota tipada». Depende de X2 | `005-05` tipada (3 rojos) |
 | B3 | Las keywords repetidas entre ámbitos pasan sin aviso: `scope update escuela-los-maitenes --keyword Paula` sale con 0 y `tuku doctor` dice que el vault está sano, con `Paula` ya en `catalogo-marzo`. Es lo que hace ambigua a la Paula del `005-06`. Falta decidir si avisa `scope keywords`, `doctor` o los dos, y depende de S2 | sin test |
 | B4 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se baja con un comando. Falta el nombre y la forma | sin test: se escribe cuando B4 tenga nombre |
@@ -108,7 +108,7 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 
 | Id | Pendiente |
 | --- | --- |
-| E1 | Dos tests del `005-04` pasan sin probar nada hasta que exista B1, porque afirman que algo queda fuera de una salida que hoy es siempre «sin hallazgos». Se vuelven reales con B1 |
+| ~~E1~~ | ~~Dos tests del `005-04` pasaban sin probar nada hasta que existiera B1.~~ Resuelto el 2026-10-18 con B1 |
 | E2 | Falta el atraso por horizonte expirado (los cinco `esta semana` que siguen en `PENDIENTES.md` pasada la semana). Depende de cómo ruede un horizonte, que es del epic 006 |
 | E3 | Cuatro tests del `005-05` caen en cascada de otros: el escenario de la nota tipada aborta en su primer `Entonces`. Se resuelven con B2 |
 
@@ -118,7 +118,7 @@ Tomadas al escribir los escenarios, para poder escribirlos. Cada una se confirma
 
 | Id | Decisión | Usa |
 | --- | --- | --- |
-| ~~X1~~ | ~~`tuku doctor todo` informa los atrasados como aviso, con código 0.~~ Rechazada el 2026-10-18: no se necesita un comando por ahora, `PENDIENTES.md` y `tuku context todo` bastan | B1, `005-04` |
+| ~~X1~~ | ~~`tuku doctor todo` informa los atrasados como aviso, con código 0.~~ Cambiada el 2026-10-18: un atraso es un hecho del tiempo y no un defecto del vault, así que lo dice `tuku context todo --late`, no `doctor`. Sin verbo `list` | B1, `005-04` |
 | X2 | `note create --subtype persona`, con el campo que `spec/notas.md` ya llama `subtype`, y `reglas/tipos/persona.md` sembrado por `tuku init` | B2, `005-05` |
 | X3 | El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea | B5, `005-01` |
 | X4 | El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos | C1, `005-06` |
