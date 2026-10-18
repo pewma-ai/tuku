@@ -100,6 +100,29 @@ tuku regenerate
 Entonces sale con código 1 (`RECHAZO`) nombrando `PENDIENTES.md`
 Y no escribe ningún archivo
 
+## Escenario: corregir un pendiente con entry update arrastra su fila
+
+Cuando se corrige el cuerpo de un pendiente abierto
+```bash
+tuku entry update --match "llamar a la administradora" --body "llamar a la administradora por el reajuste"
+tuku doctor todo
+```
+Entonces el registro de las 21:32 conserva `**pendiente**:` y dice el cuerpo nuevo
+Y la fila de `PENDIENTES.md` dice el cuerpo nuevo
+Y `tuku doctor todo` sale limpio
+
+## Escenario: una fila sin registro pendiente la nombra todo lint
+
+Dado el registro de `llamar a la administradora` sin su marca `**pendiente**`, escrito con un editor
+```bash
+sed -i.bak 's/\*\*pendiente\*\*: llamar a la administradora/llamar a la administradora/' AHORA.md && rm AHORA.md.bak
+```
+Cuando se revisa
+```bash
+tuku doctor todo
+```
+Entonces sale con código 1 (`RECHAZO`) y nombra la fila huérfana `llamar a la administradora`
+
 ## Aceptación humana (en Obsidian)
 
 - Cada mensaje de lint dice qué está mal y qué comando lo corrige, sin sonar punitivo.

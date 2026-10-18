@@ -90,6 +90,27 @@ def test_002_14_un_canonico_roto_hace_que_regenerate_no_escriba() -> None:
     assert corrida.delta_de("mi-vault") == {}, "el rechazo escribió"
 
 
+def test_002_14_corregir_un_pendiente_con_entry_update_arrastra_su_fila() -> None:
+    corrida = gherkin.correr(SLUG, "corregir un pendiente con entry update")
+
+    ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
+    assert (
+        f"- 21:32 - {PERSONAL} **pendiente**: llamar a la administradora por el reajuste"
+        in ahora
+    ), ahora
+    pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
+    assert f"| {PERSONAL} | llamar a la administradora por el reajuste |" in pendientes, (
+        pendientes
+    )
+    assert corrida.de("tuku doctor todo").codigo == EXITO
+
+
+def test_002_14_una_fila_sin_registro_pendiente_la_nombra_todo_lint() -> None:
+    corrida = gherkin.correr(SLUG, "una fila sin registro pendiente")
+    assert corrida.codigo == RECHAZO, corrida.stdout
+    assert "llamar a la administradora" in corrida.stdout, corrida.stdout
+
+
 if __name__ == "__main__":
     import pytest
 
