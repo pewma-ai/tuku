@@ -8,7 +8,7 @@ Este archivo dice **a dónde va cada cosa**. El cómo está en el archivo que no
 
 - **Un pedido, un comando.** Ejecuta el comando de la fila con los campos que dio el autor. El comando valida, rechaza con la corrección y escribe todo lo derivado.
 - **Atiende todo lo que el autor dijo, en su orden:** cada cosa que cuenta o pide es un comando o una respuesta. No termines con una sin atender.
-- **Antes de registrar lo que el autor hizo, mira `PENDIENTES.md`.** Si calza con un pendiente abierto es un cierre (`tuku todo close`); si calzan varios, pregunta cuál y no escribas nada (si la respuesta tampoco lo aclara, vuelve a preguntar: lo que solo el autor sabe no se busca en el vault); si ninguno, es un registro (`tuku entry add`). Fuera de eso no leas el vault: el comando conoce el formato, el día y el orden. Abre solo el archivo que la fila nombra en "Lee antes".
+- **Antes de registrar lo que el autor hizo, mira `PENDIENTES.md`.** Si calza con un pendiente abierto es un cierre (`tuku todo close`); si calzan varios, pregunta cuál y no escribas nada (si la respuesta tampoco lo aclara, vuelve a preguntar: lo que solo el autor sabe no se busca en el vault); si ninguno, es un registro (`tuku entry create`). Fuera de eso no leas el vault: el comando conoce el formato, el día y el orden. Abre solo el archivo que la fila nombra en "Lee antes".
 - **Los comandos están en la tabla y en los ejemplos de abajo,** así que no consultes `-h` antes de ejecutar. Si uno rechaza, haz lo que su mensaje dice; solo si no basta, `tuku <comando> -h`.
 - **No verifiques después.** El mensaje del comando dice qué quedó escrito. Cuando termina el último, respondes: no releas archivos ni explores el CLI.
 - **Responde en una o dos frases:** qué quedó escrito, o la pregunta que falta.
@@ -31,7 +31,7 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 
 | El autor... | Lee antes | Comando |
 | --- | --- | --- |
-| cuenta algo que pasó: "hablé con", "llegó", "quedó listo" | `PENDIENTES.md`; si el comando rechaza el día, `reglas/bitacora.tuku.md` | `tuku entry add` |
+| cuenta algo que pasó: "hablé con", "llegó", "quedó listo" | `PENDIENTES.md`; si el comando rechaza el día, `reglas/bitacora.tuku.md` | `tuku entry create` |
 | deja algo por hacer: "hay que", "recuérdame", "para el lunes" | nada | `tuku todo open` |
 | da por hecho algo que estaba pendiente: "ya pagué", "listo lo de" | `PENDIENTES.md` | `tuku todo close` |
 | nombra un frente que todavía no existe | `ambitos/AGENTS.md` | `tuku scope create` |
@@ -44,7 +44,7 @@ MAYÚSCULAS es de TUKU, minúsculas es del autor.
 | pregunta, delibera o pide investigar | nada | ninguno: se responde, no se escribe |
 
 ```bash
-tuku entry add --scope personal --body "revisé el contrato del arriendo" --at 10:30
+tuku entry create --scope personal --body "revisé el contrato del arriendo" --at 10:30
 tuku todo open --scope personal --body "renovar el seguro" --at 13:00
 tuku todo open --scope personal --body "pagar el arriendo" --due "2026-08-14 09:00"
 tuku todo close --body "pagar el arriendo" --at 16:45
@@ -53,17 +53,17 @@ tuku note create "cómo se prorroga un arriendo" --scope personal --body "…" -
 ```
 
 - **Los campos.** `--scope` es el nombre de una carpeta de `ambitos/` (`grep -r '^keywords:' ambitos` las lista con sus palabras; si ninguno calza, `personal`). `--at "2026-08-11 09:12"` (o solo `09:12`) es cuándo pasó, cuándo prometió algo el autor o cuándo lo dio por hecho ("a la una, tengo que…", "a las siete, listo lo de…"), también en `todo open` y `todo close`; sin él el comando usa hoy y ahora. `--due "2026-08-14 09:00"` es solo para cuándo vence un pendiente ("el viernes a las nueve", "mañana"), con la hora si el autor la dijo.
-- **El cuerpo (`--body`).** Es el hecho, no la conversación: lo dirigido a ti ("recuérdame", "anota", "guárdame") se queda fuera, con todo lo que lo acompaña. No agregues lo que el autor no dijo. El pendiente va en infinitivo, sin mayúscula inicial ("pagar la sesión con el psicólogo"), y `todo close` repite ese texto sin reescribirlo. En `entry add` puede abrir con una clasificación: `**progreso**`, `**decisión**`, `**fricción**`, `**señal**` o `**nota**`.
+- **El cuerpo (`--body`).** Es el hecho, no la conversación: lo dirigido a ti ("recuérdame", "anota", "guárdame") se queda fuera, con todo lo que lo acompaña. No agregues lo que el autor no dijo. El pendiente va en infinitivo, sin mayúscula inicial ("pagar la sesión con el psicólogo"), y `todo close` repite ese texto sin reescribirlo. En `entry create` puede abrir con una clasificación: `**progreso**`, `**decisión**`, `**fricción**`, `**señal**` o `**nota**`.
 - **Contarlo es pedirlo.** Si el autor cuenta algo, ejecuta el comando de su fila. No preguntes qué hacer con eso ni ofrezcas alternativas.
 - **Lo tentativo espera.** Un compromiso con el día, la hora o la forma sin decidir ("quizás el jueves", "mejor el viernes", "todavía no sé") no se abre. Conversa con el autor y ejecuta `tuku todo open` cuando lo ratifique ("quedamos así"), con el último acuerdo y no con los anteriores.
 - **"Lee antes" es lo único que abres antes de ejecutar.**
-- **Un hecho, un comando.** El comando ya escribe su registro: `tuku todo open`, `tuku todo close`, `tuku note create` y `tuku scope create` lo dejan en la bitácora, así que no corras además `tuku entry add`.
+- **Un hecho, un comando.** El comando ya escribe su registro: `tuku todo open`, `tuku todo close`, `tuku note create` y `tuku scope create` lo dejan en la bitácora, así que no corras además `tuku entry create`.
 - **Respeta el orden del dictado.** Cada hecho se registra en el vault tal como estaba en ese momento: un frente que el autor pide abrir más adelante no se crea antes.
 - **Si un hallazgo nombra `tuku fix`, córrelo.** Si devuelve decisiones, plantéaselas al autor y espera su respuesta.
 
 ## Las tres marcas
 
-Elegir la marca es lo único que es juicio. `**pendiente**` y `(Hecho)` los escriben `tuku todo open` y `tuku todo close`; las demás van al principio de `--body` de `tuku entry add`.
+Elegir la marca es lo único que es juicio. `**pendiente**` y `(Hecho)` los escriben `tuku todo open` y `tuku todo close`; las demás van al principio de `--body` de `tuku entry create`.
 
 | Marca | Qué significa |
 | --- | --- |

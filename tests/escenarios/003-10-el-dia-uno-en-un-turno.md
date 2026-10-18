@@ -38,7 +38,7 @@ Cámbiale el nombre a la carpeta de notas, ponle "apuntes".
 ```
 Entonces el dictado se traduce en doce comandos y ninguno más
 ```text
-tuku entry add --at "2026-08-11 09:12" --scope personal --body "..."   ×4
+tuku entry create --at "2026-08-11 09:12" --scope personal --body "..."   ×4
 tuku todo open --at "2026-08-11 13:00" --scope personal --body "..."    ×2
 tuku todo close --at "2026-08-11 19:05" --scope personal --body "..."   ×2
 tuku scope create depto-centro --at 2026-08-11

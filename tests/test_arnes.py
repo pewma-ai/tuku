@@ -78,7 +78,7 @@ def test_el_shim_escribe_en_el_vault_con_el_entorno_que_recibe_el_agente() -> No
                     [
                         "tuku",
                         "entry",
-                        "add",
+                        "create",
                         "--at",
                         "2026-08-11 09:12",
                         "--scope",

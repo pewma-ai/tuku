@@ -52,7 +52,7 @@ TABLA: dict[str, dict[str, tuple[str, str | None]]] = {
 #: la nota. La consulta, la pregunta y los dos pedidos al final no producen
 #: ninguno.
 TRADUCCION = {
-    "entry add": 4,
+    "entry create": 4,
     "todo open": 4,
     "todo close": 2,
     "scope create": 1,

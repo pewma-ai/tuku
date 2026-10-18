@@ -47,7 +47,7 @@ def _con_registros(vault: Path) -> None:
     assert _crear(vault, "faena-ai") == EXITO
     assert (
         _tuku(
-            vault, "entry", "add", "--scope", "faena-ai", "--at", f"{HOY} 19:00",
+            vault, "entry", "create", "--scope", "faena-ai", "--at", f"{HOY} 19:00",
             "--body", "**nota**: revisé el marco",
         )
         == EXITO
@@ -115,7 +115,7 @@ def test_un_ambito_bajo_otro_vive_en_su_carpeta_y_se_enlaza_con_su_ruta_completa
     constancia = "[faena-ai](ambitos/faena/faena-ai/faena-ai.md) **nota**: abrí el ámbito"
     assert constancia in _leer(vault, "AHORA.md")
 
-    argv = ("entry", "add", "--scope", "faena-ai", "--at", f"{HOY} 19:00", "--body", "x")
+    argv = ("entry", "create", "--scope", "faena-ai", "--at", f"{HOY} 19:00", "--body", "x")
     assert _tuku(vault, *argv) == EXITO
     assert "[faena-ai](ambitos/faena/faena-ai/faena-ai.md) x" in _leer(vault, "AHORA.md")
     assert _tuku(vault, "scope", "lint") == EXITO

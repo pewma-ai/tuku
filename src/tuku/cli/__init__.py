@@ -47,7 +47,7 @@ _COMANDOS: dict[tuple[str, str | None], Handler] = {}
 
 
 def comandos() -> frozenset[str]:
-    """Todo lo invocable, como `"entry add"` o `"doctor"`.
+    """Todo lo invocable, como `"entry create"` o `"doctor"`.
 
     Sale del parser y no de una lista escrita aparte: una lista se desincroniza
     en silencio, y lo que `tuku doctor` afirma con esto es justamente que un

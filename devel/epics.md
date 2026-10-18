@@ -49,7 +49,7 @@ Registrar un hecho produce texto en la bitácora. Todo lo demás (abrir o cerrar
 | Tramo | Naturaleza | Cómo se prueba |
 | --- | --- | --- |
 | Dictado a campos | Juicio: cuántos hechos, qué ámbito, qué clase, qué hora | LLM contra ground truth de [`referencia-faena.md`](../corpus/referencia/referencia-faena.md), comparando llamadas de comando `tuku`. Cuesta tokens |
-| Campos a línea | Formato: línea canónica, día y orden cronológico | Determinista. `entry add` y `entry lint`, sin modelo |
+| Campos a línea | Formato: línea canónica, día y orden cronológico | Determinista. `entry create` y `entry lint`, sin modelo |
 | Línea a consecuencias | Mecánico: reacciona a lo escrito en el vault | Determinista. Inyección de líneas y verificación del vault |
 
 ### Dos puntos de inyección
@@ -101,7 +101,7 @@ Que una persona nueva instale TUKU con un comando, siembre un vault en un direct
 
 ## Epic 002. El día uno, a mano
 
-Alguien instala TUKU y empieza a usarlo el mismo día sobre un vault vacío. Todo lo que hace lo hace invocando `tuku` a mano: cada decisión del autor (`tuku entry add`, `tuku todo open`, `tuku note create`, etc.) deja huella cronológica en la bitácora del ciclo y aplica sus consecuencias de forma atómica e idempotente. Cubre las fases 1 y 2 completas, y la versión mínima de las fases 3 y 5.
+Alguien instala TUKU y empieza a usarlo el mismo día sobre un vault vacío. Todo lo que hace lo hace invocando `tuku` a mano: cada decisión del autor (`tuku entry create`, `tuku todo open`, `tuku note create`, etc.) deja huella cronológica en la bitácora del ciclo y aplica sus consecuencias de forma atómica e idempotente. Cubre las fases 1 y 2 completas, y la versión mínima de las fases 3 y 5.
 
 - **Entregable:** ciclo abierto con plantilla completa, registros cronológicos, consecuencias aplicadas de forma atómica vía bitácora, fechado automático, ámbito creado con enlaces retroactivos y nota creada a petición.
 - **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). El día en cadena, un escenario por tramo ([`002-13`](../tests/escenarios/002-13-el-dia.md)), y sus casos borde sobre el vault final ([`002-14`](../tests/escenarios/002-14-casos-borde.md)); lo que no necesita el día está en unitarios. Se salda el principio 9 mediante `tuku regenerate`. Cerrado el 2026-09-19 tras verificación humana de notas y bitácora en Obsidian.

@@ -21,7 +21,7 @@ Todo lo demás son ejemplos.
 
 Ámbito y clasificación son opcionales según el contexto. La marca de la ontología cerrada va en la misma posición, antes de la clasificación abierta.
 
-El ámbito es un **link Markdown cuya ruta es relativa al archivo que contiene la línea**, y la calcula `tuku` a partir del árbol de `ambitos/`: un ámbito anidado lleva su ruta completa (`ambitos/trabajo/pewma/pewma.md`). Quien dicta pasa el nombre; nadie escribe la ruta. Sin `--scope`, `tuku entry add`, `tuku todo open` y `tuku todo close` usan el `scope_default` de `reglas/config.tuku.md`. En `AHORA.md`, que vive en la raíz, es `[arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md)`. Los lectores aceptan también el wikilink `[[ambito]]` hasta que `tuku fix link` lo convierte ([cli.md](cli.md)).
+El ámbito es un **link Markdown cuya ruta es relativa al archivo que contiene la línea**, y la calcula `tuku` a partir del árbol de `ambitos/`: un ámbito anidado lleva su ruta completa (`ambitos/trabajo/pewma/pewma.md`). Quien dicta pasa el nombre; nadie escribe la ruta. Sin `--scope`, `tuku entry create`, `tuku todo open` y `tuku todo close` usan el `scope_default` de `reglas/config.tuku.md`. En `AHORA.md`, que vive en la raíz, es `[arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md)`. Los lectores aceptan también el wikilink `[[ambito]]` hasta que `tuku fix link` lo convierte ([cli.md](cli.md)).
 
 ### De dónde salen el día y la hora
 

@@ -16,7 +16,7 @@ De ahí la prueba para saber si una línea pertenece a la raíz: si la respuesta
 
 No hay taxonomía nueva. [`../devel/epics.md`](../devel/epics.md) fija que el vault se cambia por la vía bitácora o por comando directo y que no existe una tercera, y el despacho decide entre esas dos, más el caso que no escribe:
 
-1. **Vía bitácora.** El autor cuenta algo que ocurrió, deja algo por hacer o cierra algo pendiente. Se escribe el registro con `tuku entry add`, o con `tuku todo open` y `tuku todo close` cuando abre o cierra un pendiente: esos dos escriben el registro y su consecuencia en la misma llamada, y la consecuencia sigue siendo derivable de lo escrito ([flujo-informacion.md](flujo-informacion.md)). Es el caso por defecto y el más frecuente.
+1. **Vía bitácora.** El autor cuenta algo que ocurrió, deja algo por hacer o cierra algo pendiente. Se escribe el registro con `tuku entry create`, o con `tuku todo open` y `tuku todo close` cuando abre o cierra un pendiente: esos dos escriben el registro y su consecuencia en la misma llamada, y la consecuencia sigue siendo derivable de lo escrito ([flujo-informacion.md](flujo-informacion.md)). Es el caso por defecto y el más frecuente.
 2. **Vía comando directo.** El autor pide una operación de sistema o toma una decisión explícita que ningún hecho justifica: abrir o cerrar un pendiente, moverlo de escalón, crear un ámbito, abrir una nota o el ciclo. Toda operación mutadora por esta vía estampa automáticamente constancia cronológica en `AHORA.md` (con fallback de fecha a **HOY** y hora a **AHORA** en `TZ`), de modo que no existan decisiones sin registro temporal.
 3. **Sin despacho.** Deliberar, consultar el estado, investigar, redactar un borrador. No toca ningún archivo del conjunto canónico. Termina en respuesta, no en escritura.
 
@@ -34,7 +34,7 @@ Una fila que dice `nada` no es una fila sin reglas: es una cuyo comando se expli
 
 **La tabla nombra solo comandos que existen.** Cerrar el ciclo y cambiar un pendiente de horizonte están en el diseño y todavía no tienen comando, así que no tienen fila: el vault sembrado no promete lo que no puede hacer, y `tuku doctor` lo comprueba (ver abajo). Entran acá el día que el comando entre a la superficie del CLI.
 
-Las tres primeras filas comparten archivo de reglas y campos, y difieren en el comando, que fija la marca: abrir y cerrar un pendiente es solo de `tuku todo`. `tuku entry add` rechaza `**pendiente**` y `(Hecho)` y nombra el comando correcto, así que equivocarse de fila se corrige con la salida y no deja nada escrito.
+Las tres primeras filas comparten archivo de reglas y campos, y difieren en el comando, que fija la marca: abrir y cerrar un pendiente es solo de `tuku todo`. `tuku entry create` rechaza `**pendiente**` y `(Hecho)` y nombra el comando correcto, así que equivocarse de fila se corrige con la salida y no deja nada escrito.
 
 La tabla nombra comandos y no reglas. Quien la lee no necesita saber cómo se arma una línea ni cómo se propaga un pendiente, solo qué comando lo hace ([agente.md](agente.md)). Es también lo que la hace servir a una persona sin ningún agente instalado, que la lee como el índice de comandos que es.
 

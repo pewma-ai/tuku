@@ -149,7 +149,7 @@ Interpretar es lo único que pide un LLM. Produce una lista ordenada de comandos
 - **Una frase puede traer varios hechos.** «Hablé con Fabina y Carla me dijo que no hay presupuesto» son dos comandos, en el orden del dictado.
 - **Solo un hecho firme escribe.** «Quizás el jueves» no abre nada. «Quedamos así, el jueves» abre el pendiente con ese último acuerdo. Una consulta o una deliberación se responde y no se escribe.
 - **Cerrar exige un pendiente abierto.** «Llamé al banco» sin pendiente previo es un registro. Si calzan varios, ver Ambigüedad.
-- **Un hecho, un comando.** `todo open` ya escribe su registro, y correr además `entry add` lo duplicaría.
+- **Un hecho, un comando.** `todo open` ya escribe su registro, y correr además `entry create` lo duplicaría.
 - **Nada se inventa.** Si el autor no dice la hora, el comando usa la de escritura. Si no dice el ámbito, sale del vault; si no hay de dónde, ver Ambigüedad.
 
 ### Ambigüedad

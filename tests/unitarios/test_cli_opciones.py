@@ -1,4 +1,4 @@
-"""Las opciones de los comandos que escriben un registro: entry add, todo open y todo close.
+"""Las opciones de los comandos que escriben un registro: entry create, todo open y todo close.
 
 Lo que decide argparse (alias, tipos, valores por defecto) se prueba en memoria.
 En disco va solo lo que necesita un vault: la forma abreviada, que corre dentro
@@ -26,7 +26,7 @@ CUERPO = "avisar de los GGCC"
 
 #: Cómo se escribe el registro de cada comando, después del ámbito.
 REGISTRO = {
-    "entry add": CUERPO,
+    "entry create": CUERPO,
     "todo open": f"**pendiente**: {CUERPO}",
     "todo close": f"(Hecho): ~~{CUERPO}~~",
 }
@@ -156,11 +156,11 @@ def test_el_vault_viene_de_la_opcion_y_sin_scope_default_el_registro_no_lleva_am
     vault: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    assert _correr("entry add", "--vault", str(vault), "--at", f"{HOY} 09:12") == EXITO
+    assert _correr("entry create", "--vault", str(vault), "--at", f"{HOY} 09:12") == EXITO
     assert _martes(vault) == [f"- 09:12 - {PERSONAL} {CUERPO}"]
 
     _config(vault, lambda t: "\n".join(x for x in t.splitlines() if "`scope_default`" not in x))
-    assert _correr("entry add", "--vault", str(vault), "--at", f"{HOY} 10:00") == EXITO
+    assert _correr("entry create", "--vault", str(vault), "--at", f"{HOY} 10:00") == EXITO
     assert _martes(vault)[-1] == f"- 10:00 - {CUERPO}"
 
 
@@ -168,7 +168,7 @@ def test_un_scope_default_que_no_existe_nombra_scope_create(
     vault: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     _config(vault, lambda t: t.replace("| `personal` ", "| `casa`     "))
-    assert _correr("entry add", "--at", f"{HOY} 09:12") == RECHAZO
+    assert _correr("entry create", "--at", f"{HOY} 09:12") == RECHAZO
     assert "tuku scope create casa" in capsys.readouterr().err
     assert _martes(vault) == []
 

@@ -110,7 +110,7 @@ def renombrar_titulo(texto: str, nuevo: str) -> str:
 
 #: Un registro de bitácora: `- HH:MM - [ambito](ruta) cuerpo`. El ámbito es
 #: opcional, y lo que se corrige es el cuerpo: la hora y el ámbito los fija otra
-#: cosa (`tuku entry add`), y cambiarlos acá los dejaría fuera de su control.
+#: cosa (`tuku entry create`), y cambiarlos acá los dejaría fuera de su control.
 _REGISTRO = re.compile(rf"^(- (\d{{2}}:\d{{2}}) - (?:{link.ENLACE} )?)(.*)$")
 
 
@@ -138,7 +138,7 @@ def cuerpo_del_registro(ahora: str, dia: str, hora: str) -> str | None:
 def corregir_registro(ahora: str, dia: str, hora: str, cuerpo: str) -> tuple[str, bool]:
     """`AHORA.md` con el cuerpo de ese registro reemplazado.
 
-    Conserva la hora y el ámbito, que son de `tuku entry add`. Devuelve si
+    Conserva la hora y el ámbito, que son de `tuku entry create`. Devuelve si
     cambió algo, para que el caso de uso distinga "corregido" de "no estaba".
     """
     encabezado = dia if dia.startswith("## ") else f"## {dia}"

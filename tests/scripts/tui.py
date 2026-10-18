@@ -111,7 +111,7 @@ def _esperado(celda: str) -> Esperado:
         if re.search(r"\bcierres?\b", celda):
             comandos.append("todo close")
         if re.search(r"\bregistros?\b", celda):
-            comandos.append("entry add")
+            comandos.append("entry create")
         if re.search(r"\bpendientes?\b", celda) and "todo close" not in comandos:
             comandos.append("todo open")
     return Esperado(True, comandos, celda)

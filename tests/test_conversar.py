@@ -86,13 +86,13 @@ def test_el_log_lista_comandos_y_delta_cuando_los_hay() -> None:
             {
                 "damian": "Pagué.",
                 "agente": "Anotado.",
-                "escribe": ["tuku entry add --body x"],
+                "escribe": ["tuku entry create --body x"],
                 "delta": {"AHORA.md": "modificado"},
             }
         ],
     }
     texto = conversar.renderizar(estado, "Conversación")
-    assert "- `tuku entry add --body x`" in texto
+    assert "- `tuku entry create --body x`" in texto
     assert "- `AHORA.md`: modificado" in texto
 
 
@@ -112,7 +112,7 @@ def test_un_escenario_agentico_deja_su_conversacion_en_el_vault(
 
     def _turno(vault: Path, prompt: str, **_: object) -> agente.Turno:
         (vault / "borrador.txt").write_text("x\n", encoding="utf-8")
-        return _turno_falso([["entry", "add", "--body", "x"]], "Anotado.")
+        return _turno_falso([["entry", "create", "--body", "x"]], "Anotado.")
 
     monkeypatch.setattr(agente, "turno", _turno)
     monkeypatch.setattr(
@@ -131,7 +131,7 @@ def test_un_escenario_agentico_deja_su_conversacion_en_el_vault(
     texto = (v / conversar.LOG).read_text(encoding="utf-8")
     assert "El autor es el texto del escenario." in texto
     assert "> [!question] Autor (" in texto
-    assert "- `tuku entry add --body x`" in texto
+    assert "- `tuku entry create --body x`" in texto
     assert "- `borrador.txt`: nuevo" in texto
     assert main(["doctor", "--vault", str(v)]) == EXITO
 

@@ -550,7 +550,7 @@ def abrir_en_vault(
     """Abre un pendiente, estampa huella en la bitácora y propaga las vistas.
 
     Recibe los campos, no la línea del registro: abrir **es** el pendiente, y la
-    marca la lleva implícita el verbo. Es la única vía: `tuku entry add` rechaza
+    marca la lleva implícita el verbo. Es la única vía: `tuku entry create` rechaza
     un `**pendiente**` y manda acá. El registro en `AHORA.md` se escribe salvo que
     ya esté.
 

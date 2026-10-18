@@ -71,7 +71,7 @@ mkdir ambitos/depto-centro/gastos
 ```
 Cuando se escribe un registro a `gastos` y se revisa
 ```bash
-tuku entry add --at "2026-08-11 20:00" --scope gastos --body "**progreso**: revisé el detalle del mes"
+tuku entry create --at "2026-08-11 20:00" --scope gastos --body "**progreso**: revisé el detalle del mes"
 tuku scope lint
 ```
 Entonces `tuku scope lint` sale con código 1 (`RECHAZO`) y explica que una categoría no recibe registros
@@ -81,7 +81,7 @@ Y el registro queda escrito en `AHORA.md`: un error del autor se informa, nunca 
 
 Cuando se escribe `**Cadencia**` en vez de `**cadencia**` y se revisa
 ```bash
-tuku entry add --at "2026-08-11 13:30" --body "**Cadencia**: revisar la caldera"
+tuku entry create --at "2026-08-11 13:30" --body "**Cadencia**: revisar la caldera"
 tuku entry lint
 ```
 Entonces `tuku entry lint` sale con código 1 (`RECHAZO`) y dice cómo se escribe la marca

@@ -234,7 +234,7 @@ def _sujeto(argv: list[str]) -> tuple[str, ...]:
 #: traducción de un dictado: esa es la secuencia de los que escriben.
 LEEN = ("doctor", "vocab", "style")
 
-#: Los comandos con subcomando: su verbo son dos palabras (`entry add`).
+#: Los comandos con subcomando: su verbo son dos palabras (`entry create`).
 GRUPOS = ("cycle", "entry", "todo", "scope", "note")
 
 
@@ -454,10 +454,10 @@ class Turno:
         return [shlex.join(["tuku", *argv]) for argv in self.traza]
 
     def invocaciones_de(self, *verbo: str) -> list[list[str]]:
-        """Las invocaciones que empiezan con ese noun y verb, p. ej. `("entry", "add")`.
+        """Las invocaciones que empiezan con ese noun y verb, p. ej. `("entry", "create")`.
 
         **Las de ayuda no cuentan.** Un agente que no conoce un comando corre
-        `tuku entry add --help` antes de usarlo, y eso es exactamente lo que
+        `tuku entry create --help` antes de usarlo, y eso es exactamente lo que
         debería hacer: no escribe nada y evita inventarse una opción. Contarlas
         haría fallar al agente prudente y pasar al que adivina.
         """
@@ -476,7 +476,7 @@ class Turno:
         registro antes que su consecuencia no es un detalle de estilo, es lo que
         hace que la consecuencia se aplique releyendo lo escrito.
 
-        Deja fuera lo que solo lee. Un `tuku entry add --help` antes de usarlo, o
+        Deja fuera lo que solo lee. Un `tuku entry create --help` antes de usarlo, o
         un `tuku doctor` al terminar, no son parte de la traducción.
         """
         return [verbo(argv) for argv in self.traza if escribe(argv)]

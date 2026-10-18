@@ -2,7 +2,7 @@
 
 Un comando no declara una opción compartida por su cuenta: la pide a
 `Opciones`, que fija su nombre, sus alias, su tipo y su ayuda. Así `--at`
-significa lo mismo en `entry add` que en `scope create`.
+significa lo mismo en `entry create` que en `scope create`.
 
 `--at` es cuándo pasó algo y `--due`, para cuándo es. Los dos aceptan
 `AAAA-MM-DD HH:MM`, `AAAA-MM-DD` o `HH:MM`. Una fecha sin año (`MM-DD`) no se

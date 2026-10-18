@@ -42,7 +42,7 @@ Consecuencia de segundo orden, más útil que el ahorro: una sesión queda reduc
 | Paso | Naturaleza | Ejecutor |
 | --- | --- | --- |
 | 1 a 3, entender y situar | juicio | LLM |
-| 4, redactar el registro | los campos son juicio, la línea es formato | LLM llena los campos, `tuku entry add` construye la línea |
+| 4, redactar el registro | los campos son juicio, la línea es formato | LLM llena los campos, `tuku entry create` construye la línea |
 | 5, aplicar consecuencias | mecánico en su mayoría | comando |
 
 El paso 4 estaba repartido en el tiempo ("LLM hoy, script cuando el formato se estabilice") y ahora lo está por campo, que es un corte más firme: el formato de la línea ya está fijo en [bitacora.md](bitacora.md), así que construirla es del script desde ahora. Lo que nunca pasa al script es elegir el ámbito, la clasificación o cuántos registros da un dictado. Ver [cli.md](cli.md), "qué es dueño el comando".

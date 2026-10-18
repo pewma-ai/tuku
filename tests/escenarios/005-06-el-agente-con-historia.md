@@ -18,7 +18,7 @@ Hablé con la Patricia del precio y quedó conforme.
 ```
 Entonces esa frase se traduce en un solo registro, del ámbito del liceo
 ```text
-tuku entry add --scope liceo-tecnico-andes --body "<la frase tal como la dijo>"
+tuku entry create --scope liceo-tecnico-andes --body "<la frase tal como la dijo>"
 ```
 Y el cuerpo conserva las palabras de Andrea: la Patricia sin apellido y el texto sin links
 Y el registro cae en el domingo 23, y el delta es `AHORA.md` y la página del liceo

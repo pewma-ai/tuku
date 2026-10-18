@@ -89,9 +89,9 @@ La línea `keywords: [nombre, vlti, LCU]` del frontmatter de la página lista lo
 
 ## El nombre de un ámbito
 
-**Los espacios pasan a guion.** El autor dicta "depto centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry add`, `todo open`, `note create`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
+**Los espacios pasan a guion.** El autor dicta "depto centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry create`, `todo open`, `note create`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
 
-**Un ámbito que no existe se rechaza.** `entry add`, `todo open` y `note create` salen con `RECHAZO` sin escribir nada, y el mensaje nombra `tuku scope create <nombre>` como corrección. Crear un ámbito cambia dónde cae todo lo que venga después, y esa decisión es del autor: se le ofrece, no se toma por él. Una categoría sí existe, y apuntarle un registro lo reporta `scope lint`, no lo impide el comando.
+**Un ámbito que no existe se rechaza.** `entry create`, `todo open` y `note create` salen con `RECHAZO` sin escribir nada, y el mensaje nombra `tuku scope create <nombre>` como corrección. Crear un ámbito cambia dónde cae todo lo que venga después, y esa decisión es del autor: se le ofrece, no se toma por él. Una categoría sí existe, y apuntarle un registro lo reporta `scope lint`, no lo impide el comando.
 
 ## Un ámbito dentro de otro
 

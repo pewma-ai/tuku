@@ -14,7 +14,7 @@ def _parser() -> argparse.ArgumentParser:
     sub.add_parser("init", description="Siembra  un\nvault.")
     entry = sub.add_parser("entry", description="Registros.")
     verbos = entry.add_subparsers(dest="verb")
-    verbos.add_parser("add", description="Escribe un registro.")
+    verbos.add_parser("create", description="Escribe un registro.")
     verbos.add_parser("lint")
     return raiz
 
@@ -24,7 +24,7 @@ def test_cada_sustantivo_entra_con_sus_verbos_anidados_y_descripcion_normalizada
     assert [(e.nombre, e.nivel, e.invocable) for e in entradas] == [
         ("tuku init", 1, True),
         ("tuku entry", 1, False),
-        ("tuku entry add", 2, True),
+        ("tuku entry create", 2, True),
         ("tuku entry lint", 2, True),
     ]
     assert entradas[0].que_hace == "Siembra un vault."
@@ -36,7 +36,7 @@ def test_el_documento_es_determinista_anida_y_dice_lo_que_falta() -> None:
     assert texto == manual.documento(entradas)
     assert texto.startswith("---\ntype: Config\n---\n")
     assert "\n## tuku entry\n\nRegistros.\n" in texto
-    assert "\n### tuku entry add\n\nEscribe un registro.\n" in texto
+    assert "\n### tuku entry create\n\nEscribe un registro.\n" in texto
     assert "### tuku entry lint\n\nSin descripción.\n" in texto
 
     vacio = manual.documento([])

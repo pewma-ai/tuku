@@ -59,8 +59,8 @@ def _flag(argv: list[str], nombre: str) -> str | None:
 @sin_arnes
 def test_005_06_la_frase_de_la_patricia_es_un_solo_registro_del_liceo() -> None:
     turno = _correr(PATRICIA).turno
-    assert turno.traduccion == ["entry add"], f"la traza dice: {turno.comandos}"
-    (argv,) = turno.invocaciones_de("entry", "add")
+    assert turno.traduccion == ["entry create"], f"la traza dice: {turno.comandos}"
+    (argv,) = turno.invocaciones_de("entry", "create")
     assert _flag(argv, "--scope") == "liceo-tecnico-andes", argv
 
 
@@ -68,7 +68,7 @@ def test_005_06_la_frase_de_la_patricia_es_un_solo_registro_del_liceo() -> None:
 @sin_arnes
 def test_005_06_el_cuerpo_conserva_las_palabras_de_andrea_y_no_se_enlaza() -> None:
     corrida = _correr(PATRICIA)
-    (argv,) = corrida.turno.invocaciones_de("entry", "add")
+    (argv,) = corrida.turno.invocaciones_de("entry", "create")
     cuerpo = _flag(argv, "--body") or ""
     assert "Patricia" in cuerpo and "Lillo" not in cuerpo, cuerpo
     assert not LINK.search(cuerpo.split("**", 2)[-1]), f"el cuerpo se enlazó solo: {cuerpo}"
@@ -90,7 +90,7 @@ def test_005_06_el_registro_de_la_patricia_toca_solo_el_ciclo_y_la_pagina_del_li
 @sin_arnes
 def test_005_06_la_paula_queda_sin_ambito_de_ninguna_de_las_dos() -> None:
     turno = _correr(PAULA).turno
-    for argv in turno.invocaciones_de("entry", "add"):
+    for argv in turno.invocaciones_de("entry", "create"):
         assert _flag(argv, "--scope") not in ("catalogo-marzo", "escuela-los-maitenes"), argv
     assert not turno.invocaciones_de("todo", "open")
     assert not turno.invocaciones_de("todo", "close")
@@ -100,7 +100,7 @@ def test_005_06_la_paula_queda_sin_ambito_de_ninguna_de_las_dos() -> None:
 @sin_arnes
 def test_005_06_si_el_agente_pregunta_por_la_paula_nombra_a_las_dos() -> None:
     corrida = _correr(PAULA)
-    if corrida.turno.invocaciones_de("entry", "add"):
+    if corrida.turno.invocaciones_de("entry", "create"):
         pytest.skip("el agente registró en el ámbito común en vez de preguntar")
     respuesta = corrida.turno.stdout
     assert "?" in respuesta, respuesta

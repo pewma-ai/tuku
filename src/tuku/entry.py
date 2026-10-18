@@ -1,4 +1,4 @@
-"""tuku entry add: coloca líneas de bitácora ya formadas en su día.
+"""tuku entry create: coloca líneas de bitácora ya formadas en su día.
 
 Fase 1 de `devel/epics.md`. No interpreta ni reformatea: recibe
 líneas que ya cumplen `spec/bitacora.md` y las inserta bajo el encabezado del
@@ -148,7 +148,7 @@ def add_al_vault(
 ) -> Resultado:
     """Escribe un registro en `AHORA.md` y propaga lo que se deriva de él.
 
-    El caso de uso de `tuku entry add`. Un registro con marca de la ontología
+    El caso de uso de `tuku entry create`. Un registro con marca de la ontología
     cerrada se rechaza antes de escribir: abrir y cerrar pendientes es de
     `tuku todo open` y `tuku todo close`, que escriben el registro y la fila
     juntos, y el rechazo nombra el comando exacto.
@@ -217,7 +217,7 @@ def rechazo_de_marca(
     comando = todo.comando_de(marca.marca, marca.cuerpo, ambito=scope, day=day, hour=hour)
     que = "abre un pendiente" if abre else "cierra un pendiente"
     return (
-        f"`{marca.marca}` {que}, y eso no lo escribe `tuku entry add`: "
+        f"`{marca.marca}` {que}, y eso no lo escribe `tuku entry create`: "
         f"usa `{comando}`, que escribe el registro y la fila de "
         "`PENDIENTES.md` juntos."
     )
@@ -255,7 +255,7 @@ def corregir_en_vault(
     Corregir a mano es exactamente donde eso se rompe, porque la línea está a la
     vista y la fila no.
 
-    La hora y el ámbito no se tocan: los fija `tuku entry add`, y cambiarlos acá
+    La hora y el ámbito no se tocan: los fija `tuku entry create`, y cambiarlos acá
     sería reescribir un hecho en vez de corregir cómo quedó dicho.
     """
     from tuku import ahora as ahora_mod

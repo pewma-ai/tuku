@@ -4,11 +4,11 @@ type: Config
 
 # Bitácora
 
-Cómo se escribe un registro. Se lee antes de la primera llamada de la sesión a `tuku entry add`, `tuku todo open` o `tuku todo close`, y con eso basta para todas las demás.
+Cómo se escribe un registro. Se lee antes de la primera llamada de la sesión a `tuku entry create`, `tuku todo open` o `tuku todo close`, y con eso basta para todas las demás.
 
 ## Cuándo aplica
 
-Cuando el autor cuenta algo que pasó (`tuku entry add`), deja algo por hacer (`tuku todo open`) o da por cerrado algo que estaba pendiente (`tuku todo close`). Son las tres primeras filas del `AGENTS.md` de la raíz, y los tres reciben los mismos campos. `tuku entry add` rechaza `**pendiente**` y `(Hecho)` y nombra el comando que corresponde.
+Cuando el autor cuenta algo que pasó (`tuku entry create`), deja algo por hacer (`tuku todo open`) o da por cerrado algo que estaba pendiente (`tuku todo close`). Son las tres primeras filas del `AGENTS.md` de la raíz, y los tres reciben los mismos campos. `tuku entry create` rechaza `**pendiente**` y `(Hecho)` y nombra el comando que corresponde.
 
 ## Le pasas los campos, no la línea
 
@@ -21,7 +21,7 @@ tuku todo open --at "2026-08-11 14:20" --scope personal \
 
 | Campo | Qué lleva |
 | --- | --- |
-| `--body` | El hecho. En `tuku entry add`, con su clasificación al principio si la lleva; en `tuku todo open` y `tuku todo close`, solo el cuerpo: la marca la pone el comando |
+| `--body` | El hecho. En `tuku entry create`, con su clasificación al principio si la lleva; en `tuku todo open` y `tuku todo close`, solo el cuerpo: la marca la pone el comando |
 | `--scope` | El frente al que pertenece, sin corchetes |
 | `--at` | Cuándo ocurrió, o cuándo se prometió si es un pendiente |
 | `--due` | Solo en `tuku todo open`: cuándo vence |

@@ -25,7 +25,7 @@ A las diez y cuarto llegó el certificado de dominio vigente del depto centro.
 ```
 Entonces esa frase se traduce en un solo comando
 ```text
-tuku entry add --at "2026-08-12 10:15" --scope depto-centro \
+tuku entry create --at "2026-08-12 10:15" --scope depto-centro \
   --body "**<clasificación>**: <el cuerpo>"
 ```
 Y el registro de las 10:15 cae en el miércoles 12, después de los de las 09:00 y las 09:30

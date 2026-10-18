@@ -33,7 +33,7 @@ Vive en el `AGENTS.md` de la raíz y es lo que el ejecutor consulta antes de act
 
 | El autor... | Ejemplo | Comando |
 | --- | --- | --- |
-| cuenta algo que pasó | «a las once me reuní con Rodrigo Álvarez por la versión 2» | `tuku entry add` |
+| cuenta algo que pasó | «a las once me reuní con Rodrigo Álvarez por la versión 2» | `tuku entry create` |
 | deja algo por hacer | «recuérdame renovar el seguro», «para el lunes» | `tuku todo open` |
 | da por hecho algo que estaba pendiente | «ya pagué el arriendo» | `tuku todo close` |
 | nombra un frente que todavía no existe | «abre faena» | `tuku scope create` |
@@ -46,7 +46,7 @@ Vive en el `AGENTS.md` de la raíz y es lo que el ejecutor consulta antes de act
 | pide algo que ninguna fila cubre | «junta estos tres ámbitos en uno» | ninguno: reformula y confirma |
 | pregunta, delibera o pide investigar | «¿qué me quedaba abierto hoy?» | ninguno: se responde, no se escribe |
 
-Las tres primeras filas son la familia de hechos. Comparten reglas y campos y difieren en el comando, que fija la marca: abrir y cerrar un pendiente es solo de `tuku todo`. `tuku entry add` rechaza `**pendiente**` y `(Hecho)` y nombra el comando correcto, así que equivocarse de fila se corrige con la salida y no deja nada escrito.
+Las tres primeras filas son la familia de hechos. Comparten reglas y campos y difieren en el comando, que fija la marca: abrir y cerrar un pendiente es solo de `tuku todo`. `tuku entry create` rechaza `**pendiente**` y `(Hecho)` y nombra el comando correcto, así que equivocarse de fila se corrige con la salida y no deja nada escrito.
 
 La tabla nombra comandos y no reglas. Quien la lee no necesita saber cómo se arma una línea ni cómo se propaga un pendiente, solo qué comando lo hace ([agente.md](agente.md)). Es también lo que la hace servir a una persona sin ningún agente instalado, que la lee como el índice de comandos que es.
 

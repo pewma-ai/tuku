@@ -70,7 +70,7 @@ def test_keywords_suma_las_nuevas_sin_repetir_y_no_toca_la_bitacora(vault: Path)
     assert _crear(vault, "paranal") == EXITO
     assert (
         _tuku(
-            vault, "entry", "add", "--at", f"{HOY} 19:00", "--scope", "personal",
+            vault, "entry", "create", "--at", f"{HOY} 19:00", "--scope", "personal",
             "--body", "revisé el LCU del VLTI",
         )
         == EXITO
@@ -89,7 +89,15 @@ def test_crear_un_ambito_no_enlaza_ni_modifica_lo_ya_escrito(vault: Path) -> Non
     body = "hablé de arriendo con Viana en el depto centro"
     assert (
         _tuku(
-            vault, "entry", "add", "--at", f"{HOY} 17:00", "--scope", "personal", "--body", body
+            vault,
+            "entry",
+            "create",
+            "--at",
+            f"{HOY} 17:00",
+            "--scope",
+            "personal",
+            "--body",
+            body,
         )
         == EXITO
     )

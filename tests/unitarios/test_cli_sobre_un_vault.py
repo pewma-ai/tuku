@@ -54,11 +54,20 @@ def test_un_rechazo_no_deja_nada_a_medias(
     _congelar(monkeypatch, entry, date(2026, 8, 11), "21:30")
     casos: list[tuple[tuple[str, ...], str]] = [
         (
-            ("entry", "add", "--at", f"{HOY} 09:00", "--scope", "depto centro", "--body", "x"),
+            (
+                "entry",
+                "create",
+                "--at",
+                f"{HOY} 09:00",
+                "--scope",
+                "depto centro",
+                "--body",
+                "x",
+            ),
             "tuku scope create depto-centro",
         ),
         (
-            ("entry", "add", "--body", "x", "--at", "2026-08-12 09:00"),
+            ("entry", "create", "--body", "x", "--at", "2026-08-12 09:00"),
             "todo open --due 2026-08-12",
         ),
         (("scope", "create", "PERSONAL", "--at", f"{HOY} 10:00"), "personal"),
@@ -96,7 +105,7 @@ def test_el_ambito_se_escribe_con_guion_y_se_encuentra_sin_distinguir_mayusculas
 
     assert _tuku(vault, "scope", "create", "Ñandú Rojo", "--at", f"{HOY} 10:00") == EXITO
     for cuerpo, hora, nombre in (("uno", "11:00", "ñandú rojo"), ("dos", "12:00", "PERSONAL")):
-        argv = ("entry", "add", "--scope", nombre, "--body", cuerpo, "--at", f"{HOY} {hora}")
+        argv = ("entry", "create", "--scope", nombre, "--body", cuerpo, "--at", f"{HOY} {hora}")
         assert _tuku(vault, *argv) == EXITO
     ahora = _leer(vault, "AHORA.md")
     assert "[Ñandú-Rojo](ambitos/Ñandú-Rojo/Ñandú-Rojo.md) uno" in ahora

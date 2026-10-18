@@ -10,7 +10,7 @@ from tuku.cli.opciones import Opciones
 from tuku.config import ambito_por_defecto
 
 
-def _cmd_entry_add(args: argparse.Namespace) -> int:
+def _cmd_entry_create(args: argparse.Namespace) -> int:
     return traducir(
         entry.add_al_vault(
             args.vault,
@@ -19,7 +19,7 @@ def _cmd_entry_add(args: argparse.Namespace) -> int:
             day=args.at.dia,
             hour=args.at.hora,
         ),
-        "tuku entry add",
+        "tuku entry create",
     )
 
 
@@ -48,8 +48,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     )
     entry_v = entry_p.add_subparsers(dest="verb", required=True)
 
-    add_p = entry_v.add_parser(
-        "add",
+    create_p = entry_v.add_parser(
+        "create",
         help="escribe un registro en la bitácora",
         description=(
             "Escribe en `AHORA.md`, bajo el día y en orden de hora, la línea "
@@ -59,11 +59,11 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "y `tuku todo close`."
         ),
     )
-    add = Opciones(add_p)
-    add.vault("vault destino")
-    add.body("la marca y el cuerpo: '**señal**: la administradora responde tarde'")
-    add.scope()
-    add.at()
+    create = Opciones(create_p)
+    create.vault("vault destino")
+    create.body("la marca y el cuerpo: '**señal**: la administradora responde tarde'")
+    create.scope()
+    create.at()
 
     rename_p = entry_v.add_parser(
         "rename",
@@ -94,7 +94,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     Opciones(lint_p).vault("vault a revisar")
 
     return {
-        ("entry", "add"): _cmd_entry_add,
+        ("entry", "create"): _cmd_entry_create,
         ("entry", "rename"): _cmd_entry_rename,
         ("entry", "lint"): _cmd_entry_lint,
     }

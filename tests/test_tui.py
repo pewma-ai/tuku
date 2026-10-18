@@ -203,7 +203,7 @@ def test_la_tabla_del_escenario_dice_que_turnos_cambian_el_vault() -> None:
     assert plan.a_mano[0].startswith("En los turnos 1 a 3")
     uno = tui.leer_plan("004-01")
     assert uno.esperado[10].comandos == ["scope create", "scope move"]
-    assert uno.esperado[3].comandos == ["todo close", "entry add"]
+    assert uno.esperado[3].comandos == ["todo close", "entry create"]
 
 
 def test_la_conclusion_dice_que_funciono_cuando_todo_coincide() -> None:
@@ -222,7 +222,7 @@ def test_la_conclusion_dice_que_funciono_cuando_todo_coincide() -> None:
 def test_la_conclusion_dice_por_que_no_funciono() -> None:
     plan = tui.leer_plan("004-03")
     turnos = [
-        _turno({"AHORA.md": "modificado"}, ["tuku entry add --body x"]),
+        _turno({"AHORA.md": "modificado"}, ["tuku entry create --body x"]),
         _turno({}, []),
         _turno({"AHORA.md": "modificado"}, []),
         _turno({}, [], codigo=124),

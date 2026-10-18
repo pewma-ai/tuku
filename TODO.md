@@ -13,9 +13,9 @@ Lo que hay que hacer y no bloquea a nadie. Nada de aquí condiciona el orden de 
 
 ## Reglas del vault
 
-- **Validar el `AGENTS.md` adelgazado contra un agente vivo.** El refactor del 2026-09-09 bajó de la raíz todo lo que dice *cómo* se escribe un registro: los campos de `tuku entry add`, el día y la hora, `--when` y `--horizon` pasaron a [`template/vanilla/reglas/bitacora.tuku.md`](template/vanilla/reglas/bitacora.tuku.md), y la elección de ámbito a [`template/vanilla/ambitos/AGENTS.md`](template/vanilla/ambitos/AGENTS.md). La raíz volvió a enrutar y nada más.
+- **Validar el `AGENTS.md` adelgazado contra un agente vivo.** El refactor del 2026-09-09 bajó de la raíz todo lo que dice *cómo* se escribe un registro: los campos de `tuku entry create`, el día y la hora, `--when` y `--horizon` pasaron a [`template/vanilla/reglas/bitacora.tuku.md`](template/vanilla/reglas/bitacora.tuku.md), y la elección de ámbito a [`template/vanilla/ambitos/AGENTS.md`](template/vanilla/ambitos/AGENTS.md). La raíz volvió a enrutar y nada más.
 
-  Lo que hay que medir es una sola cosa, y no es la longitud: **si la regla que se carga tarde llega a tiempo**. Con `ambitos/AGENTS.md` el agente entra al directorio y lo lee; con `reglas/bitacora.tuku.md` no hay un "entrar" equivalente, así que la raíz tiene que mandar a leerlo antes de la primera llamada a `entry add` y eso puede no ocurrir. Los dos párrafos que bajaron son justamente los que se escribieron porque dos agentes distintos fallaron sin ellos, así que un refactor que los aleje demasiado reintroduce esos fallos.
+  Lo que hay que medir es una sola cosa, y no es la longitud: **si la regla que se carga tarde llega a tiempo**. Con `ambitos/AGENTS.md` el agente entra al directorio y lo lee; con `reglas/bitacora.tuku.md` no hay un "entrar" equivalente, así que la raíz tiene que mandar a leerlo antes de la primera llamada a `entry create` y eso puede no ocurrir. Los dos párrafos que bajaron son justamente los que se escribieron porque dos agentes distintos fallaron sin ellos, así que un refactor que los aleje demasiado reintroduce esos fallos.
 
   Se mide con la cadena del epic 003, que ya distingue el modelo que alcanza del que no. Es un experimento con resultado esperado, no una revisión de redacción: si falla, la regla vuelve a subir y queda escrito que la cascada tiene un piso.
 

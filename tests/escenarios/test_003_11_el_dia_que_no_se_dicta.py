@@ -51,7 +51,7 @@ def _miercoles(corrida: gherkin.Corrida) -> list[str]:
 @sin_arnes
 def test_003_11_un_solo_comando() -> None:
     turno = gherkin.correr(SLUG, TITULO).turno
-    assert turno.traduccion == ["entry add"], f"la traza dice: {turno.comandos}"
+    assert turno.traduccion == ["entry create"], f"la traza dice: {turno.comandos}"
 
 
 @pytest.mark.agentic
