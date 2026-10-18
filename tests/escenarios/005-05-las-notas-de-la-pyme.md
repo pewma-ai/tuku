@@ -48,11 +48,13 @@ Entonces el lint sale con código 0 y deja fuera `notas/AGENTS.md`, que es del s
 
 ## Escenario: un enlace del cuerpo sin motivo en Ver además se nombra
 
-Dado el vault con las tres notas
+Dado el vault con las tres notas, y `Proveedores y sus plazos reales` reescrita con un editor para enlazar en su cuerpo a `Condiciones de pago por canal`
 ```bash
 cp -r ../las-notas-del-negocio-se/mi-vault .
+cp ../../tests/escenarios/fixtures/005-05-las-notas-de-la-pyme/proveedores-con-enlace.md .
+cp proveedores-con-enlace.md mi-vault/notas/proveedores-y-sus-plazos-reales.md
 ```
-Cuando se revisa `Proveedores y sus plazos reales`, que enlaza en su cuerpo a `Condiciones de pago por canal`
+Cuando se revisa la nota
 ```bash
 cd mi-vault
 tuku doctor note notas/proveedores-y-sus-plazos-reales.md

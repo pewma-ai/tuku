@@ -357,6 +357,27 @@ def _ruta_local(destino: str, desde: str) -> str | None:
     return posixpath.normpath(posixpath.join(posixpath.dirname(desde), ruta))
 
 
+def salientes(texto: str, desde: str) -> list[tuple[int, str, str, str]]:
+    """Los links Markdown de `texto` a archivos locales: (línea, texto, ruta, destino).
+
+    La ruta es relativa al vault, como en `rotos`, y el destino es como se escribió:
+    dos links al mismo archivo dan la misma ruta aunque se escriban distinto. Salta
+    lo externo, las anclas de la misma página y lo que va en código.
+    """
+    salida = []
+    for m in _MD.finditer(_sin_codigo(texto)):
+        if (local := _ruta_local(m.group("destino"), desde)) is not None:
+            salida.append(
+                (
+                    texto.count("\n", 0, m.start()) + 1,
+                    m.group("texto"),
+                    local,
+                    m.group("destino"),
+                )
+            )
+    return salida
+
+
 def rotos(texto: str, desde: str, existe: Callable[[str], bool]) -> list[Roto]:
     """Los links Markdown del archivo `desde` cuya ruta no existe.
 

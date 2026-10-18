@@ -156,6 +156,16 @@ def test_rotos_reporta_solo_lo_que_no_existe() -> None:
     assert r.destino == "../../fuera.md", "un link que se sale del vault"
 
 
+def test_salientes_da_la_ruta_local_de_cada_link_y_salta_lo_externo() -> None:
+    texto = (
+        "[a](a.md) [web](https://a.b) [aqui](#sec)\n[b](../ambitos/b/b.md#ancla) `[c](c.md)`"
+    )
+    assert link.salientes(texto, "notas/n.md") == [
+        (1, "a", "notas/a.md", "a.md"),
+        (2, "b", "ambitos/b/b.md", "../ambitos/b/b.md#ancla"),
+    ]
+
+
 def test_rebasar_recalcula_las_rutas_al_mover_la_linea() -> None:
     linea = "habló con [a](ambitos/a/a.md#ancla) y [web](https://x.y)"
     assert link.rebasar(linea, "AHORA.md", "ambitos/p/p.md") == (

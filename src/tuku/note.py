@@ -199,6 +199,7 @@ def lint(nota: str) -> list[str]:
 
     lineas = nota.splitlines()
     ini = lineas.index(VER_ADEMAS)
+    hallazgos += _enlaces_sin_listar(lineas, ini)
     for n, linea in enumerate(lineas[ini + 1 :], start=ini + 2):
         m = _ENLACE.match(linea)
         if m is None:
@@ -208,6 +209,27 @@ def lint(nota: str) -> list[str]:
                 f"línea {n}: error: el enlace no dice para qué conecta. "
                 f"Agrega el motivo después del enlace, en una frase."
             )
+    return hallazgos
+
+
+def _enlaces_sin_listar(lineas: list[str], ini: int) -> list[str]:
+    """Los enlaces del cuerpo que `## Ver además` (en la línea `ini`) no lista.
+
+    La sección es la lista de todos los enlaces salientes de la nota: uno que el
+    cuerpo usa y ella no nombra no tiene motivo escrito.
+    """
+    desde = "notas/nota.md"
+    listados = {ruta for _, _, ruta, _ in link.salientes("\n".join(lineas[ini:]), desde)}
+    hallazgos = []
+    vistos: set[str] = set()
+    for n, texto, ruta, destino in link.salientes("\n".join(lineas[:ini]), desde):
+        if ruta in listados or ruta in vistos:
+            continue
+        vistos.add(ruta)
+        hallazgos.append(
+            f"línea {n}: error: el cuerpo enlaza a {ruta} y `{VER_ADEMAS}` no lo lista. "
+            f"Agrega `* [{texto}]({destino}) — para qué conecta` en esa sección."
+        )
     return hallazgos
 
 

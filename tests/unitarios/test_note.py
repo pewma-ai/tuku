@@ -63,6 +63,23 @@ def test_el_lint_pide_la_seccion_ver_ademas_y_un_motivo_por_enlace() -> None:
     assert note.lint(cuerpo) == [], "la regla es solo de la sección final"
 
 
+def test_el_lint_nombra_el_enlace_del_cuerpo_que_ver_ademas_no_lista() -> None:
+    cuerpo = "# Nota\n\nVer [Pagos](pagos.md) y [web](https://a.b) y `[x](no.md)`.\n\n"
+    motivo = "* [Pagos](pagos.md) — cómo se cobra\n"
+
+    [falta] = note.lint(
+        f"{cuerpo}## Ver además\n\n* [negocio](../ambitos/n/n.md) — el ámbito\n"
+    )
+    assert "línea 3" in falta and "notas/pagos.md" in falta and "`## Ver además`" in falta
+    assert "[Pagos](notas/pagos.md)" not in falta, (
+        "la corrección repite el link tal cual está escrito"
+    )
+
+    assert note.lint(f"{cuerpo}## Ver además\n\n{motivo}") == []
+    dos = "# Nota\n\n[Pagos](pagos.md) y otra vez [Pagos](pagos.md)\n\n## Ver además\n\n"
+    assert len(note.lint(dos)) == 1, "un destino repetido se nombra una vez"
+
+
 def test_aliases_en_linea_o_en_bloque() -> None:
     from tuku.note import aliases
 
