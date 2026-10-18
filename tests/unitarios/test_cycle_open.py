@@ -48,6 +48,7 @@ def test_un_ciclo_con_registros_no_se_pisa(tmp_path: Path) -> None:
         open_cycle(vault, SEMANA_2)
 
     assert "bitacoras/bitacora-2026-09-07-2026-09-13.md" in str(e.value)
+    assert "](../ambitos/" in str(e.value), "el rechazo dice que los links bajan un nivel"
     assert "no se pierde" in ahora.read_text(encoding="utf-8")
 
 

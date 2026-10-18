@@ -73,7 +73,7 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     try:
         ini = next(i for i, linea in enumerate(src) if linea.strip() == encabezado)
     except StopIteration:
-        from tuku.ahora import fecha_del_dia, rango
+        from tuku.ahora import como_cerrar, fecha_del_dia, rango
 
         limites = rango(ahora)
         if limites is not None:
@@ -94,9 +94,8 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
                     f"el día {encabezado!r} cae fuera del ciclo abierto "
                     f"({desde.isoformat()} a {hasta.isoformat()}). Si el registro es "
                     f"de este ciclo, corrige la fecha; si empezó uno nuevo, cierra "
-                    f"este antes: mueve AHORA.md a bitacoras/bitacora-"
-                    f"{desde.isoformat()}-{hasta.isoformat()}.md y corre "
-                    f"`tuku process cycle`."
+                    f"este antes: {como_cerrar(desde, hasta)}, y corre "
+                    "`tuku process cycle`."
                 )
                 raise ValueError(msg) from None
         else:

@@ -27,6 +27,19 @@ def es_dia(linea: str) -> bool:
     return m is not None and m.group(2) in MESES
 
 
+def como_cerrar(desde: date, hasta: date) -> str:
+    """Cómo se archiva a mano el ciclo `desde`–`hasta`, mientras no exista `cycle close`.
+
+    La bitácora vive un nivel más adentro que `AHORA.md`: sin reescribir sus links
+    relativos quedan rotos, y `tuku fix link` no los repara.
+    """
+    return (
+        f"copia AHORA.md a bitacoras/bitacora-{desde.isoformat()}-{hasta.isoformat()}.md, "
+        "pon `status: stable` y baja un nivel sus links relativos "
+        "(`](ambitos/` pasa a `](../ambitos/`, y lo mismo con `notas/` y `bitacoras/`)"
+    )
+
+
 def rango(ahora: str) -> tuple[date, date] | None:
     """`from` y `to` del frontmatter OKF, o `None` si siguen siendo placeholders."""
     campos: dict[str, date] = {}

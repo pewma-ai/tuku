@@ -22,7 +22,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from tuku import archivo
-from tuku.ahora import rango
+from tuku.ahora import como_cerrar, rango
 from tuku.config import resolver_plantilla_ahora
 from tuku.init import DIAS, MESES
 from tuku.resultado import Resultado
@@ -103,9 +103,8 @@ def open_cycle(vault: Path, fecha: date | None = None) -> tuple[Path, bool]:
                 raise CicloEnCurso(
                     f"hay un ciclo abierto con registros ({desde.isoformat()} a "
                     f"{hasta.isoformat()}) y {fecha.isoformat()} cae fuera. "
-                    f"Ciérralo antes: mueve AHORA.md a "
-                    f"bitacoras/bitacora-{desde.isoformat()}-{hasta.isoformat()}.md, "
-                    f"y vuelve a correr esto."
+                    f"Ciérralo antes: {como_cerrar(desde, hasta)}, "
+                    "y vuelve a correr esto."
                 )
 
     desde, _ = calcular_rango_semanal(fecha)
