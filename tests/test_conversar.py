@@ -33,10 +33,10 @@ def test_resumir_deja_los_comandos_que_escriben_y_no_la_ayuda() -> None:
     traza = [
         ["todo", "open", "--help"],
         ["doctor"],
-        ["todo", "close", "--scope", "faena-ai", "--body", "presentar el marco"],
+        ["todo", "close", "--scope", "faena-ai", "presentar el marco"],
     ]
     r = conversar.resumir(_turno(traza), {"AHORA.md": "modificado"})
-    assert r["escribe"] == ["tuku todo close --scope faena-ai --body 'presentar el marco'"]
+    assert r["escribe"] == ["tuku todo close --scope faena-ai 'presentar el marco'"]
     assert r["delta"] == {"AHORA.md": "modificado"}
 
 

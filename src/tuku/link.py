@@ -27,7 +27,8 @@ from __future__ import annotations
 
 import posixpath
 import re
-from collections.abc import Callable, Iterable, Mapping
+import unicodedata
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from urllib.parse import unquote
 
@@ -149,6 +150,54 @@ def enlace_ambito(
 ) -> str:
     """El link a un ámbito, escrito en el archivo `desde`."""
     return enlace(nombre, desde, ruta_ambito(nombre, rutas))
+
+
+def _plegar(c: str) -> str:
+    """Un carácter sin tilde y en minúscula, sin cambiar el largo del texto."""
+    return unicodedata.normalize("NFKD", c)[0].lower()
+
+
+def enlazar_menciones(
+    cuerpo: str, nombres: Mapping[str, Sequence[str]], desde: str
+) -> tuple[str, list[str]]:
+    """`cuerpo` con la primera mención de cada destino enlazada, y los nombres ambiguos.
+
+    `nombres` va de cada ruta destino (relativa al vault) a los nombres que la
+    mencionan: su título y sus `aliases` (`spec/notas.md`, "Enlazar al registrar").
+    Se compara sin mayúsculas ni tildes y por palabras completas, y el texto queda
+    como lo escribió el autor. Lo que ya es link no se toca. Un nombre que comparten
+    dos destinos no se enlaza: si aparece en `cuerpo`, vuelve en la segunda lista,
+    para avisarlo.
+    """
+    destinos_de: dict[str, set[str]] = {}
+    for ruta, lista in nombres.items():
+        for nombre in lista:
+            if nombre.strip():
+                destinos_de.setdefault("".join(map(_plegar, nombre.strip())), set()).add(ruta)
+    plegado = "".join(map(_plegar, cuerpo))
+    ambiguos = sorted(
+        n
+        for n, rutas in destinos_de.items()
+        if len(rutas) > 1 and re.search(rf"(?<!\w){re.escape(n)}(?!\w)", plegado)
+    )
+    ocupado = [(m.start(), m.end()) for m in re.finditer(ENLACE, cuerpo)]
+    enlazados: set[str] = set()
+    cortes: list[tuple[int, int, str]] = []
+    for nombre in sorted(destinos_de, key=len, reverse=True):
+        rutas = destinos_de[nombre]
+        if len(rutas) > 1 or (ruta := next(iter(rutas))) in enlazados:
+            continue
+        patron = re.compile(rf"(?<!\w){re.escape(nombre)}(?!\w)")
+        for m in patron.finditer(plegado):
+            ini, fin = m.span()
+            if any(a < fin and ini < b for a, b in [*ocupado, *((c[0], c[1]) for c in cortes)]):
+                continue
+            cortes.append((ini, fin, ruta))
+            enlazados.add(ruta)
+            break
+    for ini, fin, ruta in sorted(cortes, reverse=True):
+        cuerpo = cuerpo[:ini] + enlace(cuerpo[ini:fin], desde, ruta) + cuerpo[fin:]
+    return cuerpo, ambiguos
 
 
 # ---------------------------------------------------------------------------

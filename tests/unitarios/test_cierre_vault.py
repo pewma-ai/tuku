@@ -78,8 +78,8 @@ def test_corregir_el_registro_encuentra_la_fila_aunque_difieran_en_links(vault: 
         encoding="utf-8",
     )
 
-    r = entry.corregir_en_vault(
-        vault, body="**pendiente**: avisar a Carmen de los GGCC hoy", day=DIA, hour="14:20"
+    r = entry.actualizar_en_vault(
+        vault, match="GGCC", body="**pendiente**: avisar a Carmen de los GGCC hoy"
     )
 
     assert "su fila en PENDIENTES.md" in r.mensaje
@@ -102,5 +102,5 @@ def test_entry_add_rechaza_abrir_y_cerrar_y_nombra_el_comando(vault: Path) -> No
     _abre(vault, SIN_LINK)
     r = entry.add_al_vault(vault, body=f"(Hecho): ~~{SIN_LINK}~~", day=DIA, hour="19:05")
     assert not r.ok
-    assert f"tuku todo close --at '2026-08-11 19:05' --body '{SIN_LINK}'" in r.mensaje
+    assert f"tuku todo close --at '2026-08-11 19:05' '{SIN_LINK}'" in r.mensaje
     assert _tabla(vault) == [SIN_LINK]

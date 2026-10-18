@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from tuku.entry import _clave_hora, add, componer
+from tuku.entry import _claves, add, componer
 
 AHORA = (
     "---\n"
@@ -43,12 +43,26 @@ def test_componer_arma_la_linea_del_registro() -> None:
     )
 
 
-def test_clave_hora_extrae_horas_y_minutos_y_rechaza_lo_malformado() -> None:
-    assert _clave_hora("- 09:45 - registro") == (9, 45)
-    assert _clave_hora("- 23:59 - fin") == (23, 59)
-    for linea in ("09:45 - falta guion inicial", "- 9:45 - hora con un solo digito"):
-        with pytest.raises(ValueError, match="no empieza con '- HH:MM - '"):
-            _clave_hora(linea)
+def test_un_registro_sin_hora_toma_la_del_anterior_y_uno_nuevo_va_al_final() -> None:
+    previas = ["- 09:45 - registro", "- llamé a Rodolfo", "- 23:59 - fin"]
+    assert _claves(previas) == [(9, 45), (9, 45), (23, 59)]
+    assert _claves(["- llamé a Rodolfo"], nuevas=True) == [(24, 0)]
+    with pytest.raises(ValueError, match="un registro empieza con '- '"):
+        add(AHORA, ["09:45 - falta guion inicial"], dia="Lunes 7 de septiembre")
+
+
+def test_sin_hora_queda_al_final_y_el_siguiente_con_hora_va_a_continuacion() -> None:
+    dia = "Lunes 7 de septiembre"
+    texto = add(AHORA, ["- 10:00 - **nota**: primero"], dia=dia)
+    texto = add(texto, ["- llamé a Rodolfo"], dia=dia)
+    texto = add(texto, ["- 08:00 - **nota**: temprano", "- 11:00 - **nota**: después"], dia=dia)
+    seccion = texto.split(f"## {dia}\n", 1)[1].split("\n\n", 1)[0].splitlines()
+    assert seccion == [
+        "- 08:00 - **nota**: temprano",
+        "- 10:00 - **nota**: primero",
+        "- llamé a Rodolfo",
+        "- 11:00 - **nota**: después",
+    ]
 
 
 def test_add_respeta_lo_que_viene_despues_del_dia() -> None:

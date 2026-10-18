@@ -1,6 +1,6 @@
 # spec · ciclo
 
-> `AHORA.md` es el ciclo en curso. Se justifica por el principio 1 y el principio 9 de [`../docs/principios.md`](../docs/principios.md). Si el ciclo es o no una primitiva propia sigue abierto (ver [`README.md`](README.md)).
+> `AHORA.md` es el ciclo en curso. Se justifica por el principio 1 y el principio 9 de [`../docs/principios.md`](../docs/principios.md). El ciclo es un proceso y no una primitiva: `tuku process cycle` lo abre, y se compone sobre la bitácora, los pendientes y las notas.
 
 ## `AHORA.md`, el ciclo en curso
 
@@ -8,7 +8,7 @@ Lo único canónico aquí son **los registros**. El resto es vista, y entra de d
 
 El frontmatter es OKF, con los campos en inglés porque son superficie de máquina (ver [`vault.md`](vault.md), "El frontmatter"). `AHORA.md` y una bitácora cerrada llevan **el mismo `type`**, `Logbook`: los separa `status`, que es `draft` mientras el ciclo está abierto y `stable` cuando se archiva y deja de tocarse. `from` y `to` son el rango que cubre, y son lo que dice dónde termina el ciclo: no hay ninguna marca en el cuerpo que lo repita.
 
-**El ciclo semanal va de lunes a domingo.** `tuku init --at` y `tuku cycle open --at` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente.
+**El ciclo semanal va de lunes a domingo.** `tuku init --at` y `tuku process cycle --at` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente.
 
 ```markdown
 ---
@@ -89,12 +89,12 @@ El resumen es la excepción y va como enlace: es un documento de decisión compl
 
 ## Abrir un ciclo
 
-De los comandos de esta sección y de las siguientes, hoy existen `tuku cycle open`, `tuku cycle lint` y `tuku regenerate todo`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `cycle open` hace los pasos 1 y 2, y el pendiente de revisar la bitácora anterior.
+De los comandos de esta sección y de las siguientes, hoy existen `tuku process cycle`, `tuku cycle lint` y `tuku regenerate todo`. Los demás (`todo promote`, `cadence …`, `capacity calc`, `cycle extract`, `cycle close`, `transclusion flatten`, `plan …`) son diseño y entran con el epic 006. Hoy `process cycle` hace los pasos 1 y 2, y el pendiente de revisar la bitácora anterior.
 
 En este orden:
 
-1. Instanciar `reglas/plantilla/AHORA.md`, con `from` y `to` del ciclo y `status: draft` → `cycle open`
-2. Sembrar los días con `## Día DD de mes` → `cycle open`
+1. Instanciar `reglas/plantilla/AHORA.md`, con `from` y `to` del ciclo y `status: draft` → `process cycle`
+2. Sembrar los días con `## Día DD de mes` → `process cycle`
 3. Rodar y promover pendientes: lo del horizonte del ciclo en curso que no tenga fecha rueda al del ciclo nuevo, y el horizonte siguiente promueve → `todo promote`
 4. Colectar cadencias desde el árbol y emitir lo que corresponda → `cadence collect`, `cadence resolve`, `cadence inject`
 5. Generar el plan en `planes/` y transcluirlo → `capacity calc` lo alimenta, leyendo los `CAPACIDAD.md` del árbol
@@ -106,17 +106,19 @@ Idempotencia: abrir dos veces no duplica días, ni pendientes, ni emisiones.
 
 Un ciclo que sigue a otro cerrado abre con el pendiente `revisar la bitácora anterior`, con vencimiento el primer día: aparece en el callout de ese día y en `PENDIENTES.md` con su fecha. Revisar lo vivido antes de planificar lo que viene es lo que fuerza el aprendizaje, y por eso el comando lo abre y no queda a la memoria del autor.
 
-Lo abre `cycle open` cuando crea el ciclo y `bitacoras/` tiene una bitácora. El primer ciclo de un vault no tiene nada que revisar y no lo trae. Es un pendiente como cualquiera: se cierra con `tuku todo close`, y abrir el ciclo otra vez no lo duplica. Si no se puede abrir, el ciclo queda abierto y el motivo sale como aviso.
+Lo abre `process cycle` cuando crea el ciclo y `bitacoras/` tiene una bitácora. El primer ciclo de un vault no tiene nada que revisar y no lo trae. Es un pendiente como cualquiera: se cierra con `tuku todo close`, y abrir el ciclo otra vez no lo duplica. Si no se puede abrir, el ciclo queda abierto y el motivo sale como aviso.
 
 ### La estructura del ciclo sale de una plantilla
 
-`cycle open` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. Ante la omisión de fecha de apertura, toma por defecto la fecha actual (**HOY**) evaluada en la zona horaria `TZ` de `reglas/config.tuku.md` para determinar el rango según el ritmo declarado (`cycle_type`). La plantilla es del autor y vive en su vault, así que cambiar el ritmo del ciclo, o qué secciones trae un ciclo recién abierto, se hace editándola y no tocando el comando.
+`process cycle` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. Ante la omisión de fecha de apertura, toma por defecto la fecha actual (**HOY**) evaluada en la zona horaria `TZ` de `reglas/config.tuku.md` para determinar el rango según el ritmo declarado (`cycle_type`). La plantilla es del autor y vive en su vault, así que cambiar el ritmo del ciclo, o qué secciones trae un ciclo recién abierto, se hace editándola y no tocando el comando.
 
 ### Un ciclo abierto con registros no se pisa
 
 Abrir un ciclo cuya fecha cae fuera del que ya está abierto **se rechaza** si ese ciclo tiene registros escritos. Archivar es una consecuencia mayor y nadie la aprobó (principio 3 de [`../docs/principios.md`](../docs/principios.md)): sobreescribir `AHORA.md` haría desaparecer registros sin dejar rastro en `bitacoras/`. El rechazo nombra el archivo destino con las fechas ya calculadas, para que cerrarlo sea copiar la línea.
 
 Un ciclo abierto **sin registros sí se regenera**, porque no hay nada que perder. Y ante una fecha de otra semana se falla en vez de archivar solo, porque el caso frecuente es un dedazo y no el lunes nuevo: fallar es barato y deshacer un cierre no.
+
+**Un ciclo no se abre hacia atrás.** Una fecha anterior al `from` del ciclo abierto se rechaza siempre, tenga o no registros: con `AHORA.md` en la semana del 24 de agosto, `tuku process cycle --at 2026-07-06` rechaza y nombra el ciclo abierto. Lo vivido en una semana ya cerrada se agrega a mano en su bitácora de `bitacoras/`.
 
 ## Cerrar un ciclo
 

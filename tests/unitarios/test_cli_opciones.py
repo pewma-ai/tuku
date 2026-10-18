@@ -34,7 +34,14 @@ COMANDOS = tuple(REGISTRO)
 
 
 def _parsear(comando: str, *argv: str) -> argparse.Namespace:
-    return cli._construir_parser().parse_args([*comando.split(), *argv, "--body", CUERPO])
+    """Parsea `comando`, con el cuerpo como `--body` o, en `todo close`, posicional."""
+    extra = [CUERPO] if comando == "todo close" else ["--body", CUERPO]
+    return cli._construir_parser().parse_args([*comando.split(), *argv, *extra])
+
+
+def _cuerpo(args: argparse.Namespace) -> str:
+    """El cuerpo parseado, bajo el nombre que le da cada comando."""
+    return str(args.texto if hasattr(args, "texto") else args.body)
 
 
 # --- En memoria: lo que decide argparse ---------------------------------------
@@ -46,7 +53,7 @@ def test_las_opciones_llegan_con_su_tipo_en_los_tres_comandos() -> None:
         assert (args.vault, args.scope, args.at) == (Path("."), None, Momento()), comando
 
         args = _parsear(comando, "--vault", "v", "--scope", "casa", "--at", f"{HOY} 9:12")
-        assert (args.vault, args.scope, args.at.dia, args.at.hora, args.body) == (
+        assert (args.vault, args.scope, args.at.dia, args.at.hora, _cuerpo(args)) == (
             Path("v"),
             "casa",
             date(2026, 8, 11),
@@ -55,8 +62,8 @@ def test_las_opciones_llegan_con_su_tipo_en_los_tres_comandos() -> None:
         )
 
     for comando in ("todo open", "todo close"):
-        assert _parsear(comando, "--no-propagate").no_propagate
-        assert not _parsear(comando).no_propagate
+        assert _parsear(comando, "--no-regenerate").no_regenerate
+        assert not _parsear(comando).no_regenerate
 
     assert _parsear("todo open", "--due", f"{HOY} 09:00").due.celda() == f"{HOY} 09:00"
     assert _parsear("todo open", "--horizon", "próxima semana").horizon == "próxima semana"
@@ -89,8 +96,9 @@ def test_los_errores_de_opciones_son_error_de_uso(capsys: pytest.CaptureFixture[
         assert "11-08-2026" in capsys.readouterr().err
 
         for cuerpo in ["", "   ", "dos\nlíneas"]:
+            extra = [cuerpo] if comando == "todo close" else ["--body", cuerpo]
             with pytest.raises(SystemExit) as e:
-                parser.parse_args([*comando.split(), "--body", cuerpo])
+                parser.parse_args([*comando.split(), *extra])
             assert e.value.code == USO, (comando, cuerpo)
 
     with pytest.raises(SystemExit) as e:
@@ -119,6 +127,7 @@ def _correr(comando: str, *argv: str) -> int:
     if comando == "todo close":
         abrir = ["todo", "open", "--at", "2026-08-10 08:00", "--body", CUERPO]
         assert main(abrir) == EXITO
+        return main([*comando.split(), *argv, CUERPO])
     return main([*comando.split(), *argv, "--body", CUERPO])
 
 
@@ -182,10 +191,10 @@ def test_un_scope_default_que_no_existe_nombra_scope_create(
     assert _martes(vault) == []
 
 
-def test_no_propagate_no_toca_las_vistas(vault: Path) -> None:
+def test_no_regenerate_no_toca_las_vistas(vault: Path) -> None:
     vista = vault / "ambitos" / "PENDIENTES-AMBITOS.md"
     antes = vista.read_bytes()
-    assert _correr("todo open", "--no-propagate", "--at", f"{HOY} 09:12") == EXITO
+    assert _correr("todo open", "--no-regenerate", "--at", f"{HOY} 09:12") == EXITO
     assert vista.read_bytes() == antes
     assert _martes(vault) == [f"- 09:12 - {PERSONAL} **pendiente**: {CUERPO}"]
 

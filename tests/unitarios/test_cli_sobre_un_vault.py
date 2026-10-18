@@ -155,10 +155,10 @@ def test_scope_rename_arrastra_carpeta_links_y_ancla(
     assert "casa-playa.md" in [p.name for p in (ambitos / "casa-playa").iterdir()]
 
 
-def test_entry_rename_corrige_tambien_la_fila_del_pendiente(vault: Path) -> None:
+def test_entry_update_corrige_tambien_la_fila_del_pendiente(vault: Path) -> None:
     abrir = ("todo", "open", "--at", "2026-08-12 09:00", "--scope", "personal")
     assert _tuku(vault, *abrir, "--body", "pagar la sesión con el psicólogo") == EXITO
-    corregir = ("entry", "rename", "--at", "2026-08-12 09:00")
+    corregir = ("entry", "update", "2026-08-12", "--match", "psicólogo")
     assert (
         _tuku(vault, *corregir, "--body", "**pendiente**: pagar la sesión de terapia") == EXITO
     )
@@ -175,7 +175,7 @@ def test_los_avisos_proceden_y_alertan_por_stderr(
 ) -> None:
     _congelar(monkeypatch, todo, date(2026, 8, 11), "21:30")
 
-    argv = ("todo", "close", "--body", "algo que nunca se abrió", "--at", f"{HOY} 10:00")
+    argv = ("todo", "close", "algo que nunca se abrió", "--at", f"{HOY} 10:00")
     assert _tuku(vault, *argv) == EXITO
     salida = capsys.readouterr()
     assert "warning" in salida.err and "palabra por palabra" in salida.err
@@ -183,7 +183,7 @@ def test_los_avisos_proceden_y_alertan_por_stderr(
     assert "algo que nunca se abrió" in _leer(vault, "AHORA.md")
 
     assert _tuku(vault, "todo", "open", "--body", "pagar", "--at", f"{HOY} 09:00") == EXITO
-    assert _tuku(vault, "todo", "close", "--body", "pagar", "--at", f"{HOY} 10:00") == EXITO
+    assert _tuku(vault, "todo", "close", "pagar", "--at", f"{HOY} 10:00") == EXITO
     assert "warning" not in capsys.readouterr().err
 
     for cuerpo, opciones, dice in (
@@ -195,6 +195,6 @@ def test_los_avisos_proceden_y_alertan_por_stderr(
         assert "warning" in err and dice in err, cuerpo
         assert cuerpo in _leer(vault, "PENDIENTES.md")
 
-    argv = ("todo", "open", "--body", "pagar el gas", "--due", "2026-08-12 09:00")
-    assert _tuku(vault, *argv) == EXITO
+    sin_aviso = ("todo", "open", "--body", "pagar el gas", "--due", "2026-08-12 09:00")
+    assert _tuku(vault, *sin_aviso) == EXITO
     assert "warning" not in capsys.readouterr().err

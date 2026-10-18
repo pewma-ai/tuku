@@ -32,12 +32,13 @@ from __future__ import annotations
 
 import os
 import re
+import unicodedata
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from tuku import link
+from tuku import archivo, link
 from tuku.resultado import Resultado
 
 _KEYWORDS = re.compile(r"^keywords:\s*\[(?P<lista>[^\]]*)\]\s*$", re.M)
@@ -298,16 +299,16 @@ def crear(
         lista = ", ".join(_sumar([], palabras, valor))
         base = f"---\ntype: Scope\nkeywords: [{lista}]\n---\n# {valor}\n\n![[{rel}#^{valor}]]\n"
         ahora_file = vault / "AHORA.md"
-        ahora_texto = ahora_file.read_text(encoding="utf-8") if ahora_file.is_file() else ""
+        ahora_texto = archivo.leer(ahora_file) if ahora_file.is_file() else ""
         texto = actualizar_contenido_pagina(
             base, ahora_texto, valor, pagina=pagina.relative_to(vault).as_posix()
         )
-        pagina.write_text(texto, encoding="utf-8")
+        archivo.escribir(pagina, texto)
 
     if (vault / "PENDIENTES.md").is_file():
-        from tuku import propagate
+        from tuku import regenerate
 
-        propagate.propagar(vault)
+        regenerate.rehacer(vault, ["ambitos/", "AHORA.md", "bitacoras/"])
 
     return directorio
 
@@ -330,9 +331,9 @@ def _bloque_de_hijos(lineas: list[str]) -> tuple[int, int] | None:
 
 
 def _titulo_de_hijos(padre: Path, texto: str) -> str:
-    from tuku import propagate
+    from tuku import regenerate
 
-    return f"{_HIJOS}**{propagate.display_name(padre.name, texto)}**:"
+    return f"{_HIJOS}**{regenerate.display_name(padre.name, texto)}**:"
 
 
 def _lineas_de_hijos(base: Path, carpeta: Path, nivel: int = 0) -> list[str]:
@@ -343,7 +344,7 @@ def _lineas_de_hijos(base: Path, carpeta: Path, nivel: int = 0) -> list[str]:
     también por orden alfabético y separado por `---`. Una categoría sin ámbitos no sale.
     El orden es siempre el mismo: lo escriba `create`, `move` o `regenerate`.
     """
-    from tuku import propagate
+    from tuku import regenerate
 
     marca = "> " * (nivel + 1)
     hijos = sorted(h for h in carpeta.iterdir() if h.is_dir() and not h.name.startswith("."))
@@ -356,7 +357,7 @@ def _lineas_de_hijos(base: Path, carpeta: Path, nivel: int = 0) -> list[str]:
         interior = _lineas_de_hijos(base, categoria, nivel + 1)
         if not interior:
             continue
-        titulo = propagate.display_name(categoria.name)
+        titulo = regenerate.display_name(categoria.name)
         if lineas:
             lineas.append(f"{marca}---")
         lineas += [f"{marca}> [!abstract]+ {titulo}", *interior]
@@ -407,10 +408,10 @@ def refrescar_hijos(carpeta: Path) -> None:
             return
         if _pagina(d).is_file():
             pagina = _pagina(d)
-            texto = pagina.read_text(encoding="utf-8")
+            texto = archivo.leer(pagina)
             salida = _con_hijos(d, texto)
             if salida != texto:
-                pagina.write_text(salida, encoding="utf-8")
+                archivo.escribir(pagina, salida)
             return
 
 
@@ -462,10 +463,10 @@ def regenerar_parent(vault: Path) -> list[Path]:
     cambiados: list[Path] = []
     for a in leer(vault):
         pagina = _pagina(a.directorio)
-        texto = pagina.read_text(encoding="utf-8")
+        texto = archivo.leer(pagina)
         salida = _con_parent(texto, _parent_esperado(vault, a.directorio))
         if salida != texto:
-            pagina.write_text(salida, encoding="utf-8")
+            archivo.escribir(pagina, salida)
             cambiados.append(pagina)
     return cambiados
 
@@ -481,10 +482,10 @@ def regenerar_hijos(vault: Path) -> list[Path]:
         pagina = _pagina(a.directorio)
         if not pagina.is_file():
             continue
-        texto = pagina.read_text(encoding="utf-8")
+        texto = archivo.leer(pagina)
         salida = _con_hijos(a.directorio, texto)
         if salida != texto:
-            pagina.write_text(salida, encoding="utf-8")
+            archivo.escribir(pagina, salida)
             cambiados.append(pagina)
     return cambiados
 
@@ -494,17 +495,17 @@ def retitular_hijos(directorio: Path) -> None:
     pagina = _pagina(directorio)
     if not pagina.is_file():
         return
-    texto = pagina.read_text(encoding="utf-8")
+    texto = archivo.leer(pagina)
     lineas = texto.splitlines()
     bloque = _bloque_de_hijos(lineas)
     if bloque is None:
         return
     lineas[bloque[0]] = _titulo_de_hijos(directorio, texto)
-    pagina.write_text("\n".join(lineas) + "\n", encoding="utf-8")
+    archivo.escribir(pagina, "\n".join(lineas) + "\n")
 
 
 def extraer_actividad_ambito(
-    ahora: str, nombre_ambito: str, *, pagina: str | None = None
+    ahora: str, nombre_ambito: str, *, pagina: str | None = None, origen: str = "AHORA.md"
 ) -> dict[str, list[str]]:
     """Extrae las líneas de bitácora vinculadas al ámbito, agrupadas por día.
 
@@ -515,8 +516,8 @@ def extraer_actividad_ambito(
 
     El enlace se reconoce en cualquiera de los dos formatos. Los demás links de
     la línea se copian a la página del ámbito, que vive en otra carpeta, así que
-    sus rutas se recalculan desde `AHORA.md` hacia `pagina` (por defecto, la
-    forma plana `ambitos/<n>/<n>.md`).
+    sus rutas se recalculan desde `origen` (`AHORA.md`, o una bitácora cerrada) hacia
+    `pagina` (por defecto, la forma plana `ambitos/<n>/<n>.md`).
 
     El orden de días y de líneas dentro de cada día es el mismo de `AHORA.md`.
     """
@@ -541,7 +542,7 @@ def extraer_actividad_ambito(
 
         lineas_dia: list[str] = []
         for i in range(ini + 1, fin):
-            m = re.match(r"^- \d{2}:\d{2} - (.*)$", lineas[i])
+            m = re.match(r"^- (?:\d{2}:\d{2} - )?(.*)$", lineas[i])
             if m is None or not any(es_el_ambito(e) for e in propio.finditer(m.group(1))):
                 continue
             cuerpo = m.group(1)
@@ -551,7 +552,7 @@ def extraer_actividad_ambito(
             cuerpo = propio.sub(
                 lambda e: nombre_ambito if es_el_ambito(e) else e.group(), cuerpo
             )
-            lineas_dia.append(f"- {link.rebasar(cuerpo, 'AHORA.md', destino)}")
+            lineas_dia.append(f"- {link.rebasar(cuerpo, origen, destino)}")
 
         if lineas_dia:
             salida[encabezado] = lineas_dia
@@ -573,12 +574,76 @@ def formatear_esta_semana(actividad: dict[str, list[str]]) -> str:
     return "\n".join(bloques)
 
 
-def actualizar_contenido_pagina(
-    contenido_actual: str, ahora_texto: str, nombre_ambito: str, *, pagina: str | None = None
-) -> str:
-    """Actualiza o incorpora `## Esta semana` y `## Actividad reciente` en el ámbito."""
-    from datetime import date
+#: Meses hacia atrás que cubre `## Actividad reciente` (`spec/ambitos.md`).
+MESES_DE_ACTIVIDAD = 12
 
+
+def _hace_doce_meses(hoy: date) -> date:
+    anio, mes = divmod(hoy.year * 12 + hoy.month - 1 - MESES_DE_ACTIVIDAD, 12)
+    dia = hoy.day
+    while True:
+        try:
+            return date(anio, mes + 1, dia)
+        except ValueError:
+            dia -= 1
+
+
+def actividad_reciente(
+    cerradas: Sequence[tuple[str, str]],
+    nombre_ambito: str,
+    *,
+    pagina: str,
+    hoy: date,
+) -> str:
+    """La sección `## Actividad reciente`: los registros del ámbito en los ciclos cerrados.
+
+    `cerradas` son las bitácoras, como (ruta desde el vault, texto). Entran los días
+    de los últimos doce meses, agrupados bajo `### Octubre 2026`, del mes más reciente
+    al más antiguo, y cada línea lleva su día: `- 12 - entregué 40 cuadernos`.
+    """
+    from tuku.ahora import fecha_del_dia, rango
+    from tuku.init import MESES
+
+    desde = _hace_doce_meses(hoy)
+    por_mes: dict[tuple[int, int], list[tuple[date, str]]] = {}
+    for ruta, texto in cerradas:
+        limites = rango(texto)
+        if limites is None or limites[1] < desde:
+            continue
+        for encabezado, lineas in extraer_actividad_ambito(
+            texto, nombre_ambito, pagina=pagina, origen=ruta
+        ).items():
+            fecha = fecha_del_dia(encabezado, *limites)
+            if fecha is None or fecha < desde:
+                continue
+            for linea in lineas:
+                cuerpo = linea.removeprefix("- ")
+                por_mes.setdefault((fecha.year, fecha.month), []).append(
+                    (fecha, f"- {fecha.day} - {cuerpo}")
+                )
+    bloques = ["## Actividad reciente"]
+    for anio, mes in sorted(por_mes, reverse=True):
+        bloques.append(f"### {MESES[mes - 1].capitalize()} {anio}")
+        bloques.extend(linea for _, linea in sorted(por_mes[(anio, mes)], key=lambda x: x[0]))
+    return "\n".join(bloques)
+
+
+def actualizar_contenido_pagina(
+    contenido_actual: str,
+    ahora_texto: str,
+    nombre_ambito: str,
+    *,
+    pagina: str | None = None,
+    cerradas: Sequence[tuple[str, str]] | None = None,
+    hoy: date | None = None,
+) -> str:
+    """Actualiza o incorpora `## Esta semana` y `## Actividad reciente` en el ámbito.
+
+    Con `cerradas` (las bitácoras de `bitacoras/`), `## Actividad reciente` se rehace
+    desde ellas, contando los doce meses desde el inicio del ciclo abierto: lo derivado
+    depende de lo canónico y no del reloj. Sin `cerradas` se conserva lo que la página
+    ya trae.
+    """
     from tuku.ahora import rango
     from tuku.init import MESES
 
@@ -593,7 +658,12 @@ def actualizar_contenido_pagina(
     partes_semana = contenido_actual.split("## Esta semana", 1)
     base = partes_semana[0].rstrip()
 
-    if "## Actividad reciente" in contenido_actual:
+    if cerradas is not None:
+        destino = pagina or f"ambitos/{nombre_ambito}/{nombre_ambito}.md"
+        seccion_reciente = actividad_reciente(
+            cerradas, nombre_ambito, pagina=destino, hoy=hoy or fecha_ref
+        )
+    elif "## Actividad reciente" in contenido_actual:
         parte_reciente = contenido_actual.split("## Actividad reciente", 1)[1].rstrip()
         if not parte_reciente.strip():
             seccion_reciente = f"## Actividad reciente\n### {mes_anio}"
@@ -613,13 +683,21 @@ def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
     ahora_path = vault / "AHORA.md"
     if not ahora_path.is_file():
         return None
-    ahora_texto = ahora_path.read_text(encoding="utf-8")
-    actual = pagina.read_text(encoding="utf-8")
+    ahora_texto = archivo.leer(ahora_path)
+    actual = archivo.leer(pagina)
+    cerradas = [
+        (b.relative_to(vault).as_posix(), archivo.leer(b))
+        for b in sorted((vault / "bitacoras").glob("*.md"))
+    ]
     nuevo = actualizar_contenido_pagina(
-        actual, ahora_texto, nombre, pagina=pagina.relative_to(vault).as_posix()
+        actual,
+        ahora_texto,
+        nombre,
+        pagina=pagina.relative_to(vault).as_posix(),
+        cerradas=cerradas,
     )
     if nuevo != actual:
-        pagina.write_text(nuevo, encoding="utf-8")
+        archivo.escribir(pagina, nuevo)
         return pagina
     return None
 
@@ -637,7 +715,7 @@ def leer(vault: Path) -> list[Ambito]:
                 Ambito(
                     directorio.name,
                     directorio,
-                    keywords(pagina.read_text(encoding="utf-8")),
+                    keywords(archivo.leer(pagina)),
                 )
             )
     return salida
@@ -670,7 +748,7 @@ def lint_transclusiones(vault: Path) -> list[str]:
     hallazgos = []
     for a in leer(vault):
         pagina = a.directorio / f"{a.nombre}.md"
-        contenido = pagina.read_text(encoding="utf-8")
+        contenido = archivo.leer(pagina)
         patron = rf"!\[\[[^\]]*PENDIENTES-AMBITOS(?:\.md)?#\^{re.escape(a.nombre)}\]\]"
         if not re.search(patron, contenido):
             rel = os.path.relpath(vault / "ambitos" / "PENDIENTES-AMBITOS.md", a.directorio)
@@ -688,7 +766,7 @@ def lint_parent(vault: Path) -> list[str]:
     for a in leer(vault):
         pagina = _pagina(a.directorio)
         esperado = _parent_esperado(vault, a.directorio)
-        actual = parent_de(pagina.read_text(encoding="utf-8"))
+        actual = parent_de(archivo.leer(pagina))
         if actual != esperado:
             dice = f"`parent: {actual}`" if actual else "no declara `parent:`"
             debe = f"`parent: {esperado}`" if esperado else "ningún `parent:`"
@@ -701,13 +779,13 @@ def lint_parent(vault: Path) -> list[str]:
 
 def lint_callouts(vault: Path) -> list[str]:
     """Comprueba que en PENDIENTES-AMBITOS.md exista un callout por cada ámbito."""
-    archivo = vault / "ambitos" / "PENDIENTES-AMBITOS.md"
-    if not archivo.is_file():
+    ruta = vault / "ambitos" / "PENDIENTES-AMBITOS.md"
+    if not ruta.is_file():
         return [
             "ambitos/PENDIENTES-AMBITOS.md: error: falta el archivo. "
             "Corre `tuku regenerate todo` para generarlo."
         ]
-    contenido = archivo.read_text(encoding="utf-8")
+    contenido = archivo.leer(ruta)
     hallazgos = []
     for a in leer(vault):
         patron = rf">\s*\[!todo\].*\^{re.escape(a.nombre)}(?:\s|$)"
@@ -738,9 +816,7 @@ def lint(
     ahora_path = vault / "AHORA.md"
     if ahora_path.is_file():
         cats = categorias if categorias is not None else globals()["categorias"](vault)
-        hallazgos.extend(
-            lint_categorias(ahora_path.read_text(encoding="utf-8"), categorias=cats)
-        )
+        hallazgos.extend(lint_categorias(archivo.leer(ahora_path), categorias=cats))
     hallazgos.extend(lint_transclusiones(vault))
     hallazgos.extend(lint_parent(vault))
     hallazgos.extend(lint_callouts(vault))
@@ -789,6 +865,7 @@ def crear_con_constancia(
     day: date | None = None,
     hour: str | None = None,
     palabras: Sequence[str] = (),
+    since: str | None = None,
 ) -> Resultado:
     """Crea el ámbito y deja constancia. No modifica nada de lo ya escrito.
 
@@ -810,10 +887,14 @@ def crear_con_constancia(
     Las `palabras` son las `keywords` con que el autor nombra el ámbito sin decir
     su nombre. Si no vienen, la salida le pide al agente que las pregunte: el
     agente las lee de la página para saber de qué frente es algo que no lo nombra.
+
+    La salida lista, desde `since` (7 días si falta), los registros de otros ámbitos
+    que nombran al nuevo (`registros_que_nombran`), para moverlos con `tuku entry move`.
+    Sobre un ámbito que ya existe vuelve a listar sin crear nada.
     """
     from datetime import datetime
 
-    from tuku import entry, todo
+    from tuku import context, entry, todo
     from tuku.ahora import encabezado_de
 
     nombre = normalizar(nombre)
@@ -821,6 +902,10 @@ def crear_con_constancia(
         return rechazo
     if (rechazo := _rechazo_de_keywords(palabras)) is not None:
         return rechazo
+    try:
+        inicio = context.desde(since, date.today(), DESDE_POR_DEFECTO)
+    except ValueError as e:
+        return Resultado.rechazo(str(e))
     palabras = palabras_de(palabras)
     if (otro := _choque(vault, nombre)) is not None:
         return Resultado.rechazo(
@@ -842,7 +927,7 @@ def crear_con_constancia(
     pendientes = vault / "PENDIENTES.md"
     if pendientes.is_file():
         try:
-            todo.filas(pendientes.read_text(encoding="utf-8"))
+            todo.filas(archivo.leer(pendientes))
         except todo.SinTabla as e:
             return Resultado.rechazo(str(e))
 
@@ -852,7 +937,7 @@ def crear_con_constancia(
     hora = hour or datetime.now().strftime("%H:%M")
     if nuevo and ahora_path.is_file():
         try:
-            entry.add(ahora_path.read_text(encoding="utf-8"), [], day=dia)
+            entry.add(archivo.leer(ahora_path), [], day=dia)
         except ValueError as e:
             return Resultado.rechazo(str(e))
 
@@ -864,9 +949,15 @@ def crear_con_constancia(
     regenerar_parent(vault)
     pagina_path = directorio / f"{nombre}.md"
     if not nuevo and palabras:
-        return actualizar(vault, nombre, palabras)
+        r = actualizar(vault, nombre, palabras)
+        if not r.ok:
+            return r
+        return Resultado.hecho(
+            "\n".join(filter(None, (r.mensaje, _registros_previos(vault, nombre, inicio)))),
+            avisos=r.avisos,
+        )
     if ahora_path.is_file() and pagina_path.is_file():
-        original = ahora_path.read_text(encoding="utf-8")
+        original = archivo.leer(ahora_path)
         texto = original
         if nuevo:
             mapa = rutas(vault)
@@ -881,7 +972,7 @@ def crear_con_constancia(
             constancia = registro_de_constancia(nombre, hour=hora, rutas=mapa, bajo=bajo)
             texto = entry.add(texto, [constancia], day=dia)
         if texto != original:
-            ahora_path.write_text(texto, encoding="utf-8")
+            archivo.escribir(ahora_path, texto)
         actualizar_pagina(vault, nombre)
         if nuevo and padre is not None:
             ambito_padre, _ = _donde_cuelga(vault, padre)
@@ -889,10 +980,94 @@ def crear_con_constancia(
                 # la constancia enlaza al padre, y la actividad de su página la cuenta
                 actualizar_pagina(vault, ambito_padre.name)
 
-    mensaje = f"ámbito creado en {directorio}."
+    mensaje = f"ámbito creado en {directorio}." if nuevo else f"el ámbito {nombre} ya existe."
     if nuevo and not palabras:
         mensaje += "\n" + _pedir_keywords(nombre)
+    if previos := _registros_previos(vault, nombre, inicio):
+        mensaje += "\n" + previos
     return Resultado.hecho(mensaje)
+
+
+#: Días hacia atrás que busca `scope create` registros que nombran al ámbito nuevo.
+DESDE_POR_DEFECTO = 7
+
+_REGISTRO_LINEA = re.compile(r"^- (?:(?P<hora>\d{2}:\d{2}) - )?(?P<cuerpo>.*)$")
+
+
+def _plegar(texto: str) -> str:
+    """Sin mayúsculas, tildes ni guiones: `Los-Robles` y `los robles` son lo mismo."""
+    plano = unicodedata.normalize("NFKD", texto)
+    plano = "".join(c for c in plano if not unicodedata.combining(c)).lower()
+    return " ".join(re.sub(r"[-_\s]+", " ", plano).split())
+
+
+def registros_que_nombran(
+    vault: Path, nombre: str, inicio: date
+) -> tuple[list[tuple[date, str | None, str, str]], int]:
+    """Los registros de otros ámbitos que nombran a `nombre`, y cuántas bitácoras quedan atrás.
+
+    Nombrar es decir el nombre o una keyword del ámbito, por palabras completas y sin
+    distinguir mayúsculas, tildes, guiones ni espacios. Cada registro vuelve como
+    (día, hora, ámbito en que está, cuerpo). Lo segundo es el número de bitácoras
+    cerradas anteriores a `inicio`, que esta búsqueda no leyó.
+    """
+    from tuku import context
+    from tuku.ahora import rango
+
+    pagina = _pagina(carpeta(vault, nombre))
+    claves = {_plegar(nombre), *(_plegar(k) for k in keywords(archivo.leer(pagina)))}
+    patron = re.compile(
+        "|".join(rf"(?<!\w){re.escape(c)}(?!\w)" for c in sorted(claves, key=len, reverse=True))
+    )
+    hallados: list[tuple[date, str | None, str, str]] = []
+    for fecha, _, lineas in context.registros_desde(vault, inicio):
+        for linea in lineas:
+            m = _REGISTRO_LINEA.match(linea)
+            if m is None:
+                continue
+            cuerpo = m.group("cuerpo")
+            duenos = [
+                n for e in re.finditer(link.ENLACE, cuerpo) if (n := link.nombre_de(e.group()))
+            ]
+            if nombre in duenos[:1]:
+                continue
+            if (inicial := re.match(link.ENLACE, cuerpo)) is not None:
+                cuerpo = cuerpo[inicial.end() :].lstrip()
+            sin_links = link.sin_links(cuerpo)
+            if patron.search(_plegar(sin_links)):
+                hallados.append(
+                    (fecha, m.group("hora"), duenos[0] if duenos else "", sin_links)
+                )
+    anteriores = 0
+    bitacoras = vault / "bitacoras"
+    if bitacoras.is_dir():
+        for b in bitacoras.glob("*.md"):
+            limites = rango(archivo.leer(b))
+            if limites is not None and limites[1] < inicio:
+                anteriores += 1
+    return hallados, anteriores
+
+
+def _registros_previos(vault: Path, nombre: str, inicio: date) -> str:
+    """El bloque de la salida de `scope create` con los registros que ya nombran al ámbito."""
+    hallados, anteriores = registros_que_nombran(vault, nombre, inicio)
+    lineas: list[str] = []
+    if hallados:
+        lineas.append(
+            f"Registros de otros ámbitos que nombran a {nombre!r} "
+            f"desde el {inicio.isoformat()}. "
+            "Decide con el autor cuáles son del ámbito y muévelos con "
+            f"`tuku entry move AAAA-MM-DD HH:MM --match TEXTO --scope {nombre}`:"
+        )
+        for fecha, hora, dueno, cuerpo in hallados:
+            cuando = f"{fecha.isoformat()} {hora}" if hora else fecha.isoformat()
+            lineas.append(f"- {cuando} ({dueno or 'sin ámbito'}): {cuerpo}")
+    if anteriores:
+        lineas.append(
+            f"Hay {anteriores} bitácoras cerradas más antiguas que el {inicio.isoformat()}: "
+            "pregunta al autor hasta cuándo buscar y repite con `--since`."
+        )
+    return "\n".join(lineas)
 
 
 def _pedir_keywords(nombre: str) -> str:
@@ -924,7 +1099,7 @@ def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
             f"nada que actualizar. Uso: `tuku scope update {nombre} --keyword PALABRA`."
         )
     pagina = _pagina(carpeta(vault, nombre))
-    texto = pagina.read_text(encoding="utf-8")
+    texto = archivo.leer(pagina)
     if _KEYWORDS.search(texto) is None:
         return Resultado.rechazo(
             f"la página de {nombre!r} no declara `keywords:` en su frontmatter. "
@@ -934,9 +1109,8 @@ def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
     todas = _sumar(previas, nuevas, nombre)
     if todas == previas:
         return Resultado.hecho(f"{nombre!r} ya tenía esas keywords: {', '.join(previas)}.")
-    pagina.write_text(
-        _KEYWORDS.sub(lambda _m: f"keywords: [{', '.join(todas)}]", texto, count=1),
-        encoding="utf-8",
+    archivo.escribir(
+        pagina, _KEYWORDS.sub(lambda _m: f"keywords: [{', '.join(todas)}]", texto, count=1)
     )
     return Resultado.hecho(f"keywords de {nombre!r}: {', '.join(todas)}.")
 
@@ -954,7 +1128,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     que no ocurrió: deja al autor con dos ámbitos incompletos y sin saber cuál
     es el bueno.
     """
-    from tuku import propagate, rename
+    from tuku import regenerate, rename
 
     viejo, nuevo = canonico(vault, viejo), normalizar(nuevo)
     if (rechazo := _rechazo_de_nombre(nuevo)) is not None:
@@ -987,7 +1161,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     viejo_dir = origen.relative_to(vault).as_posix()
     nuevo_dir = destino.relative_to(vault).as_posix()
     for ruta in sorted(vault.rglob("*.md")):
-        texto = ruta.read_text(encoding="utf-8")
+        texto = archivo.leer(ruta)
         salida, n = rename.renombrar_enlaces(texto, viejo, nuevo)
         enlaces += n
         salida, _ = rename.renombrar_ancla(salida, viejo, nuevo)
@@ -1004,12 +1178,12 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
             if ruta.name == f"{nuevo}.md":
                 salida = rename.renombrar_titulo(salida, nuevo)
         if salida != texto:
-            ruta.write_text(salida, encoding="utf-8")
+            archivo.escribir(ruta, salida)
 
     # El callout de `PENDIENTES-AMBITOS.md` lleva el nombre legible del ámbito,
     # y quien sabe componerlo es la propagación: se regenera en vez de parchear.
     if (vault / "PENDIENTES.md").is_file():
-        propagate.propagar(vault)
+        regenerate.rehacer(vault, ["ambitos/", "AHORA.md", "bitacoras/"])
     retitular_hijos(destino)
     refrescar_hijos(destino.parent)
     regenerar_parent(vault)
@@ -1031,7 +1205,7 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
     padre que cuelga del propio ámbito, un destino ocupado o una tabla de
     pendientes rota. Moverlo donde ya está no escribe nada.
     """
-    from tuku import link, propagate
+    from tuku import link, regenerate
 
     nombre = canonico(vault, nombre)
     origen = directorio_de(vault, nombre)
@@ -1062,7 +1236,7 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
         from tuku import todo
 
         try:
-            todo.filas(pendientes.read_text(encoding="utf-8"))
+            todo.filas(archivo.leer(pendientes))
         except todo.SinTabla as e:
             return Resultado.rechazo(str(e))
 
@@ -1071,7 +1245,7 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
 
     viejo_dir, nuevo_dir = rel(origen), rel(destino)
     textos = {
-        p: p.read_text(encoding="utf-8")
+        p: archivo.leer(p)
         for p in sorted(vault.rglob("*.md"))
         if not any(parte.startswith(".") for parte in p.relative_to(vault).parts)
     }
@@ -1086,14 +1260,14 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
         )
         salida = link.reubicar(texto, antes, despues, {viejo_dir: nuevo_dir})
         if salida != texto:
-            (vault / despues).write_text(salida, encoding="utf-8")
+            archivo.escribir((vault / despues), salida)
             cambiados += 1
 
     refrescar_hijos(origen.parent)
     refrescar_hijos(padre)
     regenerar_parent(vault)
     if pendientes.is_file():
-        propagate.propagar(vault)
+        regenerate.rehacer(vault, ["ambitos/", "AHORA.md", "bitacoras/"])
     detalle = f" ({cambiados} archivo(s) con links actualizados)" if cambiados else ""
     return Resultado.hecho(f"ámbito {nombre!r} movido a {nuevo_dir}{detalle}.")
 

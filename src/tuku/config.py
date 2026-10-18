@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from tuku import vocab
+from tuku import archivo, vocab
 from tuku.init import MESES, resolver_home
 
 #: Fila de la tabla de configuración: `| `Campo` | `Valor` |`.
@@ -69,6 +69,7 @@ class Configuracion:
     clasificaciones: list[str]
     horizontes: list[str]
     tipos_nota: list[str]
+    tipos_enlazables: list[str]
     # De reglas/plantilla/
     plantilla_ahora: str
 
@@ -102,14 +103,14 @@ def fecha_corta(fecha: date, formato: str = FORMATO_FECHA) -> str:
 def formato_fecha(vault: Path) -> str:
     """El `date_format` de `reglas/config.tuku.md`, o el de por defecto."""
     ruta = Path(vault) / "reglas" / "config.tuku.md"
-    texto = ruta.read_text(encoding="utf-8") if ruta.is_file() else ""
+    texto = archivo.leer(ruta) if ruta.is_file() else ""
     return parsear_config_md(texto).get("date_format", "").strip("`") or FORMATO_FECHA
 
 
 def ambito_por_defecto(vault: Path) -> str | None:
     """El `scope_default` de `reglas/config.tuku.md`: el ámbito de lo que no nombra otro."""
     ruta = Path(vault) / "reglas" / "config.tuku.md"
-    texto = ruta.read_text(encoding="utf-8") if ruta.is_file() else ""
+    texto = archivo.leer(ruta) if ruta.is_file() else ""
     return parsear_config_md(texto).get("scope_default", "").strip("`") or None
 
 
@@ -140,10 +141,10 @@ def resolver_plantilla_ahora(vault: Path) -> str:
     """Busca la plantilla de AHORA.md en el vault o en el fallback de TUKU."""
     local = vault / "reglas" / "plantilla" / "AHORA.md"
     if local.is_file():
-        return local.read_text(encoding="utf-8")
+        return archivo.leer(local)
     fallback = resolver_home() / "template" / "vanilla" / "reglas" / "plantilla" / "AHORA.md"
     if fallback.is_file():
-        return fallback.read_text(encoding="utf-8")
+        return archivo.leer(fallback)
     raise FileNotFoundError(
         f"no se encontró la plantilla de AHORA.md en {local} ni en {fallback}"
     )
@@ -162,7 +163,7 @@ def leer_config(
     # 1. reglas/config.tuku.md
     if texto_config is None:
         ruta_config = vault / "reglas" / "config.tuku.md"
-        texto_config = ruta_config.read_text(encoding="utf-8") if ruta_config.is_file() else ""
+        texto_config = archivo.leer(ruta_config) if ruta_config.is_file() else ""
     datos = parsear_config_md(texto_config)
     zona_horaria = datos.get("TZ", "America/Santiago")
     tipo_ciclo = datos.get("cycle_type", "semanal")
@@ -170,7 +171,7 @@ def leer_config(
     # 2. LIBRO-DE-ESTILO.md
     if texto_libro is None:
         ruta_libro = archivo_vault(vault, "LIBRO-DE-ESTILO.md")
-        texto_libro = ruta_libro.read_text(encoding="utf-8")
+        texto_libro = archivo.leer(ruta_libro)
     autor = parsear_autor(texto_libro)
     vocabs = vocab.leer(texto_libro) if texto_libro else {}
 
@@ -193,5 +194,6 @@ def leer_config(
         clasificaciones=vocabs.get("clasificaciones", []),
         horizontes=vocabs.get("horizontes", []),
         tipos_nota=vocabs.get("tipos-de-nota", []),
+        tipos_enlazables=vocab.enlazables(texto_libro),
         plantilla_ahora=plantilla_ahora,
     )

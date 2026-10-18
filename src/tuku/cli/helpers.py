@@ -61,6 +61,21 @@ def traducir(r: Resultado, prefijo: str) -> int:
     return EXITO if r.ok else RECHAZO
 
 
+def sin_implementar(prefijo: str, mientras: str) -> int:
+    """Un verbo que ya tiene lugar en el CLI y todavía no tiene implementación.
+
+    Avisa por `stderr` y sale con éxito sin escribir nada. Existe para que la
+    superficie y la ayuda del comando se revisen antes que su lógica; `mientras`
+    dice qué hacer hasta que exista.
+    """
+    return traducir(
+        Resultado.hecho(
+            "no escribí nada.", avisos=(f"todavía no está implementado. {mientras}",)
+        ),
+        prefijo,
+    )
+
+
 def cuerpo_de_la_nota(args: argparse.Namespace) -> str | None:
     """De dónde sale el cuerpo: la línea de comandos, o un archivo (`-` es `stdin`).
 

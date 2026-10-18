@@ -191,3 +191,32 @@ def test_reubicar_no_toca_externos_anclas_codigo_ni_lo_que_no_cambia() -> None:
         "- 09:12 - [personal](ambitos/personal/personal.md) cuerpo",
     ):
         assert link.reubicar(texto, "AHORA.md", "AHORA.md", MOVIDO) == texto
+
+
+def test_enlaza_la_primera_mencion_por_titulo_o_alias_sin_tildes_ni_mayusculas() -> None:
+    nombres = {"notas/rodolfo-cifuentes.md": ["Rodolfo Cifuentes", "don Rodolfo"]}
+    cuerpo, ambiguos = link.enlazar_menciones(
+        "llamé a Don Rodolfo; don Rodolfo no contestó", nombres, "AHORA.md"
+    )
+    assert cuerpo == (
+        "llamé a [Don Rodolfo](notas/rodolfo-cifuentes.md); don Rodolfo no contestó"
+    )
+    assert ambiguos == []
+    en_bitacora, _ = link.enlazar_menciones(
+        "hablé con don rodolfo", nombres, "bitacoras/bitacora-2026-08-03-2026-08-09.md"
+    )
+    assert en_bitacora == "hablé con [don rodolfo](../notas/rodolfo-cifuentes.md)"
+
+
+def test_no_enlaza_palabras_a_medias_ni_links_ni_nombres_ambiguos() -> None:
+    nombres = {"notas/ana.md": ["Ana"], "notas/ana-perez.md": ["Ana Pérez"]}
+    assert link.enlazar_menciones("Mariana llamó", nombres, "AHORA.md") == ("Mariana llamó", [])
+    ya = "vi a [Ana](notas/ana.md) hoy"
+    assert link.enlazar_menciones(ya, nombres, "AHORA.md") == (ya, [])
+    cuerpo, _ = link.enlazar_menciones("almorcé con Ana Perez", nombres, "AHORA.md")
+    assert cuerpo == "almorcé con [Ana Perez](notas/ana-perez.md)"
+    dos = {"notas/rodolfo-a.md": ["Rodolfo"], "notas/rodolfo-b.md": ["Rodolfo"]}
+    assert link.enlazar_menciones("Rodolfo llamó", dos, "AHORA.md") == (
+        "Rodolfo llamó",
+        ["rodolfo"],
+    )

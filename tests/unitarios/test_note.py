@@ -61,3 +61,17 @@ def test_el_lint_pide_la_seccion_ver_ademas_y_un_motivo_por_enlace() -> None:
 
     cuerpo = "# Nota\n\nhabla del [[depto-centro]] sin motivo\n\n## Ver además\n\n"
     assert note.lint(cuerpo) == [], "la regla es solo de la sección final"
+
+
+def test_aliases_en_linea_o_en_bloque() -> None:
+    from tuku.note import aliases
+
+    assert aliases('---\ntype: Note\naliases: [Rodolfo, "don Rodolfo"]\n---\n# R\n') == [
+        "Rodolfo",
+        "don Rodolfo",
+    ]
+    assert aliases("---\naliases:\n  - LR\n  - Los Robles\ntype: Note\n---\n") == [
+        "LR",
+        "Los Robles",
+    ]
+    assert aliases("# sin frontmatter\n") == []

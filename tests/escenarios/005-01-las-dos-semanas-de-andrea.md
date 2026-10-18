@@ -68,9 +68,9 @@ tuku entry create --at "2026-08-10 21:30" --scope negocio --body "**cadencia**: 
 ```
 Y el martes 11
 ```bash
-tuku todo close --at "2026-08-11 09:05" --scope colegio-los-robles --body "enviar cotización de reposición de segundo semestre"
+tuku todo close --at "2026-08-11 09:05" --scope colegio-los-robles "enviar cotización de reposición de segundo semestre"
 tuku entry create --at "2026-08-11 09:10" --scope colegio-los-robles --body "**progreso**: cotización enviada por $1.800.000 más IVA"
-tuku todo close --at "2026-08-11 10:30" --scope negocio --body "pedir cuadernos universitarios y témperas a Papelera del Sur"
+tuku todo close --at "2026-08-11 10:30" --scope negocio "pedir cuadernos universitarios y témperas a Papelera del Sur"
 tuku entry create --at "2026-08-11 10:35" --scope papelera-del-sur --body "**progreso**: Iván Zamora comprometió despacho para el jueves 13 de agosto"
 tuku entry create --at "2026-08-11 12:40" --scope jardin-semillita --body "**hito**: venta despachada a Jardín Semillita: témperas, cartulinas y dos cajas de plasticina"
 tuku entry create --at "2026-08-11 12:45" --scope jardin-semillita --body "**nota**: Marcela Ossandón, sostenedora del jardín, solicita boleta y no factura"
@@ -97,17 +97,17 @@ tuku entry create --at "2026-08-13 09:20" --scope libreria-el-compas --body "**p
 tuku entry create --at "2026-08-13 11:30" --scope papelera-del-sur --body "**fricción**: despacho de Papelera del Sur llegó incompleto: llegaron los cuadernos y no las témperas, comprometidas con Jardín Semillita para la semana siguiente"
 tuku todo open --at "2026-08-13 11:35" --scope papelera-del-sur --body "reclamar a Iván Zamora las témperas no despachadas"
 tuku todo open --at "2026-08-13 15:00" --scope colegio-los-robles --body "llamar a Colegio Los Robles por la cotización sin respuesta"
-tuku todo close --at "2026-08-13 19:00" --scope personal --body "asistir a reunión de apoderados de Emilia el jueves 13 de agosto a las 19:00"
+tuku todo close --at "2026-08-13 19:00" --scope personal "asistir a reunión de apoderados de Emilia el jueves 13 de agosto a las 19:00"
 tuku entry create --at "2026-08-13 20:30" --scope personal --body "**señal**: el colegio solicita aporte de $80.000 por alumno para la gira de estudios de Emilia"
 ```
 Y el viernes 14
 ```bash
-tuku todo close --at "2026-08-14 10:20" --scope colegio-los-robles --body "llamar a Colegio Los Robles por la cotización sin respuesta"
+tuku todo close --at "2026-08-14 10:20" --scope colegio-los-robles "llamar a Colegio Los Robles por la cotización sin respuesta"
 tuku entry create --at "2026-08-14 10:25" --scope colegio-los-robles --body "**progreso**: Rodolfo Cifuentes informa que la cotización está en revisión de administración y responden la semana siguiente"
-tuku todo close --at "2026-08-14 11:15" --scope papelera-del-sur --body "reclamar a Iván Zamora las témperas no despachadas"
+tuku todo close --at "2026-08-14 11:15" --scope papelera-del-sur "reclamar a Iván Zamora las témperas no despachadas"
 tuku entry create --at "2026-08-14 11:20" --scope papelera-del-sur --body "**progreso**: Papelera del Sur despacha las témperas el lunes 17 de agosto sin costo de flete"
 tuku entry create --at "2026-08-14 11:25" --scope papelera-del-sur --body "**fricción**: segundo despacho incompleto de Papelera del Sur en el año"
-tuku todo close --at "2026-08-14 16:00" --scope catalogo-marzo --body "enviar brief y fotografías del catálogo a Paula Ibáñez"
+tuku todo close --at "2026-08-14 16:00" --scope catalogo-marzo "enviar brief y fotografías del catálogo a Paula Ibáñez"
 tuku todo open --at "2026-08-14 16:05" --scope catalogo-marzo --horizon "próxima semana" --body "fotografiar el mobiliario para el catálogo de marzo"
 tuku entry create --at "2026-08-14 17:30" --scope administracion --body "**progreso**: cuadrar caja y conciliar banco de la semana"
 tuku entry create --at "2026-08-14 17:40" --scope administracion --body "**progreso**: ventas de la semana por $2.100.000"
@@ -147,7 +147,7 @@ Cuando se archiva la semana como lo haría Andrea con un editor, y se abre la si
 mkdir bitacoras
 sed -e 's/^status: draft/status: stable/' -e 's|](ambitos/|](../ambitos/|g' AHORA.md > bitacoras/bitacora-2026-08-10-2026-08-16.md
 rm AHORA.md
-tuku cycle open --at 2026-08-17
+tuku process cycle --at 2026-08-17
 ```
 Entonces `bitacoras/bitacora-2026-08-10-2026-08-16.md` tiene los registros de la semana, `status: stable`, y los links de cada ámbito resuelven desde `bitacoras/`
 Y `AHORA.md` es la semana del 17 al 23, vacía de registros salvo el pendiente de revisar la bitácora anterior, con vencimiento el lunes 17
@@ -170,11 +170,11 @@ tuku entry create --at "2026-08-17 08:20" --scope bodega --body "**progreso**: r
 tuku entry create --at "2026-08-17 08:25" --scope papelera-del-sur --body "**progreso**: recibir las témperas pendientes de Papelera del Sur"
 tuku entry create --at "2026-08-17 08:30" --scope papelera-del-sur --body "**progreso**: témperas recibidas sin costo de flete, según lo comprometido"
 tuku entry create --at "2026-08-17 08:35" --scope bodega --body "**señal**: quiebre de stock en cartulina de color y pegamento en barra"
-tuku todo close --at "2026-08-17 10:40" --scope escuela-los-maitenes --body "enviar cotización de material didáctico a Escuela Rural Los Maitenes"
+tuku todo close --at "2026-08-17 10:40" --scope escuela-los-maitenes "enviar cotización de material didáctico a Escuela Rural Los Maitenes"
 tuku entry create --at "2026-08-17 10:50" --scope escuela-los-maitenes --body "**señal**: el convenio municipal paga a sesenta días y no a treinta, plazo que debe conocerse antes de aceptar el pedido"
-tuku todo close --at "2026-08-17 11:30" --scope liceo-tecnico-andes --body "cotizar de nuevo a Liceo Técnico Andes con precio ajustado"
+tuku todo close --at "2026-08-17 11:30" --scope liceo-tecnico-andes "cotizar de nuevo a Liceo Técnico Andes con precio ajustado"
 tuku entry create --at "2026-08-17 11:35" --scope liceo-tecnico-andes --body "**decisión**: la recotización garantiza entrega en cinco días hábiles, que es donde falló el proveedor competidor"
-tuku todo close --at "2026-08-17 15:00" --scope temporada-marzo --body "confirmar a Gloria Pinto el pedido de marzo por la mitad del volumen"
+tuku todo close --at "2026-08-17 15:00" --scope temporada-marzo "confirmar a Gloria Pinto el pedido de marzo por la mitad del volumen"
 tuku entry create --at "2026-08-17 15:10" --scope temporada-marzo --body "**señal**: Importadora Andina exige 40% de anticipo sobre el pedido de marzo"
 ```
 Y el martes 18
@@ -193,7 +193,7 @@ tuku entry create --at "2026-08-19 09:30" --scope equipo --body "**progreso**: c
 tuku entry create --at "2026-08-19 12:00" --scope catalogo-marzo --body "**progreso**: Paula Ibáñez entregó la primera propuesta del catálogo de marzo"
 tuku entry create --at "2026-08-19 12:10" --scope catalogo-marzo --body "**fricción**: la propuesta del catálogo trae los precios del año anterior"
 tuku todo open --at "2026-08-19 12:15" --scope catalogo-marzo --body "enviar la lista de precios corregida a Paula Ibáñez"
-tuku todo close --at "2026-08-19 15:20" --scope financiamiento --body "enviar los tres últimos F29 y el balance al banco"
+tuku todo close --at "2026-08-19 15:20" --scope financiamiento "enviar los tres últimos F29 y el balance al banco"
 tuku entry create --at "2026-08-19 15:25" --scope financiamiento --body "**señal**: el banco responde la solicitud de línea de capital de trabajo en diez días hábiles"
 tuku todo open --at "2026-08-19 17:00" --scope liceo-tecnico-andes --body "llamar a Liceo Técnico Andes por la cotización sin respuesta"
 tuku entry create --at "2026-08-19 17:30" --scope escuela-los-maitenes --body "**señal**: Paula Reyes, jefa de UTP de la Escuela Los Maitenes, pidió ver el catálogo de material didáctico"
@@ -202,7 +202,7 @@ Y el jueves 20
 ```bash
 tuku entry create --at "2026-08-20 09:00" --scope cobranza --body "**progreso**: revisar facturas vencidas de la semana"
 tuku entry create --at "2026-08-20 09:10" --scope cobranza --body "**progreso**: sin facturas vencidas esta semana; dos vencen la semana siguiente"
-tuku todo close --at "2026-08-20 10:30" --scope liceo-tecnico-andes --body "llamar a Liceo Técnico Andes por la cotización sin respuesta"
+tuku todo close --at "2026-08-20 10:30" --scope liceo-tecnico-andes "llamar a Liceo Técnico Andes por la cotización sin respuesta"
 tuku entry create --at "2026-08-20 10:35" --scope liceo-tecnico-andes --body "**progreso**: Patricia Lillo presenta la propuesta al consejo del lunes 24 de agosto"
 tuku entry create --at "2026-08-20 14:00" --scope equipo --body "**progreso**: pagar la primera mitad del catálogo a Paula Ibáñez contra boleta de honorarios, con retención"
 tuku entry create --at "2026-08-20 18:20" --scope personal --body "**fricción**: el control médico de Vicente del viernes en la mañana coincide con el despacho a Colegio Los Robles"
@@ -210,7 +210,7 @@ tuku entry create --at "2026-08-20 18:25" --scope personal --body "**decisión**
 ```
 Y el viernes 21
 ```bash
-tuku todo close --at "2026-08-21 12:30" --scope colegio-los-robles --body "despachar el pedido de Colegio Los Robles el viernes 21 de agosto"
+tuku todo close --at "2026-08-21 12:30" --scope colegio-los-robles "despachar el pedido de Colegio Los Robles el viernes 21 de agosto"
 tuku entry create --at "2026-08-21 12:40" --scope colegio-los-robles --body "**hito**: entrega recibida conforme y firmada por Rodolfo Cifuentes"
 tuku entry create --at "2026-08-21 12:45" --scope colegio-los-robles --body "**progreso**: factura emitida a treinta días"
 tuku entry create --at "2026-08-21 17:30" --scope administracion --body "**progreso**: cuadrar caja y conciliar banco de la semana"
@@ -251,11 +251,11 @@ tuku entry create --at "2026-08-17 08:20" --scope bodega --body "**progreso**: r
 tuku entry create --at "2026-08-17 08:25" --scope papelera-del-sur --body "**progreso**: recibir las témperas pendientes de Papelera del Sur"
 tuku entry create --at "2026-08-17 08:30" --scope papelera-del-sur --body "**progreso**: témperas recibidas sin costo de flete, según lo comprometido"
 tuku entry create --at "2026-08-17 08:35" --scope bodega --body "**señal**: quiebre de stock en cartulina de color y pegamento en barra"
-tuku todo close --at "2026-08-17 10:40" --scope escuela-los-maitenes --body "enviar cotización de material didáctico a Escuela Rural Los Maitenes"
+tuku todo close --at "2026-08-17 10:40" --scope escuela-los-maitenes "enviar cotización de material didáctico a Escuela Rural Los Maitenes"
 tuku entry create --at "2026-08-17 10:50" --scope escuela-los-maitenes --body "**señal**: el convenio municipal paga a sesenta días y no a treinta, plazo que debe conocerse antes de aceptar el pedido"
-tuku todo close --at "2026-08-17 11:30" --scope liceo-tecnico-andes --body "cotizar de nuevo a Liceo Técnico Andes con precio ajustado"
+tuku todo close --at "2026-08-17 11:30" --scope liceo-tecnico-andes "cotizar de nuevo a Liceo Técnico Andes con precio ajustado"
 tuku entry create --at "2026-08-17 11:35" --scope liceo-tecnico-andes --body "**decisión**: la recotización garantiza entrega en cinco días hábiles, que es donde falló el proveedor competidor"
-tuku todo close --at "2026-08-17 15:00" --scope temporada-marzo --body "confirmar a Gloria Pinto el pedido de marzo por la mitad del volumen"
+tuku todo close --at "2026-08-17 15:00" --scope temporada-marzo "confirmar a Gloria Pinto el pedido de marzo por la mitad del volumen"
 tuku entry create --at "2026-08-17 15:10" --scope temporada-marzo --body "**señal**: Importadora Andina exige 40% de anticipo sobre el pedido de marzo"
 ```
 Y el martes 18
@@ -274,7 +274,7 @@ tuku entry create --at "2026-08-19 09:30" --scope equipo --body "**progreso**: c
 tuku entry create --at "2026-08-19 12:00" --scope catalogo-marzo --body "**progreso**: Paula Ibáñez entregó la primera propuesta del catálogo de marzo"
 tuku entry create --at "2026-08-19 12:10" --scope catalogo-marzo --body "**fricción**: la propuesta del catálogo trae los precios del año anterior"
 tuku todo open --at "2026-08-19 12:15" --scope catalogo-marzo --body "enviar la lista de precios corregida a Paula Ibáñez"
-tuku todo close --at "2026-08-19 15:20" --scope financiamiento --body "enviar los tres últimos F29 y el balance al banco"
+tuku todo close --at "2026-08-19 15:20" --scope financiamiento "enviar los tres últimos F29 y el balance al banco"
 tuku entry create --at "2026-08-19 15:25" --scope financiamiento --body "**señal**: el banco responde la solicitud de línea de capital de trabajo en diez días hábiles"
 tuku todo open --at "2026-08-19 17:00" --scope liceo-tecnico-andes --body "llamar a Liceo Técnico Andes por la cotización sin respuesta"
 tuku entry create --at "2026-08-19 17:30" --scope escuela-los-maitenes --body "**señal**: Paula Reyes, jefa de UTP de la Escuela Los Maitenes, pidió ver el catálogo de material didáctico"
@@ -283,7 +283,7 @@ Y el jueves 20
 ```bash
 tuku entry create --at "2026-08-20 09:00" --scope cobranza --body "**progreso**: revisar facturas vencidas de la semana"
 tuku entry create --at "2026-08-20 09:10" --scope cobranza --body "**progreso**: sin facturas vencidas esta semana; dos vencen la semana siguiente"
-tuku todo close --at "2026-08-20 10:30" --scope liceo-tecnico-andes --body "llamar a Liceo Técnico Andes por la cotización sin respuesta"
+tuku todo close --at "2026-08-20 10:30" --scope liceo-tecnico-andes "llamar a Liceo Técnico Andes por la cotización sin respuesta"
 tuku entry create --at "2026-08-20 10:35" --scope liceo-tecnico-andes --body "**progreso**: Patricia Lillo presenta la propuesta al consejo del lunes 24 de agosto"
 tuku entry create --at "2026-08-20 14:00" --scope equipo --body "**progreso**: pagar la primera mitad del catálogo a Paula Ibáñez contra boleta de honorarios, con retención"
 tuku entry create --at "2026-08-20 18:20" --scope personal --body "**fricción**: el control médico de Vicente del viernes en la mañana coincide con el despacho a Colegio Los Robles"
@@ -291,7 +291,7 @@ tuku entry create --at "2026-08-20 18:25" --scope personal --body "**decisión**
 ```
 Y el viernes 21
 ```bash
-tuku todo close --at "2026-08-21 12:30" --scope colegio-los-robles --body "despachar el pedido de Colegio Los Robles el viernes 21 de agosto"
+tuku todo close --at "2026-08-21 12:30" --scope colegio-los-robles "despachar el pedido de Colegio Los Robles el viernes 21 de agosto"
 tuku entry create --at "2026-08-21 12:40" --scope colegio-los-robles --body "**hito**: entrega recibida conforme y firmada por Rodolfo Cifuentes"
 tuku entry create --at "2026-08-21 12:45" --scope colegio-los-robles --body "**progreso**: factura emitida a treinta días"
 tuku entry create --at "2026-08-21 17:30" --scope administracion --body "**progreso**: cuadrar caja y conciliar banco de la semana"

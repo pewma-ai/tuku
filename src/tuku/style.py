@@ -18,6 +18,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from tuku import archivo
 from tuku.lint import ERROR, PREGUNTA
 from tuku.resultado import Resultado
 from tuku.vocab import ENCABEZADOS
@@ -118,7 +119,7 @@ def lint_del_vault(vault: Path) -> Resultado:
     """Revisa los contratos de `LIBRO-DE-ESTILO.md` y reporta; no escribe."""
     from tuku.config import archivo_vault
 
-    libro = archivo_vault(vault, "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
+    libro = archivo.leer(archivo_vault(vault, "LIBRO-DE-ESTILO.md"))
     hallazgos = lint(libro)
     mensaje = formatear(hallazgos)
     if any(h.grado == ERROR for h in hallazgos):

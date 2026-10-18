@@ -40,7 +40,7 @@ Entonces el dictado se traduce en doce comandos y ninguno más
 ```text
 tuku entry create --at "2026-08-11 09:12" --scope personal --body "..."   ×4
 tuku todo open --at "2026-08-11 13:00" --scope personal --body "..."    ×2
-tuku todo close --at "2026-08-11 19:05" --scope personal --body "..."   ×2
+tuku todo close --at "2026-08-11 19:05" --scope personal "..."   ×2
 tuku scope create depto-centro --at 2026-08-11
 tuku note create "<el título>" --scope depto-centro --at "2026-08-11 21:15"
 tuku todo open --at 2026-08-11 --due "2026-08-12 09:00" --scope personal --body "..."

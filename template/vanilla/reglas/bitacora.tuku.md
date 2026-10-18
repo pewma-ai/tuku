@@ -28,7 +28,7 @@ tuku todo open --at "2026-08-11 14:20" --scope personal \
 
 ## El día y la hora
 
-`--at` y `--due` aceptan fecha y hora (`2026-08-11 09:12`), solo fecha (`2026-08-11`) o solo hora (`09:12`), con el año: una fecha sin año se rechaza. En `--at`, sin día es hoy y sin hora es ahora.
+`--at` y `--due` aceptan fecha y hora (`2026-08-11 09:12`), solo fecha (`2026-08-11`) o solo hora (`09:12`), con el año: una fecha sin año se rechaza. En `--at`, sin día es hoy. Sin hora es ahora si el día es hoy; en un día pasado el registro queda sin hora, al final de ese día.
 
 Si el autor cuenta algo de otro día ("ayer a las nueve", "el lunes a las diez"), va con su día y su hora en `--at`. Un día que todavía no llega no es un `--at`: es el vencimiento de un pendiente.
 

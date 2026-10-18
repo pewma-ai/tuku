@@ -26,10 +26,99 @@ from collections.abc import Mapping
 from datetime import date
 from pathlib import Path
 
-from tuku import link
+from tuku import archivo, link
 from tuku.resultado import Resultado
 
 VER_ADEMAS = "## Ver además"
+
+#: El frontmatter de una nota: lo que va entre los dos primeros `---`.
+_FRONTMATTER = re.compile(r"\A---\n(?P<cuerpo>.*?)\n---\n", re.S)
+
+
+def aliases(nota: str) -> list[str]:
+    """Los otros nombres de la nota: `aliases: [a, b]`, o la lista YAML en bloque.
+
+    Es el campo que Obsidian usa para lo mismo; `tuku` lo lee sin Obsidian
+    (`spec/notas.md`, "Enlazar al registrar").
+    """
+    m = _FRONTMATTER.match(nota)
+    if m is None:
+        return []
+    lineas = m.group("cuerpo").splitlines()
+    for i, linea in enumerate(lineas):
+        if not linea.startswith("aliases:"):
+            continue
+        resto = linea.removeprefix("aliases:").strip()
+        if resto.startswith("["):
+            valores = resto.strip("[]").split(",")
+        else:
+            valores = []
+            for siguiente in lineas[i + 1 :]:
+                if not siguiente.lstrip().startswith("- "):
+                    break
+                valores.append(siguiente.lstrip().removeprefix("- "))
+        return [v.strip().strip("\"'") for v in valores if v.strip().strip("\"'")]
+    return []
+
+
+def subtype(nota: str) -> str | None:
+    """El `subtype` del frontmatter: el tipo de la nota en `### Tipos de nota`."""
+    m = _FRONTMATTER.match(nota)
+    if m is None:
+        return None
+    for linea in m.group("cuerpo").splitlines():
+        if linea.startswith("subtype:"):
+            return linea.removeprefix("subtype:").strip() or None
+    return None
+
+
+def titulo(nota: str, ruta: Path) -> str:
+    """El `# Título` de la nota, o el nombre del archivo si no lo tiene."""
+    for linea in nota.splitlines():
+        if linea.startswith("# "):
+            return linea.removeprefix("# ").strip()
+    return ruta.stem
+
+
+def nombres_enlazables(vault: Path) -> dict[str, list[str]]:
+    """Cada nota de un tipo enlazable, con su título y sus `aliases`.
+
+    La clave es la ruta relativa al vault, como la pide `link.enlazar_menciones`.
+    Qué tipos se enlazan lo dice la columna "Enlazable" del libro de estilo.
+    """
+    from tuku.config import leer_config
+
+    dir_notas = vault / "notas"
+    if not dir_notas.is_dir() or not (vault / "LIBRO-DE-ESTILO.md").is_file():
+        return {}
+    tipos = set(leer_config(vault).tipos_enlazables)
+    if not tipos:
+        return {}
+    nombres: dict[str, list[str]] = {}
+    for ruta in sorted(dir_notas.glob("*.md")):
+        texto = archivo.leer(ruta)
+        if subtype(texto) in tipos:
+            nombres[f"notas/{ruta.name}"] = [titulo(texto, ruta), *aliases(texto)]
+    return nombres
+
+
+def enlazar(
+    vault: Path, cuerpo: str, desde: str, *, salvo: str | None = None
+) -> tuple[str, tuple[str, ...]]:
+    """`cuerpo` con la primera mención de cada nota enlazable enlazada, y los avisos.
+
+    `salvo` es la ruta de una nota que no se enlaza: la que se está escribiendo.
+    Un nombre que comparten dos notas queda sin link y vuelve como aviso.
+    """
+    nombres = {r: n for r, n in nombres_enlazables(vault).items() if r != salvo}
+    enlazado, ambiguos = link.enlazar_menciones(cuerpo, nombres, desde)
+    avisos = tuple(
+        f"{a!r} nombra a más de una nota; quedó sin link. "
+        "Enlázala a mano, o deja ese nombre en los aliases de una sola."
+        for a in ambiguos
+    )
+    return enlazado, avisos
+
 
 #: Un enlace de la sección "Ver además": markdown o wikilink, y lo que sigue.
 _ENLACE = re.compile(rf"^\s*[*-]\s+{link.ENLACE}(?P<motivo>.*)$")
@@ -78,7 +167,7 @@ def crear(
         f"---\ntype: Note\ncreated: {(today or date.today()).isoformat()}\n---\n\n"
         f"# {title}\n\n{body.strip()}\n{ver_ademas}"
     )
-    ruta.write_text(contenido, encoding="utf-8")
+    archivo.escribir(ruta, contenido)
     return ruta
 
 
@@ -165,11 +254,13 @@ def crear_con_constancia(
     hoy = day or date.today()
     hora = hour or datetime.now().strftime("%H:%M")
     ruta = vault / "notas" / f"{slug(title)}.md"
+    desde = f"notas/{ruta.name}"
+    body, avisos = enlazar(vault, body, desde, salvo=desde)
 
     ahora_path = vault / "AHORA.md"
     pendiente: str | None = None
     if record and ahora_path.is_file():
-        texto = ahora_path.read_text(encoding="utf-8")
+        texto = archivo.leer(ahora_path)
         constancia = registro_de_constancia(
             ruta, hour=hora, scope=scope, rutas=scope_mod.rutas(vault)
         )
@@ -181,17 +272,17 @@ def crear_con_constancia(
 
     crear(vault, title=title, body=body, scope=scope, today=hoy, rutas=scope_mod.rutas(vault))
     if pendiente is not None:
-        ahora_path.write_text(pendiente, encoding="utf-8")
+        archivo.escribir(ahora_path, pendiente)
         if scope:
             scope_mod.actualizar_pagina(vault, scope)
 
-    return Resultado.hecho(f"nota creada en {ruta}.")
+    return Resultado.hecho(f"nota creada en {ruta}.", avisos=avisos)
 
 
-def lint_del_vault(vault: Path, archivo: Path | None = None) -> Resultado:
+def lint_del_vault(vault: Path, nota: Path | None = None) -> Resultado:
     """Revisa una nota, o todas las de `notas/` si no se nombra ninguna."""
-    rutas = [archivo] if archivo is not None else []
-    if archivo is None:
+    rutas = [nota] if nota is not None else []
+    if nota is None:
         dir_notas = vault / "notas"
         if dir_notas.is_dir():
             rutas = sorted(dir_notas.glob("*.md"))
@@ -199,9 +290,7 @@ def lint_del_vault(vault: Path, archivo: Path | None = None) -> Resultado:
         return Resultado.hecho("sin notas que revisar.")
 
     hallazgos = [
-        f"{ruta.name}: {error}"
-        for ruta in rutas
-        for error in lint(ruta.read_text(encoding="utf-8"))
+        f"{ruta.name}: {error}" for ruta in rutas for error in lint(archivo.leer(ruta))
     ]
     if not hallazgos:
         return Resultado.hecho("sin hallazgos.")
@@ -222,15 +311,12 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     from tuku import rename
 
     if not nuevo.strip():
-        return Resultado.rechazo(
-            "falta el título nuevo. Pasa el nombre que quieres darle."
-        )
+        return Resultado.rechazo("falta el título nuevo. Pasa el nombre que quieres darle.")
     origen = vault / "notas" / f"{slug(viejo)}.md"
     destino = vault / "notas" / f"{slug(nuevo)}.md"
     if not origen.is_file():
         return Resultado.rechazo(
-            f"no existe la nota {viejo!r} en notas/. "
-            f"Mira notas/ y confirma el título."
+            f"no existe la nota {viejo!r} en notas/. Mira notas/ y confirma el título."
         )
     if origen == destino:
         return Resultado.hecho(f"la nota ya se llama {nuevo!r}: nada que hacer.")
@@ -241,19 +327,16 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
         )
 
     origen.rename(destino)
-    destino.write_text(
-        rename.renombrar_titulo(destino.read_text(encoding="utf-8"), nuevo.strip()),
-        encoding="utf-8",
-    )
+    archivo.escribir(destino, rename.renombrar_titulo(archivo.leer(destino), nuevo.strip()))
 
     # Los enlaces apuntan al nombre del archivo, no al título: `notas/<slug>.md`.
     enlaces = 0
     for ruta in sorted(vault.rglob("*.md")):
-        texto = ruta.read_text(encoding="utf-8")
+        texto = archivo.leer(ruta)
         salida, n = rename.renombrar_enlaces(texto, origen.stem, destino.stem)
         if n:
             enlaces += n
-            ruta.write_text(salida, encoding="utf-8")
+            archivo.escribir(ruta, salida)
 
     detalle = f" ({enlaces} enlace(s) actualizado(s))" if enlaces else ""
     return Resultado.hecho(f"nota {viejo!r} renombrada a {nuevo!r}{detalle}.")

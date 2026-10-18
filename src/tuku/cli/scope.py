@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 
 from tuku import scope
-from tuku.cli.helpers import Handler, Subparsers, traducir
+from tuku.cli.helpers import Handler, Subparsers, sin_implementar, traducir
 from tuku.cli.opciones import Opciones
 
 
@@ -18,6 +18,7 @@ def _cmd_scope_create(args: argparse.Namespace) -> int:
             day=args.at.dia,
             hour=args.at.hora,
             palabras=args.keyword,
+            since=args.since,
         ),
         "tuku scope create",
     )
@@ -41,6 +42,14 @@ def _cmd_scope_rename(args: argparse.Namespace) -> int:
 
 def _cmd_scope_lint(args: argparse.Namespace) -> int:
     return traducir(scope.lint_del_vault(args.vault), "scope lint")
+
+
+def _cmd_scope_archive(args: argparse.Namespace) -> int:
+    return sin_implementar(
+        "tuku scope archive",
+        "Archivar es decisión del autor: conversa con él qué pasa con los pendientes, "
+        "las cadencias y los links de la rama (spec/ambitos.md, «Archivar es caro»).",
+    )
 
 
 def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
@@ -78,6 +87,14 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         default=[],
         metavar="PALABRA",
         help="palabra que delata el ámbito (repetible, o varias separadas por coma)",
+    )
+    scope_create_p.add_argument(
+        "--since",
+        default=None,
+        help=(
+            "desde cuándo buscar registros que nombran al ámbito: un número de días o "
+            "AAAA-MM-DD; por defecto, 7 días"
+        ),
     )
     Opciones(scope_create_p).parent()
     Opciones(scope_create_p).at("cuándo se abre, para la constancia; lo que falte, hoy y ahora")
@@ -146,10 +163,24 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     )
     Opciones(scope_lint_p).vault("vault a revisar")
 
+    scope_archive_p = scope_v.add_parser(
+        "archive",
+        help="archiva un ámbito (todavía no implementado)",
+        description=(
+            "Todavía no está implementado: avisa y no escribe nada. Cuando exista, moverá "
+            "`ambitos/<nombre>/` a `archivado/` después de resolver con el autor sus "
+            "pendientes de `PENDIENTES.md` y sus cadencias, y recalculará los links que lo "
+            "apuntan, también en `bitacoras/`."
+        ),
+    )
+    scope_archive_p.add_argument("name", help="nombre del ámbito")
+    Opciones(scope_archive_p).vault("vault a modificar")
+
     return {
         ("scope", "create"): _cmd_scope_create,
         ("scope", "update"): _cmd_scope_update,
         ("scope", "move"): _cmd_scope_move,
         ("scope", "rename"): _cmd_scope_rename,
         ("scope", "lint"): _cmd_scope_lint,
+        ("scope", "archive"): _cmd_scope_archive,
     }

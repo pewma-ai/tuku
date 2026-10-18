@@ -41,7 +41,7 @@ _MARCA = re.compile(r"\*\*[^*\n]+\*\*|~~\([^)\n]+\)~~")
 #: `(Hecho)` no lleva delimitadores, así que su mala escritura se busca en la
 #: posición de la marca: tras la hora y el link del ámbito.
 _CIERRE = re.compile(
-    rf"^- \d{{2}}:\d{{2}} - (?:{link.ENLACE} )?\((?P<texto>hecho)\)", re.IGNORECASE
+    rf"^- (?:\d{{2}}:\d{{2}} - )?(?:{link.ENLACE} )?\((?P<texto>hecho)\)", re.IGNORECASE
 )
 
 ERROR = "error"
@@ -72,8 +72,11 @@ def lint(ahora: str, *, abiertos: list[str]) -> list[Hallazgo]:
     abiertos_plegados = {termino.casefold() for termino in abiertos}
     dia_actual: date | None = None
     dia_fuera = False
+    en_dia = False
 
     for n, linea in enumerate(ahora.splitlines(), start=1):
+        if linea.startswith("#"):
+            en_dia = _ahora.es_dia(linea)
         if linea.startswith("## "):
             dia_fuera = False
             dia_actual = None
@@ -83,7 +86,8 @@ def lint(ahora: str, *, abiertos: list[str]) -> list[Hallazgo]:
                 dia_fuera = dia_actual is not None and not (desde <= dia_actual <= hasta)
             continue
 
-        if not _HORA.match(linea):
+        # Un registro sin hora es válido en un día pasado (`spec/bitacora.md`).
+        if not (_HORA.match(linea) or (en_dia and linea.startswith("- "))):
             continue
 
         if dia_fuera and dia_actual is not None:

@@ -26,6 +26,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from tuku import archivo
 from tuku.resultado import Resultado
 
 #: Los campos de `config.tuku.md` sin los cuales los comandos no pueden operar.
@@ -137,6 +138,15 @@ def comandos_de_despacho(agents_md: str) -> list[str]:
     return vistos
 
 
+def inexistentes(nombrados: list[str], comandos: frozenset[str]) -> list[str]:
+    """Los nombrados que no son un comando del CLI.
+
+    `context scope` o `doctor todo` existen: son un comando sin verbos seguido
+    de su TEMA.
+    """
+    return [c for c in nombrados if c not in comandos and c.split()[0] not in comandos]
+
+
 def revisar_despacho(agents_md: str | None, comandos: frozenset[str]) -> Revision:
     """Verifica que la tabla de despacho no nombre comandos que no existen.
 
@@ -168,7 +178,7 @@ def revisar_despacho(agents_md: str | None, comandos: frozenset[str]) -> Revisio
             False,
         )
 
-    faltan = [c for c in nombrados if c not in comandos]
+    faltan = inexistentes(nombrados, comandos)
     if faltan:
         lista = ", ".join(f"`tuku {c}`" for c in faltan)
         return Revision(
@@ -196,9 +206,9 @@ def tipo_declarado(texto: str) -> str | None:
     return m.group(1) if m else None
 
 
-def ausente(nombre: str, archivo: str) -> Revision:
+def ausente(nombre: str, falta: str) -> Revision:
     """La revisión que no se pudo correr porque su archivo no está."""
-    return Revision(nombre, f"{nombre}: no se pudo revisar, falta {archivo}.", False)
+    return Revision(nombre, f"{nombre}: no se pudo revisar, falta {falta}.", False)
 
 
 def revisar_archivos(vault: Path) -> Revision:
@@ -228,12 +238,12 @@ def revisar_frontmatter(vault: Path, *, tipos_validos: list[str]) -> Revision:
     problemas: list[str] = []
     revisados = 0
 
-    for archivo in sorted(vault.rglob("*.md")):
-        if archivo.name in SIN_FRONTMATTER:
+    for md in sorted(vault.rglob("*.md")):
+        if md.name in SIN_FRONTMATTER:
             continue
         revisados += 1
-        ruta = archivo.relative_to(vault)
-        tipo = tipo_declarado(archivo.read_text(encoding="utf-8"))
+        ruta = md.relative_to(vault)
+        tipo = tipo_declarado(archivo.leer(md))
         if tipo is None:
             problemas.append(
                 f"{ruta}: error: no declara `type` en su frontmatter. "
@@ -345,7 +355,7 @@ def revisar_links(vault: Path) -> Revision:
 
     hallazgos = []
     for rel in archivos_md(vault):
-        texto = (vault / rel).read_text(encoding="utf-8")
+        texto = archivo.leer(vault / rel)
         hallazgos += [
             f"{rel}:{w.linea}: error: {w.original} es un wikilink y TUKU escribe links "
             "Markdown. Corrígelo con `tuku fix link`."
@@ -381,7 +391,7 @@ def fuente_de_referencia(variante: str = "vanilla") -> Path | None:
 def archivo_opcional(vault: Path, relativo: str) -> str | None:
     """El contenido de un archivo del vault, o `None` si no está."""
     p = vault / relativo
-    return p.read_text(encoding="utf-8") if p.is_file() else None
+    return archivo.leer(p) if p.is_file() else None
 
 
 def formatear(
@@ -503,9 +513,7 @@ def revisar_vault(
             h_cycle = cyclelint.lint(ahora)
             revisiones.append(Revision("cycle", cyclelint.formatear(h_cycle), not h_cycle))
 
-            h_entry = lint_registros(
-                ahora, abiertos=leer_config(vault).vocabularios_abiertos()
-            )
+            h_entry = lint_registros(ahora, abiertos=leer_config(vault).vocabularios_abiertos())
             sano_entry = not any(h.grado == ERROR for h in h_entry)
             revisiones.append(
                 Revision(

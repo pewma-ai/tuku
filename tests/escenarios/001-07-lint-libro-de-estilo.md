@@ -15,11 +15,11 @@ Cuando se corren el lint y un comando que necesita ese vocabulario
 
 ```bash
 tuku style lint --vault mi-vault
-tuku vocab show --vault mi-vault
+tuku context style --vault mi-vault
 ```
 
 Entonces el lint sale con código 1 y nombra el encabezado y la corrección
-Y `tuku vocab show` sale con código 1 nombrando el encabezado que falta
+Y `tuku context style` sale con código 1 nombrando el encabezado que falta
 
 ## Escenario: tabla de vocabulario vacía
 

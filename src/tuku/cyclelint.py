@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from tuku import ahora as _ahora
+from tuku import archivo
 from tuku.resultado import Resultado
 
 #: Lo que un ciclo declara en su frontmatter. `Logbook` porque `AHORA.md` y una
@@ -59,7 +60,7 @@ def lint(ahora: str) -> list[Hallazgo]:
                 1,
                 ERROR,
                 "el frontmatter no tiene `from` y `to` resueltos",
-                "Corre `tuku cycle open`, que los escribe con las fechas del ciclo.",
+                "Corre `tuku process cycle`, que los escribe con las fechas del ciclo.",
             )
         )
     else:
@@ -140,7 +141,7 @@ def lint_del_vault(vault: Path) -> Resultado:
     """Revisa la estructura de `AHORA.md` y reporta; no escribe."""
     from tuku.config import archivo_vault
 
-    ahora = archivo_vault(vault, "AHORA.md").read_text(encoding="utf-8")
+    ahora = archivo.leer(archivo_vault(vault, "AHORA.md"))
     hallazgos = lint(ahora)
     mensaje = formatear(hallazgos)
     if hallazgos:

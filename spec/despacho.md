@@ -2,6 +2,10 @@
 
 > A dónde va lo que el autor acaba de decir. Es la primera decisión de cada sesión y la toma el `AGENTS.md` de la raíz del vault. Las familias de entrada vienen de [flujo-informacion.md](flujo-informacion.md); la conducta del ejecutor, de [agente.md](agente.md).
 
+## Dos invocadores
+
+La raíz empieza diciendo quién invoca, porque cambia todo lo demás. El agente que conversa con el autor parte con `tuku context` y despacha con la tabla. El que lanzó otro agente o un cron para algo concreto (`tuku doctor`, `tuku regenerate`, un proceso) lo ejecuta sin despachar ni preguntar, y lo que pide una decisión del autor va en su respuesta final y no en el vault, hasta que se decida por dónde se comunican el autor y las entidades ([README.md](README.md), Decisiones abiertas).
+
 ## La raíz enruta
 
 El `AGENTS.md` de la raíz se lee entero en cada sesión: es el archivo más caro del vault. Una línea va en la raíz si cambia el destino; si cambia la ejecución una vez elegido el destino, va abajo. Las reglas de interpretación de [flujo-informacion.md](flujo-informacion.md) deciden si algo se escribe y con qué comando, así que van en la raíz, una sola vez y en el idioma del autor.
@@ -35,7 +39,7 @@ Que la fila nombre el archivo es lo que sostiene la cascada: si el ejecutor tuvi
 
 Una petición sin fila se hace a mano, con dos condiciones: el ejecutor dice en una frase qué va a hacer, en palabras del autor, y espera el sí; con el sí, la hace entera, porque a medias el vault queda diciendo dos cosas a la vez. Una petición sin fila que se repite es un comando que falta.
 
-Un proceso nombrado («corre el cierre de mes») se ejecuta leyendo su archivo en `procesos/`, sin pasar por la tabla. Un proceso lanzado por otro agente, igual que una entidad subordinada, ejecuta directo lo nombrado: esa cláusula corta la recursión del despacho.
+Un proceso es una rutina con nombre, y hay dos clases: los de `tuku`, deterministas (`tuku process cycle`), y los que el autor escribe en `procesos/`, que el agente ejecuta leyendo su archivo («corre el cierre de mes»). `tuku process` sin nombre lista los dos. Un proceso nombrado se ejecuta sin pasar por la tabla. Un proceso lanzado por otro agente, igual que una entidad subordinada, ejecuta directo lo nombrado: esa cláusula corta la recursión del despacho.
 
 ## Los límites
 

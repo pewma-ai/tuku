@@ -20,7 +20,7 @@ mueve o edita una fila, y nunca crea ni destruye secciones.
 que es la fuente de verdad. Los casos de uso `abrir_en_vault` y `cerrar_en_vault`
 escriben además el registro en `AHORA.md` y regeneran las dos vistas derivadas,
 la región de cada día de `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md`, llamando
-a `tuku.propagate`; con `--no-propagate` no lo hace y el lote propaga
+a `tuku.regenerate`; con `--no-regenerate` no las rehace y el lote regenera
 una sola vez al final.
 **A mano:** agregar la fila con su horizonte, o borrarla al cerrarlo, y copiar
 el pendiente bajo su día y en el callout de su ámbito.
@@ -35,7 +35,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 
-from tuku import link
+from tuku import archivo, link
 from tuku.resultado import Resultado
 
 ABRE = "**pendiente**"
@@ -44,7 +44,7 @@ CIERRA = "(Hecho)"
 #: Un registro con marca de la ontología cerrada. La clasificación abierta que
 #: puede venir después de la marca no participa: no cambia la consecuencia.
 _REGISTRO = re.compile(
-    r"^- \d{2}:\d{2} - "
+    r"^- (?:\d{2}:\d{2} - )?"
     rf"(?:(?P<ambito>{link.ENLACE}) )?"
     r"(?P<marca>\*\*pendiente\*\*|\(Hecho\))"
     r"(?: \*\*[^*\n]+\*\*)?"
@@ -53,9 +53,7 @@ _REGISTRO = re.compile(
 
 #: Un cierre tal como llega por `--body`, con o sin clasificación abierta y con
 #: el cuerpo tachado o sin tachar.
-_CIERRE_ENTRADA = re.compile(
-    r"^\(Hecho\)(?P<clasif> \*\*[^*\n]+\*\*)?: (?P<cuerpo>.+)$"
-)
+_CIERRE_ENTRADA = re.compile(r"^\(Hecho\)(?P<clasif> \*\*[^*\n]+\*\*)?: (?P<cuerpo>.+)$")
 
 #: Una celda de la tabla: un `|` dentro del texto va escapado, `\|`, como en
 #: cualquier tabla Markdown.
@@ -344,6 +342,25 @@ def reemplazar_cuerpo(pendientes: str, viejo: str, nuevo: str) -> tuple[str, boo
     return pendientes, False
 
 
+def cambiar_ambito(
+    pendientes: str, cuerpo: str, ambito: str, rutas: Mapping[str, str] | None = None
+) -> tuple[str, bool]:
+    """Pasa la fila que dice `cuerpo` al ámbito `ambito`. Conserva el resto de la fila.
+
+    Encuentra la fila comparando sin links, como `reemplazar_cuerpo`.
+    """
+    lineas = pendientes.splitlines(keepends=True)
+    buscado = clave(cuerpo)
+    for i, linea in enumerate(lineas):
+        fila = _parsear_fila(linea.rstrip("\n"))
+        m = _FILA.match(linea.rstrip("\n"))
+        if fila is not None and m is not None and clave(fila.cuerpo) == buscado:
+            enlace = link.enlace_ambito(ambito, "PENDIENTES.md", rutas)
+            lineas[i] = linea[: m.start("ambito")] + f" {enlace} " + linea[m.end("ambito") :]
+            return "".join(lineas), True
+    return pendientes, False
+
+
 def horizontes(pendientes: str) -> list[str]:
     """Los horizontes que aparecen en la tabla, sin repetir, en el orden del archivo."""
     vistos: list[str] = []
@@ -364,12 +381,13 @@ def comando_de(
     """El `tuku todo open` o `close` entero que escribe esa marca, listo para correr."""
     import shlex
 
-    partes = ["tuku todo open" if marca == ABRE else "tuku todo close"]
+    es_open = marca == ABRE
+    partes = ["tuku todo open" if es_open else "tuku todo close"]
     if ambito:
         partes.append(f"--scope {shlex.quote(ambito)}")
     if cuando := " ".join(x for x in (day.isoformat() if day else "", hour or "") if x):
         partes.append(f"--at {shlex.quote(cuando)}")
-    partes.append(f"--body {shlex.quote(cuerpo)}")
+    partes.append(f"--body {shlex.quote(cuerpo)}" if es_open else shlex.quote(cuerpo))
     return " ".join(partes)
 
 
@@ -543,21 +561,21 @@ def abrir_en_vault(
     scope: str | None = None,
     horizon: str | None = None,
     due: str = "",
-    propagate: bool = True,
+    regenerar: bool = True,
     day: date | None = None,
     hour: str | None = None,
 ) -> Resultado:
-    """Abre un pendiente, estampa huella en la bitácora y propaga las vistas.
+    """Abre un pendiente, estampa huella en la bitácora y regenera las vistas.
 
     Recibe los campos, no la línea del registro: abrir **es** el pendiente, y la
     marca la lleva implícita el verbo. Es la única vía: `tuku entry create` rechaza
     un `**pendiente**` y manda acá. El registro en `AHORA.md` se escribe salvo que
     ya esté.
 
-    Propagar es parte de abrir: si la vista quedara para un segundo comando, el
+    Regenerar es parte de abrir: si la vista quedara para un segundo comando, el
     pendiente existiría sin aparecer en su día, que es la falla silenciosa que
-    `spec/pendientes.md` persigue. `propagate=False` es la escotilla del lote,
-    que propaga una sola vez al final.
+    `spec/pendientes.md` persigue. `regenerar=False` es la escotilla del lote,
+    que regenera una sola vez al final.
 
     `day` y `hour` son cuándo se prometió y `due`, para cuándo es, como se
     escribe en la columna `Vence`: `AAAA-MM-DD` o `AAAA-MM-DD HH:MM`
@@ -571,7 +589,7 @@ def abrir_en_vault(
     from tuku.config import archivo_vault, leer_config
     from tuku.entry import add as entry_add
     from tuku.entry import componer
-    from tuku.propagate import propagar
+    from tuku.regenerate import rehacer
 
     if day is not None and day > date.today():
         return Resultado.rechazo(
@@ -581,12 +599,15 @@ def abrir_en_vault(
     limpio_scope = ambitos.canonico(vault, scope) if scope else None
     if limpio_scope and (rechazo := ambitos.rechazo_si_no_existe(vault, limpio_scope)):
         return rechazo
-    marca = Marca(ABRE, limpio_scope, body.strip())
+    from tuku import note
+
+    cuerpo, avisos = note.enlazar(vault, body.strip(), "AHORA.md")
+    marca = Marca(ABRE, limpio_scope, cuerpo)
     escalera = escalera_de(leer_config(vault).horizontes)
     horizon = CON_FECHA if due else canonico(horizon or escalera[0], escalera)
 
     ahora_path = archivo_vault(vault, "AHORA.md")
-    ahora_actual = ahora_path.read_text(encoding="utf-8")
+    ahora_actual = archivo.leer(ahora_path)
     ya_abierto = any(
         (m := parsear(lin)) is not None
         and m.marca == ABRE
@@ -604,29 +625,26 @@ def abrir_en_vault(
         )
         try:
             ahora_texto = entry_add(ahora_actual, [linea], day=dia_encabezado)
-            ahora_path.write_text(ahora_texto, encoding="utf-8")
+            archivo.escribir(ahora_path, ahora_texto)
         except ValueError as e:
             return Resultado.rechazo(str(e))
 
     ruta = archivo_vault(vault, "PENDIENTES.md")
-    ruta.write_text(
+    archivo.escribir(
+        ruta,
         abrir(
-            ruta.read_text(encoding="utf-8"),
+            archivo.leer(ruta),
             marca,
             horizon=horizon,
             due=due,
             escalera=escalera,
             rutas=ambitos.rutas(vault),
         ),
-        encoding="utf-8",
     )
-    for amb in ambitos.leer(vault):
-        ambitos.actualizar_pagina(vault, amb.nombre)
-    if propagate:
-        propagar(vault)
+    rehacer(vault, ["AHORA.md", "PENDIENTES.md"], salvo=() if regenerar else ("todo",))
     return Resultado.hecho(
         f"pendiente abierto en «{horizon}»: {marca.cuerpo}",
-        avisos=avisos_de_plazo(due, day, hour),
+        avisos=(*avisos, *avisos_de_plazo(due, day, hour)),
     )
 
 
@@ -634,7 +652,7 @@ def cerrar_en_vault(
     vault: Path,
     *,
     body: str,
-    propagate: bool = True,
+    regenerar: bool = True,
     day: date | None = None,
     hour: str | None = None,
     scope: str | None = None,
@@ -651,7 +669,7 @@ def cerrar_en_vault(
     from tuku.config import archivo_vault
     from tuku.entry import add as entry_add
     from tuku.entry import componer
-    from tuku.propagate import propagar
+    from tuku.regenerate import rehacer
 
     if scope:
         scope = ambitos.canonico(vault, scope)
@@ -659,7 +677,7 @@ def cerrar_en_vault(
             return rechazo
     marca = Marca(CIERRA, None, body.strip())
     ruta = archivo_vault(vault, "PENDIENTES.md")
-    pendientes_texto = ruta.read_text(encoding="utf-8")
+    pendientes_texto = archivo.leer(ruta)
 
     ambito_encontrado: str | None = None
     for f in filas(pendientes_texto):
@@ -670,7 +688,7 @@ def cerrar_en_vault(
     texto, hubo_pareja = cerrar(pendientes_texto, marca)
 
     ahora_path = archivo_vault(vault, "AHORA.md")
-    ahora_actual = ahora_path.read_text(encoding="utf-8")
+    ahora_actual = archivo.leer(ahora_path)
     ya_cerrado = any(
         (m := parsear(lin)) is not None
         and m.marca == CIERRA
@@ -692,16 +710,12 @@ def cerrar_en_vault(
         except ValueError as e:
             return Resultado.rechazo(str(e))
     ahora_texto = quitar_aperturas_cerradas(ahora_actual, marca.cuerpo)
-    if ahora_texto != ahora_path.read_text(encoding="utf-8"):
-        ahora_path.write_text(ahora_texto, encoding="utf-8")
+    if ahora_texto != archivo.leer(ahora_path):
+        archivo.escribir(ahora_path, ahora_texto)
 
     if hubo_pareja:
-        ruta.write_text(texto, encoding="utf-8")
-    for amb in ambitos.leer(vault):
-        ambitos.actualizar_pagina(vault, amb.nombre)
-
-    if propagate:
-        propagar(vault)
+        archivo.escribir(ruta, texto)
+    rehacer(vault, ["AHORA.md", "PENDIENTES.md"], salvo=() if regenerar else ("todo",))
 
     if not hubo_pareja:
         return Resultado.hecho(
@@ -751,10 +765,10 @@ def lint(
             "sobra el registro que lo abrió. Corre `tuku fix todo`."
             for a in cerrados_el_mismo_dia(ahora)
         ]
-    for archivo, (actual, esperado) in (vistas or {}).items():
+    for vista, (actual, esperado) in (vistas or {}).items():
         if actual != esperado:
             hallazgos.append(
-                f"{archivo}: error: la vista de pendientes no coincide con PENDIENTES.md. "
+                f"{vista}: error: la vista de pendientes no coincide con PENDIENTES.md. "
                 "Corre `tuku regenerate todo`."
             )
     return hallazgos
@@ -762,22 +776,22 @@ def lint(
 
 def hallazgos_del_vault(vault: Path) -> list[str]:
     """`lint` sobre el vault: lee los archivos y calcula las vistas esperadas."""
-    from tuku import propagate, scope
+    from tuku import regenerate, scope
     from tuku.config import archivo_vault
 
-    pendientes = archivo_vault(vault, "PENDIENTES.md").read_text(encoding="utf-8")
+    pendientes = archivo.leer(archivo_vault(vault, "PENDIENTES.md"))
     ahora_path = vault / "AHORA.md"
-    ahora = ahora_path.read_text(encoding="utf-8") if ahora_path.is_file() else None
+    ahora = archivo.leer(ahora_path) if ahora_path.is_file() else None
     vistas: dict[str, tuple[str | None, str]] = {}
     if ahora is not None:
         vistas["AHORA.md"] = (
             ahora,
-            propagate.propagar_ahora(ahora, pendientes, scope.rutas(vault)),
+            regenerate.vistas_en_ahora(ahora, pendientes, scope.rutas(vault)),
         )
-    ambitos_path = vault / propagate.ARCHIVO_AMBITOS
-    vistas[propagate.ARCHIVO_AMBITOS.as_posix()] = (
-        ambitos_path.read_text(encoding="utf-8") if ambitos_path.is_file() else None,
-        propagate.documento_del_vault(vault, pendientes),
+    ambitos_path = vault / regenerate.ARCHIVO_AMBITOS
+    vistas[regenerate.ARCHIVO_AMBITOS.as_posix()] = (
+        archivo.leer(ambitos_path) if ambitos_path.is_file() else None,
+        regenerate.documento_del_vault(vault, pendientes),
     )
     return lint(pendientes, ahora, vistas=vistas)
 

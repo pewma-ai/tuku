@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from datetime import date
 
-from tuku.propagate import (
+from tuku.regenerate import (
     documento_ambitos,
-    propagar_ahora,
     region_de_la_semana,
     region_del_dia,
+    vistas_en_ahora,
 )
 from tuku.todo import filas
 
@@ -60,7 +60,7 @@ def test_region_de_la_semana_lleva_los_de_esta_semana_y_ninguno_con_fecha() -> N
 
 
 def test_la_region_de_la_semana_va_bajo_el_titulo_y_se_rehace_entera() -> None:
-    una = propagar_ahora(AHORA, PENDIENTES)
+    una = vistas_en_ahora(AHORA, PENDIENTES)
     lineas = una.splitlines()
     i = lineas.index("# Actividad diaria")
     assert lineas[i + 1 : i + 5] == [
@@ -72,15 +72,15 @@ def test_la_region_de_la_semana_va_bajo_el_titulo_y_se_rehace_entera() -> None:
     assert lineas[i + 5] == "## Lunes 7 de septiembre"
 
     sin_maleta = PENDIENTES.replace(f"| esta semana |  | {P} | comprar una maleta |\n", "")
-    texto = propagar_ahora(una, sin_maleta)
+    texto = vistas_en_ahora(una, sin_maleta)
     assert "Pendientes de esta semana" not in texto
     sin = texto.splitlines()
     assert sin[sin.index("# Actividad diaria") + 1 :][:2] == ["", "## Lunes 7 de septiembre"]
-    assert propagar_ahora(una, PENDIENTES) == una
+    assert vistas_en_ahora(una, PENDIENTES) == una
 
 
-def test_propagar_ahora_reemplaza_la_region_entera_antes_del_primer_registro() -> None:
-    una = propagar_ahora(AHORA, PENDIENTES)
+def test_vistas_en_ahora_reemplaza_la_region_entera_antes_del_primer_registro() -> None:
+    una = vistas_en_ahora(AHORA, PENDIENTES)
     lineas = una.splitlines()
     assert lineas.count(f"> - {P} - comprar una maleta") == 1, "solo en el callout de la semana"
     assert lineas.index("## Lunes 7 de septiembre") > lineas.index(
@@ -96,12 +96,12 @@ def test_propagar_ahora_reemplaza_la_region_entera_antes_del_primer_registro() -
         "## Martes 8 de septiembre\n",
         f"## Martes 8 de septiembre\n- {P} - lo que ya no toca\n",
     )
-    texto = propagar_ahora(viejo, PENDIENTES)
+    texto = vistas_en_ahora(viejo, PENDIENTES)
     assert "lo que ya no toca" not in texto
     assert texto.count(f"> - {P} - pagar la sesión con el psicólogo") == 1
     assert f"- 09:12 - {P} **nota**: cuerpo" in texto
 
-    assert propagar_ahora(una, PENDIENTES) == una, "propagar dos veces no cambia nada"
+    assert vistas_en_ahora(una, PENDIENTES) == una, "regenerar dos veces no cambia nada"
 
 
 def test_documento_de_ambitos_agrupa_ordena_y_deja_su_callout_a_cada_ambito() -> None:
@@ -137,3 +137,12 @@ def test_en_el_ambito_van_primero_los_fechados_por_fecha() -> None:
         "> - comprar una maleta",
         "> - ordenar el escritorio",
     ]
+
+
+def test_un_registro_sin_hora_no_es_parte_de_la_region() -> None:
+    con_registro = AHORA.replace(
+        "## Martes 8 de septiembre\n",
+        f"## Martes 8 de septiembre\n- {P} recordé la reunión con Ximena\n",
+    )
+    texto = vistas_en_ahora(con_registro, PENDIENTES)
+    assert f"- {P} recordé la reunión con Ximena" in texto

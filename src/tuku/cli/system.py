@@ -1,4 +1,5 @@
-"""Comandos del sistema: `init`, `cycle`, `doctor`, `fix`, `regenerate`, `vocab` y `style`."""
+"""Comandos del sistema: `init`, `cycle`, `process`, `doctor`, `fix`, `regenerate`, `context`
+y `style`."""
 
 from __future__ import annotations
 
@@ -7,7 +8,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-from tuku import style, vocab
+from tuku import context, style
 from tuku.cli import manual
 from tuku.cli.helpers import (
     ENTORNO,
@@ -52,18 +53,24 @@ def _cmd_init(args: argparse.Namespace) -> int:
     return EXITO
 
 
-def _cmd_vocab_show(args: argparse.Namespace) -> int:
-    return traducir(vocab.mostrar_del_vault(args.vault), "tuku vocab show")
+def _cmd_context(args: argparse.Namespace) -> int:
+    return traducir(context.del_vault(args.vault, args.tema, args.since), "tuku context")
 
 
 def _cmd_style_lint(args: argparse.Namespace) -> int:
     return traducir(style.lint_del_vault(args.vault), "tuku style lint")
 
 
-def _cmd_cycle_open(args: argparse.Namespace) -> int:
+def _cmd_process(args: argparse.Namespace) -> int:
+    from tuku import process
+
+    return traducir(process.listar(args.vault), "tuku process")
+
+
+def _cmd_process_cycle(args: argparse.Namespace) -> int:
     from tuku import cycle
 
-    return traducir(cycle.abrir_en_vault(args.vault, args.at.dia), "tuku cycle open")
+    return traducir(cycle.abrir_en_vault(args.vault, args.at.dia), "tuku process cycle")
 
 
 def _cmd_cycle_lint(args: argparse.Namespace) -> int:
@@ -145,22 +152,11 @@ def registrar(
         help="gestión del ciclo en AHORA.md",
         description=(
             "Un ciclo es la ventana de tiempo que `AHORA.md` registra día por día; el "
-            "semanal va de lunes a domingo. Estos comandos lo abren y revisan su estructura."
+            "semanal va de lunes a domingo. Se abre con `tuku process cycle`; este "
+            "sustantivo revisa su estructura."
         ),
     )
     cycle_v = cycle_p.add_subparsers(dest="verb", required=True)
-    open_p = cycle_v.add_parser(
-        "open",
-        help="abre o verifica el ciclo en AHORA.md",
-        description=(
-            "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con las fechas de la semana, de "
-            "lunes a domingo, que contiene `--at`. Si el ciclo ya está abierto, solo lo "
-            "verifica."
-        ),
-    )
-    Opciones(open_p).vault("vault a verificar o abrir")
-    Opciones(open_p).at("un día de la semana a abrir, AAAA-MM-DD; por defecto, hoy")
-
     cycle_lint_p = cycle_v.add_parser(
         "lint",
         help="revisa la estructura de AHORA.md y reporta; no escribe",
@@ -170,6 +166,30 @@ def registrar(
         ),
     )
     Opciones(cycle_lint_p).vault("vault a revisar")
+
+    process_p = sub.add_parser(
+        "process",
+        help="las rutinas con nombre: las de tuku y las de procesos/",
+        description=(
+            "Sin nombre, lista los procesos: los de `tuku`, que corren como comando, y los "
+            "que el autor escribe en `procesos/`, que el agente ejecuta leyendo su archivo."
+        ),
+    )
+    Opciones(process_p).vault("vault a leer")
+    process_v = process_p.add_subparsers(dest="verb", required=False)
+    process_cycle_p = process_v.add_parser(
+        "cycle",
+        help="abre o verifica el ciclo en AHORA.md",
+        description=(
+            "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con las fechas de la semana, de "
+            "lunes a domingo, que contiene `--at`. Si el ciclo ya está abierto, solo lo "
+            "verifica. Una fecha anterior al ciclo abierto se rechaza: un ciclo no se abre "
+            "hacia atrás. Con una bitácora anterior en `bitacoras/`, abre en "
+            "`PENDIENTES.md` el pendiente de revisarla."
+        ),
+    )
+    Opciones(process_cycle_p).vault("vault a verificar o abrir")
+    Opciones(process_cycle_p).at("un día de la semana a abrir, AAAA-MM-DD; por defecto, hoy")
 
     doctor_p = sub.add_parser(
         "doctor",
@@ -196,6 +216,35 @@ def registrar(
         help="muestra todas las revisiones; por defecto, solo hallazgos y avisos",
     )
     Opciones(doctor_p).vault("vault a revisar")
+
+    context_p = sub.add_parser(
+        "context",
+        help="lo que el agente necesita para decidir, sin abrir archivos",
+        description=(
+            "Solo lee. `entry`: los registros desde `--since`, de `AHORA.md` y de las "
+            "bitácoras de `bitacoras/` que cruza. `scope`: cada ámbito de `ambitos/` con "
+            "su ruta y sus keywords. `todo`: los pendientes de `PENDIENTES.md`, con los "
+            "atrasados marcados. `style`: clasificaciones, horizontes y tipos de nota de "
+            "`LIBRO-DE-ESTILO.md`. `note`: las notas de `notas/` que enlazaron los "
+            "registros desde `--since`. Sin TEMA, todos."
+        ),
+    )
+    context_p.add_argument(
+        "tema",
+        nargs="?",
+        choices=context.TEMAS,
+        default=None,
+        help="solo este tema; sin tema, todos",
+    )
+    context_p.add_argument(
+        "--since",
+        default=None,
+        help=(
+            f"desde cuándo leer: un número de días o AAAA-MM-DD; por defecto, "
+            f"{context.DESDE_POR_DEFECTO} días"
+        ),
+    )
+    Opciones(context_p).vault("vault a leer")
 
     fix_p = sub.add_parser(
         "fix",
@@ -234,26 +283,6 @@ def registrar(
     )
     Opciones(regenerate_p).vault("vault a regenerar")
 
-    vocab_p = sub.add_parser(
-        "vocab",
-        help="vocabularios abiertos del autor",
-        description=(
-            "Los vocabularios del autor son las tablas Clasificaciones, Horizontes y Tipos "
-            "de nota de `LIBRO-DE-ESTILO.md`, y crecen con el uso. Este comando los "
-            "muestra."
-        ),
-    )
-    vocab_v = vocab_p.add_subparsers(dest="verb", required=True)
-    show_p = vocab_v.add_parser(
-        "show",
-        help="muestra los vocabularios del libro de estilo",
-        description=(
-            "Muestra las tablas Clasificaciones, Horizontes y Tipos de nota de "
-            "`LIBRO-DE-ESTILO.md`: los términos con que se clasifica."
-        ),
-    )
-    Opciones(show_p).vault("vault a leer")
-
     style_p = sub.add_parser(
         "style",
         help="libro de estilo y contratos de autor",
@@ -277,11 +306,12 @@ def registrar(
 
     return {
         ("init", None): _cmd_init,
-        ("cycle", "open"): _cmd_cycle_open,
         ("cycle", "lint"): _cmd_cycle_lint,
+        ("process", None): _cmd_process,
+        ("process", "cycle"): _cmd_process_cycle,
         ("doctor", None): _crear_cmd_doctor(comandos_fn),
         ("fix", None): _cmd_fix,
         ("regenerate", None): _cmd_regenerate,
-        ("vocab", "show"): _cmd_vocab_show,
+        ("context", None): _cmd_context,
         ("style", "lint"): _cmd_style_lint,
     }

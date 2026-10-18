@@ -21,6 +21,12 @@ _DIA = re.compile(r"^## \w+ (\d{1,2}) de (\w+)")
 _CAMPO = re.compile(r"^(from|to):\s*(\d{4}-\d{2}-\d{2})\s*$")
 
 
+def es_dia(linea: str) -> bool:
+    """Si la línea es el encabezado de un día: `## Martes 25 de agosto`."""
+    m = _DIA.match(linea)
+    return m is not None and m.group(2) in MESES
+
+
 def rango(ahora: str) -> tuple[date, date] | None:
     """`from` y `to` del frontmatter OKF, o `None` si siguen siendo placeholders."""
     campos: dict[str, date] = {}

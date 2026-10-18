@@ -32,9 +32,10 @@ Igual que las fases de implementación, se lee de lo que no depende de nada a lo
 | 7 | [cadencias.md](cadencias.md) | `CADENCIAS.md`: ciclo de vida de una cadencia, qué puede emitir, el trigger que conoce el tipo de ciclo, idempotencia |
 | 8 | [notas.md](notas.md) | El zettelkasten, las notas tipadas y el procedimiento de destilado |
 | 9 | [ciclo.md](ciclo.md) | `AHORA.md`, su frontmatter, apertura y cierre, qué se aplana y qué queda siempre como enlace |
-| 10 | [cli.md](cli.md) | El contrato del comando `tuku`: qué garantiza, códigos de salida, forma de la salida. Independiente de quién invoque |
-| 11 | [agente.md](agente.md) | Lo que cambia cuando el ejecutor es un agente de IA y no una persona con el flujo a mano |
-| 12 | [despacho.md](despacho.md) | El `AGENTS.md` de la raíz: a dónde va lo que el autor dice, la tabla de despacho y la cascada por directorio |
+| 10 | [cli.md](cli.md) | El contrato del comando `tuku`: la gramática de sustantivo, verbo y parámetro, qué garantiza, códigos de salida, forma de la salida. Independiente de quién invoque |
+| 11 | [tuku.md](tuku.md) | La superficie del CLI: la firma de cada comando y qué archivos lee y escribe, con lo pendiente marcado |
+| 12 | [agente.md](agente.md) | Lo que cambia cuando el ejecutor es un agente de IA y no una persona con el flujo a mano |
+| 13 | [despacho.md](despacho.md) | El `AGENTS.md` de la raíz: a dónde va lo que el autor dice, la tabla de despacho y la cascada por directorio |
 
 ## Qué está fuera de alcance
 
@@ -52,5 +53,5 @@ Cada spec declara su propio "no entra" en la sección correspondiente. A nivel d
   - **Del autor a la entidad.** Cómo responde a una propuesta («sí, abre la página de Carla») y cómo encarga algo a una entidad («repórtame el avance del mes»), sin que cada rol invente su propia forma.
   - **Entre entidades.** Si una entidad puede pedirle algo a otra (el análisis que le pide un dato al reporte) o todas hablan solo con el vault.
   - **Las preguntas de una ambigüedad.** Quién las plantea y cuándo: en la misma respuesta o más tarde, por una entidad.
-- Si el ciclo es una primitiva propia o se compone sobre bitácora, pendientes y notas. Hoy [`../docs/glosario.md`](../docs/glosario.md) lo lista entre las primitivas, y [`../docs/principios.md`](../docs/principios.md) no lo nombra entre ellas.
+- **Qué es archivar una nota.** `tuku note archive TÍTULO` existe solo como aviso de no implementado, y [notas.md](notas.md) no dice adónde va la nota ni qué pasa con los links que la apuntan. `archivado/` está pensado para ramas cerradas de `ambitos/` ([vault.md](vault.md)). La propuesta es `status: deprecated` de OKF en el frontmatter ([`../devel/okf-v2.md`](../devel/okf-v2.md)): la nota queda en `notas/`, ningún link se rompe, y `tuku context` y el enlace automático la dejan de ofrecer. Lo decide el epic 006, que es el que archiva notas.
 - **Cómo se suman las magnitudes de la capacidad.** Dónde vive la capacidad está decidido ([ambitos.md](ambitos.md)), pero no qué queda de un día al restarle `casi todo el día` y `un rato`, ni cómo se combinan dos costos el mismo día. Lo decide el epic 006 con casos reales, que es donde entran los planes.

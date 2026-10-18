@@ -20,19 +20,11 @@ con la ruta calculada desde el archivo donde está.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
-from tuku import link
+from tuku import archivo, link
 from tuku.doctor import archivos_md
 from tuku.resultado import Resultado
-
-
-def _escribir_conservando_fecha(ruta: Path, texto: str) -> None:
-    """Escribe `texto` sin tocar la fecha de modificación del archivo."""
-    antes = ruta.stat()
-    ruta.write_text(texto, encoding="utf-8")
-    os.utime(ruta, ns=(antes.st_atime_ns, antes.st_mtime_ns))
 
 
 def fix_link(vault: Path) -> Resultado:
@@ -50,10 +42,10 @@ def fix_link(vault: Path) -> Resultado:
     decisiones: list[str] = []
     for rel in archivos:
         ruta = vault / rel
-        texto = ruta.read_text(encoding="utf-8")
+        texto = archivo.leer(ruta)
         conversion = link.convertir(texto, rel, idx)
         if conversion.convertidos:
-            _escribir_conservando_fecha(ruta, conversion.texto)
+            archivo.escribir(ruta, conversion.texto, conservar_fecha=True)
             convertidos += conversion.convertidos
             tocados += 1
         decisiones += [
@@ -93,16 +85,16 @@ def fix_todo(vault: Path) -> Resultado:
     Queda solo el `(Hecho)`. Después regenera lo que se deriva de `AHORA.md`.
     Una segunda corrida no cambia nada.
     """
-    from tuku import propagate, todo
+    from tuku import regenerate, todo
     from tuku.config import archivo_vault
 
     ruta = archivo_vault(vault, "AHORA.md")
-    texto = ruta.read_text(encoding="utf-8")
+    texto = archivo.leer(ruta)
     quitados = todo.cerrados_el_mismo_dia(texto)
     if not quitados:
         return Resultado.hecho("fix todo: nada que reparar.")
-    ruta.write_text(todo.quitar_aperturas_cerradas(texto), encoding="utf-8")
-    propagate.propagar(vault)
+    archivo.escribir(ruta, todo.quitar_aperturas_cerradas(texto))
+    regenerate.rehacer(vault, ["AHORA.md"])
     return Resultado.hecho(
         "\n".join(
             [

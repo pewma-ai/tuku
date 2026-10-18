@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tuku import propagate, rename, scope, todo
+from tuku import entry, regenerate, rename, scope, todo
 
 MD = "[personal](ambitos/personal/personal.md)"
 
@@ -18,8 +18,10 @@ def test_los_lectores_aceptan_wikilink_y_link_markdown() -> None:
     anidado = todo.parsear("- 14:20 - [pewma](ambitos/trabajo/pewma/pewma.md) **pendiente**: x")
     assert anidado is not None and anidado.ambito == "pewma"
 
-    ahora = f"## Lunes 7\n- 09:00 - {MD} **señal**: algo\n"
-    assert rename.cuerpo_del_registro(ahora, "Lunes 7", "09:00") == "**señal**: algo"
+    ahora = f"## Lunes 7 de septiembre\n- 09:00 - {MD} **señal**: algo\n"
+    assert [(r.hora, r.ambito, r.cuerpo) for r in entry.registros(ahora)] == [
+        ("09:00", "personal", "**señal**: algo")
+    ]
 
     wiki_ahora = "## Lunes 7\n\n- 09:00 - [[personal]] **señal**: algo\n"
     assert scope.extraer_actividad_ambito(wiki_ahora, "personal") == {
@@ -38,7 +40,7 @@ def test_los_escritores_producen_markdown_con_la_ruta_completa() -> None:
     anidada = todo.Fila("con fecha", "2026-09-08", "pewma", "x")
     assert "[pewma](ambitos/trabajo/pewma/pewma.md)" in anidada.linea(rutas)
     assert (
-        propagate.linea_del_dia(anidada, rutas)
+        regenerate.linea_del_dia(anidada, rutas)
         == "- [pewma](ambitos/trabajo/pewma/pewma.md) - x"
     )
 

@@ -35,10 +35,8 @@ def test_003_01_la_tabla_sembrada_nombra_comandos_reales() -> None:
     agents = (RAIZ / "template" / "vanilla" / "AGENTS.md").read_text(encoding="utf-8")
     nombrados = doctor.comandos_de_despacho(agents)
     assert nombrados, "el AGENTS.md del template no nombra ningún comando"
-    assert not [c for c in nombrados if c not in comandos()], (
-        f"el template nombra comandos que no existen: "
-        f"{[c for c in nombrados if c not in comandos()]}"
-    )
+    faltan = doctor.inexistentes(nombrados, comandos())
+    assert not faltan, f"el template nombra comandos que no existen: {faltan}"
 
 
 def test_003_01_un_comando_inventado_es_un_error() -> None:

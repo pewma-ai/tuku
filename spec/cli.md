@@ -12,6 +12,38 @@ Ese reparto sostiene el principio 1 de [`../docs/principios.md`](../docs/princip
 
 **Ningún comando infiere un campo que quien invoca no dio**, salvo donde una spec declare un valor por defecto. Los que hay hoy: el día (la fecha actual, **HOY**) y la hora (la hora actual, **AHORA**) de un registro o de la huella en bitácora dejada por un comando mutador (`todo`, `scope`, `note`), evaluados en la zona horaria `TZ` del vault ([bitacora.md](bitacora.md)); y el horizonte de un pendiente sin `--due` ni `--horizon`, que es el primer escalón del autor ([pendientes.md](pendientes.md)).
 
+## Sustantivo, verbo y parámetro
+
+Un comando es `tuku SUSTANTIVO VERBO [POSICIONAL] [--parámetro]`, y cada pieza significa lo mismo en todos los comandos: quien aprendió uno sabe leer los demás. Qué comandos hay y con qué firma está en [tuku.md](tuku.md).
+
+**Los sustantivos** son las cosas del vault: `entry`, `todo`, `scope` y `note`. Dos más llevan un `TEMA` en lugar de verbo: `process`, las rutinas con nombre (`tuku process cycle`; sin nombre lista los de `tuku` y los de `procesos/`, [despacho.md](despacho.md)), y `context`, que solo lee (`tuku context scope`). `init`, `doctor`, `regenerate` y `fix` van sin sustantivo porque actúan sobre el vault entero.
+
+**Los verbos:**
+
+| Verbo | Significa siempre | Sustantivos |
+| --- | --- | --- |
+| `create` | Nace | `entry`, `scope`, `note` |
+| `open` / `close` | Abre o cierra algo que tiene ciclo de vida | `todo` |
+| `update` | Cambia atributos; la identidad y el lugar quedan | `entry` (el cuerpo), `scope` (las keywords) |
+| `move` | Cambia de dónde cuelga | `entry` (`--scope`), `scope` (`--parent`) |
+| `rename` | Cambia la identidad, y con ella cada link que la nombra | `scope`, `note` |
+| `archive` | Sale de circulación sin borrarse | `scope`, `note` |
+
+**Los parámetros:**
+
+| Forma | Significa siempre | Ejemplo |
+| --- | --- | --- |
+| Posicional | La cosa sobre la que actúa el comando, o el nombre de la que nace, completo | `scope rename colegio-los-robles colegio-robles`, `todo close "enviar la cotización"` |
+| `--match TEXTO` | Un fragmento del cuerpo que ubica un registro: el último de `AHORA.md` que calza | `entry update --match GGCC --body "…"` |
+| `--at` | Cuándo ocurrió. Nunca ubica qué corregir | `--at "2026-08-10 07:41"` |
+| `--scope`, `--parent` | Dónde va un registro y de qué cuelga un ámbito | `--parent negocio/clientes` |
+| `--body`, `--body-file` | El contenido | `--body "llamé a Rodolfo por la cotización"` |
+| `--since` | Desde cuándo leer: una fecha o un número de días. Cada comando declara su valor por defecto en días | `--since 30`, `--since 2026-09-01` |
+| `--no-X` | Omite un efecto colateral | `--no-regenerate`, `--no-record` |
+| `TEMA` | El nombre de la cosa, el mismo en `doctor`, `fix`, `regenerate` y `context` | `tuku doctor todo` |
+
+Un parámetro tiene un solo significado en todo el CLI, y un comando nuevo usa el que ya existe antes de inventar otro. Solo `-h` y `-v` tienen forma corta.
+
 ## Los códigos de salida
 
 Son contrato. Quien invoca decide qué hacer según el código, sin leer el mensaje.
@@ -51,6 +83,16 @@ De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa
 
 **El comando que repara es el comando original, y es idempotente.** Cuando un linter detecta un estado desincronizado (por ejemplo, una marca de bitácora sin su fila en la tabla de pendientes), no la repara por su cuenta: nombra como corrección el comando que debió haberse ejecutado originalmente (`tuku todo open`, etc.). Todos los comandos mutadores del CLI son estrictamente idempotentes: ejecutarlos repetidas veces asegura el estado completo sin duplicar líneas en `AHORA.md` ni filas en los derivados.
 
+## Escribir con el vault abierto en otro editor
+
+El autor edita en Obsidian mientras un agente o un cron corre `tuku`. Cada archivo se reescribe de una vez (archivo temporal y `os.replace`) y solo si sigue igual a como se leyó. Si cambió, el comando vuelve a leerlo y a transformarlo, con hasta tres reintentos a los 0,1, 0,3 y 1 segundos. Si el último también choca, sale con 1 y dice qué archivos quedaron escritos, cuál faltó y con qué se completa:
+
+```text
+tuku todo open: escribí AHORA.md. Faltó PENDIENTES.md, y lo que venía después de él: otro programa lo estaba editando. Corre el mismo comando de nuevo.
+```
+
+Repetir el comando basta porque todo mutador es idempotente.
+
 ## La pareja `doctor` / `fix`
 
 `tuku doctor` verifica y `tuku fix TEMA` repara. Se separan por la misma razón que verificar y corregir son operaciones distintas: quien revisa antes de reparar conserva la oportunidad de no hacerlo.
@@ -89,6 +131,6 @@ Ese párrafo, el de cada sustantivo con sus verbos anidados debajo, es también 
 
 ## No entra
 
-- Qué comandos existen y qué hace cada uno. Eso lo especifica la spec de la primitiva que el comando toca: el registro en [bitacora.md](bitacora.md), los pendientes en [pendientes.md](pendientes.md), el ciclo en [ciclo.md](ciclo.md).
+- Qué comandos existen, con qué firma y qué archivos leen y escriben. Eso es [tuku.md](tuku.md). Qué significa lo que escriben lo especifica la primitiva que tocan: el registro en [bitacora.md](bitacora.md), los pendientes en [pendientes.md](pendientes.md), el ciclo en [ciclo.md](ciclo.md).
 - Cómo se instala `tuku` y dónde vive su árbol. Eso es [`../devel/epics.md`](../devel/epics.md), epic 001.
 - Cómo un agente decide qué comandos emitir. Eso es [agente.md](agente.md).

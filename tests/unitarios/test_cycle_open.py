@@ -64,7 +64,7 @@ def test_la_semana_se_siembra_de_lunes_a_domingo_desde_cualquier_dia(tmp_path: P
     sembrado = init(tmp_path / "b", desde=date(2026, 9, 9), home=RAIZ_REPO)
     assert "from: 2026-09-07" in (sembrado / "AHORA.md").read_text(encoding="utf-8")
     _, creado = open_cycle(sembrado, date(2026, 9, 9))
-    assert not creado, "init y cycle open no abren la misma semana"
+    assert not creado, "init y process cycle no abren la misma semana"
 
 
 # --- El pendiente de revisar la bitácora anterior --------------------------------
@@ -92,12 +92,14 @@ def test_el_pendiente_de_revisar_la_bitacora_anterior_se_abre_una_sola_vez(
 ) -> None:
     sin_bitacora = _vault(tmp_path / "a")
     assert _filas(sin_bitacora) == [], "el primer ciclo no trae pendiente de revisión"
-    assert main(["cycle", "open", "--at", "2026-09-14", "--vault", str(sin_bitacora)]) == EXITO
+    assert (
+        main(["process", "cycle", "--at", "2026-09-14", "--vault", str(sin_bitacora)]) == EXITO
+    )
     assert _filas(sin_bitacora) == []
 
     vault = _vault(tmp_path / "b")
     _cerrar_a_mano(vault)
-    assert main(["cycle", "open", "--at", "2026-09-14", "--vault", str(vault)]) == EXITO
+    assert main(["process", "cycle", "--at", "2026-09-14", "--vault", str(vault)]) == EXITO
 
     (fila,) = _filas(vault)
     assert REVISAR in fila
@@ -108,5 +110,26 @@ def test_el_pendiente_de_revisar_la_bitacora_anterior_se_abre_una_sola_vez(
     assert REVISAR in lunes.split("## Martes")[0]
 
     antes = (vault / "PENDIENTES.md").read_bytes()
-    assert main(["cycle", "open", "--at", "2026-09-14", "--vault", str(vault)]) == EXITO
+    assert main(["process", "cycle", "--at", "2026-09-14", "--vault", str(vault)]) == EXITO
     assert (vault / "PENDIENTES.md").read_bytes() == antes
+
+
+def test_un_ciclo_no_se_abre_hacia_atras_aunque_el_abierto_este_vacio(tmp_path: Path) -> None:
+    vault = _vault(tmp_path)
+    antes = (vault / "AHORA.md").read_text(encoding="utf-8")
+    with pytest.raises(CicloEnCurso, match="no se abre hacia atrás"):
+        open_cycle(vault, date(2026, 8, 31))
+    assert (vault / "AHORA.md").read_text(encoding="utf-8") == antes
+
+
+def test_process_lista_los_de_tuku_y_los_del_autor_y_cycle_abre(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    vault = _vault(tmp_path)
+    (vault / "procesos").mkdir()
+    (vault / "procesos" / "cierre-de-mes.md").write_text("# Cierre de mes\n", encoding="utf-8")
+    assert main(["process", "--vault", str(vault)]) == EXITO
+    salida = capsys.readouterr().out
+    assert "- cycle: " in salida and "- procesos/cierre-de-mes.md: Cierre de mes" in salida
+    assert main(["process", "cycle", "--at", "2026-09-14", "--vault", str(vault)]) == EXITO
+    assert "from: 2026-09-14" in (vault / "AHORA.md").read_text(encoding="utf-8")

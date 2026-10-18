@@ -2,7 +2,7 @@
 
 Son los que otros comandos necesitan para funcionar: el marcador del autor, que
 `tuku init --author` sustituye, y los tres encabezados de vocabulario, que
-`tuku vocab show` lee. La regla transversal de `spec/cli.md` también se afirma
+`tuku context style` lee. La regla transversal de `spec/cli.md` también se afirma
 acá, en un barrido: ningún hallazgo puede quedar sin corrección.
 """
 

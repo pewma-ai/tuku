@@ -96,7 +96,7 @@ Lo que el autor escribe en la página va arriba. Debajo, la transclusión de sus
 | Sección | Qué trae | Desde |
 | --- | --- | --- |
 | `## Esta semana` | Los registros del ámbito en el ciclo abierto, bajo su día | `AHORA.md` |
-| `## Actividad reciente` | Los registros del ámbito en los ciclos cerrados, bajo `### Octubre 2026`, del mes más reciente al más antiguo, cada línea con su día: `- 12 - entregué 40 cuadernos` | `bitacoras/` |
+| `## Actividad reciente` | Los registros del ámbito en los ciclos cerrados de los últimos doce meses, bajo `### Octubre 2026`, del mes más reciente al más antiguo, cada línea con su día: `- 12 - entregué 40 cuadernos` | `bitacoras/` |
 
 Un registro es del ámbito cuando su línea lo enlaza. Las dos secciones las reescriben los comandos que escriben o mueven un registro (`entry create`, `todo open`, `todo close`, `note create`, `entry move`) y `tuku regenerate scope`, que las rehace desde cero: un vault armado comando a comando es idéntico al regenerado (principio 9). Lo escrito a mano dentro de ellas se pierde en el siguiente comando.
 
@@ -113,7 +113,7 @@ Esos registros pasan al ámbito nuevo: cambia el link del ámbito al inicio de l
 
 Se reparte entre el comando y quien interpreta:
 
-- **`tuku scope create`** lista en su salida los registros de otros ámbitos que nombran al nuevo con su nombre o una keyword, sin distinguir mayúsculas, guiones ni espacios. Busca en `AHORA.md`, y con `--since AAAA-MM-DD` también en las bitácoras cerradas desde esa fecha. Si hay bitácoras cerradas, la salida dice cuántas y pide preguntarle al autor hasta cuándo buscar. Sobre un ámbito que ya existe, vuelve a listar sin crear nada.
+- **`tuku scope create`** lista en su salida los registros de otros ámbitos que nombran al nuevo con su nombre o una keyword, sin distinguir mayúsculas, guiones ni espacios. Busca en los últimos 7 días, o desde lo que diga `--since` (`--since 60` o `--since 2026-07-01`), también en las bitácoras cerradas. Si quedan bitácoras más antiguas, la salida dice cuántas y pide preguntarle al autor hasta cuándo buscar. Sobre un ámbito que ya existe, vuelve a listar sin crear nada.
 - **Quien interpreta decide** cuáles son del ámbito: «le conté a la Paula lo de Los Robles» nombra al colegio y es de otro ámbito. Los dudosos se le preguntan al autor.
 - **`tuku entry move --at AAAA-MM-DD HH:MM --scope NOMBRE`** cambia el ámbito de un registro, en `AHORA.md` o en la bitácora cerrada que lo tiene. Si es un pendiente abierto, cambia también el ámbito de su fila en `PENDIENTES.md` y regenera las vistas. Es una corrección: cómo ubica el registro y qué conserva está en [bitacora.md](bitacora.md), "Corregir un registro ya escrito".
 

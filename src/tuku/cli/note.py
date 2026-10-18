@@ -12,6 +12,7 @@ from tuku.cli.helpers import (
     Handler,
     Subparsers,
     cuerpo_de_la_nota,
+    sin_implementar,
     traducir,
 )
 from tuku.cli.opciones import Opciones
@@ -48,6 +49,12 @@ def _cmd_note_rename(args: argparse.Namespace) -> int:
 
 def _cmd_note_lint(args: argparse.Namespace) -> int:
     return traducir(note.lint_del_vault(args.vault, args.file), "note lint")
+
+
+def _cmd_note_archive(args: argparse.Namespace) -> int:
+    return sin_implementar(
+        "tuku note archive", "Mientras tanto, la nota queda en `notas/` tal como está."
+    )
 
 
 def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
@@ -123,8 +130,20 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     )
     Opciones(note_lint_p).vault("vault a revisar")
 
+    note_archive_p = note_v.add_parser(
+        "archive",
+        help="archiva una nota (todavía no implementado)",
+        description=(
+            "Todavía no está implementado: avisa y no escribe nada. Cuando exista, "
+            "archivará `notas/<título>.md` sin romper los links que la apuntan."
+        ),
+    )
+    note_archive_p.add_argument("title", help="título de la nota")
+    Opciones(note_archive_p).vault("vault a modificar")
+
     return {
         ("note", "create"): _cmd_note_create,
         ("note", "rename"): _cmd_note_rename,
         ("note", "lint"): _cmd_note_lint,
+        ("note", "archive"): _cmd_note_archive,
     }

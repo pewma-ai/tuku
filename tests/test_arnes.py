@@ -271,14 +271,14 @@ def test_la_traduccion_cuenta_todo_lo_que_no_es_lectura() -> None:
         ["vocab", "show"],
         ["scope", "create", "faena"],
         ["scope", "move", "faena-ai", "--parent", "faena"],
-        ["entry", "rename", "--body", "x"],
+        ["entry", "update", "--match", "x", "--body", "y"],
         ["regenerate", "todo"],
     ]
     turno = agente.Turno(prompt="", codigo=0, stdout="", stderr="", traza=traza)
     assert turno.traduccion == [
         "scope create",
         "scope move",
-        "entry rename",
+        "entry update",
         "regenerate",
     ]
 

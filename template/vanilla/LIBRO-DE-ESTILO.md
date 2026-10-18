@@ -54,11 +54,11 @@ Estos tres nombres son del autor: si el ritmo no es la semana sino el turno, la 
 
 Las notas pueden ser libres. Algunas, sobre cosas que se repiten, conviene que sigan una plantilla.
 
-| Tipo | Para qué | Cuidado |
-| --- | --- | --- |
-| `persona` | Trabajar mejor con alguien con quien el autor trata seguido. | Se escribe solo lo que se le mostraría a esa persona. |
+| Tipo | Para qué | Cuidado | Enlazable |
+| --- | --- | --- | --- |
+| `persona` | Trabajar mejor con alguien con quien el autor trata seguido. | Se escribe solo lo que se le mostraría a esa persona. | sí |
 
-Empieza con uno. Los demás aparecen cuando algo se repite lo suficiente como para merecer página propia.
+"Enlazable" dice si `tuku` enlaza solo la primera mención de una nota de ese tipo al registrar: su título o uno de sus `aliases`. Empieza con uno. Los demás aparecen cuando algo se repite lo suficiente como para merecer página propia.
 
 ## Las plantillas viven en `reglas/`
 

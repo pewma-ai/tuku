@@ -162,7 +162,7 @@ El detalle (cierres, horas, ámbitos, vocabularios) lo especifican [agente.md](a
 
 ## Qué hace un comando
 
-`tuku todo close --body "pagar el arriendo"` busca ese cuerpo en `PENDIENTES.md`, borra la fila, escribe el registro de cierre en `AHORA.md` y regenera las vistas que dependían de ella. Si el cuerpo no calza con ningún pendiente abierto avisa que no borró nada y pide revisar el texto. Si lo repites no duplica el cierre. El comando es el dueño de todo lo que no es juicio (contrato en [cli.md](cli.md)): valida, escribe el registro, aplica las consecuencias, es idempotente, y cuando falta información la pide en su salida. `tuku scope create faena` responde pidiendo las keywords del frente nuevo, y el agente las pregunta al autor.
+`tuku todo close "pagar el arriendo"` busca ese cuerpo en `PENDIENTES.md`, borra la fila, escribe el registro de cierre en `AHORA.md` y regenera las vistas que dependían de ella. Si el cuerpo no calza con ningún pendiente abierto avisa que no borró nada y pide revisar el texto. Si lo repites no duplica el cierre. El comando es el dueño de todo lo que no es juicio (contrato en [cli.md](cli.md)): valida, escribe el registro, aplica las consecuencias, es idempotente, y cuando falta información la pide en su salida. `tuku scope create faena` responde pidiendo las keywords del frente nuevo, y el agente las pregunta al autor.
 
 Toda consecuencia sale del texto del registro, no de la conversación. Cerrar un pendiente necesita su cuerpo y nada más. Si una consecuencia exige recordar lo que se dijo, o al registro le falta información, o esa operación no pertenece a este flujo.
 
@@ -174,7 +174,7 @@ Y viaja dentro del mismo comando que escribe, nunca en un paso aparte que alguie
 | Ámbitos | su página, su jerarquía, las keywords con que se elige y el ámbito de los registros que ya hablaban de él | `scope create`, `scope move`, `scope update`, `entry move` (todavía no existe) |
 | Notas | la nota en `notas/` y su constancia en la bitácora | `note create`, `note lint` |
 | Cadencias | alta o cambio de una cadencia en su ámbito | `cadence …` (todavía no existe) |
-| Ciclo | apertura, cierre y archivo de la bitácora | `cycle open`, `cycle close` (todavía no existe) |
+| Ciclo | apertura, cierre y archivo de la bitácora | `process cycle`, `cycle close` (todavía no existe) |
 | Propuesta | sugiere algo y espera aprobación | sin comando, a propósito |
 
 La lista es abierta. Agregar una consecuencia es agregar su regla y su comando, sin tocar el flujo. La propuesta es la única que no se ejecuta: se muestra y espera, y una rechazada no deja nada que limpiar. `tuku doctor` comprueba que lo derivado coincide con lo canónico y que el despacho nombra solo comandos que existen.

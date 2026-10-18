@@ -232,10 +232,10 @@ def _sujeto(argv: list[str]) -> tuple[str, ...]:
 #: registrarlo acá. Un agente que corre un `--help` antes de escribir, o un
 #: `tuku doctor` al terminar, hace lo correcto, y tampoco entra en la
 #: traducción de un dictado: esa es la secuencia de los que escriben.
-LEEN = ("doctor", "vocab", "style")
+LEEN = ("doctor", "vocab", "style", "context")
 
 #: Los comandos con subcomando: su verbo son dos palabras (`entry create`).
-GRUPOS = ("cycle", "entry", "todo", "scope", "note")
+GRUPOS = ("cycle", "entry", "todo", "scope", "note", "process")
 
 
 def escribe(argv: list[str]) -> bool:

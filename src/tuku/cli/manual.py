@@ -42,6 +42,7 @@ class Entrada:
     que_hace: str
     nivel: int = 1
     invocable: bool = True
+    ejemplos: str = ""
 
 
 def entradas(
@@ -61,7 +62,9 @@ def entradas(
             ruta = f"{camino} {nombre}"
             hijos = entradas(sub, ruta, nivel + 1)
             texto = " ".join((sub.description or "").split())
-            salida.append(Entrada(ruta, texto, nivel, invocable=not hijos))
+            ejemplos = (sub.epilog or "").removeprefix("Ejemplos:\n")
+            ejemplos = "\n".join(linea.strip() for linea in ejemplos.splitlines())
+            salida.append(Entrada(ruta, texto, nivel, invocable=not hijos, ejemplos=ejemplos))
             salida += hijos
     return salida
 
@@ -70,6 +73,7 @@ def documento(lista: list[Entrada]) -> str:
     """El archivo entero. Determinista: la misma lista da los mismos bytes."""
     bloques = [
         f"{'#' * (e.nivel + 1)} {e.nombre}\n\n{e.que_hace or 'Sin descripción.'}\n"
+        + (f"\n```bash\n{e.ejemplos}\n```\n" if e.ejemplos else "")
         for e in lista
     ]
     return _ENCABEZADO + "".join(f"\n{b}" for b in bloques)

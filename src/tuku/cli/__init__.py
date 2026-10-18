@@ -13,8 +13,10 @@ from __future__ import annotations
 import argparse
 import functools
 import sys
+from pathlib import Path
 
-from tuku.cli import entry, note, scope, system, todo
+from tuku import archivo
+from tuku.cli import ejemplos, entry, note, scope, system, todo
 from tuku.cli.helpers import (
     ENTORNO,
     EXITO,
@@ -55,9 +57,7 @@ def comandos() -> frozenset[str]:
     """
     if not _COMANDOS:
         _construir_parser()
-    return frozenset(
-        noun if verb is None else f"{noun} {verb}" for noun, verb in _COMANDOS
-    )
+    return frozenset(noun if verb is None else f"{noun} {verb}" for noun, verb in _COMANDOS)
 
 
 @functools.cache
@@ -85,6 +85,7 @@ def _construir_parser() -> argparse.ArgumentParser:
     cmds.update(scope.registrar(sub))
     cmds.update(note.registrar(sub))
 
+    ejemplos.aplicar(parser)
     _COMANDOS = cmds
     return parser
 
@@ -100,7 +101,12 @@ def main(argv: list[str] | None = None) -> int:
         # `note lint <archivo>` revisa un archivo suelto y no lee el vault.
         if getattr(args, "file", None) is None and (vault := getattr(args, "vault", None)):
             exigir_vault(vault)
-        return comando(args)
+        return archivo.con_reintentos(lambda: comando(args))
+    except archivo.SinReintentos as e:
+        nombre = " ".join(filter(None, (args.noun, getattr(args, "verb", None))))
+        base = getattr(args, "vault", None) or Path()
+        print(f"tuku {nombre}: {e.mensaje(base)}", file=sys.stderr)
+        return RECHAZO
     except (
         VaultInvalido,
         VocabularioIncompleto,

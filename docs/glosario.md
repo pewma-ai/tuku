@@ -10,7 +10,7 @@
 | **TUKU** | El software que mantiene ese vault: las reglas, los comandos y el agente. No es el vault. |
 | **MaC** | *Management as Code*, la metodología de PEWMA.AI de la que TUKU es la variante personal. |
 | **Estado cero** | El vault recién instalado, antes de la primera palabra: infraestructura vacía y un ciclo semanal abierto. |
-| **Primitiva** | Cada uno de los tipos de cosa que el sistema guarda: bitácora, pendientes, notas, ámbitos, cadencias, ciclos. |
+| **Primitiva** | Cada uno de los tipos de cosa que el sistema guarda: bitácora, pendientes, notas, ámbitos y cadencias. El ciclo no es una: es un proceso que se compone sobre ellas. |
 
 ## Los archivos
 

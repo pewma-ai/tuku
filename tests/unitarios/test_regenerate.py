@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
-from tuku import init
+from tuku import init, regenerate
 from tuku.cli import EXITO, main
 from tuku.regenerate import TEMAS, regenerar
 
@@ -80,3 +80,11 @@ def test_cada_tema_es_idempotente_y_el_cli_los_acepta(tmp_path: Path) -> None:
         regenerar(v, tema=tema, comandos="nuevo\n")
         assert "al día" in regenerar(v, tema=tema, comandos="nuevo\n").mensaje
         assert main(["regenerate", tema, "--vault", str(v)]) == EXITO
+
+
+def test_cada_canonico_rehace_solo_los_temas_que_dependen_de_el() -> None:
+    assert regenerate.temas_afectados(["PENDIENTES.md"]) == ["todo"]
+    assert regenerate.temas_afectados(["AHORA.md"]) == ["todo", "scope"]
+    assert regenerate.temas_afectados(["bitacoras/bitacora-2026-08-03.md"]) == ["scope"]
+    assert regenerate.temas_afectados(["ambitos/"]) == ["todo", "scope"]
+    assert regenerate.temas_afectados(["notas/x.md", "reglas/config.tuku.md"]) == []

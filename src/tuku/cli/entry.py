@@ -6,7 +6,7 @@ import argparse
 
 from tuku import entry
 from tuku.cli.helpers import Handler, Subparsers, traducir
-from tuku.cli.opciones import Opciones
+from tuku.cli.opciones import Momento, Opciones, momento_pasado
 from tuku.config import ambito_por_defecto
 
 
@@ -23,12 +23,39 @@ def _cmd_entry_create(args: argparse.Namespace) -> int:
     )
 
 
-def _cmd_entry_rename(args: argparse.Namespace) -> int:
+def _cmd_entry_update(args: argparse.Namespace) -> int:
     return traducir(
-        entry.corregir_en_vault(
-            args.vault, body=args.body, day=args.at.dia, hour=args.at.hora
+        entry.actualizar_en_vault(
+            args.vault, match=args.match, body=args.body, day=args.at.dia, hour=args.at.hora
         ),
-        "tuku entry rename",
+        "tuku entry update",
+    )
+
+
+def _cmd_entry_move(args: argparse.Namespace) -> int:
+    return traducir(
+        entry.mover_en_vault(
+            args.vault, match=args.match, scope=args.scope, day=args.at.dia, hour=args.at.hora
+        ),
+        "tuku entry move",
+    )
+
+
+def _ubicacion(o: Opciones) -> None:
+    """`CUÁNDO` y `--match`: cómo `update` y `move` encuentran el registro."""
+    o.parser.add_argument(
+        "at",
+        nargs="?",
+        metavar="CUÁNDO",
+        default=Momento(),
+        type=momento_pasado,
+        help="el día, o el día y la hora, donde buscar: AAAA-MM-DD o 'AAAA-MM-DD HH:MM'",
+    )
+    o.parser.add_argument(
+        "--match",
+        required=True,
+        metavar="TEXTO",
+        help="un fragmento del cuerpo actual; se elige el último registro que calza",
     )
 
 
@@ -65,20 +92,36 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
     create.scope()
     create.at()
 
-    rename_p = entry_v.add_parser(
-        "rename",
+    update_p = entry_v.add_parser(
+        "update",
         help="corrige el cuerpo de un registro ya escrito",
         description=(
-            "Reemplaza el cuerpo del registro de `AHORA.md` ubicado por `--at`, sin "
-            "tocar hora ni ámbito. Si es un pendiente, reemplaza igual su fila en "
-            "`PENDIENTES.md`: las dos copias deben coincidir carácter por carácter para "
-            "que el pendiente se pueda cerrar."
+            "Reemplaza el cuerpo del último registro de `AHORA.md` que contiene el "
+            "fragmento de `--match` (sin distinguir mayúsculas ni tildes), sin tocar hora "
+            "ni ámbito. `CUÁNDO` acota la búsqueda a un día o a un minuto. Si es un "
+            "pendiente, reemplaza igual su fila en `PENDIENTES.md`: las dos copias deben "
+            "coincidir para que el pendiente se pueda cerrar."
         ),
     )
-    rename = Opciones(rename_p)
-    rename.vault()
-    rename.body("el cuerpo corregido, con su marca si la lleva")
-    rename.at("el registro a corregir: AAAA-MM-DD HH:MM, o HH:MM si es de hoy", con_hora=True)
+    update = Opciones(update_p)
+    _ubicacion(update)
+    update.body("el cuerpo corregido, con su marca si la lleva")
+    update.vault()
+
+    move_p = entry_v.add_parser(
+        "move",
+        help="cambia el ámbito de un registro ya escrito",
+        description=(
+            "Cambia el link de ámbito del último registro de `AHORA.md` que contiene el "
+            "fragmento de `--match`, sin tocar hora ni cuerpo. Con `CUÁNDO` fuera del "
+            "ciclo en curso, busca en la bitácora de `bitacoras/` que cubre ese día. Si es "
+            "un pendiente abierto, su fila de `PENDIENTES.md` cambia de ámbito con él."
+        ),
+    )
+    move = Opciones(move_p)
+    _ubicacion(move)
+    move_p.add_argument("--scope", required=True, help="el ámbito al que pasa el registro")
+    move.vault()
 
     lint_p = entry_v.add_parser(
         "lint",
@@ -95,6 +138,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
 
     return {
         ("entry", "create"): _cmd_entry_create,
-        ("entry", "rename"): _cmd_entry_rename,
+        ("entry", "update"): _cmd_entry_update,
+        ("entry", "move"): _cmd_entry_move,
         ("entry", "lint"): _cmd_entry_lint,
     }

@@ -30,12 +30,12 @@ Antes de cambiar un artefacto del vault, esta tabla dice qué más se toca. La p
 
 | Artefacto | Spec | Módulos | Lo escriben |
 |---|---|---|---|
-| `AHORA.md` | [`bitacora.md`](spec/bitacora.md), [`ciclo.md`](spec/ciclo.md) | [`entry.py`](src/tuku/entry.py), [`ahora.py`](src/tuku/ahora.py), [`cycle.py`](src/tuku/cycle.py), [`propagate.py`](src/tuku/propagate.py) | `tuku entry create`, `tuku cycle open`; la región del día, `tuku regenerate` (tema `todo`) |
+| `AHORA.md` | [`bitacora.md`](spec/bitacora.md), [`ciclo.md`](spec/ciclo.md) | [`entry.py`](src/tuku/entry.py), [`ahora.py`](src/tuku/ahora.py), [`cycle.py`](src/tuku/cycle.py), [`regenerate.py`](src/tuku/regenerate.py) | `tuku entry create`, `tuku process cycle`; la región del día, `tuku regenerate` (tema `todo`) |
 | `PENDIENTES.md` | [`pendientes.md`](spec/pendientes.md) | [`todo.py`](src/tuku/todo.py) | `tuku todo open`, `tuku todo close` |
-| `ambitos/PENDIENTES-AMBITOS.md` | [`pendientes.md`](spec/pendientes.md), [`ambitos.md`](spec/ambitos.md) | [`propagate.py`](src/tuku/propagate.py), [`regenerate.py`](src/tuku/regenerate.py) | `tuku regenerate` (tema `todo`) |
+| `ambitos/PENDIENTES-AMBITOS.md` | [`pendientes.md`](spec/pendientes.md), [`ambitos.md`](spec/ambitos.md) | [`regenerate.py`](src/tuku/regenerate.py) | `tuku regenerate` (tema `todo`) |
 | `ambitos/<nombre>/<nombre>.md` | [`ambitos.md`](spec/ambitos.md) | [`scope.py`](src/tuku/scope.py), [`link.py`](src/tuku/link.py) | `tuku scope create`, `tuku scope rename`; la actividad, `tuku regenerate` (tema `scope`) |
 | `notas/<slug>.md` | [`notas.md`](spec/notas.md) | [`note.py`](src/tuku/note.py) | `tuku note create` |
-| `LIBRO-DE-ESTILO.md` | [`bitacora.md`](spec/bitacora.md) | [`style.py`](src/tuku/style.py), [`vocab.py`](src/tuku/vocab.py) | el autor; se lee con `tuku vocab show` |
+| `LIBRO-DE-ESTILO.md` | [`bitacora.md`](spec/bitacora.md) | [`style.py`](src/tuku/style.py), [`vocab.py`](src/tuku/vocab.py) | el autor; se lee con `tuku context` (tema `style`) |
 | `reglas/config.tuku.md` | [`vault.md`](spec/vault.md) | [`config.py`](src/tuku/config.py), [`init.py`](src/tuku/init.py) | `tuku init` |
 | `reglas/types.md` | [`vault.md`](spec/vault.md) | [`doctor.py`](src/tuku/doctor.py) | el autor; lo valida `tuku doctor` |
 | `AGENTS.md` | [`despacho.md`](spec/despacho.md), [`agente.md`](spec/agente.md) | [`doctor.py`](src/tuku/doctor.py) | el autor; lo revisa `tuku doctor` |

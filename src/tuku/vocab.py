@@ -1,4 +1,4 @@
-"""tuku vocab show: los vocabularios abiertos del autor, desde el libro de estilo.
+"""tuku context style: los vocabularios abiertos del autor, desde el libro de estilo.
 
 `spec/bitacora.md` fija que los tres encabezados de `LIBRO-DE-ESTILO.md` son
 contrato: se leen esos, exactos. Las filas crecen con el uso, el encabezado no
@@ -60,8 +60,44 @@ def leer(libro: str) -> dict[str, list[str]]:
     return vocabularios
 
 
+def _celdas(linea: str) -> list[str]:
+    return [c.strip() for c in linea.strip().strip("|").split("|")]
+
+
+def enlazables(libro: str) -> list[str]:
+    """Los tipos de nota con `sí` en la columna "Enlazable" de `### Tipos de nota`.
+
+    La columna se busca por su encabezado; sin ella, ningún tipo se enlaza
+    (`spec/notas.md`, "Enlazar al registrar").
+    """
+    lineas = libro.splitlines()
+    try:
+        ini = next(
+            i for i, linea in enumerate(lineas) if linea.strip() == ENCABEZADOS["tipos-de-nota"]
+        )
+    except StopIteration:
+        return []
+    columna: int | None = None
+    tipos = []
+    for linea in lineas[ini + 1 :]:
+        if linea.startswith(("## ", "### ")):
+            break
+        if not linea.lstrip().startswith("|"):
+            continue
+        celdas = _celdas(linea)
+        if columna is None:
+            normales = [c.lower() for c in celdas]
+            if "enlazable" not in normales:
+                return []
+            columna = normales.index("enlazable")
+        elif (m := _TERMINO.match(linea.strip())) and len(celdas) > columna:
+            if celdas[columna].lower() in ("sí", "si"):
+                tipos.append(m.group(1))
+    return tipos
+
+
 def formatear(vocabularios: dict[str, list[str]]) -> str:
-    """El reporte de `tuku vocab show`, para persona y para agente."""
+    """El reporte de `tuku context style`, para persona y para agente."""
     bloques = [
         f"{nombre}: {', '.join(terminos) if terminos else '(ninguno declarado)'}"
         for nombre, terminos in vocabularios.items()

@@ -19,7 +19,7 @@ Todo lo demás son ejemplos.
 - HH:MM - [ambito](ruta) (Hecho) **clasificacion**: ~~cuerpo~~
 ```
 
-Ámbito y clasificación son opcionales según el contexto. La marca de la ontología cerrada va en la misma posición, antes de la clasificación abierta.
+Ámbito y clasificación son opcionales según el contexto, y la hora también en un día pasado (ver abajo). La marca de la ontología cerrada va en la misma posición, antes de la clasificación abierta.
 
 El ámbito es un **link Markdown cuya ruta es relativa al archivo que contiene la línea**, y la calcula `tuku` a partir del árbol de `ambitos/`: un ámbito anidado lleva su ruta completa (`ambitos/trabajo/pewma/pewma.md`). Quien dicta pasa el nombre; nadie escribe la ruta. Sin `--scope`, `tuku entry create`, `tuku todo open` y `tuku todo close` usan el `scope_default` de `reglas/config.tuku.md`. En `AHORA.md`, que vive en la raíz, es `[arriendo-depto-centro](ambitos/arriendo-depto-centro/arriendo-depto-centro.md)`. Los lectores aceptan también el wikilink `[[ambito]]` hasta que `tuku fix link` lo convierte ([markdown.md](markdown.md)).
 
@@ -29,9 +29,11 @@ El ámbito es un **link Markdown cuya ruta es relativa al archivo que contiene l
 
 Cuando quien invoca no proporciona el día o la hora (o no se pueden derivar), los valores por defecto son:
 - **El día:** la fecha actual (**HOY**), situando el registro bajo la sección correspondiente al día de hoy en `AHORA.md`.
-- **La hora:** la hora actual (**AHORA**), con formato `HH:MM`.
+- **La hora:** si el día es hoy, la hora actual (**AHORA**), con formato `HH:MM`. Si el día es pasado, el registro va sin hora, al final de ese día: `- [colegio-los-robles](ambitos/negocio/clientes/colegio-los-robles/colegio-los-robles.md) llamé a Rodolfo`. La hora de hoy en un día pasado sería inventada.
 
-Ambos se evalúan en la zona horaria que declara `TZ` en `reglas/config.tuku.md`. Nunca se dejan en blanco ni se eligen valores plausibles inventados: o se derivan explícitamente, o hacen fallback al momento actual. Son los dos únicos campos del registro con valor por defecto, y por eso están declarados acá y no quedan a criterio del comando (ver [cli.md](cli.md)).
+Ambos se evalúan en la zona horaria que declara `TZ` en `reglas/config.tuku.md`. Ninguno se elige por plausible: o se deriva del dictado, o es el momento actual, o la hora queda en blanco. Son los dos únicos campos del registro con valor por defecto, y por eso están declarados acá y no quedan a criterio del comando (ver [cli.md](cli.md)).
+
+Para ordenar, un registro sin hora toma la del registro anterior de su día: el siguiente que llega con hora se ubica a continuación si su hora es igual o mayor.
 
 ## Ejemplos
 
@@ -110,12 +112,14 @@ El cuerpo es el mismo en los tres lugares: el registro que abre, el ítem en `PE
 
 ## Corregir un registro ya escrito
 
-Un registro se ubica por su día y su hora, `--at AAAA-MM-DD HH:MM`. Varios registros en el mismo minuto son lo normal cuando una frase trae varios hechos, como los dos de las 18:40 en los ejemplos de arriba. En ese caso el comando rechaza, lista los registros de ese minuto y pide `--match TEXTO`, un fragmento del cuerpo actual que calce con uno solo. Con `--match` el registro se ubica aunque esté solo en su minuto.
+Un registro se ubica con `--match TEXTO`, obligatorio: un fragmento de su cuerpo actual. El comando corrige el último registro de `AHORA.md` que calza, que es el caso común: el autor dijo tres cosas a las 07:00 y "no era eso" habla de la última. Si el que se corrige es otro, un fragmento más largo lo distingue. Para un registro de un ciclo cerrado, el posicional `CUÁNDO` (`2026-08-10` o `"2026-08-10 18:40"`) dice dónde buscar.
 
 | Comando | Cambia | Conserva | Dónde |
 | --- | --- | --- | --- |
-| `tuku entry rename --at … --body …` | el cuerpo, y la fila de `PENDIENTES.md` si es un pendiente, para que el cierre lo siga encontrando | la hora y el ámbito | `AHORA.md` |
-| `tuku entry move --at … --scope …` | el ámbito, y el de la fila de `PENDIENTES.md` si es un pendiente abierto ([ambitos.md](ambitos.md), "Lo escrito antes de abrir un ámbito") | la hora y el cuerpo | `AHORA.md` y las bitácoras cerradas |
+| `tuku entry update [CUÁNDO] --match … --body …` | el cuerpo, y la fila de `PENDIENTES.md` si es un pendiente, para que el cierre lo siga encontrando | la hora y el ámbito | `AHORA.md` |
+| `tuku entry move [CUÁNDO] --match … --scope …` | el ámbito, y el de la fila de `PENDIENTES.md` si es un pendiente abierto ([ambitos.md](ambitos.md), "Lo escrito antes de abrir un ámbito") | la hora y el cuerpo | `AHORA.md` y las bitácoras cerradas |
+
+Hoy existe `tuku entry rename --at … --body …`, que ubica por la hora; `entry update` y `entry move` están en [`../TODO.md`](../TODO.md).
 
 Los dos son correcciones: arreglan el registro en su lugar, la bitácora queda con el registro corregido y nada más, y el historial de git guarda la versión anterior. Los dos son idempotentes: si el registro ya dice eso, lo informan y salen con 0.
 
