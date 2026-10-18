@@ -147,7 +147,7 @@ Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumul
 
 ## Epic 006. Abrir y cerrar el ciclo
 
-Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo valga la pena leerlo. Las cadencias entran acá porque emiten en la apertura del ciclo. Cubre fases 6 y 7, más lo restante de la 4. La mecánica determinista (abrir, promover pendientes, aplanar transclusiones, archivar) se prueba con archivos inyectados antes de conectar el LLM para plan y resumen.
+Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo valga la pena leerlo. Las cadencias entran acá porque emiten en la apertura del ciclo. Cubre fases 6 y 7, más lo restante de la 4. La mecánica determinista (abrir, promover pendientes, aplanar transclusiones, archivar ciclos, ramas de ámbitos y notas) se prueba con archivos inyectados antes de conectar el LLM para plan y resumen.
 
 - **Criterio de salida:** abrir dos veces no duplica; cerrar dos veces no vuelve a mover; prueba que falla a propósito si se aplana antes del resumen. Plan calcula capacidad contra lo declarado.
 
