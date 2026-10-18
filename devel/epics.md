@@ -91,6 +91,7 @@ Actualizado el 2026-10-16.
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | siete documentos en `tests/escenarios/005-*`: 20 de 31 tests deterministas en verde y 11 en rojo, más 5 agénticos (3 en verde, 1 en rojo y 1 que se salta). Los rojos son hallazgos: cada uno está en la tabla de `005-00` (lista de hijos en dos órdenes, `doctor note`, atrasados, nota tipada, agente que adivina) |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
 | 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
+| 008 | MAINTENANCE MODE | por definir | por definir | sin detalles aún: tests del modo de mantenimiento del `AGENTS.md` del vault |
 
 ## Epic 001. Un TUKU mínimo instalable
 
@@ -168,6 +169,10 @@ El agente deja de responder y empieza a observar: infiere ámbitos y notas tipad
 > - [`VAULT/agentes.md`](VAULT/agentes.md), "El agente silencioso": un proceso de fondo con silencio absoluto (`[SILENT]`) salvo que la conclusión madure y aporte valor.
 > - [`VAULT/spec/entidades.md`](VAULT/spec/entidades.md): "sembrar y corregir" y nunca decirle "entidad" al autor.
 > - [`VAULT/spec/corpus.md`](VAULT/spec/corpus.md), "Autoría y procedencia": toda inferencia externa lleva modelo y fecha, y la marca se reclasifica cuando el autor edita a mano.
+
+## Epic 008. MAINTENANCE MODE
+
+Tests del modo de mantenimiento: un prompt que empieza con `MAINTENANCE MODE` en mayúsculas no carga nada extra y sigue las instrucciones directas, y cualquier otro es una interacción natural con el autor ([`../spec/despacho.md`](../spec/despacho.md)). Sin detalles aún; se define cuando el `AGENTS.md` del vault diga el modo.
 
 ## Wishlist
 
