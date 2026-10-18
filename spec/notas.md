@@ -53,7 +53,7 @@ aliases: [Rodolfo, don Rodolfo]
 
 `aliases` es el campo que Obsidian usa para lo mismo, así que el editor de referencia lo entiende sin configurar nada. `tuku` lo lee con su propio lector de frontmatter, como `type` y `subtype`.
 
-Enlazar una nota al registrar lo decide el agente, con `tuku context note` de referencia. Por cada tipo enlazable trae las últimas notas, de la modificada más recientemente a la más antigua, cada una con su título y sus `aliases`. El tope por tipo es `context_note_limit` de `reglas/config.tuku.md` (25 por defecto), para que el listado no crezca con el vault. Si lo que dijo el autor nombra a una de ellas, el agente escribe la primera mención como link en el `--body` de `entry create`, `todo open` o `note create`: "llamé a don Rodolfo por la cotización" queda como `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md) por la cotización`. El texto del link es el que dijo el autor. Si el nombre calza con dos notas, es una ambigüedad y el agente pregunta antes de escribir ([flujo-informacion.md](flujo-informacion.md)). Una nota que `context` no trae no se enlaza: el comando no busca por su cuenta.
+Enlazar una nota al registrar lo decide el agente, con `tuku context note` de referencia. Por cada tipo enlazable trae las últimas notas, de la de `updated` más reciente a la más antigua, cada una con su título y sus `aliases`. El tope por tipo es `context_note_limit` de `reglas/config.tuku.md` (25 por defecto), para que el listado no crezca con el vault. Si lo que dijo el autor nombra a una de ellas, el agente escribe la primera mención como link en el `--body` de `entry create`, `todo open` o `note create`: "llamé a don Rodolfo por la cotización" queda como `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md) por la cotización`. El texto del link es el que dijo el autor. Si el nombre calza con dos notas, es una ambigüedad y el agente pregunta antes de escribir ([flujo-informacion.md](flujo-informacion.md)). Una nota que `context` no trae no se enlaza: el comando no busca por su cuenta.
 
 Los comandos no enlazan solos. Escriben el cuerpo como llega, y lo ya escrito no se toca: enlazar hacia atrás es una operación deliberada ([markdown.md](markdown.md), "Enlazar es deliberado"). Los ámbitos no se enlazan en el cuerpo: los pone `--scope`.
 
@@ -88,7 +88,7 @@ La prueba es simple: **una inferencia que no se le podría mostrar a la persona 
 
 Toda creación de nota mediante `tuku note create` deja huella en la bitácora:
 
-- **Escribe la nota:** en `notas/<slug>.md` con frontmatter OKF (`type: Note`). Si la nota es tipada, incluye su campo `subtype`.
+- **Escribe la nota:** en `notas/<slug>.md` con frontmatter OKF (`type: Note`). Si la nota es tipada, incluye su campo `subtype`. Lleva `created` y `updated` con una fecha `AAAA-MM-DD`, iguales al crearla. Los comandos que reescriben la nota (`note rename`) mueven `updated`; quien edita a mano lo mueve también. `tuku context note` ordena por `updated`, y no por la fecha del archivo, porque un clon de git la reinicia.
 - **Estampa constancia:** agrega una línea cronológica en `AHORA.md` registrando la creación de la nota. Ante la omisión de día u hora, los valores por defecto normativos son la fecha actual (**HOY**) y la hora actual (**AHORA**) evaluadas en la zona horaria `TZ` de `reglas/config.tuku.md`.
 
 ### Idempotencia y reparación

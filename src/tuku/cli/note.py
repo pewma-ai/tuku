@@ -71,9 +71,9 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help="crea una nota y deja constancia en la bitácora",
         description=(
             "Escribe `notas/<título sin tildes, en minúsculas y con guiones>.md` con "
-            "frontmatter (`type: Note`, `subtype` si se pasa, `created`), el cuerpo y la "
-            "sección `## Ver además`, que lista el ámbito y los links que el comando puso "
-            "en el cuerpo al enlazar a las personas. Registra en `AHORA.md` "
+            "frontmatter (`type: Note`, `subtype` si se pasa, `created` y `updated`), "
+            "el cuerpo y la sección `## Ver además`, que lista el ámbito y los links "
+            "del cuerpo. Registra en `AHORA.md` "
             "`**nota**: escribí la nota [título](notas/...)`. Una nota que ya existe no "
             "se reescribe."
         ),

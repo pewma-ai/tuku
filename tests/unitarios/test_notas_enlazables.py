@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from datetime import date
 from pathlib import Path
 
@@ -87,6 +86,7 @@ def test_subtype_se_escribe_si_la_tabla_lo_lista_y_se_rechaza_si_no(vault: Path)
     assert r.ok
     texto = (vault / "notas" / "patricia-lillo.md").read_text(encoding="utf-8")
     assert texto.startswith("---\ntype: Note\nsubtype: persona\ncreated: ")
+    assert note.campo(texto, "updated") == note.campo(texto, "created")
     assert note.subtype(texto) == "persona"
 
     antes = sorted(p.name for p in (vault / "notas").iterdir())
@@ -96,11 +96,13 @@ def test_subtype_se_escribe_si_la_tabla_lo_lista_y_se_rechaza_si_no(vault: Path)
     assert sorted(p.name for p in (vault / "notas").iterdir()) == antes
 
 
-def _antiguedad(v: Path, nombre: str, segundos: int) -> None:
-    """La nota `nombre` pasa a estar modificada hace `segundos`."""
+def _actualizada(v: Path, nombre: str, dia: str) -> None:
+    """La nota `nombre` pasa a tener `updated: dia`."""
     ruta = v / "notas" / f"{nombre}.md"
-    ahora = ruta.stat().st_mtime
-    os.utime(ruta, (ahora - segundos, ahora - segundos))
+    ruta.write_text(
+        note.con_updated(ruta.read_text(encoding="utf-8"), date.fromisoformat(dia)),
+        encoding="utf-8",
+    )
 
 
 def test_context_note_lista_por_tipo_enlazable_con_nombres_y_aliases(vault: Path) -> None:
@@ -112,9 +114,10 @@ def test_context_note_lista_por_tipo_enlazable_con_nombres_y_aliases(vault: Path
 def test_context_note_trae_las_ultimas_modificadas_hasta_el_limite(vault: Path) -> None:
     for n in ("ana", "beto", "carla"):
         _nota(vault, n, "persona", n.capitalize())
-    _antiguedad(vault, "ana", 300)
-    _antiguedad(vault, "rodolfo-cifuentes", 200)
-    _antiguedad(vault, "beto", 100)
+    _actualizada(vault, "ana", "2026-08-01")
+    _actualizada(vault, "rodolfo-cifuentes", "2026-08-05")
+    _actualizada(vault, "beto", "2026-08-09")
+    _actualizada(vault, "carla", "2026-08-10")
     config = vault / "reglas" / "config.tuku.md"
     config.write_text(
         config.read_text(encoding="utf-8").replace("| `25` |", "| `3` |"),
@@ -151,3 +154,24 @@ def test_context_note_sin_tipos_enlazables_lo_dice(vault: Path) -> None:
     assert context.del_vault(vault, "note", hoy=HOY).mensaje == (
         "sin tipos enlazables en `### Tipos de nota`."
     )
+
+
+def test_updated_se_mueve_al_renombrar_y_created_queda(vault: Path) -> None:
+    note.crear_con_constancia(
+        vault, title="Ana Pérez", body="Jefa de UTP.", day=date(2026, 8, 11), record=False
+    )
+    r = note.renombrar_en_vault(vault, "Ana Pérez", "Ana Pérez Soto", hoy=date(2026, 8, 20))
+    assert r.ok
+    texto = (vault / "notas" / "ana-perez-soto.md").read_text(encoding="utf-8")
+    assert note.campo(texto, "updated") == "2026-08-20"
+    assert note.campo(texto, "created") == "2026-08-11"
+    assert texto.index("created:") < texto.index("updated:")
+
+
+def test_con_updated_no_inventa_frontmatter_ni_duplica_el_campo() -> None:
+    assert note.con_updated("# Sin frontmatter\n", date(2026, 8, 1)) == "# Sin frontmatter\n"
+    una = note.con_updated("---\ntype: Note\n---\n# T\n", date(2026, 8, 1))
+    dos = note.con_updated(una, date(2026, 8, 2))
+    assert dos == "---\ntype: Note\nupdated: 2026-08-02\n---\n# T\n"
+    assert note.modificada("---\ncreated: 2026-07-01\n---\n") == "2026-07-01"
+    assert note.modificada("# nada") == ""

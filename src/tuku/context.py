@@ -128,6 +128,9 @@ def _style(vault: Path) -> str:
 def _note(vault: Path) -> str:
     """Por cada tipo enlazable, sus últimas notas, de la modificada más recientemente.
 
+    "Modificada" es el `updated` del frontmatter (o `created` si falta), no la fecha
+    del archivo: un clon de git reinicia esas. Con el mismo día, por nombre.
+
     Enlazable es la columna del libro de estilo (`spec/notas.md`): las personas,
     no las ideas. Cada nota trae su título y sus `aliases`, que son los nombres con
     que el autor la menciona, para que el agente decida qué enlazar. El tope por
@@ -142,14 +145,15 @@ def _note(vault: Path) -> str:
     limite = limite_de_notas(vault)
     dir_notas = vault / "notas"
     rutas = sorted(dir_notas.glob("*.md")) if dir_notas.is_dir() else []
-    por_tipo: dict[str, list[tuple[float, Path, str]]] = {t: [] for t in tipos}
+    por_tipo: dict[str, list[tuple[str, Path, str]]] = {t: [] for t in tipos}
     for ruta in rutas:
         texto = archivo.leer(ruta)
         if (tipo := note.subtype(texto)) in por_tipo:
-            por_tipo[tipo].append((ruta.stat().st_mtime, ruta, texto))
+            por_tipo[tipo].append((note.modificada(texto), ruta, texto))
     bloques = []
     for tipo in tipos:
-        ultimas = sorted(por_tipo[tipo], key=lambda n: (-n[0], n[1].name))[:limite]
+        ultimas = sorted(por_tipo[tipo], key=lambda n: n[1].name)
+        ultimas = sorted(ultimas, key=lambda n: n[0], reverse=True)[:limite]
         lineas = []
         for _, ruta, texto in ultimas:
             otros = note.aliases(texto)

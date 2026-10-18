@@ -260,7 +260,7 @@ flowchart LR
         DER["Lo derivado: actividad<br/>de la página del ámbito"]
     end
 
-    NC -->|"frontmatter con subtype y created de --at,<br/>cuerpo y Ver además con --scope<br/>y los links del cuerpo"| NO
+    NC -->|"frontmatter con subtype, created y updated de --at,<br/>cuerpo y Ver además con --scope<br/>y los links del cuerpo"| NO
     NC -.->|"--subtype debe ser una fila<br/>de Tipos de nota"| LE
     NC -->|"constancia en la bitácora,<br/>salvo --no-record"| AH
     NC -->|"con --scope, rehace"| DER

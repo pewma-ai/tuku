@@ -72,6 +72,38 @@ def subtype(nota: str) -> str | None:
     return None
 
 
+def campo(nota: str, nombre: str) -> str | None:
+    """Un campo de una línea del frontmatter, como `created` o `updated`."""
+    m = _FRONTMATTER.match(nota)
+    if m is None:
+        return None
+    for linea in m.group("cuerpo").splitlines():
+        if linea.startswith(f"{nombre}:"):
+            return linea.removeprefix(f"{nombre}:").strip() or None
+    return None
+
+
+def modificada(nota: str) -> str:
+    """Cuándo se tocó por última vez: `updated`, o `created` si no lo tiene, o vacío."""
+    return campo(nota, "updated") or campo(nota, "created") or ""
+
+
+def con_updated(nota: str, hoy: date) -> str:
+    """La nota con `updated: hoy` en su frontmatter, que se crea si falta.
+
+    Va tras `created` si está, y si no, al final del frontmatter. Una nota sin
+    frontmatter queda igual: no se inventa uno.
+    """
+    m = _FRONTMATTER.match(nota)
+    if m is None:
+        return nota
+    lineas = [x for x in m.group("cuerpo").splitlines() if not x.startswith("updated:")]
+    marca = f"updated: {hoy.isoformat()}"
+    pos = next((i + 1 for i, x in enumerate(lineas) if x.startswith("created:")), len(lineas))
+    lineas.insert(pos, marca)
+    return "---\n" + "\n".join(lineas) + "\n---\n" + nota[m.end() :]
+
+
 def titulo(nota: str, ruta: Path) -> str:
     """El `# Título` de la nota, o el nombre del archivo si no lo tiene."""
     for linea in nota.splitlines():
@@ -144,7 +176,7 @@ def crear(
     ruta.parent.mkdir(parents=True, exist_ok=True)
     creada = (today or date.today()).isoformat()
     contenido = (
-        f"---\ntype: Note\n{marca_subtype}created: {creada}\n---\n\n"
+        f"---\ntype: Note\n{marca_subtype}created: {creada}\nupdated: {creada}\n---\n\n"
         f"# {title}\n\n{body.strip()}\n{ver_ademas}"
     )
     archivo.escribir(ruta, contenido)
@@ -333,7 +365,9 @@ def lint_del_vault(vault: Path, nota: Path | None = None) -> Resultado:
     return Resultado.rechazo("\n".join(hallazgos), error=False)
 
 
-def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
+def renombrar_en_vault(
+    vault: Path, viejo: str, nuevo: str, hoy: date | None = None
+) -> Resultado:
     """Renombra una nota y arregla lo que la enlazaba.
 
     El caso de uso de `tuku note rename`. Una nota se nombra en tres lugares a
@@ -363,7 +397,8 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
         )
 
     origen.rename(destino)
-    archivo.escribir(destino, rename.renombrar_titulo(archivo.leer(destino), nuevo.strip()))
+    renombrada = rename.renombrar_titulo(archivo.leer(destino), nuevo.strip())
+    archivo.escribir(destino, con_updated(renombrada, hoy or date.today()))
 
     # Los enlaces apuntan al nombre del archivo, no al título: `notas/<slug>.md`.
     enlaces = 0
