@@ -7,6 +7,7 @@ Plan para simplificar la arquitectura del comando `tuku` y, después, acortar su
 1. **Auditar `tuku`.** Diagnóstico de `src/tuku/` y propuesta de mejoras. Hecha el 2026-10-18.
 2. **Refactorizar `tuku`** según lo aprobado, **sin tocar los tests**. Los tests actuales son la red de seguridad: si el refactor es correcto, pasan tal cual.
 3. **Revisar los tests.** Con la arquitectura ya simplificada, fundir los que afirman lo mismo. Hecha el 2026-10-18 sobre 18 archivos; ver el resultado al final.
+4. **Planificar y ejecutar por separado, y reloj inyectado.** Levanta la restricción de no editar tests. Hecha el 2026-10-18 para `todo`, `entry` y `note`; ver "Resultado de la fase 4".
 
 ## Estado
 
@@ -20,13 +21,16 @@ Plan para simplificar la arquitectura del comando `tuku` y, después, acortar su
 - [x] Fase 2, P6 (2026-10-18): **revertido**. Ver la propuesta.
 - [x] Fase 2, P7 (2026-10-18): docstrings de `doctor`, `resultado` e `init`.
 - [x] Fase 3 (2026-10-18): 192 funciones de test unitario (antes 237) y 194 casos (antes 286), con **los mismos arcos de ramas ejecutados** y los 317 tests de la suite no agéntica en verde.
+- [x] Fase 4 (2026-10-18): `plan.py` con `Change` y `apply`; planners de `todo open`, `todo close`, `entry create` y `note create`; el reloj se lee solo en `cli.main`.
 - [ ] Pendiente: ver "Lo que queda" al final.
 
 ## Restricciones de la fase 2
 
+Las del reloj y de las firmas se levantaron en la fase 4.
+
 - Ningún archivo de `tests/` cambia. Criterio de cada paso: `git diff --stat tests/` vacío, `uv run pytest` (unitarios y escenarios deterministas), `uv run ruff check .` y `uv run mypy src tests` en verde.
 - Las firmas públicas que los tests usan se mantienen: `todo.abrir_en_vault`, `todo.cerrar_en_vault`, `entry.add_al_vault`, `scope.crear_con_constancia`, `note.crear_con_constancia`, `scope.rutas`, `scope.nombres`, `scope.canonico`, entre otras.
-- **El reloj no se inyecta en esta fase.** Los tests congelan `date` y `datetime` parchando el módulo donde se leen (`entry`, `todo`, `scope`, `note`, `cycle`, `context`, `init`, `cli.opciones`; ver [`tests/scripts/tiempo.py`](../tests/scripts/tiempo.py) y `test_cli_opciones.py`). Quitar esas lecturas, o moverlas a otro módulo, rompe esos tests. Por la misma razón, el código que lee el reloj se queda en el módulo donde está hoy.
+- **El reloj no se inyecta en esta fase** (levantado en la fase 4). Los tests congelan `date` y `datetime` parchando el módulo donde se leen (`entry`, `todo`, `scope`, `note`, `cycle`, `context`, `init`, `cli.opciones`; ver [`tests/scripts/tiempo.py`](../tests/scripts/tiempo.py) y `test_cli_opciones.py`). Quitar esas lecturas, o moverlas a otro módulo, rompe esos tests. Por la misma razón, el código que lee el reloj se queda en el módulo donde está hoy.
 - Dividir un módulo se hace sacando código a un módulo nuevo y reexportándolo desde el original, para que `scope.algo` siga existiendo.
 - **El código Python nuevo va en inglés** (identificadores, docstrings, comentarios), sin mezclar castellano. Lo existente no se renombra por esta regla. Los mensajes que ve quien invoca `tuku` siguen en español.
 - Otra sesión trabaja en la misma rama: antes de editar un archivo se vuelve a leer, y no se revierte lo que no es del refactor. Con dos sesiones, un `mypy` o un `pytest` pueden fallar por el trabajo a medias de la otra o por la caché compartida (`.mypy_cache`): se repite, y si persiste se prueba con `--cache-dir` propio antes de culpar al código.
@@ -176,11 +180,49 @@ Medido con un plugin de `pytest` que registra los arcos de `src/tuku/` que ejecu
 
 La capa unitaria corre en unos 4 s (antes 4,5 s).
 
+## Resultado de la fase 4
+
+**Reloj.** `cli.main(argv, *, now=None)` lee `datetime.now()` una vez y lo deja en `args.now`; los handlers lo pasan como `now` a los casos de uso. Ningún otro módulo de `src/tuku/` llama a `date.today()` ni a `datetime.now()`. Las firmas cambian:
+
+| Función | Antes | Ahora |
+|---|---|---|
+| `entry.add_al_vault`, `todo.abrir_en_vault`, `todo.cerrar_en_vault`, `note.crear_con_constancia`, `scope.crear_con_constancia` | leían el reloj | `now: datetime` obligatorio |
+| `note.renombrar_en_vault` | `hoy: date \| None` | `now: datetime` |
+| `context.del_vault` | `hoy: date \| None` | `now: datetime` |
+| `cycle.abrir_en_vault` | `fecha` o hoy | `fecha` o la de `now`; `cycle.open_cycle` exige la `fecha` |
+| `init.init` | `desde` o hoy | `desde: date` obligatorio; el CLI pasa `args.at.dia or args.now.date()` |
+| `todo.avisos_de_plazo` | leía el reloj | recibe `now` |
+| `cli.opciones` | las funciones `type=` de argparse leían el reloj | `momento_pasado` y `momento_futuro` solo parsean; `Momento.con_reloj(now)` completa la hora sola y el año que falta, y `main` lo aplica a `--at` y `--due` (`opciones.completar`) |
+
+`tests/scripts/tiempo.py` ya no parchea módulos: `tiempo.instante("AAAA-MM-DD HH:MM")` devuelve el `datetime` que el arnés y el shim del agente pasan como `now`. Los tests unitarios usan la constante `AHORA` de [`conftest.py`](../tests/conftest.py) (miércoles 12 de agosto de 2026, 09:00).
+
+**Planificar y ejecutar.** [`plan.py`](../src/tuku/plan.py) define `State` (lo que se lee: árbol de ámbitos, `AHORA.md`, `PENDIENTES.md`, horizontes y ámbito por defecto), `Change` (textos nuevos por ruta, mensaje, avisos, rutas a regenerar y páginas de ámbito a rehacer) y `apply`, el ejecutor único: escribe solo lo que difiere del disco, llama a `regenerate.rehacer` (con `skip=("todo",)` para `--no-regenerate`) y devuelve el `Resultado`. Cada caso de uso quedó en tres pasos: leer el estado, `plan_*` (puro) y `apply`.
+
+| Planner | Caso de uso |
+|---|---|
+| `entry.plan_add` | `entry.add_al_vault` |
+| `todo.plan_open` | `todo.abrir_en_vault` |
+| `todo.plan_close` | `todo.cerrar_en_vault` |
+| `note.plan_create` | `note.crear_con_constancia` (con `note.compose`, que reemplaza a `note.crear`) |
+
+`scope_tree.Tree` suma `scopes` (los ámbitos con página) para que el rechazo de «no existe el ámbito» no vuelva a leer el disco.
+
+**Tests.** Los de preparación (`test_context`, `test_entry_corregir`, `test_doctor`, `test_scope_create_since`, `test_notas_enlazables`, `test_opciones`, `test_cli_*`) pasan `now=AHORA` o `main(..., now=AHORA)`; los fixtures que sembraban con `date.today()` siembran con `AHORA.date()`. El nuevo [`test_plan.py`](../tests/unitarios/test_plan.py) prueba las reglas de rechazo, idempotencia, ámbito del cierre, horizonte y plazo sobre texto (12 funciones para `todo` y `entry`, 3 para `note`) y el ejecutor una vez sobre un vault. De las 17 funciones con vault de `test_cierre_vault`, `test_cli_opciones`, `test_cli_sobre_un_vault` y `test_archivo` quedan 5 (`entry update` con links distintos, que ahora vive en `test_entry_corregir`; el ámbito por defecto y el `now` de `main`; el rechazo sin dejar nada a medias; el nombre de un ámbito; `scope rename`) y `test_cierre_vault.py` desaparece. `test_archivo` ya no siembra un vault. `test_los_avisos_proceden_y_alertan_por_stderr` pasó a `traducir`, sin vault.
+
+La unión de arcos de la capa unitaria es la de antes más 13 arcos nuevos, ninguno perdido. Los nuevos son rechazos que ningún unitario ejercía: un día fuera del ciclo en `plan_add` y `plan_open`, un ámbito inexistente en `plan_open` y `plan_close`, y un `AHORA.md` sin salto final en `entry.add`. La suite no agéntica falla en los mismos 30 escenarios que antes de empezar (`002-13` y la cadena `005`): usan `tuku process cycle --from`, que el código todavía no tiene. Como esos fallos cortan las cadenas en su primer paso, se corrieron los 65 escenarios en una copia con `--from` cambiado por `--at`: pasan los 65 antes y después de la fase. 196 funciones de test unitario (192 al cerrar la fase 3, más 16 de `test_plan` y menos 12 que dejaron de hacer falta).
+
+**Decisiones.**
+
+- `Momento` parsea sin reloj y se completa después: así el parser de argparse, que se construye una vez por proceso, no depende de hoy.
+- `scope.actualizar_contenido_pagina` ya no cae a `date.today()` cuando `AHORA.md` no trae ciclo y nadie le pasa `hoy`: sin fecha de referencia omite el encabezado de mes de `## Actividad reciente`. Ningún test ejercía esa rama; `crear_con_constancia` sigue pasando la fecha de `now`.
+- `init.init` y `cycle.open_cycle` piden la fecha en vez de un `now`: son funciones que no necesitan la hora.
+- El orden de un rechazo cambia solo en un vault roto: el caso de uso lee `AHORA.md` y `PENDIENTES.md` antes de planear, así que un vault sin `PENDIENTES.md` falla con «no parece un vault» aun si la fecha del pedido también era futura.
+
 ## Lo que queda
 
-- **Planificar y ejecutar por separado, y reloj inyectado.** Es la reducción estructural (17 funciones con vault a unas 4 más unas 12 puras) y rompe las firmas que usan los tests de preparación; pide una fase propia.
-- **`test_notas_enlazables.py`** (11, unos 3 de sobra en los `context note`): otra sesión lo está cambiando.
+- **`scope.crear_con_constancia` sigue entero en el caso de uso.** Su salida depende del disco después de escribir (carpetas del padre, callout de hijos, `parent:` de cada página, bitácoras cerradas y keywords de todos los ámbitos para el mensaje y los avisos), así que un planner puro pide un `State` mucho mayor y un `Change` con operaciones de carpeta. Queda para una fase propia, con `scope move` y `scope rename`, que comparten ese tramo.
+- **`test_notas_enlazables.py`** (11, unos 3 de sobra en los `context note`): otra sesión lo está cambiando; esta fase solo le agregó `now=AHORA`.
 - **`config` importa `doctor`** por `ARCHIVOS_REQUERIDOS`: mover la constante a `config` cuando `config.py` deje de estar en edición.
 - **El ámbito en blanco** de `todo open --scope`: ver las decisiones tomadas.
-- **Escenarios de `tests/escenarios/`:** no se analizaron para fusionar.
-- **Tests que parchean el reloj** (`test_cli_opciones`, `test_cli_sobre_un_vault`) siguen dependiendo de que `entry`, `todo`, `scope` y `note` lean el reloj en su propio módulo.
+- **Escenarios de `tests/escenarios/`:** no se analizaron para fusionar. Los 30 que fallan esperan `process cycle --from`.
+- **`entry.actualizar_en_vault` y `entry.mover_en_vault`** siguen mezclando decisión y escritura; son los candidatos siguientes a un planner, después de `scope`.
