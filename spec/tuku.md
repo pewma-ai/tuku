@@ -56,7 +56,7 @@ Un proceso es una rutina con nombre ([despacho.md](despacho.md)). Los de `tuku` 
 
 ```text
 tuku process
-tuku process cycle [--from] [--to] [--name] [--force]   # pendiente: --from --to --name --force
+tuku process cycle [--from] [--to] [--name] [--force]
 ```
 
 ```mermaid
@@ -79,12 +79,10 @@ flowchart LR
 
     PL -.->|"lista los de tuku<br/>y los de procesos/"| PR
     PC -.->|"la plantilla"| TP
-    PC -->|"la semana de lunes a domingo<br/>que contiene la fecha;<br/>si ya la cubre, solo verifica"| AH
-    PC -.->|"pendiente: el rango de --from a --to;<br/>con semana, el que contiene --from"| AH
-    PC -.->|"rechaza una fecha<br/>anterior a su from"| AH
-    PC -.->|"pendiente: rechaza un --from que no sea<br/>el día siguiente al to del anterior,<br/>salvo repetir el ciclo abierto"| AH
-    PC -.->|"pendiente: un --from anterior al del ciclo abierto<br/>es un ciclo histórico, sin verificar"| BI
-    PC -.->|"pendiente: el nombre avanza en cycle_name;<br/>repetir el ciclo abierto lo conserva;<br/>--name fuera de la lista, solo con --force"| CF
+    PC -->|"el rango de --from a --to;<br/>con semana, el que contiene --from<br/>y sin --from, el día siguiente al to anterior;<br/>si ya lo cubre, solo verifica"| AH
+    PC -->|"rechaza un --from que no sea<br/>el día siguiente al to del anterior,<br/>salvo repetir el ciclo abierto"| AH
+    PC -->|"un --from anterior al del ciclo abierto<br/>es un ciclo pasado, sin verificar"| BI
+    PC -->|"el nombre avanza en cycle_name;<br/>repetir el ciclo abierto lo conserva;<br/>--name fuera de la lista, solo con --force"| CF
     PC -.->|"si hay una bitácora anterior"| BI
     PC -->|"con bitácora anterior, abre<br/>revisar la bitácora anterior<br/>como tuku todo open"| PE
 
@@ -378,8 +376,4 @@ flowchart LR
 
 ## Lo que se retira
 
-Comandos y opciones que existen hoy y que la firma de arriba reemplaza. Una línea sale de aquí cuando sale del CLI ([`../TODO.md`](../TODO.md), "Superficie del CLI").
-
-```text
-tuku process cycle --at         → tuku process cycle --from
-```
+Comandos y opciones que existen hoy y que la firma de arriba reemplaza. Una línea sale de aquí cuando sale del CLI ([`../TODO.md`](../TODO.md), "Superficie del CLI"). Hoy no se retira ninguno.

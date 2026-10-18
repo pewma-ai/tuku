@@ -22,7 +22,7 @@ to: 2026-08-18
 ---
 ```
 
-Hoy `process cycle` solo abre la semana y se invoca con `--at`. `--from`, `--to`, `--name`, `cycle_name` y `cycle:` entran con lo que dice [`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo".
+`tuku process cycle` recibe `--from`, `--to` y `--name`, y el nombre y el rango salen de `cycle_name` y del rango pedido ("Abrir el siguiente ciclo").
 
 ```markdown
 ---

@@ -245,6 +245,7 @@ def ahora_sembrado(template_variante: Path, *, desde: str, hasta: str, dias: lis
     plantilla = plantilla_path.read_text(encoding="utf-8")
     esperado = plantilla.replace("from: AAAA-MM-DD", f"from: {desde}")
     esperado = esperado.replace("to: AAAA-MM-DD", f"to: {hasta}")
+    esperado = esperado.replace("cycle: NOMBRE", "cycle: semana")
 
     posiciones = [
         "Lunes",

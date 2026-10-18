@@ -19,8 +19,12 @@ operaciones distintas (`spec/cli.md`).
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date, timedelta
+from itertools import pairwise
+from pathlib import Path
 
 from tuku import ahora as _ahora
+from tuku import archivo
 
 #: Lo que un ciclo declara en su frontmatter. `Logbook` porque `AHORA.md` y una
 #: bitácora cerrada son el mismo tipo de archivo (ver `reglas/types.md`).
@@ -110,6 +114,42 @@ def lint(ahora: str) -> list[Hallazgo]:
             )
 
     return hallazgos
+
+
+def gaps_and_overlaps(vault: Path) -> tuple[list[str], list[str]]:
+    """Overlaps (errors) and gaps (notices) between the cycles of `bitacoras/` and `AHORA.md`.
+
+    A past cycle loaded with `process cycle --from` is not checked against its
+    neighbours, so this is where the days covered twice or by no cycle show up.
+    """
+    found: list[tuple[date, date, str]] = []
+    paths = [*sorted((vault / "bitacoras").glob("bitacora-*.md")), vault / "AHORA.md"]
+    for path in paths:
+        if not path.is_file():
+            continue
+        limits = _ahora.rango(archivo.leer(path))
+        if limits is not None:
+            label = path.relative_to(vault).as_posix()
+            found.append((limits[0], limits[1], label))
+    found.sort()
+    overlaps: list[str] = []
+    gaps: list[str] = []
+    for (_, previous_end, previous), (start, _, label) in pairwise(found):
+        if start <= previous_end:
+            overlaps.append(
+                f"{label}: error: cubre desde el {start.isoformat()} y {previous} llega hasta "
+                f"el {previous_end.isoformat()}. Deja un ciclo por día: ajusta `from` y `to` "
+                "de uno de los dos."
+            )
+        elif start > previous_end + timedelta(days=1):
+            first = previous_end + timedelta(days=1)
+            last = start - timedelta(days=1)
+            gaps.append(
+                f"{label}: aviso: entre el {first.isoformat()} y el {last.isoformat()} no hay "
+                f"ciclo. Si hace falta, guárdalo con `tuku process cycle --from "
+                f"{first.isoformat()} --to {last.isoformat()} --name NOMBRE`."
+            )
+    return overlaps, gaps
 
 
 def _frontmatter(ahora: str) -> dict[str, str]:

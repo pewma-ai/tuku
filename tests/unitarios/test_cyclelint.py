@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from tuku.cyclelint import STATUS_ABIERTO, TYPE_DEL_CICLO, formatear, lint
+from pathlib import Path
+
+from tuku.cyclelint import (
+    STATUS_ABIERTO,
+    TYPE_DEL_CICLO,
+    formatear,
+    gaps_and_overlaps,
+    lint,
+)
 
 CABECERA = (
     "---\n"
@@ -41,3 +49,24 @@ def test_sin_frontmatter_reporta_todo_lo_que_falta() -> None:
         h.defecto for h in lint("# Actividad diaria\n\n## Lunes 7 de septiembre\n")
     )
     assert "frontmatter" in defectos and "`type`" in defectos and "`status`" in defectos
+
+
+def test_los_hoyos_y_solapes_entre_ciclos_se_reportan(tmp_path: Path) -> None:
+    def ciclo(desde: str, hasta: str) -> str:
+        return f"---\ntype: Logbook\nstatus: stable\nfrom: {desde}\nto: {hasta}\n---\n"
+
+    (tmp_path / "bitacoras").mkdir()
+    (tmp_path / "bitacoras" / "bitacora-2026-08-03-2026-08-09-semana.md").write_text(
+        ciclo("2026-08-03", "2026-08-09"), encoding="utf-8"
+    )
+    (tmp_path / "bitacoras" / "bitacora-2026-08-12-2026-08-16-semana.md").write_text(
+        ciclo("2026-08-12", "2026-08-16"), encoding="utf-8"
+    )
+    (tmp_path / "AHORA.md").write_text(ciclo("2026-08-15", "2026-08-21"), encoding="utf-8")
+
+    solapes, huecos = gaps_and_overlaps(tmp_path)
+
+    assert len(huecos) == 1 and "2026-08-10 y el 2026-08-11" in huecos[0]
+    assert "--from 2026-08-10 --to 2026-08-11" in huecos[0]
+    assert len(solapes) == 1 and solapes[0].startswith("AHORA.md: error:")
+    assert "2026-08-16" in solapes[0]

@@ -250,6 +250,7 @@ def _sembrar_ahora(contenido: str, desde: date) -> str:
 
     contenido = contenido.replace("from: AAAA-MM-DD", f"from: {desde.isoformat()}")
     contenido = contenido.replace("to: AAAA-MM-DD", f"to: {hasta.isoformat()}")
+    contenido = contenido.replace("cycle: NOMBRE", "cycle: semana")
 
     solo_extremos = (
         "## Lunes DD de mes" in contenido

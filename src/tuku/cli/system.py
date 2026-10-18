@@ -15,6 +15,7 @@ from tuku.cli.helpers import (
     RECHAZO,
     Handler,
     Subparsers,
+    fecha,
     traducir,
 )
 from tuku.cli.opciones import Opciones
@@ -74,7 +75,15 @@ def _cmd_process_cycle(args: argparse.Namespace) -> int:
     from tuku import cycle
 
     return traducir(
-        cycle.abrir_en_vault(args.vault, args.at.dia, now=args.now), "tuku process cycle"
+        cycle.abrir_en_vault(
+            args.vault,
+            desde=args.desde,
+            hasta=args.hasta,
+            nombre=args.nombre,
+            force=args.force,
+            now=args.now,
+        ),
+        "tuku process cycle",
     )
 
 
@@ -166,17 +175,49 @@ def registrar(
     process_v = process_p.add_subparsers(dest="verb", required=False)
     process_cycle_p = process_v.add_parser(
         "cycle",
-        help="abre o verifica el ciclo en AHORA.md",
+        help="abre, repite o guarda un ciclo de AHORA.md",
         description=(
-            "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con las fechas de la semana, de "
-            "lunes a domingo, que contiene `--at`. Si el ciclo ya está abierto, solo lo "
-            "verifica. Una fecha anterior al ciclo abierto se rechaza: un ciclo no se abre "
-            "hacia atrás. Con una bitácora anterior en `bitacoras/`, abre en "
-            "`PENDIENTES.md` el pendiente de revisarla."
+            "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con `cycle`, `from` y `to` del "
+            "ciclo y un encabezado de día por cada fecha del rango. Sin `--from` empieza el "
+            "día siguiente al `to` del ciclo anterior (el abierto o la bitácora más "
+            "reciente de `bitacoras/`) y, sin anterior, hoy. Con `semana` basta un día "
+            "cualquiera, que abre la semana de lunes a domingo que lo contiene; con otro "
+            "nombre de `cycle_name` hay que dar `--to`. El nombre es el siguiente de "
+            "`cycle_name`, o `--name` (uno que la lista no declara se rechaza salvo con "
+            "`--force`). Rechaza un `--from` que deje hoyos o solapes, y abrir otro ciclo "
+            "mientras el abierto tiene registros; repetir el ciclo abierto solo lo "
+            "verifica, o lo regenera si no tiene registros. Un `--from` anterior al ciclo "
+            "abierto guarda un ciclo pasado en `bitacoras/` sin verificarlo, y pide "
+            "`--name`. Con una bitácora anterior, abre en `PENDIENTES.md` el pendiente de "
+            "revisarla."
         ),
     )
     Opciones(process_cycle_p).vault("vault a verificar o abrir")
-    Opciones(process_cycle_p).at("un día de la semana a abrir, AAAA-MM-DD; por defecto, hoy")
+    process_cycle_p.add_argument(
+        "--from",
+        dest="desde",
+        type=fecha,
+        default=None,
+        help="primer día del ciclo, AAAA-MM-DD; con `semana`, un día cualquiera de la semana",
+    )
+    process_cycle_p.add_argument(
+        "--to",
+        dest="hasta",
+        type=fecha,
+        default=None,
+        help="último día del ciclo, AAAA-MM-DD; obligatorio si el nombre no es `semana`",
+    )
+    process_cycle_p.add_argument(
+        "--name",
+        dest="nombre",
+        default=None,
+        help="nombre del ciclo; por defecto, el siguiente de `cycle_name`",
+    )
+    process_cycle_p.add_argument(
+        "--force",
+        action="store_true",
+        help="acepta un `--name` que `cycle_name` no declara",
+    )
 
     doctor_p = sub.add_parser(
         "doctor",

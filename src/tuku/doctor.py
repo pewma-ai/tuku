@@ -502,8 +502,22 @@ def _check_logbook(c: _Check) -> list[Revision]:
     cycle_findings = cyclelint.lint(ahora)
     entry_findings = lint_records(ahora, abiertos=leer_config(c.vault).vocabularios_abiertos())
     entry_ok = not any(h.grado == ERROR for h in entry_findings)
+    overlaps, gaps = cyclelint.gaps_and_overlaps(c.vault)
+    cycle_ok = not cycle_findings and not overlaps
+    if overlaps or gaps:
+        errors = len(cycle_findings) + len(overlaps)
+        cycle_text = "\n".join(
+            [
+                *(str(h) for h in cycle_findings),
+                *overlaps,
+                *gaps,
+                f"cycle lint: {errors} error(es), {len(gaps)} aviso(s).",
+            ]
+        )
+    else:
+        cycle_text = cyclelint.formatear(cycle_findings)
     return [
-        Revision("cycle", cyclelint.formatear(cycle_findings), not cycle_findings),
+        Revision("cycle", cycle_text, cycle_ok, aviso=cycle_ok and bool(gaps)),
         Revision(
             "entry",
             format_records(entry_findings),

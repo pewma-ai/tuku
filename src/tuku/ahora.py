@@ -19,6 +19,10 @@ from tuku.init import DIAS, MESES
 
 _DIA = re.compile(r"^## \w+ (\d{1,2}) de (\w+)")
 _CAMPO = re.compile(r"^(from|to):\s*(\d{4}-\d{2}-\d{2})\s*$")
+_CICLO = re.compile(r"^cycle:\s*(\S.*?)\s*$")
+
+#: El nombre del ciclo cuando el frontmatter no lo declara.
+SEMANA = "semana"
 
 
 def es_dia(linea: str) -> bool:
@@ -49,6 +53,14 @@ def rango(ahora: str) -> tuple[date, date] | None:
     if "from" not in campos or "to" not in campos:
         return None
     return campos["from"], campos["to"]
+
+
+def nombre_del_ciclo(texto: str) -> str:
+    """The `cycle` of the frontmatter, or `semana` when a file does not declare one."""
+    for linea in texto.splitlines()[:10]:
+        if m := _CICLO.match(linea.strip()):
+            return m.group(1)
+    return SEMANA
 
 
 def fecha_del_dia(encabezado: str, desde: date, hasta: date) -> date | None:

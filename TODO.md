@@ -49,7 +49,7 @@ Con `semana`, `próxima semana` es desde el lunes siguiente, fijo. El artículo 
 
 **Defecto relacionado, sin resolver.** El libro de estilo promete que renombrar un horizonte no rompe nada, y no es así: [`regenerate.py`](src/tuku/regenerate.py) selecciona los pendientes del callout del ciclo por el texto literal `esta semana` (`todo.ESTA_SEMANA`), y `todo open` usa esa misma constante de valor por defecto. Quien renombre el primer horizonte a `este turno` deja el callout vacío, sin aviso. Debe seleccionar por posición (el primer escalón de la escalera del autor), no por texto.
 
-Lo decidido el 2026-10-18 sobre `tuku process cycle` ([`spec/ciclo.md`](spec/ciclo.md), "Abrir el siguiente ciclo"), por implementar junto con lo de arriba:
+Lo decidido el 2026-10-18 sobre `tuku process cycle` ([`spec/ciclo.md`](spec/ciclo.md), "Abrir el siguiente ciclo"), **implementado ese día** en [`cycle.py`](src/tuku/cycle.py) y, para los hoyos y solapes de `doctor cycle`, en [`cyclelint.py`](src/tuku/cyclelint.py):
 
 - `--at` se reemplaza por `--from` y `--to`, con el nombre de los campos del frontmatter. Con `semana`, `--from` es un día cualquiera de la semana y `--to` se deduce.
 - Sin `--from`, empieza el día siguiente al `to` del ciclo anterior (el abierto o, si ya se archivó, la bitácora más reciente).
@@ -57,7 +57,6 @@ Lo decidido el 2026-10-18 sobre `tuku process cycle` ([`spec/ciclo.md`](spec/cic
 - Un `--from` anterior al del ciclo abierto es un ciclo histórico: se escribe en `bitacoras/` sin verificar contra los vecinos, con `--name`, y `tuku doctor cycle` reporta los hoyos y solapes que queden.
 - El cambio de ciclo lo dispara el rechazo de `tuku entry create` ante un día fuera del ciclo abierto; ya existe, y el agente avisa al autor, cierra el ciclo si tiene registros y corre `process cycle`.
 - `--name` opcional. Fuera de `cycle_name` se rechaza con aviso y se repite con `--force` tras confirmarlo con el autor.
-- Al cambiar `--at` por `--from`, borrar la línea de "Lo que se retira" de [`spec/tuku.md`](spec/tuku.md) y los `# pendiente` de la firma, y actualizar los escenarios 002-13, 005-01 y `test_cycle_open.py`.
 
 ### El libro de estilo estático, con los datos del autor aparte
 
@@ -151,3 +150,4 @@ Anotado desde el chat de specs el 2026-10-18. Lo de comandos y tests vive ademá
 ### Epics
 
 - **Capítulos 3 y 4 con aviso "Todavía no funciona":** la tabla de estado dice que el epic 004 está sin empezar, pero hay escenarios `004-01` a `004-05` y un conductor de conversación. Si ya funcionan, el epic quita el aviso de los capítulos 3 y 4 y actualiza la tabla.
+- **Correr el tutorial con `test-tui`** (propuesta del chat de specs). Los `> [!tip]` del capítulo 2 son frases literales: un escenario con bloques `agente` que las copie corre hoy con [`test-tui.py`](tests/scripts/test-tui.py) sin cambiar el arnés, y un test unitario compara esas frases con los callouts de [`docs/tutorial/02-el-primer-dia.md`](docs/tutorial/02-el-primer-dia.md) para que no diverjan. Falta soportar pasos que no son del agente (`tuku doctor`, "borra una fila a mano") entre turnos, y un reloj fijo por frase. Los capítulos 3 a 6 parten de un vault con historia (dos profesoras, Importadora Andina, el ámbito Liceo Técnico Andes) que el capítulo 2 no crea: cada uno necesita su vault base, como los de `005-*`, o el capítulo 2 debe sembrar esos datos.
