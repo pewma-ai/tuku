@@ -55,13 +55,13 @@ def _pagina(directorio: Path) -> Path:
 
 
 def normalizar(nombre: str) -> str:
-    """El nombre de un ámbito tal como va en disco y en los enlaces.
+    """El nombre de un ámbito tal como va en disco y en los enlaces: kebab-case.
 
-    Los espacios pasan a guion: el autor dicta "depto centro" y el ámbito es
-    `depto-centro`. Sin esto, cada agente elige su forma y el mismo frente
+    En minúsculas y con los espacios en guion: el autor dicta "Depto Centro" y el
+    ámbito es `depto-centro`. Sin esto, cada agente elige su forma y el mismo frente
     termina con dos nombres.
     """
-    return re.sub(r"\s+", "-", nombre.strip().strip("[]").strip())
+    return re.sub(r"\s+", "-", nombre.strip().strip("[]").strip()).lower()
 
 
 def igual_nombre(a: str, b: str) -> bool:
@@ -190,13 +190,13 @@ def _clave(keyword: str) -> str:
 
 
 def palabras_de(valores: Sequence[str]) -> list[str]:
-    """Las keywords que dicen `valores`: separadas por coma, con los espacios en guion.
+    """Las keywords que dicen `valores`: separadas por coma, en kebab-case.
 
-    `--keyword "Los Robles, Rodolfo"` son dos keywords, `Los-Robles` y `Rodolfo`: la
+    `--keyword "Los Robles, Rodolfo"` son dos keywords, `los-robles` y `rodolfo`: la
     misma regla de los nombres de ámbito (`normalizar`), así una keyword se escribe
     igual dentro de la lista `[a, b]` del frontmatter, que separa con comas y espacios.
     """
-    palabras = (re.sub(r"\s+", "-", p.strip()) for v in valores for p in v.split(","))
+    palabras = (re.sub(r"\s+", "-", p.strip()).lower() for v in valores for p in v.split(","))
     return [p for p in palabras if p]
 
 

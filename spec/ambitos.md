@@ -60,7 +60,7 @@ Toda página de ámbito debe transcluir sus pendientes desde `PENDIENTES-AMBITOS
 ![[../PENDIENTES-AMBITOS.md#^personal]]
 ```
 
-Los nombres de ámbito no distinguen mayúsculas: dos carpetas que solo difieren en ellas no pueden coexistir (el disco de macOS y Windows no las distingue), y un nombre que escribe mal las mayúsculas encuentra el ámbito existente. `tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito, asegura su callout en `PENDIENTES-AMBITOS.md` y estampa una constancia cronológica en `AHORA.md`, con `--at` o, si falta, HOY y AHORA en `TZ`:
+Los nombres de ámbito van en minúsculas, en kebab-case (ver «El nombre de un ámbito»): `Depto Centro` es `depto-centro`. Así dos carpetas no pueden diferir solo en mayúsculas, que el disco de macOS y Windows no distingue, y un nombre mal escrito en mayúsculas encuentra el ámbito existente. `tuku scope create` siembra automáticamente esta transclusión al crear un nuevo ámbito, asegura su callout en `PENDIENTES-AMBITOS.md` y estampa una constancia cronológica en `AHORA.md`, con `--at` o, si falta, HOY y AHORA en `TZ`:
 
 ```text
 - 18:45 - [depto-centro](ambitos/depto-centro/depto-centro.md) **nota**: abrí el ámbito
@@ -84,12 +84,12 @@ Ante cualquier defecto, el linter informa y nunca repara por su cuenta: nombra l
 La línea `keywords: [vlti, LCU]` del frontmatter de la página lista las palabras con que el autor se refiere al ámbito sin decir su nombre. El nombre del ámbito no va en la lista: ya es el de la carpeta. Cuando lo que el autor dice menciona una de ellas, el ámbito es ese. Si `depto-centro` declara `viana`, `claudia` y `arriendo`, «hablé con Claudia por el arriendo» va a `depto-centro` aunque el autor no diga su nombre. Elige quien interpreta, leyendo las páginas, y el body queda como lo dijo el autor: una keyword no lo modifica ni lo enlaza.
 
 - **`tuku scope create NOMBRE`** pide las keywords en su salida cuando el ámbito es nuevo y no recibió ninguna: el agente las pregunta al autor y no las inventa. `--keyword`, repetible o con varias palabras separadas por coma, las pone en el mismo comando.
-- **`tuku scope update NOMBRE --keyword PALABRA`** las suma a la lista y no escribe nada más: ni `AHORA.md` ni ningún registro cambian. `--keyword` es repetible y admite varias palabras separadas por coma (`--keyword viana,claudia`). Los espacios de una palabra pasan a guion, como en el nombre de un ámbito: `Los Robles` se guarda `Los-Robles`. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con corchetes.
+- **`tuku scope update NOMBRE --keyword PALABRA`** las suma a la lista y no escribe nada más: ni `AHORA.md` ni ningún registro cambian. `--keyword` es repetible y admite varias palabras separadas por coma (`--keyword viana,claudia`). Una palabra va en kebab-case, como el nombre de un ámbito: minúsculas y con guiones en lugar de espacios, así que `Los Robles` se guarda `los-robles`. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con corchetes.
 - **`tuku scope rename`** no toca las keywords, porque el nombre no está entre ellas.
 
 ## El nombre de un ámbito
 
-**Los espacios pasan a guion.** El autor dicta "depto centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry create`, `todo open`, `note create`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
+**Minúsculas y espacios en guion (kebab-case).** El autor dicta "Depto Centro" y el ámbito es `depto-centro`: carpeta, página y enlaces. Todo comando que recibe un ámbito (`scope create`, `scope rename`, `entry create`, `todo open`, `note create`) lo normaliza igual, así que la forma en que se dictó no crea un segundo frente.
 
 **Un ámbito que no existe se rechaza.** `entry create`, `todo open` y `note create` salen con `RECHAZO` sin escribir nada, y el mensaje nombra `tuku scope create <nombre>` como corrección. Crear un ámbito cambia dónde cae todo lo que venga después, y esa decisión es del autor: se le ofrece, no se toma por él. Una categoría sí existe, y apuntarle un registro lo reporta `scope lint`, no lo impide el comando.
 

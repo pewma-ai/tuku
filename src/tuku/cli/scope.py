@@ -89,10 +89,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "Suma cada `--keyword` a las `keywords` del frontmatter de la página del ámbito, "
             "que debe existir: siglas, sistemas, personas y proyectos que, al mencionarlos, "
             "indican que algo es de ese ámbito. Sirven para elegir el ámbito de lo que el "
-            "autor dice. Cada `--keyword` admite varias palabras separadas por coma, y los "
-            "espacios de una palabra pasan a guion. Solo escribe la página del ámbito: "
-            "`AHORA.md` y los registros no cambian. Lo que ya estaba no se repite, y si "
-            "nada es nuevo no escribe nada."
+            "autor dice. Cada `--keyword` admite varias palabras separadas por coma, y cada "
+            "palabra va en kebab-case: minúsculas y guiones en lugar de espacios. Solo "
+            "escribe la página del ámbito: `AHORA.md` y los registros no cambian. Lo que ya "
+            "estaba no se repite, y si nada es nuevo no escribe nada."
         ),
     )
     scope_update_p.add_argument("name", help="nombre del ámbito")

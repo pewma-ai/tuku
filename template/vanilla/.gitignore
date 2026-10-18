@@ -1,0 +1,3 @@
+# De Obsidian se versiona solo la semilla: lo demás lo reescribe el editor.
+.obsidian/*
+!.obsidian/app.json

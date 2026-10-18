@@ -14,9 +14,9 @@ Si el autor nombra un frente que todavía no existe, **no lo crees por tu cuenta
 
 ## Cuándo se crea un ámbito
 
-Cuando el autor lo pide. `tuku scope create` arma la carpeta y su página y deja la constancia en la bitácora: no escribas otro registro para eso. El nombre se pasa tal como lo dijo el autor: el comando cambia los espacios por guiones. El día y la hora de la constancia se pasan como en un registro, con `--at`.
+Cuando el autor lo pide. `tuku scope create` arma la carpeta y su página y deja la constancia en la bitácora: no escribas otro registro para eso. El nombre se pasa tal como lo dijo el autor: el comando lo pasa a minúsculas y cambia los espacios por guiones. El día y la hora de la constancia se pasan como en un registro, con `--at`.
 
-Al crearlo, la salida del comando pide las keywords. Pregúntaselas al autor con sus propias palabras, sin inventarlas, y regístralas con `tuku scope update paranal --keyword vlti,gravity,LCU`. Si ya las dio al pedir el ámbito, pásalas en el mismo comando: `tuku scope create paranal --keyword vlti,LCU`. Cada `--keyword` admite varias palabras separadas por coma, y una palabra de varios términos lleva guiones en lugar de espacios (`Los-Robles`). Las keywords te dicen de qué ámbito es lo que el autor menciona; no cambian ni enlazan lo ya escrito. Para sumar otras después, el mismo `scope update`.
+Al crearlo, la salida del comando pide las keywords. Pregúntaselas al autor con sus propias palabras, sin inventarlas, y regístralas con `tuku scope update paranal --keyword vlti,gravity,LCU`. Si ya las dio al pedir el ámbito, pásalas en el mismo comando: `tuku scope create paranal --keyword vlti,LCU`. Cada `--keyword` admite varias palabras separadas por coma, y una palabra va en kebab-case: minúsculas y guiones en lugar de espacios (`los-robles`). Las keywords te dicen de qué ámbito es lo que el autor menciona; no cambian ni enlazan lo ya escrito. Para sumar otras después, el mismo `scope update`.
 
 Si un comando rechaza un ámbito porque no existe, ofrécele al autor crearlo y espera el sí.
 

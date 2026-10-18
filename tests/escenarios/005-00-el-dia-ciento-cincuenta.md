@@ -64,6 +64,7 @@ La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usa
 | S7 | `note lint` acepta un archivo y `entry lint`, `todo lint` y `scope lint` no aceptan destino. `vocab` y `style` son nouns con un solo verbo cada uno (`show`, `lint`) |
 | S8 | `tuku init` recibe el destino como posicional y `--variant`, y el resto usa `--vault`. En `reglas/config.tuku.md` el campo se llama `tuku_template` |
 | S9 | Falta un escenario de superficie para el CLI completo: [`devel/epics.md`](../../devel/epics.md) pide que todo epic que añada comandos fije su superficie con `tuku -h`, y hoy solo `001-06` cubre `tuku init -h`. Se escribe cuando S1 a S8 estén cerrados |
+| ~~S10~~ | ~~Los nombres de ámbito y las keywords conservaban las mayúsculas del dictado (`Los-Robles`).~~ Resuelto el 2026-10-17 (lo pidió el autor): todo nombre de carpeta o archivo que TUKU genera, y las keywords, van en kebab-case en minúsculas (`importadora-andina`). Un ámbito escrito en mayúsculas encuentra el existente. Las notas ya lo cumplían, además sin tildes |
 
 ### A. Defectos: la spec ya lo dice y el CLI no lo cumple
 

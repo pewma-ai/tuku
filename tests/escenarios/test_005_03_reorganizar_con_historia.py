@@ -98,7 +98,7 @@ def test_005_03_las_keywords_siguen_a_su_ambito() -> None:
     linea = next(x for x in pagina.splitlines() if x.startswith("keywords:"))
     # el nombre no vive en las keywords: renombrar no las toca
     assert "liceo-tecnico-andes" not in linea
-    for palabra in ("Patricia", "Lillo"):
+    for palabra in ("patricia", "lillo"):
         assert palabra in linea
 
 

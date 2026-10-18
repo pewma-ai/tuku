@@ -49,7 +49,7 @@ Entonces cada turno deja el delta de esta tabla
 
 Y el vault final coincide con la tabla de verdad
 Y `ambitos/` queda con `faena`, `personal` y `tuku`, y `faena` con `faena-ai`, `tesis-javier-castro` y `transformacion-digital`
-Y la página de `faena` lista esos tres ámbitos en el callout `En **Faena**:` y declara `keywords: [la-planta, FNA]`
+Y la página de `faena` lista esos tres ámbitos en el callout `En **Faena**:` y declara `keywords: [la-planta, fna]`
 Y cada cambio del vault tiene su comando `tuku` en la traza
 Y `notas/conversation-log.md` contiene los doce turnos
 Y `tuku doctor` confirma la coherencia total del vault
