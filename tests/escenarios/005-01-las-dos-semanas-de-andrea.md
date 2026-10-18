@@ -147,7 +147,7 @@ Cuando se archiva la semana como lo haría Andrea con un editor, y se abre la si
 mkdir bitacoras
 sed -e 's/^status: draft/status: stable/' -e 's|](ambitos/|](../ambitos/|g' AHORA.md > bitacoras/bitacora-2026-08-10-2026-08-16.md
 rm AHORA.md
-tuku process cycle --at 2026-08-17
+tuku process cycle --from 2026-08-17
 ```
 Entonces `bitacoras/bitacora-2026-08-10-2026-08-16.md` tiene los registros de la semana, `status: stable`, y los links de cada ámbito resuelven desde `bitacoras/`
 Y `AHORA.md` es la semana del 17 al 23, vacía de registros salvo el pendiente de revisar la bitácora anterior, con vencimiento el lunes 17

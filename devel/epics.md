@@ -151,6 +151,7 @@ Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumul
 Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo valga la pena leerlo. Las cadencias entran acá porque emiten en la apertura del ciclo. Cubre fases 6 y 7, más lo restante de la 4. La mecánica determinista (abrir, promover pendientes, aplanar transclusiones, archivar ciclos, ramas de ámbitos y notas) se prueba con archivos inyectados antes de conectar el LLM para plan y resumen.
 
 - **Criterio de salida:** abrir dos veces no duplica; cerrar dos veces no vuelve a mover; prueba que falla a propósito si se aplana antes del resumen. Plan calcula capacidad contra lo declarado.
+- **Horizontes vencidos:** al abrir el ciclo siguiente, un pendiente cuyo horizonte ya pasó (los `esta semana` de la semana cerrada) se marca atrasado en `tuku context todo`, sin moverlo de escalón. El autor decide si lo posterga; TUKU no corre un compromiso por su cuenta.
 
 > [!tip] Mirar en VAULT al diseñar cadencias y cierre
 > - [`VAULT/spec/cadencias.md`](VAULT/spec/cadencias.md): los cinco disparadores, en particular la cadencia por ausencia de actividad ("un cliente sin contacto hace cuatro semanas"), la más valiosa y la única que ningún cuaderno tiene. Y "el reporte es la memoria": lo que se conserva de un período largo es su relato.
