@@ -179,7 +179,7 @@ def test_005_01_las_palabras_que_delatan_un_frente_quedan_en_su_pagina() -> None
         "liceo-tecnico-andes.md",
     ).read_text(encoding="utf-8")
     linea = next(x for x in pagina.splitlines() if x.startswith("keywords:"))
-    for palabra in ("Liceo Andes", "Patricia", "Lillo"):
+    for palabra in ("Liceo-Andes", "Patricia", "Lillo"):
         assert palabra in linea, linea
     personal = _leer(corrida, "ambitos", "personal", "personal.md")
     assert "Emilia" in personal and "Vicente" in personal

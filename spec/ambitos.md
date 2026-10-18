@@ -83,8 +83,8 @@ Ante cualquier defecto, el linter informa y nunca repara por su cuenta: nombra l
 
 La línea `keywords: [nombre, vlti, LCU]` del frontmatter de la página lista los nombres con que el autor se refiere al ámbito. Cuando lo que el autor dice menciona una de ellas, el ámbito es ese. Si `depto-centro` declara `viana`, `claudia` y `arriendo`, «hablé con Claudia por el arriendo» va a `depto-centro` aunque el autor no diga su nombre. Elige quien interpreta, leyendo las páginas, y el body queda como lo dijo el autor: una keyword no lo modifica ni lo enlaza.
 
-- **`tuku scope create NOMBRE`** pide las keywords en su salida cuando el ámbito es nuevo y no recibió ninguna: el agente las pregunta al autor y no las inventa. `--keyword PALABRA`, repetible, las pone en el mismo comando.
-- **`tuku scope keywords NOMBRE PALABRA...`** las suma a la lista y no escribe nada más: ni `AHORA.md` ni ningún registro cambian. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con comas o corchetes.
+- **`tuku scope create NOMBRE`** pide las keywords en su salida cuando el ámbito es nuevo y no recibió ninguna: el agente las pregunta al autor y no las inventa. `--keyword`, repetible o con varias palabras separadas por coma, las pone en el mismo comando.
+- **`tuku scope update NOMBRE --keyword PALABRA`** las suma a la lista y no escribe nada más: ni `AHORA.md` ni ningún registro cambian. `--keyword` es repetible y admite varias palabras separadas por coma (`--keyword viana,claudia`). Los espacios de una palabra pasan a guion, como en el nombre de un ámbito: `Los Robles` se guarda `Los-Robles`. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con corchetes.
 - **`tuku scope rename`** cambia el nombre dentro de la lista y conserva las demás.
 
 ## El nombre de un ámbito

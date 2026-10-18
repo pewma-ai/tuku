@@ -45,7 +45,7 @@ Entonces cada turno deja el delta de esta tabla
 | 9 | Ratifica | un pendiente con vencimiento el viernes 14 |
 | 10 | Pide abrir `faena` y poner adentro `faena-ai` y `transformacion-digital` | `scope create faena` y dos `scope move`; los links de los registros ya escritos siguen resolviendo |
 | 11 | Pide poner adentro la tesis | un `scope move`; el callout de `faena` suma `tesis-javier-castro` |
-| 12 | Dice qué palabras delatan a `faena` | un `scope keywords`; la página de `faena` suma «la planta» y «FNA» a sus `keywords` |
+| 12 | Dice qué palabras delatan a `faena` | un `scope update`; la página de `faena` suma «la planta» y «FNA» a sus `keywords` |
 
 Y el vault final coincide con la tabla de verdad
 Y `ambitos/` queda con `faena`, `personal` y `tuku`, y `faena` con `faena-ai`, `tesis-javier-castro` y `transformacion-digital`

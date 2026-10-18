@@ -56,7 +56,7 @@ def crear(
     reescribe lo que el autor pueda haber editado a mano.
 
     El frontmatter lleva `type: Note`, que `reglas/types.md` asigna a todo lo de
-    `notas/` y `spec/README.md` exige en cualquier archivo que guarde
+    `notas/` y `spec/vault.md` exige en cualquier archivo que guarde
     conocimiento. Es distinto de `subtype`, la lista abierta que subdivide ese
     `Note` en las notas tipadas (`spec/notas.md`): solo lo declaran algunas, y
     TUKU todavía no lo escribe.

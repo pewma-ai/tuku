@@ -37,7 +37,7 @@ tuku scope create administracion --at "2026-08-10 07:53" --keyword caja --keywor
 tuku scope create tributario --parent administracion --at "2026-08-10 07:54" --keyword SII --keyword F29 --keyword IVA --keyword patente
 tuku scope create cobranza --parent administracion --at "2026-08-10 07:55" --keyword cobranza --keyword "facturas vencidas"
 tuku scope create financiamiento --parent administracion --at "2026-08-10 07:56" --keyword "Felipe Correa" --keyword "línea de capital"
-tuku scope keywords personal Emilia Vicente
+tuku scope update personal --keyword Emilia,Vicente
 ```
 Entonces el negocio y la administración tienen sus ámbitos dentro, y `clientes/` y `proveedores/` son categorías sin página
 Y cada ámbito lleva en `keywords` los nombres con que Andrea lo menciona

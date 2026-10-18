@@ -189,12 +189,22 @@ def _clave(keyword: str) -> str:
     return re.sub(r"[-\s]+", " ", keyword).strip().casefold()
 
 
+def palabras_de(valores: Sequence[str]) -> list[str]:
+    """Las keywords que dicen `valores`: separadas por coma, con los espacios en guion.
+
+    `--keyword "Los Robles, Rodolfo"` son dos keywords, `Los-Robles` y `Rodolfo`: la
+    misma regla de los nombres de ámbito (`normalizar`), así una keyword se escribe
+    igual dentro de la lista `[a, b]` del frontmatter, que separa con comas y espacios.
+    """
+    palabras = (re.sub(r"\s+", "-", p.strip()) for v in valores for p in v.split(","))
+    return [p for p in palabras if p]
+
+
 def _sumar(previas: list[str], nuevas: Sequence[str]) -> list[str]:
     """`previas` y, detrás, las `nuevas` que ninguna anterior repite."""
     salida = list(previas)
     vistas = {_clave(k) for k in salida}
-    for k in nuevas:
-        k = " ".join(k.split())
+    for k in palabras_de(nuevas):
         if k and _clave(k) not in vistas:
             salida.append(k)
             vistas.add(_clave(k))
@@ -202,12 +212,11 @@ def _sumar(previas: list[str], nuevas: Sequence[str]) -> list[str]:
 
 
 def _rechazo_de_keywords(nuevas: Sequence[str]) -> Resultado | None:
-    """Una keyword vive en una lista `[a, b]` de una línea: sin comas ni corchetes."""
-    malas = [k for k in nuevas if re.search(r"[,\[\]\n]", k)]
+    """Una keyword vive en una lista `[a, b]` de una línea: sin corchetes."""
+    malas = [k for k in nuevas if re.search(r"[\[\]]", k)]
     if malas:
         return Resultado.rechazo(
-            f"la keyword {malas[0]!r} lleva comas o corchetes y no cabe en la lista del "
-            f"frontmatter. Pasa cada palabra por separado."
+            f"la keyword {malas[0]!r} lleva corchetes y no cabe en la lista del frontmatter."
         )
     return None
 
@@ -660,6 +669,7 @@ def crear_con_constancia(
         return rechazo
     if (rechazo := _rechazo_de_keywords(palabras)) is not None:
         return rechazo
+    palabras = palabras_de(palabras)
     if (otro := _choque(vault, nombre)) is not None:
         return Resultado.rechazo(
             f"ya existe el ámbito {otro!r}, y los nombres no distinguen mayúsculas. "
@@ -701,7 +711,7 @@ def crear_con_constancia(
         anotar_hijo(padre, directorio)
     pagina_path = directorio / f"{nombre}.md"
     if not nuevo and palabras:
-        return agregar_keywords(vault, nombre, palabras)
+        return actualizar(vault, nombre, palabras)
     if ahora_path.is_file() and pagina_path.is_file():
         original = ahora_path.read_text(encoding="utf-8")
         texto = original
@@ -724,13 +734,13 @@ def _pedir_keywords(nombre: str) -> str:
         f"Pregunta al autor qué palabras, cuando las mencione, indican que algo es de "
         f"{nombre!r}: siglas, sistemas, personas, proyectos (para `paranal`: vlti, gravity, "
         f"LCU, TCS, VLT). No son otros nombres del ámbito, son lo que lo delata. "
-        f"No las inventes. Regístralas con `tuku scope keywords {nombre} PALABRA...`: "
-        f"quedan en el frontmatter de la página y sirven para elegir este ámbito cuando "
-        f"el autor las mencione, sin modificar lo que dice."
+        f"No las inventes. Regístralas con `tuku scope update {nombre} --keyword PALABRA`, "
+        f"repetible o separadas por coma: quedan en el frontmatter de la página y sirven "
+        f"para elegir este ámbito cuando el autor las mencione, sin modificar lo que dice."
     )
 
 
-def agregar_keywords(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
+def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
     """Suma `nuevas` a las `keywords` de la página del ámbito.
 
     Una keyword sirve para elegir el ámbito de lo que el autor dice, y no modifica ni
@@ -742,9 +752,9 @@ def agregar_keywords(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resulta
         return rechazo
     if (rechazo := _rechazo_de_keywords(nuevas)) is not None:
         return rechazo
-    if not [k for k in nuevas if k.strip()]:
+    if not palabras_de(nuevas):
         return Resultado.rechazo(
-            f"faltan las palabras. Uso: `tuku scope keywords {nombre} PALABRA...`."
+            f"nada que actualizar. Uso: `tuku scope update {nombre} --keyword PALABRA`."
         )
     pagina = _pagina(carpeta(vault, nombre))
     texto = pagina.read_text(encoding="utf-8")

@@ -1,4 +1,4 @@
-"""Las keywords de un ámbito: `scope create` las pide y `scope keywords` las suma."""
+"""Las keywords de un ámbito: `scope create` las pide y `scope update` las suma."""
 
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ def test_crear_un_ambito_sin_keywords_le_pide_al_agente_preguntarlas(
     assert "indican que algo es de 'paranal'" in salida, (
         "las keywords no son sinónimos del nombre"
     )
-    assert "tuku scope keywords paranal PALABRA..." in salida
+    assert "tuku scope update paranal --keyword PALABRA" in salida
     assert _keywords(vault, "paranal", "paranal.md") == ["paranal"]
 
 
@@ -76,11 +76,17 @@ def test_keywords_suma_las_nuevas_sin_repetir_y_no_toca_la_bitacora(vault: Path)
         == EXITO
     )  # fmt: skip
     antes = _ahora(vault)
-    assert _tuku(vault, "scope", "keywords", "paranal", "lcu", "vlti", "TCS") == EXITO
+    assert (
+        _tuku(vault, "scope", "update", "paranal", "--keyword", "lcu,vlti", "--keyword", "TCS")
+        == EXITO
+    )
     assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "lcu", "vlti", "TCS"]
     assert _ahora(vault) == antes, "una keyword no modifica ni enlaza el body"
 
-    assert _tuku(vault, "scope", "keywords", "paranal", "LCU", "tcs") == EXITO
+    assert (
+        _tuku(vault, "scope", "update", "paranal", "--keyword", "LCU", "--keyword", "tcs")
+        == EXITO
+    )
     assert _keywords(vault, "paranal", "paranal.md") == ["paranal", "lcu", "vlti", "TCS"]
     assert _tuku(vault, "doctor") == EXITO
 
@@ -109,7 +115,7 @@ def test_crear_un_ambito_no_enlaza_ni_modifica_lo_ya_escrito(vault: Path) -> Non
 def test_keywords_repetida_con_otra_grafia_no_escribe_nada(vault: Path) -> None:
     assert _crear(vault, "paranal", "--keyword", "casa matriz") == EXITO
     antes = (vault / "ambitos" / "paranal" / "paranal.md").read_bytes()
-    assert _tuku(vault, "scope", "keywords", "paranal", "casa-matriz") == EXITO
+    assert _tuku(vault, "scope", "update", "paranal", "--keyword", "Casa-Matriz") == EXITO
     assert (vault / "ambitos" / "paranal" / "paranal.md").read_bytes() == antes
 
 
@@ -119,9 +125,10 @@ def test_keywords_rechaza_lo_que_no_cabe_o_no_existe(
     assert _crear(vault, "paranal") == EXITO
     capsys.readouterr()
     casos = [
-        (("scope", "keywords", "nada", "x"), "no existe el ámbito"),
-        (("scope", "keywords", "paranal", "a,b"), "comas o corchetes"),
-        (("scope", "keywords", "paranal", " "), "faltan las palabras"),
+        (("scope", "update", "nada", "--keyword", "x"), "no existe el ámbito"),
+        (("scope", "update", "paranal", "--keyword", "[a]"), "corchetes"),
+        (("scope", "update", "paranal", "--keyword", " , "), "nada que actualizar"),
+        (("scope", "update", "paranal"), "nada que actualizar"),
     ]
     for argv, dice in casos:
         assert _tuku(vault, *argv) == RECHAZO, argv
@@ -146,7 +153,35 @@ def test_un_pendiente_con_una_keyword_sigue_coincidiendo_con_su_fila(vault: Path
         )
         == EXITO
     )  # fmt: skip
-    assert _tuku(vault, "scope", "keywords", "depto-centro", "gastos comunes") == EXITO
+    assert (
+        _tuku(vault, "scope", "update", "depto-centro", "--keyword", "gastos comunes") == EXITO
+    )
     assert "**pendiente**: pagar los gastos comunes del depto centro" in _ahora(vault)
     assert _tuku(vault, "todo", "lint") == EXITO
     assert _tuku(vault, "doctor") == EXITO
+
+
+def test_una_keyword_admite_varias_palabras_separadas_por_coma_y_los_espacios_pasan_a_guion(
+    vault: Path,
+) -> None:
+    assert (
+        _crear(vault, "paranal", "--keyword", "Los Robles, vlti", "--keyword", "gravity")
+        == EXITO
+    )
+    assert _keywords(vault, "paranal", "paranal.md") == [
+        "paranal",
+        "Los-Robles",
+        "vlti",
+        "gravity",
+    ]
+    assert _tuku(vault, "scope", "update", "paranal", "--keyword", "Paula  Reyes,LCU") == EXITO
+    assert _keywords(vault, "paranal", "paranal.md")[-2:] == ["Paula-Reyes", "LCU"]
+
+
+def test_scope_keywords_ya_no_existe(vault: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """La sintaxis se estabiliza sin retrocompatibilidad: una sola forma de dar keywords."""
+    assert _crear(vault, "paranal") == EXITO
+    capsys.readouterr()
+    with pytest.raises(SystemExit):
+        _tuku(vault, "scope", "keywords", "paranal", "vlti")
+    assert "invalid choice" in capsys.readouterr().err

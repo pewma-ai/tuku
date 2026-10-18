@@ -23,10 +23,8 @@ def _cmd_scope_create(args: argparse.Namespace) -> int:
     )
 
 
-def _cmd_scope_keywords(args: argparse.Namespace) -> int:
-    return traducir(
-        scope.agregar_keywords(args.vault, args.name, args.palabras), "tuku scope keywords"
-    )
+def _cmd_scope_update(args: argparse.Namespace) -> int:
+    return traducir(scope.actualizar(args.vault, args.name, args.keyword), "tuku scope update")
 
 
 def _cmd_scope_move(args: argparse.Namespace) -> int:
@@ -78,28 +76,34 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         action="append",
         default=[],
         metavar="PALABRA",
-        help="palabra con que el autor nombra el ámbito (repetible); va en las keywords",
+        help="palabra que delata el ámbito (repetible, o varias separadas por coma)",
     )
     Opciones(scope_create_p).parent()
     Opciones(scope_create_p).at("cuándo se abre, para la constancia; lo que falte, hoy y ahora")
     Opciones(scope_create_p).vault("vault a modificar")
 
-    scope_keywords_p = scope_v.add_parser(
-        "keywords",
-        help="suma palabras a las keywords de un ámbito",
+    scope_update_p = scope_v.add_parser(
+        "update",
+        help="suma keywords a la página de un ámbito",
         description=(
-            "Suma PALABRA... a las `keywords` del frontmatter de la página del ámbito, que "
-            "debe existir: siglas, sistemas, personas y proyectos que, al mencionarlos, "
+            "Suma cada `--keyword` a las `keywords` del frontmatter de la página del ámbito, "
+            "que debe existir: siglas, sistemas, personas y proyectos que, al mencionarlos, "
             "indican que algo es de ese ámbito. Sirven para elegir el ámbito de lo que el "
-            "autor dice. Solo escribe la página del ámbito: `AHORA.md` y los registros no "
-            "cambian. Lo que ya estaba no se repite, y si nada es nuevo no escribe nada."
+            "autor dice. Cada `--keyword` admite varias palabras separadas por coma, y los "
+            "espacios de una palabra pasan a guion. Solo escribe la página del ámbito: "
+            "`AHORA.md` y los registros no cambian. Lo que ya estaba no se repite, y si "
+            "nada es nuevo no escribe nada."
         ),
     )
-    scope_keywords_p.add_argument("name", help="nombre del ámbito")
-    scope_keywords_p.add_argument(
-        "palabras", nargs="+", metavar="PALABRA", help="keywords a sumar"
+    scope_update_p.add_argument("name", help="nombre del ámbito")
+    scope_update_p.add_argument(
+        "--keyword",
+        action="append",
+        default=[],
+        metavar="PALABRA",
+        help="palabra que delata el ámbito (repetible, o varias separadas por coma)",
     )
-    Opciones(scope_keywords_p).vault("vault a modificar")
+    Opciones(scope_update_p).vault("vault a modificar")
 
     scope_move_p = scope_v.add_parser(
         "move",
@@ -143,7 +147,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
 
     return {
         ("scope", "create"): _cmd_scope_create,
-        ("scope", "keywords"): _cmd_scope_keywords,
+        ("scope", "update"): _cmd_scope_update,
         ("scope", "move"): _cmd_scope_move,
         ("scope", "rename"): _cmd_scope_rename,
         ("scope", "lint"): _cmd_scope_lint,
