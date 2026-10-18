@@ -304,8 +304,22 @@ def revisar_version(config_md: str | None, version_home: str | None) -> Revision
     )
 
 
-#: Los temas de `tuku doctor TEMA`. Un tema existe cuando tiene su `tuku fix TEMA`.
-TEMAS = ("link", "todo")
+#: Los temas de `tuku doctor TEMA`: el nombre de cada revisión, en el orden en que corren.
+#: `link`, `todo` y `scope` son los mismos nombres que usan `tuku fix` y `tuku regenerate`.
+TEMAS = (
+    "config",
+    "version",
+    "types",
+    "files",
+    "frontmatter",
+    "dispatch",
+    "link",
+    "cycle",
+    "entry",
+    "todo",
+    "style",
+    "scope",
+)
 
 
 def archivos_md(vault: Path) -> list[str]:
@@ -436,20 +450,11 @@ def revisar_vault(
     para reparar comparando. Nunca copia: verificar y corregir son operaciones
     distintas.
 
-    Con `tema` corre solo esa revisión (`TEMAS`); el arreglo de cada hallazgo
-    lo aplica `tuku fix TEMA`.
+    Con `tema` informa solo esa revisión (`TEMAS`); el arreglo de los hallazgos de
+    `link` y `todo` lo aplica `tuku fix TEMA`.
 
     Sin `verbose` el reporte trae solo los hallazgos y los avisos; ver `formatear`.
     """
-    if tema in TEMAS:
-        revision = revisar_links(vault) if tema == "link" else revisar_todo(vault)
-        if revision.sano:
-            return Resultado.hecho(
-                formatear([revision], verbose=True)
-                if verbose
-                else f"doctor {tema}: sin hallazgos."
-            )
-        return Resultado.rechazo(formatear([revision], verbose=verbose), error=False)
     from tuku import cyclelint, scope, style
     from tuku.config import leer_config
     from tuku.lint import ERROR
@@ -459,78 +464,95 @@ def revisar_vault(
     def leer(nombre: str) -> str | None:
         return archivo_opcional(vault, nombre)
 
-    from tuku.init import TukuHomeInvalido, resolver_home, version_del_home
+    def quiere(*nombres: str) -> bool:
+        return tema is None or tema in nombres
 
-    try:
-        version_home = version_del_home(resolver_home())
-    except TukuHomeInvalido:
-        version_home = None
-
+    revisiones: list[Revision] = []
     types_md = leer("reglas/types.md")
-    revisiones = [
-        revisar_config(leer("reglas/config.tuku.md")),
-        revisar_version(leer("reglas/config.tuku.md"), version_home),
-        revisar_tipos(types_md),
-        revisar_archivos(vault),
-        revisar_frontmatter(
-            vault, tipos_validos=tipos_declarados(types_md) if types_md else []
-        ),
-    ]
-    if comandos is not None:
+    if quiere("config"):
+        revisiones.append(revisar_config(leer("reglas/config.tuku.md")))
+    if quiere("version"):
+        from tuku.init import TukuHomeInvalido, resolver_home, version_del_home
+
+        try:
+            version_home = version_del_home(resolver_home())
+        except TukuHomeInvalido:
+            version_home = None
+        revisiones.append(revisar_version(leer("reglas/config.tuku.md"), version_home))
+    if quiere("types"):
+        revisiones.append(revisar_tipos(types_md))
+    if quiere("files"):
+        revisiones.append(revisar_archivos(vault))
+    if quiere("frontmatter"):
+        revisiones.append(
+            revisar_frontmatter(
+                vault, tipos_validos=tipos_declarados(types_md) if types_md else []
+            )
+        )
+    if comandos is not None and quiere("dispatch"):
         revisiones.append(revisar_despacho(leer("AGENTS.md"), comandos))
-    revisiones.append(revisar_links(vault))
+    if quiere("link"):
+        revisiones.append(revisar_links(vault))
 
-    ahora = leer("AHORA.md")
-    if ahora is None:
-        revisiones.append(ausente("cycle", "AHORA.md"))
-        revisiones.append(ausente("entry", "AHORA.md"))
-    else:
-        h_cycle = cyclelint.lint(ahora)
-        revisiones.append(Revision("cycle", cyclelint.formatear(h_cycle), not h_cycle))
+    if quiere("cycle", "entry"):
+        ahora = leer("AHORA.md")
+        if ahora is None:
+            revisiones.append(ausente("cycle", "AHORA.md"))
+            revisiones.append(ausente("entry", "AHORA.md"))
+        else:
+            h_cycle = cyclelint.lint(ahora)
+            revisiones.append(Revision("cycle", cyclelint.formatear(h_cycle), not h_cycle))
 
-        h_entry = lint_registros(ahora, abiertos=leer_config(vault).vocabularios_abiertos())
-        sano_entry = not any(h.grado == ERROR for h in h_entry)
+            h_entry = lint_registros(
+                ahora, abiertos=leer_config(vault).vocabularios_abiertos()
+            )
+            sano_entry = not any(h.grado == ERROR for h in h_entry)
+            revisiones.append(
+                Revision(
+                    "entry",
+                    formatear_registros(h_entry),
+                    sano_entry,
+                    aviso=sano_entry and bool(h_entry),
+                )
+            )
+
+    if quiere("todo"):
+        if leer("PENDIENTES.md") is None:
+            revisiones.append(ausente("todo", "PENDIENTES.md"))
+        else:
+            # `todo lint` entero: duplicados, marcas sin su fila y vistas desactualizadas.
+            revisiones.append(revisar_todo(vault))
+
+    if quiere("style"):
+        libro = leer("LIBRO-DE-ESTILO.md")
+        if libro is None:
+            revisiones.append(ausente("style", "LIBRO-DE-ESTILO.md"))
+        else:
+            h_style = style.lint(libro)
+            sano_style = not any(h.grado == ERROR for h in h_style)
+            revisiones.append(
+                Revision(
+                    "style",
+                    style.formatear(h_style),
+                    sano_style,
+                    aviso=sano_style and bool(h_style),
+                )
+            )
+
+    if quiere("scope"):
+        h_scope = scope.lint(vault)
         revisiones.append(
             Revision(
-                "entry",
-                formatear_registros(h_entry),
-                sano_entry,
-                aviso=sano_entry and bool(h_entry),
+                "scope",
+                "scope lint: sin hallazgos."
+                if not h_scope
+                else "\n".join([*h_scope, f"scope lint: {len(h_scope)} error(es)."]),
+                not h_scope,
             )
         )
 
-    pendientes = leer("PENDIENTES.md")
-    if pendientes is None:
-        revisiones.append(ausente("todo", "PENDIENTES.md"))
-    else:
-        # `todo lint` entero: duplicados, marcas sin su fila y vistas desactualizadas.
-        revisiones.append(revisar_todo(vault))
-
-    libro = leer("LIBRO-DE-ESTILO.md")
-    if libro is None:
-        revisiones.append(ausente("style", "LIBRO-DE-ESTILO.md"))
-    else:
-        h_style = style.lint(libro)
-        sano_style = not any(h.grado == ERROR for h in h_style)
-        revisiones.append(
-            Revision(
-                "style",
-                style.formatear(h_style),
-                sano_style,
-                aviso=sano_style and bool(h_style),
-            )
-        )
-
-    h_scope = scope.lint(vault)
-    revisiones.append(
-        Revision(
-            "scope",
-            "scope lint: sin hallazgos."
-            if not h_scope
-            else "\n".join([*h_scope, f"scope lint: {len(h_scope)} error(es)."]),
-            not h_scope,
-        )
-    )
+    if tema is not None and not verbose and all(r.sano and not r.aviso for r in revisiones):
+        return Resultado.hecho(f"doctor {tema}: sin hallazgos.")
 
     mensaje = formatear(revisiones, fuente=fuente_de_referencia(), verbose=verbose)
     if all(r.sano for r in revisiones):

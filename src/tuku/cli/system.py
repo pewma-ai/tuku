@@ -19,6 +19,7 @@ from tuku.cli.helpers import (
 )
 from tuku.cli.opciones import Opciones
 from tuku.doctor import TEMAS as TEMAS_DOCTOR
+from tuku.fix import TEMAS as TEMAS_FIX
 from tuku.init import (
     DestinoNoVacio,
     DestinoProhibido,
@@ -178,8 +179,9 @@ def registrar(
         description=(
             "Corre todos los lint y revisa el vault entero: archivos requeridos, "
             "`reglas/config.tuku.md`, los comandos que nombra cada `AGENTS.md`, la tabla "
-            "de `reglas/types.md`, los links y la versión con que se sembró. Con un TEMA "
-            "revisa solo esa parte. No escribe nada: cada hallazgo dice cómo corregirlo."
+            "de `reglas/types.md`, los links y la versión con que se sembró. Con un TEMA, "
+            f"el nombre de una revisión ({', '.join(TEMAS_DOCTOR)}), informa solo esa "
+            "parte. No escribe nada: cada hallazgo dice cómo corregirlo."
         ),
     )
     doctor_p.add_argument(
@@ -208,7 +210,7 @@ def registrar(
             "pide una decisión del autor no se escribe: sale listado, con código 1."
         ),
     )
-    fix_p.add_argument("tema", choices=TEMAS_DOCTOR, help="el tema a reparar")
+    fix_p.add_argument("tema", choices=tuple(TEMAS_FIX), help="el tema a reparar")
     Opciones(fix_p).vault("vault a reparar")
 
     regenerate_p = sub.add_parser(

@@ -5,7 +5,10 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
+import pytest
+
 from tuku import doctor, entry, init
+from tuku.cli import EXITO, main
 from tuku.doctor import (
     TIPOS_REQUERIDOS,
     Revision,
@@ -192,3 +195,28 @@ def test_la_version_del_vault_se_compara_con_la_del_paquete() -> None:
     assert sin_referencia.sano and "sin sello" in sin_referencia.salida
 
     assert doctor.revisar_version(None, "2.0").sano
+
+
+def test_cada_tema_de_doctor_es_el_nombre_de_una_revision(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`doctor TEMA` informa solo esa revisión; los temas son los nombres de las revisiones."""
+    vault = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    for tema in doctor.TEMAS:
+        assert main(["doctor", tema, "--vault", str(vault)]) == EXITO, tema
+        assert capsys.readouterr().out.strip() == f"doctor {tema}: sin hallazgos."
+        assert main(["doctor", tema, "-v", "--vault", str(vault)]) == EXITO
+        assert capsys.readouterr().out.strip() != "doctor: el vault está sano.", (
+            f"{tema} no corre ninguna revisión"
+        )
+
+
+def test_doctor_scope_reporta_solo_el_lint_de_ambitos(tmp_path: Path) -> None:
+    vault = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    pagina = vault / "ambitos" / "personal" / "personal.md"
+    pagina.write_text("x [[roto]]\n", encoding="utf-8")
+
+    con_tema = doctor.revisar_vault(vault, tema="scope")
+    assert "scope lint" in con_tema.mensaje
+    assert "wikilink" not in con_tema.mensaje, "el wikilink es del tema link"
+    assert "wikilink" in doctor.revisar_vault(vault, tema="link").mensaje

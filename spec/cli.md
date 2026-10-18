@@ -55,15 +55,16 @@ De ahí la asimetría de `tuku entry lint` ([bitacora.md](bitacora.md)): informa
 
 `tuku doctor` verifica y `tuku fix TEMA` repara. Se separan por la misma razón que verificar y corregir son operaciones distintas: quien revisa antes de reparar conserva la oportunidad de no hacerlo.
 
-- **`tuku doctor [TEMA]`.** Sin tema revisa todo el vault; con tema, solo esa revisión. Un tema desconocido es error de uso (código 2).
+- **`tuku doctor [TEMA]`.** Sin tema revisa todo el vault; con tema, solo esa revisión, que se nombra como en el reporte: `config`, `version`, `types`, `files`, `frontmatter`, `dispatch`, `link`, `cycle`, `entry`, `todo`, `style` o `scope`. Un tema desconocido es error de uso (código 2).
+- **Un tema es siempre el nombre de la cosa.** `link`, `todo` y `scope` significan lo mismo en `doctor`, `fix` y `regenerate`, y cada comando acepta los que le tienen sentido.
 - **Sin `--verbose`, solo lo que hay que leer.** El reporte trae las revisiones con hallazgos y las que dejan un aviso (una pregunta del lint, un vault sembrado con otra versión), más el cierre `doctor: el vault está sano.` o la cuenta de hallazgos. Con `--verbose` (`-v`), todas las revisiones. El código de salida no depende de la opción, y un aviso no hace fallar.
-- **`tuku fix TEMA`.** Todo tema tiene su `fix`, y cada hallazgo del tema nombra `tuku fix TEMA` como corrección.
+- **`tuku fix TEMA`.** Acepta los temas de `doctor` que tienen arreglo, hoy `link` y `todo`, y cada hallazgo de esos temas nombra `tuku fix TEMA` como corrección.
 - **Lo determinista se aplica.** Cuando el arreglo no requiere juicio, `fix` lo hace entero: cada cambio queda completo, nunca a medias por archivo.
 - **Lo no determinista se devuelve como decisiones, sin escribir.** La salida dice qué hay que decidir, entre qué opciones y qué comando correr una vez decidido. Quien corre TUKU suele ser un agente, y esas decisiones son del autor.
 - **Hallazgos mixtos.** `fix` aplica lo determinista, deja intacto lo que requiere decisión y lista esas decisiones.
 - **Códigos de salida.** 0 si el tema quedó sano; 1 si quedan decisiones. Es idempotente: una segunda corrida no cambia nada.
 - **La fecha de modificación se conserva cuando el cambio es solo de forma.** Convertir `[[x]]` en `[x](ruta)` no es una edición del autor, y esa fecha es la que Obsidian y el sistema de archivos usan para ordenar lo reciente.
-- **Cuándo entra un tema nuevo.** Un tema existe cuando tiene un `fix` que hacer. Las demás revisiones de `tuku doctor` salen sin tema y su corrección sigue siendo el comando original o una tarea del autor. Un tema nuevo entra cuando un epic encuentra un caso real que lo pida. Hoy: `link` y `todo`.
+- **Cuándo entra un `fix` nuevo.** Un tema de `doctor` tiene `fix` cuando hay algo determinista que reparar. En los demás la corrección sigue siendo el comando original o una tarea del autor. Un `fix` nuevo entra cuando un epic encuentra un caso real que lo pida. Hoy: `link` y `todo`.
 
 ## `tuku regenerate [TEMA]`
 
