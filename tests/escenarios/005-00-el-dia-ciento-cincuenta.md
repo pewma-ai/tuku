@@ -47,7 +47,23 @@ La Parte 3 (el estado reconstruible) **no se usa como aserción**: contiene pend
 
 Lo que los escenarios encontraron, jerarquizado y con un identificador estable. Se trabajan en el orden de las tablas, y cada uno que se completa se tacha (`~~así~~`) sin borrarlo: qué hacer con la lista al cerrar el epic se decide entonces.
 
-El orden sigue dos criterios: primero lo que el diseño ya dice y el código no cumple (hay un test rojo que lo prueba y no hace falta decidir nada), después lo que pide una decisión mínima antes de escribir código, y al final los documentos que se contradicen. Cada fila nombra el test que la prueba, o dice por qué no lo tiene.
+El orden sigue tres criterios: primero la sintaxis del CLI, que está en revisión y de la que cuelgan los nombres de varios pendientes; después lo que el diseño ya dice y el código no cumple (hay un test rojo que lo prueba y no hace falta decidir nada); al final lo que pide una decisión y los documentos que se contradicen. Cada fila nombra el test que la prueba, o dice por qué no lo tiene.
+
+### S. La sintaxis del CLI está abierta
+
+La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usan la de hoy: el `.md` es la fuente ejecutable, así que un nombre nuevo cambia solo sus líneas `tuku`. Los nombres que este epic propone (`todo lint` para los atrasados, `note create --subtype`, el verbo de postergar) son provisionales hasta cerrar esta sección. Lo que sigue es el repaso de la superficie actual, con lo que cada punto cuesta cambiar: un nombre vive en el código, en `reglas/comandos.tuku.md`, en el `AGENTS.md` del template, en las specs y en los escenarios.
+
+| Id | Pendiente |
+| --- | --- |
+| S1 | Los verbos de crear son tres: `entry add`, `scope create` y `note create`, más `todo open` y `cycle open`. `add` es el que desentona. Cambiarlo toca el `AGENTS.md` del template, que el agente aprende de memoria |
+| S2 | `scope keywords NOMBRE PALABRA...` usa un sustantivo como verbo, entre `create`, `move`, `rename` y `lint`, y las keywords se dan de dos formas: `scope create --keyword` (repetible) y `scope keywords` (posicionales) |
+| S3 | Los temas de `doctor`, `fix` y `regenerate` son tres listas distintas: `doctor` y `fix` aceptan `link` y `todo`, `regenerate` acepta `todo`, `scope` y `comandos`. `doctor scope` se rechaza aunque `doctor` corre el lint de ámbitos, de registros, de ciclo, de estilo y de notas. Un solo vocabulario de temas (el noun) lo resuelve |
+| S4 | Los alias en español cubren la mitad de las opciones: `--body/--cuerpo`, `--scope/--ambito`, `--at/--cuando`, `--parent/--padre`, `--due/--vence`, `--horizon/--horizonte`, `--variant/--variante`, `--author/--autor`, `--body-file/--cuerpo-archivo`, `--no-record/--sin-constancia`. Quedan sin alias `--keyword`, `--force`, `--no-propagate`, `--vault` y `--verbose`. Se decide alias para todas o para ninguna |
+| S5 | `--at` significa tres cosas: cuándo ocurrió (`entry add`, `todo open`, `todo close`, `scope create`, `note create`), qué día abre el ciclo (`cycle open`) y qué registro corregir (`entry rename`). Con dos registros en el mismo minuto, `entry rename --at` corrige el primero sin avisar cuál: la spec pide informar ante la duda. Se rechaza con la lista de candidatos, o se elige por el cuerpo actual |
+| S6 | El CLI no tiene comandos de lectura: ni `todo list`, ni `scope list` o `scope tree`, ni `note list`. «Qué tengo pendiente» se responde leyendo archivos. B1 (los atrasados) y B4 (postergar) piden decidir si hay un verbo `list` (por ejemplo `todo list --late`) en vez de cargarle fechas a `lint`, que revisa defectos |
+| S7 | `note lint` acepta un archivo y `entry lint`, `todo lint` y `scope lint` no aceptan destino. `vocab` y `style` son nouns con un solo verbo cada uno (`show`, `lint`) |
+| S8 | `tuku init` recibe el destino como posicional y `--variant`, y el resto usa `--vault`. En `reglas/config.tuku.md` el campo se llama `tuku_template` |
+| S9 | Falta un escenario de superficie para el CLI completo: [`devel/epics.md`](../../devel/epics.md) pide que todo epic que añada comandos fije su superficie con `tuku -h`, y hoy solo `001-06` cubre `tuku init -h`. Se escribe cuando S1 a S8 estén cerrados |
 
 ### A. Defectos: la spec ya lo dice y el CLI no lo cumple
 
@@ -61,10 +77,10 @@ El orden sigue dos criterios: primero lo que el diseño ya dice y el código no 
 
 | Id | Pendiente | Test |
 | --- | --- | --- |
-| B1 | Ningún comando informa los atrasados. `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo y `todo lint` y `doctor` no saben de fechas. Depende de X1 | `005-04` (2 rojos y 2 guardas) |
+| B1 | Ningún comando informa los atrasados. `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo y `todo lint` y `doctor` no saben de fechas. Depende de X1 y S6 | `005-04` (2 rojos y 2 guardas) |
 | B2 | No existe una nota tipada: `note create` no tiene `--subtype` y no se siembra `reglas/tipos/persona.md`, que `spec/notas.md` promete «el epic que escriba la primera nota tipada». Depende de X2 | `005-05` tipada (3 rojos) |
-| B3 | Las keywords repetidas entre ámbitos pasan sin aviso: `scope keywords escuela-los-maitenes Paula` sale con 0 y `tuku doctor` dice que el vault está sano, con `Paula` ya en `catalogo-marzo`. Es lo que hace ambigua a la Paula del `005-06`. Falta decidir si avisa `scope keywords`, `doctor` o los dos | sin test |
-| B4 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se baja con un comando. Falta el nombre y la forma | sin test: se escribe cuando B4 tenga nombre |
+| B3 | Las keywords repetidas entre ámbitos pasan sin aviso: `scope keywords escuela-los-maitenes Paula` sale con 0 y `tuku doctor` dice que el vault está sano, con `Paula` ya en `catalogo-marzo`. Es lo que hace ambigua a la Paula del `005-06`. Falta decidir si avisa `scope keywords`, `doctor` o los dos, y depende de S2 | sin test |
+| B4 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se baja con un comando. Falta el nombre y la forma, que dependen de S6 | sin test: se escribe cuando B4 tenga nombre |
 | B5 | El rechazo de `cycle open` con un ciclo con registros dice «mueve AHORA.md a bitacoras/…». Quien lo sigue al pie de la letra deja 9 links rotos en la bitácora (están a un nivel más adentro) y `doctor` falla sin que `fix link` pueda repararlos. Mientras `cycle close` sea del epic 006, el mensaje tiene que decir que se reescriban los links con `../` | sin test: `005-01` lo hace a mano |
 
 ### C. El agente
@@ -98,10 +114,11 @@ Tomadas al escribir los escenarios, para poder escribirlos. Cada una se confirma
 
 | Id | Decisión | Usa |
 | --- | --- | --- |
-| X1 | `tuku todo lint` informa los atrasados como aviso, con código 0. Es la forma que menos inventa: un comando que ya existe, con el patrón de `entry lint`, que informa preguntas sin fallar. La alternativa es un comando propio | B1, `005-04` |
+| X1 | `tuku todo lint` informa los atrasados como aviso, con código 0. Es la forma que menos inventa: un comando que ya existe, con el patrón de `entry lint`, que informa preguntas sin fallar. Las alternativas son un comando propio y un verbo `list` (S6) | B1, `005-04` |
 | X2 | `note create --subtype persona`, con el campo que `spec/notas.md` ya llama `subtype`, y `reglas/tipos/persona.md` sembrado por `tuku init` | B2, `005-05` |
 | X3 | El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea | B5, `005-01` |
 | X4 | El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos | C1, `005-06` |
+| X5 | Los escenarios usan la sintaxis de hoy aunque esté en revisión (S): al cambiar un nombre se cambian sus líneas `tuku` y los tests no se tocan | todos |
 
 ## Escenario: preparar el ambiente del epic
 
