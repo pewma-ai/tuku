@@ -7,6 +7,14 @@
 >
 > Sirve para dos cosas. Probar que el modelo aguanta un dominio ajeno al de su autor sin tocar `src/`, y probar las cadencias, que en un negocio son casi todas de fecha fija impuesta desde afuera, no de ritmo propio.
 
+> [!warning] Dónde este corpus difiere de la spec
+> Se escribió antes de que la spec fijara algunas reglas, y no se reescribe: los escenarios lo leen con la spec de hoy ([`005-00`](../../tests/escenarios/005-00-el-dia-ciento-cincuenta.md), "Cómo se leyó el corpus"). Las diferencias:
+> - Un `AGENTS.md` y un `CADENCIAS.md` «obligatorios en cada directorio»: la spec dice que ausente es vacío.
+> - Registros sobre categorías y sobre personas: la spec los apunta a un ámbito o a una actividad.
+> - 17 de los 29 `(Hecho)` no tienen pendiente abierto: la spec pide un pendiente previo para cerrar.
+> - Un horizonte `sin fecha`: la spec no lo tiene.
+> - Una Parte 3 con pendientes que la Parte 2 no abre.
+
 ## La usuaria
 
 **Andrea Bustos**, 43 años, dueña de **Insumos Kelluwün**, una PYME de venta de insumos educacionales en una ciudad intermedia: cuadernos, útiles, material didáctico, mobiliario menor y reposición para colegios, jardines infantiles y librerías revendedoras.
