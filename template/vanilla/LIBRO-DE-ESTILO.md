@@ -58,7 +58,7 @@ Las notas pueden ser libres. Algunas, sobre cosas que se repiten, conviene que s
 | --- | --- | --- | --- |
 | `persona` | Trabajar mejor con alguien con quien el autor trata seguido. | Se escribe solo lo que se le mostraría a esa persona. | sí |
 
-"Enlazable" dice si `tuku` enlaza solo la primera mención de una nota de ese tipo al registrar: su título o uno de sus `aliases`. Empieza con uno. Los demás aparecen cuando algo se repite lo suficiente como para merecer página propia.
+"Enlazable" dice si `tuku context` ofrece al agente las últimas notas de ese tipo, con su título y sus `aliases`, para que enlace la primera mención al registrar. Empieza con uno. Los demás aparecen cuando algo se repite lo suficiente como para merecer página propia.
 
 ## Las plantillas viven en `reglas/`
 

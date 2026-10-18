@@ -120,7 +120,6 @@ flowchart LR
         BI["bitacoras/"]
         PE["PENDIENTES.md"]
         AM["ambitos/"]
-        NO["notas/"]
         CF["reglas/config.tuku.md"]
         DER["Lo derivado"]
     end
@@ -129,7 +128,6 @@ flowchart LR
     EC -->|"en un día pasado sin hora,<br/>al final del día"| AH
     EC -.->|"sin --scope, scope_default"| CF
     EC -.->|"que exista el ámbito de --scope,<br/>y su ruta para el link"| AM
-    EC -.->|"título y aliases de las notas<br/>de tipo enlazable, para el link"| NO
     EU -->|"el cuerpo del último registro<br/>que calza con --match"| AH
     EU & EM -->|"si es pendiente, su fila"| PE
     EM -->|"el ámbito del registro"| AH
@@ -140,7 +138,7 @@ flowchart LR
     classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
     classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
     class EC,EU,EM escribe
-    class AH,BI,PE,AM,NO,CF archivo
+    class AH,BI,PE,AM,CF archivo
     class DER derivado
 ```
 
@@ -165,14 +163,12 @@ flowchart LR
         PE["PENDIENTES.md"]
         CF["reglas/config.tuku.md"]
         LE["LIBRO-DE-ESTILO.md"]
-        NO["notas/"]
         DER["Lo derivado<br/>vistas de pendientes,<br/>salvo --no-regenerate;<br/>actividad de los ámbitos, siempre"]
     end
 
     TO -->|"registro pendiente bajo el día de --at,<br/>una sola vez"| AH
     TO -->|"fila bajo su horizonte:<br/>con fecha si --due,<br/>el de --horizon o el primero"| PE
     TO -.->|"los horizontes"| LE
-    TO -.->|"título y aliases de las notas<br/>de tipo enlazable, para el link"| NO
     TC -->|"registro (Hecho) tachado;<br/>borra el pendiente si se abrió<br/>ese mismo día"| AH
     TC -->|"borra la fila cuyo texto es TEXTO"| PE
     TO -.->|"sin --scope, scope_default"| CF
@@ -183,7 +179,7 @@ flowchart LR
     classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
     classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
     class TO,TC escribe
-    class AH,PE,CF,LE,NO archivo
+    class AH,PE,CF,LE archivo
     class DER derivado
 ```
 
@@ -264,9 +260,8 @@ flowchart LR
         DER["Lo derivado: actividad<br/>de la página del ámbito"]
     end
 
-    NC -->|"frontmatter con subtype y created de --at,<br/>cuerpo y Ver además con --scope<br/>y los links que enlazó"| NO
+    NC -->|"frontmatter con subtype y created de --at,<br/>cuerpo y Ver además con --scope<br/>y los links del cuerpo"| NO
     NC -.->|"--subtype debe ser una fila<br/>de Tipos de nota"| LE
-    NC -.->|"título y aliases de las notas<br/>de tipo enlazable, para el link"| NO
     NC -->|"constancia en la bitácora,<br/>salvo --no-record"| AH
     NC -->|"con --scope, rehace"| DER
     NR -->|"renombra archivo y título"| NO
@@ -290,7 +285,7 @@ Lo que el agente necesita para decidir, sin abrir archivos. Sin `TEMA`, todos.
 tuku context [TEMA] [--since] [--late]
 ```
 
-`--since` vale 2 días por defecto. `--late` solo vale con `todo` y deja únicamente los pendientes atrasados.
+`--since` (2 días por defecto) acota los registros de `entry`. `context note` trae las últimas notas de cada tipo enlazable, tantas como diga `context_note_limit` en `reglas/config.tuku.md` (25 por defecto). `--late` solo vale con `todo` y deja únicamente los pendientes atrasados.
 
 ```mermaid
 %%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
@@ -314,7 +309,7 @@ flowchart LR
     CX -.->|"scope: el árbol con sus keywords"| AM
     CX -.->|"todo: abiertos y atrasados;<br/>con --late, solo los atrasados"| PE
     CX -.->|"style: clasificaciones,<br/>horizontes y tipos de nota"| LE
-    CX -.->|"note: las de tipo enlazable<br/>nombradas desde --since"| NO
+    CX -.->|"note: por tipo enlazable, las últimas<br/>con título y aliases"| NO
 
     classDef revisa fill:#fce7f3,color:#831843,stroke:#f9a8d4
     classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1

@@ -69,7 +69,7 @@ def test_scope_todo_y_note(vault: Path) -> None:
         "- con fecha, vence 2026-08-11, atrasado: enviar la cotización (personal)" in pendientes
     )
     notas = context.del_vault(vault, "note", hoy=HOY).mensaje
-    assert notas == "- notas/rodolfo-cifuentes.md (persona), mencionada el 2026-08-11"
+    assert notas == "## persona\n\n- notas/rodolfo-cifuentes.md: Rodolfo Cifuentes"
 
 
 def test_late_deja_solo_los_pendientes_cuyo_vence_ya_paso(vault: Path) -> None:

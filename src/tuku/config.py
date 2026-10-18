@@ -114,6 +114,18 @@ def ambito_por_defecto(vault: Path) -> str | None:
     return parsear_config_md(texto).get("scope_default", "").strip("`") or None
 
 
+#: Cuántas notas por tipo trae `tuku context note` si la config no dice otra cosa.
+LIMITE_DE_NOTAS = 25
+
+
+def limite_de_notas(vault: Path) -> int:
+    """El `context_note_limit` de `reglas/config.tuku.md`, o 25 si falta o no es un entero."""
+    ruta = Path(vault) / "reglas" / "config.tuku.md"
+    texto = archivo.leer(ruta) if ruta.is_file() else ""
+    valor = parsear_config_md(texto).get("context_note_limit", "").strip("`")
+    return int(valor) if valor.isdigit() and int(valor) > 0 else LIMITE_DE_NOTAS
+
+
 def parsear_config_md(texto: str) -> dict[str, str]:
     """Los campos de la tabla de `config.tuku.md`.
 

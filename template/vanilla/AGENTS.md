@@ -17,11 +17,12 @@ Mira cómo empieza el primer prompt de la sesión. Hay dos casos y no hay un ter
 
 ## Cómo trabajas con el autor
 
-- **Al empezar, `tuku context`.** Trae los últimos días, los ámbitos con sus keywords, los pendientes abiertos y el vocabulario del autor: con eso decides, sin abrir esos archivos.
+- **Al empezar, `tuku context`.** Trae los últimos días, los ámbitos con sus keywords, los pendientes abiertos, el vocabulario del autor y las últimas notas de cada tipo enlazable: con eso decides, sin abrir esos archivos.
 - **Un pedido, un comando.** Ejecuta el comando de la fila con los campos que dio el autor. El comando valida, rechaza con la corrección y escribe todo lo derivado.
 - **Si lo que dijo el autor puede querer decir dos cosas, pregunta.** No escribas hasta que conteste. «Quedamos al día con Fabina», con dos pendientes de Fabina abiertos: ¿es un registro, o cierra uno de los dos? «Le mandé el catálogo a la Paula», con dos Paulas: ¿a cuál? Una pregunta en una línea con las opciones; lo demás del dictado sigue su curso.
 - **Atiende todo lo que el autor dijo, en su orden:** cada cosa que cuenta o pide es un comando o una respuesta. No termines con una sin atender.
 - **Antes de registrar lo que el autor hizo, mira los pendientes de `tuku context`.** Si calza con un pendiente abierto es un cierre (`tuku todo close`); si calzan varios, pregunta cuál y no escribas nada (si la respuesta tampoco lo aclara, vuelve a preguntar: lo que solo el autor sabe no se busca en el vault); si ninguno, es un registro (`tuku entry create`). Fuera de eso no leas el vault: el comando conoce el formato, el día y el orden. Abre solo el archivo que la fila nombra en "Lee antes".
+- **Enlaza las notas que el autor nombra.** `tuku context` lista, por cada tipo enlazable, sus últimas notas con su título y sus `aliases`. Si lo que dijo el autor nombra a una, escribe en el `--body` la primera mención como link a su ruta, con el texto que dijo el autor: `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md)`. Dentro de una nota, la ruta es relativa a `notas/`: `(rodolfo-cifuentes.md)`. Si el nombre calza con dos notas, es una ambigüedad y se pregunta. Si ninguna calza, no enlazas: no inventes rutas. Los ámbitos no se enlazan en el cuerpo, los pone `--scope`.
 - **Los comandos están en la tabla y en los ejemplos de abajo,** así que no consultes `-h` antes de ejecutar. Si uno rechaza, haz lo que su mensaje dice; solo si no basta, `tuku <comando> -h`.
 - **No verifiques después.** El mensaje del comando dice qué quedó escrito. Cuando termina el último, respondes: no releas archivos ni explores el CLI.
 - **Responde en una o dos frases:** qué quedó escrito, o la pregunta que falta; no cómo se hizo.

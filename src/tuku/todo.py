@@ -625,10 +625,7 @@ def abrir_en_vault(
     limpio_scope = ambitos.canonico(vault, scope) if scope else None
     if limpio_scope and (rechazo := ambitos.rechazo_si_no_existe(vault, limpio_scope)):
         return rechazo
-    from tuku import note
-
-    cuerpo, avisos = note.enlazar(vault, body.strip(), "AHORA.md")
-    marca = Marca(ABRE, limpio_scope, cuerpo)
+    marca = Marca(ABRE, limpio_scope, body.strip())
     escalera = escalera_de(leer_config(vault).horizontes)
     horizon = CON_FECHA if due else canonico(horizon or escalera[0], escalera)
 
@@ -670,7 +667,7 @@ def abrir_en_vault(
     rehacer(vault, ["AHORA.md", "PENDIENTES.md"], salvo=() if regenerar else ("todo",))
     return Resultado.hecho(
         f"pendiente abierto en «{horizon}»: {marca.cuerpo}",
-        avisos=(*avisos, *avisos_de_plazo(due, day, hour)),
+        avisos=avisos_de_plazo(due, day, hour),
     )
 
 

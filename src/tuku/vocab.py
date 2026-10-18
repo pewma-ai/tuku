@@ -68,7 +68,7 @@ def enlazables(libro: str) -> list[str]:
     """Los tipos de nota con `sí` en la columna "Enlazable" de `### Tipos de nota`.
 
     La columna se busca por su encabezado; sin ella, ningún tipo se enlaza
-    (`spec/notas.md`, "Enlazar al registrar").
+    (`spec/notas.md`, "Enlazar notas").
     """
     lineas = libro.splitlines()
     try:

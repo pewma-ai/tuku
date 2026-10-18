@@ -139,7 +139,7 @@ Se prueba con dos agentes, uno del lado del autor y otro del lado de TUKU. No ag
 
 Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumulado (ámbitos poblados, notas escritas, historial de pendientes). Segunda vuelta de capacidades donde aparecen enlaces automáticos desde el primer día, autoasignación de pendientes, notas con "Ver además" y versiones completas de ámbitos y destilados. Cubre fases 3 y 5 completas, y resto de la 4.
 
-- **Criterio de salida:** inyectar un ciclo de `mac-jpgil` sobre un vault poblado produce enlaces, asignación a ámbitos y notas tejidas sin intervención.
+- **Criterio de salida:** inyectar un ciclo de `mac-jpgil` sobre un vault poblado produce registros con su ámbito, enlazados a las notas que `tuku context` ofrece, y notas tejidas, sin intervención del autor.
 
 > [!tip] Mirar en VAULT al abrir el epic
 > - [`VAULT/scratchpad/tuku-docs/corpus-regresion/contrato-de-regeneracion.md`](VAULT/scratchpad/tuku-docs/corpus-regresion/contrato-de-regeneracion.md): tabla de artefactos con su criterio de igualdad (idéntico si lo produce un proceso determinista, equivalente si lo redacta un agente). Es la base para convertir el principio 9 en un test sobre un vault poblado.

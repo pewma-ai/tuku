@@ -183,8 +183,8 @@ def add_al_vault(
     Sin `day` es hoy; sin `hour`, ahora si el día es hoy. Un día pasado sin `hour`
     queda sin hora, al final del día: la de ahora sería inventada.
     """
-    from tuku import note, todo
     from tuku import scope as ambitos
+    from tuku import todo
     from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
@@ -200,7 +200,6 @@ def add_al_vault(
 
     ruta = archivo_vault(vault, "AHORA.md")
     dia = encabezado_de(day or date.today())
-    body, avisos = note.enlazar(vault, body, "AHORA.md")
     linea = componer(
         hora=hour
         or ("" if day is not None and day < date.today() else datetime.now().strftime("%H:%M")),
@@ -221,7 +220,7 @@ def add_al_vault(
     from tuku import regenerate
 
     regenerate.rehacer(vault, ["AHORA.md"])
-    return Resultado.hecho(f"{linea}\nen {dia.removeprefix('## ')}.", avisos=avisos)
+    return Resultado.hecho(f"{linea}\nen {dia.removeprefix('## ')}.")
 
 
 def rechazo_de_marca(

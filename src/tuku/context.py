@@ -9,7 +9,7 @@ todos, en este orden:
 | `scope` | Cada ámbito con su ruta y sus keywords | `ambitos/` |
 | `todo` | Los pendientes abiertos, atrasados marcados (`--late`: solo esos) | `PENDIENTES.md` |
 | `style` | Clasificaciones, horizontes y tipos de nota | `LIBRO-DE-ESTILO.md` |
-| `note` | Las notas enlazables nombradas desde `--since` | registros y `notas/` |
+| `note` | Por cada tipo enlazable, sus últimas notas con nombres y aliases | `notas/` |
 
 `--since` es un número de días o una fecha (`AAAA-MM-DD`), y vale 2 días.
 
@@ -23,7 +23,7 @@ from collections.abc import Callable
 from datetime import date, timedelta
 from pathlib import Path
 
-from tuku import archivo, link
+from tuku import archivo
 from tuku.resultado import Resultado
 
 TEMAS = ("entry", "scope", "todo", "style", "note")
@@ -125,30 +125,38 @@ def _style(vault: Path) -> str:
     return vocab.mostrar_del_vault(vault).mensaje
 
 
-def _note(vault: Path, inicio: date) -> str:
-    """Las notas enlazables que nombran los registros recientes, de la mención más nueva.
+def _note(vault: Path) -> str:
+    """Por cada tipo enlazable, sus últimas notas, de la modificada más recientemente.
 
     Enlazable es la columna del libro de estilo (`spec/notas.md`): las personas,
-    no las ideas. Una nota de otro tipo enlazada a mano no entra.
+    no las ideas. Cada nota trae su título y sus `aliases`, que son los nombres con
+    que el autor la menciona, para que el agente decida qué enlazar. El tope por
+    tipo es `context_note_limit` de la config, para que el listado no crezca con el vault.
     """
     from tuku import note
-    from tuku.config import leer_config
+    from tuku.config import leer_config, limite_de_notas
 
-    tipos = set(leer_config(vault).tipos_enlazables)
-    ultima: dict[str, date] = {}
-    for fecha, _, lineas in registros_desde(vault, inicio):
-        for linea in lineas:
-            for nombre in link.nombres_enlazados(linea):
-                if (vault / "notas" / f"{nombre}.md").is_file():
-                    ultima[nombre] = max(fecha, ultima.get(nombre, fecha))
-    lineas_salida = []
-    for nombre, fecha in sorted(ultima.items(), key=lambda par: (par[1], par[0]), reverse=True):
-        tipo = note.subtype(archivo.leer(vault / "notas" / f"{nombre}.md"))
-        if tipo in tipos:
-            lineas_salida.append(
-                f"- notas/{nombre}.md ({tipo}), mencionada el {fecha.isoformat()}"
-            )
-    return "\n".join(lineas_salida) or f"sin notas mencionadas desde el {inicio.isoformat()}."
+    tipos = leer_config(vault).tipos_enlazables
+    if not tipos:
+        return "sin tipos enlazables en `### Tipos de nota`."
+    limite = limite_de_notas(vault)
+    dir_notas = vault / "notas"
+    rutas = sorted(dir_notas.glob("*.md")) if dir_notas.is_dir() else []
+    por_tipo: dict[str, list[tuple[float, Path, str]]] = {t: [] for t in tipos}
+    for ruta in rutas:
+        texto = archivo.leer(ruta)
+        if (tipo := note.subtype(texto)) in por_tipo:
+            por_tipo[tipo].append((ruta.stat().st_mtime, ruta, texto))
+    bloques = []
+    for tipo in tipos:
+        ultimas = sorted(por_tipo[tipo], key=lambda n: (-n[0], n[1].name))[:limite]
+        lineas = []
+        for _, ruta, texto in ultimas:
+            otros = note.aliases(texto)
+            alias = f"; aliases: {', '.join(otros)}" if otros else ""
+            lineas.append(f"- notas/{ruta.name}: {note.titulo(texto, ruta)}{alias}")
+        bloques.append(f"## {tipo}\n\n" + ("\n".join(lineas) or "sin notas."))
+    return "\n\n".join(bloques)
 
 
 def del_vault(
@@ -173,7 +181,7 @@ def del_vault(
             lambda: _todo(vault, hoy, late),
         ),
         "style": ("Vocabulario del autor", lambda: _style(vault)),
-        "note": ("Notas mencionadas", lambda: _note(vault, inicio)),
+        "note": ("Notas enlazables", lambda: _note(vault)),
     }
     temas = [tema] if tema else list(TEMAS)
     if len(temas) == 1:

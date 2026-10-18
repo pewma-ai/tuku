@@ -218,8 +218,9 @@ def registrar(
             "bitácoras de `bitacoras/` que cruza. `scope`: cada ámbito de `ambitos/` con "
             "su ruta y sus keywords. `todo`: los pendientes de `PENDIENTES.md`, con los "
             "atrasados marcados (con `--late`, solo esos). `style`: clasificaciones, "
-            "horizontes y tipos de nota de `LIBRO-DE-ESTILO.md`. `note`: las notas de "
-            "`notas/` que enlazaron los registros desde `--since`. Sin TEMA, todos."
+            "horizontes y tipos de nota de `LIBRO-DE-ESTILO.md`. `note`: por cada "
+            "tipo de nota enlazable, sus últimas notas de `notas/` con título y aliases "
+            "(cuántas, `context_note_limit` de la config). Sin TEMA, todos."
         ),
     )
     context_p.add_argument(
@@ -233,8 +234,8 @@ def registrar(
         "--since",
         default=None,
         help=(
-            f"desde cuándo leer: un número de días o AAAA-MM-DD; por defecto, "
-            f"{context.DESDE_POR_DEFECTO} días"
+            f"desde cuándo leer los registros: un número de días o AAAA-MM-DD; "
+            f"por defecto, {context.DESDE_POR_DEFECTO} días"
         ),
     )
     context_p.add_argument(

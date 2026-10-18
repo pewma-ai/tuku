@@ -39,7 +39,7 @@ def aliases(nota: str) -> list[str]:
     """Los otros nombres de la nota: `aliases: [a, b]`, o la lista YAML en bloque.
 
     Es el campo que Obsidian usa para lo mismo; `tuku` lo lee sin Obsidian
-    (`spec/notas.md`, "Enlazar al registrar").
+    (`spec/notas.md`, "Enlazar notas").
     """
     m = _FRONTMATTER.match(nota)
     if m is None:
@@ -80,48 +80,19 @@ def titulo(nota: str, ruta: Path) -> str:
     return ruta.stem
 
 
-def nombres_enlazables(vault: Path) -> dict[str, list[str]]:
-    """Cada nota de un tipo enlazable, con su título y sus `aliases`.
-
-    La clave es la ruta relativa al vault, como la pide `link.enlazar_menciones`.
-    Qué tipos se enlazan lo dice la columna "Enlazable" del libro de estilo.
-    """
-    from tuku.config import leer_config
-
-    dir_notas = vault / "notas"
-    if not dir_notas.is_dir() or not (vault / "LIBRO-DE-ESTILO.md").is_file():
-        return {}
-    tipos = set(leer_config(vault).tipos_enlazables)
-    if not tipos:
-        return {}
-    nombres: dict[str, list[str]] = {}
-    for ruta in sorted(dir_notas.glob("*.md")):
-        texto = archivo.leer(ruta)
-        if subtype(texto) in tipos:
-            nombres[f"notas/{ruta.name}"] = [titulo(texto, ruta), *aliases(texto)]
-    return nombres
-
-
-def enlazar(
-    vault: Path, cuerpo: str, desde: str, *, salvo: str | None = None
-) -> tuple[str, tuple[str, ...]]:
-    """`cuerpo` con la primera mención de cada nota enlazable enlazada, y los avisos.
-
-    `salvo` es la ruta de una nota que no se enlaza: la que se está escribiendo.
-    Un nombre que comparten dos notas queda sin link y vuelve como aviso.
-    """
-    nombres = {r: n for r, n in nombres_enlazables(vault).items() if r != salvo}
-    enlazado, ambiguos = link.enlazar_menciones(cuerpo, nombres, desde)
-    avisos = tuple(
-        f"{a!r} nombra a más de una nota; quedó sin link. "
-        "Enlázala a mano, o deja ese nombre en los aliases de una sola."
-        for a in ambiguos
-    )
-    return enlazado, avisos
-
-
 #: Un enlace de la sección "Ver además": markdown o wikilink, y lo que sigue.
 _ENLACE = re.compile(rf"^\s*[*-]\s+{link.ENLACE}(?P<motivo>.*)$")
+
+
+def _links_del_cuerpo(cuerpo: str, desde: str) -> list[tuple[str, str]]:
+    """Los links locales del cuerpo, como (texto, destino) y una vez por nota."""
+    vistos: set[str] = set()
+    salida = []
+    for _, texto, ruta, destino in link.salientes(cuerpo, desde):
+        if ruta not in vistos:
+            vistos.add(ruta)
+            salida.append((texto, destino))
+    return salida
 
 
 def slug(titulo: str) -> str:
@@ -152,9 +123,9 @@ def crear(
     `Note` en las notas tipadas (`spec/notas.md`): solo lo declaran algunas, y
     se escribe si se pasa `subtype`.
 
-    `menciones` son los links que `enlazar` puso en el cuerpo, como (texto,
-    destino): cada uno entra a `## Ver además` con un motivo mecánico, porque esa
-    sección lista todos los enlaces salientes de la nota.
+    `menciones` son los links del cuerpo, como (texto, destino): cada uno entra a
+    `## Ver además` con un motivo mecánico, porque esa sección lista todos los
+    enlaces salientes de la nota.
     """
     ruta = vault / "notas" / f"{slug(title)}.md"
     if ruta.exists():
@@ -310,10 +281,7 @@ def crear_con_constancia(
     hora = hour or datetime.now().strftime("%H:%M")
     ruta = vault / "notas" / f"{slug(title)}.md"
     desde = f"notas/{ruta.name}"
-    original = body
-    body, avisos = enlazar(vault, body, desde, salvo=desde)
-    previos = {r for _, _, r, _ in link.salientes(original, desde)}
-    menciones = [(tx, d) for _, tx, r, d in link.salientes(body, desde) if r not in previos]
+    menciones = _links_del_cuerpo(body, desde)
 
     ahora_path = vault / "AHORA.md"
     pendiente: str | None = None
@@ -343,7 +311,7 @@ def crear_con_constancia(
         if scope:
             scope_mod.actualizar_pagina(vault, scope)
 
-    return Resultado.hecho(f"nota creada en {ruta}.", avisos=avisos)
+    return Resultado.hecho(f"nota creada en {ruta}.")
 
 
 def lint_del_vault(vault: Path, nota: Path | None = None) -> Resultado:
