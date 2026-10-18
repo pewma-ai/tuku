@@ -62,6 +62,16 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 #: regla `command(tuku)` en los ajustes del arnés, y `motivo_no_disponible` avisa
 #: cuando falta (`_REGLA_DE_PERMISO`).
 #:
+#: **La primera llamada a `tuku` de cada turno de `agy` falla, y es esperado.** Su
+#: `run_command` corre por defecto dentro del sandbox, que niega el socket del
+#: puente (`PermissionError: [Errno 1] Operation not permitted`). El modelo lee el
+#: error y repite el comando con `BypassSandbox: true`, que la regla `command(tuku)`
+#: autoriza. Medido el 2026-10-18 en 12 de 12 turnos de una frase con
+#: `gemini-3.8-flash-low`. Cuesta una llamada de modelo de más por turno (2 a 5 s y
+#: unos 16.000 tokens de entrada), así que los tiempos y el conteo de llamadas de un
+#: turno incluyen ese reintento. Es del arnés y no del producto: el `tuku` real no
+#: usa socket. La traza no lo ve, porque la llamada fallida no llega al puente.
+#:
 #: `sesion` es opcional y dice cómo pedirle al arnés **la conversación entera**,
 #: no solo el texto final. Lo que un turno devuelve por stdout es su conclusión;
 #: lo que hizo para llegar ahí (qué leyó, qué se preguntó, qué descartó) explica
