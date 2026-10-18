@@ -66,7 +66,7 @@ Los nombres de ámbito van en minúsculas, en kebab-case (ver «El nombre de un 
 - 18:45 - [depto-centro](ambitos/depto-centro/depto-centro.md) **nota**: abrí el ámbito
 ```
 
-Con `--parent`, la constancia dice dónde quedó: `**nota**: abrí el ámbito bajo [negocio](ambitos/negocio/negocio.md)`, con el padre enlazado si es un ámbito y por su nombre (`bajo clientes`) si es una categoría.
+Con `--parent`, la constancia dice dónde quedó: `**nota**: abrí el ámbito bajo [negocio](ambitos/negocio/negocio.md), en clientes`. El padre ámbito va enlazado y las categorías del camino (carpetas sin página, como `clientes`) por su nombre, porque no hay a dónde enlazarlas. Si no hay ningún ámbito arriba, solo el nombre de la categoría: `bajo suelta`.
 
 La constancia la deja solo quien crea la carpeta. Un día fuera del ciclo abierto se rechaza antes de crear nada, igual que en `tuku note create`.
 

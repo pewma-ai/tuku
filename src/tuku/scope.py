@@ -706,11 +706,25 @@ def registro_de_constancia(
 ) -> str:
     """La línea de bitácora que deja constancia del ámbito creado, para `AHORA.md`.
 
-    Con `bajo` (el padre, ya escrito como enlace si es un ámbito o como nombre si es
-    una categoría) la constancia dice dónde quedó: `abrí el ámbito bajo clientes`.
+    Con `bajo` (el ámbito padre como enlace, y las categorías que haya en medio por su
+    nombre) la constancia dice dónde quedó: `abrí el ámbito bajo [negocio](…), en clientes`.
     """
     donde = f" bajo {bajo}" if bajo else ""
     return f"- {hour} - {link.enlace_ambito(nombre, 'AHORA.md', rutas)} {CONSTANCIA}{donde}"
+
+
+def _donde_cuelga(vault: Path, carpeta: Path) -> tuple[Path | None, list[str]]:
+    """El ámbito más cercano que contiene a `carpeta` y las categorías que hay entre ambos.
+
+    Las categorías van de la más externa a la más interna. Una carpeta de `ambitos/`
+    sin ningún ámbito arriba devuelve `None` y sus categorías.
+    """
+    categorias: list[str] = []
+    raiz = vault / "ambitos"
+    while carpeta != raiz and not _pagina(carpeta).is_file():
+        categorias.insert(0, carpeta.name)
+        carpeta = carpeta.parent
+    return (None if carpeta == raiz else carpeta), categorias
 
 
 def crear_con_constancia(
@@ -803,17 +817,23 @@ def crear_con_constancia(
         if nuevo:
             mapa = rutas(vault)
             bajo = None
-            if parent and padre is not None:
-                es_ambito = (padre / f"{padre.name}.md").is_file()
-                bajo = link.enlace_ambito(parent, "AHORA.md", mapa) if es_ambito else parent
+            if padre is not None:
+                ambito_padre, categorias = _donde_cuelga(vault, padre)
+                bajo = " / ".join(categorias)
+                if ambito_padre is not None:
+                    bajo = link.enlace_ambito(ambito_padre.name, "AHORA.md", mapa) + (
+                        f", en {bajo}" if bajo else ""
+                    )
             constancia = registro_de_constancia(nombre, hour=hora, rutas=mapa, bajo=bajo)
             texto = entry.add(texto, [constancia], day=dia)
         if texto != original:
             ahora_path.write_text(texto, encoding="utf-8")
         actualizar_pagina(vault, nombre)
-        if nuevo and parent and padre is not None and (padre / f"{padre.name}.md").is_file():
-            # la constancia nombra al padre, y la actividad de su página la cuenta
-            actualizar_pagina(vault, parent)
+        if nuevo and padre is not None:
+            ambito_padre, _ = _donde_cuelga(vault, padre)
+            if ambito_padre is not None:
+                # la constancia enlaza al padre, y la actividad de su página la cuenta
+                actualizar_pagina(vault, ambito_padre.name)
 
     mensaje = f"ámbito creado en {directorio}."
     if nuevo and not palabras:

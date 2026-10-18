@@ -421,3 +421,26 @@ def test_cada_ambito_hijo_declara_en_su_frontmatter_la_carpeta_en_que_cuelga(
     assert _tuku(vault, "regenerate", "scope") == EXITO
     assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "ambitos/pyme"
     assert _tuku(vault, "scope", "lint") == EXITO
+
+
+def test_la_constancia_enlaza_al_ambito_padre_y_nombra_las_categorias_del_camino(
+    vault: Path,
+) -> None:
+    assert _crear(vault, "negocio") == EXITO
+    (vault / "ambitos" / "negocio" / "clientes").mkdir()
+    (vault / "ambitos" / "suelta").mkdir()
+    assert _crear(vault, "colegio", "--parent", "clientes") == EXITO
+    assert _crear(vault, "bodega", "--parent", "negocio") == EXITO
+    assert _crear(vault, "huerfano", "--parent", "suelta") == EXITO
+
+    lineas = _leer(vault, "AHORA.md").splitlines()
+    negocio = "[negocio](ambitos/negocio/negocio.md)"
+    nota = "**nota**: abrí el ámbito"
+    esperadas = [
+        "[colegio](ambitos/negocio/clientes/colegio/colegio.md) "
+        f"{nota} bajo {negocio}, en clientes",
+        f"[bodega](ambitos/negocio/bodega/bodega.md) {nota} bajo {negocio}",
+        f"[huerfano](ambitos/suelta/huerfano/huerfano.md) {nota} bajo suelta",
+    ]
+    for esperada in esperadas:
+        assert any(x.endswith(esperada) for x in lineas), esperada
