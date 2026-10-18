@@ -566,13 +566,17 @@ def revisar_vault(
 
     if quiere("scope"):
         h_scope = scope.lint(vault)
+        preguntas = scope.keywords_repetidas(vault)
+        cuentas = [
+            *([f"scope: {len(h_scope)} error(es)."] if h_scope else []),
+            *([f"scope: {len(preguntas)} pregunta(s)."] if preguntas else []),
+        ]
         revisiones.append(
             Revision(
                 "scope",
-                "scope: sin hallazgos."
-                if not h_scope
-                else "\n".join([*h_scope, f"scope: {len(h_scope)} error(es)."]),
+                "\n".join([*h_scope, *preguntas, *cuentas]) or "scope: sin hallazgos.",
                 not h_scope,
+                aviso=not h_scope and bool(preguntas),
             )
         )
 

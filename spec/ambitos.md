@@ -87,6 +87,7 @@ La línea `keywords: [vlti, LCU]` del frontmatter de la página lista las palabr
 
 - **`tuku scope create NOMBRE`** pide las keywords en su salida cuando el ámbito es nuevo y no recibió ninguna: el agente las pregunta al autor y no las inventa. `--keyword`, repetible o con varias palabras separadas por coma, las pone en el mismo comando.
 - **`tuku scope update NOMBRE --keyword PALABRA`** las suma a la lista y no escribe nada más: ni `AHORA.md` ni ningún registro cambian. `--keyword` es repetible y admite varias palabras separadas por coma (`--keyword viana,claudia`). Una palabra va en kebab-case, como el nombre de un ámbito: minúsculas y con guiones en lugar de espacios, así que `Los Robles` se guarda `los-robles`. Lo que ya estaba, sin distinguir mayúsculas, guiones ni espacios, no se repite; si nada es nuevo, no escribe nada. Rechaza un ámbito que no existe y una palabra con corchetes.
+- **Una palabra que nombra a dos ámbitos** hace ambiguo a cuál va lo que el autor dice (dos Paulas, dos clientes). `scope create` y `scope update` avisan por `stderr`, con código 0, cuando una palabra que se agrega ya está en las keywords de otro ámbito o es su nombre, y `tuku doctor scope` la pregunta sin fallar. No se rechaza: puede ser a propósito, y quien lo ve decide si quita la palabra de uno.
 - **`tuku scope rename`** no toca las keywords, porque el nombre no está entre ellas.
 
 ## La página de un ámbito

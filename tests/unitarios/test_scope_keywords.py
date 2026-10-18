@@ -119,6 +119,47 @@ def test_keywords_repetida_con_otra_grafia_no_escribe_nada(vault: Path) -> None:
     assert (vault / "ambitos" / "paranal" / "paranal.md").read_bytes() == antes
 
 
+def test_una_keyword_que_ya_nombra_a_otro_ambito_avisa_y_escribe(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert _crear(vault, "catalogo-marzo", "--keyword", "paula") == EXITO
+    assert capsys.readouterr().err == ""
+    assert _crear(vault, "escuela-los-maitenes") == EXITO
+    capsys.readouterr()
+
+    assert (
+        _tuku(vault, "scope", "update", "escuela-los-maitenes", "--keyword", "Paula") == EXITO
+    )
+    err = capsys.readouterr().err
+    assert "warning" in err and "'paula'" in err and "catalogo-marzo" in err
+    assert _keywords(vault, "escuela-los-maitenes", "escuela-los-maitenes.md") == ["paula"]
+
+    assert _crear(vault, "liceo", "--keyword", "paula") == EXITO
+    assert "catalogo-marzo y escuela-los-maitenes" in capsys.readouterr().err
+
+    assert _tuku(vault, "scope", "update", "liceo", "--keyword", "paula") == EXITO
+    assert capsys.readouterr().err == "", "lo que ya estaba no vuelve a avisar"
+
+
+def test_un_ambito_con_el_nombre_de_la_keyword_tambien_cuenta(vault: Path) -> None:
+    assert _crear(vault, "bodega") == EXITO
+    avisos = scope.avisos_de_keywords(vault, "paranal", ["bodega"])
+    assert len(avisos) == 1 and "bodega" in avisos[0]
+    assert scope.avisos_de_keywords(vault, "bodega", ["bodega"]) == ()
+
+
+def test_doctor_scope_pregunta_por_la_keyword_repetida_y_no_falla(vault: Path) -> None:
+    from tuku import doctor
+
+    _crear(vault, "catalogo-marzo", "--keyword", "paula")
+    _crear(vault, "escuela-los-maitenes", "--keyword", "paula")
+    r = doctor.revisar_vault(vault, tema="scope")
+    assert r.ok, "una pregunta no hace fallar"
+    assert "scope: pregunta:" in r.mensaje and "'paula'" in r.mensaje
+    assert "1 pregunta(s)" in r.mensaje
+    assert main(["doctor", "scope", "--vault", str(vault)]) == EXITO
+
+
 def test_keywords_rechaza_lo_que_no_cabe_o_no_existe(
     vault: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

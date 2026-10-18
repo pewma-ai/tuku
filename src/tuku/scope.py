@@ -985,7 +985,8 @@ def crear_con_constancia(
         mensaje += "\n" + _pedir_keywords(nombre)
     if previos := _registros_previos(vault, nombre, inicio):
         mensaje += "\n" + previos
-    return Resultado.hecho(mensaje)
+    avisos = avisos_de_keywords(vault, nombre, palabras) if nuevo else ()
+    return Resultado.hecho(mensaje, avisos=avisos)
 
 
 #: Días hacia atrás que busca `scope create` registros que nombran al ámbito nuevo.
@@ -1070,6 +1071,56 @@ def _registros_previos(vault: Path, nombre: str, inicio: date) -> str:
     return "\n".join(lineas)
 
 
+def _claves_de(vault: Path) -> dict[str, set[str]]:
+    """Por ámbito, las palabras con que se lo nombra: su nombre y sus keywords."""
+    return {a.nombre: {_clave(a.nombre), *(_clave(k) for k in a.keywords)} for a in leer(vault)}
+
+
+def _aviso_de_palabra(palabra: str, duenos: Sequence[str], de: str | None = None) -> str:
+    otros = " y ".join(duenos)
+    donde = f"{de} y {otros}" if de else otros
+    return (
+        f"la palabra {palabra!r} nombra a más de un ámbito ({donde}): con ella, el agente no "
+        "puede elegir sin preguntar. Si no es a propósito, quita la de uno en el frontmatter "
+        "de su página."
+    )
+
+
+def avisos_de_keywords(vault: Path, nombre: str, palabras: Sequence[str]) -> tuple[str, ...]:
+    """Un aviso por cada una de `palabras` que ya nombra a otro ámbito distinto de `nombre`.
+
+    Avisa y no rechaza: una palabra compartida puede ser a propósito
+    (`spec/ambitos.md`), y `tuku doctor scope` la vuelve a nombrar como pregunta.
+    """
+    claves = _claves_de(vault)
+    avisos = []
+    for palabra in palabras:
+        duenos = [n for n, cs in claves.items() if n != nombre and _clave(palabra) in cs]
+        if duenos:
+            avisos.append(_aviso_de_palabra(palabra, duenos, nombre))
+    return tuple(avisos)
+
+
+def keywords_repetidas(vault: Path) -> list[str]:
+    """Las palabras que nombran a más de un ámbito, cada una como una pregunta.
+
+    Lo que `tuku doctor scope` pregunta sin fallar: una keyword repetida hace
+    ambiguo el ámbito de lo que el autor dice (la Paula de dos clientes).
+    """
+    ambitos = leer(vault)
+    claves = _claves_de(vault)
+    vistas: dict[str, str] = {}
+    for a in ambitos:
+        for k in a.keywords:
+            vistas.setdefault(_clave(k), k)
+    salida = []
+    for clave, palabra in vistas.items():
+        duenos = [n for n, cs in claves.items() if clave in cs]
+        if len(duenos) > 1:
+            salida.append(f"scope: pregunta: {_aviso_de_palabra(palabra, duenos)}")
+    return salida
+
+
 def _pedir_keywords(nombre: str) -> str:
     """Lo que la salida de `scope create` le pide al agente que haga con el autor."""
     return (
@@ -1112,7 +1163,11 @@ def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
     archivo.escribir(
         pagina, _KEYWORDS.sub(lambda _m: f"keywords: [{', '.join(todas)}]", texto, count=1)
     )
-    return Resultado.hecho(f"keywords de {nombre!r}: {', '.join(todas)}.")
+    nuevas_palabras = [k for k in todas if k not in previas]
+    return Resultado.hecho(
+        f"keywords de {nombre!r}: {', '.join(todas)}.",
+        avisos=avisos_de_keywords(vault, nombre, nuevas_palabras),
+    )
 
 
 def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
