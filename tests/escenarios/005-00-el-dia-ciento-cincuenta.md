@@ -74,7 +74,7 @@ La sintaxis de `tuku` se está estabilizando y puede cambiar. Los escenarios usa
 | A2 | `tuku note lint` sin archivo sale con error en un vault recién sembrado: revisa `notas/AGENTS.md`, que es del sistema y no una nota | `005-05` lint sin archivo |
 | A3 | `note lint` no mira los enlaces del cuerpo. `spec/notas.md` pide que la nota cierre con la lista de sus enlaces salientes, cada uno con motivo, y un enlace del cuerpo ausente de esa lista pasa | `005-05` enlace sin motivo |
 | ~~A4~~ | ~~Las keywords de un ámbito repetían su nombre: `keywords: [importadora-andina, Gloria]`.~~ Resuelto el 2026-10-17 (lo vio el autor): el nombre ya es el de la carpeta y no va en la lista, que nace vacía (`keywords: []`) si no se dieron palabras, y una keyword que repite el nombre no entra. `scope rename` ya no toca las keywords | `tests/unitarios/test_scope_keywords.py` |
-| A5 | `scope rename` de un ámbito con hijos deja rotos los links a los descendientes: `scope rename negocio pyme` renombra la carpeta pero `AHORA.md` y la página siguen apuntando a `ambitos/negocio/bodega/bodega.md`, y `tuku doctor` reporta `link` con errores. `spec/ambitos.md` dice que `scope rename` funciona igual sobre un ámbito anidado. Lo encontró la prueba de `parent:` (2026-10-18) | `test_scope_arbol` (sin escenario) |
+| ~~A5~~ | ~~`scope rename` de un ámbito con hijos dejaba rotos los links a los descendientes.~~ Resuelto el 2026-10-18: el rename recalcula con `link.reubicar` los links de los descendientes, como `scope move`. Lo cubre `test_scope_arbol` (renombrar `negocio` a `pyme` deja `doctor` sano) | ~~`test_scope_arbol` (sin escenario)~~ |
 
 ### B. Lo que la spec promete y no existe
 

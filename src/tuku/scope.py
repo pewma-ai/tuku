@@ -930,11 +930,21 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     # el vault entero una vez y se escribe solo lo que cambió, que es lo que hace
     # la operación idempotente.
     enlaces = 0
+    viejo_dir = origen.relative_to(vault).as_posix()
+    nuevo_dir = destino.relative_to(vault).as_posix()
     for ruta in sorted(vault.rglob("*.md")):
         texto = ruta.read_text(encoding="utf-8")
         salida, n = rename.renombrar_enlaces(texto, viejo, nuevo)
         enlaces += n
         salida, _ = rename.renombrar_ancla(salida, viejo, nuevo)
+        # Los descendientes cambian de ruta con la carpeta: sus links se recalculan.
+        despues = ruta.relative_to(vault).as_posix()
+        antes = despues
+        if despues.startswith(f"{nuevo_dir}/"):
+            antes = viejo_dir + despues[len(nuevo_dir) :]
+            if antes == f"{viejo_dir}/{nuevo}.md":
+                antes = f"{viejo_dir}/{viejo}.md"
+        salida = link.reubicar(salida, antes, despues, {viejo_dir: nuevo_dir})
         if ruta.parent == destino:
             salida = salida.replace(f"de {viejo}", f"de {nuevo}")
             if ruta.name == f"{nuevo}.md":

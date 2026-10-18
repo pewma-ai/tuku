@@ -401,6 +401,8 @@ def test_cada_ambito_hijo_declara_en_su_frontmatter_la_carpeta_en_que_cuelga(
     # renombrar un ámbito cambia el parent de sus descendientes; mover, el del movido
     assert _tuku(vault, "scope", "rename", "negocio", "pyme") == EXITO
     assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "ambitos/pyme"
+    assert _tuku(vault, "doctor") == EXITO, "los links de los descendientes siguen a la carpeta"
+    assert "ambitos/pyme/bodega/bodega.md" in _leer(vault, "AHORA.md")
     assert _tuku(vault, "scope", "move", "colegio", "--parent", "bodega") == EXITO
     assert (
         _parent(vault, "ambitos", "pyme", "bodega", "colegio", "colegio.md")
@@ -408,6 +410,7 @@ def test_cada_ambito_hijo_declara_en_su_frontmatter_la_carpeta_en_que_cuelga(
     )
     assert _tuku(vault, "scope", "move", "colegio") == EXITO
     assert _parent(vault, "ambitos", "colegio", "colegio.md") is None
+    assert _tuku(vault, "doctor") == EXITO
 
     # el desfase se reporta y `regenerate scope` lo repara
     pagina = vault / "ambitos" / "pyme" / "bodega" / "bodega.md"
