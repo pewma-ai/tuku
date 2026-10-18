@@ -40,7 +40,7 @@ AHORA = (
 )
 
 
-def test_region_del_dia_solo_lleva_los_de_esa_fecha() -> None:
+def test_las_regiones_llevan_solo_lo_de_su_fecha() -> None:
     assert region_del_dia(filas(PENDIENTES), date(2026, 9, 8)) == [
         "> [!todo] Pendientes del día",
         f"> - {P} - pagar la sesión con el psicólogo",
@@ -50,8 +50,6 @@ def test_region_del_dia_solo_lleva_los_de_esa_fecha() -> None:
         "> - renovar el pasaporte",
     ], "sin ámbito va sin enlace"
 
-
-def test_region_de_la_semana_lleva_los_de_esta_semana_y_ninguno_con_fecha() -> None:
     assert region_de_la_semana(filas(PENDIENTES)) == [
         "> [!todo] Pendientes de esta semana",
         f"> - {P} - comprar una maleta",
@@ -59,7 +57,7 @@ def test_region_de_la_semana_lleva_los_de_esta_semana_y_ninguno_con_fecha() -> N
     assert region_de_la_semana(filas(PENDIENTES, "con fecha")) == []
 
 
-def test_la_region_de_la_semana_va_bajo_el_titulo_y_se_rehace_entera() -> None:
+def test_vistas_en_ahora_rehace_las_regiones_enteras() -> None:
     una = vistas_en_ahora(AHORA, PENDIENTES)
     lineas = una.splitlines()
     i = lineas.index("# Actividad diaria")
@@ -68,7 +66,7 @@ def test_la_region_de_la_semana_va_bajo_el_titulo_y_se_rehace_entera() -> None:
         "> [!todo] Pendientes de esta semana",
         f"> - {P} - comprar una maleta",
         "",
-    ]
+    ], "la semana va bajo el título"
     assert lineas[i + 5] == "## Lunes 7 de septiembre"
 
     sin_maleta = PENDIENTES.replace(f"| esta semana |  | {P} | comprar una maleta |\n", "")
@@ -76,21 +74,16 @@ def test_la_region_de_la_semana_va_bajo_el_titulo_y_se_rehace_entera() -> None:
     assert "Pendientes de esta semana" not in texto
     sin = texto.splitlines()
     assert sin[sin.index("# Actividad diaria") + 1 :][:2] == ["", "## Lunes 7 de septiembre"]
-    assert vistas_en_ahora(una, PENDIENTES) == una
 
-
-def test_vistas_en_ahora_reemplaza_la_region_entera_antes_del_primer_registro() -> None:
-    una = vistas_en_ahora(AHORA, PENDIENTES)
-    lineas = una.splitlines()
     assert lineas.count(f"> - {P} - comprar una maleta") == 1, "solo en el callout de la semana"
     assert lineas.index("## Lunes 7 de septiembre") > lineas.index(
         f"> - {P} - comprar una maleta"
     )
-    i = lineas.index("## Martes 8 de septiembre")
-    assert lineas[i + 1] == "> [!todo] Pendientes del día"
-    assert lineas[i + 2] == f"> - {P} - pagar la sesión con el psicólogo"
-    assert lineas[i + 3] == ""
-    assert lineas[i + 4].startswith("- 09:12 - ")
+    j = lineas.index("## Martes 8 de septiembre")
+    assert lineas[j + 1] == "> [!todo] Pendientes del día"
+    assert lineas[j + 2] == f"> - {P} - pagar la sesión con el psicólogo"
+    assert lineas[j + 3] == ""
+    assert lineas[j + 4].startswith("- 09:12 - ")
 
     viejo = AHORA.replace(
         "## Martes 8 de septiembre\n",
@@ -102,6 +95,14 @@ def test_vistas_en_ahora_reemplaza_la_region_entera_antes_del_primer_registro() 
     assert f"- 09:12 - {P} **nota**: cuerpo" in texto
 
     assert vistas_en_ahora(una, PENDIENTES) == una, "regenerar dos veces no cambia nada"
+
+    con_registro = AHORA.replace(
+        "## Martes 8 de septiembre\n",
+        f"## Martes 8 de septiembre\n- {P} recordé la reunión con Ximena\n",
+    )
+    assert f"- {P} recordé la reunión con Ximena" in vistas_en_ahora(
+        con_registro, PENDIENTES
+    ), "un registro sin hora no es parte de la región"
 
 
 def test_documento_de_ambitos_agrupa_ordena_y_deja_su_callout_a_cada_ambito() -> None:
@@ -123,26 +124,14 @@ def test_documento_de_ambitos_agrupa_ordena_y_deja_su_callout_a_cada_ambito() ->
     formato = documento_ambitos(PENDIENTES, ["personal"], formato="DD/MM/AAAA")
     assert "> - 08/09/2026 - pagar la sesión con el psicólogo" in formato
 
-
-def test_en_el_ambito_van_primero_los_fechados_por_fecha() -> None:
     tabla = PENDIENTES + (
         f"| con fecha | 2026-09-07 | {P} | llamar al banco |\n"
         f"| esta semana |  | {P} | ordenar el escritorio |\n"
     )
     callout = documento_ambitos(tabla, ["personal"]).split("^personal\n", 1)[1]
-
     assert callout.splitlines() == [
         "> - Sep/07 - llamar al banco",
         "> - Sep/08 - pagar la sesión con el psicólogo",
         "> - comprar una maleta",
         "> - ordenar el escritorio",
-    ]
-
-
-def test_un_registro_sin_hora_no_es_parte_de_la_region() -> None:
-    con_registro = AHORA.replace(
-        "## Martes 8 de septiembre\n",
-        f"## Martes 8 de septiembre\n- {P} recordé la reunión con Ximena\n",
-    )
-    texto = vistas_en_ahora(con_registro, PENDIENTES)
-    assert f"- {P} recordé la reunión con Ximena" in texto
+    ], "van primero los fechados, por fecha"

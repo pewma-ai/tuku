@@ -52,9 +52,12 @@ def test_la_tabla_de_tipos_se_lee_y_se_revisa() -> None:
 
 
 ROTA = [Revision("types", "roto", False), Revision("cycle", "bien", True)]
+SANA = Revision("config", "config: 5 campos declarados.", True)
+AVISO = Revision("version", "version: aviso: el vault es anterior.", True, aviso=True)
+ROTA_LINK = Revision("link", "AHORA.md:1: error: x.\nlink: 1 error(es).", False)
 
 
-def test_el_reporte_nombra_lo_roto_y_apunta_al_template_original() -> None:
+def test_el_reporte_nombra_lo_roto_y_solo_trae_hallazgos_y_avisos_sin_verbose() -> None:
     salida = formatear(ROTA)
     assert "types" in salida and "sano" not in salida
 
@@ -67,13 +70,6 @@ def test_el_reporte_nombra_lo_roto_y_apunta_al_template_original() -> None:
     sano = formatear([Revision("types", "bien", True)], fuente=Path("/casa/.tuku"))
     assert "/casa/.tuku" not in sano and sano.endswith("el vault está sano.")
 
-
-SANA = Revision("config", "config: 5 campos declarados.", True)
-AVISO = Revision("version", "version: aviso: el vault es anterior.", True, aviso=True)
-ROTA_LINK = Revision("link", "AHORA.md:1: error: x.\nlink: 1 error(es).", False)
-
-
-def test_sin_verbose_solo_hallazgos_y_avisos() -> None:
     assert formatear([SANA, SANA]) == "doctor: el vault está sano."
     assert formatear([SANA, SANA], verbose=True) == (
         "config: 5 campos declarados.\n"
@@ -137,9 +133,7 @@ def test_el_vault_sembrado_y_una_pregunta_del_lint_no_fallan(tmp_path: Path) -> 
     assert corto.mensaje.endswith("doctor: el vault está sano.")
 
 
-def test_un_vault_completo_esta_sano_y_no_exige_frontmatter_a_agents_ni_plantilla(
-    tmp_path: Path,
-) -> None:
+def test_un_vault_completo_esta_sano_y_uno_con_defectos_los_nombra(tmp_path: Path) -> None:
     vault = _vault(tmp_path, COMPLETO)
 
     assert revisar_archivos(vault).sano
@@ -149,8 +143,6 @@ def test_un_vault_completo_esta_sano_y_no_exige_frontmatter_a_agents_ni_plantill
     assert "AGENTS.md" not in revision.salida
     assert "plantilla/AHORA.md" not in revision.salida
 
-
-def test_un_vault_con_defectos_los_nombra(tmp_path: Path) -> None:
     sin_type = revisar_frontmatter(
         _vault(tmp_path / "a", {**COMPLETO, "notas/suelta.md": "# Sin frontmatter\n"}),
         tipos_validos=VALIDOS,

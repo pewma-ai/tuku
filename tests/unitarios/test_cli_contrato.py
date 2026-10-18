@@ -1,4 +1,4 @@
-"""El contrato del CLI: códigos, uso, rechazo fuera de un vault, correcciones y propuestas."""
+"""El contrato del CLI: rechazo fuera de un vault, correcciones y lectura del cuerpo."""
 
 from __future__ import annotations
 
@@ -9,28 +9,11 @@ from pathlib import Path
 import pytest
 
 from tuku import cli
-from tuku.cli import ENTORNO, EXITO, RECHAZO, USO, main, manual
+from tuku.cli import EXITO, RECHAZO, main
 from tuku.lint import lint
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
 PERSONAL = "[personal](ambitos/personal/personal.md)"
-
-
-def test_los_cuatro_codigos_son_distintos() -> None:
-    codigos = [EXITO, RECHAZO, USO, ENTORNO]
-    assert len(set(codigos)) == len(codigos), "dos causas comparten código de salida"
-
-
-def test_un_uso_incorrecto_es_error_de_uso(capsys: pytest.CaptureFixture[str]) -> None:
-    for argv in (
-        *([noun] for noun in ("entry", "todo", "scope", "note", "cycle", "vocab", "style")),
-        ["fix"],
-        ["doctor", "inexistente"],
-    ):
-        with pytest.raises(SystemExit) as salida:
-            cli.main(argv)
-        assert salida.value.code == USO, argv
-    assert "invalid choice" in capsys.readouterr().err
 
 
 def test_rechaza_fuera_de_un_vault_y_nombra_que_falta(
@@ -69,14 +52,6 @@ def test_todo_hallazgo_del_lint_nombra_la_correccion() -> None:
     assert len(hallazgos) >= 2, hallazgos
     for h in hallazgos:
         assert h.correccion.strip(), f"hallazgo sin corrección: {h.defecto}"
-
-
-def test_ningun_comando_escribe_una_propuesta() -> None:
-    """La propuesta no tiene comando a propósito: se muestra y espera."""
-    nombres = [e.nombre for e in manual.entradas(cli._construir_parser())]
-    assert not any("propose" in n for n in nombres), nombres
-    for fuente in (RAIZ / "src" / "tuku").rglob("*.py"):
-        assert "propuestas/" not in fuente.read_text(encoding="utf-8"), fuente.name
 
 
 def test_el_cuerpo_no_se_busca_en_stdin_sin_pedirlo(monkeypatch: pytest.MonkeyPatch) -> None:

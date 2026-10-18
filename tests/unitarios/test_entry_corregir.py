@@ -43,7 +43,7 @@ def _ahora(vault: Path) -> str:
     return (vault / "AHORA.md").read_text(encoding="utf-8")
 
 
-def test_lee_los_registros_de_los_dias_con_y_sin_hora() -> None:
+def test_lee_los_registros_y_ubica_el_ultimo_que_calza_sin_mayusculas_ni_tildes() -> None:
     lista = entry.registros(TRES)
     assert [(r.hora, r.cuerpo[:6]) for r in lista] == [
         ("07:00", "llamé "),
@@ -54,8 +54,6 @@ def test_lee_los_registros_de_los_dias_con_y_sin_hora() -> None:
     assert {r.dia for r in lista} == {"Martes 11 de agosto"}
     assert lista[0].ambito == "personal"
 
-
-def test_ubica_el_ultimo_que_calza_sin_distinguir_mayusculas_ni_tildes() -> None:
     r = entry.ubicar(TRES, "llame a RODOLFO")
     assert r is not None and r.cuerpo.endswith("el presupuesto")
     r = entry.ubicar(TRES, "rodolfo por la cotizacion")
@@ -65,7 +63,7 @@ def test_ubica_el_ultimo_que_calza_sin_distinguir_mayusculas_ni_tildes() -> None
     assert entry.ubicar(TRES, "punto del plan") is None
 
 
-def test_update_corrige_el_ultimo_registro_y_la_fila_del_pendiente(vault: Path) -> None:
+def test_update_corrige_el_ultimo_registro_la_fila_y_conserva_la_marca(vault: Path) -> None:
     todo.abrir_en_vault(
         vault, body="enviar la cotización", scope="personal", day=DIA, hour="09:00"
     )
@@ -83,16 +81,15 @@ def test_update_corrige_el_ultimo_registro_y_la_fila_del_pendiente(vault: Path) 
     )
     assert otra.ok and "ya decía eso" in otra.mensaje
 
-
-def test_update_conserva_la_marca_del_pendiente_cuando_el_body_no_la_trae(vault: Path) -> None:
     todo.abrir_en_vault(
         vault, body="llamar a la administradora", scope="personal", day=DIA, hour="09:00"
     )
     r = entry.actualizar_en_vault(vault, match="administradora", body="llamar por el reajuste")
     assert r.ok
     assert "personal.md) **pendiente**: llamar por el reajuste" in _ahora(vault)
-    assert todo.cuerpos((vault / "PENDIENTES.md").read_text(encoding="utf-8")) == [
-        "llamar por el reajuste"
+    assert sorted(todo.cuerpos((vault / "PENDIENTES.md").read_text(encoding="utf-8"))) == [
+        "enviar el presupuesto",
+        "llamar por el reajuste",
     ]
     assert entry.actualizar_en_vault(vault, match="reajuste", body="llamar por el reajuste").ok
 

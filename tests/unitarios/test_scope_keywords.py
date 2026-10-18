@@ -35,7 +35,7 @@ def _ahora(vault: Path) -> str:
     return (vault / "AHORA.md").read_text(encoding="utf-8")
 
 
-def test_crear_un_ambito_sin_keywords_le_pide_al_agente_preguntarlas(
+def test_crear_pide_las_keywords_solo_si_faltan(
     vault: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     assert _crear(vault, "paranal") == EXITO
@@ -47,25 +47,15 @@ def test_crear_un_ambito_sin_keywords_le_pide_al_agente_preguntarlas(
     assert "tuku scope update paranal --keyword PALABRA" in salida
     assert _keywords(vault, "paranal", "paranal.md") == []
 
-
-def test_crear_un_ambito_con_keywords_las_deja_en_la_pagina_y_no_vuelve_a_pedirlas(
-    vault: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    assert _crear(vault, "paranal", "--keyword", "vlti", "--keyword", "LCU") == EXITO
-    assert "Pregunta al autor" not in capsys.readouterr().out
-    assert _keywords(vault, "paranal", "paranal.md") == ["vlti", "lcu"]
-
-
-def test_crear_sobre_un_ambito_existente_no_vuelve_a_pedir_keywords(
-    vault: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
     assert _crear(vault, "paranal") == EXITO
-    capsys.readouterr()
-    assert _crear(vault, "paranal") == EXITO
+    assert "Pregunta al autor" not in capsys.readouterr().out, "ya existe"
+
+    assert _crear(vault, "cerro", "--keyword", "vlti", "--keyword", "LCU") == EXITO
     assert "Pregunta al autor" not in capsys.readouterr().out
+    assert _keywords(vault, "cerro", "cerro.md") == ["vlti", "lcu"]
 
 
-def test_keywords_suma_las_nuevas_sin_repetir_y_no_toca_la_bitacora(vault: Path) -> None:
+def test_una_keyword_no_modifica_ni_enlaza_lo_ya_escrito(vault: Path) -> None:
     """Las keywords sirven para elegir el ámbito de lo que el autor dice, no para enlazar."""
     assert _crear(vault, "paranal") == EXITO
     assert (
@@ -82,41 +72,57 @@ def test_keywords_suma_las_nuevas_sin_repetir_y_no_toca_la_bitacora(vault: Path)
     )
     assert _keywords(vault, "paranal", "paranal.md") == ["lcu", "vlti", "tcs"]
     assert _ahora(vault) == antes, "una keyword no modifica ni enlaza el body"
-
     assert (
         _tuku(vault, "scope", "update", "paranal", "--keyword", "LCU", "--keyword", "tcs")
         == EXITO
     )
     assert _keywords(vault, "paranal", "paranal.md") == ["lcu", "vlti", "tcs"]
-    assert _tuku(vault, "doctor") == EXITO
 
-
-def test_crear_un_ambito_no_enlaza_ni_modifica_lo_ya_escrito(vault: Path) -> None:
     body = "hablé de arriendo con Viana en el depto centro"
     assert (
         _tuku(
-            vault,
-            "entry",
-            "create",
-            "--at",
-            f"{HOY} 17:00",
-            "--scope",
-            "personal",
-            "--body",
-            body,
+            vault, "entry", "create", "--at", f"{HOY} 20:00", "--scope", "personal",
+            "--body", body,
         )
         == EXITO
-    )
+    )  # fmt: skip
     assert _crear(vault, "depto-centro", "--keyword", "arriendo", "--keyword", "viana") == EXITO
     assert f") {body}\n" in _ahora(vault), "el body queda como lo dijo el autor"
     assert "[depto centro]" not in _ahora(vault)
 
+    assert (
+        _tuku(
+            vault, "todo", "open", "--at", f"{HOY} 21:00", "--scope", "personal",
+            "--body", "pagar los gastos comunes del depto centro",
+        )
+        == EXITO
+    )  # fmt: skip
+    assert (
+        _tuku(vault, "scope", "update", "depto-centro", "--keyword", "gastos comunes") == EXITO
+    )
+    assert "**pendiente**: pagar los gastos comunes del depto centro" in _ahora(vault)
+    assert _tuku(vault, "doctor", "todo") == EXITO
+    assert _tuku(vault, "doctor") == EXITO
 
-def test_keywords_repetida_con_otra_grafia_no_escribe_nada(vault: Path) -> None:
+
+def test_las_keywords_se_normalizan_y_no_se_repiten(vault: Path) -> None:
     assert _crear(vault, "paranal", "--keyword", "casa matriz") == EXITO
-    antes = (vault / "ambitos" / "paranal" / "paranal.md").read_bytes()
+    pagina = vault / "ambitos" / "paranal" / "paranal.md"
+    antes = pagina.read_bytes()
     assert _tuku(vault, "scope", "update", "paranal", "--keyword", "Casa-Matriz") == EXITO
-    assert (vault / "ambitos" / "paranal" / "paranal.md").read_bytes() == antes
+    assert pagina.read_bytes() == antes, "otra grafía de la misma keyword no escribe"
+
+    assert (
+        _crear(vault, "cerro", "--keyword", "Los Robles, vlti", "--keyword", "gravity") == EXITO
+    )
+    assert _keywords(vault, "cerro", "cerro.md") == ["los-robles", "vlti", "gravity"]
+    assert _tuku(vault, "scope", "update", "cerro", "--keyword", "Paula  Reyes,LCU") == EXITO
+    assert _keywords(vault, "cerro", "cerro.md")[-2:] == ["paula-reyes", "lcu"]
+
+    assert _crear(vault, "casa-matriz", "--keyword", "Casa Matriz, sede") == EXITO
+    assert _keywords(vault, "casa-matriz", "casa-matriz.md") == ["sede"]
+    assert _tuku(vault, "scope", "update", "casa-matriz", "--keyword", "CASA-MATRIZ") == EXITO
+    assert _keywords(vault, "casa-matriz", "casa-matriz.md") == ["sede"]
 
 
 def test_una_keyword_que_ya_nombra_a_otro_ambito_avisa_y_escribe(
@@ -140,11 +146,9 @@ def test_una_keyword_que_ya_nombra_a_otro_ambito_avisa_y_escribe(
     assert _tuku(vault, "scope", "update", "liceo", "--keyword", "paula") == EXITO
     assert capsys.readouterr().err == "", "lo que ya estaba no vuelve a avisar"
 
-
-def test_un_ambito_con_el_nombre_de_la_keyword_tambien_cuenta(vault: Path) -> None:
     assert _crear(vault, "bodega") == EXITO
     avisos = scope.avisos_de_keywords(vault, "paranal", ["bodega"])
-    assert len(avisos) == 1 and "bodega" in avisos[0]
+    assert len(avisos) == 1 and "bodega" in avisos[0], "el nombre de un ámbito también cuenta"
     assert scope.avisos_de_keywords(vault, "bodega", ["bodega"]) == ()
 
 
@@ -175,60 +179,3 @@ def test_keywords_rechaza_lo_que_no_cabe_o_no_existe(
         assert _tuku(vault, *argv) == RECHAZO, argv
         assert dice in capsys.readouterr().err, argv
     assert _keywords(vault, "paranal", "paranal.md") == []
-
-
-def test_renombrar_un_ambito_deja_sus_keywords_como_estaban(vault: Path) -> None:
-    assert _crear(vault, "paranal", "--keyword", "vlti", "--keyword", "LCU") == EXITO
-    assert _tuku(vault, "scope", "rename", "paranal", "cerro") == EXITO
-    assert _keywords(vault, "cerro", "cerro.md") == ["vlti", "lcu"]
-    assert _tuku(vault, "doctor") == EXITO
-
-
-def test_un_pendiente_con_una_keyword_sigue_coincidiendo_con_su_fila(vault: Path) -> None:
-    """El body del pendiente queda como lo dijo el autor, así que se puede cerrar."""
-    assert _crear(vault, "depto-centro") == EXITO
-    assert (
-        _tuku(
-            vault, "todo", "open", "--at", f"{HOY} 19:00", "--scope", "personal",
-            "--body", "pagar los gastos comunes del depto centro",
-        )
-        == EXITO
-    )  # fmt: skip
-    assert (
-        _tuku(vault, "scope", "update", "depto-centro", "--keyword", "gastos comunes") == EXITO
-    )
-    assert "**pendiente**: pagar los gastos comunes del depto centro" in _ahora(vault)
-    assert _tuku(vault, "doctor", "todo") == EXITO
-    assert _tuku(vault, "doctor") == EXITO
-
-
-def test_una_keyword_admite_varias_palabras_separadas_por_coma_y_los_espacios_pasan_a_guion(
-    vault: Path,
-) -> None:
-    assert (
-        _crear(vault, "paranal", "--keyword", "Los Robles, vlti", "--keyword", "gravity")
-        == EXITO
-    )
-    assert _keywords(vault, "paranal", "paranal.md") == [
-        "los-robles",
-        "vlti",
-        "gravity",
-    ]
-    assert _tuku(vault, "scope", "update", "paranal", "--keyword", "Paula  Reyes,LCU") == EXITO
-    assert _keywords(vault, "paranal", "paranal.md")[-2:] == ["paula-reyes", "lcu"]
-
-
-def test_scope_keywords_ya_no_existe(vault: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    """La sintaxis se estabiliza sin retrocompatibilidad: una sola forma de dar keywords."""
-    assert _crear(vault, "paranal") == EXITO
-    capsys.readouterr()
-    with pytest.raises(SystemExit):
-        _tuku(vault, "scope", "keywords", "paranal", "vlti")
-    assert "invalid choice" in capsys.readouterr().err
-
-
-def test_una_keyword_que_repite_el_nombre_del_ambito_no_entra(vault: Path) -> None:
-    assert _crear(vault, "casa-matriz", "--keyword", "Casa Matriz, sede") == EXITO
-    assert _keywords(vault, "casa-matriz", "casa-matriz.md") == ["sede"]
-    assert _tuku(vault, "scope", "update", "casa-matriz", "--keyword", "CASA-MATRIZ") == EXITO
-    assert _keywords(vault, "casa-matriz", "casa-matriz.md") == ["sede"]

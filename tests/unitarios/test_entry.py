@@ -50,8 +50,6 @@ def test_un_registro_sin_hora_toma_la_del_anterior_y_uno_nuevo_va_al_final() -> 
     with pytest.raises(ValueError, match="un registro empieza con '- '"):
         add(AHORA, ["09:45 - falta guion inicial"], dia="Lunes 7 de septiembre")
 
-
-def test_sin_hora_queda_al_final_y_el_siguiente_con_hora_va_a_continuacion() -> None:
     dia = "Lunes 7 de septiembre"
     texto = add(AHORA, ["- 10:00 - **nota**: primero"], dia=dia)
     texto = add(texto, ["- llamé a Rodolfo"], dia=dia)

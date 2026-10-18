@@ -28,6 +28,20 @@ def test_renombrar_enlaces_cambia_solo_el_nombre_entero() -> None:
         1,
     )
 
+    # los links Markdown cambian texto y ruta, y no lo que eligió el autor
+    texto = "ver [personal](ambitos/personal/personal.md#a) y [otro](ambitos/otro/otro.md)"
+    assert renombrar_enlaces(texto, "personal", "propio") == (
+        "ver [propio](ambitos/propio/propio.md#a) y [otro](ambitos/otro/otro.md)",
+        1,
+    )
+    assert renombrar_enlaces(
+        "[mi casa](ambitos/personal/personal.md)", "personal", "propio"
+    ) == ("[mi casa](ambitos/propio/propio.md)", 1)
+    assert renombrar_enlaces("[gastos](notas/gastos.md)", "gastos", "cobros") == (
+        "[cobros](notas/cobros.md)",
+        1,
+    )
+
 
 def test_renombrar_enlaces_sin_nada_que_cambiar() -> None:
     assert renombrar_enlaces("[[a]]", "a", "a") == ("[[a]]", 0)

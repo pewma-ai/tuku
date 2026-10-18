@@ -10,8 +10,6 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import pytest
-
 from tuku.cli import _construir_parser
 
 SPEC = Path(__file__).resolve().parent.parent.parent / "spec" / "tuku.md"
@@ -154,13 +152,15 @@ def test_lo_que_se_retira_sigue_en_el_cli() -> None:
     )
 
 
-@pytest.mark.parametrize("ruta", sorted(r for r, f in FIRMAS.items() if not f.pendiente))
-def test_cada_firma_implementada_calza_con_argparse(ruta: str) -> None:
-    assert ruta in CLI, f"`tuku {ruta}` está en la spec y no en el CLI: márcalo `# pendiente`"
-    esperada, real = FIRMAS[ruta], CLI[ruta]
-    pendientes = esperada.piezas_pendientes
-    assert esperada.opciones - pendientes == real.opciones - RETIRO.get(ruta, set())
-    posicionales = [p for p in esperada.posicionales if p not in pendientes]
-    assert len(posicionales) == len(real.posicionales), (
-        f"`tuku {ruta}`: la spec y el CLI no tienen los mismos posicionales"
-    )
+def test_cada_firma_implementada_calza_con_argparse() -> None:
+    for ruta in sorted(r for r, f in FIRMAS.items() if not f.pendiente):
+        assert ruta in CLI, (
+            f"`tuku {ruta}` está en la spec y no en el CLI: márcalo `# pendiente`"
+        )
+        esperada, real = FIRMAS[ruta], CLI[ruta]
+        pendientes = esperada.piezas_pendientes
+        assert esperada.opciones - pendientes == real.opciones - RETIRO.get(ruta, set()), ruta
+        posicionales = [p for p in esperada.posicionales if p not in pendientes]
+        assert len(posicionales) == len(real.posicionales), (
+            f"`tuku {ruta}`: la spec y el CLI no tienen los mismos posicionales"
+        )

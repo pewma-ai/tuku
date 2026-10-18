@@ -114,7 +114,7 @@ def test_convertir_calcula_la_ruta_desde_donde_esta_el_archivo() -> None:
     )
 
 
-def test_convertir_deja_lo_ambiguo_y_lo_inexistente_como_decision() -> None:
+def test_convertir_deja_intacto_lo_ambiguo_lo_inexistente_la_transclusion_y_el_codigo() -> None:
     r = link.convertir("[[personal]]", "AHORA.md", IDX)
     assert (r.convertidos, r.texto) == (0, "[[personal]]")
     [d] = r.decisiones
@@ -125,8 +125,6 @@ def test_convertir_deja_lo_ambiguo_y_lo_inexistente_como_decision() -> None:
     [d] = r.decisiones
     assert "no existe" in d.motivo
 
-
-def test_convertir_respeta_transclusion_y_codigo_y_es_idempotente() -> None:
     texto = (
         "![[ambitos/PENDIENTES-AMBITOS.md#^x]] `[[depto-centro]]`\n```\n[[depto-centro]]\n```\n"
     )
@@ -139,9 +137,6 @@ def test_convertir_respeta_transclusion_y_codigo_y_es_idempotente() -> None:
     primero = link.convertir("[[depto-centro]] y [[fantasma]]", "AHORA.md", IDX)
     segundo = link.convertir(primero.texto, "AHORA.md", IDX)
     assert segundo.texto == primero.texto and segundo.convertidos == 0
-
-
-# --- revisar y mover ---------------------------------------------------------
 
 
 def test_rotos_reporta_solo_lo_que_no_existe() -> None:
@@ -177,7 +172,7 @@ def test_rebasar_recalcula_las_rutas_al_mover_la_linea() -> None:
 MOVIDO = {"ambitos/a": "ambitos/g/a"}
 
 
-def test_reubicar_recalcula_los_links_cuando_una_carpeta_cambia_de_lugar() -> None:
+def test_reubicar_recalcula_los_links_de_lo_movido_y_no_toca_el_resto() -> None:
     assert link.reubicar("ver [a](ambitos/a/a.md#ancla)", "AHORA.md", "AHORA.md", MOVIDO) == (
         "ver [a](ambitos/g/a/a.md#ancla)"
     ), "el link de otro archivo a lo movido"
@@ -194,8 +189,6 @@ def test_reubicar_recalcula_los_links_cuando_una_carpeta_cambia_de_lugar() -> No
         == "![[../../PENDIENTES-AMBITOS.md#^a]]"
     ), "la transclusión"
 
-
-def test_reubicar_no_toca_externos_anclas_codigo_ni_lo_que_no_cambia() -> None:
     for texto in (
         "[web](https://x.y) [aca](#seccion) `[a](ambitos/a/a.md)`",
         "- 09:12 - [personal](ambitos/personal/personal.md) cuerpo",

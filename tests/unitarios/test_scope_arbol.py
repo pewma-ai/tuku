@@ -222,6 +222,12 @@ def test_renombrar_un_ambito_anidado_arrastra_todo(vault: Path) -> None:
     assert "ambitos/faena/faena-ia/faena-ia.md" in _leer(vault, "AHORA.md")
     assert _tuku(vault, "doctor") == EXITO
 
+    assert _tuku(vault, "scope", "rename", "faena", "trabajo") == EXITO
+    assert _hijos(vault, "ambitos", "trabajo", "trabajo.md") == [
+        "> [!abstract]+ En **Trabajo**:",
+        "> - [faena-ia](faena-ia/faena-ia.md)",
+    ], "renombrar el padre retitula su callout"
+
 
 def _hijos(vault: Path, *ruta: str) -> list[str]:
     """Las líneas del callout "En X:" de una página, o `[]` si no lo tiene."""
@@ -273,15 +279,6 @@ def test_la_pagina_del_padre_lista_sus_hijos_directos_y_los_sigue_al_moverlos(
     assert _tuku(vault, "scope", "move", "faena-dos") == EXITO
     assert _hijos(vault, *pagina) == []
     assert _tuku(vault, "doctor") == EXITO
-
-
-def test_renombrar_el_padre_retitula_su_callout(vault: Path) -> None:
-    _con_faena(vault)
-    assert _tuku(vault, "scope", "rename", "faena", "trabajo") == EXITO
-    assert _hijos(vault, "ambitos", "trabajo", "trabajo.md") == [
-        "> [!abstract]+ En **Trabajo**:",
-        "> - [faena-ai](faena-ai/faena-ai.md)",
-    ]
 
 
 def test_al_abrir_el_callout_entran_los_hijos_que_ya_tenia_el_padre(vault: Path) -> None:
@@ -446,7 +443,9 @@ def test_la_constancia_enlaza_al_ambito_padre_y_nombra_las_categorias_del_camino
         assert any(x.endswith(esperada) for x in lineas), esperada
 
 
-def test_parent_acepta_la_ruta_y_crea_la_categoria_que_falta(vault: Path) -> None:
+def test_parent_acepta_la_ruta_y_la_exige_si_el_nombre_es_ambiguo(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     assert _crear(vault, "negocio") == EXITO
     assert _crear(vault, "colegio", "--parent", "negocio/clientes") == EXITO
 
@@ -466,37 +465,23 @@ def test_parent_acepta_la_ruta_y_crea_la_categoria_que_falta(vault: Path) -> Non
     assert _crear(vault, "jardin", "--parent", "negocio/clientes") == EXITO
     assert (vault / "ambitos" / "negocio" / "clientes" / "jardin" / "jardin.md").is_file()
 
-
-def test_parent_con_ruta_cuyo_padre_no_existe_se_rechaza_sin_escribir(vault: Path) -> None:
-    assert _crear(vault, "negocio") == EXITO
     antes = _foto(vault)
-    assert _crear(vault, "colegio", "--parent", "pyme/clientes") == RECHAZO
-    assert _foto(vault) == antes
+    assert _crear(vault, "colegio-nuevo", "--parent", "pyme/clientes") == RECHAZO
+    assert _foto(vault) == antes, "un padre que no existe no escribe nada"
 
-
-def test_un_nombre_de_categoria_repetido_exige_la_ruta(
-    vault: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    assert _crear(vault, "negocio") == EXITO
     assert _crear(vault, "casa") == EXITO
-    assert _crear(vault, "colegio", "--parent", "negocio/clientes") == EXITO
     assert _crear(vault, "taller", "--parent", "casa/clientes") == EXITO
     antes = _foto(vault)
     capsys.readouterr()
-
-    assert _crear(vault, "jardin", "--parent", "clientes") == RECHAZO
+    assert _crear(vault, "huerta", "--parent", "clientes") == RECHAZO
     salida = capsys.readouterr()
     assert "casa/clientes" in salida.err + salida.out
     assert "negocio/clientes" in salida.err + salida.out
     assert _foto(vault) == antes
+    assert _crear(vault, "huerta", "--parent", "casa/clientes") == EXITO
+    assert (vault / "ambitos" / "casa" / "clientes" / "huerta" / "huerta.md").is_file()
 
-    assert _crear(vault, "jardin", "--parent", "casa/clientes") == EXITO
-    assert (vault / "ambitos" / "casa" / "clientes" / "jardin" / "jardin.md").is_file()
-
-
-def test_move_acepta_la_ruta_del_padre(vault: Path) -> None:
-    assert _crear(vault, "negocio") == EXITO
-    assert _crear(vault, "colegio") == EXITO
-    assert _tuku(vault, "scope", "move", "colegio", "--parent", "negocio/clientes") == EXITO
-    assert (vault / "ambitos" / "negocio" / "clientes" / "colegio" / "colegio.md").is_file()
+    assert _crear(vault, "oficina") == EXITO
+    assert _tuku(vault, "scope", "move", "oficina", "--parent", "negocio/clientes") == EXITO
+    assert (vault / "ambitos" / "negocio" / "clientes" / "oficina" / "oficina.md").is_file()
     assert _tuku(vault, "doctor") == EXITO

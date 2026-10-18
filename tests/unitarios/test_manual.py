@@ -19,7 +19,7 @@ def _parser() -> argparse.ArgumentParser:
     return raiz
 
 
-def test_cada_sustantivo_entra_con_sus_verbos_anidados_y_descripcion_normalizada() -> None:
+def test_el_documento_anida_cada_sustantivo_con_sus_verbos_y_es_determinista() -> None:
     entradas = manual.entradas(_parser())
     assert [(e.nombre, e.nivel, e.invocable) for e in entradas] == [
         ("tuku init", 1, True),
@@ -29,9 +29,6 @@ def test_cada_sustantivo_entra_con_sus_verbos_anidados_y_descripcion_normalizada
     ]
     assert entradas[0].que_hace == "Siembra un vault."
 
-
-def test_el_documento_es_determinista_anida_y_dice_lo_que_falta() -> None:
-    entradas = manual.entradas(_parser())
     texto = manual.documento(entradas)
     assert texto == manual.documento(entradas)
     assert texto.startswith("---\ntype: Config\n---\n")

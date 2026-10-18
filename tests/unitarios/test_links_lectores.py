@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tuku import entry, regenerate, rename, scope, todo
+from tuku import entry, regenerate, scope, todo
 
 MD = "[personal](ambitos/personal/personal.md)"
 
@@ -42,21 +42,6 @@ def test_los_escritores_producen_markdown_con_la_ruta_completa() -> None:
     assert (
         regenerate.linea_del_dia(anidada, rutas)
         == "- [pewma](ambitos/trabajo/pewma/pewma.md) - x"
-    )
-
-
-def test_renombrar_cambia_texto_y_ruta_sin_tocar_lo_que_eligio_el_autor() -> None:
-    texto = "ver [personal](ambitos/personal/personal.md#a) y [otro](ambitos/otro/otro.md)"
-    assert rename.renombrar_enlaces(texto, "personal", "propio") == (
-        "ver [propio](ambitos/propio/propio.md#a) y [otro](ambitos/otro/otro.md)",
-        1,
-    )
-    assert rename.renombrar_enlaces(
-        "[mi casa](ambitos/personal/personal.md)", "personal", "propio"
-    ) == ("[mi casa](ambitos/propio/propio.md)", 1)
-    assert rename.renombrar_enlaces("[gastos](notas/gastos.md)", "gastos", "cobros") == (
-        "[cobros](notas/cobros.md)",
-        1,
     )
 
 

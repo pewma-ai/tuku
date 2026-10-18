@@ -17,6 +17,8 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 DIA = date(2026, 8, 11)
 CON_LINK = "avisar a [Carmen](notas/carmen.md) de los GGCC"
 SIN_LINK = "avisar a Carmen de los GGCC"
+ANA_CON_LINK = "llamar a [Ana](notas/ana.md) por el stock"
+ANA_SIN_LINK = "llamar a Ana por el stock"
 
 
 @pytest.fixture
@@ -36,13 +38,36 @@ def _tabla(vault: Path) -> list[str]:
     return todo.cuerpos((vault / "PENDIENTES.md").read_text(encoding="utf-8"))
 
 
-def test_el_cierre_queda_con_la_marca_a_la_vista_y_el_cuerpo_tachado(vault: Path) -> None:
-    _abre(vault, SIN_LINK)
-    r = todo.cerrar_en_vault(vault, body=SIN_LINK, scope="personal", day=DIA, hour="19:05")
-
+def test_cerrar_deja_la_marca_a_la_vista_y_abrir_o_cerrar_ignora_los_links(vault: Path) -> None:
+    _abre(vault, "pagar la patente")
+    r = todo.cerrar_en_vault(
+        vault, body="pagar la patente", scope="personal", day=DIA, hour="19:05"
+    )
     assert r.ok, r.mensaje
-    assert f"(Hecho): ~~{SIN_LINK}~~" in _ahora(vault)
+    assert "(Hecho): ~~pagar la patente~~" in _ahora(vault)
     assert _tabla(vault) == []
+
+    _abre(vault, SIN_LINK)
+    todo.cerrar_en_vault(vault, body=CON_LINK, scope="personal", day=DIA, hour="19:05")
+    assert _tabla(vault) == []
+    assert f"(Hecho): ~~{CON_LINK}~~" in _ahora(vault)
+
+    _abre(vault, CON_LINK)
+    assert _tabla(vault) == [CON_LINK]
+    r = todo.cerrar_en_vault(vault, body=SIN_LINK, day=DIA, hour="19:20")
+    assert "pendiente cerrado" in r.mensaje
+    assert _tabla(vault) == []
+
+    _abre(vault, ANA_CON_LINK)
+    antes = _ahora(vault)
+    todo.abrir_en_vault(vault, body=ANA_SIN_LINK, scope="personal", day=DIA, hour="15:00")
+    assert len(_tabla(vault)) == 1
+    assert _ahora(vault) == antes, "abrir dos veces no duplica"
+
+    todo.cerrar_en_vault(vault, body=ANA_SIN_LINK, day=DIA, hour="19:05")
+    cerrado = _ahora(vault)
+    todo.cerrar_en_vault(vault, body=ANA_CON_LINK, day=DIA, hour="19:10")
+    assert _ahora(vault) == cerrado, "cerrar dos veces no duplica"
 
 
 def test_el_cierre_cae_en_el_ambito_donde_estaba_el_pendiente(vault: Path) -> None:
@@ -60,32 +85,6 @@ def test_el_cierre_cae_en_el_ambito_donde_estaba_el_pendiente(vault: Path) -> No
     miercoles = _ahora(vault).split("## Miércoles 12 de agosto", 1)[1]
     assert "[bodega](ambitos/bodega/bodega.md) (Hecho): ~~contar el stock~~" in miercoles
     assert "[personal](ambitos/personal/personal.md) (Hecho): ~~llamar a Ana~~" in miercoles
-
-
-def test_cierra_aunque_solo_el_registro_o_solo_la_tabla_lleve_el_link(vault: Path) -> None:
-    _abre(vault, SIN_LINK)
-    todo.cerrar_en_vault(vault, body=CON_LINK, scope="personal", day=DIA, hour="19:05")
-    assert _tabla(vault) == []
-    assert f"(Hecho): ~~{CON_LINK}~~" in _ahora(vault)
-
-    _abre(vault, CON_LINK)
-    assert _tabla(vault) == [CON_LINK]
-    r = todo.cerrar_en_vault(vault, body=SIN_LINK, day=DIA, hour="19:20")
-    assert "pendiente cerrado" in r.mensaje
-    assert _tabla(vault) == []
-
-
-def test_abrir_o_cerrar_dos_veces_no_duplica_con_o_sin_link(vault: Path) -> None:
-    _abre(vault, CON_LINK)
-    antes = _ahora(vault)
-    todo.abrir_en_vault(vault, body=SIN_LINK, scope="personal", day=DIA, hour="15:00")
-    assert len(_tabla(vault)) == 1
-    assert _ahora(vault) == antes
-
-    todo.cerrar_en_vault(vault, body=SIN_LINK, day=DIA, hour="19:05")
-    cerrado = _ahora(vault)
-    todo.cerrar_en_vault(vault, body=CON_LINK, day=DIA, hour="19:10")
-    assert _ahora(vault) == cerrado
 
 
 def test_corregir_el_registro_encuentra_la_fila_aunque_difieran_en_links(vault: Path) -> None:

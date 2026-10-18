@@ -14,7 +14,9 @@ from tuku.cli import RECHAZO
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 
 
-def test_escribe_de_una_vez_conserva_permisos_y_no_deja_temporales(tmp_path: Path) -> None:
+def test_escribe_de_una_vez_conserva_permisos_y_puede_conservar_la_fecha(
+    tmp_path: Path,
+) -> None:
     ruta = tmp_path / "AHORA.md"
     ruta.write_text("antes\n", encoding="utf-8")
     ruta.chmod(0o640)
@@ -23,8 +25,6 @@ def test_escribe_de_una_vez_conserva_permisos_y_no_deja_temporales(tmp_path: Pat
     assert ruta.stat().st_mode & 0o777 == 0o640
     assert [p.name for p in tmp_path.iterdir()] == ["AHORA.md"]
 
-
-def test_conservar_fecha_deja_la_de_modificacion(tmp_path: Path) -> None:
     ruta = tmp_path / "nota.md"
     ruta.write_text("[[x]]\n", encoding="utf-8")
     antes = ruta.stat().st_mtime_ns - 10**9
@@ -33,7 +33,9 @@ def test_conservar_fecha_deja_la_de_modificacion(tmp_path: Path) -> None:
     assert ruta.stat().st_mtime_ns == antes
 
 
-def test_fuera_de_un_intento_escribe_aunque_el_archivo_haya_cambiado(tmp_path: Path) -> None:
+def test_un_cambio_ajeno_se_reintenta_dentro_de_un_intento_y_se_pisa_fuera_de_el(
+    tmp_path: Path,
+) -> None:
     ruta = tmp_path / "AHORA.md"
     ruta.write_text("uno\n", encoding="utf-8")
     archivo.leer(ruta)
@@ -41,8 +43,6 @@ def test_fuera_de_un_intento_escribe_aunque_el_archivo_haya_cambiado(tmp_path: P
     archivo.escribir(ruta, "tres\n")
     assert ruta.read_text(encoding="utf-8") == "tres\n"
 
-
-def test_un_cambio_ajeno_se_reintenta_y_el_segundo_intento_escribe(tmp_path: Path) -> None:
     ruta = tmp_path / "PENDIENTES.md"
     ruta.write_text("| fila |\n", encoding="utf-8")
     esperas: list[float] = []

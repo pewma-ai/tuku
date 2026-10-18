@@ -64,12 +64,3 @@ def test_scope_lint_registro_apunta_a_categoria(tmp_path: Path) -> None:
 
     hallazgos = scope.lint(tmp_path)
     assert any("categoría" in h for h in hallazgos)
-
-
-def test_normalizar_pasa_espacios_a_guion_y_respeta_lo_que_esta_bien() -> None:
-    assert scope.normalizar("depto centro") == "depto-centro"
-    assert scope.normalizar("  depto   centro ") == "depto-centro"
-    assert scope.normalizar("[[depto centro]]") == "depto-centro"
-    assert scope.normalizar("personal") == "personal"
-    assert scope.normalizar("depto-centro") == "depto-centro"
-    assert scope.normalizar("") == scope.normalizar("   ") == ""

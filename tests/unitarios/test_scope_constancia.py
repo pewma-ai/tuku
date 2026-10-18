@@ -5,7 +5,7 @@ from __future__ import annotations
 from tuku import scope
 
 
-def test_la_constancia_lleva_la_ruta_del_ambito_y_termina_en_el_cuerpo_fijo() -> None:
+def test_la_constancia_lleva_la_ruta_del_ambito_y_dice_donde_quedo() -> None:
     assert scope.registro_de_constancia("depto-centro", hour="18:45") == (
         "- 18:45 - [depto-centro](ambitos/depto-centro/depto-centro.md) "
         "**nota**: abrí el ámbito"
@@ -17,8 +17,6 @@ def test_la_constancia_lleva_la_ruta_del_ambito_y_termina_en_el_cuerpo_fijo() ->
     # los lectores la reconocen por el cuerpo fijo, sin depender de la hora
     assert scope.CONSTANCIA in scope.registro_de_constancia("x", hour="")
 
-
-def test_bajo_un_padre_la_constancia_dice_dónde_quedó() -> None:
     rutas = {"bodega": "ambitos/negocio/bodega/bodega.md"}
     enlace = "[negocio](ambitos/negocio/negocio.md)"
     assert scope.registro_de_constancia("bodega", hour="07:48", rutas=rutas, bajo=enlace) == (

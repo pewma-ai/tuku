@@ -87,8 +87,21 @@ def test_cada_opcion_tiene_una_sola_forma_en_ingles(capsys: pytest.CaptureFixtur
             assert opcion in capsys.readouterr().err, (comando, opcion)
 
 
-def test_los_errores_de_opciones_son_error_de_uso(capsys: pytest.CaptureFixture[str]) -> None:
+def test_los_errores_de_uso_salen_con_el_codigo_de_uso(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     parser = cli._construir_parser()
+    for argv in (
+        *([noun] for noun in ("entry", "todo", "scope", "note")),
+        ["fix"],
+        ["doctor", "inexistente"],
+        ["inexistente"],
+    ):
+        with pytest.raises(SystemExit) as e:
+            cli.main(argv)
+        assert e.value.code == USO, argv
+    assert "invalid choice" in capsys.readouterr().err
+
     for comando in COMANDOS:
         with pytest.raises(SystemExit) as e:
             _parsear(comando, "--at", "11-08-2026")
@@ -143,12 +156,6 @@ def _config(vault: Path, cambiar: Callable[[str], str]) -> None:
 
 
 @pytest.mark.parametrize("comando", COMANDOS)
-def test_abreviado_dentro_del_vault_va_al_ambito_por_defecto(comando: str, vault: Path) -> None:
-    assert _correr(comando, "--at", f"{HOY} 09:12") == EXITO
-    assert _martes(vault) == [f"- 09:12 - {PERSONAL} {REGISTRO[comando]}"]
-
-
-@pytest.mark.parametrize("comando", COMANDOS)
 def test_sin_day_ni_hour_es_hoy_y_ahora(
     comando: str, vault: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -170,25 +177,26 @@ def test_sin_day_ni_hour_es_hoy_y_ahora(
     assert _martes(vault) == [f"- 16:45 - {PERSONAL} {REGISTRO[comando]}"]
 
 
-def test_el_vault_viene_de_la_opcion_y_sin_scope_default_el_registro_no_lleva_ambito(
-    vault: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_el_scope_default_viene_de_la_config(
+    vault: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
+    config = (vault / "reglas" / "config.tuku.md").read_text(encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     assert _correr("entry create", "--vault", str(vault), "--at", f"{HOY} 09:12") == EXITO
-    assert _martes(vault) == [f"- 09:12 - {PERSONAL} {CUERPO}"]
+    assert _martes(vault) == [f"- 09:12 - {PERSONAL} {CUERPO}"], "el vault viene de la opción"
 
     _config(vault, lambda t: "\n".join(x for x in t.splitlines() if "`scope_default`" not in x))
     assert _correr("entry create", "--vault", str(vault), "--at", f"{HOY} 10:00") == EXITO
-    assert _martes(vault)[-1] == f"- 10:00 - {CUERPO}"
+    assert _martes(vault)[-1] == f"- 10:00 - {CUERPO}", "sin scope_default no lleva ámbito"
 
-
-def test_un_scope_default_que_no_existe_nombra_scope_create(
-    vault: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    _config(vault, lambda t: t.replace("| `personal` ", "| `casa`     "))
-    assert _correr("entry create", "--at", f"{HOY} 09:12") == RECHAZO
+    antes = _martes(vault)
+    _config(vault, lambda _t: config.replace("| `personal` ", "| `casa`     "))
+    assert _correr("entry create", "--vault", str(vault), "--at", f"{HOY} 11:00") == RECHAZO
     assert "tuku scope create casa" in capsys.readouterr().err
-    assert _martes(vault) == []
+    assert _martes(vault) == antes
 
 
 def test_no_regenerate_no_toca_las_vistas(vault: Path) -> None:

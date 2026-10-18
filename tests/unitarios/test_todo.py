@@ -26,7 +26,7 @@ def _con(*lineas: str) -> str:
 # --- parsear ----------------------------------------------------------------
 
 
-def test_parsear_reconoce_aperturas_y_cierres() -> None:
+def test_parsear_reconoce_aperturas_y_cierres_y_es_estricto_con_la_ontologia_cerrada() -> None:
     marca = todo.parsear("- 14:20 - [[personal]] **pendiente**: comprar una maleta")
     assert marca is not None
     assert (marca.marca, marca.ambito, marca.cuerpo) == (
@@ -49,8 +49,6 @@ def test_parsear_reconoce_aperturas_y_cierres() -> None:
     marca = todo.parsear("- 19:05 - (Hecho) **hito**: ~~avisar de los GGCC~~")
     assert marca is not None and marca.cuerpo == "avisar de los GGCC"
 
-
-def test_parsear_es_estricto_con_la_ontologia_cerrada() -> None:
     for linea in [
         "",
         "no es una línea de registro",
@@ -63,10 +61,7 @@ def test_parsear_es_estricto_con_la_ontologia_cerrada() -> None:
         assert todo.parsear(linea) is None, linea
 
 
-# --- abrir y cerrar ---------------------------------------------------------
-
-
-def test_abrir_copia_el_cuerpo_literal_y_es_idempotente() -> None:
+def test_abrir_copia_el_cuerpo_literal_es_idempotente_y_con_fecha_va_a_vence() -> None:
     marca = todo.parsear("- 14:20 - [[personal]] **pendiente**: avisar de los GGCC")
     assert marca is not None
 
@@ -76,8 +71,6 @@ def test_abrir_copia_el_cuerpo_literal_y_es_idempotente() -> None:
     assert todo.cuerpos(una, "esta semana") == ["avisar de los GGCC"]
     assert todo.abrir(una, marca) == una, "un registro repetido no abre dos veces"
 
-
-def test_abrir_con_fecha_va_a_la_columna_vence_y_sin_tabla_se_niega() -> None:
     marca = todo.Marca(todo.ABRE, "personal", "pagar la sesión")
 
     fila = todo.filas(todo.abrir(VACIA, marca, horizon=todo.CON_FECHA, due="2026-08-12"))[0]
@@ -128,13 +121,11 @@ def test_filas_horizontes_y_duplicados() -> None:
 # --- vocabulario de horizontes ---------------------------------------------
 
 
-def test_canonico_normaliza_y_deja_pasar_el_horizonte_propio() -> None:
+def test_el_horizonte_se_normaliza_y_la_escalera_es_la_del_autor() -> None:
     assert todo.canonico("Esta Semana") == todo.ESTA_SEMANA
     assert todo.canonico("  esta semana  ") == todo.ESTA_SEMANA
     assert todo.canonico("algún día") == "algún día"
 
-
-def test_la_escalera_es_la_del_autor_y_con_fecha_va_ultima() -> None:
     assert todo.escalera_de(["esta quincena", "próxima quincena"]) == (
         "esta quincena",
         "próxima quincena",
@@ -219,15 +210,13 @@ CON_LINK = "avisar a [Carmen](notas/carmen.md) de los GGCC"
 SIN_LINK = "avisar a Carmen de los GGCC"
 
 
-def test_clave_ignora_links_y_espacios_repetidos_pero_no_mayusculas() -> None:
+def test_los_links_y_los_espacios_no_cuentan_al_buscar_un_pendiente() -> None:
     assert todo.clave(CON_LINK) == todo.clave(SIN_LINK)
     assert todo.clave("ver [[carmen|Carmen]] hoy") == "ver Carmen hoy"
     assert todo.clave("ver [[carmen]] hoy") == "ver carmen hoy"
     assert todo.clave("pagar  la\tluz ") == todo.clave("pagar la luz")
     assert todo.clave("Pagar la luz") != todo.clave("pagar la luz")
 
-
-def test_con_y_sin_link_es_el_mismo_pendiente_en_todas_las_operaciones() -> None:
     sin = todo.Marca(todo.ABRE, "personal", SIN_LINK)
     con = todo.Marca(todo.ABRE, "personal", CON_LINK)
     cierra_con = todo.Marca(todo.CIERRA, "personal", CON_LINK)
@@ -255,8 +244,6 @@ def test_con_y_sin_link_es_el_mismo_pendiente_en_todas_las_operaciones() -> None
     )
     assert hubo_pareja and todo.cuerpos(sin_fila) == []
 
-
-def test_reemplazar_cuerpo_busca_sin_links_y_conserva_el_resto() -> None:
     tabla = _tabla(SIN_LINK)
     nueva, hubo = todo.reemplazar_cuerpo(tabla, CON_LINK, "avisar a Carmen mañana")
     assert hubo
@@ -316,7 +303,7 @@ def test_huerfanas_son_las_filas_sin_registro_pendiente_en_ahora_ni_en_la_histor
     assert todo.huerfanas(_tabla(), [ahora]) == []
 
 
-def test_lint_nombra_la_fila_huerfana_con_el_comando_que_le_devuelve_el_registro() -> None:
+def test_lint_nombra_el_comando_que_corrige_cada_hallazgo() -> None:
     ahora = (
         "---\nfrom: 2026-08-10\nto: 2026-08-16\n---\n"
         "## Martes 11 de agosto\n\n- 09:00 - llamar\n"
@@ -334,8 +321,6 @@ def test_lint_nombra_la_fila_huerfana_con_el_comando_que_le_devuelve_el_registro
         == []
     )
 
-
-def test_lint_nombra_el_comando_que_corrige_cada_hallazgo() -> None:
     ahora = (
         "---\nfrom: 2026-08-10\nto: 2026-08-16\n---\n"
         f"## Martes 11 de agosto\n\n- 14:20 - {P} **pendiente**: avisar de los GGCC\n"

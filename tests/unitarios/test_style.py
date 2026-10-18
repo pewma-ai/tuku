@@ -34,15 +34,13 @@ def _errores(texto: str) -> list[style.HallazgoEstilo]:
     return [h for h in style.lint(texto) if h.grado == ERROR]
 
 
-def test_el_libro_completo_no_tiene_errores_y_falta_el_marcador_del_autor() -> None:
+def test_el_libro_completo_no_tiene_errores_y_cada_contrato_que_falta_es_uno() -> None:
     assert _errores(COMPLETO) == []
 
     [error] = _errores(COMPLETO.replace("**Nombre del autor:** por declarar", ""))
     assert "Nombre del autor" in error.defecto
     assert "tuku init --author" in error.correccion
 
-
-def test_falta_un_encabezado_de_contrato() -> None:
     for encabezado in ("### Clasificaciones", "### Horizontes", "### Tipos de nota"):
         errores = _errores(COMPLETO.replace(f"{encabezado}\n", ""))
         assert any(encabezado in h.defecto for h in errores), encabezado

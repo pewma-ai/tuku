@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tuku import entry, init, todo
+from tuku import entry, init, scope, todo
 from tuku.cli import EXITO, RECHAZO, main
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -95,15 +95,18 @@ def test_un_rechazo_no_deja_nada_a_medias(
     assert not (vault / "ambitos" / "depto-centro").exists()
 
 
-def test_un_ambito_con_el_nombre_de_otro_en_mayusculas_es_el_mismo(vault: Path) -> None:
+def test_el_nombre_de_un_ambito_va_en_kebab_case_y_no_distingue_mayusculas(vault: Path) -> None:
+    assert scope.normalizar("depto centro") == "depto-centro"
+    assert scope.normalizar("  depto   centro ") == "depto-centro"
+    assert scope.normalizar("[[depto centro]]") == "depto-centro"
+    assert scope.normalizar("personal") == "personal"
+    assert scope.normalizar("depto-centro") == "depto-centro"
+    assert scope.normalizar("") == scope.normalizar("   ") == ""
+
     antes = sorted(p.name for p in (vault / "ambitos").iterdir())
     assert _tuku(vault, "scope", "create", "PERSONAL", "--at", f"{HOY} 10:00") == EXITO
     assert sorted(p.name for p in (vault / "ambitos").iterdir()) == antes
 
-
-def test_el_ambito_se_escribe_en_kebab_case_y_se_encuentra_sin_distinguir_mayusculas(
-    vault: Path,
-) -> None:
     assert _tuku(vault, "scope", "create", "Depto  Centro", "--at", f"{HOY} 18:45") == EXITO
     assert (vault / "ambitos" / "depto-centro" / "depto-centro.md").is_file()
     assert not (vault / "ambitos" / "depto centro").exists()
@@ -120,7 +123,8 @@ def test_el_ambito_se_escribe_en_kebab_case_y_se_encuentra_sin_distinguir_mayusc
 def test_scope_rename_arrastra_carpeta_links_y_ancla(
     vault: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    assert _tuku(vault, "scope", "create", "depto-centro", "--at", f"{HOY} 18:45") == EXITO
+    crear = ("scope", "create", "depto-centro", "--at", f"{HOY} 18:45")
+    assert _tuku(vault, *crear, "--keyword", "gastos", "--keyword", "LCU") == EXITO
     argv = ("todo", "open", "--at", f"{HOY} 19:00", "--scope", "depto-centro")
     assert _tuku(vault, *argv, "--body", "pagar los gastos comunes") == EXITO
     assert _tuku(vault, "scope", "rename", "depto-centro", "depto-playa") == EXITO
@@ -137,6 +141,10 @@ def test_scope_rename_arrastra_carpeta_links_y_ancla(
     ]
     assert colgando == []
     assert "#^depto-playa" in _leer(vault, "ambitos", "depto-playa", "depto-playa.md")
+    assert scope.keywords(_leer(vault, "ambitos", "depto-playa", "depto-playa.md")) == [
+        "gastos",
+        "lcu",
+    ]
     assert "^depto-playa" in _leer(vault, "ambitos", "PENDIENTES-AMBITOS.md")
     capsys.readouterr()
     assert _tuku(vault, "doctor", "scope") == EXITO
