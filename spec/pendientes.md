@@ -51,15 +51,15 @@ Cada pendiente está bajo exactamente un horizonte y baja de escalón a medida q
 
 `esta semana` → `próxima semana` / `fin de mes` → `con fecha` → cerrado
 
-**Los horizontes se nombran con el ciclo.** En el libro de estilo el autor puede escribir `$cycle_name[0]` dentro del nombre de un escalón, y TUKU lo reemplaza por el primer nombre de `cycle_name` ([`ciclo.md`](ciclo.md)): `esta $cycle_name[0]` es `esta semana` por defecto y `este turno` con `cycle_name: turno, descanso`. El artículo lo escribe el autor, porque no se deduce del nombre. Cada escalón cubre:
+**Los horizontes se nombran con el ciclo.** En el libro de estilo el autor puede escribir `$cycle_name[N]` dentro del nombre de un escalón, y TUKU lo reemplaza por el N-ésimo nombre de `cycle_name` ([`ciclo.md`](ciclo.md)), contando desde 0. Cualquier índice vale, no solo el primero: con `cycle_name: turno, descanso`, `$cycle_name[0]` es `turno` y `$cycle_name[1]` es `descanso`. `esta $cycle_name[0]` es `esta semana` por defecto y `este turno` con esa lista; `este $cycle_name[1]` es `este descanso`. El artículo lo escribe el autor, porque no se deduce del nombre. Cada escalón cubre:
 
 | Escalón | Cubre | Con `semana` | Con `turno, descanso`, estando en turno |
 | --- | --- | --- | --- |
-| `este $cycle_name[0]` | El ciclo en curso | La semana de hoy | El turno que corre |
-| `próximo $cycle_name[0]` | El siguiente ciclo con ese nombre, pasando por los demás | Desde el lunes siguiente, fijo | El turno que viene después del descanso |
+| `este $cycle_name[N]` | El ciclo en curso, si se llama así | La semana de hoy | El turno que corre (`este turno`) |
+| `próximo $cycle_name[N]` | El siguiente ciclo con ese nombre, pasando por los demás | Desde el lunes siguiente, fijo | El turno que viene después del descanso (`próximo turno`) |
 | `fin de mes` | Hasta el último día del mes, menos uno, por si acaso | Igual | Igual |
 
-Estando en otra fase, en el descanso, `este turno` es un error del autor y no un horizonte válido: el comando rechaza sin escribir, nombra la corrección (`próximo turno`, o la fase en curso) y el agente desambigua con el autor. Queda abierto si, en esa fase, la escalera debe empezar por `este descanso` para tener dónde poner lo de esa fase ([`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo").
+Un `este …` solo vale mientras el ciclo en curso se llama así. Estando en el descanso, `este turno` es un error del autor y no un horizonte válido: el comando rechaza sin escribir, nombra la corrección (`próximo turno`, o `este descanso`) y el agente desambigua con el autor. Con los índices, la escalera puede declarar `este turno` y `este descanso` a la vez. Queda abierto cuál de los dos es el escalón del ciclo en curso para el callout y para un pendiente que no dice horizonte ([`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo").
 
 **El primer escalón se reconoce por su posición en la escalera, no por su texto.** Renombrarlo no cambia qué pendientes entran al callout de la región del ciclo ni dónde nace un pendiente que no dice horizonte. Hoy el código lo busca por el texto `esta semana`, y es un defecto.
 

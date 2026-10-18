@@ -35,15 +35,15 @@ Lo decidido:
 - **La bitácora cerrada lleva el nombre del ciclo**: `bitacora-2026-08-11-2026-08-18-turno.md`. `plan-…-turno.md` y `resumen-…-turno.md` ya lo llevaban en [`spec/vault.md`](spec/vault.md).
 - **La plantilla [`reglas/plantilla/AHORA.md`](template/vanilla/reglas/plantilla/AHORA.md) deja de traer siete días fijos**: genera un encabezado por cada fecha entre `from` y `to`.
 
-Los horizontes del libro de estilo se nombran con el ciclo: `esta semana` y `próxima semana` pasan a poder escribirse con `$cycle_name[0]`. Lo que significa cada uno, según el autor:
+Los horizontes del libro de estilo se nombran con el ciclo: `esta semana` y `próxima semana` pasan a poder escribirse con `$cycle_name[N]`, donde `N` es cualquier índice de la lista (`$cycle_name[0]` es `turno` y `$cycle_name[1]` es `descanso`). Lo que significa cada uno, según el autor:
 
 | Horizonte | Hasta cuándo | Ejemplo con `[turno, descanso]`, estando en turno |
 | --- | --- | --- |
-| `este $cycle_name[0]` | El ciclo en curso | Este turno |
-| `próximo $cycle_name[0]` | El siguiente ciclo de ese nombre, pasando por los demás | El turno que viene después del descanso |
+| `este $cycle_name[N]` | El ciclo en curso, si se llama así | Este turno |
+| `próximo $cycle_name[N]` | El siguiente ciclo de ese nombre, pasando por los demás | El turno que viene después del descanso |
 | `fin de mes` | El último día del mes, menos uno, por si acaso | 30 en un mes de 31 días |
 
-Con `semana`, `próxima semana` es desde el lunes siguiente, fijo. El artículo (`este` o `esta`) lo escribe el autor en su tabla, porque no se deduce del nombre. Estando en el descanso, `este turno` es un error del autor, no un horizonte válido: el comando rechaza sin escribir, nombra la corrección (`próximo turno`, o la fase en curso) y el agente desambigua con el autor. Queda abierto si, estando en el descanso, la escalera debe empezar por `este descanso` para tener dónde poner lo de esa fase.
+Con `semana`, `próxima semana` es desde el lunes siguiente, fijo. El artículo (`este` o `esta`) lo escribe el autor en su tabla, porque no se deduce del nombre. Estando en el descanso, `este turno` es un error del autor, no un horizonte válido: el comando rechaza sin escribir, nombra la corrección (`próximo turno`, o `este descanso`) y el agente desambigua con el autor. Con los índices la escalera puede declarar `este turno` y `este descanso` a la vez. Queda abierto cuál de los dos es el escalón del ciclo en curso para el callout y para un pendiente que no dice horizonte; la propuesta es el `este …` cuyo índice es el del ciclo en curso.
 
 **Defecto relacionado, sin resolver.** El libro de estilo promete que renombrar un horizonte no rompe nada, y no es así: [`regenerate.py`](src/tuku/regenerate.py) selecciona los pendientes del callout del ciclo por el texto literal `esta semana` (`todo.ESTA_SEMANA`), y `todo open` usa esa misma constante de valor por defecto. Quien renombre el primer horizonte a `este turno` deja el callout vacío, sin aviso. Debe seleccionar por posición (el primer escalón de la escalera del autor), no por texto.
 
