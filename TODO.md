@@ -17,7 +17,6 @@ La gramática está en [`spec/cli.md`](spec/cli.md), "Sustantivo, verbo y parám
 
 Hecho el 2026-10-18 ([`devel/iteraciones/2026-10-18.md`](devel/iteraciones/2026-10-18.md)): escritura atómica con reintentos, `regenerate` con su tabla de dependencias, `entry update` y `entry move`, registros sin hora, `tuku context`, `tuku process`, el `AGENTS.md` de dos invocadores, enlazar al registrar con la columna "Enlazable", los `lint` pasados a `doctor TEMA`, `todo close TEXTO`, `Actividad reciente` de doce meses, `scope create --since`, el retiro de `cycle open` y `vocab show`, y los ejemplos en la ayuda ([`ejemplos.py`](src/tuku/cli/ejemplos.py)). Falta:
 
-- **Medir el `AGENTS.md` de dos invocadores** con la cadena agéntica del epic 003: cambió la tabla (`tuku context` al empezar, filas de corrección separadas, `process cycle`, `todo close TEXTO`) y la suite no agéntica no lo cubre.
 - **Bajar un pendiente por la escalera de horizontes (B4 de [`005-00`](tests/escenarios/005-00-el-dia-ciento-cincuenta.md)).** [`spec/pendientes.md`](spec/pendientes.md) nombra las «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`. Falta el nombre y la forma. Propuesta: `tuku todo update "Llamar a Fabina" --horizon "próxima semana"`, sin verbo nuevo, igual que `entry update`. Modifica un comando, así que se hace donde se trabaja la superficie del CLI.
 - **Cada cambio de esta lista toca [`spec/tuku.md`](spec/tuku.md):** se quita el `# pendiente` de lo implementado y la línea de "Lo que se retira" de lo que sale del CLI. [`tests/unitarios/test_superficie.py`](tests/unitarios/test_superficie.py) falla y dice qué línea cambiar si se olvida.
 
@@ -94,18 +93,11 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
 
 ## Agente
 
-- **Revisar qué prompts de `procesos/` y del arnés necesitan la marca `MAINTENANCE MODE`.** Un prompt sin la marca es una interacción natural y carga `tuku context` ([`spec/despacho.md`](spec/despacho.md)). Los tests del modo son el epic 008.
 - **Detectar menciones sin enlace.** Los comandos no enlazan solos: si el agente olvida enlazar una nota que `tuku context note` le ofreció, nada lo avisa. Un chequeo de `tuku doctor` que lo nombre como pregunta, sin fallar, queda por decidir.
 - **`updated` de las notas editadas a mano.** Solo lo mueven los comandos que reescriben la nota (`note rename`). Una edición en Obsidian no lo toca, y la nota sale tarde en `tuku context note`. Queda por decidir si `doctor` lo avisa.
 - **El contexto que se inyecta al agente.** Decidido el 2026-10-18: `tuku context [TEMA] [--since]`, en [Superficie del CLI](#superficie-del-cli-decidida-el-2026-10-18).
 
 ## Reglas del vault
-
-- **Validar el `AGENTS.md` adelgazado contra un agente vivo.** El refactor del 2026-09-09 bajó de la raíz todo lo que dice *cómo* se escribe un registro: los campos de `tuku entry create`, el día y la hora, `--when` y `--horizon` pasaron a [`template/vanilla/reglas/bitacora.tuku.md`](template/vanilla/reglas/bitacora.tuku.md), y la elección de ámbito a [`template/vanilla/ambitos/AGENTS.md`](template/vanilla/ambitos/AGENTS.md). La raíz volvió a enrutar y nada más.
-
-  Lo que hay que medir es una sola cosa, y no es la longitud: **si la regla que se carga tarde llega a tiempo**. Con `ambitos/AGENTS.md` el agente entra al directorio y lo lee; con `reglas/bitacora.tuku.md` no hay un "entrar" equivalente, así que la raíz tiene que mandar a leerlo antes de la primera llamada a `entry create` y eso puede no ocurrir. Los dos párrafos que bajaron son justamente los que se escribieron porque dos agentes distintos fallaron sin ellos, así que un refactor que los aleje demasiado reintroduce esos fallos.
-
-  Se mide con la cadena del epic 003, que ya distingue el modelo que alcanza del que no. Es un experimento con resultado esperado, no una revisión de redacción: si falla, la regla vuelve a subir y queda escrito que la cascada tiene un piso.
 
 - **El mínimo viable es Deepseek v4.1 Flash.** Ese es el suelo contra el que se valida: si el `AGENTS.md` no funciona con él, no funciona. Cualquier cosa más tonta que eso **no se ha probado que no falle, ni se va a probar**. No es un límite provisional a la espera de más presupuesto: es hasta dónde llega la promesa del vault, y por debajo de ahí el problema deja de ser del `AGENTS.md`.
 
@@ -126,7 +118,6 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
 
 ## Suite de escenarios
 
-- **Marcar el reintento por sandbox de `agy`.** La primera llamada a `tuku` de cada turno falla por el sandbox y el modelo reintenta con `BypassSandbox: true` (una llamada y unos 16.000 tokens de más por turno). Hoy solo está anotado en [`tests/scripts/agente.py`](tests/scripts/agente.py): falta que el arnés lo reconozca y no lo cuente como llamada del producto.
 - **Resuelto (2026-09-10): tests en Epic 002 para entradas y pendientes sin fecha (fallback a hoy):** Se implementó `_congelar_tiempo` en [`tests/scripts/gherkin.py`](tests/scripts/gherkin.py) para interceptar `TUKU_NOW="AAAA-MM-DD HH:MM"` en bloques bash y congelar deterministamente `date.today()` y `datetime.now()` durante llamadas en proceso a `cli.main`, sin tocar el código de producción. Probado en `002-02-registro-en-su-dia`.
 
 - **Resuelto (2026-09-10): cobertura de comandos directos para pendientes:** Se incorporaron escenarios BDD en `002-04` (`tuku todo open`) y `002-05` (`tuku todo close`) verificando que operan de forma idempotente, actualizan `PENDIENTES.md` y estampan su huella cronológica en `AHORA.md` respetando la regla normativa de huella obligatoria.
@@ -138,12 +129,6 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
   La lección de método: llamarlo "flake" costó horas. Un flake invita a reintentar, y por eso los primeros cuatro intentos fueron reintentos, esperas y verificaciones, o sea curar el síntoma. En cuanto se nombró como "hay un intruso escribiendo en `playground/`", la pregunta pasó a ser "¿quién?" y se resolvió en minutos. **Ante un fallo intermitente, reproducirlo fuera del framework antes de tocar el framework.**
 
   El agente quedó detenido y deshabilitado (`launchctl bootout` más `disable`), y **no se vuelve a activar**: es una decisión del autor, tomada tras meses de incidentes con la sincronización a Drive, no una medida temporal mientras se buscaba la causa. El plist sigue en `~/Library/LaunchAgents/com.jgil.sync-obsidian-gdrive.plist` por si se quiere borrar a mano.
-
-- **Dos corridas simultáneas de la suite se pisan.** `playground/` es compartido y el `XXX-00` de un epic lo limpia al empezar, así que si el autor corre `uv run pytest` mientras otra corrida está a mitad, la segunda borra lo que la primera está usando. El síntoma es el mismo `ya existe después de limpiar el epic`, culpando a un escenario inocente. Se arregla con un lock en `playground/` (un archivo con el pid, borrado al terminar) que haga fallar la segunda corrida diciendo qué está pasando, en vez de dejar que las dos se destrocen.
-
-- **Quitar el andamiaje defensivo que se puso mientras se buscaba la causa.** Con el sincronizador fuera, sobran los reintentos y las verificaciones que hoy tiene [`tests/scripts/vault.py`](tests/scripts/vault.py) y [`tests/scripts/gherkin.py`](tests/scripts/gherkin.py): el borrado con reintentos (`_borrar`), el apartado por renombre (`_apartar`), el barrido de apartadas con su `atexit`, y la insistencia de `_verificar_limpio`. Ninguno resolvió nada y todos oscurecen el código. Conviene medir sin ellos antes de borrarlos: si la suite aguanta 40 corridas limpias, se van.
-
-- **Retirar [`tests/scripts/cadena.py`](tests/scripts/cadena.py).** Los epics 001 y 002 están migrados enteros: todos sus escenarios toman los comandos del `.md` mediante [`tests/scripts/gherkin.py`](tests/scripts/gherkin.py), y ya ningún arnés usa `preparar_paso`. El módulo queda sin consumidores, salvo `instantanea` y `delta`, que se reexportan desde `vault`. Se borra cuando el epic 003 confirme que no lo necesita.
 
 ## Alrededor del vault
 
@@ -165,6 +150,4 @@ Anotado desde el chat de specs el 2026-10-18. Lo de comandos y tests vive ademá
 
 ### Epics
 
-- **Epic 006, cerrar un ciclo:** el cambio de ciclo que dispara el rechazo de `entry create` supone poder cerrar el ciclo que terminó. El rechazo ya existe; falta `cycle close` y los escenarios del flujo completo (rechazo, aviso al autor, cierre, `process cycle`).
-- **Capítulo 5 del tutorial, promesa del epic 006:** el lunes, un `entry create` rechazado hace que el agente avise, cierre el ciclo, abra el siguiente (preguntando el rango si no es `semana`) y recién escriba el registro; pedir abrir el ciclo ya abierto solo verifica. Escenario del flujo completo pendiente ([`docs/tutorial/05-cerrar-la-semana.md`](docs/tutorial/05-cerrar-la-semana.md)).
 - **Capítulos 3 y 4 con aviso "Todavía no funciona":** la tabla de estado dice que el epic 004 está sin empezar, pero hay escenarios `004-01` a `004-05` y un conductor de conversación. Si ya funcionan, el epic quita el aviso de los capítulos 3 y 4 y actualiza la tabla.

@@ -91,7 +91,6 @@ Actualizado el 2026-10-16.
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | ocho documentos en `tests/escenarios/005-*`: 33 tests deterministas y 7 agénticos, todos en verde. Lo que sigue abierto está en la tabla de `005-00`: S5 y S8 caen con la conversación del config, E2 con el epic 006 y B4 está en `TODO.md` |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
 | 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
-| 008 | MAINTENANCE MODE | `ciclo-en-curso` | propuesto | tests con agente del modo de mantenimiento y de la revisión diaria con `doctor` y `fix`; falta tu revisión |
 
 ## Epic 001. Un TUKU mínimo instalable
 
@@ -151,6 +150,7 @@ Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumul
 Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo valga la pena leerlo. Las cadencias entran acá porque emiten en la apertura del ciclo. Cubre fases 6 y 7, más lo restante de la 4. La mecánica determinista (abrir, promover pendientes, aplanar transclusiones, archivar ciclos, ramas de ámbitos y notas) se prueba con archivos inyectados antes de conectar el LLM para plan y resumen.
 
 - **Criterio de salida:** abrir dos veces no duplica; cerrar dos veces no vuelve a mover; prueba que falla a propósito si se aplana antes del resumen. Plan calcula capacidad contra lo declarado.
+- **El cambio de ciclo:** el lunes, un `entry create` fuera del ciclo abierto se rechaza (ya existe) y el flujo sigue: el agente avisa al autor, cierra el ciclo que terminó, abre el siguiente (si el nombre no es `semana`, pregunta el rango) y recién escribe el registro. Pedir abrir el ciclo ya abierto solo verifica. Falta `cycle close`, que es de comandos ([`TODO.md`](../TODO.md)), y el escenario del flujo completo (rechazo, aviso, cierre, `process cycle`, registro), que es la promesa del [capítulo 5 del tutorial](../docs/tutorial/05-cerrar-la-semana.md).
 - **Horizontes vencidos:** al abrir el ciclo siguiente, un pendiente cuyo horizonte ya pasó (los `esta semana` de la semana cerrada) se marca atrasado en `tuku context todo`, sin moverlo de escalón. El autor decide si lo posterga; TUKU no corre un compromiso por su cuenta.
 
 > [!tip] Mirar en VAULT al diseñar cadencias y cierre
@@ -170,20 +170,6 @@ El agente deja de responder y empieza a observar: infiere ámbitos y notas tipad
 > - [`VAULT/agentes.md`](VAULT/agentes.md), "El agente silencioso": un proceso de fondo con silencio absoluto (`[SILENT]`) salvo que la conclusión madure y aporte valor.
 > - [`VAULT/spec/entidades.md`](VAULT/spec/entidades.md): "sembrar y corregir" y nunca decirle "entidad" al autor.
 > - [`VAULT/spec/corpus.md`](VAULT/spec/corpus.md), "Autoría y procedencia": toda inferencia externa lleva modelo y fecha, y la marca se reclasifica cuando el autor edita a mano.
-
-## Epic 008. MAINTENANCE MODE
-
-Que el agente distinga una invocación de mantenimiento de una conversación con el autor, y haga solo lo que el prompt pide. Un prompt que empieza con `MAINTENANCE MODE`, en mayúsculas, no carga nada extra, sigue las instrucciones tal como están y deja sin escribir lo que pide una decisión del autor; cualquier otro prompt es una interacción natural y parte con `tuku context` ([`../spec/despacho.md`](../spec/despacho.md)). El primer proceso que usa el modo es la revisión diaria: `tuku doctor`, `tuku fix` en lo que el hallazgo nombra, y las decisiones listadas sin escribir.
-
-Son escenarios con agente, así que cuestan tokens y quedan fuera de la corrida por defecto (marca `agentic`). El arnés ya antepone la marca con `mantenimiento=` ([`tests/scripts/agente.py`](../tests/scripts/agente.py)). Un solo vault de partida: el de la segunda semana de `005-01`, con un wikilink convertible y otro ambiguo.
-
-- **Qué se prueba:**
-  - Con la marca, la traza no contiene `tuku context` ni lecturas de archivos del vault.
-  - Con `maintenance mode` en minúsculas, o la frase en medio del texto, el agente parte con `tuku context`.
-  - La revisión diaria convierte el wikilink con `tuku fix link`, deja el ambiguo sin escribir y lo nombra en la respuesta, sin preguntar.
-  - Los Límites valen igual: un prompt de mantenimiento que pide borrar o editar a mano un archivo con comando se rechaza.
-- **Criterio de salida:** la misma revisión diaria, corrida dos veces, deja el vault igual que la primera (idempotencia) y su respuesta lista las mismas decisiones.
-- **Fuera del epic:** el cron que la lanza y el canal por donde la respuesta llega al autor. Este último es una decisión abierta de [`../spec/README.md`](../spec/README.md).
 
 ## Wishlist
 
