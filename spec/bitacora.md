@@ -119,8 +119,6 @@ Un registro se ubica con `--match TEXTO`, obligatorio: un fragmento de su cuerpo
 | `tuku entry update [CUÁNDO] --match … --body …` | el cuerpo, y la fila de `PENDIENTES.md` si es un pendiente, para que el cierre lo siga encontrando | la hora y el ámbito | `AHORA.md` |
 | `tuku entry move [CUÁNDO] --match … --scope …` | el ámbito, y el de la fila de `PENDIENTES.md` si es un pendiente abierto ([ambitos.md](ambitos.md), "Lo escrito antes de abrir un ámbito") | la hora y el cuerpo | `AHORA.md` y las bitácoras cerradas |
 
-Hoy existe `tuku entry rename --at … --body …`, que ubica por la hora; `entry update` y `entry move` están en [`../TODO.md`](../TODO.md).
-
 Los dos son correcciones: arreglan el registro en su lugar, la bitácora queda con el registro corregido y nada más, y el historial de git guarda la versión anterior. Los dos son idempotentes: si el registro ya dice eso, lo informan y salen con 0.
 
 ## No entra
