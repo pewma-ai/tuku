@@ -259,13 +259,15 @@ def crear(
     return directorio
 
 
-#: El título del callout con los hijos directos, que lleva la página del padre.
-_HIJOS = "> [!abstract] En "
+#: El título del callout con los hijos, que lleva la página del padre. El `+` lo deja
+#: desplegado y plegable en Obsidian.
+_HIJOS = "> [!abstract]+ En "
+_TITULO_DE_HIJOS = re.compile(r"^> \[!abstract\][+-]? En ")
 
 
 def _bloque_de_hijos(lineas: list[str]) -> tuple[int, int] | None:
     """Dónde está el callout de hijos en las líneas de una página: `[inicio, fin)`."""
-    inicio = next((i for i, x in enumerate(lineas) if x.startswith(_HIJOS)), None)
+    inicio = next((i for i, x in enumerate(lineas) if _TITULO_DE_HIJOS.match(x)), None)
     if inicio is None:
         return None
     fin = inicio + 1
@@ -280,14 +282,32 @@ def _titulo_de_hijos(padre: Path, texto: str) -> str:
     return f"{_HIJOS}**{propagate.display_name(padre.name, texto)}**:"
 
 
-def _item_de_hijo(padre: Path, hijo: Path) -> str:
-    href = os.path.relpath(_pagina(hijo), padre).replace(os.sep, "/")
-    return f"> - {link.md(hijo.name, href)}"
+def _lineas_de_hijos(base: Path, carpeta: Path, nivel: int = 0) -> list[str]:
+    """El cuerpo del callout de hijos de `base`, desde `carpeta`.
 
+    Primero los ámbitos (los que tienen página) en orden alfabético; después cada
+    categoría (carpeta sin página) como un callout interior plegable con sus ámbitos,
+    también por orden alfabético y separado por `---`. Una categoría sin ámbitos no sale.
+    El orden es siempre el mismo: lo escriba `create`, `move` o `regenerate`.
+    """
+    from tuku import propagate
 
-def _hijos_de(padre: Path) -> list[Path]:
-    """Los ámbitos que cuelgan directo de `padre`, por nombre."""
-    return sorted(h for h in padre.iterdir() if _pagina(h).is_file())
+    marca = "> " * (nivel + 1)
+    hijos = sorted(h for h in carpeta.iterdir() if h.is_dir() and not h.name.startswith("."))
+    lineas = [
+        f"{marca}- {link.md(h.name, os.path.relpath(_pagina(h), base).replace(os.sep, '/'))}"
+        for h in hijos
+        if _pagina(h).is_file()
+    ]
+    for categoria in (h for h in hijos if not _pagina(h).is_file()):
+        interior = _lineas_de_hijos(base, categoria, nivel + 1)
+        if not interior:
+            continue
+        titulo = propagate.display_name(categoria.name)
+        if lineas:
+            lineas.append(f"{marca}---")
+        lineas += [f"{marca}> [!abstract]+ {titulo}", *interior]
+    return lineas
 
 
 def _sin_bloque(lineas: list[str], inicio: int, fin: int) -> None:
@@ -296,15 +316,16 @@ def _sin_bloque(lineas: list[str], inicio: int, fin: int) -> None:
     del lineas[antes:fin]
 
 
-def _con_hijos(padre: Path, texto: str, hijos: list[Path]) -> str:
-    """El texto de la página con el callout de hijos hecho de `hijos`, o sin callout."""
+def _con_hijos(padre: Path, texto: str) -> str:
+    """El texto de la página con el callout de hijos hecho desde las carpetas, o sin callout."""
     lineas = texto.splitlines()
     bloque = _bloque_de_hijos(lineas)
-    if not hijos:
+    cuerpo = _lineas_de_hijos(padre, padre)
+    if not cuerpo:
         if bloque is not None:
             _sin_bloque(lineas, *bloque)
     else:
-        callout = [_titulo_de_hijos(padre, texto), *(_item_de_hijo(padre, h) for h in hijos)]
+        callout = [_titulo_de_hijos(padre, texto), *cuerpo]
         if bloque is not None:
             lineas[bloque[0] : bloque[1]] = callout
         else:
@@ -320,47 +341,24 @@ def _con_hijos(padre: Path, texto: str, hijos: list[Path]) -> str:
     return "\n".join(lineas) + "\n"
 
 
-def anotar_hijo(padre: Path, hijo: Path) -> None:
-    """Pone a `hijo` en el callout de hijos de la página de `padre`, si la tiene.
+def refrescar_hijos(carpeta: Path) -> None:
+    """Rehace el callout de hijos del ámbito al que `carpeta` pertenece.
 
-    El autor escribe ese callout a mano: esto lo ayuda. Sin callout lo abre bajo la
-    transclusión de pendientes, con todos los hijos que el padre ya tenía. Un hijo
-    que ya figura no se repite.
+    Es el ámbito más cercano que la contiene (ella misma si tiene página): una
+    categoría no tiene página, así que lo que cuelga de `clientes/` se lista en
+    `negocio.md`. Siempre lo deriva de las carpetas, así que `scope create`,
+    `scope move` y `scope rename` dejan lo mismo que `tuku regenerate scope`.
     """
-    pagina = _pagina(padre)
-    if not pagina.is_file():
-        return
-    texto = pagina.read_text(encoding="utf-8")
-    lineas = texto.splitlines()
-    bloque = _bloque_de_hijos(lineas)
-    if bloque is None:
-        salida = _con_hijos(padre, texto, _hijos_de(padre))
-    else:
-        if any(x.startswith(f"> - [{hijo.name}](") for x in lineas[bloque[0] : bloque[1]]):
+    for d in (carpeta, *carpeta.parents):
+        if d.name == "ambitos":
             return
-        lineas.insert(bloque[1], _item_de_hijo(padre, hijo))
-        salida = "\n".join(lineas) + "\n"
-    pagina.write_text(salida, encoding="utf-8")
-
-
-def quitar_hijo(padre: Path, hijo: str) -> None:
-    """Saca a `hijo` del callout de la página de `padre`; sin hijos el callout se va."""
-    pagina = _pagina(padre)
-    if not pagina.is_file():
-        return
-    lineas = pagina.read_text(encoding="utf-8").splitlines()
-    bloque = _bloque_de_hijos(lineas)
-    if bloque is None:
-        return
-    inicio, fin = bloque
-    resto = [x for x in lineas[inicio + 1 : fin] if not x.startswith(f"> - [{hijo}](")]
-    if len(resto) == fin - inicio - 1:
-        return
-    if any(x.startswith("> -") for x in resto):
-        lineas[inicio:fin] = [lineas[inicio], *resto]
-    else:
-        _sin_bloque(lineas, inicio, fin)
-    pagina.write_text("\n".join(lineas) + "\n", encoding="utf-8")
+        if _pagina(d).is_file():
+            pagina = _pagina(d)
+            texto = pagina.read_text(encoding="utf-8")
+            salida = _con_hijos(d, texto)
+            if salida != texto:
+                pagina.write_text(salida, encoding="utf-8")
+            return
 
 
 def regenerar_hijos(vault: Path) -> list[Path]:
@@ -375,7 +373,7 @@ def regenerar_hijos(vault: Path) -> list[Path]:
         if not pagina.is_file():
             continue
         texto = pagina.read_text(encoding="utf-8")
-        salida = _con_hijos(a.directorio, texto, _hijos_de(a.directorio))
+        salida = _con_hijos(a.directorio, texto)
         if salida != texto:
             pagina.write_text(salida, encoding="utf-8")
             cambiados.append(pagina)
@@ -721,7 +719,7 @@ def crear_con_constancia(
         vault, nombre, existente.parent if existente is not None else padre, palabras
     )
     if padre is not None:
-        anotar_hijo(padre, directorio)
+        refrescar_hijos(padre)
     pagina_path = directorio / f"{nombre}.md"
     if not nuevo and palabras:
         return actualizar(vault, nombre, palabras)
@@ -855,6 +853,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     if (vault / "PENDIENTES.md").is_file():
         propagate.propagar(vault)
     retitular_hijos(destino)
+    refrescar_hijos(destino.parent)
     actualizar_pagina(vault, nuevo)
 
     detalle = f" ({enlaces} enlace(s) actualizado(s))" if enlaces else ""
@@ -931,10 +930,8 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
             (vault / despues).write_text(salida, encoding="utf-8")
             cambiados += 1
 
-    if origen.parent != vault / "ambitos":
-        quitar_hijo(origen.parent, nombre)
-    if padre != vault / "ambitos":
-        anotar_hijo(padre, destino)
+    refrescar_hijos(origen.parent)
+    refrescar_hijos(padre)
     if pendientes.is_file():
         propagate.propagar(vault)
     detalle = f" ({cambiados} archivo(s) con links actualizados)" if cambiados else ""

@@ -226,7 +226,7 @@ def test_renombrar_un_ambito_anidado_arrastra_todo(vault: Path) -> None:
 def _hijos(vault: Path, *ruta: str) -> list[str]:
     """Las líneas del callout "En X:" de una página, o `[]` si no lo tiene."""
     lineas = _leer(vault, *ruta).splitlines()
-    inicio = next((i for i, x in enumerate(lineas) if x.startswith("> [!abstract] En ")), None)
+    inicio = next((i for i, x in enumerate(lineas) if x.startswith("> [!abstract]+ En ")), None)
     if inicio is None:
         return []
     fin = next((i for i in range(inicio, len(lineas)) if not lineas[i].startswith(">")), None)
@@ -241,13 +241,13 @@ def test_la_pagina_del_padre_lista_sus_hijos_directos_y_los_sigue_al_moverlos(
     assert _crear(vault, "faena-uno", "--parent", "faena") == EXITO
     assert _crear(vault, "nieto", "--parent", "faena-ai") == EXITO
     assert _hijos(vault, *pagina) == [
-        "> [!abstract] En **Faena**:",
+        "> [!abstract]+ En **Faena**:",
         "> - [faena-ai](faena-ai/faena-ai.md)",
         "> - [faena-uno](faena-uno/faena-uno.md)",
     ]
     assert _leer(vault, *pagina).index("![[") < _leer(vault, *pagina).index("> [!abstract]")
     assert _hijos(vault, "ambitos", "faena", "faena-ai", "faena-ai.md") == [
-        "> [!abstract] En **Faena Ai**:",
+        "> [!abstract]+ En **Faena Ai**:",
         "> - [nieto](nieto/nieto.md)",
     ]
     assert _hijos(vault, "ambitos", "personal", "personal.md") == []
@@ -261,7 +261,7 @@ def test_la_pagina_del_padre_lista_sus_hijos_directos_y_los_sigue_al_moverlos(
 
     assert _tuku(vault, "scope", "move", "faena-dos", "--parent", "faena-ai") == EXITO
     assert _hijos(vault, *pagina) == [
-        "> [!abstract] En **Faena**:",
+        "> [!abstract]+ En **Faena**:",
         "> - [faena-ai](faena-ai/faena-ai.md)",
     ]
     assert "> - [faena-dos](../faena-dos/faena-dos.md)" not in _hijos(vault, *pagina)
@@ -279,7 +279,7 @@ def test_renombrar_el_padre_retitula_su_callout(vault: Path) -> None:
     _con_faena(vault)
     assert _tuku(vault, "scope", "rename", "faena", "trabajo") == EXITO
     assert _hijos(vault, "ambitos", "trabajo", "trabajo.md") == [
-        "> [!abstract] En **Trabajo**:",
+        "> [!abstract]+ En **Trabajo**:",
         "> - [faena-ai](faena-ai/faena-ai.md)",
     ]
 
@@ -293,7 +293,7 @@ def test_al_abrir_el_callout_entran_los_hijos_que_ya_tenia_el_padre(vault: Path)
 
     assert _crear(vault, "faena-dos", "--parent", "faena") == EXITO
     assert _hijos(vault, "ambitos", "faena", "faena.md") == [
-        "> [!abstract] En **Faena**:",
+        "> [!abstract]+ En **Faena**:",
         "> - [faena-ai](faena-ai/faena-ai.md)",
         "> - [faena-dos](faena-dos/faena-dos.md)",
     ]
@@ -315,7 +315,7 @@ def test_regenerate_scope_recrea_la_lista_de_hijos_de_cada_padre(vault: Path) ->
     hoja.write_text(
         hoja.read_text(encoding="utf-8").replace(
             "## Esta semana",
-            "> [!abstract] En **Faena Dos**:\n> - [x](x/x.md)\n\n## Esta semana",
+            "> [!abstract]+ En **Faena Dos**:\n> - [x](x/x.md)\n\n## Esta semana",
         ),
         encoding="utf-8",
     )
@@ -328,3 +328,51 @@ def test_regenerate_scope_recrea_la_lista_de_hijos_de_cada_padre(vault: Path) ->
 
     assert _tuku(vault, "regenerate", "scope") == EXITO
     assert _foto(vault) == sano
+
+
+def test_el_callout_lista_los_ambitos_y_despues_las_categorias_anidadas_y_plegables(
+    vault: Path,
+) -> None:
+    assert _crear(vault, "negocio") == EXITO
+    for categoria in ("proveedores", "clientes"):
+        (vault / "ambitos" / "negocio" / categoria).mkdir()
+    for nombre, padre in (
+        ("papelera-del-sur", "proveedores"),
+        ("temporada-marzo", "negocio"),
+        ("colegio-los-robles", "clientes"),
+        ("bodega", "negocio"),
+        ("importadora-andina", "proveedores"),
+        ("jardin-semillita", "clientes"),
+    ):
+        assert _crear(vault, nombre, "--parent", padre) == EXITO
+
+    esperado = [
+        "> [!abstract]+ En **Negocio**:",
+        "> - [bodega](bodega/bodega.md)",
+        "> - [temporada-marzo](temporada-marzo/temporada-marzo.md)",
+        "> ---",
+        "> > [!abstract]+ Clientes",
+        "> > - [colegio-los-robles](clientes/colegio-los-robles/colegio-los-robles.md)",
+        "> > - [jardin-semillita](clientes/jardin-semillita/jardin-semillita.md)",
+        "> ---",
+        "> > [!abstract]+ Proveedores",
+        "> > - [importadora-andina](proveedores/importadora-andina/importadora-andina.md)",
+        "> > - [papelera-del-sur](proveedores/papelera-del-sur/papelera-del-sur.md)",
+    ]
+    pagina = ("ambitos", "negocio", "negocio.md")
+    assert _hijos(vault, *pagina) == esperado
+
+    # lo que deja `create` es lo que rehace `regenerate scope`, en cualquier orden de creación
+    sano = _foto(vault)
+    assert _tuku(vault, "regenerate", "scope") == EXITO
+    assert _foto(vault) == sano
+
+    # mover y renombrar mantienen el orden y las categorías
+    assert _tuku(vault, "scope", "rename", "bodega", "almacen") == EXITO
+    assert _hijos(vault, *pagina)[1] == "> - [almacen](almacen/almacen.md)"
+    assert _tuku(vault, "scope", "move", "jardin-semillita", "--parent", "proveedores") == EXITO
+    assert "> > - [jardin-semillita](proveedores/jardin-semillita/jardin-semillita.md)" in (
+        _hijos(vault, *pagina)
+    )
+    assert _tuku(vault, "regenerate", "scope") == EXITO
+    assert _tuku(vault, "doctor") == EXITO

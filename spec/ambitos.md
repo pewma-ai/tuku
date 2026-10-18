@@ -104,7 +104,20 @@ Un ámbito puede ir dentro de otro: `ambitos/faena/faena-ai/faena-ai.md`.
 - **`tuku scope create NOMBRE --parent PADRE`** crea el ámbito dentro de la carpeta del padre, que puede ser un ámbito o una categoría y debe existir. Un padre inexistente se rechaza nombrando `tuku scope create PADRE`: abrirlo es decisión del autor. Si el ámbito ya existe en otro lugar, se rechaza y se nombra `scope move`.
 - **`tuku scope move NOMBRE [--parent PADRE]`** cambia un ámbito de lugar, o lo lleva a la raíz de `ambitos/` sin `--parent`. Como los links son rutas relativas, recalcula la ruta de cada link que apunta a lo movido, la de los links de sus propios archivos y la transclusión de su página, en todo el vault y también en las bitácoras cerradas: reparar un link que dejaría de resolver no es enriquecer el pasado. Se rechaza antes de escribir si el ámbito o el padre no existen, si el padre cuelga del propio ámbito o si el destino está ocupado. Moverlo donde ya está no escribe nada.
 - **`tuku scope rename`** funciona igual sobre un ámbito anidado.
-- **El padre lista a sus hijos directos** en un callout bajo la transclusión de pendientes: `> [!abstract] En **Faena**:` y un link por hijo. Lo escribe el autor a mano; `scope create --parent` y `scope move` lo mantienen (agregan o quitan el hijo y abren el callout si falta), y `scope rename` renombra el link o el título. Un ámbito sin hijos no lleva callout. `tuku regenerate scope` lo rehace entero desde las carpetas: es la reparación cuando el callout se desfasó, y borra lo que el autor hubiera puesto a mano en él.
+- **El padre lista a sus hijos** en un callout bajo la transclusión de pendientes, y lo derivan los comandos de las carpetas: `scope create`, `scope move` y `scope rename` lo dejan igual que `tuku regenerate scope`, así que un vault armado comando a comando es idéntico al regenerado. Primero salen los ámbitos hijos, uno por línea y en orden alfabético; después las categorías (carpetas sin página, como `clientes/`), cada una como un callout interior plegable con los ámbitos que contiene, separadas por `---` y también en orden alfabético. Una categoría sin ámbitos no sale, y un ámbito sin hijos no lleva callout. No se edita a mano: lo escrito ahí se pierde en el siguiente comando.
+
+```markdown
+> [!abstract]+ En **Negocio**:
+> - [bodega](bodega/bodega.md)
+> - [equipo](equipo/equipo.md)
+> ---
+> > [!abstract]+ Clientes
+> > - [colegio-los-robles](clientes/colegio-los-robles/colegio-los-robles.md)
+> > - [jardin-semillita](clientes/jardin-semillita/jardin-semillita.md)
+> ---
+> > [!abstract]+ Proveedores
+> > - [importadora-andina](proveedores/importadora-andina/importadora-andina.md)
+```
 
 Se descartó un campo `parent:` en la página, sin mover carpetas: mover sería trivial, pero la carpeta dejaría de decir dónde cae una regla (principio 7) y Obsidian mostraría un árbol distinto del lógico.
 
