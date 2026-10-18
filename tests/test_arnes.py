@@ -191,6 +191,24 @@ def test_un_arnes_que_no_sabe_continuar_lo_dice() -> None:
         hermes.argv("hola", agente.Sesion())
 
 
+def _prompt_de(argv: list[str]) -> str:
+    return argv[argv.index("-p") + 1]
+
+
+def test_el_modo_de_mantenimiento_pone_su_marca_antes_de_todo() -> None:
+    sin = _prompt_de(_agy().argv("corre tuku doctor"))
+    assert not sin.startswith(agente.MANTENIMIENTO), "sin la marca, es una conversación"
+
+    con = _prompt_de(_agy().argv("corre tuku doctor", mantenimiento=True))
+    assert con.startswith(f"{agente.MANTENIMIENTO}\n")
+    assert con.endswith("corre tuku doctor")
+
+    claude = agente.Arnes(nombre="claude", ejecutable="claude", modelo="m")
+    con_preambulo = _prompt_de(claude.argv("corre tuku doctor", mantenimiento=True))
+    assert con_preambulo.startswith(f"{agente.MANTENIMIENTO}\n{agente.PREAMBULO}")
+    assert agente.MANTENIMIENTO == "MAINTENANCE MODE"
+
+
 def test_la_respuesta_json_deja_el_id_en_la_sesion() -> None:
     sesion = agente.Sesion()
     texto = agente.leer_sesion('{"conversation_id": "abc", "response": "ok\\n"}', sesion)

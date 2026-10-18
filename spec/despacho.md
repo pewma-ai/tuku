@@ -2,9 +2,16 @@
 
 > A dónde va lo que el autor acaba de decir. Es la primera decisión de cada sesión y la toma el `AGENTS.md` de la raíz del vault. Las familias de entrada vienen de [flujo-informacion.md](flujo-informacion.md); la conducta del ejecutor, de [agente.md](agente.md).
 
-## Dos invocadores
+## Dos modos
 
-La raíz empieza diciendo quién invoca, porque cambia todo lo demás. El agente que conversa con el autor parte con `tuku context` y despacha con la tabla. El que lanzó otro agente o un cron para algo concreto (`tuku doctor`, `tuku regenerate`, un proceso) lo ejecuta sin despachar ni preguntar, y lo que pide una decisión del autor va en su respuesta final y no en el vault, hasta que se decida por dónde se comunican el autor y las entidades ([README.md](README.md), Decisiones abiertas).
+La raíz empieza diciendo cómo te invocan, porque cambia todo lo demás, y lo dice por el primer prompt de la sesión y no por quién lo lanzó:
+
+| El primer prompt... | Modo | El agente |
+| --- | --- | --- |
+| empieza con `MAINTENANCE MODE`, en mayúsculas | Mantenimiento | No carga nada más: ni `tuku context` ni otro archivo. Sigue las instrucciones del prompt tal como están, sin despachar y sin preguntar. Lo que pide una decisión del autor queda sin escribir y va en su respuesta final, hasta que se decida por dónde se comunican el autor y las entidades ([README.md](README.md), Decisiones abiertas). |
+| empieza con cualquier otra cosa | Natural | Es una interacción con el autor: parte con `tuku context` y despacha con la tabla. |
+
+La marca es literal: `maintenance mode` en minúsculas, o la frase en medio del texto, no activa nada. Quien lanza al agente desde un cron, un proceso o con otro agente (`tuku doctor`, `tuku regenerate`, un proceso de `procesos/`) pone la marca al comienzo de su prompt; si falta, el agente trata la sesión como una conversación con el autor y pregunta. **Los límites valen en los dos modos** (ver "Los límites"): el modo de mantenimiento ahorra la carga, no los permisos.
 
 ## La raíz enruta
 
@@ -39,11 +46,11 @@ Que la fila nombre el archivo es lo que sostiene la cascada: si el ejecutor tuvi
 
 Una petición sin fila se hace a mano, con dos condiciones: el ejecutor dice en una frase qué va a hacer, en palabras del autor, y espera el sí; con el sí, la hace entera, porque a medias el vault queda diciendo dos cosas a la vez. Una petición sin fila que se repite es un comando que falta.
 
-Un proceso es una rutina con nombre, y hay dos clases: los de `tuku`, deterministas (`tuku process cycle`), y los que el autor escribe en `procesos/`, que el agente ejecuta leyendo su archivo («corre el cierre de mes»). `tuku process` sin nombre lista los dos. Un proceso nombrado se ejecuta sin pasar por la tabla. Un proceso lanzado por otro agente, igual que una entidad subordinada, ejecuta directo lo nombrado: esa cláusula corta la recursión del despacho.
+Un proceso es una rutina con nombre, y hay dos clases: los de `tuku`, deterministas (`tuku process cycle`), y los que el autor escribe en `procesos/`, que el agente ejecuta leyendo su archivo («corre el cierre de mes»). `tuku process` sin nombre lista los dos. Un proceso nombrado se ejecuta sin pasar por la tabla. Un proceso lanzado en modo de mantenimiento, igual que una entidad subordinada, ejecuta directo lo nombrado: esa cláusula corta la recursión del despacho.
 
 ## Los límites
 
-La raíz cierra con una tabla de dos niveles, **pregunta primero** y **nunca**. Desde el primer día lleva editar a mano un archivo que tiene comando, actuar sobre una petición ambigua y tocar cualquier `AGENTS.md`. Cada límite es verificable: se pide algo que cae en **nunca** y el diff queda vacío. Una petición ambigua se consulta antes de escribir; lo prohibido es decidir por el autor.
+La raíz cierra con una tabla de dos niveles, **pregunta primero** y **nunca**. Desde el primer día lleva editar a mano un archivo que tiene comando, actuar sobre una petición ambigua y tocar cualquier `AGENTS.md`. Valen también en modo de mantenimiento. Cada límite es verificable: se pide algo que cae en **nunca** y el diff queda vacío. Una petición ambigua se consulta antes de escribir; lo prohibido es decidir por el autor.
 
 ## Verificación
 

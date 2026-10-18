@@ -102,6 +102,12 @@ _EXPORTA_HERMES = [
 #: declarada acá y no escondida en el prompt del escenario.
 PREAMBULO = "Lee AGENTS.md antes de nada y opera este directorio según lo que diga. "
 
+#: La marca con que el `AGENTS.md` del vault reconoce el modo de mantenimiento
+#: (`spec/despacho.md`, "Dos modos"). Solo vale si el primer prompt **empieza**
+#: con ella, así que va delante de todo lo que el arnés agrega: el preámbulo y el
+#: reloj. Un prompt que no la lleva es una conversación con el autor.
+MANTENIMIENTO = "MAINTENANCE MODE"
+
 
 #: Con cuánto esfuerzo piensa el agente, cuando el arnés sabe pedirlo, y con qué
 #: modelo cuando el escenario no nombra ninguno.
@@ -414,7 +420,9 @@ class Arnes:
     perfil: str = PERFIL
     esfuerzo: str = ESFUERZO
 
-    def argv(self, prompt: str, sesion: Sesion | None = None) -> list[str]:
+    def argv(
+        self, prompt: str, sesion: Sesion | None = None, *, mantenimiento: bool = False
+    ) -> list[str]:
         plantilla = ARNESES[self.nombre]
         if sesion is not None and "continuar" not in plantilla:
             raise ArnesNoDisponible(f"{self.nombre} no sabe retomar una conversación")
@@ -432,6 +440,8 @@ class Arnes:
         if self.esfuerzo and "esfuerzo" in plantilla:
             partes += [a.format(esfuerzo=self.esfuerzo) for a in plantilla["esfuerzo"]]
         dictado = "".join(plantilla.get("preambulo", [])) + prompt
+        if mantenimiento:
+            dictado = f"{MANTENIMIENTO}\n{dictado}"
         partes += [a.format(prompt=dictado) for a in plantilla["prompt"]]
         return partes
 
@@ -893,6 +903,7 @@ def turno(
     sesion: Sesion | None = None,
     en_vivo: Callable[[str], None] | None = None,
     en_error: Callable[[str], None] | None = None,
+    mantenimiento: bool = False,
 ) -> Turno:
     """Un turno del agente dentro de `vault`, con la traza de lo que ejecutó.
 
@@ -903,6 +914,10 @@ def turno(
     `ahora` (`AAAA-MM-DD HH:MM`) es la fecha simulada: el shim la aplica a cada
     `tuku` que el agente ejecuta y la anuncia por `stderr`, así el agente sabe
     que ese es el día de hoy.
+
+    Con `mantenimiento`, el primer prompt empieza con `MAINTENANCE MODE`: el vault
+    no carga nada más y el agente sigue las instrucciones tal como están. Sin él,
+    el turno es una interacción natural con el autor.
 
     Con `sesion`, el turno retoma la conversación del anterior y deja en ella el
     id del arnés. Con `en_vivo` y `en_error`, cada línea que el arnés escribe por
@@ -937,7 +952,7 @@ def turno(
         espera = timeout or int(os.environ.get("TUKU_AGENTE_TIMEOUT", TIMEOUT))
         try:
             with Puente(bin, base):
-                argv = arnes.argv(con_reloj(prompt, ahora), sesion)
+                argv = arnes.argv(con_reloj(prompt, ahora), sesion, mantenimiento=mantenimiento)
                 if en_vivo is not None or en_error is not None:
                     p = _correr_en_vivo(argv, vault, entorno, espera, en_vivo, en_error)
                 else:
