@@ -47,6 +47,14 @@ Con `semana`, `próxima semana` es desde el lunes siguiente, fijo. El artículo 
 
 **Defecto relacionado, sin resolver.** El libro de estilo promete que renombrar un horizonte no rompe nada, y no es así: [`regenerate.py`](src/tuku/regenerate.py) selecciona los pendientes del callout del ciclo por el texto literal `esta semana` (`todo.ESTA_SEMANA`), y `todo open` usa esa misma constante de valor por defecto. Quien renombre el primer horizonte a `este turno` deja el callout vacío, sin aviso. Debe seleccionar por posición (el primer escalón de la escalera del autor), no por texto.
 
+Lo decidido el 2026-10-18 sobre `tuku process cycle` ([`spec/ciclo.md`](spec/ciclo.md), "Abrir el siguiente ciclo"), por implementar junto con lo de arriba:
+
+- `--at` se reemplaza por `--from` y `--to`, con el nombre de los campos del frontmatter. Con `semana`, `--from` es un día cualquiera de la semana y `--to` se deduce.
+- Sin `--from`, empieza el día siguiente al `to` del ciclo anterior (el abierto o, si ya se archivó, la bitácora más reciente).
+- Sin hoyos: un `from` distinto del día siguiente al `to` anterior se rechaza, salvo repetir el ciclo abierto con su mismo `from`, que solo verifica y, sin registros, lo regenera. El nombre avanza en `cycle_name` con cada ciclo nuevo y se conserva al repetir.
+- `--name` opcional. Fuera de `cycle_name` se rechaza con aviso y se repite con `--force` tras confirmarlo con el autor.
+- Al cambiar `--at` por `--from`, borrar la línea de "Lo que se retira" de [`spec/tuku.md`](spec/tuku.md) y los `# pendiente` de la firma, y actualizar los escenarios 002-13, 005-01 y `test_cycle_open.py`.
+
 ### El libro de estilo estático, con los datos del autor aparte
 
 Hoy [`LIBRO-DE-ESTILO.md`](template/vanilla/LIBRO-DE-ESTILO.md) mezcla prosa de TUKU (qué es una clasificación, qué es OKF, cómo se escribe una cadencia) con datos del autor (su nombre, las filas de las tablas, las reglas de escritura). Se copia una vez al sembrar el vault: cuando TUKU mejora una explicación, el vault ya quedó editado y no se puede pisar. Además la spec dice que MAYÚSCULAS es de TUKU y este archivo se declara a sí mismo "suyo".

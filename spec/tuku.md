@@ -56,7 +56,7 @@ Un proceso es una rutina con nombre ([despacho.md](despacho.md)). Los de `tuku` 
 
 ```text
 tuku process
-tuku process cycle [--at]
+tuku process cycle [--from] [--to] [--name] [--force]   # pendiente: --from --to --name --force
 ```
 
 ```mermaid
@@ -65,7 +65,7 @@ flowchart LR
     subgraph CMD["tuku process"]
         direction TB
         PL["process"]
-        PC["process cycle<br/>--at"]
+        PC["process cycle<br/>--from --to --name --force"]
     end
     subgraph VAULT["Vault"]
         direction TB
@@ -74,12 +74,16 @@ flowchart LR
         BI["bitacoras/"]
         AH["AHORA.md"]
         PE["PENDIENTES.md"]
+        CF["reglas/config.tuku.md"]
     end
 
     PL -.->|"lista los de tuku<br/>y los de procesos/"| PR
     PC -.->|"la plantilla"| TP
-    PC -->|"la semana de lunes a domingo<br/>que contiene --at;<br/>si ya la cubre, solo verifica"| AH
+    PC -->|"la semana de lunes a domingo<br/>que contiene la fecha;<br/>si ya la cubre, solo verifica"| AH
+    PC -.->|"pendiente: el rango de --from a --to;<br/>con semana, el que contiene --from"| AH
     PC -.->|"rechaza una fecha<br/>anterior a su from"| AH
+    PC -.->|"pendiente: rechaza un --from que no sea<br/>el día siguiente al to del anterior,<br/>salvo repetir el ciclo abierto"| AH
+    PC -.->|"pendiente: el nombre avanza en cycle_name<br/>solo si --from empieza después del to;<br/>--name fuera de la lista, solo con --force"| CF
     PC -.->|"si hay una bitácora anterior"| BI
     PC -->|"con bitácora anterior, abre<br/>revisar la bitácora anterior<br/>como tuku todo open"| PE
 
@@ -88,7 +92,7 @@ flowchart LR
     classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
     class PC escribe
     class PL revisa
-    class PR,TP,BI,AH,PE archivo
+    class PR,TP,BI,AH,PE,CF archivo
 ```
 
 ## entry
@@ -375,4 +379,6 @@ flowchart LR
 
 Comandos y opciones que existen hoy y que la firma de arriba reemplaza. Una línea sale de aquí cuando sale del CLI ([`../TODO.md`](../TODO.md), "Superficie del CLI").
 
-Nada por ahora. Cuando un comando se retire, se escribe aquí una línea por cada uno, en un bloque `text`, con el comando que lo reemplaza.
+```text
+tuku process cycle --at         → tuku process cycle --from
+```

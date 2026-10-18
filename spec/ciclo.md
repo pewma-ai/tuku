@@ -10,7 +10,7 @@ El frontmatter es OKF, con los campos en inglés porque son superficie de máqui
 
 **Cada ciclo tiene un nombre y un rango.** `cycle` dice cuál es (`cycle: semana`, `cycle: turno`) y `from` y `to`, el rango que cubre. Los nombres posibles los declara el autor en `cycle_name` de [`reglas/config.tuku.md`](vault.md), "La configuración", como una lista (`turno, descanso`), y vale `semana` si no declara ninguno. **El ciclo siguiente es el siguiente de la lista**, y al llegar al final vuelve al primero; con un solo nombre, es el mismo.
 
-**El rango se deduce solo con `semana`**, que va de lunes a domingo: `tuku init --at` y `tuku process cycle --at` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente. **Con cualquier otro nombre el rango es un dato del autor**, porque un turno dura 8 días, o 10, o 14, y nada lo deduce: el agente le pregunta hasta qué día va el ciclo y abre con ese rango. Decidir el rango es del autor; abrir un ciclo con un rango dado es determinista. Con `cycle_name: turno, descanso`, un turno del martes 11 al martes 18 de agosto y el descanso que le sigue, del miércoles 19 al lunes 24, son dos ciclos:
+**El rango se deduce solo con `semana`**, que va de lunes a domingo: `tuku init --at` y `tuku process cycle --from` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente. **Con cualquier otro nombre el rango es un dato del autor**, porque un turno dura 8 días, o 10, o 14, y nada lo deduce: el agente le pregunta hasta qué día va el ciclo y abre con ese rango. Decidir el rango es del autor; abrir un ciclo con un rango dado es determinista. Con `cycle_name: turno, descanso`, un turno del martes 11 al martes 18 de agosto y el descanso que le sigue, del miércoles 19 al lunes 24, son dos ciclos:
 
 ```markdown
 ---
@@ -22,7 +22,7 @@ to: 2026-08-18
 ---
 ```
 
-Hoy `process cycle` solo abre la semana. `cycle_name`, `cycle:` y el rango dado entran con lo que dice [`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo".
+Hoy `process cycle` solo abre la semana y se invoca con `--at`. `--from`, `--to`, `--name`, `cycle_name` y `cycle:` entran con lo que dice [`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo".
 
 ```markdown
 ---
@@ -126,7 +126,7 @@ Lo abre `process cycle` cuando crea el ciclo y `bitacoras/` tiene una bitácora.
 
 ### La estructura del ciclo sale de una plantilla
 
-`process cycle` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. Ante la omisión de fecha de apertura, toma por defecto la fecha actual (**HOY**) evaluada en la zona horaria `TZ` de `reglas/config.tuku.md` para determinar el rango: con `semana`, la semana que contiene esa fecha; con otro nombre de `cycle_name`, el rango que se le pasó, que el comando exige. Genera un encabezado de día por cada fecha entre `from` y `to`, así que un turno de 8 días trae 8 y uno de 14, 14. La plantilla es del autor y vive en su vault, así que qué secciones trae un ciclo recién abierto se cambia editándola y no tocando el comando.
+`process cycle` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. Ante la omisión de `--from`, toma el día siguiente al `to` del ciclo anterior y, si no hay anterior, la fecha actual (**HOY**) evaluada en la zona horaria `TZ` de `reglas/config.tuku.md` para determinar el rango: con `semana`, la semana que contiene esa fecha; con otro nombre de `cycle_name`, el rango que se le pasó, que el comando exige. Genera un encabezado de día por cada fecha entre `from` y `to`, así que un turno de 8 días trae 8 y uno de 14, 14. La plantilla es del autor y vive en su vault, así que qué secciones trae un ciclo recién abierto se cambia editándola y no tocando el comando.
 
 ### Un ciclo abierto con registros no se pisa
 
@@ -134,7 +134,22 @@ Abrir un ciclo cuya fecha cae fuera del que ya está abierto **se rechaza** si e
 
 Un ciclo abierto **sin registros sí se regenera**, porque no hay nada que perder. Y ante una fecha de otro ciclo se falla en vez de archivar solo, porque el caso frecuente es un dedazo y no el lunes nuevo: fallar es barato y deshacer un cierre no.
 
-**Un ciclo no se abre hacia atrás.** Una fecha anterior al `from` del ciclo abierto se rechaza siempre, tenga o no registros: con `AHORA.md` en la semana del 24 de agosto, `tuku process cycle --at 2026-07-06` rechaza y nombra el ciclo abierto. Lo vivido en una semana ya cerrada se agrega a mano en su bitácora de `bitacoras/`.
+### Abrir el siguiente ciclo
+
+```text
+tuku process cycle [--from FECHA] [--to FECHA] [--name NOMBRE] [--force]
+```
+
+`--from` y `--to` se llaman igual que `from` y `to` del frontmatter y dan el rango del ciclo; `--at` ya no existe en este comando, porque abrir un ciclo no cuenta cuándo pasó algo sino qué rango cubre. Con `semana` basta `--from` con un día cualquiera, que abre la semana que lo contiene, y `--to` se deduce. Con cualquier otro nombre `--to` es obligatorio. Sin `--from`, el ciclo empieza el día siguiente al `to` del anterior, y si no hay anterior, hoy.
+
+Las reglas valen para el ciclo que se abre contra el **ciclo anterior**: el abierto en `AHORA.md` o, si ya se archivó, la bitácora más reciente de `bitacoras/`.
+
+- **Solo hay un `AHORA.md` abierto.** Abrir el siguiente supone que el anterior ya está archivado en `bitacoras/`; si tiene registros, se rechaza como dice "Un ciclo abierto con registros no se pisa".
+- **No quedan hoyos ni solapes.** El `from` del ciclo nuevo es el día siguiente al `to` del anterior, y cualquier otro se rechaza nombrando el que corresponde: uno posterior deja días sin ciclo (`el ciclo anterior termina el 2026-08-18: empieza el 2026-08-19`) y uno anterior pisaría días ya cubiertos. La única excepción es repetir el ciclo abierto con su mismo `from`, que no es otro ciclo.
+- **El nombre avanza con cada ciclo nuevo.** Es el siguiente de `cycle_name`, y al llegar al final vuelve al primero. Repetir el ciclo abierto conserva su nombre: el comando solo verifica y, sin registros, lo regenera, que es como se corrige su `--to`.
+- **`--name` fija el nombre en vez de avanzar.** Un nombre de `cycle_name` se acepta tal cual. Uno que la lista no declara se rechaza sin escribir, con un aviso que nombra el nombre desconocido y la lista: el agente se lo confirma al autor y, si lo quiere, repite con `--force`, o lo agrega antes a `cycle_name` de la config para que deje de ser la excepción.
+
+**Un ciclo no se abre hacia atrás.** Una fecha anterior al `from` del ciclo abierto se rechaza siempre, tenga o no registros: con `AHORA.md` en la semana del 24 de agosto, `tuku process cycle --from 2026-07-06` rechaza y nombra el ciclo abierto. Lo vivido en una semana ya cerrada se agrega a mano en su bitácora de `bitacoras/`.
 
 ## Cerrar un ciclo
 
