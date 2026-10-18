@@ -195,6 +195,7 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`005-04-los-atrasados-se-calculan.md`](005-04-los-atrasados-se-calculan.md) | Epic 005 | `tuku context todo --late` informa qué venció, con cada fila donde estaba |
 | [`005-05-las-notas-de-la-pyme.md`](005-05-las-notas-de-la-pyme.md) | Epic 005 | Notas con `## Ver además` verificable y la primera nota tipada (una persona) |
 | [`005-06-el-agente-con-historia.md`](005-06-el-agente-con-historia.md) | Epic 005 | La Patricia y las dos Paulas: el agente elige el ámbito por las keywords y espera al autor ante dos candidatas. Agéntico |
+| [`005-07-el-limite-de-las-notas.md`](005-07-el-limite-de-las-notas.md) | Epic 005 | Treinta personas y `context note` trae las veinticinco más recientes; el agente enlaza a quien `context` ofrece y a nadie más. Uno determinista y uno agéntico |
 
 ## Escenarios encadenados, desde el epic 002
 
