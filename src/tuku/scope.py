@@ -627,10 +627,19 @@ CONSTANCIA = "**nota**: abrí el ámbito"
 
 
 def registro_de_constancia(
-    nombre: str, *, hour: str, rutas: Mapping[str, str] | None = None
+    nombre: str,
+    *,
+    hour: str,
+    rutas: Mapping[str, str] | None = None,
+    bajo: str | None = None,
 ) -> str:
-    """La línea de bitácora que deja constancia del ámbito creado, para `AHORA.md`."""
-    return f"- {hour} - {link.enlace_ambito(nombre, 'AHORA.md', rutas)} {CONSTANCIA}"
+    """La línea de bitácora que deja constancia del ámbito creado, para `AHORA.md`.
+
+    Con `bajo` (el padre, ya escrito como enlace si es un ámbito o como nombre si es
+    una categoría) la constancia dice dónde quedó: `abrí el ámbito bajo clientes`.
+    """
+    donde = f" bajo {bajo}" if bajo else ""
+    return f"- {hour} - {link.enlace_ambito(nombre, 'AHORA.md', rutas)} {CONSTANCIA}{donde}"
 
 
 def crear_con_constancia(
@@ -720,11 +729,19 @@ def crear_con_constancia(
         original = ahora_path.read_text(encoding="utf-8")
         texto = original
         if nuevo:
-            constancia = registro_de_constancia(nombre, hour=hora, rutas=rutas(vault))
+            mapa = rutas(vault)
+            bajo = None
+            if parent and padre is not None:
+                es_ambito = (padre / f"{padre.name}.md").is_file()
+                bajo = link.enlace_ambito(parent, "AHORA.md", mapa) if es_ambito else parent
+            constancia = registro_de_constancia(nombre, hour=hora, rutas=mapa, bajo=bajo)
             texto = entry.add(texto, [constancia], day=dia)
         if texto != original:
             ahora_path.write_text(texto, encoding="utf-8")
         actualizar_pagina(vault, nombre)
+        if nuevo and parent and padre is not None and (padre / f"{padre.name}.md").is_file():
+            # la constancia nombra al padre, y la actividad de su página la cuenta
+            actualizar_pagina(vault, parent)
 
     mensaje = f"ámbito creado en {directorio}."
     if nuevo and not palabras:

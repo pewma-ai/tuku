@@ -65,9 +65,10 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "`keywords: []` y la transclusión de su callout en "
             "`ambitos/PENDIENTES-AMBITOS.md`). Con `--parent`, la carpeta va dentro de la "
             "del ámbito padre, que debe existir. Registra en `AHORA.md` "
-            "`**nota**: abrí el ámbito` y no cambia nada de lo ya escrito. Sobre "
-            "un ámbito existente no escribe nada. Sin `--keyword`, la salida pide preguntar "
-            "al autor qué palabras, al mencionarlas, indican que algo es del ámbito."
+            "`**nota**: abrí el ámbito` (con `--parent`, `bajo` el padre) y no cambia "
+            "nada de lo ya escrito. Sobre un ámbito existente no escribe nada. Sin "
+            "`--keyword`, la salida pide preguntar al autor qué palabras, al mencionarlas, "
+            "indican que algo es del ámbito."
         ),
     )
     scope_create_p.add_argument("name", help="nombre del ámbito")

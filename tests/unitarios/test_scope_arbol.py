@@ -112,7 +112,10 @@ def test_un_ambito_bajo_otro_vive_en_su_carpeta_y_se_enlaza_con_su_ruta_completa
     _con_faena(vault)
     pagina = vault / "ambitos" / "faena" / "faena-ai" / "faena-ai.md"
     assert "![[../../PENDIENTES-AMBITOS.md#^faena-ai]]" in pagina.read_text(encoding="utf-8")
-    constancia = "[faena-ai](ambitos/faena/faena-ai/faena-ai.md) **nota**: abrí el ámbito"
+    constancia = (
+        "[faena-ai](ambitos/faena/faena-ai/faena-ai.md) "
+        "**nota**: abrí el ámbito bajo [faena](ambitos/faena/faena.md)"
+    )
     assert constancia in _leer(vault, "AHORA.md")
 
     argv = ("entry", "create", "--scope", "faena-ai", "--at", f"{HOY} 19:00", "--body", "x")

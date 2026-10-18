@@ -14,5 +14,17 @@ def test_la_constancia_lleva_la_ruta_del_ambito_y_termina_en_el_cuerpo_fijo() ->
     assert scope.registro_de_constancia("pewma", hour="09:00", rutas=rutas) == (
         "- 09:00 - [pewma](ambitos/trabajo/pewma/pewma.md) **nota**: abrí el ámbito"
     )
-    # los lectores la reconocen por el final, sin depender de la hora
-    assert scope.registro_de_constancia("x", hour="").endswith(scope.CONSTANCIA)
+    # los lectores la reconocen por el cuerpo fijo, sin depender de la hora
+    assert scope.CONSTANCIA in scope.registro_de_constancia("x", hour="")
+
+
+def test_bajo_un_padre_la_constancia_dice_dónde_quedó() -> None:
+    rutas = {"bodega": "ambitos/negocio/bodega/bodega.md"}
+    enlace = "[negocio](ambitos/negocio/negocio.md)"
+    assert scope.registro_de_constancia("bodega", hour="07:48", rutas=rutas, bajo=enlace) == (
+        "- 07:48 - [bodega](ambitos/negocio/bodega/bodega.md) "
+        f"**nota**: abrí el ámbito bajo {enlace}"
+    )
+    assert scope.registro_de_constancia("x", hour="07:48", bajo="clientes").endswith(
+        "abrí el ámbito bajo clientes"
+    )
