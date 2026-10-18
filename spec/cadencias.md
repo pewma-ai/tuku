@@ -8,6 +8,8 @@ Vive **donde aplica**: en el ámbito o subdirectorio al que pertenece. Una caden
 
 Poner el alcance en la carpeta evita declararlo dentro de cada cadencia. El árbol ya lo dice.
 
+**Verlas todas juntas es un comando, no un archivo.** Cada ámbito nuevo trae sus cadencias, así que una lista materializada envejece apenas se crea el siguiente. Un comando de solo lectura recorre los `CADENCIAS.md` del árbol, las combina en cascada y devuelve todas en un solo texto, cada una con el `CADENCIAS.md` de donde viene, para saber dónde editar su `Historia`. Su nombre lo fija [`cli.md`](cli.md) cuando exista (el candidato es `tuku context cadence`). El libro de estilo dice el mecanismo y manda a buscar en `ambitos/`: no lista ni transcluye las cadencias del autor.
+
 Un comando recorre el árbol y colecta las cadencias vigentes del autor en una vista única. Esa vista es **derivada**: la fuente son los archivos por ámbito.
 
 ## Formato de `CADENCIAS.md`
@@ -62,7 +64,7 @@ Tres campos son de máquina y dos son de persona:
 | --- | --- |
 | Un pendiente con fecha | `PENDIENTES.md`, y en el día que corresponde de `AHORA.md` por la propagación que ya existe (ver [`pendientes.md`](pendientes.md)) |
 | `AHORA.md` | El ciclo en curso, que es lo que emite la cadencia de apertura |
-| Una bitácora cerrada | `bitacoras/bitacora-<desde>-<hasta>.md`, que es lo que emite la de cierre |
+| Una bitácora cerrada | `bitacoras/bitacora-<desde>-<hasta>-<ciclo>.md`, que es lo que emite la de cierre |
 | Un reporte | `reportes/` |
 
 Que una cadencia emita un archivo y no un pendiente no la hace otra cosa: sigue siendo algo que vuelve, escrito donde aplica. Lo que cambia es el destino, y por eso el destino es un campo y no una suposición.

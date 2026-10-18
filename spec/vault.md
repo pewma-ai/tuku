@@ -6,7 +6,7 @@
 
 ```text
 AGENTS.md                     # reglas de todo el repo
-LIBRO-DE-ESTILO.md            # reglas del autor, canónico
+LIBRO-DE-ESTILO.md            # prosa de TUKU, estática y regenerada. Transcluye los datos del autor de reglas/
 AHORA.md                      # ciclo en curso
 PENDIENTES.md                 # fuente de verdad
 log.md                        # generado, OKF compliant. Todavía no existe
@@ -17,7 +17,7 @@ index.md                      # generado, OKF compliant. Todavía no existe
   app.json                    # links Markdown y rutas relativas. Lo siembra el template
 
 bitacoras/                    # ciclos cerrados, inmutables. Aparece al cerrar el primero (epic 006)
-  bitacora-2026-08-25-2026-09-01.md
+  bitacora-2026-08-25-2026-09-01-turno.md
 
 ambitos/                      # el árbol de la vida
   AGENTS.md                   # reglas de toda la rama
@@ -42,8 +42,11 @@ reglas/                       # la prosa de cada automatismo, y la configuració
   bitacora.tuku.md            # cómo se escribe un registro
   notas.tuku.md               # cómo se escribe una nota
   comandos.tuku.md            # qué hace cada comando y cómo a mano. Lo escribe `tuku init`
-  config.tuku.md              # TZ, cycle_type, tuku_template, tuku_version, origen, scope_default, date_format
+  config.tuku.md              # TZ, cycle_name, tuku_template, tuku_version, origen, scope_default, date_format
   types.md                    # los `type` que el vault reconoce
+  autor.md                    # quién es el autor. Todavía no existe
+  clasificaciones.md          # las clasificaciones del autor. Todavía no existe
+  horizontes.md               # la escalera de horizontes del autor. Todavía no existe
   plantilla/
     AHORA.md                  # de aquí sale un ciclo nuevo
   pendientes.tuku.md          # todavía no existe
@@ -60,20 +63,19 @@ planes/                       # un plan por ciclo. Todavía no existe (epic 006)
 
 reportes/                     # generados, el autor los lee. Todavía no existe (epic 006)
   resumen-2026-08-25-turno.md
-  cadencias.md                # todas, colectadas del árbol
 
 archivado/                    # ramas cerradas, enlaces vivos. Todavía no existe (epic 006)
 ```
 
 **MAYÚSCULAS es de TUKU, minúsculas es del autor.** `AHORA.md`, `PENDIENTES.md`, `AGENTS.md`, `CADENCIAS.md` y `CAPACIDAD.md` son de TUKU; `trabajo.md`, `juanito-perez.md` y las notas, del autor. Se ve de un vistazo, sin abrir nada.
 
-**Todo nombre de archivo o carpeta que TUKU genera va en kebab-case y en minúsculas**: `depto-centro/depto-centro.md` para un ámbito, `reunion-con-viana.md` para una nota, `bitacora-2026-08-25-2026-09-01.md` para un ciclo archivado. Los espacios pasan a guion, y la misma regla vale para las keywords de un ámbito (`los-robles`). Así dos nombres no difieren solo en mayúsculas, que el disco de macOS y Windows no distingue, y la forma en que el autor dictó el nombre no crea un segundo archivo. La única excepción son los archivos de TUKU en MAYÚSCULAS. El detalle para ámbitos está en [ambitos.md](ambitos.md).
+**Todo nombre de archivo o carpeta que TUKU genera va en kebab-case y en minúsculas**: `depto-centro/depto-centro.md` para un ámbito, `reunion-con-viana.md` para una nota, `bitacora-2026-08-25-2026-09-01-turno.md` para un ciclo archivado. Los espacios pasan a guion, y la misma regla vale para las keywords de un ámbito (`los-robles`). Así dos nombres no difieren solo en mayúsculas, que el disco de macOS y Windows no distingue, y la forma en que el autor dictó el nombre no crea un segundo archivo. La única excepción son los archivos de TUKU en MAYÚSCULAS. El detalle para ámbitos está en [ambitos.md](ambitos.md).
 
 Lo marcado "todavía no existe" es diseño: el árbol lo muestra para que se sepa dónde va, y el vault sembrado hoy trae el resto. Fuera de este árbol no hay nada más en el disco. **Todo lo que existe, el autor lo puede abrir y leer.** No hay carpeta de cache ni archivos de máquina. `.obsidian/` es la excepción acotada: configura el editor y guarda cero contenido: borrarla deja el vault intacto. Por qué se siembra y con qué ajustes está en [markdown.md](markdown.md). Obsidian agrega ahí sus propios archivos al usarse, y `.gitignore` los deja fuera de git.
 
 El contexto reciente y el vocabulario de ámbitos no son archivos: son la **salida de un comando**, que se calcula cuando hace falta y se inyecta. Materializarlos solo agregaría copias que envejecen, porque una cola de bitácora queda vieja apenas se escribe el registro siguiente. Calcularla en el momento es más simple y además más correcto. Esos comandos todavía no existen: hoy el agente lee `AHORA.md` y `ambitos/` directamente ([`../TODO.md`](../TODO.md)).
 
-Lo que sí se materializa, aunque sea generado, es lo que alguien mira o transcluye: `ambitos/PENDIENTES-AMBITOS.md` lo transcluyen las páginas de ámbito, y `reportes/cadencias.md` es donde el autor ve qué se le viene.
+Lo que sí se materializa, aunque sea generado, es lo que alguien mira o transcluye: `ambitos/PENDIENTES-AMBITOS.md` lo transcluyen las páginas de ámbito. Las cadencias vigentes no se materializan: las combina un comando que recorre los `CADENCIAS.md` del árbol ([cadencias.md](cadencias.md)), porque cada ámbito nuevo trae las suyas y una lista guardada envejecería.
 
 ## El frontmatter
 
@@ -93,6 +95,14 @@ Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de `reglas/t
 
 **Se documenta lo que se usa.** OKF permite más campos de los que TUKU escribe hoy; los que no se escriben todavía no se declaran, para que la spec no prometa lo que el vault no trae.
 
+## El libro de estilo
+
+`LIBRO-DE-ESTILO.md` es de TUKU, como dice el nombre en MAYÚSCULAS: la prosa que explica qué es una clasificación, qué es OKF o cómo se escribe una cadencia, igual para todos los vaults. Es estático y lo regenera `tuku regenerate`, como `reglas/comandos.tuku.md`, así que una versión nueva de TUKU mejora la explicación sin pisar nada del autor. **Vive en el vault, no en `~/.tuku`:** un vault clonado o abierto en otra máquina se lee solo, y Obsidian no transcluye archivos de fuera.
+
+Lo que cambia de un autor a otro vive aparte, en `reglas/`, y el libro lo transcluye: quién es (`autor.md`), sus clasificaciones, sus horizontes, los tipos de archivo (`types.md`, que el libro ya transcluye) y sus reglas de escritura propias. La regla de que el pendiente va en infinitivo y su cierre repite el texto es contrato y se queda en el libro.
+
+Hoy los comandos leen las tablas por su encabezado dentro del libro ([bitacora.md](bitacora.md), "dónde vive cada una"). Cuándo pasan a leer los archivos del autor se decide con la configuración ([`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo").
+
 ## La configuración
 
 **`reglas/config.tuku.md` es una tabla**, y es lo único que leen las automatizaciones de ese archivo. Siete campos:
@@ -100,7 +110,7 @@ Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de `reglas/t
 | Campo | Qué dice |
 | --- | --- |
 | `TZ` | La zona horaria, con su nombre IANA. Decide qué día es HOY y por lo tanto qué está atrasado |
-| `cycle_type` | El ritmo con que se abre y se cierra el ciclo |
+| `cycle_name` | Cómo se llama el ciclo: `semana` si falta, o una lista de nombres que se alternan en orden (`turno, descanso`). Cada ciclo declara cuál es en su frontmatter ([ciclo.md](ciclo.md)). Hoy el template siembra `cycle_type` y el código no lo usa |
 | `tuku_template` | La variante de la que salió el vault |
 | `tuku_version` | La versión de TUKU con que se sembró. `tuku doctor` la compara con la de `~/.tuku` y avisa si el vault quedó atrás |
 | `origen` | La URL del repositorio, para saber dónde revisar cambios |

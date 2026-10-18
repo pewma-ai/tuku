@@ -51,6 +51,18 @@ Cada pendiente está bajo exactamente un horizonte y baja de escalón a medida q
 
 `esta semana` → `próxima semana` / `fin de mes` → `con fecha` → cerrado
 
+**Los horizontes se nombran con el ciclo.** En el libro de estilo el autor puede escribir `$cycle_name[0]` dentro del nombre de un escalón, y TUKU lo reemplaza por el primer nombre de `cycle_name` ([`ciclo.md`](ciclo.md)): `esta $cycle_name[0]` es `esta semana` por defecto y `este turno` con `cycle_name: turno, descanso`. El artículo lo escribe el autor, porque no se deduce del nombre. Cada escalón cubre:
+
+| Escalón | Cubre | Con `semana` | Con `turno, descanso`, estando en turno |
+| --- | --- | --- | --- |
+| `este $cycle_name[0]` | El ciclo en curso | La semana de hoy | El turno que corre |
+| `próximo $cycle_name[0]` | El siguiente ciclo con ese nombre, pasando por los demás | Desde el lunes siguiente, fijo | El turno que viene después del descanso |
+| `fin de mes` | Hasta el último día del mes, menos uno, por si acaso | Igual | Igual |
+
+Estando en otra fase, en el descanso, `este turno` es un error del autor y no un horizonte válido: el comando rechaza sin escribir, nombra la corrección (`próximo turno`, o la fase en curso) y el agente desambigua con el autor. Queda abierto si, en esa fase, la escalera debe empezar por `este descanso` para tener dónde poner lo de esa fase ([`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo").
+
+**El primer escalón se reconoce por su posición en la escalera, no por su texto.** Renombrarlo no cambia qué pendientes entran al callout de la región del ciclo ni dónde nace un pendiente que no dice horizonte. Hoy el código lo busca por el texto `esta semana`, y es un defecto.
+
 **Los cuatro horizontes son de postergación.** Un pendiente al que el autor no le dice nada queda en el horizonte del ciclo en curso, que es el default: es para ahora. Postergar es el acto deliberado, y consiste en mover la fila a un horizonte más lejano. Antes era al revés, y no decir nada salía gratis: el pendiente caía en un sumidero silencioso donde nadie lo volvía a mirar. Ahora lo caro es callarse, porque lo que no se posterga reclama atención en el ciclo en curso.
 
 Efecto secundario valioso: una lista de deseos hay que postergarla ciclo tras ciclo, y esa fricción repetida es la señal de que no era un pendiente sino una nota. Lo que no tiene "cuándo" y nunca lo va a tener no pertenece a un archivo cuyo eje es el tiempo: va a `notas/` o a la página de su ámbito (ver [`notas.md`](notas.md)).
@@ -113,7 +125,7 @@ No hay marca que la delimite: los registros empiezan siempre por `- HH:MM - `, a
 
 ### La región de la semana
 
-Bajo `# Actividad diaria`, antes del primer día, el comando es dueño de **lo que va hasta el primer `## <día>`**. Ahí escribe los pendientes sin fecha del primer horizonte (`esta semana` en el template vanilla) dentro de un callout `> [!todo] Pendientes de esta semana` (únicamente si hay alguno), y al regenerar reemplaza esa región entera. Cada línea es `- [ámbito](ruta) - detalle`, en el orden de la tabla. Los pendientes de `próxima semana` y `fin de mes` no aparecen: todavía no son de este ciclo. Cerrar o agendar un pendiente lo saca del callout.
+Bajo `# Actividad diaria`, antes del primer día, el comando es dueño de **lo que va hasta el primer `## <día>`**. Ahí escribe los pendientes sin fecha del primer horizonte (`esta semana` en el template vanilla) dentro de un callout titulado con ese horizonte, `> [!todo] Pendientes de esta semana` o `> [!todo] Pendientes de este turno` (únicamente si hay alguno), y al regenerar reemplaza esa región entera. Cada línea es `- [ámbito](ruta) - detalle`, en el orden de la tabla. Los pendientes de `próxima semana` y `fin de mes` no aparecen: todavía no son de este ciclo. Cerrar o agendar un pendiente lo saca del callout.
 
 ### El archivo por ámbito
 

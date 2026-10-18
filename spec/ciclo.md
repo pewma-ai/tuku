@@ -8,12 +8,27 @@ Lo único canónico aquí son **los registros**. El resto es vista, y entra de d
 
 El frontmatter es OKF, con los campos en inglés porque son superficie de máquina (ver [`vault.md`](vault.md), "El frontmatter"). `AHORA.md` y una bitácora cerrada llevan **el mismo `type`**, `Logbook`: los separa `status`, que es `draft` mientras el ciclo está abierto y `stable` cuando se archiva y deja de tocarse. `from` y `to` son el rango que cubre, y son lo que dice dónde termina el ciclo: no hay ninguna marca en el cuerpo que lo repita.
 
-**El ciclo semanal va de lunes a domingo.** `tuku init --at` y `tuku process cycle --at` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente.
+**Cada ciclo tiene un nombre y un rango.** `cycle` dice cuál es (`cycle: semana`, `cycle: turno`) y `from` y `to`, el rango que cubre. Los nombres posibles los declara el autor en `cycle_name` de [`reglas/config.tuku.md`](vault.md), "La configuración", como una lista (`turno, descanso`), y vale `semana` si no declara ninguno. **El ciclo siguiente es el siguiente de la lista**, y al llegar al final vuelve al primero; con un solo nombre, es el mismo.
+
+**El rango se deduce solo con `semana`**, que va de lunes a domingo: `tuku init --at` y `tuku process cycle --at` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente. **Con cualquier otro nombre el rango es un dato del autor**, porque un turno dura 8 días, o 10, o 14, y nada lo deduce: el agente le pregunta hasta qué día va el ciclo y abre con ese rango. Decidir el rango es del autor; abrir un ciclo con un rango dado es determinista. Con `cycle_name: turno, descanso`, un turno del martes 11 al martes 18 de agosto y el descanso que le sigue, del miércoles 19 al lunes 24, son dos ciclos:
 
 ```markdown
 ---
 type: Logbook
 status: draft
+cycle: turno
+from: 2026-08-11
+to: 2026-08-18
+---
+```
+
+Hoy `process cycle` solo abre la semana. `cycle_name`, `cycle:` y el rango dado entran con lo que dice [`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo".
+
+```markdown
+---
+type: Logbook
+status: draft
+cycle: semana
 from: 2026-08-24
 to: 2026-08-30
 ---
@@ -45,12 +60,13 @@ Lo que va entre el encabezado del día y el primer registro es la **región prop
 
 **No tiene resumen.** El resumen se genera al cerrar, así que no existe mientras el ciclo está abierto.
 
-## `bitacoras/bitacora-<desde>-<hasta>.md`, el ciclo cerrado
+## `bitacoras/bitacora-<desde>-<hasta>-<ciclo>.md`, el ciclo cerrado
 
 ```markdown
 ---
 type: Logbook
 status: stable
+cycle: semana
 from: 2026-08-24
 to: 2026-08-30
 ---
@@ -110,13 +126,13 @@ Lo abre `process cycle` cuando crea el ciclo y `bitacoras/` tiene una bitácora.
 
 ### La estructura del ciclo sale de una plantilla
 
-`process cycle` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. Ante la omisión de fecha de apertura, toma por defecto la fecha actual (**HOY**) evaluada en la zona horaria `TZ` de `reglas/config.tuku.md` para determinar el rango según el ritmo declarado (`cycle_type`). La plantilla es del autor y vive en su vault, así que cambiar el ritmo del ciclo, o qué secciones trae un ciclo recién abierto, se hace editándola y no tocando el comando.
+`process cycle` no construye el ciclo: **instancia `reglas/plantilla/AHORA.md`**, sustituyendo las fechas del frontmatter y de los encabezados de los días. Ante la omisión de fecha de apertura, toma por defecto la fecha actual (**HOY**) evaluada en la zona horaria `TZ` de `reglas/config.tuku.md` para determinar el rango: con `semana`, la semana que contiene esa fecha; con otro nombre de `cycle_name`, el rango que se le pasó, que el comando exige. Genera un encabezado de día por cada fecha entre `from` y `to`, así que un turno de 8 días trae 8 y uno de 14, 14. La plantilla es del autor y vive en su vault, así que qué secciones trae un ciclo recién abierto se cambia editándola y no tocando el comando.
 
 ### Un ciclo abierto con registros no se pisa
 
 Abrir un ciclo cuya fecha cae fuera del que ya está abierto **se rechaza** si ese ciclo tiene registros escritos. Archivar es una consecuencia mayor y nadie la aprobó (principio 3 de [`../docs/principios.md`](../docs/principios.md)): sobreescribir `AHORA.md` haría desaparecer registros sin dejar rastro en `bitacoras/`. El rechazo nombra el archivo destino con las fechas ya calculadas, para que cerrarlo sea copiar la línea.
 
-Un ciclo abierto **sin registros sí se regenera**, porque no hay nada que perder. Y ante una fecha de otra semana se falla en vez de archivar solo, porque el caso frecuente es un dedazo y no el lunes nuevo: fallar es barato y deshacer un cierre no.
+Un ciclo abierto **sin registros sí se regenera**, porque no hay nada que perder. Y ante una fecha de otro ciclo se falla en vez de archivar solo, porque el caso frecuente es un dedazo y no el lunes nuevo: fallar es barato y deshacer un cierre no.
 
 **Un ciclo no se abre hacia atrás.** Una fecha anterior al `from` del ciclo abierto se rechaza siempre, tenga o no registros: con `AHORA.md` en la semana del 24 de agosto, `tuku process cycle --at 2026-07-06` rechaza y nombra el ciclo abierto. Lo vivido en una semana ya cerrada se agrega a mano en su bitácora de `bitacoras/`.
 
@@ -177,6 +193,8 @@ El bruto y los costos fijos los declara el autor en archivos `CAPACIDAD.md` repa
 
 `Bruto` va una sola vez, en `ambitos/personal/`. Cada bloque de `Costo fijo` va en el ámbito que lo causa, y todos se restan del mismo bruto.
 
+**Los días que no cuentan siguen en el ciclo.** El ejemplo de arriba cuenta de lunes a viernes, pero `AHORA.md` trae un encabezado por cada fecha del rango, sábado y domingo incluidos. Un día que `Días que cuentan` no nombra no aporta capacidad al plan: se puede registrar en él, no se planifica. El plan lo trata como descanso, no como un hueco sin dueño.
+
 Dos campos son de máquina, uno es de persona:
 
 | Campo | Para quién | Qué hace |
@@ -198,7 +216,7 @@ Cerrado porque es lo que permite que el comando sume sin interpretar, y corto po
 
 Lo que sale de sumar no es un número de horas: es cuánto cabe en el ciclo, en la misma escala. El plan se dimensiona contra eso.
 
-`Cuándo` depende del tipo de ciclo, igual que el trigger de una cadencia: *"los días de turno"* no se resuelve con un almanaque. El cálculo de capacidad hereda esa dependencia y sus dos trampas conocidas (ver [`cadencias.md`](cadencias.md)).
+`Cuándo` depende del ciclo, igual que el trigger de una cadencia: *"los días de turno"* no se resuelve con un almanaque, pero sí con el nombre: el ciclo que declara `cycle: turno` es el que cobra ese costo. El cálculo de capacidad hereda esa dependencia y sus dos trampas conocidas (ver [`cadencias.md`](cadencias.md)).
 
 `Por qué` cumple aquí el mismo papel que `Historia` en una cadencia. Un costo fijo sin razón escrita es lo primero que el autor recorta cuando quiere que el ciclo le quepa, y es exactamente lo que no debe recortar.
 
@@ -231,4 +249,4 @@ El veredicto sale de comparar plan contra ejecución, no de resumir la actividad
 ## No entra
 
 - **Juzgar la calidad de la prosa** del plan o el resumen.
-- **Decidir el tipo de ciclo real de quien lo usa.** El estado cero arranca en semanal y el tipo verdadero emerge después; esa regla de arranque vive en [`../devel/epics.md`](../devel/epics.md) (estrategia de pruebas, estado cero).
+- **Decidir cuánto dura un ciclo que no es `semana`.** Lo dice el autor y el agente se lo pregunta al cambiar de ciclo. El estado cero arranca en `semana` y los nombres verdaderos emergen después; esa regla de arranque vive en [`../devel/epics.md`](../devel/epics.md) (estrategia de pruebas, estado cero).

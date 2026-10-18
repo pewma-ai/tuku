@@ -90,7 +90,7 @@ Formalizar un tipo nuevo es agregar una fila bajo el encabezado que corresponda,
 
 Ese contrato es el que hay y **no crece**. Los tres vocabularios viven en el libro de estilo porque son estilo: lo que el autor elige para escribir. Cualquier **dato nuevo que una automatización necesite** no se agrega aquí, va a la sección de datos de `reglas/config.tuku.md`, y el libro de estilo lo transcluye si el autor necesita verlo mientras escribe. Así el dato tiene un solo lugar donde se edita y el libro de estilo sigue leyéndose como prosa.
 
-El comando lee la estructura visible del libro de estilo, nunca una marca invisible ([markdown.md](markdown.md), "Datos de máquina en estructura visible"), y la ausencia del encabezado es un error ruidoso.
+Así es hoy; cuando el libro pase a ser estático, cada tabla vive en su archivo de `reglas/` y el comando lee ese archivo ([vault.md](vault.md), "El libro de estilo"). El comando lee la estructura visible del libro de estilo, nunca una marca invisible ([markdown.md](markdown.md), "Datos de máquina en estructura visible"), y la ausencia del encabezado es un error ruidoso.
 
 Consecuencia directa para el linter: `tuku doctor entry` valida la ontología cerrada de forma **estricta** y la abierta de forma **permisiva**. Un tipo desconocido se reporta para preguntar más adelante, nunca se rechaza como error. Un linter que rechaza vocabulario nuevo impide que la organización emerja, que es justo lo que el diseño busca.
 
