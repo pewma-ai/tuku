@@ -81,7 +81,7 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 
 | Id | Pendiente | Test |
 | --- | --- | --- |
-| B1 | `tuku context todo` ya marca los atrasados, pero `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo y `doctor todo` no sabe de fechas, que es lo que piden los escenarios. Depende de X1 | `005-04` (2 rojos y 2 guardas) |
+| B1 | Sin comando propio de atrasados, por decisión del autor (2026-10-18): `PENDIENTES.md` ya los contiene y `tuku context todo` los marca. `doctor todo` no sabe de fechas y no lo necesita por ahora. Los escenarios `005-04` piden lo contrario y quedan en rojo hasta decidir qué se hace con ellos | `005-04` (2 rojos y 2 guardas) |
 | B2 | No existe una nota tipada: `note create` no tiene `--subtype` y no se siembra `reglas/tipos/persona.md`, que `spec/notas.md` promete «el epic que escriba la primera nota tipada». Depende de X2 | `005-05` tipada (3 rojos) |
 | B3 | Las keywords repetidas entre ámbitos pasan sin aviso: `scope update escuela-los-maitenes --keyword Paula` sale con 0 y `tuku doctor` dice que el vault está sano, con `Paula` ya en `catalogo-marzo`. Es lo que hace ambigua a la Paula del `005-06`. Falta decidir si avisa `scope keywords`, `doctor` o los dos, y depende de S2 | sin test |
 | B4 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se baja con un comando. Falta el nombre y la forma | sin test: se escribe cuando B4 tenga nombre |
@@ -118,7 +118,7 @@ Tomadas al escribir los escenarios, para poder escribirlos. Cada una se confirma
 
 | Id | Decisión | Usa |
 | --- | --- | --- |
-| X1 | `tuku doctor todo` informa los atrasados como aviso, con código 0. Es la forma que menos inventa: un comando que ya existe, con el patrón de `doctor entry`, que informa preguntas sin fallar. Las alternativas son un comando propio y un verbo `list` (S6) | B1, `005-04` |
+| ~~X1~~ | ~~`tuku doctor todo` informa los atrasados como aviso, con código 0.~~ Rechazada el 2026-10-18: no se necesita un comando por ahora, `PENDIENTES.md` y `tuku context todo` bastan | B1, `005-04` |
 | X2 | `note create --subtype persona`, con el campo que `spec/notas.md` ya llama `subtype`, y `reglas/tipos/persona.md` sembrado por `tuku init` | B2, `005-05` |
 | X3 | El cierre de la primera semana reescribe los links con `../`, como pide `spec/ambitos.md` al archivar, y el escenario lo hace con `sed` como lo haría Andrea | B5, `005-01` |
 | X4 | El test del agente acepta las dos conductas ante la ambigüedad (preguntar, o escribir en el ámbito que contiene a las dos con las palabras de Andrea) y rechaza elegir una de las dos | C1, `005-06` |
