@@ -391,23 +391,20 @@ def test_cada_ambito_hijo_declara_en_su_frontmatter_la_carpeta_en_que_cuelga(
     assert _crear(vault, "colegio", "--parent", "clientes") == EXITO
 
     assert _parent(vault, "ambitos", "negocio", "negocio.md") is None
-    assert _parent(vault, "ambitos", "negocio", "bodega", "bodega.md") == "ambitos/negocio"
+    assert _parent(vault, "ambitos", "negocio", "bodega", "bodega.md") == "negocio"
     assert (
         _parent(vault, "ambitos", "negocio", "clientes", "colegio", "colegio.md")
-        == "ambitos/negocio/clientes"
+        == "negocio/clientes"
     )
     assert "parent:" not in _leer(vault, "ambitos", "personal", "personal.md")
 
     # renombrar un ámbito cambia el parent de sus descendientes; mover, el del movido
     assert _tuku(vault, "scope", "rename", "negocio", "pyme") == EXITO
-    assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "ambitos/pyme"
+    assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "pyme"
     assert _tuku(vault, "doctor") == EXITO, "los links de los descendientes siguen a la carpeta"
     assert "ambitos/pyme/bodega/bodega.md" in _leer(vault, "AHORA.md")
     assert _tuku(vault, "scope", "move", "colegio", "--parent", "bodega") == EXITO
-    assert (
-        _parent(vault, "ambitos", "pyme", "bodega", "colegio", "colegio.md")
-        == "ambitos/pyme/bodega"
-    )
+    assert _parent(vault, "ambitos", "pyme", "bodega", "colegio", "colegio.md") == "pyme/bodega"
     assert _tuku(vault, "scope", "move", "colegio") == EXITO
     assert _parent(vault, "ambitos", "colegio", "colegio.md") is None
     assert _tuku(vault, "doctor") == EXITO
@@ -415,14 +412,14 @@ def test_cada_ambito_hijo_declara_en_su_frontmatter_la_carpeta_en_que_cuelga(
     # el desfase se reporta y `regenerate scope` lo repara
     pagina = vault / "ambitos" / "pyme" / "bodega" / "bodega.md"
     texto = pagina.read_text(encoding="utf-8")
-    pagina.write_text(texto.replace("parent: ambitos/pyme", "parent: ambitos/otro"), "utf-8")
+    pagina.write_text(texto.replace("parent: pyme", "parent: otro"), "utf-8")
     capsys.readouterr()
     assert _tuku(vault, "scope", "lint") == RECHAZO
     salida = capsys.readouterr()
-    assert "parent: ambitos/otro" in salida.err + salida.out
+    assert "parent: otro" in salida.err + salida.out
     assert "tuku regenerate scope" in salida.err + salida.out
     assert _tuku(vault, "regenerate", "scope") == EXITO
-    assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "ambitos/pyme"
+    assert _parent(vault, "ambitos", "pyme", "bodega", "bodega.md") == "pyme"
     assert _tuku(vault, "scope", "lint") == EXITO
 
 
@@ -447,3 +444,59 @@ def test_la_constancia_enlaza_al_ambito_padre_y_nombra_las_categorias_del_camino
     ]
     for esperada in esperadas:
         assert any(x.endswith(esperada) for x in lineas), esperada
+
+
+def test_parent_acepta_la_ruta_y_crea_la_categoria_que_falta(vault: Path) -> None:
+    assert _crear(vault, "negocio") == EXITO
+    assert _crear(vault, "colegio", "--parent", "negocio/clientes") == EXITO
+
+    assert (vault / "ambitos" / "negocio" / "clientes" / "colegio" / "colegio.md").is_file()
+    assert _parent(vault, "ambitos", "negocio", "clientes", "colegio", "colegio.md") == (
+        "negocio/clientes"
+    )
+    assert not (vault / "ambitos" / "negocio" / "clientes" / "clientes.md").exists()
+    assert "> > [!abstract]+ Clientes" in _leer(vault, "ambitos", "negocio", "negocio.md")
+    assert any(
+        x.endswith(
+            "**nota**: abrí el ámbito bajo [negocio](ambitos/negocio/negocio.md), en clientes"
+        )
+        for x in _leer(vault, "AHORA.md").splitlines()
+    )
+
+    assert _crear(vault, "jardin", "--parent", "negocio/clientes") == EXITO
+    assert (vault / "ambitos" / "negocio" / "clientes" / "jardin" / "jardin.md").is_file()
+
+
+def test_parent_con_ruta_cuyo_padre_no_existe_se_rechaza_sin_escribir(vault: Path) -> None:
+    assert _crear(vault, "negocio") == EXITO
+    antes = _foto(vault)
+    assert _crear(vault, "colegio", "--parent", "pyme/clientes") == RECHAZO
+    assert _foto(vault) == antes
+
+
+def test_un_nombre_de_categoria_repetido_exige_la_ruta(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert _crear(vault, "negocio") == EXITO
+    assert _crear(vault, "casa") == EXITO
+    assert _crear(vault, "colegio", "--parent", "negocio/clientes") == EXITO
+    assert _crear(vault, "taller", "--parent", "casa/clientes") == EXITO
+    antes = _foto(vault)
+    capsys.readouterr()
+
+    assert _crear(vault, "jardin", "--parent", "clientes") == RECHAZO
+    salida = capsys.readouterr()
+    assert "casa/clientes" in salida.err + salida.out
+    assert "negocio/clientes" in salida.err + salida.out
+    assert _foto(vault) == antes
+
+    assert _crear(vault, "jardin", "--parent", "casa/clientes") == EXITO
+    assert (vault / "ambitos" / "casa" / "clientes" / "jardin" / "jardin.md").is_file()
+
+
+def test_move_acepta_la_ruta_del_padre(vault: Path) -> None:
+    assert _crear(vault, "negocio") == EXITO
+    assert _crear(vault, "colegio") == EXITO
+    assert _tuku(vault, "scope", "move", "colegio", "--parent", "negocio/clientes") == EXITO
+    assert (vault / "ambitos" / "negocio" / "clientes" / "colegio" / "colegio.md").is_file()
+    assert _tuku(vault, "doctor") == EXITO

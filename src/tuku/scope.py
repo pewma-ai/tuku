@@ -179,6 +179,56 @@ def _sin_padre(padre: str) -> str:
     )
 
 
+def resolver_padre(vault: Path, parent: str) -> Path | Resultado:
+    """La carpeta que nombra `--parent`: un nombre o una ruta de nombres desde `ambitos/`.
+
+    `clientes` basta si hay una sola carpeta con ese nombre; si hay varias se
+    rechaza y se nombran sus rutas. `negocio/clientes` baja segmento a segmento. En
+    una ruta, el último segmento puede no existir: es una categoría nueva (carpeta
+    sin página) y la crea el comando que la usa, bajo un padre que sí existe.
+    """
+    raiz = vault / "ambitos"
+    segmentos = [normalizar(x) for x in parent.split("/") if x.strip()]
+    if not segmentos:
+        return Resultado.rechazo(_sin_padre(parent))
+    if len(segmentos) == 1:
+        nombre = canonico(vault, segmentos[0])
+        carpetas = [p for p in sorted(raiz.rglob("*")) if p.is_dir() and p.name == nombre]
+        if not carpetas:
+            return Resultado.rechazo(_sin_padre(nombre))
+        if len(carpetas) > 1:
+            rutas_ = ", ".join(f"`{c.relative_to(raiz).as_posix()}`" for c in carpetas)
+            return Resultado.rechazo(
+                f"{nombre!r} es ambiguo: hay {len(carpetas)} carpetas con ese nombre. "
+                f"Di la ruta completa: {rutas_}."
+            )
+        return carpetas[0]
+    actual = raiz
+    for i, segmento in enumerate(segmentos):
+        hijo = (
+            next(
+                (
+                    c
+                    for c in sorted(actual.iterdir())
+                    if c.is_dir() and igual_nombre(c.name, segmento)
+                ),
+                None,
+            )
+            if actual.is_dir()
+            else None
+        )
+        if hijo is None:
+            if i == len(segmentos) - 1:
+                return actual / segmento
+            ruta = "/".join(segmentos[: i + 1])
+            return Resultado.rechazo(
+                f"no existe {ruta!r} en ambitos/. Créalo con `tuku scope create {segmento}` "
+                f"si el autor lo pide."
+            )
+        actual = hijo
+    return actual
+
+
 def keywords(pagina: str) -> list[str]:
     """Las `keywords` del frontmatter de una página de ámbito."""
     m = _KEYWORDS.search(pagina)
@@ -382,9 +432,13 @@ def parent_de(pagina: str) -> str | None:
 
 
 def _parent_esperado(vault: Path, directorio: Path) -> str | None:
-    """La carpeta que contiene al ámbito, desde la raíz del vault; `None` en `ambitos/`."""
+    """La carpeta que contiene al ámbito, desde `ambitos/`, como se dice en `--parent`.
+
+    `None` si el ámbito cuelga de `ambitos/`.
+    """
+    raiz = vault / "ambitos"
     padre = directorio.parent
-    return None if padre == vault / "ambitos" else padre.relative_to(vault).as_posix()
+    return None if padre == raiz else padre.relative_to(raiz).as_posix()
 
 
 def _con_parent(texto: str, parent: str | None) -> str:
@@ -775,10 +829,10 @@ def crear_con_constancia(
         )
     padre: Path | None = None
     if parent:
-        parent = canonico(vault, parent)
-        padre = directorio_de(vault, parent)
-        if padre is None:
-            return Resultado.rechazo(_sin_padre(parent))
+        resuelto = resolver_padre(vault, parent)
+        if isinstance(resuelto, Resultado):
+            return resuelto
+        padre = resuelto
     existente = next((a.directorio for a in leer(vault) if a.nombre == nombre), None)
     if existente is not None and padre is not None and existente.parent != padre:
         return Resultado.rechazo(
@@ -984,10 +1038,10 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
     if origen is None:
         return Resultado.rechazo(f"no existe el ámbito {nombre!r}. Míralos en ambitos/.")
     if parent:
-        parent = canonico(vault, parent)
-        padre = directorio_de(vault, parent)
-        if padre is None:
-            return Resultado.rechazo(_sin_padre(parent))
+        resuelto = resolver_padre(vault, parent)
+        if isinstance(resuelto, Resultado):
+            return resuelto
+        padre = resuelto
         if padre == origen or origen in padre.parents:
             return Resultado.rechazo(
                 f"{nombre!r} no puede ir dentro de sí mismo: {parent!r} cuelga de él. "

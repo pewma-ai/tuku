@@ -20,14 +20,13 @@ Cuando se siembra el vault y se abren los frentes de la Pyme, con las palabras q
 tuku init mi-vault --at 2026-08-10 --author "Andrea Bustos"
 cd mi-vault
 tuku scope create negocio --at "2026-08-10 07:40" --keyword Kelluwün
-mkdir ambitos/negocio/clientes ambitos/negocio/proveedores
-tuku scope create colegio-los-robles --parent clientes --at "2026-08-10 07:41" --keyword "Los Robles" --keyword Rodolfo --keyword Cifuentes
-tuku scope create jardin-semillita --parent clientes --at "2026-08-10 07:42" --keyword Semillita --keyword Marcela --keyword Ossandón
-tuku scope create liceo-tecnico-andes --parent clientes --at "2026-08-10 07:43" --keyword "Liceo Andes" --keyword Patricia --keyword Lillo
-tuku scope create libreria-el-compas --parent clientes --at "2026-08-10 07:44" --keyword Compás --keyword Óscar --keyword Tapia
-tuku scope create escuela-los-maitenes --parent clientes --at "2026-08-10 07:45" --keyword Maitenes --keyword Sonia --keyword Cárdenas --keyword "Paula Reyes"
-tuku scope create importadora-andina --parent proveedores --at "2026-08-10 07:46" --keyword Gloria --keyword Andina
-tuku scope create papelera-del-sur --parent proveedores --at "2026-08-10 07:47" --keyword Papelera --keyword Iván --keyword Zamora
+tuku scope create colegio-los-robles --parent negocio/clientes --at "2026-08-10 07:41" --keyword "Los Robles" --keyword Rodolfo --keyword Cifuentes
+tuku scope create jardin-semillita --parent negocio/clientes --at "2026-08-10 07:42" --keyword Semillita --keyword Marcela --keyword Ossandón
+tuku scope create liceo-tecnico-andes --parent negocio/clientes --at "2026-08-10 07:43" --keyword "Liceo Andes" --keyword Patricia --keyword Lillo
+tuku scope create libreria-el-compas --parent negocio/clientes --at "2026-08-10 07:44" --keyword Compás --keyword Óscar --keyword Tapia
+tuku scope create escuela-los-maitenes --parent negocio/clientes --at "2026-08-10 07:45" --keyword Maitenes --keyword Sonia --keyword Cárdenas --keyword "Paula Reyes"
+tuku scope create importadora-andina --parent negocio/proveedores --at "2026-08-10 07:46" --keyword Gloria --keyword Andina
+tuku scope create papelera-del-sur --parent negocio/proveedores --at "2026-08-10 07:47" --keyword Papelera --keyword Iván --keyword Zamora
 tuku scope create bodega --parent negocio --at "2026-08-10 07:48" --keyword stock --keyword inventario
 tuku scope create temporada-marzo --parent negocio --at "2026-08-10 07:49" --keyword temporada --keyword mercadería
 tuku scope create catalogo-marzo --parent negocio --at "2026-08-10 07:50" --keyword catálogo --keyword Paula

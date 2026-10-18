@@ -155,7 +155,11 @@ class Opciones:
         self.parser.add_argument("--scope", dest="scope", default=None, help=ayuda)
 
     def parent(
-        self, ayuda: str = "ámbito padre, que debe existir; por defecto, la raíz de `ambitos/`"
+        self,
+        ayuda: str = (
+            "ámbito o categoría padre, por nombre o por ruta (`negocio/clientes`); "
+            "por defecto, la raíz de `ambitos/`"
+        ),
     ) -> None:
         self.parser.add_argument("--parent", dest="parent", default=None, help=ayuda)
 
