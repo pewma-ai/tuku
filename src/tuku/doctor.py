@@ -5,10 +5,10 @@ y sin tema corre todas. Junta los lint de cada archivo y agrega lo que ninguno
 cubre: que las tablas de contrato existan y estén bien formadas. Es el comando de
 quien vuelve al vault después de un mes y no se acuerda de qué revisar.
 
-Las tablas de `reglas/types.md` son distintas de las del libro de estilo. Las del
-libro son vocabulario del autor: una fila que no está no es error, es vocabulario
-por formalizar. Las de `types.md` son contrato con OKF: una fila que falta sí es
-error, porque algún archivo del vault va a quedar sin `type` que ponerle.
+Los `type` de TUKU, en el capítulo «Tipos de archivo» del libro de estilo, son
+contrato con OKF: una fila que falta es error, porque algún archivo del vault va a
+quedar sin `type` que ponerle. Los vocabularios del autor, en `reglas/`, son
+distintos: una fila que no está no es error, es vocabulario por formalizar.
 
 Cuando algo falla, el reporte termina diciendo dónde está el template original.
 Un `uv tool install` deja una copia intacta en `~/.tuku/`, y contra ella se repara
@@ -17,7 +17,7 @@ corregir son operaciones distintas (`spec/cli.md`), y el conjunto canónico no s
 sobreescribe sin que el autor lo apruebe (principio 3).
 
 **Qué lee y escribe:** lee todo lo anterior. **No escribe.**
-**A mano:** revisar cada archivo contra su spec y que `reglas/types.md` tenga su tabla.
+**A mano:** revisar cada archivo contra su spec y que el libro tenga su tabla de tipos.
 """
 
 from __future__ import annotations
@@ -27,13 +27,16 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from tuku import archivo
+from tuku import archivo, capitulos
 from tuku.resultado import Resultado
 
 #: Los campos de `config.tuku.md` sin los cuales los comandos no pueden operar.
 CAMPOS_REQUERIDOS = ("TZ", "tuku_template", "tuku_version")
 
 #: Los `type` sin los cuales un vault no se puede describir entero.
+#: El capítulo del libro de estilo que declara los `type` de TUKU.
+TIPOS_DE_TUKU = "Tipos de archivo"
+
 TIPOS_REQUERIDOS = ("Logbook", "Todo", "Scope", "Note", "Cadence", "Config", "Style Guide")
 
 _FILA = re.compile(r"^\|\s*`([^`]+)`\s*\|")
@@ -53,6 +56,10 @@ ARCHIVOS_REQUERIDOS = (
     "LIBRO-DE-ESTILO.md",
     "reglas/config.tuku.md",
     "reglas/types.md",
+    "reglas/autor.md",
+    "reglas/bitacora.md",
+    "reglas/pendientes.md",
+    "reglas/notas.md",
     "reglas/plantilla/AHORA.md",
 )
 
@@ -98,36 +105,48 @@ def tipos_declarados(types_md: str) -> list[str]:
     return tipos
 
 
-def revisar_tipos(types_md: str | None) -> Revision:
-    """Verifica que la tabla de tipos exista y declare los tipos requeridos."""
+def tipos_de_tuku(libro: str) -> list[str]:
+    """Los `type` de TUKU: la tabla del capítulo «Tipos de archivo» del libro de estilo."""
+    cap = capitulos.capitulo(libro, TIPOS_DE_TUKU)
+    return tipos_declarados("\n".join(cap.cuerpo)) if cap else []
+
+
+def revisar_tipos(libro: str | None, types_md: str | None) -> Revision:
+    """Verifica los tipos de TUKU (en el libro) y los que el autor agrega."""
+    if libro is None:
+        return ausente("types", "LIBRO-DE-ESTILO.md")
     if types_md is None:
         return Revision(
             "types",
             "reglas/types.md: error: falta el archivo. "
-            "Es donde vive la tabla de `type` que el libro de estilo transcluye.",
+            "Es donde el autor agrega sus `type` a los de TUKU, y el libro lo transcluye.",
             False,
         )
 
-    declarados = tipos_declarados(types_md)
-    if not declarados:
-        return Revision(
-            "types",
-            "reglas/types.md: error: no tiene tabla de tipos. "
-            "Cada fila empieza con el `type` entre backticks.",
-            False,
-        )
-
-    faltan = [t for t in TIPOS_REQUERIDOS if t not in declarados]
+    de_tuku = tipos_de_tuku(libro)
+    faltan = [t for t in TIPOS_REQUERIDOS if t not in de_tuku]
     if faltan:
         lista = ", ".join(f"`{t}`" for t in faltan)
         return Revision(
             "types",
-            f"reglas/types.md: error: faltan tipos en la tabla: {lista}. "
-            "Sin ellos hay archivos del vault que no se pueden describir.",
+            f"LIBRO-DE-ESTILO.md: error: faltan tipos en el capítulo «{TIPOS_DE_TUKU}»: "
+            f"{lista}. Sin ellos hay archivos del vault que no se pueden describir. "
+            "Corre `tuku regenerate libro` si el libro es viejo.",
             False,
         )
 
-    return Revision("types", f"types: {len(declarados)} tipos declarados.", True)
+    propios = tipos_declarados(types_md)
+    repetidos = [t for t in propios if t in de_tuku]
+    if repetidos:
+        lista = ", ".join(f"`{t}`" for t in repetidos)
+        return Revision(
+            "types",
+            f"reglas/types.md: error: repite tipos de TUKU: {lista}. "
+            "Ahí van solo los que el autor agrega.",
+            False,
+        )
+
+    return Revision("types", f"types: {len(de_tuku)} de TUKU y {len(propios)} propios.", True)
 
 
 def comandos_de_despacho(agents_md: str) -> list[str]:
@@ -248,12 +267,12 @@ def revisar_frontmatter(vault: Path, *, tipos_validos: list[str]) -> Revision:
         if tipo is None:
             problemas.append(
                 f"{ruta}: error: no declara `type` en su frontmatter. "
-                f"Agrégalo con uno de los de `reglas/types.md`."
+                "Agrégalo con uno de los del libro de estilo o de `reglas/types.md`."
             )
         elif tipos_validos and tipo not in tipos_validos:
             problemas.append(
-                f"{ruta}: error: `type: {tipo}` no está en `reglas/types.md`. "
-                f"Usa uno de la tabla, o agrégalo ahí si falta."
+                f"{ruta}: error: `type: {tipo}` no está en el libro de estilo ni en "
+                "`reglas/types.md`. Usa uno de sus tablas, o agrégalo a `reglas/types.md`."
             )
 
     if problemas:
@@ -271,7 +290,7 @@ def revisar_config(config_md: str | None) -> Revision:
             False,
         )
 
-    from tuku.config import parsear_config_md
+    from tuku.config import parsear_config_md, zona_valida
 
     campos = parsear_config_md(config_md)
     faltan = [c for c in CAMPOS_REQUERIDOS if not campos.get(c)]
@@ -281,6 +300,15 @@ def revisar_config(config_md: str | None) -> Revision:
             "config",
             f"reglas/config.tuku.md: error: faltan campos en la tabla: {lista}. "
             "Sin ellos los comandos adivinan, y adivinar la `TZ` vence pendientes.",
+            False,
+        )
+
+    if not zona_valida(campos["TZ"]):
+        return Revision(
+            "config",
+            f"reglas/config.tuku.md: error: la `TZ` «{campos['TZ']}» no es una zona horaria "
+            "que este sistema conozca (por ejemplo `America/Santiago`). Hasta que se "
+            "corrija, los comandos usan la zona del sistema.",
             False,
         )
 
@@ -456,16 +484,31 @@ def _check_config(c: _Check) -> list[Revision]:
 
 def _check_version(c: _Check) -> list[Revision]:
     from tuku.init import TukuHomeInvalido, resolver_home, version_del_home
+    from tuku.regenerate import prosa_de_tuku
 
     try:
         version_home = version_del_home(resolver_home())
+        desviados = [r for r, texto in prosa_de_tuku(c.vault).items() if c.read(r) != texto]
     except TukuHomeInvalido:
-        version_home = None
-    return [revisar_version(c.read("reglas/config.tuku.md"), version_home)]
+        version_home, desviados = None, []
+    revisiones = [revisar_version(c.read("reglas/config.tuku.md"), version_home)]
+    if desviados:
+        lista = ", ".join(desviados)
+        revisiones.append(
+            Revision(
+                "version",
+                f"version: aviso: la prosa de TUKU del vault difiere de la del template "
+                f"instalado: {lista}. `tuku regenerate libro` la reemplaza; si editaste "
+                "alguno a mano, lleva ese cambio a `reglas/` antes.",
+                True,
+                aviso=True,
+            )
+        )
+    return revisiones
 
 
 def _check_types(c: _Check) -> list[Revision]:
-    return [revisar_tipos(c.read("reglas/types.md"))]
+    return [revisar_tipos(c.read("LIBRO-DE-ESTILO.md"), c.read("reglas/types.md"))]
 
 
 def _check_files(c: _Check) -> list[Revision]:
@@ -473,8 +516,12 @@ def _check_files(c: _Check) -> list[Revision]:
 
 
 def _check_frontmatter(c: _Check) -> list[Revision]:
+    libro = c.read("LIBRO-DE-ESTILO.md")
     types_md = c.read("reglas/types.md")
-    valid = tipos_declarados(types_md) if types_md else []
+    valid = [
+        *(tipos_de_tuku(libro) if libro else []),
+        *(tipos_declarados(types_md) if types_md else []),
+    ]
     return [revisar_frontmatter(c.vault, tipos_validos=valid)]
 
 
@@ -540,7 +587,10 @@ def _check_style(c: _Check) -> list[Revision]:
     libro = c.read("LIBRO-DE-ESTILO.md")
     if libro is None:
         return [ausente("style", "LIBRO-DE-ESTILO.md")]
-    findings = style.lint(libro)
+    textos = {
+        ruta: c.read(ruta) for ruta in (*style.ARCHIVOS, *capitulos.transclusiones(libro))
+    }
+    findings = style.lint(textos)
     ok = not any(h.grado == ERROR for h in findings)
     return [Revision("style", style.formatear(findings), ok, aviso=ok and bool(findings))]
 

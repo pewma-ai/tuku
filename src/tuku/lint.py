@@ -13,7 +13,7 @@ Fase 1 de `devel/epics.md`, criterio de salida. Las dos ontologías de
 Un registro fuera del rango del ciclo abierto también es error, y el lint no
 inventa los días que faltan para acomodarlo.
 
-**Qué lee y escribe:** lee `AHORA.md` y `LIBRO-DE-ESTILO.md`. **No escribe.**
+**Qué lee y escribe:** lee `AHORA.md` y los vocabularios de `reglas/`. **No escribe.**
 Verificar y corregir son operaciones distintas (`spec/cli.md`).
 **A mano:** leer los registros del ciclo comparando las marcas contra el libro
 de estilo.

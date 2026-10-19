@@ -7,7 +7,7 @@ type: Cadence
 Abrir y cerrar la semana. Si tu ritmo no es de lunes a viernes más un fin de semana, cambia el `Cuándo` más abajo.
 
 
-> [!info] Ver cómo se escribe una cadencia en el [LIBRO DE ESTILO](../LIBRO-DE-ESTILO.md#Cadencias).
+> [!info] Ver cómo se escribe una cadencia en el [LIBRO DE ESTILO](../LIBRO-DE-ESTILO.md#Cadencia).
 
 ## Apertura de la semana
 

@@ -78,19 +78,17 @@ El costo que la mantiene honesta: la lista vive en el código del linter, así q
 
 **Abierta, del autor.** `**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`. Son **semánticos**: ningún comando actúa sobre ellos. Sirven para leer, filtrar y destilar. Si el autor usa un tipo nuevo se acepta, y en un ciclo posterior se le pregunta qué significa para formalizarlo.
 
-**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos viven en el `LIBRO-DE-ESTILO.md` del vault del autor (semilla en [`../template/vanilla/LIBRO-DE-ESTILO.md`](../template/vanilla/LIBRO-DE-ESTILO.md)), cada uno bajo su propio encabezado, y de ahí los lee el comando:
+**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos son del autor y viven en `reglas/`, cada uno en el archivo de su entidad, bajo un capítulo `##` con una sola tabla (semillas en [`../template/vanilla/reglas/`](../template/vanilla/reglas/)). De ahí los lee el comando, y el libro de estilo transcluye cada archivo en el capítulo de su entidad ([vault.md](vault.md), "El libro de estilo"):
 
-| Vocabulario abierto | Encabezado en el libro de estilo |
-| --- | --- |
-| Clasificaciones de registro | `### Clasificaciones` |
-| Horizontes de pendientes | `### Horizontes` |
-| Tipos de nota | `### Tipos de nota` |
+| Vocabulario abierto | Archivo | Capítulo |
+| --- | --- | --- |
+| Clasificaciones de registro | `reglas/bitacora.md` | `## Clasificaciones` |
+| Horizontes de pendientes | `reglas/pendientes.md` | `## Horizontes` |
+| Tipos de nota | `reglas/notas.md` | `## Tipos de nota` |
 
-Formalizar un tipo nuevo es agregar una fila bajo el encabezado que corresponda, en un documento en prosa que el autor lee y escribe. No hay segunda copia en ninguna parte, así que **los encabezados son contrato**: renombrarlos rompe al comando.
+Formalizar un tipo nuevo es agregar una fila a la tabla del capítulo que corresponda. No hay segunda copia en ninguna parte, así que **el archivo, el nombre del capítulo y los encabezados de su tabla son contrato**: renombrarlos rompe al comando, y un capítulo con más de una tabla lo confunde, por eso `tuku doctor style` lo reporta.
 
-Ese contrato es el que hay y **no crece**. Los tres vocabularios viven en el libro de estilo porque son estilo: lo que el autor elige para escribir. Cualquier **dato nuevo que una automatización necesite** no se agrega aquí, va a la sección de datos de `reglas/config.tuku.md`, y el libro de estilo lo transcluye si el autor necesita verlo mientras escribe. Así el dato tiene un solo lugar donde se edita y el libro de estilo sigue leyéndose como prosa.
-
-Así es hoy; cuando el libro pase a ser estático, cada tabla vive en su archivo de `reglas/` y el comando lee ese archivo ([vault.md](vault.md), "El libro de estilo"). El comando lee la estructura visible del libro de estilo, nunca una marca invisible ([markdown.md](markdown.md), "Datos de máquina en estructura visible"), y la ausencia del encabezado es un error ruidoso.
+Ese contrato es el que hay y **no crece**. Cualquier **dato nuevo que una automatización necesite** no se agrega aquí, va a la sección de datos de `reglas/config.tuku.md`, y el libro de estilo lo transcluye si el autor necesita verlo mientras escribe. Así el dato tiene un solo lugar donde se edita. El comando lee la estructura visible, nunca una marca invisible ([markdown.md](markdown.md), "Datos de máquina en estructura visible"), y la ausencia del archivo o del capítulo es un error ruidoso.
 
 Consecuencia directa para el linter: `tuku doctor entry` valida la ontología cerrada de forma **estricta** y la abierta de forma **permisiva**. Un tipo desconocido se reporta para preguntar más adelante, nunca se rechaza como error. Un linter que rechaza vocabulario nuevo impide que la organización emerja, que es justo lo que el diseño busca.
 

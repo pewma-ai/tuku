@@ -1,7 +1,8 @@
 """Lectura centralizada de configuración, libro de estilo y reglas de un vault.
 
 Reúne en un solo lugar todas las lecturas de los archivos normativos del vault
-(`reglas/config.tuku.md`, `LIBRO-DE-ESTILO.md` y `reglas/plantilla/AHORA.md`).
+(`reglas/config.tuku.md`, los archivos del autor en `reglas/` y
+`reglas/plantilla/AHORA.md`).
 Permite testear el comportamiento en memoria y desacopla la ubicación física
 de los archivos del resto de los comandos de TUKU.
 """
@@ -9,9 +10,11 @@ de los archivos del resto de los comandos de TUKU.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from datetime import date
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from datetime import date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from tuku import archivo, vocab
 from tuku.init import MESES, resolver_home
@@ -63,7 +66,7 @@ class Configuracion:
     zona_horaria: str
     nombres_de_ciclo: tuple[str, ...]
     datos: dict[str, str]
-    # De LIBRO-DE-ESTILO.md
+    # De los archivos del autor en reglas/
     autor: str | None
     vocabularios: dict[str, list[str]]
     clasificaciones: list[str]
@@ -100,30 +103,92 @@ def fecha_corta(fecha: date, formato: str = FORMATO_FECHA) -> str:
     )
 
 
+#: Cuántas notas por tipo trae `tuku context note` si la config no dice otra cosa.
+LIMITE_DE_NOTAS = 25
+
+#: Cómo se llama el ciclo si la config no lo dice.
+CICLO_POR_DEFECTO = "semana"
+
+
+@dataclass(frozen=True)
+class Preferencias:
+    """What `reglas/config.tuku.md` decides, each field with its default.
+
+    The one reader of that table: every command that needs a preference asks
+    here, so a default is written once. An empty `zona_horaria` means the
+    system's own.
+    """
+
+    zona_horaria: str = ""
+    nombres_de_ciclo: tuple[str, ...] = (CICLO_POR_DEFECTO,)
+    ambito_por_defecto: str | None = None
+    formato_fecha: str = FORMATO_FECHA
+    limite_de_notas: int = LIMITE_DE_NOTAS
+    datos: dict[str, str] = field(default_factory=dict)
+
+
+def _limpio(datos: dict[str, str], campo: str) -> str:
+    return datos.get(campo, "").strip("`").strip()
+
+
+def leer_preferencias(vault: Path | None = None, *, texto: str | None = None) -> Preferencias:
+    """The preferences of `vault`, or the defaults if its config is missing or incomplete.
+
+    `texto` replaces the file, for callers that already hold it.
+    """
+    if texto is None:
+        ruta = Path(vault) / "reglas" / "config.tuku.md" if vault is not None else None
+        texto = archivo.leer(ruta) if ruta is not None and ruta.is_file() else ""
+    datos = parsear_config_md(texto)
+    limite = _limpio(datos, "context_note_limit")
+    return Preferencias(
+        zona_horaria=_limpio(datos, "TZ"),
+        nombres_de_ciclo=tuple(
+            n.strip() for n in datos.get("cycle_name", "").split(",") if n.strip()
+        )
+        or (CICLO_POR_DEFECTO,),
+        ambito_por_defecto=_limpio(datos, "scope_default") or None,
+        formato_fecha=_limpio(datos, "date_format") or FORMATO_FECHA,
+        limite_de_notas=int(limite)
+        if limite.isdigit() and int(limite) > 0
+        else LIMITE_DE_NOTAS,
+        datos=datos,
+    )
+
+
 def formato_fecha(vault: Path) -> str:
     """El `date_format` de `reglas/config.tuku.md`, o el de por defecto."""
-    ruta = Path(vault) / "reglas" / "config.tuku.md"
-    texto = archivo.leer(ruta) if ruta.is_file() else ""
-    return parsear_config_md(texto).get("date_format", "").strip("`") or FORMATO_FECHA
+    return leer_preferencias(vault).formato_fecha
 
 
 def ambito_por_defecto(vault: Path) -> str | None:
     """El `scope_default` de `reglas/config.tuku.md`: el ámbito de lo que no nombra otro."""
-    ruta = Path(vault) / "reglas" / "config.tuku.md"
-    texto = archivo.leer(ruta) if ruta.is_file() else ""
-    return parsear_config_md(texto).get("scope_default", "").strip("`") or None
-
-
-#: Cuántas notas por tipo trae `tuku context note` si la config no dice otra cosa.
-LIMITE_DE_NOTAS = 25
+    return leer_preferencias(vault).ambito_por_defecto
 
 
 def limite_de_notas(vault: Path) -> int:
     """El `context_note_limit` de `reglas/config.tuku.md`, o 25 si falta o no es un entero."""
-    ruta = Path(vault) / "reglas" / "config.tuku.md"
-    texto = archivo.leer(ruta) if ruta.is_file() else ""
-    valor = parsear_config_md(texto).get("context_note_limit", "").strip("`")
-    return int(valor) if valor.isdigit() and int(valor) > 0 else LIMITE_DE_NOTAS
+    return leer_preferencias(vault).limite_de_notas
+
+
+def zona_valida(zona: str) -> bool:
+    """Whether `zona` is an IANA name this machine knows (`America/Santiago`)."""
+    try:
+        ZoneInfo(zona)
+    except ZoneInfoNotFoundError, ValueError, OSError:
+        return False
+    return True
+
+
+def hora_local(zona: str) -> datetime:
+    """The wall-clock now in `zona`, naive like every datetime in `tuku`.
+
+    An empty or unknown zone gives the system's clock: `doctor config` and
+    `main` are who tell the author that the zone is wrong.
+    """
+    if zona and zona_valida(zona):
+        return datetime.now(ZoneInfo(zona)).replace(tzinfo=None)
+    return datetime.now()
 
 
 def parsear_config_md(texto: str) -> dict[str, str]:
@@ -139,9 +204,9 @@ def parsear_config_md(texto: str) -> dict[str, str]:
     return pares
 
 
-def parsear_autor(texto_libro: str) -> str | None:
-    """Extrae el nombre del autor si fue declarado en LIBRO-DE-ESTILO.md."""
-    for linea in texto_libro.splitlines():
+def parsear_autor(texto_autor: str) -> str | None:
+    """Extrae el nombre del autor si fue declarado en `reglas/autor.md`."""
+    for linea in texto_autor.splitlines():
         if linea.lstrip().startswith(_MARCADOR_AUTOR):
             resto = linea.split(_MARCADOR_AUTOR, 1)[1].strip()
             if resto and not resto.lower().startswith("por declarar"):
@@ -166,28 +231,30 @@ def leer_config(
     vault: Path,
     *,
     texto_config: str | None = None,
-    texto_libro: str | None = None,
+    textos_reglas: Mapping[str, str] | None = None,
     texto_plantilla_ahora: str | None = None,
 ) -> Configuracion:
-    """Lee y consolida configuración, libro de estilo y plantillas de un vault."""
+    """Lee y consolida configuración, archivos del autor y plantillas de un vault.
+
+    `textos_reglas` reemplaza archivos de `reglas/` por su ruta (`reglas/autor.md`),
+    para quien ya los tiene en memoria.
+    """
     vault = Path(vault)
 
     # 1. reglas/config.tuku.md
     if texto_config is None:
         ruta_config = vault / "reglas" / "config.tuku.md"
         texto_config = archivo.leer(ruta_config) if ruta_config.is_file() else ""
-    datos = parsear_config_md(texto_config)
-    zona_horaria = datos.get("TZ", "America/Santiago")
-    nombres_de_ciclo = tuple(
-        n.strip() for n in datos.get("cycle_name", "").split(",") if n.strip()
-    ) or ("semana",)
+    prefs = leer_preferencias(texto=texto_config)
 
-    # 2. LIBRO-DE-ESTILO.md
-    if texto_libro is None:
-        ruta_libro = archivo_vault(vault, "LIBRO-DE-ESTILO.md")
-        texto_libro = archivo.leer(ruta_libro)
-    autor = parsear_autor(texto_libro)
-    vocabs = vocab.leer(texto_libro) if texto_libro else {}
+    # 2. Los archivos del autor en reglas/
+    def regla(ruta: str) -> str:
+        if textos_reglas is not None and ruta in textos_reglas:
+            return textos_reglas[ruta]
+        return archivo.leer(archivo_vault(vault, ruta))
+
+    autor = parsear_autor(regla("reglas/autor.md"))
+    vocabs = vocab.leer({ruta: regla(ruta) for ruta in vocab.ARCHIVOS})
 
     # 3. Plantilla AHORA.md
     if texto_plantilla_ahora is None:
@@ -200,14 +267,14 @@ def leer_config(
 
     return Configuracion(
         vault=vault,
-        zona_horaria=zona_horaria,
-        nombres_de_ciclo=nombres_de_ciclo,
-        datos=datos,
+        zona_horaria=prefs.zona_horaria,
+        nombres_de_ciclo=prefs.nombres_de_ciclo,
+        datos=prefs.datos,
         autor=autor,
         vocabularios=vocabs,
         clasificaciones=vocabs.get("clasificaciones", []),
         horizontes=vocabs.get("horizontes", []),
         tipos_nota=vocabs.get("tipos-de-nota", []),
-        tipos_enlazables=vocab.enlazables(texto_libro),
+        tipos_enlazables=vocab.enlazables(regla("reglas/notas.md")),
         plantilla_ahora=plantilla_ahora,
     )

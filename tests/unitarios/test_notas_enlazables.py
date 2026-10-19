@@ -1,4 +1,4 @@
-"""Notas enlazables: la columna "Enlazable" del libro decide qué trae `context note`."""
+"""Notas enlazables: la columna "Enlazable" de `reglas/notas.md` decide `context note`."""
 
 from __future__ import annotations
 
@@ -14,24 +14,24 @@ from tuku.config import limite_de_notas
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 HOY = AHORA.date()
 
-LIBRO = """### Tipos de nota
+LIBRO = """## Tipos de nota
 
 | Tipo | Para qué | Cuidado | Enlazable |
 | --- | --- | --- | --- |
 | `persona` | Trabajar con alguien. | Lo que se le mostraría. | sí |
 | `idea` | Pensar algo. | Nada. | no |
 
-## Otra sección
+## Otro capítulo
 """
 
 
 def test_el_libro_dice_que_tipos_se_enlazan_y_el_template_enlaza_personas() -> None:
     assert vocab.enlazables(LIBRO) == ["persona"]
-    sin_columna = "### Tipos de nota\n\n| Tipo | Para qué |\n| --- | --- |\n| `persona` | x |\n"
+    sin_columna = "## Tipos de nota\n\n| Tipo | Para qué |\n| --- | --- |\n| `persona` | x |\n"
     assert vocab.enlazables(sin_columna) == []
-    assert vocab.enlazables("# Libro sin tipos\n") == []
-    libro = RAIZ_REPO / "template" / "vanilla" / "LIBRO-DE-ESTILO.md"
-    assert vocab.enlazables(libro.read_text(encoding="utf-8")) == ["persona"]
+    assert vocab.enlazables("# Sin capítulo de tipos\n") == []
+    notas = RAIZ_REPO / "template" / "vanilla" / "reglas" / "notas.md"
+    assert vocab.enlazables(notas.read_text(encoding="utf-8")) == ["persona"]
 
 
 def _nota(v: Path, nombre: str, subtype: str, titulo: str, aliases: str = "") -> None:
@@ -122,12 +122,12 @@ def test_context_note_lista_por_tipo_enlazable_y_dice_cuando_no_hay(vault: Path)
     assert context.del_vault(vault, "note", now=AHORA).mensaje == (
         "## persona\n\n- notas/rodolfo-cifuentes.md: Rodolfo Cifuentes; aliases: don Rodolfo"
     )
-    libro = vault / "LIBRO-DE-ESTILO.md"
-    libro.write_text(
-        libro.read_text(encoding="utf-8").replace("| sí |", "| no |"), encoding="utf-8"
+    reglas = vault / "reglas" / "notas.md"
+    reglas.write_text(
+        reglas.read_text(encoding="utf-8").replace("| sí |", "| no |"), encoding="utf-8"
     )
     assert context.del_vault(vault, "note", now=AHORA).mensaje == (
-        "sin tipos enlazables en `### Tipos de nota`."
+        "sin tipos enlazables en `## Tipos de nota` de `reglas/notas.md`."
     ), "sin tipos enlazables lo dice"
 
 

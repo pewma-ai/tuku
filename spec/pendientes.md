@@ -35,7 +35,7 @@ type: Todo
 | con fecha | 2026-08-14 | [personal](ambitos/personal/personal.md) | pagar la sesión con el psicólogo |
 ```
 
-**Horizonte** indica el escalón actual del pendiente. Los del autor salen de `### Horizontes` en el libro de estilo (`esta semana`, `próxima semana`, `fin de mes` en el template vanilla) y `con fecha` es del sistema cuando tiene día asignado.
+**Horizonte** indica el escalón actual del pendiente. Los del autor salen del capítulo `## Horizontes` de `reglas/pendientes.md` (`esta semana`, `próxima semana`, `fin de mes` en el template vanilla) y `con fecha` es del sistema cuando tiene día asignado.
 
 **Vence** es el día en que toca el pendiente: ese día aparece entre los pendientes del día, y desde el siguiente está atrasado. Queda vacío cuando no lo tiene (sin `--due`), y el pendiente va al horizonte del ciclo en curso. **Ámbito** es un enlace, o vacío si el pendiente todavía no aterrizó en ninguno. **Detalle** es el cuerpo, el mismo texto que el registro que lo abrió y que el que lo cierre; un `|` del cuerpo se escribe `\|`, como en cualquier tabla Markdown.
 
@@ -51,7 +51,7 @@ Cada pendiente está bajo exactamente un horizonte y baja de escalón a medida q
 
 `esta semana` → `próxima semana` / `fin de mes` → `con fecha` → cerrado
 
-**Los horizontes se nombran con el ciclo.** En el libro de estilo el autor puede escribir `$cycle_name[N]` dentro del nombre de un escalón, y TUKU lo reemplaza por el N-ésimo nombre de `cycle_name` ([`ciclo.md`](ciclo.md)), contando desde 0. Cualquier índice vale, no solo el primero: con `cycle_name: turno, descanso`, `$cycle_name[0]` es `turno` y `$cycle_name[1]` es `descanso`. `esta $cycle_name[0]` es `esta semana` por defecto y `este turno` con esa lista; `este $cycle_name[1]` es `este descanso`. El artículo lo escribe el autor, porque no se deduce del nombre. Cada escalón cubre:
+**Los horizontes se nombran con el ciclo.** En `reglas/pendientes.md` el autor puede escribir `$cycle_name[N]` dentro del nombre de un escalón, y TUKU lo reemplaza por el N-ésimo nombre de `cycle_name` ([`ciclo.md`](ciclo.md)), contando desde 0. Cualquier índice vale, no solo el primero: con `cycle_name: turno, descanso`, `$cycle_name[0]` es `turno` y `$cycle_name[1]` es `descanso`. `esta $cycle_name[0]` es `esta semana` por defecto y `este turno` con esa lista; `este $cycle_name[1]` es `este descanso`. El artículo lo escribe el autor, porque no se deduce del nombre. Cada escalón cubre:
 
 | Escalón | Cubre | Con `semana` | Con `turno, descanso`, estando en turno |
 | --- | --- | --- | --- |

@@ -1,96 +1,106 @@
-"""tuku context style: los vocabularios abiertos del autor, desde el libro de estilo.
+"""tuku context style: los vocabularios abiertos del autor, desde `reglas/`.
 
-`spec/bitacora.md` fija que los tres encabezados de `LIBRO-DE-ESTILO.md` son
-contrato: se leen esos, exactos. Las filas crecen con el uso, el encabezado no
-se renombra. Si falta un encabezado el error es ruidoso y no silencioso, que es
-lo que separa esto de marcar el documento con marcas invisibles.
+`spec/bitacora.md` fija dónde vive cada uno: un archivo de `reglas/` por entidad,
+con un capítulo `##` y una sola tabla. Archivo, capítulo y encabezados de la
+tabla son contrato: las filas crecen con el uso, el nombre no se cambia. Si falta
+el archivo o el capítulo el error es ruidoso y no silencioso, que es lo que
+separa esto de marcar el documento con marcas invisibles.
 
-**Qué lee y escribe:** lee `LIBRO-DE-ESTILO.md`. No escribe nada.
-**A mano:** abrir el libro de estilo y leer las tres tablas.
+**Qué lee y escribe:** lee `reglas/bitacora.md`, `reglas/pendientes.md` y
+`reglas/notas.md`. No escribe nada.
+**A mano:** abrir esos archivos y leer la tabla de cada capítulo.
 """
 
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
+from pathlib import Path
 
-#: Encabezado de contrato por vocabulario. Cambiar uno rompe la lectura, y por
-#: eso el libro de estilo lo dice en su propia prosa.
-ENCABEZADOS = {
-    "clasificaciones": "### Clasificaciones",
-    "horizontes": "### Horizontes",
-    "tipos-de-nota": "### Tipos de nota",
+from tuku import archivo, capitulos
+
+#: Dónde vive cada vocabulario: el archivo de `reglas/` y su capítulo. Es el
+#: contrato; el libro de estilo lo dice en su propia prosa.
+FUENTES = {
+    "clasificaciones": ("reglas/bitacora.md", "Clasificaciones"),
+    "horizontes": ("reglas/pendientes.md", "Horizontes"),
+    "tipos-de-nota": ("reglas/notas.md", "Tipos de nota"),
 }
 
+#: Los archivos de `reglas/` que declaran vocabulario, sin repetir.
+ARCHIVOS = tuple(dict.fromkeys(ruta for ruta, _ in FUENTES.values()))
+
 #: Primera celda de una fila de tabla, que es donde va el término entre backticks.
-_TERMINO = re.compile(r"^\|\s*`([^`]+)`\s*\|")
+_TERMINO = re.compile(r"^`([^`]+)`$")
 
 
 class VocabularioIncompleto(Exception):
-    """Al libro de estilo le falta un encabezado de contrato."""
+    """A un archivo de `reglas/` le falta el capítulo de contrato, o el archivo entero."""
 
 
-def leer(libro: str) -> dict[str, list[str]]:
-    """Los tres vocabularios abiertos, en el orden en que el libro los declara."""
-    lineas = libro.splitlines()
-    vocabularios: dict[str, list[str]] = {}
-
-    for nombre, encabezado in ENCABEZADOS.items():
-        try:
-            ini = next(i for i, linea in enumerate(lineas) if linea.strip() == encabezado)
-        except StopIteration:
-            raise VocabularioIncompleto(
-                f"falta el encabezado {encabezado!r} en LIBRO-DE-ESTILO.md. "
-                f"Es contrato: agrégalo con su tabla debajo."
-            ) from None
-
-        fin = next(
-            (i for i in range(ini + 1, len(lineas)) if lineas[i].startswith(("## ", "### "))),
-            len(lineas),
+def _tabla(texto: str | None, vocabulario: str) -> capitulos.Tabla:
+    ruta, nombre = FUENTES[vocabulario]
+    if texto is None:
+        raise VocabularioIncompleto(
+            f"falta {ruta}. Es contrato: agrégalo con el capítulo '## {nombre}' y su tabla."
         )
-        terminos = [
-            m.group(1)
-            for linea in lineas[ini + 1 : fin]
-            if (m := _TERMINO.match(linea)) and m.group(1) != "Clasificación"
-        ]
-        vocabularios[nombre] = terminos
-
-    return vocabularios
-
-
-def _celdas(linea: str) -> list[str]:
-    return [c.strip() for c in linea.strip().strip("|").split("|")]
+    tabla = capitulos.tabla_unica(texto, nombre)
+    if tabla is None:
+        raise VocabularioIncompleto(
+            f"falta el capítulo '## {nombre}' con su tabla en {ruta}. "
+            "Es contrato: agrégalo con su tabla debajo."
+        )
+    return tabla
 
 
-def enlazables(libro: str) -> list[str]:
-    """Los tipos de nota con `sí` en la columna "Enlazable" de `### Tipos de nota`.
+def terminos(texto: str | None, vocabulario: str) -> list[str]:
+    """Los términos de un vocabulario, en el orden en que el archivo los declara."""
+    return [
+        m.group(1)
+        for fila in _tabla(texto, vocabulario)[1:]
+        if fila and (m := _TERMINO.match(fila[0]))
+    ]
+
+
+def leer(textos: Mapping[str, str | None]) -> dict[str, list[str]]:
+    """Los tres vocabularios abiertos. `textos` mapea cada ruta de `reglas/` a su texto."""
+    return {
+        vocabulario: terminos(textos.get(ruta), vocabulario)
+        for vocabulario, (ruta, _) in FUENTES.items()
+    }
+
+
+def leer_del_vault(vault: Path) -> dict[str, list[str]]:
+    """Los tres vocabularios abiertos del vault."""
+    return leer({ruta: leer_opcional(vault, ruta) for ruta in ARCHIVOS})
+
+
+def leer_opcional(vault: Path, ruta: str) -> str | None:
+    """El texto de `ruta` dentro del vault, o `None` si el archivo no está."""
+    archivo_ruta = vault / ruta
+    return archivo.leer(archivo_ruta) if archivo_ruta.is_file() else None
+
+
+def enlazables(notas_md: str) -> list[str]:
+    """Los tipos de nota con `sí` en la columna "Enlazable" del capítulo `## Tipos de nota`.
 
     La columna se busca por su encabezado; sin ella, ningún tipo se enlaza
     (`spec/notas.md`, "Enlazar notas").
     """
-    lineas = libro.splitlines()
-    try:
-        ini = next(
-            i for i, linea in enumerate(lineas) if linea.strip() == ENCABEZADOS["tipos-de-nota"]
-        )
-    except StopIteration:
+    tabla = capitulos.tabla_unica(notas_md, FUENTES["tipos-de-nota"][1])
+    if not tabla:
         return []
-    columna: int | None = None
-    tipos = []
-    for linea in lineas[ini + 1 :]:
-        if linea.startswith(("## ", "### ")):
-            break
-        if not linea.lstrip().startswith("|"):
-            continue
-        celdas = _celdas(linea)
-        if columna is None:
-            normales = [c.lower() for c in celdas]
-            if "enlazable" not in normales:
-                return []
-            columna = normales.index("enlazable")
-        elif (m := _TERMINO.match(linea.strip())) and len(celdas) > columna:
-            if celdas[columna].lower() in ("sí", "si"):
-                tipos.append(m.group(1))
-    return tipos
+    cabecera = [c.lower() for c in tabla[0]]
+    if "enlazable" not in cabecera:
+        return []
+    columna = cabecera.index("enlazable")
+    return [
+        m.group(1)
+        for fila in tabla[1:]
+        if len(fila) > columna
+        and (m := _TERMINO.match(fila[0]))
+        and fila[columna].lower() in ("sí", "si")
+    ]
 
 
 def formatear(vocabularios: dict[str, list[str]]) -> str:

@@ -8,10 +8,12 @@ todos, en este orden:
 | `entry` | Los registros desde `--since`, bajo su día | `AHORA.md` y las bitácoras que cruza |
 | `scope` | Cada ámbito con su ruta y sus keywords | `ambitos/` |
 | `todo` | Los pendientes abiertos, atrasados marcados (`--late`: solo esos) | `PENDIENTES.md` |
-| `style` | Clasificaciones, horizontes y tipos de nota | `LIBRO-DE-ESTILO.md` |
+| `style` | El libro con las `reglas/` expandidas (sin tema, el autor y vocabularios) | libro |
 | `note` | Por cada tipo enlazable, sus últimas notas con nombres y aliases | `notas/` |
+| `cadence` | Las cadencias de todo el árbol y su origen (solo con el tema) | `ambitos/` |
 
 `--since` es un número de días o una fecha (`AAAA-MM-DD`), y vale 2 días.
+`--chapter` deja un solo capítulo del libro.
 
 **A mano:** leer los últimos días de `AHORA.md`, las `keywords` de cada página
 de `ambitos/`, la tabla de `PENDIENTES.md` y las tablas del libro de estilo.
@@ -23,10 +25,13 @@ from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from tuku import archivo
+from tuku import archivo, capitulos
 from tuku.resultado import Resultado
 
-TEMAS = ("entry", "scope", "todo", "style", "note")
+TEMAS = ("entry", "scope", "todo", "style", "note", "cadence")
+
+#: Los temas que entran cuando no se pide uno. `cadence` espera a que se lo pidan.
+EN_TODOS = ("entry", "scope", "todo", "style", "note")
 
 #: Días hacia atrás que lee `entry` y `note` sin `--since`.
 DESDE_POR_DEFECTO = 2
@@ -120,11 +125,66 @@ def _todo(vault: Path, hoy: date, late: bool = False) -> str:
 
 
 def _style(vault: Path) -> str:
-    """Los vocabularios que el autor declaró en su libro de estilo."""
+    """Sin tema: el autor, el lenguaje y los vocabularios que declaró en `reglas/`."""
     from tuku import vocab
-    from tuku.config import leer_config
 
-    return vocab.formatear(leer_config(vault).vocabularios)
+    vocabularios = vocab.leer_del_vault(vault)
+    bloques = []
+    for ruta, nombre in (("reglas/autor.md", "Autor"), ("reglas/lenguaje.md", "Lenguaje")):
+        texto = vocab.leer_opcional(vault, ruta)
+        cap = capitulos.capitulo(texto, nombre) if texto is not None else None
+        if cap is not None:
+            bloques.append(f"## {nombre}\n\n" + "\n".join(cap.cuerpo).strip())
+    bloques.append("## Vocabulario\n\n" + vocab.formatear(vocabularios))
+    return "\n\n".join(bloques)
+
+
+def _libro(vault: Path, capitulo: str | None) -> Resultado:
+    """El libro de estilo con las `reglas/` transcluidas, o uno solo de sus capítulos.
+
+    Antes de armarlo se leen los vocabularios, así que un archivo del autor al que le
+    falta su capítulo de contrato rechaza ruidoso en vez de entregar un libro a medias.
+    """
+    from tuku import vocab
+    from tuku.config import archivo_vault
+
+    vocab.leer_del_vault(vault)
+    libro = capitulos.sin_frontmatter(archivo.leer(archivo_vault(vault, "LIBRO-DE-ESTILO.md")))
+    if capitulo is not None:
+        encontrado = capitulos.capitulo(libro, capitulo)
+        if encontrado is None:
+            hay = ", ".join(f"«{c.nombre}»" for c in capitulos.separar(libro))
+            return Resultado.rechazo(
+                f"el libro de estilo no tiene el capítulo «{capitulo}». Los que tiene: {hay}."
+            )
+        libro = "\n".join([f"## {encontrado.nombre}", *encontrado.cuerpo])
+    return Resultado.hecho(
+        capitulos.expandir(libro, lambda ruta: vocab.leer_opcional(vault, ruta)).strip("\n")
+    )
+
+
+def _cadence(vault: Path) -> str:
+    """Las cadencias de todo el árbol, cada una con el `CADENCIAS.md` de donde viene.
+
+    Se acumulan en cascada (`spec/cadencias.md`): las de una carpeta valen para todo lo
+    que cuelga de ella, así que cada cadencia dice su origen y su alcance, que es la
+    carpeta de su archivo. El orden es el del árbol: de lo más general a lo más hondo.
+    """
+    raiz = vault / "ambitos"
+    archivos = sorted(
+        raiz.rglob("CADENCIAS.md") if raiz.is_dir() else [],
+        key=lambda p: (len(p.relative_to(vault).parts), p.relative_to(vault).as_posix()),
+    )
+    bloques = []
+    for ruta in archivos:
+        origen = ruta.relative_to(vault)
+        for cap in capitulos.separar(archivo.leer(ruta)):
+            cuerpo = "\n".join(cap.cuerpo).strip("\n")
+            bloques.append(
+                f"## {cap.nombre}\n\norigen: {origen.as_posix()}; "
+                f"alcance: {origen.parent.as_posix()}\n\n{cuerpo}"
+            )
+    return "\n\n".join(bloques) or "sin cadencias declaradas."
 
 
 def _note(vault: Path) -> str:
@@ -143,7 +203,7 @@ def _note(vault: Path) -> str:
 
     tipos = leer_config(vault).tipos_enlazables
     if not tipos:
-        return "sin tipos enlazables en `### Tipos de nota`."
+        return "sin tipos enlazables en `## Tipos de nota` de `reglas/notas.md`."
     limite = limite_de_notas(vault)
     dir_notas = vault / "notas"
     rutas = sorted(dir_notas.glob("*.md")) if dir_notas.is_dir() else []
@@ -172,8 +232,12 @@ def del_vault(
     *,
     now: datetime,
     late: bool = False,
+    chapter: str | None = None,
 ) -> Resultado:
-    """El contexto del `tema`, o de todos, como texto para leer de una vez."""
+    """El contexto del `tema`, o de todos, como texto para leer de una vez.
+
+    `chapter`, solo con `style`, deja un capítulo del libro de estilo.
+    """
     hoy = now.date()
     try:
         inicio = desde(since, hoy)
@@ -186,10 +250,13 @@ def del_vault(
             "Pendientes atrasados" if late else "Pendientes abiertos",
             lambda: _todo(vault, hoy, late),
         ),
-        "style": ("Vocabulario del autor", lambda: _style(vault)),
+        "style": ("El autor y su vocabulario", lambda: _style(vault)),
         "note": ("Notas enlazables", lambda: _note(vault)),
+        "cadence": ("Cadencias", lambda: _cadence(vault)),
     }
-    temas = [tema] if tema else list(TEMAS)
+    if tema == "style":
+        return _libro(vault, chapter)
+    temas = [tema] if tema else list(EN_TODOS)
     if len(temas) == 1:
         return Resultado.hecho(secciones[temas[0]][1]())
     return Resultado.hecho(

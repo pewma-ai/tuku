@@ -21,7 +21,7 @@ Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2:
 | Archivo | Qué trae |
 | --- | --- |
 | `AGENTS.md` | Reglas de todo el repositorio |
-| `LIBRO-DE-ESTILO.md` | Reglas del autor sobre cómo se escribe |
+| `LIBRO-DE-ESTILO.md` | Cómo opera TUKU con cada entidad; lo del autor está en `reglas/` |
 | `AHORA.md` | Los días del primer ciclo sembrados, sin registros |
 | `PENDIENTES.md` | Los callouts de horizonte, vacíos |
 | `ambitos/AGENTS.md`, `ambitos/CADENCIAS.md` | Reglas y cadencias de toda la rama |
@@ -41,7 +41,7 @@ Copiar el contenido de la variante a un directorio vacío y hacer tres cosas:
 1. En `reglas/config.tuku.md`, poner la zona horaria.
 2. En `AHORA.md`, escribir `desde` y `hasta` con las fechas del primer ciclo. Por defecto es `semana`, que es el ritmo menos sorprendente para quien nunca ha usado esto.
 3. En `AHORA.md`, reemplazar los encabezados de día por los días reales de ese rango.
-4. Opcional: en `LIBRO-DE-ESTILO.md`, sección "El autor", poner el nombre del autor. Dejarlo en blanco no impide escribir; el autor lo completa cuando quiera.
+4. Opcional: en `reglas/autor.md` poner el nombre del autor. Dejarlo en blanco no impide escribir; el autor lo completa cuando quiera.
 
 Después de los tres primeros ya se puede escribir. Todo lo demás emerge del uso.
 

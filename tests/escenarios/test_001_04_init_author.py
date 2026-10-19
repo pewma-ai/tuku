@@ -1,6 +1,6 @@
 """Test del escenario 001-04-init-author.
 
-`--author` deja el nombre en la sección "El autor" de `LIBRO-DE-ESTILO.md`, y un
+`--author` deja el nombre en `reglas/autor.md`, y un
 nombre en blanco deja la línea intacta y el vault operable.
 
 Ejecutable directo: `python3 tests/escenarios/test_001_04_init_author.py`
@@ -27,18 +27,18 @@ MARCADOR = "**Nombre del autor:**"
 
 
 def _linea_del_autor(vault: Path) -> str:
-    libro = (vault / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
-    return next(ln for ln in libro.splitlines() if ln.lstrip().startswith(MARCADOR))
+    autor = (vault / "reglas" / "autor.md").read_text(encoding="utf-8")
+    return next(ln for ln in autor.splitlines() if ln.lstrip().startswith(MARCADOR))
 
 
-def test_001_04_init_author_escribe_el_nombre_en_el_libro_de_estilo() -> None:
-    corrida = gherkin.correr(SLUG, "el nombre del autor queda en el libro de estilo")
+def test_001_04_init_author_escribe_el_nombre_en_reglas_autor() -> None:
+    corrida = gherkin.correr(SLUG, "el nombre del autor queda en reglas/autor.md")
     assert corrida.codigo == EXITO, corrida.stderr
     destino = corrida.ruta("mi-vault")
 
-    libro = (destino / "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
-    assert f"{MARCADOR} {AUTOR}" in libro, f"el nombre no llegó al libro: {libro[:400]!r}"
-    assert "por declarar" not in libro, "quedó el placeholder del nombre sin sustituir"
+    autor = (destino / "reglas" / "autor.md").read_text(encoding="utf-8")
+    assert f"{MARCADOR} {AUTOR}" in autor, f"el nombre no llegó a autor.md: {autor[:400]!r}"
+    assert "Nombre del autor:** por declarar" not in autor, "quedó el placeholder sin sustituir"
 
 
 def test_001_04_un_nombre_en_blanco_deja_el_vault_operable_sin_nombre() -> None:
@@ -52,6 +52,6 @@ def test_001_04_un_nombre_en_blanco_deja_el_vault_operable_sin_nombre() -> None:
 
 
 if __name__ == "__main__":
-    test_001_04_init_author_escribe_el_nombre_en_el_libro_de_estilo()
+    test_001_04_init_author_escribe_el_nombre_en_reglas_autor()
     test_001_04_un_nombre_en_blanco_deja_el_vault_operable_sin_nombre()
     print(f"ok: --author escribe el nombre; en blanco deja el vault operable ({SLUG})")

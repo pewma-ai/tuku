@@ -1,44 +1,40 @@
-"""Tests unitarios de extracción y formateo de vocabularios del libro de estilo."""
+"""Tests unitarios de extracción y formateo de vocabularios de `reglas/`."""
 
 from __future__ import annotations
 
 import pytest
 
-from tuku.vocab import VocabularioIncompleto, formatear, leer
+from tuku.vocab import VocabularioIncompleto, formatear, leer, terminos
+
+TEXTOS: dict[str, str | None] = {
+    "reglas/bitacora.md": (
+        "# Registro\n\n## Clasificaciones\n\n"
+        "| Clasificación | Descripción |\n|---|---|\n"
+        "| `reunión` | Encuentro |\n| `foco` | Bloque concentrado |\n"
+    ),
+    "reglas/pendientes.md": (
+        "## Horizontes\n\n| Horizonte | Alcance |\n|---|---|\n| `hoy` | Día en curso |\n"
+    ),
+    "reglas/notas.md": (
+        "## Tipos de nota\n\n| Tipo | Propósito |\n|---|---|\n| `persona` | Ficha |\n"
+    ),
+}
 
 
-def test_leer_vocabularios_extrae_terminos_correctamente() -> None:
-    libro = (
-        "# Libro de estilo\n\n"
-        "### Clasificaciones\n\n"
-        "| Clasificación | Descripción |\n"
-        "|---|---|\n"
-        "| `reunión` | Encuentro |\n"
-        "| `foco` | Bloque concentrado |\n\n"
-        "### Horizontes\n\n"
-        "| Horizonte | Alcance |\n"
-        "|---|---|\n"
-        "| `hoy` | Día en curso |\n\n"
-        "### Tipos de nota\n\n"
-        "| Tipo | Propósito |\n"
-        "|---|---|\n"
-        "| `persona` | Ficha |\n"
-    )
-    res = leer(libro)
-    assert res == {
+def test_leer_extrae_los_terminos_falla_ruidoso_si_falta_uno_y_se_formatea() -> None:
+    assert leer(TEXTOS) == {
         "clasificaciones": ["reunión", "foco"],
         "horizontes": ["hoy"],
         "tipos-de-nota": ["persona"],
     }
 
+    sin_capitulo = {**TEXTOS, "reglas/pendientes.md": "# Sin capítulos\n"}
+    with pytest.raises(VocabularioIncompleto, match=r"## Horizontes.*reglas/pendientes.md"):
+        leer(sin_capitulo)
+    with pytest.raises(VocabularioIncompleto, match=r"falta reglas/notas\.md"):
+        leer({**TEXTOS, "reglas/notas.md": None})
+    assert terminos(TEXTOS["reglas/bitacora.md"], "clasificaciones") == ["reunión", "foco"]
 
-def test_leer_vocabulario_incompleto_lanza_excepcion() -> None:
-    libro = "# Libro de estilo incompleto\n\n### Clasificaciones\n| `reunión` | Descripción |\n"
-    with pytest.raises(VocabularioIncompleto, match="Horizontes"):
-        leer(libro)
-
-
-def test_formatear_lista_los_terminos_o_dice_que_no_hay() -> None:
     salida = formatear({"clasificaciones": ["reunión", "foco"], "horizontes": []})
     assert "clasificaciones: reunión, foco" in salida
     assert "horizontes: (ninguno declarado)" in salida

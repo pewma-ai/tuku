@@ -17,7 +17,7 @@ Una persona corre `uv tool install git+https://github.com/pewma-ai/tuku.git@deve
 7. `reglas/config.tuku.md` declara zona horaria y tipo de ciclo.
 8. Sembrar en un directorio con contenido se rechaza, salvo `tuku init --force`.
 9. El estado cero se verifica byte a byte con fecha fija, contra `template/vanilla/` en vivo.
-10. El nombre del autor vive en `LIBRO-DE-ESTILO.md`, sección "El autor". `tuku init --author "..."` lo siembra; es opcional.
+10. El nombre del autor vive en `reglas/autor.md`, capítulo "Autor". `tuku init --author "..."` lo siembra; es opcional.
 
 ## Escenario: preparar el ambiente del epic
 
@@ -47,4 +47,4 @@ Comandos, agentes, LLM. Tampoco el tipo de ciclo real de quien lo usa: arranca s
 - [`001-03-destino-no-vacio.md`](001-03-destino-no-vacio.md) — Rechazo ante destino ocupado salvo `--force`.
 - [`001-04-init-author.md`](001-04-init-author.md) — `tuku init --author` siembra el nombre en "El autor".
 - [`001-06-cli-ayuda.md`](001-06-cli-ayuda.md) — Opciones de `tuku init` y código de entorno.
-- [`001-07-lint-libro-de-estilo.md`](001-07-lint-libro-de-estilo.md) — Códigos de salida ante un `LIBRO-DE-ESTILO.md` roto.
+- [`001-07-lint-libro-de-estilo.md`](001-07-lint-libro-de-estilo.md) — Códigos de salida ante un libro de estilo o unos archivos de `reglas/` rotos.

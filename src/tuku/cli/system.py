@@ -57,8 +57,19 @@ def _crear_cmd_context(parser: argparse.ArgumentParser) -> Handler:
     def _cmd_context(args: argparse.Namespace) -> int:
         if args.late and args.tema != "todo":
             parser.error("--late solo vale con el tema `todo`: `tuku context todo --late`")
+        if args.chapter and args.tema != "style":
+            parser.error(
+                "--chapter solo vale con el tema `style`: `tuku context style --chapter X`"
+            )
         return traducir(
-            context.del_vault(args.vault, args.tema, args.since, now=args.now, late=args.late),
+            context.del_vault(
+                args.vault,
+                args.tema,
+                args.since,
+                now=args.now,
+                late=args.late,
+                chapter=args.chapter,
+            ),
             "tuku context",
         )
 
@@ -134,7 +145,7 @@ def registrar(
             "Copia el template al directorio destino. Escribe `AHORA.md` desde "
             "`reglas/plantilla/AHORA.md` con las fechas del primer ciclo, la zona horaria "
             "de esta máquina en `reglas/config.tuku.md` y, si se da, el autor en "
-            "`LIBRO-DE-ESTILO.md`. Rechaza un destino con contenido y el home del usuario."
+            "`reglas/autor.md`. Rechaza un destino con contenido y el home del usuario."
         ),
     )
     init_p.add_argument(
@@ -154,7 +165,7 @@ def registrar(
         "--author",
         dest="author",
         default=None,
-        help="nombre del autor para LIBRO-DE-ESTILO.md; opcional",
+        help="nombre del autor para reglas/autor.md; opcional",
     )
     Opciones(init_p).at("un día de la semana del primer ciclo, AAAA-MM-DD; por defecto, hoy")
     init_p.add_argument(
@@ -260,10 +271,13 @@ def registrar(
             "Solo lee. `entry`: los registros desde `--since`, de `AHORA.md` y de las "
             "bitácoras de `bitacoras/` que cruza. `scope`: cada ámbito de `ambitos/` con "
             "su ruta y sus keywords. `todo`: los pendientes de `PENDIENTES.md`, con los "
-            "atrasados marcados (con `--late`, solo esos). `style`: clasificaciones, "
-            "horizontes y tipos de nota de `LIBRO-DE-ESTILO.md`. `note`: por cada "
+            "atrasados marcados (con `--late`, solo esos). `style`: el libro de estilo con "
+            "las `reglas/` del autor transcluidas, o un capítulo con `--chapter`; sin tema "
+            "trae solo el autor, el lenguaje y los vocabularios. `note`: por cada "
             "tipo de nota enlazable, sus últimas notas de `notas/` con título y aliases "
-            "(cuántas, `context_note_limit` de la config). Sin TEMA, todos."
+            "(cuántas, `context_note_limit` de la config). `cadence`: las cadencias de "
+            "todo `ambitos/`, cada una con su `CADENCIAS.md`. Sin TEMA, todos menos "
+            "`cadence`."
         ),
     )
     context_p.add_argument(
@@ -280,6 +294,12 @@ def registrar(
             f"desde cuándo leer los registros: un número de días o AAAA-MM-DD; "
             f"por defecto, {context.DESDE_POR_DEFECTO} días"
         ),
+    )
+    context_p.add_argument(
+        "--chapter",
+        default=None,
+        metavar="NOMBRE",
+        help="solo con el tema `style`: un capítulo del libro, por su nombre (`Pendiente`)",
     )
     context_p.add_argument(
         "--late",
@@ -312,7 +332,10 @@ def registrar(
             "`PENDIENTES.md`. Tema `scope`: la actividad de cada página de ámbito, "
             "tomada de los registros de `AHORA.md`, y el callout `En X:` de cada "
             "ámbito con las carpetas de sus ámbitos hijos, rehecho entero. Tema `comandos`: "
-            "`reglas/comandos.tuku.md`, desde esta ayuda. Sin tema, los tres. Solo "
+            "`reglas/comandos.tuku.md`, desde esta ayuda. Tema `libro`: `LIBRO-DE-ESTILO.md` "
+            "y la prosa `reglas/*.tuku.md`, copiados del template del `tuku` instalado; "
+            "nunca toca un archivo del autor (`reglas/*.md` sin `.tuku`) ni "
+            "`reglas/config.tuku.md`. Sin tema, los cuatro. Solo "
             "escribe lo que cambió; sobre un vault al día no toca nada."
         ),
     )
@@ -321,7 +344,7 @@ def registrar(
         nargs="?",
         choices=TEMAS_REGENERATE,
         default=None,
-        help="regenerar solo este tema; sin tema, los tres",
+        help="regenerar solo este tema; sin tema, los cuatro",
     )
     Opciones(regenerate_p).vault("vault a regenerar")
 

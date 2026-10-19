@@ -375,7 +375,9 @@ def hallazgos_del_vault(vault: Path) -> list[str]:
     if ahora is not None:
         vistas["AHORA.md"] = (
             ahora,
-            regenerate.vistas_en_ahora(ahora, pendientes, scope_tree.rutas(vault)),
+            regenerate.vistas_en_ahora(
+                ahora, pendientes, scope_tree.rutas(vault), regenerate.primer_escalon(vault)
+            ),
         )
     ambitos_path = vault / regenerate.ARCHIVO_AMBITOS
     vistas[regenerate.ARCHIVO_AMBITOS.as_posix()] = (

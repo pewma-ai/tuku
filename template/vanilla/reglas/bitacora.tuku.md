@@ -42,7 +42,7 @@ Esta es la regla que más se equivoca sola. Sin ella el comando rechaza el regis
 
 Si el autor dijo para cuándo ("mañana", "el lunes", "antes del 20"), va en `--due` con la fecha ya resuelta, y con la hora si la dijo ("mañana a las nueve"). El registro queda hoy y ahora, que es cuándo se prometió, y el pendiente aparece en su día de `AHORA.md`.
 
-Sin `--due`, el pendiente nace en el primer escalón de `### Horizontes`. Para mandarlo a otro escalón, `--horizon`, con el nombre tal como está escrito en `LIBRO-DE-ESTILO.md`: los escalones son del autor y puede haberlos renombrado. `--due` y `--horizon` no van juntos.
+Sin `--due`, el pendiente nace en el primer escalón de `## Horizontes` de `reglas/pendientes.md`. Para mandarlo a otro escalón, `--horizon`, con el nombre tal como está escrito en `reglas/pendientes.md`: los escalones son del autor y puede haberlos renombrado. `--due` y `--horizon` no van juntos.
 
 Un `warning` en la salida de error es una alerta, no un fallo: el comando procedió. Un `todo close` que avisa que no encontró su pendiente escribió el cierre y no borró nada; un `--due` que avisa que ya pasó abrió un pendiente atrasado. Léelo y, si no era lo que el autor quería, corrige el texto o díselo.
 
@@ -50,7 +50,7 @@ Un `warning` en la salida de error es una alerta, no un fallo: el comando proced
 
 Una frase del autor puede dar varios registros, y cada uno es una llamada. Lo que no ocurre nunca es lo contrario: dos llamadas para un mismo hecho. Cada comando deja la línea y actualiza las páginas de ámbito; `tuku todo open` y `tuku todo close` además abren o cierran la fila de `PENDIENTES.md`, todo en la misma llamada.
 
-Registra el hecho, no la conversación: "recuérdame" y "anota" van dirigidos a ti y no son parte de lo ocurrido. El resto de cómo escribe el autor está en `LIBRO-DE-ESTILO.md`.
+Registra el hecho, no la conversación: "recuérdame" y "anota" van dirigidos a ti y no son parte de lo ocurrido. El resto de cómo escribe el autor está en `reglas/bitacora.md`, `## Escritura`.
 
 ## A mano
 

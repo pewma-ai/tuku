@@ -51,7 +51,8 @@ def test_el_destino_nunca_es_el_home_ni_un_ancestro_ni_la_raiz(
 
 
 def test_sin_marcador_se_rechaza_nombrando_el_defecto(tmp_path: Path) -> None:
-    (tmp_path / "LIBRO-DE-ESTILO.md").write_text("# Libro de estilo\n", encoding="utf-8")
+    (tmp_path / "reglas").mkdir()
+    (tmp_path / "reglas" / "autor.md").write_text("# El autor\n", encoding="utf-8")
 
     with pytest.raises(MarcadorAutorFaltante, match="Nombre del autor"):
         _sembrar_autor(tmp_path, "Arturo")

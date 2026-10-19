@@ -29,7 +29,7 @@ from tuku.cli.helpers import (
     cuerpo_de_la_nota as _cuerpo_de_la_nota,
 )
 from tuku.cli.opciones import completar, sin_anio
-from tuku.config import VaultInvalido, exigir_vault
+from tuku.config import VaultInvalido, exigir_vault, hora_local, leer_preferencias, zona_valida
 from tuku.init import MarcadorAutorFaltante
 from tuku.todo import SinTabla
 from tuku.vocab import VocabularioIncompleto
@@ -91,15 +91,32 @@ def _construir_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _reloj(args: argparse.Namespace) -> datetime:
+    """The clock in the zone `TZ` of the vault's `reglas/config.tuku.md` names.
+
+    Without a vault, a config or a valid zone it is the system's clock; an invalid
+    zone is also reported, because it moves the day a todo is due.
+    """
+    vault = getattr(args, "vault", None)
+    zona = leer_preferencias(vault).zona_horaria if vault is not None else ""
+    if zona and not zona_valida(zona):
+        print(
+            f"tuku: la zona horaria «{zona}» de reglas/config.tuku.md no existe: "
+            "se usa la del sistema. `tuku doctor config` la revisa.",
+            file=sys.stderr,
+        )
+    return hora_local(zona)
+
+
 def main(argv: list[str] | None = None, *, now: datetime | None = None) -> int:
     """Corre un comando. El reloj se lee acá, una vez, y baja como `args.now`.
 
     `now` lo fijan quienes necesitan un día determinado (el arnés de escenarios, con
-    `TUKU_NOW`); sin él es la hora local.
+    `TUKU_NOW`); sin él es la hora de la zona `TZ` del vault, o la del sistema.
     """
     argv = sys.argv[1:] if argv is None else argv
     args = _construir_parser().parse_args(argv)
-    args.now = now or datetime.now()
+    args.now = now or _reloj(args)
     completar(args, args.now)
     if error := sin_anio(args, argv):
         print(f"tuku: {error}", file=sys.stderr)

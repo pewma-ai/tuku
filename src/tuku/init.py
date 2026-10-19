@@ -70,7 +70,7 @@ class TukuHomeInvalido(Exception):
 
 
 class MarcadorAutorFaltante(Exception):
-    """No se encontró el marcador del autor en LIBRO-DE-ESTILO.md."""
+    """No se encontró el marcador del autor en `reglas/autor.md`."""
 
 
 def _tiene_template(p: Path) -> bool:
@@ -270,13 +270,13 @@ def _sembrar_ahora(contenido: str, desde: date) -> str:
 
 
 def _sembrar_autor(destino: Path, autor: str) -> None:
-    """Escribe el nombre del autor en `LIBRO-DE-ESTILO.md` del vault sembrado.
+    """Escribe el nombre del autor en `reglas/autor.md` del vault sembrado.
 
     Calza por prefijo de línea, no por la oración entera: lo que el template pone
     tras la etiqueta ("por declarar...") es prosa que puede cambiar sin que esto
     deje de funcionar.
     """
-    libro = destino / "LIBRO-DE-ESTILO.md"
+    libro = destino / "reglas" / "autor.md"
     lineas = libro.read_text(encoding="utf-8").splitlines(keepends=True)
     for i, linea in enumerate(lineas):
         if linea.lstrip().startswith(_MARCADOR_AUTOR):
@@ -286,7 +286,7 @@ def _sembrar_autor(destino: Path, autor: str) -> None:
             return
     raise MarcadorAutorFaltante(
         f"no se encontró la línea '{_MARCADOR_AUTOR}' en {libro}: "
-        "agrégalo en la sección '## El autor'."
+        "agrégalo en el capítulo '## Autor'."
     )
 
 
@@ -327,7 +327,7 @@ def init(
     `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. El ciclo
     sembrado es la semana de lunes a domingo que contiene `desde`, que quien
     invoca resuelve con su reloj. `author`, si
-    se pasa y no viene vacío, se escribe en `LIBRO-DE-ESTILO.md`. `comandos`, si
+    se pasa y no viene vacío, se escribe en `reglas/autor.md`. `comandos`, si
     se pasa, es `reglas/comandos.tuku.md`: lo compone la capa del CLI, que es la
     que conoce los comandos.
     """

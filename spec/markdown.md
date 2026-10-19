@@ -40,7 +40,7 @@ Con el tercero, Obsidian reescribe archivos sin pasar por `tuku`. Es la familia 
 
 ## Datos de máquina en estructura visible
 
-Lo que una automatización lee de un archivo está a la vista: un campo `**Campo:** valor`, una tabla o un encabezado. El `**Cuándo:**` de una cadencia ([cadencias.md](cadencias.md)), la tabla de `PENDIENTES.md` ([pendientes.md](pendientes.md)) y el `### Clasificaciones` del libro de estilo ([bitacora.md](bitacora.md)) son de esa clase. El nombre del campo o del encabezado es contrato: renombrarlo rompe al comando, y que falte es un error ruidoso.
+Lo que una automatización lee de un archivo está a la vista: un campo `**Campo:** valor`, una tabla o un encabezado. El `**Cuándo:**` de una cadencia ([cadencias.md](cadencias.md)), la tabla de `PENDIENTES.md` ([pendientes.md](pendientes.md)) y el capítulo `## Clasificaciones` de `reglas/bitacora.md` ([bitacora.md](bitacora.md)) son de esa clase. El nombre del campo o del encabezado es contrato: renombrarlo rompe al comando, y que falte es un error ruidoso.
 
 **Toda marca es visible.** Un comentario HTML o una marca invisible se rompe al editar el archivo sin que nadie lo note. Donde hace falta una frontera, la pone la estructura: la región propagada de un día termina donde empieza el primer `- HH:MM - ` ([pendientes.md](pendientes.md)).
 

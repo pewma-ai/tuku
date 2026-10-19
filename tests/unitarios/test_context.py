@@ -10,6 +10,7 @@ import pytest
 from conftest import AHORA
 from tuku import context, entry, init, scope, todo
 from tuku.cli import EXITO, main
+from tuku.vocab import VocabularioIncompleto
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 HOY = AHORA.date()
@@ -134,3 +135,55 @@ def test_sin_tema_trae_todos_y_since_malo_rechaza(vault: Path) -> None:
         assert titulo in todo_junto
     assert not context.del_vault(vault, since="ayer", now=AHORA).ok
     assert main(["context", "scope", "--vault", str(vault)]) == EXITO
+
+
+def test_style_entrega_el_libro_con_las_reglas_transcluidas_y_un_capitulo_a_la_vez(
+    vault: Path,
+) -> None:
+    libro = context.del_vault(vault, "style", now=AHORA).mensaje
+    assert "![" not in libro, "cada transclusión se reemplaza por el archivo"
+    assert (
+        libro.index("## Para qué sirve")
+        < libro.index("## Registro")
+        < libro.index("## Pendiente")
+    )
+    assert "| `progreso` |" in libro and "| `esta semana` |" in libro
+    assert "### Clasificaciones" in libro, "los capítulos de reglas/ bajan bajo el del libro"
+    assert "Este archivo es del autor" not in libro, "lo anterior al primer capítulo no entra"
+
+    pendiente = context.del_vault(vault, "style", now=AHORA, chapter="Pendiente").mensaje
+    assert pendiente.startswith("## Pendiente") and "esta semana" in pendiente
+    assert "## Registro" not in pendiente and "progreso" not in pendiente
+
+    r = context.del_vault(vault, "style", now=AHORA, chapter="Nada")
+    assert not r.ok and "«Registro»" in r.mensaje, "el rechazo lista los capítulos que hay"
+
+    (vault / "reglas" / "notas.md").unlink()
+    with pytest.raises(VocabularioIncompleto, match=r"falta reglas/notas\.md"):
+        context.del_vault(vault, "style", now=AHORA)  # `main` lo traduce a un rechazo
+
+
+def test_cadence_junta_las_del_arbol_con_su_origen_y_no_entra_en_todos(vault: Path) -> None:
+    (vault / "ambitos" / "colegio-los-robles" / "CADENCIAS.md").write_text(
+        "---\ntype: Cadence\n---\n\n# Cadencias\n\n## Reunión de apoderados\n\n"
+        "**Cuándo:** primer lunes, mensual\n**Emite:** pendiente con fecha\n",
+        encoding="utf-8",
+    )
+    salida = context.del_vault(vault, "cadence", now=AHORA).mensaje
+    assert "origen: ambitos/CADENCIAS.md; alcance: ambitos" in salida
+    assert (
+        "origen: ambitos/colegio-los-robles/CADENCIAS.md; alcance: ambitos/colegio-los-robles"
+        in salida
+    )
+    assert salida.index("## Apertura de la semana") < salida.index("## Reunión de apoderados")
+    assert "Cadencias" not in context.del_vault(vault, now=AHORA).mensaje
+
+
+def test_chapter_sin_el_tema_style_es_un_error_de_uso(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    with pytest.raises(SystemExit) as e:
+        main(["context", "todo", "--chapter", "Pendiente", "--vault", str(vault)])
+    assert e.value.code == 2
+    assert "--chapter solo vale con el tema `style`" in capsys.readouterr().err
+    assert main(["context", "style", "--chapter", "Pendiente", "--vault", str(vault)]) == EXITO

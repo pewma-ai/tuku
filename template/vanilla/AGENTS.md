@@ -17,7 +17,7 @@ Mira cómo empieza el primer prompt de la sesión. Hay dos casos y no hay un ter
 
 ## Cómo trabajas con el autor
 
-- **Al empezar, `tuku context`.** Trae los últimos días, los ámbitos con sus keywords, los pendientes abiertos, el vocabulario del autor y las últimas notas de cada tipo enlazable: con eso decides, sin abrir esos archivos.
+- **Al empezar, `tuku context`.** Trae los últimos días, los ámbitos con sus keywords, los pendientes abiertos, quién es el autor con su vocabulario y las últimas notas de cada tipo enlazable: con eso decides, sin abrir esos archivos. Cuando necesites el detalle de una entidad, `tuku context style --chapter Pendiente` (o `Registro`, `Nota`, `Ciclo`, `Ámbito`, `Cadencia`) trae el capítulo del libro con lo que el autor decidió.
 - **Un pedido, un comando.** Ejecuta el comando de la fila con los campos que dio el autor. El comando valida, rechaza con la corrección y escribe todo lo derivado.
 - **Si lo que dijo el autor puede querer decir dos cosas, pregunta.** No escribas hasta que conteste. «Quedamos al día con Fabina», con dos pendientes de Fabina abiertos: ¿es un registro, o cierra uno de los dos? «Le mandé el catálogo a la Paula», con dos Paulas: ¿a cuál? Una pregunta en una línea con las opciones; lo demás del dictado sigue su curso.
 - **Atiende todo lo que el autor dijo, en su orden:** cada cosa que cuenta o pide es un comando o una respuesta. No termines con una sin atender.
@@ -33,7 +33,7 @@ Mira cómo empieza el primer prompt de la sesión. Hay dos casos y no hay un ter
 | --- | --- |
 | `AHORA.md` | El ciclo en curso. Aquí se escriben los registros del día. |
 | `PENDIENTES.md` | Todo lo que está abierto. |
-| `LIBRO-DE-ESTILO.md` | Cómo se escribe aquí y el vocabulario del autor. |
+| `LIBRO-DE-ESTILO.md` | Cómo opera TUKU con cada entidad, con lo que decidió el autor en `reglas/`. Se lee con `tuku context style`. |
 | `ambitos/` | Los frentes de la vida del autor, uno por carpeta. |
 | `notas/` | Ideas que no pertenecen a un día. |
 | `reglas/` | Reglas de las automatizaciones y configuración. |
@@ -91,7 +91,7 @@ Elegir la marca es lo único que es juicio. `**pendiente**` y `(Hecho)` los escr
 | `(Hecho)` | Se cerró algo **que ya estaba pendiente**: `tuku todo close` con su cuerpo sin reescribirlo; el comando lo tacha. |
 | `**cadencia**` | Se da de alta algo que se repite. |
 
-Una acción que nunca fue pendiente es un registro normal, no un cierre. Cualquier otra palabra entre `**` es una clasificación del autor: `LIBRO-DE-ESTILO.md`, `### Clasificaciones`. Cómo se redacta un registro: `LIBRO-DE-ESTILO.md`, `## Cómo escribe el autor`.
+Una acción que nunca fue pendiente es un registro normal, no un cierre. Cualquier otra palabra entre `**` es una clasificación del autor: `reglas/bitacora.md`, `## Clasificaciones`. Cómo se redacta un registro: `tuku context style --chapter Registro`.
 
 ## Lo que no tiene comando
 

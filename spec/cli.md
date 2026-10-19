@@ -110,16 +110,17 @@ Repetir el comando basta porque todo mutador es idempotente.
 
 ## `tuku regenerate [TEMA]`
 
-Regenera lo derivado del conjunto canónico ([principio 9](../docs/principios.md#L79)). Cada tema regenera una derivación; sin tema, las tres.
+Regenera lo derivado del conjunto canónico ([principio 9](../docs/principios.md#L79)). Cada tema regenera una derivación; sin tema, las cuatro.
 
 | Tema | Regenera | Desde |
 | --- | --- | --- |
 | `todo` | El callout de cada día de `AHORA.md` y `ambitos/PENDIENTES-AMBITOS.md` | `PENDIENTES.md` y el árbol de `ambitos/` |
 | `scope` | La actividad de cada página de ámbito (`## Esta semana` y `## Actividad reciente`) y su callout `En X:` de hijos | Los registros de `AHORA.md` y de `bitacoras/`, y las carpetas de `ambitos/` |
 | `comandos` | `reglas/comandos.tuku.md` | La ayuda del `tuku` instalado |
+| `libro` | `LIBRO-DE-ESTILO.md` y la prosa de `reglas/*.tuku.md` y `reglas/subtipos/*.tuku.md` | El template del `tuku` instalado |
 
 - **Un tema toca solo lo suyo.** `scope` lleva a las páginas de ámbito lo escrito a mano en `AHORA.md` y deja `reglas/` como está. El agente modifica `reglas/` solo tras preguntar ([`AGENTS.md`](../template/vanilla/AGENTS.md), Límites).
-- **Valida antes de escribir.** `todo` y `scope` rechazan sin escribir si `PENDIENTES.md` o `ambitos/` están rotos. `comandos` depende solo de la versión instalada.
+- **Valida antes de escribir.** `todo` y `scope` rechazan sin escribir si `PENDIENTES.md` o `ambitos/` están rotos. `comandos` y `libro` dependen solo de la versión instalada. `libro` no toca `reglas/config.tuku.md`, que lleva los valores del autor, ni ningún `reglas/*.md` sin `.tuku`, que son del autor; `tuku doctor version` avisa cuando el libro del vault difiere del template antes de que se reemplace.
 - **Es idempotente.** Escribe lo que cambió; sobre un vault al día informa y deja todo igual.
 - **Un tema desconocido** es error de uso (código 2).
 

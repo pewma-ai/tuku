@@ -5,7 +5,9 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
-from tuku import init, regenerate
+import pytest
+
+from tuku import doctor, init, regenerate
 from tuku.cli import EXITO, main
 from tuku.regenerate import TEMAS, regenerar
 
@@ -31,8 +33,8 @@ def _desfasado(tmp_path: Path) -> Path:
     return v
 
 
-def test_los_temas_son_todo_scope_y_comandos_y_sin_tabla_se_rechaza(tmp_path: Path) -> None:
-    assert TEMAS == ("todo", "scope", "comandos")
+def test_los_temas_son_cuatro_y_sin_tabla_se_rechaza(tmp_path: Path) -> None:
+    assert TEMAS == ("todo", "scope", "comandos", "libro")
     (tmp_path / "PENDIENTES.md").write_text("sin tabla", encoding="utf-8")
     r = regenerar(tmp_path)
     assert not r.ok
@@ -88,3 +90,34 @@ def test_cada_canonico_rehace_solo_los_temas_que_dependen_de_el() -> None:
     assert regenerate.temas_afectados(["bitacoras/bitacora-2026-08-03.md"]) == ["scope"]
     assert regenerate.temas_afectados(["ambitos/"]) == ["todo", "scope"]
     assert regenerate.temas_afectados(["notas/x.md", "reglas/config.tuku.md"]) == []
+
+
+def test_libro_trae_la_prosa_de_tuku_y_no_toca_lo_del_autor_ni_los_valores(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("TUKU_HOME", str(RAIZ_REPO))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    libro, tuku_md = v / "LIBRO-DE-ESTILO.md", v / "reglas" / "bitacora.tuku.md"
+    autor, config = v / "reglas" / "bitacora.md", v / "reglas" / "config.tuku.md"
+    original = libro.read_text(encoding="utf-8")
+    libro.write_text("editado a mano\n", encoding="utf-8")
+    tuku_md.unlink()
+    autor.write_text(
+        "---\ntype: Config\n---\n\n## Clasificaciones\n\n| C |\n| --- |\n| `mía` |\n",
+        encoding="utf-8",
+    )
+    valores = config.read_text(encoding="utf-8").replace("`MMM/DD`", "`DD/MM`")
+    config.write_text(valores, encoding="utf-8")
+
+    r = regenerar(v, tema="libro")
+
+    assert r.ok and "regenerado: LIBRO-DE-ESTILO.md" in r.mensaje
+    assert "regenerado: reglas/bitacora.tuku.md" in r.mensaje
+    assert libro.read_text(encoding="utf-8") == original and tuku_md.is_file()
+    assert "`mía`" in autor.read_text(encoding="utf-8"), "lo del autor no se toca"
+    assert config.read_text(encoding="utf-8") == valores, "los valores del autor no se tocan"
+    assert regenerar(v, tema="libro").mensaje == "regenerate: todo estaba al día."
+
+    libro.write_text(original + "\nUna línea que el autor agregó.\n", encoding="utf-8")
+    aviso = doctor.revisar_vault(v)
+    assert aviso.ok and "difiere" in aviso.mensaje and "LIBRO-DE-ESTILO.md" in aviso.mensaje

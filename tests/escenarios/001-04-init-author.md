@@ -2,7 +2,7 @@
 
 **Cubre:** epic 001, decisión 10. El nombre lleva espacios, paréntesis y guion para verificar que la siembra no lo parte ni toca la prosa que sigue al marcador.
 
-## Escenario: el nombre del autor queda en el libro de estilo
+## Escenario: el nombre del autor queda en reglas/autor.md
 
 Dado un directorio destino vacío
 Cuando se corre
@@ -11,8 +11,8 @@ Cuando se corre
 tuku init mi-vault --at 2026-08-11 --author "ARTURO PEREZ-REVERTE (Arturo)"
 ```
 
-Entonces `LIBRO-DE-ESTILO.md` queda con ese nombre en la sección "El autor"
-Y no sobrevive el placeholder `por declarar`
+Entonces `reglas/autor.md` queda con ese nombre en el capítulo "Autor"
+Y no sobrevive el placeholder `por declarar` en la línea del nombre
 
 ## Escenario: un nombre en blanco deja el vault operable
 
@@ -36,5 +36,5 @@ Cada escenario deja lo suyo bajo `playground/001-04-init-author/`: `mi-vault/` e
 
 ## Qué se mira a mano
 
-- Abrir `LIBRO-DE-ESTILO.md` y ver el nombre **al inicio del documento**, en "El autor", sin buscarlo.
+- Abrir `reglas/autor.md` y ver el nombre **al inicio del documento**, en "Autor", sin buscarlo; y que `tuku context style` lo muestre en el capítulo del autor.
 - Que quede claro, leyendo, que dejarlo en blanco es válido.

@@ -279,20 +279,20 @@ flowchart LR
 
 ## context
 
-Lo que el agente necesita para decidir, sin abrir archivos. Sin `TEMA`, todos.
+Lo que el agente necesita para decidir, sin abrir archivos. Sin `TEMA`, todos menos `cadence`.
 
 ```text
-tuku context [TEMA] [--since] [--late]
+tuku context [TEMA] [--since] [--late] [--chapter]
 ```
 
-`--since` (2 días por defecto) acota los registros de `entry`. `context note` trae las últimas notas de cada tipo enlazable, tantas como diga `context_note_limit` en `reglas/config.tuku.md` (25 por defecto). `--late` solo vale con `todo` y deja únicamente los pendientes atrasados. `context cadence` (pendiente) devuelve las cadencias vigentes de todo el árbol en un solo texto, cada una con el `CADENCIAS.md` de donde viene ([cadencias.md](cadencias.md)).
+`--since` (2 días por defecto) acota los registros de `entry`. `context note` trae las últimas notas de cada tipo enlazable, tantas como diga `context_note_limit` en `reglas/config.tuku.md` (25 por defecto). `--late` solo vale con `todo` y deja únicamente los pendientes atrasados. `context style` devuelve el libro de estilo con cada `![](reglas/X.md)` expandido en su lugar, de lo general a lo específico; con `--chapter NOMBRE`, un solo capítulo. Del archivo transcluido entran sus capítulos `##`, no lo que haya antes. Sin tema, `style` trae solo el autor, el lenguaje y los vocabularios ([vault.md](vault.md), "El libro de estilo"). `context cadence` devuelve las cadencias de todo el árbol en un solo texto, cada una con el `CADENCIAS.md` de donde viene y su alcance ([cadencias.md](cadencias.md)).
 
 ```mermaid
 %%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
 flowchart LR
     subgraph CMD["tuku context"]
         direction TB
-        CX["context TEMA<br/>--since --late"]
+        CX["context TEMA<br/>--since --late --chapter"]
     end
     subgraph VAULT["Vault"]
         direction TB
@@ -308,9 +308,9 @@ flowchart LR
     CX -.->|"entry: si --since cruza<br/>un ciclo cerrado"| BI
     CX -.->|"scope: el árbol con sus keywords"| AM
     CX -.->|"todo: abiertos y atrasados;<br/>con --late, solo los atrasados"| PE
-    CX -.->|"style: clasificaciones,<br/>horizontes y tipos de nota"| LE
+    CX -.->|"style: los capítulos del libro,<br/>con las reglas/ transcluidas"| LE
     CX -.->|"note: por tipo enlazable, las últimas<br/>con título y aliases"| NO
-    CX -.->|"pendiente: cadence: los CADENCIAS.md<br/>del árbol, en cascada"| AM
+    CX -.->|"cadence: los CADENCIAS.md<br/>del árbol, en cascada"| AM
 
     classDef revisa fill:#fce7f3,color:#831843,stroke:#f9a8d4
     classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
@@ -331,7 +331,7 @@ tuku fix TEMA
 | Comando | Escribe | Temas |
 | --- | --- | --- |
 | `doctor` | Nada | `config`, `version`, `types`, `files`, `frontmatter`, `dispatch`, `link`, `cycle`, `entry`, `todo`, `style`, `scope` y `note`, el único que acepta `ARCHIVO` |
-| `regenerate` | Solo lo derivado | `todo`, `scope` y `comandos` |
+| `regenerate` | Solo lo derivado | `todo`, `scope`, `comandos` y `libro` |
 | `fix` | Lo canónico, solo lo determinista, y devuelve las decisiones del autor | `link` y `todo` |
 
 ```mermaid

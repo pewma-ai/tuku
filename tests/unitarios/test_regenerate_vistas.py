@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 
+from conftest import AHORA as INSTANTE
+from tuku import init
+from tuku.cli import main
 from tuku.regenerate import (
     documento_ambitos,
+    primer_escalon,
     region_de_la_semana,
     region_del_dia,
     vistas_en_ahora,
@@ -135,3 +140,26 @@ def test_documento_de_ambitos_agrupa_ordena_y_deja_su_callout_a_cada_ambito() ->
         "> - comprar una maleta",
         "> - ordenar el escritorio",
     ], "van primero los fechados, por fecha"
+
+
+def test_el_primer_escalon_del_autor_titula_el_callout_aunque_lo_renombre(
+    tmp_path: Path,
+) -> None:
+    raiz = Path(__file__).resolve().parent.parent.parent
+    vault = init.init(tmp_path / "v", home=raiz, desde=INSTANTE.date())
+    assert primer_escalon(vault) == "esta semana"
+
+    reglas = vault / "reglas" / "pendientes.md"
+    reglas.write_text(
+        reglas.read_text(encoding="utf-8").replace("| `esta semana` |", "| `este turno` |"),
+        encoding="utf-8",
+    )
+    assert primer_escalon(vault) == "este turno"
+
+    argv = ["todo", "open", "--body", "pagar la patente", "--vault", str(vault)]
+    assert main(argv, now=INSTANTE) == 0
+    pendientes = (vault / "PENDIENTES.md").read_text(encoding="utf-8")
+    assert "| este turno |" in pendientes, "sin horizonte, el primero de la escalera del autor"
+    ahora = (vault / "AHORA.md").read_text(encoding="utf-8")
+    assert "> [!todo] Pendientes de este turno" in ahora
+    assert "pagar la patente" in ahora.split("Pendientes de este turno")[1].split("\n\n")[0]

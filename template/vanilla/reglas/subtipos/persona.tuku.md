@@ -4,7 +4,7 @@ type: Config
 
 # Subtipo `persona`
 
-Las reglas de una nota `subtype: persona`. Para qué sirve el tipo, el cuidado que pide y si se enlaza al registrar está en `### Tipos de nota` del [libro de estilo](../../LIBRO-DE-ESTILO.md), que es su única fuente.
+Las reglas de una nota `subtype: persona`. Para qué sirve el tipo, el cuidado que pide y si se enlaza al registrar está en `## Tipos de nota` de [`reglas/notas.md`](../notas.md), que es su única fuente.
 
 ## Plantilla
 

@@ -245,8 +245,8 @@ def _rechazo_de_subtype(tipos: Sequence[str], subtype: str) -> Resultado | None:
         return None
     hay = ", ".join(f"`{t}`" for t in tipos) or "ninguno"
     return Resultado.rechazo(
-        f"{subtype!r} no es un tipo de nota. Los de `### Tipos de nota` en "
-        f"LIBRO-DE-ESTILO.md son: {hay}. Elige uno, o agrega una fila a esa tabla para "
+        f"{subtype!r} no es un tipo de nota. Los de `## Tipos de nota` en "
+        f"reglas/notas.md son: {hay}. Elige uno, o agrega una fila a esa tabla para "
         "crear el tipo nuevo."
     )
 

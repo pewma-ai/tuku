@@ -62,16 +62,39 @@ from collections.abc import Iterable, Mapping
 from datetime import date
 from pathlib import Path
 
-from tuku import archivo, link, scope, scope_tree, todo_core
+from tuku import archivo, link, scope, scope_tree, todo_core, vocab
 from tuku.ahora import dias
 from tuku.config import FORMATO_FECHA, archivo_vault, fecha_corta, formato_fecha
+from tuku.init import TukuHomeInvalido
 from tuku.resultado import Resultado
 from tuku.todo_core import SinTabla
 
 #: Los temas que se regeneran por separado.
-TEMAS = ("todo", "scope", "comandos")
+TEMAS = ("todo", "scope", "comandos", "libro")
 
 COMANDOS = Path("reglas") / "comandos.tuku.md"
+
+#: La prosa que es de TUKU y viene del template del `tuku` instalado. No incluye
+#: `reglas/config.tuku.md`, que lleva los valores del autor, ni `reglas/comandos.tuku.md`,
+#: que se deriva de la ayuda del CLI.
+PROSA_DE_TUKU = ("LIBRO-DE-ESTILO.md", "reglas/*.tuku.md", "reglas/subtipos/*.tuku.md")
+NO_ES_PROSA = ("reglas/config.tuku.md", COMANDOS.as_posix())
+
+
+def prosa_de_tuku(vault: Path) -> dict[str, str]:
+    """The TUKU-owned prose of the installed template, by path inside the vault.
+
+    Raises `TukuHomeInvalido` if there is no installed template to read.
+    """
+    from tuku.config import leer_preferencias
+    from tuku.init import resolver_home
+
+    variante = leer_preferencias(vault).datos.get("tuku_template") or "vanilla"
+    plantilla = resolver_home() / "template" / variante
+    rutas = sorted(
+        {p.relative_to(plantilla).as_posix() for g in PROSA_DE_TUKU for p in plantilla.glob(g)}
+    )
+    return {ruta: archivo.leer(plantilla / ruta) for ruta in rutas if ruta not in NO_ES_PROSA}
 
 
 def _rechazo_del_canonico(vault: Path) -> Resultado | None:
@@ -115,7 +138,7 @@ def regenerar(
     """
     cambiados: list[str] = []
 
-    if tema != "comandos":
+    if tema not in ("comandos", "libro"):
         if (rechazo := _rechazo_del_canonico(vault)) is not None:
             return rechazo
         derivados = _rehacer(vault, vistas=tema != "scope", paginas=tema != "todo")
@@ -129,6 +152,19 @@ def regenerar(
         if not ruta.is_file() or archivo.leer(ruta) != comandos:
             archivo.escribir(ruta, comandos)
             cambiados.append(COMANDOS.as_posix())
+
+    if tema in (None, "libro"):
+        try:
+            prosa = prosa_de_tuku(vault)
+        except TukuHomeInvalido as e:
+            if tema == "libro":
+                return Resultado.rechazo(f"libro: no hay un template de TUKU instalado ({e}).")
+            prosa = {}
+        for relativa, texto in prosa.items():
+            destino = vault / relativa
+            if not destino.is_file() or archivo.leer(destino) != texto:
+                archivo.escribir(destino, texto)
+                cambiados.append(relativa)
 
     if not cambiados:
         return Resultado.hecho("regenerate: todo estaba al día.")
@@ -216,23 +252,41 @@ def region_del_dia(
     ]
 
 
+def primer_escalon(vault: Path) -> str:
+    """The first rung of the author's ladder (`## Horizontes` of `reglas/pendientes.md`).
+
+    It is the cycle in progress whatever the author calls it (`esta semana`,
+    `este turno`). Without a readable `reglas/pendientes.md` it is the template's.
+    """
+    try:
+        horizontes = vocab.terminos(
+            vocab.leer_opcional(Path(vault), "reglas/pendientes.md"), "horizontes"
+        )
+    except vocab.VocabularioIncompleto:
+        horizontes = []
+    return todo_core.escalera_de(horizontes)[0]
+
+
 def region_de_la_semana(
-    filas: list[todo_core.Fila], rutas: Mapping[str, str] | None = None
+    filas: list[todo_core.Fila],
+    rutas: Mapping[str, str] | None = None,
+    escalon: str = todo_core.ESTA_SEMANA,
 ) -> list[str]:
     """Las líneas propagadas bajo el título: callout `[!todo] Pendientes de esta semana`.
 
-    Lleva los pendientes del primer horizonte, los del ciclo en curso que no tienen
-    fecha. Si no hay ninguno, la región queda vacía.
+    Lleva los pendientes de `escalon`, el primero de la escalera del autor: los del
+    ciclo en curso que no tienen fecha. El título lleva su nombre. Si no hay
+    ninguno, la región queda vacía.
     """
     items = [
         linea_del_dia(f, rutas)
         for f in filas
-        if todo_core.slug(f.horizonte) == todo_core.slug(todo_core.ESTA_SEMANA)
+        if todo_core.slug(f.horizonte) == todo_core.slug(escalon)
     ]
     if not items:
         return []
     return [
-        f"> [!todo] Pendientes de {todo_core.ESTA_SEMANA}",
+        f"> [!todo] Pendientes de {escalon}",
         *(f"> {item}" for item in items),
     ]
 
@@ -249,7 +303,12 @@ def _fin_de_seccion(lineas: list[str], ini: int) -> int:
     )
 
 
-def vistas_en_ahora(ahora: str, pendientes: str, rutas: Mapping[str, str] | None = None) -> str:
+def vistas_en_ahora(
+    ahora: str,
+    pendientes: str,
+    rutas: Mapping[str, str] | None = None,
+    escalon: str = todo_core.ESTA_SEMANA,
+) -> str:
     """`AHORA.md` con la región de cada día y la de la semana regeneradas desde la tabla.
 
     Reemplaza la región entera, así que regenerar dos veces no duplica ninguna
@@ -280,7 +339,7 @@ def vistas_en_ahora(ahora: str, pendientes: str, rutas: Mapping[str, str] | None
     # final porque los índices de `dias()` son sobre el texto original.
     titulo = next((i for i, x in enumerate(lineas) if x.strip() == "# Actividad diaria"), None)
     if titulo is not None:
-        semana = region_de_la_semana(todas, rutas)
+        semana = region_de_la_semana(todas, rutas, escalon)
         lineas[titulo + 1 : _fin_de_seccion(lineas, titulo)] = (
             ["", *semana, ""] if semana else [""]
         )
@@ -402,7 +461,9 @@ def _rehacer(vault: Path, *, vistas: bool, paginas: bool) -> list[Path]:
     if vistas:
         pendientes = archivo.leer(archivo_vault(vault, "PENDIENTES.md"))
         ruta_ahora = archivo_vault(vault, "AHORA.md")
-        texto = vistas_en_ahora(archivo.leer(ruta_ahora), pendientes, scope_tree.rutas(vault))
+        texto = vistas_en_ahora(
+            archivo.leer(ruta_ahora), pendientes, scope_tree.rutas(vault), primer_escalon(vault)
+        )
         if texto != archivo.leer(ruta_ahora):
             archivo.escribir(ruta_ahora, texto)
             cambiados.append(ruta_ahora)
