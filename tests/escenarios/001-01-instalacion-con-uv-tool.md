@@ -57,6 +57,8 @@ uv run pytest tests/escenarios/ -k 001_01 -m red
 
 Todo queda aislado: `HOME`, `UV_TOOL_DIR`, `UV_TOOL_BIN_DIR` y `PIPX_HOME` apuntan a un tempdir, así ninguna de las tres instalaciones toca el `~` real ni las tools del autor.
 
+Al terminar, el módulo deja instalado `tuku` desde este checkout con `-e` (`uv tool install --editable --force .`), para que el `tuku` del autor tome los cambios del repositorio de inmediato.
+
 ## Qué se mira a mano
 
 - Que `tuku init` sin argumentos, dentro de un directorio cualquiera con contenido, se niegue con un mensaje claro (no un traceback).

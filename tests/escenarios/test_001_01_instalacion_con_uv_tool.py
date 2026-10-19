@@ -9,6 +9,10 @@ Este arnés no toma los comandos del `.md`, porque lo que prueba es el ejecutabl
 instalado y no `tuku` en proceso. El `.md` manda.
 
 Se corre con el marcador `red`: `uv run pytest tests/escenarios/ -k 001_01 -m red`
+
+Al terminar, el módulo deja instalado `tuku` desde este checkout con `-e`
+(`restaurar_instalacion_local`), para que el `tuku` del autor tome los cambios
+del repositorio sin reinstalar.
 """
 
 from __future__ import annotations
@@ -30,6 +34,29 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 from vault import placeholders_sin_sustituir  # noqa: E402
 
 GIT_URL = "git+https://github.com/pewma-ai/tuku.git@devel"
+
+
+def restaurar_instalacion_local() -> None:
+    """Instala `tuku` desde este checkout con `-e`, en el entorno real del autor.
+
+    Los tests instalan en un `HOME` temporal y no tocan el `tuku` del autor; esto
+    es la garantía de que, pase lo que pase en ellos, termina apuntando al repo.
+    """
+    if shutil.which("uv") is None:
+        return
+    subprocess.run(
+        ["uv", "tool", "install", "--editable", "--force", str(RAIZ)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _al_terminar_deja_tuku_local() -> Iterator[None]:
+    """Al acabar los tests del módulo que se hayan corrido, restaura la instalación local."""
+    yield
+    restaurar_instalacion_local()
 
 
 @contextmanager
@@ -139,4 +166,5 @@ if __name__ == "__main__":
     test_001_01_uv_tool_install_desde_git()
     test_001_01_pipx_install_desde_git()
     test_001_01_pipx_install_desde_este_repositorio()
+    restaurar_instalacion_local()
     print("ok: las tres instalaciones dejan tuku, siembran el vault y pueblan ~/.tuku")
