@@ -22,6 +22,7 @@ Plan para simplificar la arquitectura del comando `tuku` y, después, acortar su
 - [x] Fase 2, P7 (2026-10-18): docstrings de `doctor`, `resultado` e `init`.
 - [x] Fase 3 (2026-10-18): 192 funciones de test unitario (antes 237) y 194 casos (antes 286), con **los mismos arcos de ramas ejecutados** y los 317 tests de la suite no agéntica en verde.
 - [x] Fase 4 (2026-10-18): `plan.py` con `Change` y `apply`; planners de `todo open`, `todo close`, `entry create` y `note create`; el reloj se lee solo en `cli.main`.
+- [x] Fase 5 (2026-10-18): `process cycle --from/--to/--name/--force` y ciclos con nombre (`cycle_name`), sin hoyos ni solapes; `test_cycle_open.py` pasó a 8 tests. Los 30 escenarios que fallaban por `--from` pasan.
 - [ ] Pendiente: ver "Lo que queda" al final.
 
 ## Restricciones de la fase 2
@@ -221,8 +222,8 @@ La unión de arcos de la capa unitaria es la de antes más 13 arcos nuevos, ning
 ## Lo que queda
 
 - **`scope.crear_con_constancia` sigue entero en el caso de uso.** Su salida depende del disco después de escribir (carpetas del padre, callout de hijos, `parent:` de cada página, bitácoras cerradas y keywords de todos los ámbitos para el mensaje y los avisos), así que un planner puro pide un `State` mucho mayor y un `Change` con operaciones de carpeta. Queda para una fase propia, con `scope move` y `scope rename`, que comparten ese tramo.
-- **`test_notas_enlazables.py`** (11, unos 3 de sobra en los `context note`): otra sesión lo está cambiando; esta fase solo le agregó `now=AHORA`.
+- ~~**`test_notas_enlazables.py`**~~ Hecho (2026-10-18): 11 a 8 funciones (libro y template; lista de `context note` y «sin tipos enlazables»; límite y su caída a 25), mismas aserciones.
 - **`config` importa `doctor`** por `ARCHIVOS_REQUERIDOS`: mover la constante a `config` cuando `config.py` deje de estar en edición.
-- **El ámbito en blanco** de `todo open --scope`: ver las decisiones tomadas.
-- **Escenarios de `tests/escenarios/`:** no se analizaron para fusionar. Los 30 que fallan esperan `process cycle --from`.
+- ~~**El ámbito en blanco** de `todo open --scope`~~ Hecho (2026-10-18): `todo.plan_open` resuelve todo `scope` que no sea `None`, así que `--scope "  "` se rechaza como en `entry create`, `todo close` y `note create`. Sin `--scope` (o con `""`) sigue valiendo el ámbito por defecto, y `process cycle` sigue abriendo sin ámbito. La spec no decía nada del caso; lo cubre `test_plan`.
+- **Escenarios de `tests/escenarios/`:** analizados el 2026-10-18 y **no se fusionan**. Con la unión de arcos, los 65 escenarios no agénticos ejecutan 4261 arcos de `src/tuku/`, y 653 de ellos no los toca ningún unitario (la capa `cli`, `init`, los arranques de cadena). Los seis archivos sin arcos propios (`001-04`, `004-00`, `005-01`, `005-02`, `005-04`, `005-07`) comparten caminos con otro escenario por ser cadenas de una misma historia, y `005-01` es el árbitro de P6. Además [su README](../tests/escenarios/README.md) los define como E2E narrativos con su `.md` de «Qué se mira a mano»; fundirlos borraría historias, no repeticiones. Costo total: unos 20 s. La suite completa está verde: 202 unitarios (3,9 s), 65 escenarios no agénticos (~25 s), 30 agénticos (~233 s) y 3 de red (25 s).
 - **`entry.actualizar_en_vault` y `entry.mover_en_vault`** siguen mezclando decisión y escritura; son los candidatos siguientes a un planner, después de `scope`.

@@ -25,14 +25,11 @@ LIBRO = """### Tipos de nota
 """
 
 
-def test_el_libro_dice_que_tipos_se_enlazan() -> None:
+def test_el_libro_dice_que_tipos_se_enlazan_y_el_template_enlaza_personas() -> None:
     assert vocab.enlazables(LIBRO) == ["persona"]
     sin_columna = "### Tipos de nota\n\n| Tipo | Para qué |\n| --- | --- |\n| `persona` | x |\n"
     assert vocab.enlazables(sin_columna) == []
     assert vocab.enlazables("# Libro sin tipos\n") == []
-
-
-def test_el_template_enlaza_personas() -> None:
     libro = RAIZ_REPO / "template" / "vanilla" / "LIBRO-DE-ESTILO.md"
     assert vocab.enlazables(libro.read_text(encoding="utf-8")) == ["persona"]
 
@@ -121,33 +118,26 @@ def _actualizada(v: Path, nombre: str, dia: str) -> None:
     )
 
 
-def test_context_note_lista_por_tipo_enlazable_con_nombres_y_aliases(vault: Path) -> None:
+def test_context_note_lista_por_tipo_enlazable_y_dice_cuando_no_hay(vault: Path) -> None:
     assert context.del_vault(vault, "note", now=AHORA).mensaje == (
         "## persona\n\n- notas/rodolfo-cifuentes.md: Rodolfo Cifuentes; aliases: don Rodolfo"
     )
+    libro = vault / "LIBRO-DE-ESTILO.md"
+    libro.write_text(
+        libro.read_text(encoding="utf-8").replace("| sí |", "| no |"), encoding="utf-8"
+    )
+    assert context.del_vault(vault, "note", now=AHORA).mensaje == (
+        "sin tipos enlazables en `### Tipos de nota`."
+    ), "sin tipos enlazables lo dice"
 
 
-def test_context_note_trae_las_ultimas_modificadas_hasta_el_limite(vault: Path) -> None:
+def test_context_note_trae_las_ultimas_hasta_un_limite_que_cae_a_25(vault: Path) -> None:
     for n in ("ana", "beto", "carla"):
         _nota(vault, n, "persona", n.capitalize())
     _actualizada(vault, "ana", "2026-08-01")
     _actualizada(vault, "rodolfo-cifuentes", "2026-08-05")
     _actualizada(vault, "beto", "2026-08-09")
     _actualizada(vault, "carla", "2026-08-10")
-    config = vault / "reglas" / "config.tuku.md"
-    config.write_text(
-        config.read_text(encoding="utf-8").replace("| `25` |", "| `3` |"),
-        encoding="utf-8",
-    )
-    salida = context.del_vault(vault, "note", now=AHORA).mensaje
-    assert salida.splitlines()[2:] == [
-        "- notas/carla.md: Carla",
-        "- notas/beto.md: Beto",
-        "- notas/rodolfo-cifuentes.md: Rodolfo Cifuentes; aliases: don Rodolfo",
-    ]
-
-
-def test_el_limite_de_context_cae_a_25_si_la_config_no_lo_dice(vault: Path) -> None:
     config = vault / "reglas" / "config.tuku.md"
     assert limite_de_notas(vault) == 25
     for valor in ("diez", "0", "-3"):
@@ -160,16 +150,16 @@ def test_el_limite_de_context_cae_a_25_si_la_config_no_lo_dice(vault: Path) -> N
             config.read_text(encoding="utf-8").replace(f"| `{valor}` |", "| `25` |"),
             encoding="utf-8",
         )
-
-
-def test_context_note_sin_tipos_enlazables_lo_dice(vault: Path) -> None:
-    libro = vault / "LIBRO-DE-ESTILO.md"
-    libro.write_text(
-        libro.read_text(encoding="utf-8").replace("| sí |", "| no |"), encoding="utf-8"
+    config.write_text(
+        config.read_text(encoding="utf-8").replace("| `25` |", "| `3` |"),
+        encoding="utf-8",
     )
-    assert context.del_vault(vault, "note", now=AHORA).mensaje == (
-        "sin tipos enlazables en `### Tipos de nota`."
-    )
+    salida = context.del_vault(vault, "note", now=AHORA).mensaje
+    assert salida.splitlines()[2:] == [
+        "- notas/carla.md: Carla",
+        "- notas/beto.md: Beto",
+        "- notas/rodolfo-cifuentes.md: Rodolfo Cifuentes; aliases: don Rodolfo",
+    ]
 
 
 def test_updated_se_mueve_al_renombrar_y_created_queda(vault: Path) -> None:

@@ -193,7 +193,7 @@ def plan_open(
             f"Para que venza ese día: --due {day.isoformat()}"
         )
     limpio_scope = None
-    if scope and ambitos.normalizar(scope):
+    if scope is not None:
         resolved = ambitos.resolve_scope(state.tree, scope)
         if isinstance(resolved, Resultado):
             return resolved

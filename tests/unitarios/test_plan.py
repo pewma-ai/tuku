@@ -168,6 +168,7 @@ def test_open_warns_when_the_deadline_has_passed_or_precedes_the_promise() -> No
 def test_open_rejects_a_future_day_an_unknown_scope_and_a_day_outside_the_cycle() -> None:
     assert "--due 2026-08-13" in rejection(plan_open(day=date(2026, 8, 13)))
     assert "tuku scope create casa" in rejection(plan_open(scope="casa"))
+    assert "no existe el ámbito" in rejection(plan_open(scope="  ")), "en blanco es un error"
     assert "fuera del ciclo" in rejection(plan_open(day=date(2026, 7, 1)))
 
 
