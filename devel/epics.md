@@ -80,18 +80,18 @@ Todo epic que añada comandos fija su superficie en un escenario propio: `tuku -
 
 ## Estado de los Epics
 
-Actualizado el 2026-10-16.
+Actualizado el 2026-10-20.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | cerrado | cerrado el 2026-09-19; seis escenarios en verde y verificación humana de instalación limpia y siembra offline completada |
 | 002 | El día uno, a mano | `vacio` → `primer-dia` | cerrado | cerrado el 2026-09-19; doce escenarios deterministas en verde y aceptación humana en playground/002-09 completada |
 | 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | cinco escenarios: `003-01` determinista; `003-10`, el día uno entero en un turno (fundió del `003-02` al `003-07` el 2026-10-16), y `003-11`, el día derivado, en verde con `agy`; `003-08` (`hermes`) y `003-09` (`claude`) en verde el 2026-09-20, sin repetir desde entonces. Falta revisión a mano de los turnos de `playground/003-*/` contra criterio de salida |
-| 004 | La conversación | `primer-dia` | sin empezar | depende del epic 003 |
+| 004 | La conversación | `primer-dia` | por cerrar | cinco escenarios agénticos (`004-01` a `004-05`) con el conductor [`conversacion.py`](../tests/scripts/conversacion.py), en verde el 2026-10-20. Falta revisión a mano de `playground/004-*` contra el criterio de salida |
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | ocho documentos en `tests/escenarios/005-*`: 33 tests deterministas y 7 agénticos, todos en verde. Solo queda abierto B4 de la tabla de `005-00` (bajar un pendiente por la escalera de horizontes), que está en `TODO.md`; S5, S8 y E2 ya se resolvieron (E2 pasó al criterio del epic 006) |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
 | 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
-| 010 | El tutorial entero | `vacio` → `ciclo-en-curso` | propuesto | corre [`docs/tutorial/`](../docs/tutorial/README.md) de principio a fin; los capítulos 1 a 6 ya describen lo que TUKU hace, del 7 al 10 dependen de los epics 004, 006 y 007 |
+| 010 | El tutorial entero | `vacio` → `ciclo-en-curso` | en curso | el arnés `test-tui tutorial` ya corre los capítulos. En el último recorrido pasaron 1, 2, 3, 6 y 7; 4, 5 y 8 fallan por el modelo barato y el sandbox de `agy`, no por el texto; 9 y 10 prometen lo de los epics 006 y 007 |
 
 ## Epic 001. Un TUKU mínimo instalable
 
@@ -113,7 +113,7 @@ El mismo día uno del epic 002, dictado en lenguaje natural en vez de invocado a
 
 Replica, y nada más. Un turno, un dictado, el mismo vault de salida. La conversación de ida y vuelta es el epic 004, y meterla acá haría que un fallo pudiera venir de dos sitios a la vez.
 
-- **Entregable:** el `AGENTS.md` del vault que hace que cualquier arnés opere igual ([`../spec/despacho.md`](../spec/despacho.md)), la evidencia de que con él un agente vivo reproduce el día uno, y **el método para probarlo**. El arnés no es andamiaje de este epic: es lo que permite que el 004 y los siguientes afirmen algo sobre un agente en vez de mirarlo funcionar, y un método frágil no da un resultado dudoso, da uno falso.
+- **Entregable:** el `AGENTS.md` del vault (invocación y límites) con la skill del asistente y el libro de estilo por capítulos, que hacen que cualquier arnés opere igual ([`../spec/despacho.md`](../spec/despacho.md)), la evidencia de que con él un agente vivo reproduce el día uno, y **el método para probarlo**. El arnés no es andamiaje de este epic: es lo que permite que el 004 y los siguientes afirmen algo sobre un agente en vez de mirarlo funcionar, y un método frágil no da un resultado dudoso, da uno falso.
 - **Detalle completo:** [`../tests/escenarios/003-00-el-dia-uno-dictado.md`](../tests/escenarios/003-00-el-dia-uno-dictado.md).
 
 > [!tip] Mirar en VAULT al cerrar el epic
@@ -127,7 +127,7 @@ El autor deja de dictar y conversa: el agente delibera, pregunta, cambia de rumb
 
 Se prueba con dos agentes, uno del lado del autor y otro del lado de TUKU. No agrega fixture: sigue siendo el día uno.
 
-- **Entregable:** conductor de sesión multi-turno reutilizable, límites del vault verificables como diff vacío, y los `AGENTS.md` corregidos por lo que la conversación rompa.
+- **Entregable:** conductor de sesión multi-turno reutilizable, límites del vault verificables como diff vacío, y el `AGENTS.md`, la skill y el libro corregidos por lo que la conversación rompa.
 - **Criterio de salida:** una conversación en que el autor se contradice y rectifica deja el vault en el estado que pidió al final, y ninguna prohibición de la tabla de límites se rompe en el camino.
 
 > [!tip] Mirar en VAULT al construir el conductor

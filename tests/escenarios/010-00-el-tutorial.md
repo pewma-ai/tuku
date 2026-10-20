@@ -18,7 +18,7 @@ Una persona nueva sigue el tutorial de Andrea de principio a fin, sobre un vault
 
 ## Escenarios del epic
 
-Cada escenario es un capítulo, y su fuente es el capítulo. Se corre con `uv run python tests/scripts/test-tui.py 010-NN`.
+Cada escenario es un capítulo, y su fuente es el capítulo. Se corre con `uv run python tests/scripts/test-tui.py tutorial NN` (`3-6` o `1,4,7` para varios; sin número, los diez).
 
 | Escenario | Capítulo | Parte de | Depende de |
 | --- | --- | --- | --- |
@@ -33,7 +33,7 @@ Cada escenario es un capítulo, y su fuente es el capítulo. Se corre con `uv ru
 | `010-09` | [Cerrar la semana](../../docs/tutorial/09-cerrar-la-semana.md) | El vault del 08 | Epic 006 |
 | `010-10` | [Lo que nadie pidió](../../docs/tutorial/10-lo-que-nadie-pidio.md) | El vault del 09, con meses de historia | Epic 007 |
 
-Los capítulos 1 a 6 dependen de lo que ya existe. Del 7 al 10 el escenario corre contra una promesa: sale en rojo hasta que su epic lo construya, y eso es lo esperado.
+Los capítulos 1 a 6 dependen de lo que ya existe. Los capítulos 7 y 8 ya tienen sus epics (004 y 005). Los 9 y 10 corren contra una promesa: salen en rojo hasta que los epics 006 y 007 los construyan, y eso es lo esperado.
 
 ## Estado inicial común
 
