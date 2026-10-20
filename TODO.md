@@ -121,7 +121,6 @@ El template ya está hecho ([`LIBRO-DE-ESTILO.md`](template/vanilla/LIBRO-DE-EST
 - **La compuerta `.tuku/leidos`**, solo si se mide que los agentes se saltan la lectura del capítulo. Con 003-11 el agente sí lee `Registro`.
 - **`template/README.md`:** la fila de `CAPACIDAD.md` y el paso de instalar a mano (la skill ya tiene su fila en la tabla).
 - **Tutorial con `test-tui tutorial`:** en el último recorrido (2-8) pasaron 2, 3, 6 y 7. Fallan 4, 5 y 8 por el agente y el entorno, no por el texto: el modelo barato (`gemini-3.8-flash-low`) usa heredocs que `agy` niega, no contesta la fusión de frentes del capítulo 5, y el `tuku` del agente da a veces `PermissionError` al conectar con su socket. Los capítulos 9 y 10 prometen lo que dependen de los epics 006 y 007 y no se corrieron. Para cerrar: otro modelo o permitir en `agy` los comandos compuestos.
-- **Correr los demás agénticos** con el `AGENTS.md` mínimo y la skill del asistente (solo corrió 003-11, y antes de la skill). Ver si el agente real carga la skill sin que falle el despacho.
 - **La skill vive en `reglas/skills/`**, que ningún arnés descubre solo: depende de que `AGENTS.md` la nombre. Si algún arnés no la carga, volver a `AGENTS.md` plano.
 
 ## Agente
