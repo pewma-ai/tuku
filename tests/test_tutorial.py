@@ -184,3 +184,24 @@ def test_una_edicion_que_falla_no_deja_nada_a_medias(tmp_path: Path) -> None:
         tutorial.aplicar_edicion(v, "PENDIENTES.md: borra la fila 9")
     with pytest.raises(tutorial.EdicionInvalida):
         tutorial.aplicar_edicion(v, "AHORA.md: haz magia")
+
+
+def test_el_juez_con_criterio_deja_pasar_lo_razonable_y_falla_lo_inaceptable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import criterio
+
+    prompt = "…\n## Afirmaciones\n1. A\n2. B\n3. C\n\nResponde una línea…"
+    niveles = iter(
+        [
+            criterio.Veredicto("RAZONABLE", "otro camino"),
+            criterio.Veredicto("INACEPTABLE", "inventó"),
+        ]
+    )
+    monkeypatch.setattr(criterio, "juzgar", lambda *a, **k: next(niveles))
+    juez = tutorial.con_criterio(lambda p, n: [(True, ""), (False, "x"), (False, "y")])
+    assert juez(prompt, 3) == [
+        (True, ""),
+        (True, "RAZONABLE: otro camino"),
+        (False, "INACEPTABLE: inventó"),
+    ]

@@ -8,7 +8,7 @@ Orientación normativa, no contrato rígido.
 
 ### 1. El archivo de texto es lo primero
 
-Todo lo que importa vive en archivos Markdown legibles sin ejecutar software propietario ni bases de datos. El frontmatter se mantiene al mínimo: si hace falta un programa especial para entender los datos, la arquitectura está mal.
+Todo lo que importa vive en archivos Markdown legibles sin ejecutar software propietario ni bases de datos. El frontmatter se mantiene al mínimo.
 
 Horizonte: veinte años. La prueba de fuego es que el sistema completo se pueda operar a mano con un editor de texto básico, aunque tome más esfuerzo. La automatización existe para absorber ese esfuerzo mecánico, nunca para volverlo obligatorio, y por eso toda automatización declara por escrito su equivalente manual. Una que no lo declare es una dependencia disfrazada.
 
@@ -20,7 +20,7 @@ Cero configuración inicial. El primer día hay una página en blanco y una sola
 
 Corolario de diseño: **lo que debe emerger no se especifica por adelantado**. Se deja espacio para que la práctica aparezca sola, y cuando se consolida, se anota como regla.
 
-Segundo corolario: **nada de lo que sirve para anticipar puede ser requisito para registrar**. Declarar recurrencias o dimensionar cuánto cabe en un ciclo son piezas deseables, no puertas de entrada. Sin ellas el sistema registra y devuelve lo registrado; con ellas además se adelanta. Un sistema que exige configurar antes de dejar escribir no sobrevive al primer día.
+Segundo corolario: **nada de lo que sirve para anticipar puede ser requisito para registrar**. Declarar recurrencias o dimensionar cuánto cabe en un ciclo son piezas deseables, no puertas de entrada. Sin ellas el sistema registra y devuelve lo registrado; con ellas además se adelanta. 
 
 ### 3. El agente es un secretario, no un dueño
 
@@ -49,8 +49,6 @@ El LLM se aísla en los dos extremos, el registro (interpretar el dictado y deci
 Cómo se escribe y cómo se organiza el repositorio vive en un texto en prosa que leen igual el autor y la máquina, y del que nacen los automatismos. No hay lógica de gestión escondida dentro del código.
 
 La especificación de cada automatismo acompaña al libro del autor; el código ejecutable vive fuera, instalado aparte. Así el libro no se vuelve una copia del programa que después diverge por su cuenta.
-
-Si una regla no cabe en esa prosa, todavía no es una regla madura.
 
 ### 6. Tres ejes, y un conjunto canónico que no se regenera
 

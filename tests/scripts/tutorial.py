@@ -465,6 +465,45 @@ class Resultado:
 Juez = Callable[[str, int], list[tuple[bool, str]]]
 
 
+_AFIRMACIONES = re.compile(r"^## Afirmaciones\n(.*?)\n\nResponde", re.M | re.S)
+
+
+def con_criterio(juez: Juez, modelo: str = "sonnet") -> Juez:
+    """Un juez que, ante cada afirmación que da por no cumplida, pide el criterio del evaluador.
+
+    CUMPLE y NO CUMPLE no distinguen un defecto de un camino equivalente, o de un texto
+    del tutorial mal escrito. Lo que el juez rechaza pasa por `criterio.py`: RAZONABLE y
+    DISCUTIBLE pasan (con su razón a la vista) e INACEPTABLE falla.
+    """
+    import criterio
+
+    def juzgar_con_criterio(prompt: str, total: int) -> list[tuple[bool, str]]:
+        veredicto = juez(prompt, total)
+        if not criterio.activo():
+            return veredicto
+        bloque = _AFIRMACIONES.search(prompt)
+        afirmaciones = re.findall(r"^\d+\. (.*)$", bloque.group(1), re.M) if bloque else []
+        salida: list[tuple[bool, str]] = []
+        for n, (ok, motivo) in enumerate(veredicto):
+            if ok or n >= len(afirmaciones):
+                salida.append((ok, motivo))
+                continue
+            try:
+                v = criterio.juzgar(
+                    f"Un paso del tutorial de TUKU. Afirmación esperada: {afirmaciones[n]}",
+                    f"El juez la dio por no cumplida: {motivo}",
+                    prompt,
+                    modelo,
+                )
+            except RuntimeError:
+                salida.append((ok, motivo))
+                continue
+            salida.append((v.pasa, f"{v.nivel}: {v.razon}"))
+        return salida
+
+    return juzgar_con_criterio
+
+
 def correr_capitulo(
     cap: Capitulo,
     vista: tui.Vista,
@@ -534,7 +573,7 @@ def correr_capitulo(
                 veredicto = juez(prompt_del_juez(cap, paso, registro, v), len(paso.checks))
                 for afirmacion, (ok, motivo) in zip(paso.checks, veredicto, strict=True):
                     chequeos.append(
-                        (ok, f"Paso {n}: {afirmacion}" + ("" if ok else f" → {motivo}"))
+                        (ok, f"Paso {n}: {afirmacion}" + (f" → {motivo}" if motivo else ""))
                     )
         for ruta, contenido in por_deshacer.items():
             ruta.write_bytes(contenido)

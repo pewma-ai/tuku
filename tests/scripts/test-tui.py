@@ -119,8 +119,10 @@ def _tutorial(args: argparse.Namespace) -> int:
         juez = None
         if not args.sin_juez:
 
-            def juez(prompt: str, total: int) -> list[tuple[bool, str]]:
+            def juez_base(prompt: str, total: int) -> list[tuple[bool, str]]:
                 return tutorial.juzgar(prompt, total, args.modelo_juez)
+
+            juez = tutorial.con_criterio(juez_base, args.modelo_juez)
 
         vista = tui.Vista(raw=args.raw)
         resultados = [

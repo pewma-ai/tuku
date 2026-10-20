@@ -30,7 +30,7 @@ Todo son archivos de texto y cualquier programa los lee. Para mirarlos conviene 
 Los nombres en MAYÚSCULAS son de TUKU y los de minúsculas son tuyos.
 
 > [!check] Qué debería pasar
-> - `AHORA.md` tiene siete encabezados, de lunes a domingo, con la fecha de la semana en que instalaste.
+> - `AHORA.md` tiene siete encabezados, de lunes a domingo, con las fechas de la semana en curso.
 > - `ambitos/` tiene una sola carpeta, `personal`.
 > - `PENDIENTES.md` está vacío.
 
