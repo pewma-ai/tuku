@@ -27,6 +27,7 @@ Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2:
 | `ambitos/AGENTS.md`, `ambitos/CADENCIAS.md` | Reglas y cadencias de toda la rama |
 | `ambitos/personal/` | La única rama inicial: `CAPACIDAD.md`, `personal.md` |
 | `notas/AGENTS.md` | Reglas del zettelkasten |
+| `reglas/*.user.md` | Lo que decide el autor sobre cada entidad, por declarar; el libro de estilo los transcluye |
 | `reglas/config.tuku.md` | `TZ`, `cycle_name`, `tuku_template`, `tuku_version` y `origen`, en una tabla |
 | `.obsidian/app.json`, `.gitignore` | Que Obsidian escriba links Markdown con ruta relativa, y que de `.obsidian/` solo se versione eso ([`../spec/markdown.md`](../spec/markdown.md)) |
 
@@ -41,7 +42,7 @@ Copiar el contenido de la variante a un directorio vacío y hacer tres cosas:
 1. En `reglas/config.tuku.md`, poner la zona horaria.
 2. En `AHORA.md`, escribir `desde` y `hasta` con las fechas del primer ciclo. Por defecto es `semana`, que es el ritmo menos sorprendente para quien nunca ha usado esto.
 3. En `AHORA.md`, reemplazar los encabezados de día por los días reales de ese rango.
-4. Opcional: en `reglas/autor.md` poner el nombre del autor. Dejarlo en blanco no impide escribir; el autor lo completa cuando quiera.
+4. Opcional: en `reglas/autor.user.md` poner el nombre del autor. Dejarlo en blanco no impide escribir; el autor lo completa cuando quiera.
 
 Después de los tres primeros ya se puede escribir. Todo lo demás emerge del uso.
 

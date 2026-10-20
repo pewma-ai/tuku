@@ -90,6 +90,57 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
 - Qué comandos pasan a leer los archivos de datos del autor en vez del libro.
 - `tuku_template` frente a `--variant` ([`spec/cli.md`](spec/cli.md) y 005-00, S8).
 
+## Adaptar todo al libro de estilo nuevo (decidido el 2026-10-19)
+
+El template ya está hecho ([`LIBRO-DE-ESTILO.md`](template/vanilla/LIBRO-DE-ESTILO.md) y [`reglas/`](template/vanilla/reglas/)). Esto reemplaza la dirección de "El libro de estilo estático" y la conversación sobre `reglas/config.tuku.md` de más arriba. Lo que quedó decidido:
+
+- **El libro es orientación, no la especificación completa.** Es de TUKU, legible para una persona y un agente, y los comandos hacen cumplir lo determinista. No repite lo que un comando verifica.
+- **Cada capítulo se basta solo para su tarea** (Registro, Pendiente, Ciclo, Ámbito, Nota, Cadencia, Formato OKF, Uso de Markdown...) y dice su "Lee también". `AGENTS.md` manda leer el capítulo una vez por sesión antes de la primera escritura de cada tipo. Se acepta que un agente se la salte; si pasa, la salida es una compuerta en el comando con estado local `.tuku/leidos`.
+- **Los únicos `*.tuku.md` son `config.tuku.md` y `comandos.tuku.md`.** Desaparecen `bitacora.tuku.md`, `notas.tuku.md` y `subtipos/persona.tuku.md`, y su contenido vive en el libro.
+- **Lo del autor está en `reglas/*.user.md`**, con lo mínimo: frontmatter `type: Style Guide`, `editable: true`, `modified_time` (null hasta que el agente guarda una preferencia) y `rules` (sus reglas de edición); el cuerpo es solo su tabla o su texto, **sin encabezado**. Los encabezados `###` y las frases viven en el libro. `lenguaje` se fundió en `autor.user.md` (tabla Campo y Valor), y `bitacora.md` pasó a `clasificaciones.user.md`.
+- **`cycle_name` sale de `config.tuku.md`** y pasa a `ciclo.user.md`. Hoy ese archivo lo dice en prosa ("el ciclo es la semana..."): **falta decidir cómo lo lee una máquina** (una tabla de nombres y días, o un campo del frontmatter) y cómo se alternan varios nombres.
+- **Las clasificaciones solo llegan con el capítulo Registro**; `tuku context` sin tema deja de traer el vocabulario.
+- **No hay `ambitos.user.md` ni `cadencias.user.md`.** Los ámbitos se infieren y se crean a petición del autor o por sugerencia de TUKU (regla fija en el capítulo Ámbito), y las cadencias se declaran dentro de los ámbitos. `lenguaje.user.md` tampoco existe.
+- **La capacidad del autor es texto abierto**, en `ambitos/personal/CAPACIDAD.md` (sin `Bruto` ni `Costo fijo`), que el libro transcluye. Si no se define, se infiere de las bitácoras. Un ámbito puede tener su propio `CAPACIDAD.md` si el autor lo considera necesario.
+- **Fallo del template que hay que arreglar:** `ciclo.user.md` dice en su `rules` que el nombre y la duración del ciclo van en `config.tuku.md`, y `config.tuku.md` todavía trae la fila `cycle_name`. Al mover `cycle_name` hay que cambiar los dos.
+
+### Specs (chat de specs)
+
+- [`spec/vault.md`](spec/vault.md): el árbol de `reglas/`, la convención (`X.user.md` del autor), "El libro de estilo" entero (capítulos nuevos, orientación, autocontenido, una tabla por archivo del autor en vez de una por capítulo `##`), los tipos (`Style Guide` también para los `.user.md`, `Config` solo la config), el frontmatter de los `.user.md` y los campos de la config (siete, sin `cycle_name`).
+- [`spec/bitacora.md`](spec/bitacora.md): dónde vive cada vocabulario, las marcas reservadas y **qué pasa con `**cadencia**`**: ya no figura entre las reservadas del libro, pero `spec/bitacora.md` la trata como marca. Decidir si sigue existiendo.
+- [`spec/pendientes.md`](spec/pendientes.md) y [`spec/ciclo.md`](spec/ciclo.md): los horizontes salen de `pendientes.user.md` y el nombre del ciclo de `ciclo.user.md`.
+- [`spec/cli.md`](spec/cli.md) y [`spec/tuku.md`](spec/tuku.md): `context style` y `--chapter` con los nombres de capítulo, qué trae `context` sin tema, y `regenerate libro` (el libro y `comandos.tuku.md`).
+- [`spec/notas.md`](spec/notas.md) (la plantilla `persona` vive en el capítulo Nota), [`spec/cadencias.md`](spec/cadencias.md), [`spec/ambitos.md`](spec/ambitos.md) y [`spec/markdown.md`](spec/markdown.md) (el capítulo "Uso de Markdown").
+- [`spec/ambitos.md`](spec/ambitos.md) y [`spec/ciclo.md`](spec/ciclo.md): la capacidad del autor es texto abierto, no `Bruto` y `Costo fijo` con cuatro magnitudes. Y los capítulos del libro, que ahora son: Propósito del vault, Autor, Registro, Pendiente, Ciclo, Ámbito, Capacidad, Nota, Cadencia, Proceso, Estructura del vault, Formato OKF, Configuración y Uso de Markdown.
+- Dejar escrita la regla de lectura por sesión y su salida, la compuerta con `.tuku/leidos`.
+
+### Comandos (chat de comandos)
+
+- **Transclusiones fuera de `reglas/`.** El capítulo Capacidad transcluye `ambitos/personal/CAPACIDAD.md`. `style.lint`, `doctor style` y `context style` deben cargar las transclusiones del libro sea cual sea la ruta (dentro del vault), y no solo `ARCHIVOS`.
+- **`autor.user.md`.** Su tabla (`Nombre`, `Rol`, `Idioma`, `Trato`, `Registro`, `Términos propios`) trae `PEDIR AL AUTOR!` en Nombre: `init --author` lo reemplaza y `doctor` debe avisar si queda.
+- **`capitulos` y `vocab`:** leen la primera tabla del archivo del autor, sin buscar un `##`; `FUENTES` apunta a los archivos nuevos. `solo_capitulos` ya no corta en el primer `##` porque los `.user.md` no llevan encabezados.
+- **Cadencias al cambiar de ciclo.** El libro dice que se evalúan al crear un ciclo y generan sus pendientes. Hoy `process cycle` no las lee (solo `context cadence` las lista): hay que diseñar esa evaluación, y alinear [`spec/cadencias.md`](spec/cadencias.md) y [`spec/ciclo.md`](spec/ciclo.md).
+- **Capacidad.** El libro dice que la del autor, en `ambitos/personal/CAPACIDAD.md`, se lee siempre al crear un ciclo, y la transcluye. **`process cycle` no la lee** y no hay comando que la entregue; hay que diseñarlo, y alinear [`spec/ciclo.md`](spec/ciclo.md) y [`spec/ambitos.md`](spec/ambitos.md). Quedan por pensar la capacidad de cada proyecto, su lectura recursiva y las magnitudes con que se mide (hoy en el spec, ya fuera del template).
+- **`config`:** quitar `cycle_name` y `nombres_de_ciclo` de `Preferencias` y de la tabla; leer el ciclo de `ciclo.user.md`. Afecta a `process cycle`, `doctor config`, `cyclelint` y los vaults ya sembrados con la fila.
+- **`init`:** sembrar los archivos nuevos. `--author` escribe la fila Nombre de la tabla de `autor.user.md`, y el marcador `**Nombre del autor:**` desaparece (también en `style.lint`).
+- **`doctor`:** archivos requeridos nuevos (`autor`, `clasificaciones`, `pendientes`, `notas`, `ciclo`, `types`) y ninguno de `lenguaje`, `ambitos` ni `cadencias`; aviso si un `.user.md` sigue con `modified_time: null` y difiere del template (decidir si ese aviso se queda); revisar el frontmatter de los `.user.md` (`editable`, `modified_time`, `rules`); una tabla por archivo; aviso si la prosa de TUKU difiere del template, ahora solo el libro.
+- **`regenerate`:** `PROSA_DE_TUKU` pasa a ser el libro y `comandos.tuku.md`; sin `reglas/*.tuku.md` ni `subtipos/`.
+- **`context`:** `_style` y `_libro` con los capítulos nuevos, el vocabulario de clasificaciones solo con Registro, y `--chapter` validado contra la lista real.
+- **Textos con rutas viejas.** `todo open --horizon` dice "`### Horizontes` en el libro de estilo"; revisar también las ayudas y mensajes de `lint`, `doctor`, `note` y `init` que nombran `reglas/bitacora.md`, `reglas/notas.md` o `reglas/types.md`.
+- **Tests unitarios:** `test_capitulos`, `test_style`, `test_vocab`, `test_config`, `test_context`, `test_doctor`, `test_init`, `test_regenerate`.
+
+### Epics y escenarios (chat de epics)
+
+- Escenarios que leen el libro o las reglas: 001-02, 001-04, 001-07 (lint del libro) y 005-0X, además del tutorial 010-00.
+- Correr los agénticos con el `AGENTS.md` nuevo, y **medir si los agentes saltan la lectura del capítulo**. Con eso se decide si hace falta la compuerta.
+- [`devel/epics.md`](devel/epics.md): ajustar los epics que describen el libro, el vocabulario o `cycle_name`.
+
+### Docs (chat de specs)
+
+- [`docs/glosario.md`](docs/glosario.md): `LIBRO-DE-ESTILO.md` hoy dice "reglas del autor... de aquí nacen los comandos". Es al revés: es de TUKU, orientación, y los comandos hacen cumplir.
+- Tutoriales [01](docs/tutorial/01-instalar.md) a [04](docs/tutorial/04-frentes-y-notas.md): dicen que el vocabulario está en el libro; ahora está en `reglas/*.user.md`.
+- [`template/README.md`](template/README.md): la fila de `CAPACIDAD.md` ("sin un solo dato, diciendo que todavía no se ha declarado nada...") y la de `config.tuku.md` (`cycle_name`); revisar el paso de instalar a mano.
+
 ## Agente
 
 - **Detectar menciones sin enlace.** Los comandos no enlazan solos: si el agente olvida enlazar una nota que `tuku context note` le ofreció, nada lo avisa. Un chequeo de `tuku doctor` que lo nombre como pregunta, sin fallar, queda por decidir.
