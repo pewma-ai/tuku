@@ -12,7 +12,7 @@ Deja `AHORA.md` y `PENDIENTES.md` abiertos al lado mientras hablas.
 > Tengo que decidir si le confirmo a la Importadora Andina el pedido de marzo. Es mucha plata y la línea de crédito del banco todavía no está lista. ¿Qué tengo pendiente para hoy antes de meterme en eso?
 
 > [!check] Qué debería pasar
-> - El agente te lista tus pendientes abiertos, empezando por los que vencen hoy, y te ayuda a pensar.
+> - El agente responde con pendientes que de verdad tienes abiertos, los más cercanos primero, sin inventar ninguno, y te ayuda a pensar.
 > - Ningún archivo cambió.
 
 Consultar y deliberar no son hechos.
