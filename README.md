@@ -6,27 +6,29 @@ Qué es y para quién, en [`docs/brief.md`](docs/brief.md). Cómo se organiza es
 
 ## Instalar
 
-Para probar TUKU, crear un directorio de estado cero con una línea:
+Necesita [`uv`](https://docs.astral.sh/uv/) o `pipx`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pewma-ai/tuku/devel/install.sh | sh -s -- mi-vault
+uv tool install --force "git+https://github.com/pewma-ai/tuku.git@devel"
+tuku init mi-vault
 ```
 
-Solo necesita `curl`, `tar` y `python3`; no instala ningún programa.
+`tuku init` copia el template a `mi-vault/` sin tocar la red y deja el primer ciclo abierto. Después, abrir un agente (Claude Code, Codex, Antigravity) sobre esa carpeta y contarle el primer hecho. Para ver qué quedó en disco, `tuku init -h`, o seguir el [tutorial](docs/tutorial/README.md), que recorre una semana de trabajo en diez capítulos.
 
-Pregunta el nombre del autor (opcional, Enter lo deja en blanco), y si el destino ya existe y no está vacío pide confirmación antes de sobrescribir. Nada más.
-
-Al terminar, abrir `mi-vault/AHORA.md` y escribir la primera línea.
-
-Para instalarlo a mano, sin `curl`, ver [`template/README.md`](template/README.md).
+Para instalarlo a mano, sin `uv`, ver [`template/README.md`](template/README.md).
 
 ## Cómo funciona
 
 Son archivos Markdown y nada más: se leen con cualquier editor, viajan en un pendrive, siguen siendo legibles cuando esta herramienta ya no exista.
 
-- El autor dicta lo que hizo y un agente lo escribe en la bitácora.
-- Comandos deterministas leen esa bitácora para abrir y cerrar pendientes, sembrar cadencias y mantener índices.
+- El autor habla con un agente. El agente decide qué comando `tuku` corresponde y el comando escribe: registros en `AHORA.md`, pendientes en `PENDIENTES.md`, ámbitos en `ambitos/` y notas en `notas/`.
+- El agente se guía por el `AGENTS.md` del vault, la skill del asistente y el [libro de estilo](template/vanilla/LIBRO-DE-ESTILO.md), que se lee por capítulos.
+- Los comandos son deterministas: lo derivado (vistas, índices, ciclos) se regenera con `tuku regenerate` y `tuku doctor` revisa la coherencia.
 - Todo lo que importa queda en texto plano, no en la memoria de un modelo, y el sistema entero se puede operar a mano.
+
+## Estado
+
+En desarrollo en la rama `devel`. El registro, los pendientes, los ámbitos y las notas funcionan; abrir y cerrar el ciclo y las cadencias vienen después. El detalle, epic por epic, está en [`devel/epics.md`](devel/epics.md).
 
 ## Autor
 
