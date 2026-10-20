@@ -18,7 +18,7 @@ Dicta ahora seguido, como al final de una jornada. El agente atiende cada cosa e
 >
 > | Frase | Hecho | Ámbito | Pendientes |
 > | --- | --- | --- | --- |
-> | Ximena | Mandaste los documentos del F29 y sale IVA | `personal` | Pagar el IVA, unos ciento ochenta mil, con `Vence` el día 20 |
+> | Ximena | Mandaste los documentos del F29 y sale IVA, unos ciento ochenta mil | `personal` | Pagar el IVA, con `Vence` el día 20 |
 > | Patricia | La llamada, con el motivo del cambio de proveedor | `liceo-andes`, por las keywords | Cotizarle de nuevo, y mandarle las muestras. Los dos en `esta semana` |
 > | Banco | La visita y lo que te pidió Felipe Correa | `personal` | Llevar al banco los tres F29 y el balance, en `esta semana` |
 > | Vicente | La fiebre y la mañana perdida | `personal` | Ninguno: ya pasó |

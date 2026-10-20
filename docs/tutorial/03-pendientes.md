@@ -45,8 +45,8 @@ Un pendiente sin fecha cuelga de un **horizonte**, un escalón de la escalera qu
 > [!check] Qué debería pasar
 > - La fila de la cotización desapareció de `PENDIENTES.md`.
 > - `AHORA.md` tiene el cierre `(Hecho): ~~…~~` con la hora de ahora y el texto tachado.
-> - El registro que abrió el compromiso, escrito hoy, se retiró: el día no lo cuenta dos veces.
-> - El monto, un millón ochocientos más IVA, quedó en un registro propio.
+> - El registro `**pendiente**` que abrió el compromiso, escrito hoy, se retiró: el día no lo cuenta dos veces. La llamada, que es un hecho, se queda.
+> - El monto, un millón ochocientos más IVA, quedó en una línea aparte de `AHORA.md`.
 
 Un mismo comando retira la fila y escribe la constancia. Si el texto no coincide con ninguna fila, el comando avisa y deja solo el registro.
 

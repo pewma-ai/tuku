@@ -107,7 +107,7 @@ Una nota es un archivo de `notas/` sobre algo que no pertenece a un día. `tuku 
 2. **Deja una entrada en la bitácora**, con el enlace a la nota. La escribe el mismo `note create`: no se suma un `entry create`.
 3. **Cierra con `## Ver además`**, donde cada enlace dice para qué conecta.
 4. **Un tipo enlazable se enlaza al nombrarlo.** Si la columna `Enlazable` del tipo dice `sí`, `tuku context` ofrece sus últimas notas (hasta `context_note_limit`), y se enlazan como dice el capítulo Registro; dentro de una nota, la ruta es relativa a `notas/`. Una nota de un tipo no enlazable existe, pero nadie la enlaza sola.
-5. **Una persona sigue una plantilla** (`--subtype persona`): el nombre completo como título; quién es y de dónde se conoce; los hechos, cada uno con la fecha del registro que lo sostiene; las inferencias aparte y marcadas como tales. Solo se infiere lo que sirve para trabajar mejor con ella. Los otros nombres con que se la nombra van en `aliases`.
+5. **Una persona sigue una plantilla** (`--subtype persona`): el nombre completo como título; quién es y de dónde se conoce; los hechos, cada uno con la fecha del registro que lo sostiene; las inferencias aparte y marcadas como tales. Solo se infiere lo que sirve para trabajar mejor con ella. Los otros nombres con que se la nombra van en `aliases`, con `--alias` (repetible, o separados por coma): `--alias "don Rodolfo,Rodolfo"`.
 
 > [!example] Ejemplos tuku
 > ```bash

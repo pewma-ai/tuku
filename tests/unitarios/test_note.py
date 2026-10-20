@@ -92,3 +92,17 @@ def test_aliases_en_linea_o_en_bloque() -> None:
         "Los Robles",
     ]
     assert aliases("# sin frontmatter\n") == []
+
+
+def test_compose_escribe_los_aliases_que_context_ofrece_al_agente() -> None:
+    from datetime import date
+
+    texto = note.compose(
+        title="Rodolfo Cifuentes",
+        body="Administrador.",
+        today=date(2026, 8, 11),
+        subtype="persona",
+        aliases=["don Rodolfo", "Rodolfo"],
+    )
+    assert "subtype: persona\naliases: [don Rodolfo, Rodolfo]\ncreated: 2026-08-11" in texto
+    assert note.aliases(texto) == ["don Rodolfo", "Rodolfo"]

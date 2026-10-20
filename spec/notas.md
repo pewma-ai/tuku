@@ -88,7 +88,7 @@ La prueba es simple: **una inferencia que no se le podría mostrar a la persona 
 
 Toda creación de nota mediante `tuku note create` deja huella en la bitácora:
 
-- **Escribe la nota:** en `notas/<slug>.md` con frontmatter OKF (`type: Note`). Si la nota es tipada, incluye su campo `subtype`. Lleva `created` y `updated` con una fecha `AAAA-MM-DD`, iguales al crearla. Los comandos que reescriben la nota (`note rename`) mueven `updated`; quien edita a mano lo mueve también. `tuku context note` ordena por `updated`, y no por la fecha del archivo, porque un clon de git la reinicia.
+- **Escribe la nota:** en `notas/<slug>.md` con frontmatter OKF (`type: Note`). Si la nota es tipada, incluye su campo `subtype`; con `--alias` (repetible, o varios separados por coma) incluye `aliases: [a, b]`, la única forma de declararlos sin editar a mano. Lleva `created` y `updated` con una fecha `AAAA-MM-DD`, iguales al crearla. Los comandos que reescriben la nota (`note rename`) mueven `updated`; quien edita a mano lo mueve también. `tuku context note` ordena por `updated`, y no por la fecha del archivo, porque un clon de git la reinicia.
 - **Estampa constancia:** agrega una línea cronológica en `AHORA.md` registrando la creación de la nota. Ante la omisión de día u hora, los valores por defecto normativos son la fecha actual (**HOY**) y la hora actual (**AHORA**) evaluadas en la zona horaria `TZ` de `reglas/config.tuku.md`.
 
 ### Idempotencia y reparación

@@ -54,13 +54,12 @@ Cuando escribir tiene consecuencias, el agente pregunta antes de decidir por ti.
 En medio de una conversación larga, la realidad interrumpe.
 
 > [!tip] Dile a tu agente
-> Espérate, me acaba de llegar el flete con las cajas de témperas. Llegaron tres cajas rotas y manchadas, voy a tener que reclamar.
+> Espérate, me acaba de llegar el flete con las cajas de témperas. Llegaron tres cajas rotas y manchadas, hay que reclamar.
 
 > [!check] Qué debería pasar
 > - `AHORA.md` tiene el registro del incidente, con su hora, y `PENDIENTES.md` una fila nueva: reclamar las cajas rotas.
-> - El agente retoma el hilo de la Importadora Andina.
 
-Es un hecho consumado y se registra al momento, aunque estés en medio de otra cosa.
+Es un hecho consumado y se registra al momento, aunque estés en medio de otra cosa. El agente puede volver después al hilo de la Importadora Andina.
 
 ## Una propuesta que rechazas
 
@@ -84,7 +83,7 @@ Una propuesta rechazada queda como si nunca se hubiera hecho. Un asistente que r
 > En resumen: el viernes a las diez voy al banco a firmar la ampliación de la línea, y después de eso llamo a Andina para cerrar el pedido.
 
 > [!check] Qué debería pasar
-> - `PENDIENTES.md` tiene dos filas nuevas: ir al banco el viernes a las 10:00, y llamar a Andina el viernes.
+> - `PENDIENTES.md` tiene dos filas nuevas: ir al banco el viernes a las 10:00, y llamar a Andina para cerrar el pedido.
 > - Del resto de la conversación quedó solo lo que ya estaba escrito: el incidente de las témperas y el cierre de las muestras.
 
 De toda la deliberación quedan las acciones que ratificaste.

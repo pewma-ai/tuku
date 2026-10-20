@@ -37,10 +37,22 @@ def _cmd_note_create(args: argparse.Namespace) -> int:
             hour=args.at.hora,
             record=not args.no_record,
             subtype=args.subtype,
+            aliases=_aliases(args.alias),
             now=args.now,
         ),
         "tuku note create",
     )
+
+
+def _aliases(valores: list[str]) -> list[str]:
+    """Los `--alias` repetidos o separados por coma, sin vacíos ni repetidos."""
+    vistos: list[str] = []
+    for valor in valores:
+        for nombre in valor.split(","):
+            nombre = nombre.strip()
+            if nombre and nombre not in vistos:
+                vistos.append(nombre)
+    return vistos
 
 
 def _cmd_note_rename(args: argparse.Namespace) -> int:
@@ -97,6 +109,16 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help=(
             "tipo de la nota, una fila de la tabla de `reglas/notas.user.md` "
             "(por ejemplo `persona`); agrega `subtype` al frontmatter"
+        ),
+    )
+    note_create_p.add_argument(
+        "--alias",
+        action="append",
+        default=[],
+        metavar="NOMBRE",
+        help=(
+            "otro nombre con que se nombra la nota (repetible, o varios separados por coma); "
+            "agrega `aliases` al frontmatter, y `tuku context note` los ofrece al agente"
         ),
     )
     crear.at("cuándo se escribe, para la nota y su constancia; lo que falte, hoy y ahora")

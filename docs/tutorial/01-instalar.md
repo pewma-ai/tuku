@@ -22,7 +22,7 @@ Todo son archivos de texto y cualquier programa los lee. Para mirarlos conviene 
 | --- | --- |
 | `AHORA.md` | Lo que pasó, con su hora. Un encabezado por cada día de la semana en curso |
 | `PENDIENTES.md` | Lo que sigue abierto y cuándo vence |
-| `AGENTS.md` | Lo que tu agente sabe y cómo debe actuar |
+| `AGENTS.md` | Cómo te invocan y los límites de tu agente. Sus reglas de trabajo están en `reglas/skills/asistente/SKILL.md` |
 | `LIBRO-DE-ESTILO.md` | Cómo opera TUKU, capítulo por capítulo. Tu vocabulario (clasificaciones, horizontes y tipos de nota) está en `reglas/*.user.md` y el libro lo incluye |
 | `ambitos/` | Tus frentes: trabajo, casa, un cliente |
 | `notas/` | Lo que sabes y no es de un día |
@@ -34,7 +34,7 @@ Los nombres en MAYÚSCULAS son de TUKU y los de minúsculas son tuyos.
 > - `ambitos/` tiene una sola carpeta, `personal`.
 > - `PENDIENTES.md` está vacío.
 
-Abre `AGENTS.md` y léelo: en dos minutos sabes todo lo que tu agente sabe, porque el vault no guarda otras instrucciones.
+Abre `AGENTS.md` y `reglas/skills/asistente/SKILL.md` y léelos: en cinco minutos sabes todo lo que tu agente sabe, porque el vault no guarda otras instrucciones.
 
 ## Abre tu agente
 

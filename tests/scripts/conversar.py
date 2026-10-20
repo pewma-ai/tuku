@@ -104,12 +104,12 @@ def renderizar(estado: dict[str, Any], titulo: str) -> str:
         "",
     ]
     for n, t in enumerate(estado["turnos"], start=1):
-        escribe = "\n".join(f"- `{c}`" for c in t["escribe"]) or "ninguno"
+        escribe = "\n".join(f"- `{_sin_links(c)}`" for c in t["escribe"]) or "ninguno"
         delta = "\n".join(f"- `{r}`: {c}" for r, c in t["delta"].items()) or "vacío"
         lineas += [
             f"## Turno {n}",
             "",
-            *_callout("question", autor, t.get("enviado"), t["damian"]),
+            *_callout("question", autor, t.get("enviado"), _sin_links(t["damian"])),
             "",
             *_callout(
                 "info",

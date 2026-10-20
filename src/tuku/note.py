@@ -146,6 +146,7 @@ def compose(
     today: date,
     rutas: Mapping[str, str] | None = None,
     subtype: str | None = None,
+    aliases: Sequence[str] = (),
     menciones: Sequence[tuple[str, str]] = (),
 ) -> str:
     """The text of a new note.
@@ -170,9 +171,11 @@ def compose(
     ver_ademas = f"\n{VER_ADEMAS}\n\n" + "\n".join(items) + "\n" if items else ""
 
     marca_subtype = f"subtype: {subtype}\n" if subtype else ""
+    marca_aliases = f"aliases: [{', '.join(aliases)}]\n" if aliases else ""
     creada = today.isoformat()
     return (
-        f"---\ntype: Note\n{marca_subtype}created: {creada}\nupdated: {creada}\n---\n\n"
+        f"---\ntype: Note\n{marca_subtype}{marca_aliases}"
+        f"created: {creada}\nupdated: {creada}\n---\n\n"
         f"# {title}\n\n{body.strip()}\n{ver_ademas}"
     )
 
@@ -274,6 +277,7 @@ def plan_create(
     hour: str | None,
     record: bool,
     subtype: str | None,
+    aliases: Sequence[str] = (),
     now: datetime,
 ) -> Change | Resultado:
     """The change of `tuku note create`: the note and its record in `AHORA.md`, or a rejection.
@@ -311,6 +315,7 @@ def plan_create(
             today=hoy,
             rutas=state.tree.paths,
             subtype=subtype,
+            aliases=aliases,
             menciones=_links_del_cuerpo(body, ruta),
         )
     pages: tuple[str, ...] = ()
@@ -337,6 +342,7 @@ def crear_con_constancia(
     hour: str | None = None,
     record: bool = True,
     subtype: str | None = None,
+    aliases: Sequence[str] = (),
     now: datetime,
 ) -> Resultado:
     """Escribe la nota y deja constancia en la bitácora. Idempotente.
@@ -371,6 +377,7 @@ def crear_con_constancia(
         hour=hour,
         record=record,
         subtype=subtype,
+        aliases=aliases,
         now=now,
     )
     return apply(vault, plan)

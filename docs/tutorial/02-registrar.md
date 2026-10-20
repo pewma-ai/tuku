@@ -9,7 +9,7 @@ Un **registro** es una línea de `AHORA.md`: un hecho, con su hora y su ámbito.
 
 > [!check] Qué debería pasar
 > - `AHORA.md` tiene una línea nueva bajo el día de hoy, con la forma `- HH:MM - [personal](ambitos/personal/personal.md) …`.
-> - La hora es la actual. No dijiste ninguna.
+> - Lleva una hora y no dijiste ninguna: la puso el comando, con el reloj.
 > - El ámbito es `personal`, el único frente que existe.
 
 La hora y el formato los pone el comando, no el agente. Pregúntale al agente qué corrió: te mostrará un comando `tuku entry create`. Todo lo que el sistema escribe pasa por un comando porque un comando da siempre el mismo resultado ([principio 4](../principios.md)).
@@ -19,8 +19,9 @@ La hora y el formato los pone el comando, no el agente. Pregúntale al agente qu
 
 > [!check] Qué debería pasar
 > - Hay una segunda línea, con otra hora, bajo el mismo día.
-> - Puede llevar una palabra entre asteriscos, como `**señal**` o `**fricción**`. Es la clasificación, y la eligió el agente de la tabla de `reglas/clasificaciones.user.md`, que el capítulo Registro de `LIBRO-DE-ESTILO.md` incluye.
 
-La clasificación es opcional y la única decisión del agente en un registro. Si quieres otra palabra, edita la tabla del libro: es tuya.
+Un registro puede llevar una palabra entre asteriscos, como `**señal**` o `**fricción**`: es la clasificación, y el agente la elige de la tabla de `reglas/clasificaciones.user.md`.
+
+La clasificación es opcional y la única decisión del agente en un registro. Si quieres otra palabra, edita `reglas/clasificaciones.user.md`: es tuyo, y el libro lo incluye en el capítulo Registro.
 
 Siguiente: [3. Pendientes](03-pendientes.md).

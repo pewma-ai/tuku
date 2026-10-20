@@ -19,16 +19,15 @@ El agente te va a preguntar qué palabras, al mencionarlas, indican que algo es 
 > [!check] Qué debería pasar
 > - Existe `ambitos/colegio-los-robles/colegio-los-robles.md`.
 > - Su línea `keywords` dice `[rodolfo, cifuentes, los-robles]`, en minúsculas y con guiones.
-> - Los registros de hoy sobre el colegio empiezan con `[colegio-los-robles](…)` en vez de `[personal](…)`. El texto quedó como lo dictaste.
-> - Si algún registro era dudoso, el agente te preguntó antes de moverlo.
+> - `AHORA.md` tiene el registro `**nota**: abrí el ámbito` con `[colegio-los-robles](…)`. Lo que ya habías escrito sigue en `personal`: abrir un frente no cambia nada de lo anterior.
 
-Las **keywords** son las palabras que delatan un frente sin nombrarlo. Gracias a ellas, más adelante dices «hablé con don Rodolfo» y el registro cae en el frente correcto. Mueven registros, nunca los reescriben.
+Las **keywords** son las palabras que delatan un frente sin nombrarlo. Gracias a ellas, más adelante dices «hablé con don Rodolfo» y el registro cae en el frente correcto. Deciden el frente de lo que dictes de ahí en adelante. Lo que ya está escrito se queda donde está, salvo que pidas moverlo («ese registro era de Los Robles»).
 
 > [!tip] Un segundo cliente
-> Liceo Andes también es un cliente. Sus palabras son Patricia, Lillo y Liceo Andes.
+> Liceo Andes también es un cliente. Sus palabras son Patricia y Lillo.
 
 > [!check] Qué debería pasar
-> - Existe `ambitos/liceo-andes/liceo-andes.md` con sus keywords.
+> - Existe `ambitos/liceo-andes/liceo-andes.md` con `keywords: [patricia, lillo]`.
 
 ## Una ficha de persona
 
@@ -36,7 +35,7 @@ Las **keywords** son las palabras que delatan un frente sin nombrarlo. Gracias a
 > Guárdame una ficha de don Rodolfo Cifuentes, administrador de Los Robles. Compran para el segundo semestre y le importa más el plazo de entrega que el precio. Le dicen don Rodolfo.
 
 > [!check] Qué debería pasar
-> - Existe `notas/rodolfo-cifuentes.md` con `subtype: persona` y `aliases: [don Rodolfo, Rodolfo]`.
+> - Existe `notas/rodolfo-cifuentes.md` con `subtype: persona` y `aliases` que incluye «don Rodolfo».
 > - La nota termina con `## Ver además`, que enlaza al frente `colegio-los-robles` con su motivo.
 > - `AHORA.md` tiene el registro de que creaste la nota.
 

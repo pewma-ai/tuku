@@ -237,7 +237,7 @@ flowchart LR
 ## note
 
 ```text
-tuku note create TÍTULO (--body | --body-file) [--scope] [--subtype] [--at] [--no-record]
+tuku note create TÍTULO (--body | --body-file) [--scope] [--subtype] [--alias] [--at] [--no-record]
 tuku note rename TÍTULO NUEVO
 tuku note archive TÍTULO                                            # pendiente
 ```
@@ -247,7 +247,7 @@ tuku note archive TÍTULO                                            # pendiente
 flowchart LR
     subgraph CMD["tuku note"]
         direction TB
-        NC["note create TÍTULO<br/>--body o --body-file<br/>--scope --subtype --at --no-record"]
+        NC["note create TÍTULO<br/>--body o --body-file<br/>--scope --subtype --alias --at --no-record"]
         NR["note rename TÍTULO NUEVO"]
         NA["note archive TÍTULO"]
     end

@@ -11,9 +11,8 @@ Te equivocas, o el agente te entiende mal. Corregir también se dicta.
 
 > [!check] Qué debería pasar
 > - El registro y la fila de `PENDIENTES.md` dicen «seis y media», los dos.
-> - `Vence` trae el jueves a las 18:30.
 
-Si uno cambiara y el otro no, el pendiente ya no se podría cerrar, porque cerrar es repetir su texto. Por eso corregir es un solo comando.
+Si uno cambiara y el otro no, el pendiente ya no se podría cerrar, porque cerrar es repetir su texto. Por eso corregir es un solo comando. Corrige el texto: la columna `Vence` se queda como estaba, porque todavía no hay un comando que la cambie.
 
 ## Renombrar un frente
 
@@ -22,7 +21,7 @@ Si uno cambiara y el otro no, el pendiente ya no se podría cerrar, porque cerra
 
 > [!check] Qué debería pasar
 > - La carpeta y la página pasaron a `ambitos/los-robles/los-robles.md`.
-> - Ningún link del vault conserva el nombre viejo: ni `AHORA.md`, ni la ficha de don Rodolfo.
+> - Ningún link del vault apunta ya a la ruta vieja: ni `AHORA.md`, ni la ficha de don Rodolfo.
 > - Las keywords siguen igual.
 
 ## Pedir lo que ningún comando hace
