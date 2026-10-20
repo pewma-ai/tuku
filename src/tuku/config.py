@@ -16,12 +16,13 @@ from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from tuku import archivo, vocab
+from tuku import archivo, capitulos, vocab
 from tuku.init import MESES, resolver_home
 
 #: Fila de la tabla de configuración: `| `Campo` | `Valor` |`.
 _FILA_CONFIG = re.compile(r"^\|\s*`([^`]+)`\s*\|\s*`?([^`|]*?)`?\s*\|")
-_MARCADOR_AUTOR = "**Nombre del autor:**"
+#: Lo que el autor no ha declarado en la fila `Nombre` de `reglas/autor.user.md`.
+_SIN_DECLARAR = ("pedir al autor", "no especificado", "por declarar")
 
 
 class VaultInvalido(Exception):
@@ -106,7 +107,7 @@ def fecha_corta(fecha: date, formato: str = FORMATO_FECHA) -> str:
 #: Cuántas notas por tipo trae `tuku context note` si la config no dice otra cosa.
 LIMITE_DE_NOTAS = 25
 
-#: Cómo se llama el ciclo si la config no lo dice.
+#: Cómo se llama el ciclo si `reglas/ciclo.user.md` no lo dice.
 CICLO_POR_DEFECTO = "semana"
 
 
@@ -120,7 +121,6 @@ class Preferencias:
     """
 
     zona_horaria: str = ""
-    nombres_de_ciclo: tuple[str, ...] = (CICLO_POR_DEFECTO,)
     ambito_por_defecto: str | None = None
     formato_fecha: str = FORMATO_FECHA
     limite_de_notas: int = LIMITE_DE_NOTAS
@@ -143,10 +143,6 @@ def leer_preferencias(vault: Path | None = None, *, texto: str | None = None) ->
     limite = _limpio(datos, "context_note_limit")
     return Preferencias(
         zona_horaria=_limpio(datos, "TZ"),
-        nombres_de_ciclo=tuple(
-            n.strip() for n in datos.get("cycle_name", "").split(",") if n.strip()
-        )
-        or (CICLO_POR_DEFECTO,),
         ambito_por_defecto=_limpio(datos, "scope_default") or None,
         formato_fecha=_limpio(datos, "date_format") or FORMATO_FECHA,
         limite_de_notas=int(limite)
@@ -205,12 +201,13 @@ def parsear_config_md(texto: str) -> dict[str, str]:
 
 
 def parsear_autor(texto_autor: str) -> str | None:
-    """Extrae el nombre del autor si fue declarado en `reglas/autor.md`."""
-    for linea in texto_autor.splitlines():
-        if linea.lstrip().startswith(_MARCADOR_AUTOR):
-            resto = linea.split(_MARCADOR_AUTOR, 1)[1].strip()
-            if resto and not resto.lower().startswith("por declarar"):
-                return resto
+    """El nombre del autor: la fila `Nombre` de `reglas/autor.user.md`, si se declaró."""
+    tabla = capitulos.primera_tabla(texto_autor)
+    for fila in tabla[1:] if tabla else []:
+        if len(fila) > 1 and fila[0].lower() == "nombre":
+            valor = fila[1].strip()
+            if valor and not valor.lower().startswith(_SIN_DECLARAR):
+                return valor
     return None
 
 
@@ -236,7 +233,7 @@ def leer_config(
 ) -> Configuracion:
     """Lee y consolida configuración, archivos del autor y plantillas de un vault.
 
-    `textos_reglas` reemplaza archivos de `reglas/` por su ruta (`reglas/autor.md`),
+    `textos_reglas` reemplaza archivos de `reglas/` por su ruta (`reglas/autor.user.md`),
     para quien ya los tiene en memoria.
     """
     vault = Path(vault)
@@ -253,7 +250,7 @@ def leer_config(
             return textos_reglas[ruta]
         return archivo.leer(archivo_vault(vault, ruta))
 
-    autor = parsear_autor(regla("reglas/autor.md"))
+    autor = parsear_autor(regla("reglas/autor.user.md"))
     vocabs = vocab.leer({ruta: regla(ruta) for ruta in vocab.ARCHIVOS})
 
     # 3. Plantilla AHORA.md
@@ -268,13 +265,13 @@ def leer_config(
     return Configuracion(
         vault=vault,
         zona_horaria=prefs.zona_horaria,
-        nombres_de_ciclo=prefs.nombres_de_ciclo,
+        nombres_de_ciclo=tuple(vocabs.get("ciclos", [])) or (CICLO_POR_DEFECTO,),
         datos=prefs.datos,
         autor=autor,
         vocabularios=vocabs,
         clasificaciones=vocabs.get("clasificaciones", []),
         horizontes=vocabs.get("horizontes", []),
         tipos_nota=vocabs.get("tipos-de-nota", []),
-        tipos_enlazables=vocab.enlazables(regla("reglas/notas.md")),
+        tipos_enlazables=vocab.enlazables(regla("reglas/notas.user.md")),
         plantilla_ahora=plantilla_ahora,
     )

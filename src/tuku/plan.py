@@ -26,7 +26,7 @@ class State:
     """What a planner reads from the vault, read once and before planning.
 
     `logbook` is `AHORA.md` and `todo` is `PENDIENTES.md`; a use case that does not
-    read one leaves it empty. `horizons` are the author's steps (`### Horizontes`)
+    read one leaves it empty. `horizons` are the author's steps (`reglas/pendientes.user.md`)
     and `default_scope` is the config's `scope_default`.
     """
 

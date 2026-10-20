@@ -5,7 +5,7 @@ y sin tema corre todas. Junta los lint de cada archivo y agrega lo que ninguno
 cubre: que las tablas de contrato existan y estén bien formadas. Es el comando de
 quien vuelve al vault después de un mes y no se acuerda de qué revisar.
 
-Los `type` de TUKU, en el capítulo «Tipos de archivo» del libro de estilo, son
+Los `type` de TUKU, en el capítulo «Formato OKF» del libro de estilo, son
 contrato con OKF: una fila que falta es error, porque algún archivo del vault va a
 quedar sin `type` que ponerle. Los vocabularios del autor, en `reglas/`, son
 distintos: una fila que no está no es error, es vocabulario por formalizar.
@@ -35,7 +35,7 @@ CAMPOS_REQUERIDOS = ("TZ", "tuku_template", "tuku_version")
 
 #: Los `type` sin los cuales un vault no se puede describir entero.
 #: El capítulo del libro de estilo que declara los `type` de TUKU.
-TIPOS_DE_TUKU = "Tipos de archivo"
+TIPOS_DE_TUKU = "Formato OKF"
 
 TIPOS_REQUERIDOS = ("Logbook", "Todo", "Scope", "Note", "Cadence", "Config", "Style Guide")
 
@@ -44,7 +44,7 @@ _FILA = re.compile(r"^\|\s*`([^`]+)`\s*\|")
 #: Lo que en un documento del vault se lee como una invocación: algo entre
 #: backticks que empieza por `tuku`. Se mira el archivo entero y no solo la
 #: tabla, porque la prosa que rodea la tabla también nombra comandos.
-_INVOCACION = re.compile(r"`tuku ([a-z]+(?: [a-z]+)?)`")
+_INVOCACION = re.compile(r"(?:`|^)tuku ([a-z]+(?: [a-z]+)?)(?=[` ]|$)", re.MULTILINE)
 
 #: El `type` del frontmatter. Solo se mira el bloque de arriba del archivo.
 _TYPE = re.compile(r"^type:\s*(.+?)\s*$", re.MULTILINE)
@@ -55,17 +55,18 @@ ARCHIVOS_REQUERIDOS = (
     "PENDIENTES.md",
     "LIBRO-DE-ESTILO.md",
     "reglas/config.tuku.md",
-    "reglas/types.md",
-    "reglas/autor.md",
-    "reglas/bitacora.md",
-    "reglas/pendientes.md",
-    "reglas/notas.md",
+    "reglas/types.user.md",
+    "reglas/autor.user.md",
+    "reglas/clasificaciones.user.md",
+    "reglas/pendientes.user.md",
+    "reglas/notas.user.md",
+    "reglas/ciclo.user.md",
     "reglas/plantilla/AHORA.md",
 )
 
 #: Reglas de operación, no conocimiento: quedan fuera de OKF a propósito
 #: (lo dice el `## OKF` del libro de estilo).
-SIN_FRONTMATTER = ("AGENTS.md",)
+SIN_FRONTMATTER = ("AGENTS.md", "SKILL.md")
 
 
 @dataclass(frozen=True)
@@ -81,7 +82,7 @@ class Revision:
 
 
 def tipos_declarados(types_md: str) -> list[str]:
-    """Los `type` que declara la tabla de `reglas/types.md`, en orden.
+    """Los `type` que declara la tabla de `reglas/types.user.md`, en orden.
 
     Cuenta desde la fila separadora, porque el encabezado de la tabla también
     lleva `type` entre backticks y si no se descarta se cuenta como un tipo más.
@@ -106,7 +107,7 @@ def tipos_declarados(types_md: str) -> list[str]:
 
 
 def tipos_de_tuku(libro: str) -> list[str]:
-    """Los `type` de TUKU: la tabla del capítulo «Tipos de archivo» del libro de estilo."""
+    """Los `type` de TUKU: la tabla del capítulo «Formato OKF» del libro de estilo."""
     cap = capitulos.capitulo(libro, TIPOS_DE_TUKU)
     return tipos_declarados("\n".join(cap.cuerpo)) if cap else []
 
@@ -118,7 +119,7 @@ def revisar_tipos(libro: str | None, types_md: str | None) -> Revision:
     if types_md is None:
         return Revision(
             "types",
-            "reglas/types.md: error: falta el archivo. "
+            "reglas/types.user.md: error: falta el archivo. "
             "Es donde el autor agrega sus `type` a los de TUKU, y el libro lo transcluye.",
             False,
         )
@@ -141,7 +142,7 @@ def revisar_tipos(libro: str | None, types_md: str | None) -> Revision:
         lista = ", ".join(f"`{t}`" for t in repetidos)
         return Revision(
             "types",
-            f"reglas/types.md: error: repite tipos de TUKU: {lista}. "
+            f"reglas/types.user.md: error: repite tipos de TUKU: {lista}. "
             "Ahí van solo los que el autor agrega.",
             False,
         )
@@ -253,7 +254,7 @@ def revisar_frontmatter(vault: Path, *, tipos_validos: list[str]) -> Revision:
     exista y esté en la tabla, que es lo que hace legible el archivo para
     cualquier cosa que hable OKF.
 
-    Los `AGENTS.md` quedan fuera: son reglas de operación, no conocimiento.
+    Los `AGENTS.md` y los `SKILL.md` quedan fuera: son reglas de operación, no conocimiento.
     """
     problemas: list[str] = []
     revisados = 0
@@ -267,12 +268,12 @@ def revisar_frontmatter(vault: Path, *, tipos_validos: list[str]) -> Revision:
         if tipo is None:
             problemas.append(
                 f"{ruta}: error: no declara `type` en su frontmatter. "
-                "Agrégalo con uno de los del libro de estilo o de `reglas/types.md`."
+                "Agrégalo con uno de los del libro de estilo o de `reglas/types.user.md`."
             )
         elif tipos_validos and tipo not in tipos_validos:
             problemas.append(
                 f"{ruta}: error: `type: {tipo}` no está en el libro de estilo ni en "
-                "`reglas/types.md`. Usa uno de sus tablas, o agrégalo a `reglas/types.md`."
+                "`reglas/types.user.md`. Usa uno de sus tablas, o agrégalo a ese archivo."
             )
 
     if problemas:
@@ -508,7 +509,7 @@ def _check_version(c: _Check) -> list[Revision]:
 
 
 def _check_types(c: _Check) -> list[Revision]:
-    return [revisar_tipos(c.read("LIBRO-DE-ESTILO.md"), c.read("reglas/types.md"))]
+    return [revisar_tipos(c.read("LIBRO-DE-ESTILO.md"), c.read("reglas/types.user.md"))]
 
 
 def _check_files(c: _Check) -> list[Revision]:
@@ -517,7 +518,7 @@ def _check_files(c: _Check) -> list[Revision]:
 
 def _check_frontmatter(c: _Check) -> list[Revision]:
     libro = c.read("LIBRO-DE-ESTILO.md")
-    types_md = c.read("reglas/types.md")
+    types_md = c.read("reglas/types.user.md")
     valid = [
         *(tipos_de_tuku(libro) if libro else []),
         *(tipos_declarados(types_md) if types_md else []),
@@ -528,7 +529,11 @@ def _check_frontmatter(c: _Check) -> list[Revision]:
 def _check_dispatch(c: _Check) -> list[Revision]:
     if c.comandos is None:
         return []
-    return [revisar_despacho(c.read("AGENTS.md"), c.comandos)]
+    agents = c.read("AGENTS.md")
+    skill = c.read("reglas/skills/asistente/SKILL.md")
+    # The dispatch table lives in the skill the AGENTS.md points to.
+    text = None if agents is None else f"{agents}\n{skill or ''}"
+    return [revisar_despacho(text, c.comandos)]
 
 
 def _check_link(c: _Check) -> list[Revision]:

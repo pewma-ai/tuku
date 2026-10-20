@@ -47,7 +47,7 @@ MESES = [
     "diciembre",
 ]
 
-_MARCADOR_AUTOR = "**Nombre del autor:**"
+_FILA_NOMBRE = "nombre"
 
 #: De dónde sale TUKU: se escribe en cada vault para saber dónde revisar cambios.
 ORIGEN = "https://github.com/pewma-ai/tuku"
@@ -70,7 +70,7 @@ class TukuHomeInvalido(Exception):
 
 
 class MarcadorAutorFaltante(Exception):
-    """No se encontró el marcador del autor en `reglas/autor.md`."""
+    """No se encontró la fila `Nombre` en la tabla de `reglas/autor.user.md`."""
 
 
 def _tiene_template(p: Path) -> bool:
@@ -270,23 +270,24 @@ def _sembrar_ahora(contenido: str, desde: date) -> str:
 
 
 def _sembrar_autor(destino: Path, autor: str) -> None:
-    """Escribe el nombre del autor en `reglas/autor.md` del vault sembrado.
+    """Escribe el nombre del autor en la fila `Nombre` de `reglas/autor.user.md`.
 
-    Calza por prefijo de línea, no por la oración entera: lo que el template pone
-    tras la etiqueta ("por declarar...") es prosa que puede cambiar sin que esto
-    deje de funcionar.
+    Calza por la primera celda de la fila, no por el valor: lo que el template pone
+    como valor ("PEDIR AL AUTOR!") puede cambiar sin que esto deje de funcionar.
     """
-    libro = destino / "reglas" / "autor.md"
-    lineas = libro.read_text(encoding="utf-8").splitlines(keepends=True)
+    ruta = destino / "reglas" / "autor.user.md"
+    lineas = ruta.read_text(encoding="utf-8").splitlines(keepends=True)
     for i, linea in enumerate(lineas):
-        if linea.lstrip().startswith(_MARCADOR_AUTOR):
+        celdas = linea.strip().strip("|").split("|")
+        es_nombre = celdas[0].strip().lower() == _FILA_NOMBRE
+        if linea.lstrip().startswith("|") and len(celdas) >= 2 and es_nombre:
+            ancho = len(celdas[1]) - 2
             fin = "\n" if linea.endswith("\n") else ""
-            lineas[i] = f"{_MARCADOR_AUTOR} {autor}{fin}"
-            libro.write_text("".join(lineas), encoding="utf-8")
+            lineas[i] = f"|{celdas[0]}| {autor.ljust(max(ancho, 0))} |{fin}"
+            ruta.write_text("".join(lineas), encoding="utf-8")
             return
     raise MarcadorAutorFaltante(
-        f"no se encontró la línea '{_MARCADOR_AUTOR}' en {libro}: "
-        "agrégalo en el capítulo '## Autor'."
+        f"no se encontró la fila 'Nombre' en la tabla de {ruta}: agrégala."
     )
 
 
@@ -327,7 +328,7 @@ def init(
     `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. El ciclo
     sembrado es la semana de lunes a domingo que contiene `desde`, que quien
     invoca resuelve con su reloj. `author`, si
-    se pasa y no viene vacío, se escribe en `reglas/autor.md`. `comandos`, si
+    se pasa y no viene vacío, se escribe en `reglas/autor.user.md`. `comandos`, si
     se pasa, es `reglas/comandos.tuku.md`: lo compone la capa del CLI, que es la
     que conoce los comandos.
     """

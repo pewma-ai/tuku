@@ -99,6 +99,21 @@ def tabla_unica(texto: str, nombre: str) -> Tabla | None:
     return todas[0] if todas else None
 
 
+def primera_tabla(texto: str) -> Tabla | None:
+    """The first table of `texto` without its frontmatter, or `None` if it has none.
+
+    The author's files in `reglas/` hold a single table and no headings, so a
+    command reads that table without looking for a chapter by name.
+    """
+    todas = tablas(sin_frontmatter(texto).splitlines())
+    return todas[0] if todas else None
+
+
+def tablas_del_archivo(texto: str) -> list[Tabla]:
+    """Every table of `texto` without its frontmatter."""
+    return tablas(sin_frontmatter(texto).splitlines())
+
+
 def exceso_de_tablas(texto: str) -> list[Capitulo]:
     """The chapters of `texto` that hold more than one table."""
     return [c for c in separar(texto) if len(c.tablas()) > 1]

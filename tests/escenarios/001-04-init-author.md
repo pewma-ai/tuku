@@ -1,8 +1,8 @@
 # Escenario · 001-04-init-author
 
-**Cubre:** epic 001, decisión 10. El nombre lleva espacios, paréntesis y guion para verificar que la siembra no lo parte ni toca la prosa que sigue al marcador.
+**Cubre:** epic 001, decisión 10. El nombre lleva espacios, paréntesis y guion para verificar que la siembra no lo parte ni toca el resto de la tabla.
 
-## Escenario: el nombre del autor queda en reglas/autor.md
+## Escenario: el nombre del autor queda en reglas/autor.user.md
 
 Dado un directorio destino vacío
 Cuando se corre
@@ -11,8 +11,8 @@ Cuando se corre
 tuku init mi-vault --at 2026-08-11 --author "ARTURO PEREZ-REVERTE (Arturo)"
 ```
 
-Entonces `reglas/autor.md` queda con ese nombre en el capítulo "Autor"
-Y no sobrevive el placeholder `por declarar` en la línea del nombre
+Entonces `reglas/autor.user.md` queda con ese nombre en la fila `Nombre` de su tabla
+Y no sobrevive el placeholder `PEDIR AL AUTOR!` en esa fila
 
 ## Escenario: un nombre en blanco deja el vault operable
 
@@ -23,7 +23,7 @@ Cuando se corre
 tuku init en-blanco --at 2026-08-11 --author "   "
 ```
 
-Entonces la línea `**Nombre del autor:**` queda intacta con su texto de partida
+Entonces la fila `Nombre` queda intacta con su texto de partida
 Y el vault igual queda operable (principio 2: dejar el nombre en blanco no impide escribir)
 
 ## Cómo se corre
@@ -36,5 +36,5 @@ Cada escenario deja lo suyo bajo `playground/001-04-init-author/`: `mi-vault/` e
 
 ## Qué se mira a mano
 
-- Abrir `reglas/autor.md` y ver el nombre **al inicio del documento**, en "Autor", sin buscarlo; y que `tuku context style` lo muestre en el capítulo del autor.
+- Abrir `reglas/autor.user.md` y ver el nombre en la primera fila de la tabla, sin buscarlo; y que `tuku context style` lo muestre en el capítulo Autor.
 - Que quede claro, leyendo, que dejarlo en blanco es válido.

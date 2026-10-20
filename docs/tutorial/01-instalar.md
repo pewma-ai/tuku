@@ -23,7 +23,7 @@ Todo son archivos de texto y cualquier programa los lee. Para mirarlos conviene 
 | `AHORA.md` | Lo que pasó, con su hora. Un encabezado por cada día de la semana en curso |
 | `PENDIENTES.md` | Lo que sigue abierto y cuándo vence |
 | `AGENTS.md` | Lo que tu agente sabe y cómo debe actuar |
-| `LIBRO-DE-ESTILO.md` | Tu vocabulario: clasificaciones, horizontes y tipos de nota |
+| `LIBRO-DE-ESTILO.md` | Cómo opera TUKU, capítulo por capítulo. Tu vocabulario (clasificaciones, horizontes y tipos de nota) está en `reglas/*.user.md` y el libro lo incluye |
 | `ambitos/` | Tus frentes: trabajo, casa, un cliente |
 | `notas/` | Lo que sabes y no es de un día |
 

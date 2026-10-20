@@ -12,7 +12,7 @@ Algunas notas no son libres: son sobre algo que se repite en la bitácora y que 
 
 **"Persona" no es una entidad del diseño.** Serlo la volvería un caso especial, y en cuanto apareciera el segundo concepto inferido habría que abrir otro. El concepto general es la **nota tipada**: una nota que declara `subtype` en su frontmatter y que por eso tiene plantilla y procedimiento de destilado.
 
-La lista de tipos es **abierta**, igual que las clasificaciones y los horizontes (ver [`bitacora.md`](bitacora.md)). Vive en el capítulo `## Tipos de nota` de `reglas/notas.md` y crece cuando el uso revela uno nuevo. Cada tipo tiene su archivo en `reglas/subtipos/` (`persona.tuku.md`), con lo que declara abajo; la tabla de `reglas/notas.md` es la única fuente del resto, entre ello si es enlazable. `tuku note create --subtype persona` escribe el campo y rechaza un tipo que la tabla no lista, con la lista de los que sí: agregar un tipo es agregar una fila.
+La lista de tipos es **abierta**, igual que las clasificaciones y los horizontes (ver [`bitacora.md`](bitacora.md)). Vive en la tabla de `reglas/notas.user.md` y crece cuando el uso revela uno nuevo. La plantilla de `persona` (qué barrer, qué inferir, cómo enlazar) está en el capítulo Nota del libro de estilo; la tabla es la única fuente del resto, entre ello si es enlazable. `tuku note create --subtype persona` escribe el campo y rechaza un tipo que la tabla no lista, con la lista de los que sí: agregar un tipo es agregar una fila.
 
 ## El destilado no depende del tipo
 
@@ -37,7 +37,7 @@ El paso 3 es caro y conviene aislarlo: barrer meses de bitácoras no cabe dentro
 | Cómo enlazar | Cómo se nombra el archivo y cómo se referencia |
 | Enlazable | Si `tuku context` ofrece sus notas al agente para enlazarlas al registrar (ver abajo). Es la columna de la tabla del libro, no una línea del archivo |
 
-Los tipos y su columna "Enlazable" están en `## Tipos de nota` de `reglas/notas.md`: `persona` es enlazable, `idea` no. Se decide por tipo y no nota por nota, para que ninguna quede olvidada.
+Los tipos y su columna "Enlazable" están en la tabla de `reglas/notas.user.md`: `persona` es enlazable, `idea` no. Se decide por tipo y no nota por nota, para que ninguna quede olvidada.
 
 ## Enlazar notas
 

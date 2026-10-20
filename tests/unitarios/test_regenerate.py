@@ -97,13 +97,12 @@ def test_libro_trae_la_prosa_de_tuku_y_no_toca_lo_del_autor_ni_los_valores(
 ) -> None:
     monkeypatch.setenv("TUKU_HOME", str(RAIZ_REPO))
     v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
-    libro, tuku_md = v / "LIBRO-DE-ESTILO.md", v / "reglas" / "bitacora.tuku.md"
-    autor, config = v / "reglas" / "bitacora.md", v / "reglas" / "config.tuku.md"
+    libro = v / "LIBRO-DE-ESTILO.md"
+    autor, config = v / "reglas" / "clasificaciones.user.md", v / "reglas" / "config.tuku.md"
     original = libro.read_text(encoding="utf-8")
     libro.write_text("editado a mano\n", encoding="utf-8")
-    tuku_md.unlink()
     autor.write_text(
-        "---\ntype: Config\n---\n\n## Clasificaciones\n\n| C |\n| --- |\n| `mía` |\n",
+        "---\ntype: Style Guide\n---\n\n| C |\n| --- |\n| `mía` |\n",
         encoding="utf-8",
     )
     valores = config.read_text(encoding="utf-8").replace("`MMM/DD`", "`DD/MM`")
@@ -112,8 +111,7 @@ def test_libro_trae_la_prosa_de_tuku_y_no_toca_lo_del_autor_ni_los_valores(
     r = regenerar(v, tema="libro")
 
     assert r.ok and "regenerado: LIBRO-DE-ESTILO.md" in r.mensaje
-    assert "regenerado: reglas/bitacora.tuku.md" in r.mensaje
-    assert libro.read_text(encoding="utf-8") == original and tuku_md.is_file()
+    assert libro.read_text(encoding="utf-8") == original
     assert "`mía`" in autor.read_text(encoding="utf-8"), "lo del autor no se toca"
     assert config.read_text(encoding="utf-8") == valores, "los valores del autor no se tocan"
     assert regenerar(v, tema="libro").mensaje == "regenerate: todo estaba al día."

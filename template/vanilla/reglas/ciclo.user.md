@@ -2,7 +2,9 @@
 type: Style Guide
 editable: true
 modified_time: null
-rules: "Texto libre. El nombre y la duración del ciclo no van aquí sino en `config.tuku.md` (`cycle_name`)."
+rules: "Una fila por ciclo, en el orden en que se alternan. Los encabezados de la tabla no se cambian, porque los leen los comandos. `semana` va de lunes a domingo; con otro nombre, el rango se dice al abrir el ciclo."
 ---
 
-El ciclo es la semana: de lunes a viernes, y el fin de semana, sábado y domingo.
+| Ciclo    | Días                                                              |
+| -------- | ----------------------------------------------------------------- |
+| `semana` | De lunes a viernes, y el fin de semana, sábado y domingo (7 días) |

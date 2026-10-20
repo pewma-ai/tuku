@@ -2,10 +2,10 @@
 
 Revisa los contratos que los comandos de TUKU necesitan para operar
 (`spec/vault.md`, "El libro de estilo"):
-1. El marcador del autor, `**Nombre del autor:**`, en `reglas/autor.md`.
-2. Que cada archivo de vocabulario (`reglas/bitacora.md`, `reglas/pendientes.md`,
-   `reglas/notas.md`) tenga su capítulo `##` con una tabla de términos.
-3. Que ningún capítulo del libro ni de `reglas/` tenga más de una tabla.
+1. La fila `Nombre` de la tabla de `reglas/autor.user.md`.
+2. Que cada archivo de vocabulario (`reglas/clasificaciones.user.md`,
+   `reglas/pendientes.user.md`, `reglas/notas.user.md`) tenga su tabla de términos.
+3. Que ningún capítulo del libro ni archivo del autor tenga más de una tabla.
 4. Que cada transclusión `![](ruta)` del libro apunte a un archivo que existe.
 
 Toda falla reporta el defecto y la corrección (spec/cli.md).
@@ -19,9 +19,8 @@ from dataclasses import dataclass
 from tuku import capitulos, vocab
 from tuku.lint import ERROR, PREGUNTA
 
-_MARCADOR_AUTOR = "**Nombre del autor:**"
 LIBRO = "LIBRO-DE-ESTILO.md"
-AUTOR = "reglas/autor.md"
+AUTOR = "reglas/autor.user.md"
 
 #: Los archivos que el lint necesita además de las transclusiones del libro.
 ARCHIVOS = (LIBRO, AUTOR, *vocab.ARCHIVOS)
@@ -51,45 +50,45 @@ def lint(textos: Mapping[str, str | None]) -> list[HallazgoEstilo]:
     """
     hallazgos: list[HallazgoEstilo] = []
 
-    # 1. Marcador del autor
+    # 1. La fila Nombre del autor
     autor = textos.get(AUTOR)
     if autor is None:
-        hallazgos.append(_falta_archivo(AUTOR, f"con el marcador '{_MARCADOR_AUTOR}'"))
-    elif not any(ln.lstrip().startswith(_MARCADOR_AUTOR) for ln in autor.splitlines()):
+        hallazgos.append(_falta_archivo(AUTOR, "con su tabla Campo y Valor y la fila 'Nombre'"))
+    elif not _tiene_fila_nombre(autor):
         hallazgos.append(
             HallazgoEstilo(
                 archivo=AUTOR,
                 linea=None,
                 grado=ERROR,
-                defecto=f"falta el marcador '{_MARCADOR_AUTOR}'",
-                correccion="Agrégalo bajo '## Autor' para que `tuku init --author` funcione.",
+                defecto="falta la fila 'Nombre' en la tabla",
+                correccion="Agrégala para que `tuku init --author` funcione.",
             )
         )
 
-    # 2. Capítulos de vocabulario y sus tablas
-    for vocabulario, (ruta, nombre) in vocab.FUENTES.items():
+    # 2. Las tablas de vocabulario
+    for vocabulario, ruta in vocab.FUENTES.items():
         texto = textos.get(ruta)
         if texto is None:
-            hallazgos.append(_falta_archivo(ruta, f"con el capítulo '## {nombre}' y su tabla"))
+            hallazgos.append(_falta_archivo(ruta, "con su tabla de términos"))
             continue
-        cap = capitulos.capitulo(texto, nombre)
-        if cap is None:
+        tabla = capitulos.primera_tabla(texto)
+        if tabla is None:
             hallazgos.append(
                 HallazgoEstilo(
                     archivo=ruta,
                     linea=None,
                     grado=ERROR,
-                    defecto=f"falta el capítulo de contrato '## {nombre}'",
-                    correccion="Es contrato: agrégalo con su tabla debajo.",
+                    defecto="falta la tabla de términos",
+                    correccion="Es contrato: agrégala con sus encabezados.",
                 )
             )
         elif not vocab.terminos(texto, vocabulario):
             hallazgos.append(
                 HallazgoEstilo(
                     archivo=ruta,
-                    linea=cap.linea,
+                    linea=None,
                     grado=PREGUNTA,
-                    defecto=f"la tabla de '## {nombre}' no tiene ningún término declarado",
+                    defecto="la tabla no tiene ningún término declarado",
                     correccion=(
                         "Declara al menos un término en la primera columna entre backticks "
                         "(p. ej. `progreso`)."
@@ -97,9 +96,24 @@ def lint(textos: Mapping[str, str | None]) -> list[HallazgoEstilo]:
                 )
             )
 
-    # 3. Una tabla por capítulo
+    # 3. Una tabla por archivo del autor y por capítulo del libro
     for ruta, texto in textos.items():
         if texto is None:
+            continue
+        if ruta.endswith(".user.md"):
+            n = len(capitulos.tablas_del_archivo(texto))
+            if n > 1:
+                hallazgos.append(
+                    HallazgoEstilo(
+                        archivo=ruta,
+                        linea=None,
+                        grado=ERROR,
+                        defecto=f"el archivo tiene {n} tablas",
+                        correccion=(
+                            "Un archivo del autor lleva una tabla: la que leen los comandos."
+                        ),
+                    )
+                )
             continue
         for cap in capitulos.exceso_de_tablas(texto):
             hallazgos.append(
@@ -130,6 +144,11 @@ def lint(textos: Mapping[str, str | None]) -> list[HallazgoEstilo]:
             )
 
     return hallazgos
+
+
+def _tiene_fila_nombre(texto: str) -> bool:
+    tabla = capitulos.primera_tabla(texto)
+    return tabla is not None and any(f and f[0].lower() == "nombre" for f in tabla[1:])
 
 
 def _falta_archivo(ruta: str, que: str) -> HallazgoEstilo:

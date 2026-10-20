@@ -108,9 +108,10 @@ def test_005_05_una_nota_tipada_declara_su_subtype() -> None:
     assert "liceo-tecnico-andes.md) — " in nota
 
 
-def test_005_05_el_tipo_persona_tiene_su_archivo_de_reglas() -> None:
+def test_005_05_el_libro_describe_la_plantilla_de_persona() -> None:
     corrida = _correr(TIPADA)
-    assert corrida.ruta("mi-vault", "reglas", "subtipos", "persona.tuku.md").is_file()
+    libro = corrida.ruta("mi-vault", "LIBRO-DE-ESTILO.md").read_text(encoding="utf-8")
+    assert "--subtype persona" in libro
 
 
 def test_005_05_con_la_nota_tipada_el_vault_sigue_sano() -> None:

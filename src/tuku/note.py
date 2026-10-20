@@ -67,7 +67,7 @@ def aliases(nota: str) -> list[str]:
 
 
 def subtype(nota: str) -> str | None:
-    """El `subtype` del frontmatter: el tipo de la nota en `### Tipos de nota`."""
+    """El `subtype` del frontmatter: el tipo de la nota en `reglas/notas.user.md`."""
     m = _FRONTMATTER.match(nota)
     if m is None:
         return None
@@ -150,7 +150,7 @@ def compose(
 ) -> str:
     """The text of a new note.
 
-    El frontmatter lleva `type: Note`, que `reglas/types.md` asigna a todo lo de
+    El frontmatter lleva `type: Note`, que `reglas/types.user.md` asigna a todo lo de
     `notas/` y `spec/vault.md` exige en cualquier archivo que guarde
     conocimiento. Es distinto de `subtype`, la lista abierta que subdivide ese
     `Note` en las notas tipadas (`spec/notas.md`): solo lo declaran algunas, y
@@ -240,13 +240,13 @@ def _enlaces_sin_listar(lineas: list[str], ini: int) -> list[str]:
 
 
 def _rechazo_de_subtype(tipos: Sequence[str], subtype: str) -> Resultado | None:
-    """El rechazo de un `--subtype` que `### Tipos de nota` no lista, o `None` si sirve."""
+    """El rechazo de un `--subtype` que `reglas/notas.user.md` no lista, o `None` si sirve."""
     if subtype in tipos:
         return None
     hay = ", ".join(f"`{t}`" for t in tipos) or "ninguno"
     return Resultado.rechazo(
-        f"{subtype!r} no es un tipo de nota. Los de `## Tipos de nota` en "
-        f"reglas/notas.md son: {hay}. Elige uno, o agrega una fila a esa tabla para "
+        f"{subtype!r} no es un tipo de nota. Los de "
+        f"reglas/notas.user.md son: {hay}. Elige uno, o agrega una fila a esa tabla para "
         "crear el tipo nuevo."
     )
 
@@ -255,7 +255,7 @@ def _rechazo_de_subtype(tipos: Sequence[str], subtype: str) -> Resultado | None:
 class NoteState:
     """What `plan_create` reads: the scopes, `AHORA.md` if the vault has one, and `notas/`.
 
-    `note_types` are the rows of `### Tipos de nota`, read only when a `subtype` is passed.
+    `note_types` are the rows of `reglas/notas.user.md`, read only when a `subtype` is passed.
     """
 
     tree: Tree
@@ -341,9 +341,8 @@ def crear_con_constancia(
 ) -> Resultado:
     """Escribe la nota y deja constancia en la bitácora. Idempotente.
 
-    Con `subtype` la nota es tipada: debe ser una fila de `### Tipos de nota` del
-    libro de estilo, y si no lo es se rechaza nombrando los que hay. Agregar un
-    tipo es agregar una fila a esa tabla.
+    Con `subtype` la nota es tipada: debe ser una fila de `reglas/notas.user.md`, y si no
+    lo es se rechaza nombrando los que hay. Agregar un tipo es agregar una fila a esa tabla.
 
     Crear una nota es un hecho de la vida del autor, que la pidió, así que se
     registra; mover un pendiente de escalón es del sistema y no se registra. Esa

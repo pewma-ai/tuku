@@ -40,7 +40,7 @@ Las **keywords** son las palabras que delatan un frente sin nombrarlo. Gracias a
 > - La nota termina con `## Ver además`, que enlaza al frente `colegio-los-robles` con su motivo.
 > - `AHORA.md` tiene el registro de que creaste la nota.
 
-El tipo `persona` sale de `LIBRO-DE-ESTILO.md`, sección `### Tipos de nota`. La nota guarda lo que sabes de Rodolfo, y el registro, que la creaste hoy. Consultas la ficha en marzo sin releer agosto.
+El tipo `persona` sale de `reglas/notas.user.md`. La nota guarda lo que sabes de Rodolfo, y el registro, que la creaste hoy. Consultas la ficha en marzo sin releer agosto.
 
 ## Una mención con link
 

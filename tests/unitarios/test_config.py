@@ -34,22 +34,23 @@ def test_parsear_la_config_y_el_autor() -> None:
         "| Campo | Valor |\n"
         "| --- | --- |\n"
         "| `TZ` | `America/Santiago` |\n"
-        "| `cycle_name` | `semana` |\n"
         "| `Campo extra` | valor personalizado |\n\n"
         "## Otra sección\n"
     )
     datos = parsear_config_md(texto)
     assert datos == {
         "TZ": "America/Santiago",
-        "cycle_name": "semana",
         "Campo extra": "valor personalizado",
     }
     assert parsear_config_md("") == {}
     assert parsear_config_md("Solo prosa sin formato.") == {}
 
-    assert parsear_autor("**Nombre del autor:** Juan Pérez") == "Juan Pérez"
-    assert parsear_autor("**Nombre del autor:** por declarar. El instalador...") is None
-    assert parsear_autor("**Nombre del autor:**") is None
+    tabla = "| Campo | Valor |\n| --- | --- |\n| Nombre | {} |\n| Rol | x |\n"
+    assert parsear_autor(tabla.format("Juan Pérez")) == "Juan Pérez"
+    assert parsear_autor(tabla.format("PEDIR AL AUTOR!")) is None
+    assert parsear_autor(tabla.format("No especificado / Inferir del Vault")) is None
+    assert parsear_autor(tabla.format("")) is None
+    assert parsear_autor("Solo prosa.") is None
     assert parsear_autor("# Sin marcador") is None
 
 
@@ -77,21 +78,20 @@ def test_leer_config_sobre_template_vanilla() -> None:
 
 
 def test_leer_config_en_memoria_sin_disco(tmp_path: Path) -> None:
-    texto_cfg = (
-        "| Campo | Valor |\n| --- | --- |\n"
-        "| `TZ` | `UTC` |\n| `cycle_name` | `turno, descanso` |\n"
-    )
+    texto_cfg = "| Campo | Valor |\n| --- | --- |\n| `TZ` | `UTC` |\n"
     textos_reglas = {
-        "reglas/autor.md": "## Autor\n\n**Nombre del autor:** Test Bot\n",
-        "reglas/bitacora.md": (
-            "## Clasificaciones\n\n"
+        "reglas/autor.user.md": "| Campo | Valor |\n| --- | --- |\n| Nombre | Test Bot |\n",
+        "reglas/clasificaciones.user.md": (
             "| Clasificación | Significa |\n| --- | --- |\n| `alfa` | primera |\n"
         ),
-        "reglas/pendientes.md": (
-            "## Horizontes\n\n| Horizonte | Significa |\n| --- | --- |\n| `hoy` | de hoy |\n"
+        "reglas/pendientes.user.md": (
+            "| Horizonte | Significa |\n| --- | --- |\n| `hoy` | de hoy |\n"
         ),
-        "reglas/notas.md": (
-            "## Tipos de nota\n\n| Tipo | Significa |\n| --- | --- |\n| `persona` | alguien |\n"
+        "reglas/notas.user.md": (
+            "| Tipo | Significa |\n| --- | --- |\n| `persona` | alguien |\n"
+        ),
+        "reglas/ciclo.user.md": (
+            "| Ciclo | Días |\n| --- | --- |\n| `turno` | 8 |\n| `descanso` | 6 |\n"
         ),
     }
     texto_plantilla = "PLANTILLA PERSONALIZADA"
@@ -126,19 +126,18 @@ def test_se_exige_un_vault_y_se_nombra_lo_que_falta(tmp_path: Path) -> None:
 
 def test_las_preferencias_salen_de_un_solo_lector_con_su_default(tmp_path: Path) -> None:
     por_defecto = leer_preferencias(tmp_path)
-    assert (por_defecto.zona_horaria, por_defecto.nombres_de_ciclo) == ("", ("semana",))
+    assert por_defecto.zona_horaria == ""
     assert por_defecto.ambito_por_defecto is None
     assert (por_defecto.formato_fecha, por_defecto.limite_de_notas) == ("MMM/DD", 25)
 
     texto = (
         "| Campo | Valor | Qué |\n| --- | --- | --- |\n"
-        "| `TZ` | `Europe/Madrid` | x |\n| `cycle_name` | `turno, descanso` | x |\n"
+        "| `TZ` | `Europe/Madrid` | x |\n"
         "| `scope_default` | `casa` | x |\n| `date_format` | `DD/MM` | x |\n"
         "| `context_note_limit` | `diez` | x |\n"
     )
     prefs = leer_preferencias(texto=texto)
     assert prefs.zona_horaria == "Europe/Madrid"
-    assert prefs.nombres_de_ciclo == ("turno", "descanso")
     assert (prefs.ambito_por_defecto, prefs.formato_fecha) == ("casa", "DD/MM")
     assert prefs.limite_de_notas == 25, "un límite que no es un entero cae al default"
 

@@ -23,6 +23,8 @@ Un registro es una línea de la bitácora (`AHORA.md` mientras el ciclo está ab
 2. **El hecho, no la conversación.** Lo dirigido a quien escucha («recuérdame», «anota», «guárdame») queda fuera.
 3. **Autocontenido.** Se va a leer en años, sin el resto del día. Las personas se nombran con su rol la primera vez y «el otro día» se convierte en una fecha.
 4. **Precisión.** No se agrega información inferida.
+5. **El día fuera del ciclo.** Si hoy cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros, con ese día explícito en `--at`. Un ciclo que quedó atrás no es motivo para cerrarlo: eso lo decide el autor.
+6. **Una nota nombrada se enlaza.** `tuku context` ofrece las últimas notas de cada tipo enlazable con su título y sus `aliases`. La primera mención de una va como enlace en el `--body`, con el texto que dijo el autor: `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md)`. Si el nombre calza con dos notas, se pregunta; si con ninguna, no se enlaza ni se inventan rutas.
 
 > [!example] Ejemplos tuku
 > ```bash
@@ -69,7 +71,7 @@ Los horizontes son los plazos de `PENDIENTES.md`, del más cercano al más lejan
 
 ## Ciclo
 
-El ciclo en curso es `AHORA.md`; los cerrados están en `bitacoras/`. `tuku process cycle` abre el siguiente, y cerrar el ciclo lo decide el autor, no el agente. Con el nombre `semana` el rango es de lunes a domingo; con cualquier otro hay que decir hasta qué día va.
+El ciclo en curso es `AHORA.md`; los cerrados están en `bitacoras/`. `tuku process cycle` abre el siguiente, y cerrar el ciclo lo decide el autor, no el agente. Los ciclos y su orden están en la tabla del autor: el siguiente es el que sigue en ella. Con el nombre `semana` el rango es de lunes a domingo; con cualquier otro hay que decir hasta qué día va.
 
 > [!example] Ejemplos tuku
 > ```bash
@@ -104,7 +106,7 @@ Una nota es un archivo de `notas/` sobre algo que no pertenece a un día. `tuku 
 1. **Solo si el autor la pide.** Lo que parezca merecer nota se propone y espera el sí.
 2. **Deja una entrada en la bitácora**, con el enlace a la nota. La escribe el mismo `note create`: no se suma un `entry create`.
 3. **Cierra con `## Ver además`**, donde cada enlace dice para qué conecta.
-4. **Un tipo enlazable se enlaza al nombrarlo.** Si la columna `Enlazable` del tipo dice `sí`, `tuku context` ofrece sus últimas notas (hasta `context_note_limit`) con su título y sus `aliases`, y la primera mención de una de ellas va como enlace en el `--body`, con el texto que dijo el autor: `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md)`. Dentro de una nota, la ruta es relativa a `notas/`. Si el nombre calza con dos notas, se pregunta; si con ninguna, no se enlaza ni se inventan rutas. Una nota de un tipo no enlazable existe, pero nadie la enlaza sola.
+4. **Un tipo enlazable se enlaza al nombrarlo.** Si la columna `Enlazable` del tipo dice `sí`, `tuku context` ofrece sus últimas notas (hasta `context_note_limit`), y se enlazan como dice el capítulo Registro; dentro de una nota, la ruta es relativa a `notas/`. Una nota de un tipo no enlazable existe, pero nadie la enlaza sola.
 5. **Una persona sigue una plantilla** (`--subtype persona`): el nombre completo como título; quién es y de dónde se conoce; los hechos, cada uno con la fecha del registro que lo sostiene; las inferencias aparte y marcadas como tales. Solo se infiere lo que sirve para trabajar mejor con ella. Los otros nombres con que se la nombra van en `aliases`.
 
 > [!example] Ejemplos tuku
@@ -165,7 +167,7 @@ MAYÚSCULAS es de TUKU y minúsculas es del autor. `AHORA.md`, `PENDIENTES.md`, 
 | `ambitos/` | Los frentes de la vida del autor, uno por carpeta |
 | `notas/` | Ideas que no pertenecen a un día |
 | `procesos/` | Los procedimientos con nombre del autor |
-| `reglas/` | Las preferencias del autor (`*.user.md`) y la configuración |
+| `reglas/` | Las preferencias del autor (`*.user.md`), la configuración y las skills (`skills/`) |
 | `bitacoras/` | Los ciclos cerrados. Aparece al cerrar el primero |
 
 Los archivos `.user.md` son la memoria del autor: cuando dice cómo prefiere que se haga algo, el agente lo condensa ahí. Las reglas de cada uno están en su frontmatter.
@@ -174,7 +176,7 @@ Los archivos `.user.md` son la memoria del autor: cuando dice cómo prefiere que
 
 [OKF](https://github.com/GoogleCloudPlatform/open-knowledge-format) es un formato abierto de Google para que personas y agentes compartan conocimiento: Markdown con un bloque YAML arriba, un concepto por archivo, sin herramientas obligatorias. TUKU lo usa porque un vault en OKF lo entiende algo que nunca oyó hablar de TUKU.
 
-Un campo es obligatorio, `type`, y dice qué clase de archivo es. Los nombres van en inglés. Se declara en todo archivo que guarde conocimiento; los `AGENTS.md` quedan fuera. Los `type` de TUKU son el contrato con OKF y no se renombran; uno propio del autor no puede repetir uno de estos.
+Un campo es obligatorio, `type`, y dice qué clase de archivo es. Los nombres van en inglés. Se declara en todo archivo que guarde conocimiento; los `AGENTS.md` y los `SKILL.md` quedan fuera. Los `type` de TUKU son el contrato con OKF y no se renombran; uno propio del autor no puede repetir uno de estos.
 
 | `type` | Qué archivo | Se reconoce por |
 | --- | --- | --- |

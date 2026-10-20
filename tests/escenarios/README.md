@@ -176,7 +176,7 @@ uv run pytest tests/escenarios/ -k 001_02  # un escenario
 | [`001-01-instalacion-con-uv-tool.md`](001-01-instalacion-con-uv-tool.md) | Epic 001, fase 0 | Los únicos que instalan de verdad, con `--force`: `uv tool install` y `pipx install` desde `git+...@devel`, y `pipx install` desde este checkout. Marcados `red`, fuera de la corrida por defecto |
 | [`001-02-init-siembra-el-estado-cero.md`](001-02-init-siembra-el-estado-cero.md) | Epic 001, fase 0 | La verificación byte a byte de `tuku init` contra `template/vanilla/` en vivo, con `home` local y la red bloqueada |
 | [`001-03-destino-no-vacio.md`](001-03-destino-no-vacio.md) | Epic 001, fase 0 | `tuku init` se niega a sembrar sobre contenido; `--force` reemplaza |
-| [`001-04-init-author.md`](001-04-init-author.md) | Epic 001, fase 0 | La capa de identidad: `--author` deja el nombre en `reglas/autor.md`; en blanco deja el vault operable |
+| [`001-04-init-author.md`](001-04-init-author.md) | Epic 001, fase 0 | La capa de identidad: `--author` deja el nombre en `reglas/autor.user.md`; en blanco deja el vault operable |
 | [`001-06-cli-ayuda.md`](001-06-cli-ayuda.md) | Epic 001, fase 0 | `tuku init -h` nombra sus opciones, y una instalación rota sale con el código de entorno. En proceso, sin red |
 | [`001-07-lint-libro-de-estilo.md`](001-07-lint-libro-de-estilo.md) | Epic 001, fase 0 | Con qué código salen `doctor style` y `context style` ante un libro de estilo o unos archivos de `reglas/` rotos |
 | [`002-00-el-dia-uno-a-mano.md`](002-00-el-dia-uno-a-mano.md) | Epic 002 | Descripción general, qué tiene que funcionar, qué se verifica y movimientos de diseño del Epic 002 |

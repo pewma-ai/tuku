@@ -54,7 +54,7 @@ CABECERA = "| Horizonte | Vence | Ámbito | Detalle |"
 
 
 #: La escalera del template vanilla, y solo el punto de partida: los escalones
-#: son del autor y salen de `### Horizontes` en su libro de estilo
+#: son del autor y salen de la tabla de `reglas/pendientes.user.md`
 #: (`spec/pendientes.md`). Quien opera sobre un vault pasa la del autor con
 #: `escalera_de`; esta queda como el valor por defecto de las funciones puras,
 #: que no leen disco.

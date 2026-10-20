@@ -145,7 +145,7 @@ def registrar(
             "Copia el template al directorio destino. Escribe `AHORA.md` desde "
             "`reglas/plantilla/AHORA.md` con las fechas del primer ciclo, la zona horaria "
             "de esta máquina en `reglas/config.tuku.md` y, si se da, el autor en "
-            "`reglas/autor.md`. Rechaza un destino con contenido y el home del usuario."
+            "`reglas/autor.user.md`. Rechaza un destino con contenido y el home del usuario."
         ),
     )
     init_p.add_argument(
@@ -165,7 +165,7 @@ def registrar(
         "--author",
         dest="author",
         default=None,
-        help="nombre del autor para reglas/autor.md; opcional",
+        help="nombre del autor para reglas/autor.user.md; opcional",
     )
     Opciones(init_p).at("un día de la semana del primer ciclo, AAAA-MM-DD; por defecto, hoy")
     init_p.add_argument(
@@ -193,8 +193,8 @@ def registrar(
             "día siguiente al `to` del ciclo anterior (el abierto o la bitácora más "
             "reciente de `bitacoras/`) y, sin anterior, hoy. Con `semana` basta un día "
             "cualquiera, que abre la semana de lunes a domingo que lo contiene; con otro "
-            "nombre de `cycle_name` hay que dar `--to`. El nombre es el siguiente de "
-            "`cycle_name`, o `--name` (uno que la lista no declara se rechaza salvo con "
+            "nombre de la tabla de `reglas/ciclo.user.md` hay que dar `--to`. El nombre es "
+            "el siguiente de esa tabla, o `--name` (uno que no declara se rechaza salvo con "
             "`--force`). Rechaza un `--from` que deje hoyos o solapes, y abrir otro ciclo "
             "mientras el abierto tiene registros; repetir el ciclo abierto solo lo "
             "verifica, o lo regenera si no tiene registros. Un `--from` anterior al ciclo "
@@ -222,12 +222,12 @@ def registrar(
         "--name",
         dest="nombre",
         default=None,
-        help="nombre del ciclo; por defecto, el siguiente de `cycle_name`",
+        help="nombre del ciclo; por defecto, el siguiente de `reglas/ciclo.user.md`",
     )
     process_cycle_p.add_argument(
         "--force",
         action="store_true",
-        help="acepta un `--name` que `cycle_name` no declara",
+        help="acepta un `--name` que `reglas/ciclo.user.md` no declara",
     )
 
     doctor_p = sub.add_parser(
@@ -236,7 +236,7 @@ def registrar(
         description=(
             "Corre todos los lint y revisa el vault entero: archivos requeridos, "
             "`reglas/config.tuku.md`, los comandos que nombra cada `AGENTS.md`, la tabla "
-            "de `reglas/types.md`, los links y la versión con que se sembró. Con un TEMA, "
+            "de `reglas/types.user.md`, los links y la versión con que se sembró. Con un TEMA, "
             f"el nombre de una revisión ({', '.join(TEMAS_DOCTOR)}), informa solo esa "
             "parte. No escribe nada: cada hallazgo dice cómo corregirlo."
         ),
@@ -273,7 +273,7 @@ def registrar(
             "su ruta y sus keywords. `todo`: los pendientes de `PENDIENTES.md`, con los "
             "atrasados marcados (con `--late`, solo esos). `style`: el libro de estilo con "
             "las `reglas/` del autor transcluidas, o un capítulo con `--chapter`; sin tema "
-            "trae solo el autor, el lenguaje y los vocabularios. `note`: por cada "
+            "trae solo la tabla del autor. `note`: por cada "
             "tipo de nota enlazable, sus últimas notas de `notas/` con título y aliases "
             "(cuántas, `context_note_limit` de la config). `cadence`: las cadencias de "
             "todo `ambitos/`, cada una con su `CADENCIAS.md`. Sin TEMA, todos menos "
@@ -333,8 +333,8 @@ def registrar(
             "tomada de los registros de `AHORA.md`, y el callout `En X:` de cada "
             "ámbito con las carpetas de sus ámbitos hijos, rehecho entero. Tema `comandos`: "
             "`reglas/comandos.tuku.md`, desde esta ayuda. Tema `libro`: `LIBRO-DE-ESTILO.md` "
-            "y la prosa `reglas/*.tuku.md`, copiados del template del `tuku` instalado; "
-            "nunca toca un archivo del autor (`reglas/*.md` sin `.tuku`) ni "
+            "copiado del template del `tuku` instalado; "
+            "nunca toca un archivo del autor (`reglas/*.user.md`) ni "
             "`reglas/config.tuku.md`. Sin tema, los cuatro. Solo "
             "escribe lo que cambió; sobre un vault al día no toca nada."
         ),

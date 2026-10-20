@@ -24,11 +24,11 @@ ambitos/                      # el árbol de la vida
   CADENCIAS.md                # cadencias de toda la rama
   PENDIENTES-AMBITOS.md       # generado, un callout por ámbito, se transcluye
   personal/
-    CAPACIDAD.md              # el bruto, si se declara. Opcional
+    CAPACIDAD.md              # restricciones de tiempo y recursos del autor, texto abierto. El libro la transcluye
     personal.md               # página propia: es ámbito
   trabajo/
     trabajo.md
-    CAPACIDAD.md              # costo fijo de este ámbito. Opcional
+    CAPACIDAD.md              # lo que cuesta sostener este ámbito, si el autor lo considera necesario. Opcional
     AGENTS.md                 # solo si el ámbito tiene reglas propias
     CADENCIAS.md              # solo si tiene cadencias propias
     clientes/                 # sin página: es categoría
@@ -38,29 +38,19 @@ ambitos/                      # el árbol de la vida
 
 notas/                        # zettelkasten, formato libre
 
-reglas/                       # por entidad: X.tuku.md es la prosa de TUKU y X.md lo del autor
-  bitacora.tuku.md            # cómo se escribe un registro
-  bitacora.md                 # del autor: ## Clasificaciones y ## Escritura
-  pendientes.tuku.md          # todavía no existe
-  pendientes.md               # del autor: ## Horizontes
-  notas.tuku.md               # cómo se escribe una nota
-  notas.md                    # del autor: ## Tipos de nota
-  ciclo.tuku.md               # todavía no existe
-  ciclo.md                    # del autor: cómo es su ciclo
-  ambitos.md                  # del autor: las convenciones de sus ámbitos
-  cadencias.tuku.md           # todavía no existe (epic 006)
-  cadencias.md                # del autor: las convenciones de sus cadencias
-  autor.md                    # del autor: nombre y rol
-  lenguaje.md                 # del autor: idioma, trato, registro y términos propios
-  types.md                    # del autor: los `type` que agrega a los de TUKU
+reglas/                       # lo que decide el autor (X.user.md) y la configuración
+  autor.user.md               # del autor: tabla Campo y Valor (nombre, rol, idioma, trato, registro, términos propios)
+  clasificaciones.user.md     # del autor: la tabla de clasificaciones de registro
+  pendientes.user.md          # del autor: la tabla de horizontes
+  notas.user.md               # del autor: la tabla de tipos de nota
+  ciclo.user.md               # del autor: cómo es su ciclo
+  types.user.md               # del autor: los `type` que agrega a los de TUKU
   comandos.tuku.md            # qué hace cada comando y cómo a mano. Lo escribe `tuku init`
-  config.tuku.md              # TZ, cycle_name, tuku_template, tuku_version, origen, scope_default, date_format, context_note_limit
+  config.tuku.md              # TZ, tuku_template, tuku_version, origen, scope_default, date_format, context_note_limit
   plantilla/
     AHORA.md                  # de aquí sale un ciclo nuevo
   enlaces.tuku.md             # todavía no existe
   propuestas.tuku.md          # todavía no existe (epic 007)
-  subtipos/                   # una por subtipo de nota, con su plantilla y qué inferir
-    persona.tuku.md
 
 procesos/                     # los que el autor invoca por su nombre. Aparece con el primero
 
@@ -75,7 +65,7 @@ archivado/                    # ramas cerradas, enlaces vivos. Todavía no exist
 
 **MAYÚSCULAS es de TUKU, minúsculas es del autor.** `AHORA.md`, `PENDIENTES.md`, `AGENTS.md`, `CADENCIAS.md` y `CAPACIDAD.md` son de TUKU; `trabajo.md`, `juanito-perez.md` y las notas, del autor. Se ve de un vistazo, sin abrir nada.
 
-**En `reglas/`, `X.tuku.md` es la prosa de TUKU para la entidad `X` y `X.md` es lo que el autor decide sobre ella.** `bitacora.tuku.md` explica cómo se escribe un registro y `bitacora.md` trae las clasificaciones del autor. Una versión nueva de TUKU reemplaza los `X.tuku.md` y el libro de estilo (`tuku regenerate libro`) y no toca ningún `X.md`.
+**En `reglas/`, `X.user.md` es lo que el autor decide y `X.tuku.md` es de TUKU.** Los únicos `.tuku.md` son `config.tuku.md` y `comandos.tuku.md`; la prosa de TUKU vive en el libro de estilo. Una versión nueva de TUKU reemplaza el libro y `comandos.tuku.md` (`tuku regenerate libro`, `tuku regenerate comandos`) y no toca ningún `X.user.md`.
 
 **Todo nombre de archivo o carpeta que TUKU genera va en kebab-case y en minúsculas**: `depto-centro/depto-centro.md` para un ámbito, `reunion-con-viana.md` para una nota, `bitacora-2026-08-25-2026-09-01-turno.md` para un ciclo archivado. Los espacios pasan a guion, y la misma regla vale para las keywords de un ámbito (`los-robles`). Así dos nombres no difieren solo en mayúsculas, que el disco de macOS y Windows no distingue, y la forma en que el autor dictó el nombre no crea un segundo archivo. La única excepción son los archivos de TUKU en MAYÚSCULAS. El detalle para ámbitos está en [ambitos.md](ambitos.md).
 
@@ -93,13 +83,13 @@ El formato es [OKF](https://github.com/GoogleCloudPlatform/open-knowledge-format
 
 **Los nombres de campo van en inglés**, como los comandos `tuku`: son superficie experta, la lee una máquina o alguien que sabe lo que busca. El cuerpo sigue en castellano, que es donde escribe el autor.
 
-**Los `type` de TUKU son contrato y viajan en el libro de estilo** (capítulo «Tipos de archivo», una tabla). Renombrar `Logbook` rompe los comandos y deja el vault ilegible para cualquier herramienta que hable OKF, así que esa tabla es de TUKU y el autor no la edita. Hoy son `Logbook`, `Todo`, `Derived`, `Scope`, `Note`, `Cadence`, `Capacity`, `Config` y `Style Guide`.
+**Los `type` de TUKU son contrato y viajan en el libro de estilo** (capítulo «Formato OKF», una tabla). Renombrar `Logbook` rompe los comandos y deja el vault ilegible para cualquier herramienta que hable OKF, así que esa tabla es de TUKU y el autor no la edita. Hoy son `Logbook`, `Todo`, `Derived`, `Scope`, `Note`, `Cadence`, `Capacity`, `Config` y `Style Guide`.
 
-**Los que el autor agrega viven en [`reglas/types.md`](../template/vanilla/reglas/types.md)**, otra tabla, y el libro la transcluye debajo de la de TUKU. Agregar un tipo propio es agregar una fila ahí. Un nombre no puede repetir uno de TUKU.
+**Los que el autor agrega viven en [`reglas/types.user.md`](../template/vanilla/reglas/types.user.md)**, otra tabla, y el libro la transcluye debajo de la de TUKU. Agregar un tipo propio es agregar una fila ahí. Un nombre no puede repetir uno de TUKU.
 
 **Los `AGENTS.md` quedan fuera** y no llevan frontmatter: son reglas de operación, no conocimiento.
 
-Un `type` puede pedir campos propios, y los declara la spec de esa primitiva: `Logbook` lleva además `status`, `from` y `to` ([ciclo.md](ciclo.md)).
+Un `type` puede pedir campos propios, y los declara la spec de esa primitiva: `Logbook` lleva además `status`, `from` y `to` ([ciclo.md](ciclo.md)). Los `reglas/*.user.md` son `Style Guide` y llevan `editable: true`; `modified_time`, que es `null` hasta que el agente anota en ellos una preferencia del autor y entonces lleva la fecha y la hora; y `rules`, una frase con sus reglas de edición.
 
 Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de las dos tablas en tiempo de ejecución y recorre el vault entero.
 
@@ -107,26 +97,36 @@ Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de las dos t
 
 ## El libro de estilo
 
-`LIBRO-DE-ESTILO.md` es de TUKU, como dice el nombre en MAYÚSCULAS, y viene del repositorio: explica qué hace `tuku` con cada entidad, igual para todos los vaults. Es estático y lo regenera `tuku regenerate libro`, que lo copia del template del `tuku` instalado junto con los `reglas/*.tuku.md`. **Una versión nueva de TUKU trae un libro nuevo y no toca nada de lo que el autor decidió.** Vive en el vault y no en `~/.tuku`: un vault clonado o abierto en otra máquina se lee solo, y Obsidian no transcluye archivos de fuera.
+`LIBRO-DE-ESTILO.md` es la orientación de TUKU: las convenciones de escritura del vault, legibles igual para una persona que para un agente. Los comandos existen para ahorrar el trabajo de hacerlas cumplir; el libro **no es la especificación completa** y no repite lo que un comando verifica, solo lo que pide juicio. Es de TUKU, como dice el nombre en MAYÚSCULAS, y viene del repositorio, igual para todos los vaults. Lo regenera `tuku regenerate libro`, que lo copia del template del `tuku` instalado. **Una versión nueva de TUKU trae un libro nuevo y no toca nada de lo que el autor decidió.** Vive en el vault y no en `~/.tuku`: un vault clonado o abierto en otra máquina se lee solo, y Obsidian no transcluye archivos de fuera.
 
-**Se organiza por entidad.** Un capítulo por cada una: registro, pendiente, ciclo, ámbito, nota, cadencia, tipos de archivo y cómo escribe el autor. Cada capítulo dice en pocas líneas qué hace el comando `tuku` para esa entidad y cuál es (por ejemplo, que las cadencias de la semana son la concatenación de las de cada ámbito, y `tuku context cadence` las recolecta). Al final apunta a `reglas/X.md` y lo transcluye con `![](reglas/X.md)`, que es donde el autor decide lo suyo.
+**Se organiza por tarea, con capítulos autocontenidos.** Propósito del vault, Autor, Registro, Pendiente, Ciclo, Ámbito, Capacidad, Nota, Cadencia, Proceso, Estructura del vault, Formato OKF, Configuración y Uso de Markdown. Quien va a escribir algo lee su capítulo y nada más; si depende de otro lo dice en «Lee también». Cada capítulo da las reglas de juicio, un ejemplo de comando y, al final, lo que el autor decidió para esa tarea.
 
-**El libro no lleva vocabulario del autor.** Las clasificaciones, los horizontes y los tipos de nota viven en `reglas/bitacora.md`, `reglas/pendientes.md` y `reglas/notas.md`. Lo que no sea de una entidad va a `reglas/autor.md` (quién es el autor: nombre, rol) o a `reglas/lenguaje.md` (idioma, trato, registro, términos propios). La regla de que el registro va en primera persona, y la de que el pendiente va en infinitivo y su cierre repite el texto, son contrato y se quedan en el libro.
+**Se lee una vez por sesión**, antes de la primera escritura de cada tipo: la regla está en el [`AGENTS.md`](../template/vanilla/AGENTS.md) del vault, en la columna «Lee antes». Se acepta que un agente se la salte. Si hiciera falta garantizarlo, el comando de escritura rechazaría con «lee primero `tuku context style --chapter X`», apoyado en un estado local (`.tuku/leidos`) con la fecha de cada capítulo leído; es una salida abierta y no está decidida.
 
-**Cada capítulo es un `##` y lleva como máximo una tabla.** Vale para el libro y para cada archivo de `reglas/`, y es lo que hace que un comando pueda leer un capítulo por su nombre y tomar su única tabla (`## Clasificaciones` en `reglas/bitacora.md`; «Tipos de archivo» en el libro). Los `###` dentro de un capítulo son libres, pero sin tablas propias. La regla es sobre el texto de cada archivo y no sobre el resultado de expandir las transclusiones. `tuku doctor style` la verifica.
+**Lo del autor vive en `reglas/X.user.md`, con lo mínimo.** Cada archivo trae el frontmatter y su contenido, una tabla o un texto, sin encabezados. Los encabezados `###` y las frases que lo presentan están en el libro, que transcluye cada archivo con `![](reglas/X.user.md)` en el capítulo que corresponde:
 
-**El agente no lee el libro crudo: corre `tuku context style`**, que devuelve los capítulos, de lo general a lo específico, con cada transclusión expandida en su lugar. Con `--chapter NOMBRE` devuelve uno solo. Sin tema, `tuku context` trae de `style` solo `autor`, `lenguaje` y las tablas. De un archivo transcluido entran sus capítulos `##`: lo que haya antes del primero (el título, un aviso) es para quien lo edita y no llega al agente. Uno que falta sale marcado en el texto y `doctor style` lo reporta.
+| Archivo | Contenido | Capítulo |
+| --- | --- | --- |
+| `autor.user.md` | Tabla Campo y Valor: nombre, rol, idioma, trato, registro, términos propios. Sin declarar vale «No especificado / Inferir del Vault» | Autor |
+| `clasificaciones.user.md` | Tabla de clasificaciones de registro | Registro |
+| `pendientes.user.md` | Tabla de horizontes | Pendiente |
+| `ciclo.user.md` | Tabla de ciclos: una fila por ciclo, en el orden en que se alternan (`semana`, o `turno` y `descanso`), con sus días | Ciclo |
+| `notas.user.md` | Tabla de tipos de nota y cuáles son enlazables | Nota |
+| `types.user.md` | Tabla de los `type` propios | Formato OKF |
 
-Los comandos leen cada tabla del archivo y el capítulo que le corresponde ([bitacora.md](bitacora.md), "dónde vive cada una"). Por qué el libro se redacta en tercera persona está en la [iteración del 2026-09-06](../devel/iteraciones/2026-09-06.md).
+No hay archivo para los ámbitos ni para las cadencias: los ámbitos se infieren de `ambitos/` y las cadencias se declaran dentro de ellos. La capacidad la transcluye de `ambitos/personal/CAPACIDAD.md`, y la configuración, de `reglas/config.tuku.md`. Cuando el autor dice cómo prefiere que se haga algo, el agente lo condensa en el archivo que corresponde y pone `modified_time`.
+
+**Cada archivo del autor lleva una sola tabla, y el libro una por capítulo `##`.** Un comando toma la primera tabla del archivo que le toca ([bitacora.md](bitacora.md), "dónde vive cada una"); ya no busca un capítulo por su nombre. Los encabezados de columna son contrato. La regla es sobre el texto de cada archivo y no sobre el resultado de expandir las transclusiones. `tuku doctor style` la verifica.
+
+**El agente corre `tuku context style --chapter NOMBRE`**, que devuelve un capítulo con las transclusiones expandidas en su lugar, y todo el libro sin `--chapter`. Sin tema, `tuku context` trae de `style` solo la tabla del autor: las clasificaciones, los horizontes y los tipos de nota llegan con el capítulo que los usa. Se expande un nivel, sin el frontmatter de lo transcluido, y el libro puede transcluir cualquier archivo del vault. Uno que falta sale marcado en el texto y `doctor style` lo reporta.
 
 ## La configuración
 
-**`reglas/config.tuku.md` es una tabla**, y es lo único que leen las automatizaciones de ese archivo. Ocho campos:
+**`reglas/config.tuku.md` es una tabla**, y es lo único que leen las automatizaciones de ese archivo. Siete campos:
 
 | Campo | Qué dice |
 | --- | --- |
 | `TZ` | La zona horaria, con su nombre IANA. Decide qué día es HOY y por lo tanto qué está atrasado |
-| `cycle_name` | Cómo se llama el ciclo: `semana` si falta, o una lista de nombres que se alternan en orden (`turno, descanso`). Cada ciclo declara cuál es en su frontmatter ([ciclo.md](ciclo.md)). El template siembra `semana`. Es opcional: `doctor config` no lo exige |
 | `tuku_template` | La variante de la que salió el vault |
 | `tuku_version` | La versión de TUKU con que se sembró. `tuku doctor` la compara con la de `~/.tuku` y avisa si el vault quedó atrás |
 | `origen` | La URL del repositorio, para saber dónde revisar cambios |
@@ -134,7 +134,7 @@ Los comandos leen cada tabla del archivo y el capítulo que le corresponde ([bit
 | `date_format` | Cómo se escribe la fecha corta de un pendiente fuera de `AHORA.md`, con `MMM` (mes abreviado, `Ago`), `MM`, `DD` y `AAAA`. `MMM/DD` por defecto y también si falta |
 | `context_note_limit` | Cuántas notas de cada tipo enlazable trae `tuku context note`, las de `updated` más reciente. `25` por defecto y también si falta o no es un entero positivo |
 
-La escribe `tuku init`, que toma la zona horaria de la máquina, y un callout en el archivo lo dice. Cada campo que no es un sello de la instalación (`tuku_template`, `tuku_version`, `origen`) tiene un valor por defecto, escrito una sola vez en el código.
+La escribe `tuku init`, que toma la zona horaria de la máquina. Cada campo que no es un sello de la instalación (`tuku_template`, `tuku_version`, `origen`) tiene un valor por defecto, escrito una sola vez en el código.
 
 **Cada comando mide HOY en la zona `TZ` del vault**, no en la del sistema. Con una zona vacía o inexistente usa la del sistema; si es inexistente, el comando avisa por stderr y `tuku doctor config` lo reporta como error.
 

@@ -35,6 +35,8 @@ ambitos/
 
 ## `CAPACIDAD.md`, el costo de un ámbito
 
+> **Provisional.** El template ya no siembra `Bruto` ni `Costo fijo`: `ambitos/personal/CAPACIDAD.md` es hoy un texto abierto sobre las restricciones de tiempo y recursos del autor (qué días hace deporte, cuánto del fin de semana es para otras cosas), que se infiere de las bitácoras si no se define, y que se lee siempre al crear un ciclo. Un ámbito puede tener el suyo si el autor lo considera necesario. Lo que sigue describe el diseño anterior hasta que se retome.
+
 Un ámbito puede declarar lo que cuesta sostenerlo, en un `CAPACIDAD.md` propio. Es lo que permite dimensionar el trabajo del ciclo antes de planificarlo, y su formato y uso están en [`ciclo.md`](ciclo.md).
 
 **Es opcional en todas partes, incluida `ambitos/personal/`.** Deseable donde ayude, como muchas cadencias: TUKU se opera sin ninguno de los dos. El estado cero siembra uno en `ambitos/personal/`, sin datos: dice que todavía no se declaró nada y por qué conviene. Sin `CAPACIDAD.md` el plan se propone igual, solo que sin contraste de cuánto cabe, y el autor hace ese contraste en su cabeza como lo hacía antes. Degrada, no rompe. Es la misma relación que con las cadencias: sin ellas el sistema registra, con ellas además anticipa.

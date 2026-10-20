@@ -17,7 +17,7 @@ Una persona corre `uv tool install git+https://github.com/pewma-ai/tuku.git@deve
 7. `reglas/config.tuku.md` declara zona horaria y tipo de ciclo.
 8. Sembrar en un directorio con contenido se rechaza, salvo `tuku init --force`.
 9. El estado cero se verifica byte a byte con fecha fija, contra `template/vanilla/` en vivo.
-10. El nombre del autor vive en `reglas/autor.md`, capítulo "Autor". `tuku init --author "..."` lo siembra; es opcional.
+10. El nombre del autor vive en la fila `Nombre` de `reglas/autor.user.md`. `tuku init --author "..."` lo siembra; es opcional.
 
 ## Escenario: preparar el ambiente del epic
 

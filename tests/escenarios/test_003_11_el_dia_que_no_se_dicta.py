@@ -3,7 +3,7 @@
 Escenario: 003-11-el-dia-que-no-se-dicta.md
 
 El día no se dicta: se deriva del vault. El ciclo abierto va del 11 al 17 de
-agosto y HOY cae fuera, así que el día lo decide `reglas/bitacora.tuku.md`: el
+agosto y HOY cae fuera, así que el día lo decide la regla del comando: el
 último del ciclo que ya tiene registros, que acá es el miércoles por el
 pendiente que siembra el estado inicial.
 

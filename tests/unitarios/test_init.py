@@ -52,9 +52,11 @@ def test_el_destino_nunca_es_el_home_ni_un_ancestro_ni_la_raiz(
 
 def test_sin_marcador_se_rechaza_nombrando_el_defecto(tmp_path: Path) -> None:
     (tmp_path / "reglas").mkdir()
-    (tmp_path / "reglas" / "autor.md").write_text("# El autor\n", encoding="utf-8")
+    (tmp_path / "reglas" / "autor.user.md").write_text(
+        "| Campo | Valor |\n| --- | --- |\n", encoding="utf-8"
+    )
 
-    with pytest.raises(MarcadorAutorFaltante, match="Nombre del autor"):
+    with pytest.raises(MarcadorAutorFaltante, match="fila 'Nombre'"):
         _sembrar_autor(tmp_path, "Arturo")
 
 
@@ -79,5 +81,5 @@ def test_init_sustituye_el_placeholder_por_la_zona_real(tmp_path: Path) -> None:
     config = vault / "reglas" / "config.tuku.md"
     campos = parsear_config_md(config.read_text(encoding="utf-8"))
     assert campos["TZ"] == "Pacific/Easter"
-    assert campos["cycle_name"] == "semana"
+    assert "cycle_name" not in campos
     assert campos["tuku_template"] == "vanilla"

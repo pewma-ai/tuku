@@ -8,7 +8,7 @@ todos, en este orden:
 | `entry` | Los registros desde `--since`, bajo su día | `AHORA.md` y las bitácoras que cruza |
 | `scope` | Cada ámbito con su ruta y sus keywords | `ambitos/` |
 | `todo` | Los pendientes abiertos, atrasados marcados (`--late`: solo esos) | `PENDIENTES.md` |
-| `style` | El libro con las `reglas/` expandidas (sin tema, el autor y vocabularios) | libro |
+| `style` | El libro con las `reglas/` expandidas (sin tema, solo la tabla del autor) | libro |
 | `note` | Por cada tipo enlazable, sus últimas notas con nombres y aliases | `notas/` |
 | `cadence` | Las cadencias de todo el árbol y su origen (solo con el tema) | `ambitos/` |
 
@@ -125,18 +125,12 @@ def _todo(vault: Path, hoy: date, late: bool = False) -> str:
 
 
 def _style(vault: Path) -> str:
-    """Sin tema: el autor, el lenguaje y los vocabularios que declaró en `reglas/`."""
+    """Sin tema: la tabla del autor. El vocabulario llega con el capítulo que lo usa."""
     from tuku import vocab
 
-    vocabularios = vocab.leer_del_vault(vault)
-    bloques = []
-    for ruta, nombre in (("reglas/autor.md", "Autor"), ("reglas/lenguaje.md", "Lenguaje")):
-        texto = vocab.leer_opcional(vault, ruta)
-        cap = capitulos.capitulo(texto, nombre) if texto is not None else None
-        if cap is not None:
-            bloques.append(f"## {nombre}\n\n" + "\n".join(cap.cuerpo).strip())
-    bloques.append("## Vocabulario\n\n" + vocab.formatear(vocabularios))
-    return "\n\n".join(bloques)
+    texto = vocab.leer_opcional(vault, "reglas/autor.user.md")
+    tabla = capitulos.sin_frontmatter(texto).strip() if texto is not None else ""
+    return tabla or "sin autor declarado."
 
 
 def _libro(vault: Path, capitulo: str | None) -> Resultado:
@@ -203,7 +197,7 @@ def _note(vault: Path) -> str:
 
     tipos = leer_config(vault).tipos_enlazables
     if not tipos:
-        return "sin tipos enlazables en `## Tipos de nota` de `reglas/notas.md`."
+        return "sin tipos enlazables en la tabla de `reglas/notas.user.md`."
     limite = limite_de_notas(vault)
     dir_notas = vault / "notas"
     rutas = sorted(dir_notas.glob("*.md")) if dir_notas.is_dir() else []
@@ -250,7 +244,7 @@ def del_vault(
             "Pendientes atrasados" if late else "Pendientes abiertos",
             lambda: _todo(vault, hoy, late),
         ),
-        "style": ("El autor y su vocabulario", lambda: _style(vault)),
+        "style": ("El autor", lambda: _style(vault)),
         "note": ("Notas enlazables", lambda: _note(vault)),
         "cadence": ("Cadencias", lambda: _cadence(vault)),
     }

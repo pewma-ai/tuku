@@ -28,7 +28,7 @@
 | `AGENTS.md` | Reglas que aplican a un directorio y a todo lo que cuelga de él. Uno por carpeta. |
 | `CADENCIAS.md` | Las cadencias de un directorio. Existe donde se declaró la primera. |
 | `CAPACIDAD.md` | Lo que cuesta sostener un ámbito. Opcional y deseable: solo donde hay algo que declarar. El bruto, si se declara, va en `ambitos/personal/`. |
-| `LIBRO-DE-ESTILO.md` | Un archivo único con las reglas de escritura y organización del autor, en prosa. De aquí nacen los comandos. No confundir con el vault, que es el repositorio entero. |
+| `LIBRO-DE-ESTILO.md` | La orientación de TUKU: las convenciones de escritura del vault, por capítulos, con lo que el autor decidió transcluido al final de cada uno. Los comandos hacen cumplir lo determinista; el libro no es la especificación completa. No confundir con el vault, que es el repositorio entero. |
 
 **MAYÚSCULAS es de TUKU, minúsculas es del autor.** Se distingue de un vistazo sin abrir nada.
 
@@ -40,7 +40,7 @@
 | **Hecho** | La unidad del registro. Una sola frase dictada puede contener varios y produce varios registros. |
 | **Ontología cerrada** | Las tres marcas de TUKU que disparan consecuencias deterministas: `**pendiente**`, `(Hecho)`, `**cadencia**`. El autor no las puede extender. |
 | **Ontología abierta** | Las clasificaciones del autor (`**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`). Sirven para leer y filtrar, ningún comando actúa sobre ellas. Crece con el uso. |
-| **Clasificación** | El tipo abierto de un registro, elegido del vocabulario del libro de estilo. |
+| **Clasificación** | El tipo abierto de un registro, elegido de la tabla de `reglas/clasificaciones.user.md`. |
 | **Consecuencia** | Lo que se aplica *después* de escribir el registro, releyendo el texto: abrir un pendiente, enlazar, dar de alta una cadencia, proponer. |
 | **Propuesta** | Lo que el sistema sugiere y no ejecuta. Espera aprobación del autor y, si se rechaza, no deja rastro. |
 

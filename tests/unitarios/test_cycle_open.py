@@ -18,13 +18,10 @@ AHORA = datetime(2026, 9, 20, 10, 0)
 def _vault(tmp: Path, *, nombres: str | None = None) -> Path:
     vault = init(tmp / "v", desde=SEMANA_1, home=RAIZ_REPO)
     if nombres is not None:
-        config = vault / "reglas" / "config.tuku.md"
-        texto = re.sub(
-            r"(\| `cycle_name`\s*\| )`[^`]*`",
-            rf"\1`{nombres}`",
-            config.read_text(encoding="utf-8"),
+        filas = "".join(f"| `{n.strip()}` | x |\n" for n in nombres.split(","))
+        (vault / "reglas" / "ciclo.user.md").write_text(
+            f"| Ciclo | Días |\n| --- | --- |\n{filas}", encoding="utf-8"
         )
-        config.write_text(texto, encoding="utf-8")
     return vault
 
 
@@ -106,7 +103,7 @@ def test_el_ciclo_siguiente_empieza_el_dia_despues_sin_hoyos_ni_solapes(tmp_path
     assert "from: 2026-09-07" in _ahora(vault)
 
 
-def test_el_nombre_avanza_en_cycle_name_y_uno_fuera_de_la_lista_pide_force(
+def test_el_nombre_avanza_en_la_tabla_de_ciclos_y_uno_fuera_pide_force(
     tmp_path: Path,
 ) -> None:
     vault = _vault(tmp_path, nombres="turno, descanso")

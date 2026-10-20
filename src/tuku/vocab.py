@@ -1,14 +1,14 @@
 """tuku context style: los vocabularios abiertos del autor, desde `reglas/`.
 
-`spec/bitacora.md` fija dónde vive cada uno: un archivo de `reglas/` por entidad,
-con un capítulo `##` y una sola tabla. Archivo, capítulo y encabezados de la
+`spec/bitacora.md` fija dónde vive cada uno: un archivo `X.user.md` de `reglas/`
+por entidad, con una sola tabla y sin encabezados. Archivo y encabezados de la
 tabla son contrato: las filas crecen con el uso, el nombre no se cambia. Si falta
-el archivo o el capítulo el error es ruidoso y no silencioso, que es lo que
-separa esto de marcar el documento con marcas invisibles.
+el archivo o su tabla el error es ruidoso y no silencioso, que es lo que separa
+esto de marcar el documento con marcas invisibles.
 
-**Qué lee y escribe:** lee `reglas/bitacora.md`, `reglas/pendientes.md` y
-`reglas/notas.md`. No escribe nada.
-**A mano:** abrir esos archivos y leer la tabla de cada capítulo.
+**Qué lee y escribe:** lee `reglas/clasificaciones.user.md`,
+`reglas/pendientes.user.md`, `reglas/notas.user.md` y `reglas/ciclo.user.md`. No escribe nada.
+**A mano:** abrir esos archivos y leer su tabla.
 """
 
 from __future__ import annotations
@@ -19,36 +19,34 @@ from pathlib import Path
 
 from tuku import archivo, capitulos
 
-#: Dónde vive cada vocabulario: el archivo de `reglas/` y su capítulo. Es el
-#: contrato; el libro de estilo lo dice en su propia prosa.
+#: Dónde vive cada vocabulario: el archivo de `reglas/`, con su única tabla. Es el
+#: contrato; el libro de estilo lo transcluye en el capítulo de su entidad.
 FUENTES = {
-    "clasificaciones": ("reglas/bitacora.md", "Clasificaciones"),
-    "horizontes": ("reglas/pendientes.md", "Horizontes"),
-    "tipos-de-nota": ("reglas/notas.md", "Tipos de nota"),
+    "clasificaciones": "reglas/clasificaciones.user.md",
+    "horizontes": "reglas/pendientes.user.md",
+    "tipos-de-nota": "reglas/notas.user.md",
+    "ciclos": "reglas/ciclo.user.md",
 }
 
-#: Los archivos de `reglas/` que declaran vocabulario, sin repetir.
-ARCHIVOS = tuple(dict.fromkeys(ruta for ruta, _ in FUENTES.values()))
+#: Los archivos de `reglas/` que declaran vocabulario.
+ARCHIVOS = tuple(FUENTES.values())
 
 #: Primera celda de una fila de tabla, que es donde va el término entre backticks.
 _TERMINO = re.compile(r"^`([^`]+)`$")
 
 
 class VocabularioIncompleto(Exception):
-    """A un archivo de `reglas/` le falta el capítulo de contrato, o el archivo entero."""
+    """A un archivo de `reglas/` le falta su tabla de contrato, o el archivo entero."""
 
 
 def _tabla(texto: str | None, vocabulario: str) -> capitulos.Tabla:
-    ruta, nombre = FUENTES[vocabulario]
+    ruta = FUENTES[vocabulario]
     if texto is None:
-        raise VocabularioIncompleto(
-            f"falta {ruta}. Es contrato: agrégalo con el capítulo '## {nombre}' y su tabla."
-        )
-    tabla = capitulos.tabla_unica(texto, nombre)
+        raise VocabularioIncompleto(f"falta {ruta}. Es contrato: agrégalo con su tabla.")
+    tabla = capitulos.primera_tabla(texto)
     if tabla is None:
         raise VocabularioIncompleto(
-            f"falta el capítulo '## {nombre}' con su tabla en {ruta}. "
-            "Es contrato: agrégalo con su tabla debajo."
+            f"falta la tabla en {ruta}. Es contrato: agrégala con sus encabezados."
         )
     return tabla
 
@@ -63,15 +61,15 @@ def terminos(texto: str | None, vocabulario: str) -> list[str]:
 
 
 def leer(textos: Mapping[str, str | None]) -> dict[str, list[str]]:
-    """Los tres vocabularios abiertos. `textos` mapea cada ruta de `reglas/` a su texto."""
+    """Los vocabularios abiertos. `textos` mapea cada ruta de `reglas/` a su texto."""
     return {
         vocabulario: terminos(textos.get(ruta), vocabulario)
-        for vocabulario, (ruta, _) in FUENTES.items()
+        for vocabulario, ruta in FUENTES.items()
     }
 
 
 def leer_del_vault(vault: Path) -> dict[str, list[str]]:
-    """Los tres vocabularios abiertos del vault."""
+    """Los vocabularios abiertos del vault."""
     return leer({ruta: leer_opcional(vault, ruta) for ruta in ARCHIVOS})
 
 
@@ -82,12 +80,12 @@ def leer_opcional(vault: Path, ruta: str) -> str | None:
 
 
 def enlazables(notas_md: str) -> list[str]:
-    """Los tipos de nota con `sí` en la columna "Enlazable" del capítulo `## Tipos de nota`.
+    """Los tipos de nota con `sí` en la columna "Enlazable" de `reglas/notas.user.md`.
 
     La columna se busca por su encabezado; sin ella, ningún tipo se enlaza
     (`spec/notas.md`, "Enlazar notas").
     """
-    tabla = capitulos.tabla_unica(notas_md, FUENTES["tipos-de-nota"][1])
+    tabla = capitulos.primera_tabla(notas_md)
     if not tabla:
         return []
     cabecera = [c.lower() for c in tabla[0]]

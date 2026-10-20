@@ -74,7 +74,7 @@ cd mi-vault
 tuku note create "Patricia Lillo" --subtype persona --body-file ../patricia-lillo.md --scope liceo-tecnico-andes --at "2026-08-23 20:20"
 ```
 Entonces `notas/patricia-lillo.md` tiene `type: Note` y `subtype: persona`, y su `## Ver además` enlaza el ámbito del liceo con su motivo
-Y existe `reglas/subtipos/persona.tuku.md`, el archivo de reglas del tipo, que `tuku init` siembra junto con los demás archivos del vault
+Y el capítulo Nota del `LIBRO-DE-ESTILO.md` del vault describe la plantilla de `persona`
 Y `tuku doctor note` y `tuku doctor` salen limpios
 ```bash
 tuku doctor note notas/patricia-lillo.md

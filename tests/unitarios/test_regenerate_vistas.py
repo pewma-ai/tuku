@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from pathlib import Path
 
@@ -149,9 +150,9 @@ def test_el_primer_escalon_del_autor_titula_el_callout_aunque_lo_renombre(
     vault = init.init(tmp_path / "v", home=raiz, desde=INSTANTE.date())
     assert primer_escalon(vault) == "esta semana"
 
-    reglas = vault / "reglas" / "pendientes.md"
+    reglas = vault / "reglas" / "pendientes.user.md"
     reglas.write_text(
-        reglas.read_text(encoding="utf-8").replace("| `esta semana` |", "| `este turno` |"),
+        re.sub(r"\| `esta semana`", "| `este turno`", reglas.read_text(encoding="utf-8")),
         encoding="utf-8",
     )
     assert primer_escalon(vault) == "este turno"

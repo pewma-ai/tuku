@@ -1,9 +1,10 @@
 """tuku process cycle: abre, repite o guarda un ciclo de `AHORA.md`.
 
 El ciclo tiene un nombre (`cycle`) y un rango (`from` a `to`). `semana` se deduce
-de un día cualquiera (de lunes a domingo); con otro nombre de `cycle_name` el
-rango lo da `--to`. El ciclo siguiente empieza el día después de que termina el
-anterior, sin hoyos ni solapes, y su nombre es el siguiente de `cycle_name`.
+de un día cualquiera (de lunes a domingo); con otro nombre de la tabla de
+`reglas/ciclo.user.md` el rango lo da `--to`. El ciclo siguiente empieza el día
+después de que termina el anterior, sin hoyos ni solapes, y su nombre es el
+siguiente de esa tabla.
 Repetir el ciclo abierto solo lo verifica, o lo regenera si no tiene registros.
 Un `--from` anterior al ciclo abierto guarda un ciclo pasado en `bitacoras/`,
 sin verificarlo contra sus vecinos (`spec/ciclo.md`, "Abrir el siguiente ciclo").
@@ -168,7 +169,7 @@ def deduce_range(name: str, start: date, end: date | None) -> tuple[date, date]:
 
 
 def next_name(names: tuple[str, ...], previous: str | None) -> str:
-    """The cycle that follows `previous` in `cycle_name`, wrapping around at the end."""
+    """The cycle after `previous` in `reglas/ciclo.user.md`, wrapping around at the end."""
     if previous in names:
         return names[(names.index(previous) + 1) % len(names)]
     return names[0]
@@ -233,8 +234,8 @@ def abrir_en_vault(
     names = leer_config(vault).nombres_de_ciclo
     if nombre is not None and nombre not in names and not force:
         return Resultado.rechazo(
-            f"«{nombre}» no está en `cycle_name` ({', '.join(names)}). Confírmalo con el "
-            "autor y repite con --force, o agrégalo a `cycle_name` de reglas/config.tuku.md."
+            f"«{nombre}» no está en la tabla de ciclos ({', '.join(names)}). Confírmalo con el "
+            "autor y repite con --force, o agrégalo a la tabla de reglas/ciclo.user.md."
         )
     try:
         return _open(vault, names, desde, hasta, nombre, now)

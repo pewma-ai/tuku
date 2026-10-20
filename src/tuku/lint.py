@@ -134,7 +134,7 @@ def lint(ahora: str, *, abiertos: list[str]) -> list[Hallazgo]:
                         n,
                         PREGUNTA,
                         f"{marca} no está en el libro de estilo",
-                        "Se acepta igual. Agrégalo a `### Clasificaciones` "
+                        "Se acepta igual. Agrégalo a `reglas/clasificaciones.user.md` "
                         "cuando sepas qué significa.",
                     )
                 )

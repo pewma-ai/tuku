@@ -95,7 +95,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "--subtype",
         default=None,
         help=(
-            "tipo de la nota, una fila de `### Tipos de nota` del libro de estilo "
+            "tipo de la nota, una fila de la tabla de `reglas/notas.user.md` "
             "(por ejemplo `persona`); agrega `subtype` al frontmatter"
         ),
     )

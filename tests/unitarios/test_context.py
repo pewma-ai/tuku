@@ -129,7 +129,7 @@ def test_sin_tema_trae_todos_y_since_malo_rechaza(vault: Path) -> None:
         "# Registros desde",
         "# Ámbitos",
         "# Pendientes",
-        "# Vocabulario",
+        "# El autor",
         "# Notas",
     ):
         assert titulo in todo_junto
@@ -141,15 +141,15 @@ def test_style_entrega_el_libro_con_las_reglas_transcluidas_y_un_capitulo_a_la_v
     vault: Path,
 ) -> None:
     libro = context.del_vault(vault, "style", now=AHORA).mensaje
-    assert "![" not in libro, "cada transclusión se reemplaza por el archivo"
+    assert "](reglas/" not in libro, "cada transclusión se reemplaza por el archivo"
     assert (
-        libro.index("## Para qué sirve")
+        libro.index("## Propósito del vault")
         < libro.index("## Registro")
         < libro.index("## Pendiente")
     )
-    assert "| `progreso` |" in libro and "| `esta semana` |" in libro
-    assert "### Clasificaciones" in libro, "los capítulos de reglas/ bajan bajo el del libro"
-    assert "Este archivo es del autor" not in libro, "lo anterior al primer capítulo no entra"
+    assert "| `progreso`" in libro and "| `esta semana`" in libro
+    assert "### Clasificaciones del autor" in libro and "| Nombre " in libro
+    assert "\neditable: true\n" not in libro, "el frontmatter de lo transcluido no entra"
 
     pendiente = context.del_vault(vault, "style", now=AHORA, chapter="Pendiente").mensaje
     assert pendiente.startswith("## Pendiente") and "esta semana" in pendiente
@@ -158,8 +158,8 @@ def test_style_entrega_el_libro_con_las_reglas_transcluidas_y_un_capitulo_a_la_v
     r = context.del_vault(vault, "style", now=AHORA, chapter="Nada")
     assert not r.ok and "«Registro»" in r.mensaje, "el rechazo lista los capítulos que hay"
 
-    (vault / "reglas" / "notas.md").unlink()
-    with pytest.raises(VocabularioIncompleto, match=r"falta reglas/notas\.md"):
+    (vault / "reglas" / "notas.user.md").unlink()
+    with pytest.raises(VocabularioIncompleto, match=r"falta reglas/notas\.user\.md"):
         context.del_vault(vault, "style", now=AHORA)  # `main` lo traduce a un rechazo
 
 

@@ -74,10 +74,10 @@ TEMAS = ("todo", "scope", "comandos", "libro")
 
 COMANDOS = Path("reglas") / "comandos.tuku.md"
 
-#: La prosa que es de TUKU y viene del template del `tuku` instalado. No incluye
-#: `reglas/config.tuku.md`, que lleva los valores del autor, ni `reglas/comandos.tuku.md`,
-#: que se deriva de la ayuda del CLI.
-PROSA_DE_TUKU = ("LIBRO-DE-ESTILO.md", "reglas/*.tuku.md", "reglas/subtipos/*.tuku.md")
+#: La prosa que es de TUKU y viene del template del `tuku` instalado: el libro de estilo.
+#: No incluye `reglas/config.tuku.md`, que lleva los valores del autor, ni
+#: `reglas/comandos.tuku.md`, que se deriva de la ayuda del CLI.
+PROSA_DE_TUKU = ("LIBRO-DE-ESTILO.md",)
 NO_ES_PROSA = ("reglas/config.tuku.md", COMANDOS.as_posix())
 
 
@@ -253,14 +253,14 @@ def region_del_dia(
 
 
 def primer_escalon(vault: Path) -> str:
-    """The first rung of the author's ladder (`## Horizontes` of `reglas/pendientes.md`).
+    """The first rung of the author's ladder (the table of `reglas/pendientes.user.md`).
 
     It is the cycle in progress whatever the author calls it (`esta semana`,
-    `este turno`). Without a readable `reglas/pendientes.md` it is the template's.
+    `este turno`). Without a readable `reglas/pendientes.user.md` it is the template's.
     """
     try:
         horizontes = vocab.terminos(
-            vocab.leer_opcional(Path(vault), "reglas/pendientes.md"), "horizontes"
+            vocab.leer_opcional(Path(vault), "reglas/pendientes.user.md"), "horizontes"
         )
     except vocab.VocabularioIncompleto:
         horizontes = []

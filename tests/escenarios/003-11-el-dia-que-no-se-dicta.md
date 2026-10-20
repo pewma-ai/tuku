@@ -2,7 +2,7 @@
 
 > **Principio:** [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/bitacora.md`](../../spec/bitacora.md), [`spec/agente.md`](../../spec/agente.md)
 
-El autor dicta una hora y no un día. El día se deriva del vault, con la regla de [`reglas/bitacora.tuku.md`](../../template/vanilla/reglas/bitacora.tuku.md): si HOY cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros.
+El autor dicta una hora y no un día. El día se deriva del vault, con la regla del comando, que rechaza con la corrección: si HOY cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros.
 
 El turno del agente declara `TUKU_NOW="2026-08-20 10:00"` en el fence ```agente```: el `tuku` que el agente ejecuta usa esa fecha como hoy y la anuncia por `stderr`. Así el agente y el escenario viven en el mismo día.
 

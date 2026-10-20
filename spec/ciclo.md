@@ -8,7 +8,7 @@ Lo único canónico aquí son **los registros**. El resto es vista, y entra de d
 
 El frontmatter es OKF, con los campos en inglés porque son superficie de máquina (ver [`vault.md`](vault.md), "El frontmatter"). `AHORA.md` y una bitácora cerrada llevan **el mismo `type`**, `Logbook`: los separa `status`, que es `draft` mientras el ciclo está abierto y `stable` cuando se archiva y deja de tocarse. `from` y `to` son el rango que cubre, y son lo que dice dónde termina el ciclo: no hay ninguna marca en el cuerpo que lo repita.
 
-**Cada ciclo tiene un nombre y un rango.** `cycle` dice cuál es (`cycle: semana`, `cycle: turno`) y `from` y `to`, el rango que cubre. Los nombres posibles los declara el autor en `cycle_name` de [`reglas/config.tuku.md`](vault.md), "La configuración", como una lista (`turno, descanso`), y vale `semana` si no declara ninguno. **El ciclo siguiente es el siguiente de la lista**, y al llegar al final vuelve al primero; con un solo nombre, es el mismo.
+**Cada ciclo tiene un nombre y un rango.** `cycle` dice cuál es (`cycle: semana`, `cycle: turno`) y `from` y `to`, el rango que cubre. Los nombres posibles los declara el autor en la tabla de [`reglas/ciclo.user.md`](vault.md), "El libro de estilo", una fila por ciclo en el orden en que se alternan (`turno`, `descanso`), y vale `semana` si no declara ninguno. **El ciclo siguiente es el siguiente de la tabla**, y al llegar al final vuelve al primero; con un solo nombre, es el mismo.
 
 **El rango se deduce solo con `semana`**, que va de lunes a domingo: `tuku init --at` y `tuku process cycle --from` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente. **Con cualquier otro nombre el rango es un dato del autor**, porque un turno dura 8 días, o 10, o 14, y nada lo deduce: el agente le pregunta hasta qué día va el ciclo y abre con ese rango. Decidir el rango es del autor; abrir un ciclo con un rango dado es determinista. Con `cycle_name: turno, descanso`, un turno del martes 11 al martes 18 de agosto y el descanso que le sigue, del miércoles 19 al lunes 24, son dos ciclos:
 
@@ -22,7 +22,7 @@ to: 2026-08-18
 ---
 ```
 
-`tuku process cycle` recibe `--from`, `--to` y `--name`, y el nombre y el rango salen de `cycle_name` y del rango pedido ("Abrir el siguiente ciclo").
+`tuku process cycle` recibe `--from`, `--to` y `--name`, y el nombre y el rango salen de la tabla de ciclos y del rango pedido ("Abrir el siguiente ciclo").
 
 ```markdown
 ---
@@ -148,8 +148,8 @@ Las reglas valen para el ciclo que se abre contra el **ciclo anterior**: el abie
 
 - **Solo hay un `AHORA.md` abierto.** Si el ciclo abierto tiene registros, se rechaza como dice "Un ciclo abierto con registros no se pisa".
 - **No quedan hoyos ni solapes.** El `from` efectivo del ciclo nuevo es el día siguiente al `to` del anterior, y cualquier otro se rechaza nombrando el que corresponde: uno posterior deja días sin ciclo (`el ciclo anterior termina el 2026-08-18: empieza el 2026-08-19`) y uno anterior pisaría días ya cubiertos. El `from` efectivo es el que queda después de deducir el rango: con `semana`, `--from 2026-08-26` (un miércoles) tras un ciclo que terminó el domingo 2026-08-23 abre la semana que empieza el lunes 2026-08-24, y es válido. La única excepción es repetir el ciclo abierto con su mismo `from`, que no es otro ciclo.
-- **El nombre avanza con cada ciclo nuevo.** Es el siguiente de `cycle_name`, y al llegar al final vuelve al primero. Repetir el ciclo abierto conserva su nombre: el comando solo verifica y, sin registros, lo regenera, que es como se corrige su `--to`.
-- **`--name` fija el nombre en vez de avanzar.** Un nombre de `cycle_name` se acepta tal cual. Uno que la lista no declara se rechaza sin escribir, con un aviso que nombra el nombre desconocido y la lista: el agente se lo confirma al autor y, si lo quiere, repite con `--force`, o lo agrega antes a `cycle_name` de la config para que deje de ser la excepción.
+- **El nombre avanza con cada ciclo nuevo.** Es el siguiente de la tabla de ciclos, y al llegar al final vuelve al primero. Repetir el ciclo abierto conserva su nombre: el comando solo verifica y, sin registros, lo regenera, que es como se corrige su `--to`.
+- **`--name` fija el nombre en vez de avanzar.** Un nombre de la tabla se acepta tal cual. Uno que la tabla no declara se rechaza sin escribir, con un aviso que nombra el nombre desconocido y los que hay: el agente se lo confirma al autor y, si lo quiere, repite con `--force`, o lo agrega antes a `reglas/ciclo.user.md` para que deje de ser la excepción.
 
 **Un ciclo histórico no se verifica.** Un `--from` anterior al `from` del ciclo abierto guarda un ciclo pasado, por ejemplo para cargar el historial de un autor. No se compara con el anterior ni con el siguiente, no toca `AHORA.md` y se escribe en `bitacoras/` con la plantilla; como no hay ciclo anterior que haga avanzar el nombre, lo da `--name`. Los hoyos y solapes que queden entre los ciclos de `bitacoras/` los reporta `tuku doctor cycle`, sin rechazar nada.
 
@@ -185,6 +185,8 @@ Calcular la capacidad antes de planificar → `capacity calc`:
 - Se planifica contra lo que queda. Planificar contra el ciclo entero es la forma más común de fallar.
 
 ### De dónde lee: `CAPACIDAD.md`
+
+> **Provisional.** Ver la nota de [`ambitos.md`](ambitos.md): la capacidad del autor es hoy un texto abierto y no las secciones `Bruto` y `Costo fijo` de más abajo.
 
 El bruto y los costos fijos los declara el autor en archivos `CAPACIDAD.md` repartidos por el árbol de ámbitos (dónde vive cada uno y por qué se acumulan, en [`ambitos.md`](ambitos.md)).
 

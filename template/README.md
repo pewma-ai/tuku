@@ -28,7 +28,7 @@ Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2:
 | `ambitos/personal/` | La única rama inicial: `CAPACIDAD.md`, `personal.md` |
 | `notas/AGENTS.md` | Reglas del zettelkasten |
 | `reglas/*.user.md` | Lo que decide el autor sobre cada entidad, por declarar; el libro de estilo los transcluye |
-| `reglas/config.tuku.md` | `TZ`, `cycle_name`, `tuku_template`, `tuku_version` y `origen`, en una tabla |
+| `reglas/config.tuku.md` | `TZ`, `tuku_template`, `tuku_version` y `origen`, entre otros, en una tabla |
 | `.obsidian/app.json`, `.gitignore` | Que Obsidian escriba links Markdown con ruta relativa, y que de `.obsidian/` solo se versione eso ([`../spec/markdown.md`](../spec/markdown.md)) |
 
 La tabla es la referencia, no un inventario cerrado: lo que importa es que cualquier cosa que se agregue supone algo sobre el autor y hay que justificarlo.

@@ -1,7 +1,8 @@
-"""Notas enlazables: la columna "Enlazable" de `reglas/notas.md` decide `context note`."""
+"""Notas enlazables: la columna "Enlazable" de `reglas/notas.user.md` decide `context note`."""
 
 from __future__ import annotations
 
+import re
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -14,23 +15,19 @@ from tuku.config import limite_de_notas
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 HOY = AHORA.date()
 
-LIBRO = """## Tipos de nota
-
-| Tipo | Para qué | Cuidado | Enlazable |
+LIBRO = """| Tipo | Para qué | Cuidado | Enlazable |
 | --- | --- | --- | --- |
 | `persona` | Trabajar con alguien. | Lo que se le mostraría. | sí |
 | `idea` | Pensar algo. | Nada. | no |
-
-## Otro capítulo
 """
 
 
 def test_el_libro_dice_que_tipos_se_enlazan_y_el_template_enlaza_personas() -> None:
     assert vocab.enlazables(LIBRO) == ["persona"]
-    sin_columna = "## Tipos de nota\n\n| Tipo | Para qué |\n| --- | --- |\n| `persona` | x |\n"
+    sin_columna = "| Tipo | Para qué |\n| --- | --- |\n| `persona` | x |\n"
     assert vocab.enlazables(sin_columna) == []
-    assert vocab.enlazables("# Sin capítulo de tipos\n") == []
-    notas = RAIZ_REPO / "template" / "vanilla" / "reglas" / "notas.md"
+    assert vocab.enlazables("Sin tabla de tipos\n") == []
+    notas = RAIZ_REPO / "template" / "vanilla" / "reglas" / "notas.user.md"
     assert vocab.enlazables(notas.read_text(encoding="utf-8")) == ["persona"]
 
 
@@ -122,12 +119,12 @@ def test_context_note_lista_por_tipo_enlazable_y_dice_cuando_no_hay(vault: Path)
     assert context.del_vault(vault, "note", now=AHORA).mensaje == (
         "## persona\n\n- notas/rodolfo-cifuentes.md: Rodolfo Cifuentes; aliases: don Rodolfo"
     )
-    reglas = vault / "reglas" / "notas.md"
+    reglas = vault / "reglas" / "notas.user.md"
     reglas.write_text(
         reglas.read_text(encoding="utf-8").replace("| sí |", "| no |"), encoding="utf-8"
     )
     assert context.del_vault(vault, "note", now=AHORA).mensaje == (
-        "sin tipos enlazables en `## Tipos de nota` de `reglas/notas.md`."
+        "sin tipos enlazables en la tabla de `reglas/notas.user.md`."
     ), "sin tipos enlazables lo dice"
 
 
@@ -139,21 +136,17 @@ def test_context_note_trae_las_ultimas_hasta_un_limite_que_cae_a_25(vault: Path)
     _actualizada(vault, "beto", "2026-08-09")
     _actualizada(vault, "carla", "2026-08-10")
     config = vault / "reglas" / "config.tuku.md"
+    original = config.read_text(encoding="utf-8")
+
+    def con_limite(valor: str) -> None:
+        fila = re.compile(r"(\| `context_note_limit`\s*\| )`[^`]*`")
+        config.write_text(fila.sub(rf"\g<1>`{valor}`", original), encoding="utf-8")
+
     assert limite_de_notas(vault) == 25
     for valor in ("diez", "0", "-3"):
-        config.write_text(
-            config.read_text(encoding="utf-8").replace("| `25` |", f"| `{valor}` |"),
-            encoding="utf-8",
-        )
+        con_limite(valor)
         assert limite_de_notas(vault) == 25
-        config.write_text(
-            config.read_text(encoding="utf-8").replace(f"| `{valor}` |", "| `25` |"),
-            encoding="utf-8",
-        )
-    config.write_text(
-        config.read_text(encoding="utf-8").replace("| `25` |", "| `3` |"),
-        encoding="utf-8",
-    )
+    con_limite("3")
     salida = context.del_vault(vault, "note", now=AHORA).mensaje
     assert salida.splitlines()[2:] == [
         "- notas/carla.md: Carla",

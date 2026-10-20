@@ -35,7 +35,7 @@ TABLA = (
     + CABECERA
     + "".join(f"| `{t}` | un archivo | algo |\n" for t in TIPOS_REQUERIDOS)
 )
-LIBRO = f"---\ntype: Style Guide\n---\n\n## Tipos de archivo\n\n{TABLA.split('---', 2)[2]}"
+LIBRO = f"---\ntype: Style Guide\n---\n\n## Formato OKF\n\n{TABLA.split('---', 2)[2]}"
 PROPIOS = (
     "---\ntype: Config\n---\n\n## Tipos propios\n\n"
     f"{CABECERA}| `Receta` | un archivo | algo |\n"
@@ -65,7 +65,7 @@ def test_la_tabla_de_tipos_se_lee_y_se_revisa() -> None:
     assert not repite.sano and "repite tipos de TUKU: `Logbook`" in repite.salida
 
     sin_archivo = revisar_tipos(LIBRO, None)
-    assert not sin_archivo.sano and "reglas/types.md" in sin_archivo.salida
+    assert not sin_archivo.sano and "reglas/types.user.md" in sin_archivo.salida
     assert not revisar_tipos(None, PROPIOS).sano
 
 
@@ -122,11 +122,12 @@ COMPLETO = {
     "ambitos/personal/personal.md": "---\ntype: Scope\n---\n",
     "ambitos/AGENTS.md": "# Reglas, sin frontmatter a propósito\n",
     "reglas/config.tuku.md": "---\ntype: Config\n---\n",
-    "reglas/types.md": "---\ntype: Config\n---\n",
-    "reglas/autor.md": "---\ntype: Config\n---\n",
-    "reglas/bitacora.md": "---\ntype: Config\n---\n",
-    "reglas/pendientes.md": "---\ntype: Config\n---\n",
-    "reglas/notas.md": "---\ntype: Config\n---\n",
+    "reglas/types.user.md": "---\ntype: Style Guide\n---\n",
+    "reglas/autor.user.md": "---\ntype: Style Guide\n---\n",
+    "reglas/clasificaciones.user.md": "---\ntype: Style Guide\n---\n",
+    "reglas/pendientes.user.md": "---\ntype: Style Guide\n---\n",
+    "reglas/notas.user.md": "---\ntype: Style Guide\n---\n",
+    "reglas/ciclo.user.md": "---\ntype: Style Guide\n---\n",
     "reglas/plantilla/AHORA.md": "---\ntype: Logbook\n---\n",
 }
 VALIDOS = ["Config", "Logbook", "Scope", "Style Guide", "Todo"]
@@ -162,7 +163,7 @@ def test_un_vault_completo_esta_sano_y_uno_con_defectos_los_nombra(tmp_path: Pat
     assert revisar_archivos(vault).sano
     revision = revisar_frontmatter(vault, tipos_validos=VALIDOS)
     assert revision.sano
-    assert "11 archivos" in revision.salida  # los 12 menos el AGENTS.md
+    assert "12 archivos" in revision.salida  # los 12 menos el AGENTS.md
     assert "AGENTS.md" not in revision.salida
     assert "plantilla/AHORA.md" not in revision.salida
 
@@ -179,10 +180,10 @@ def test_un_vault_completo_esta_sano_y_uno_con_defectos_los_nombra(tmp_path: Pat
     )
     assert not raro.sano and "`type: Cosa`" in raro.salida
 
-    faltante = {k: v for k, v in COMPLETO.items() if k != "reglas/types.md"}
+    faltante = {k: v for k, v in COMPLETO.items() if k != "reglas/types.user.md"}
     sin_archivo = revisar_archivos(_vault(tmp_path / "c", faltante))
     assert not sin_archivo.sano
-    assert "reglas/types.md: error: falta el archivo." in sin_archivo.salida
+    assert "reglas/types.user.md: error: falta el archivo." in sin_archivo.salida
 
 
 def test_el_type_solo_cuenta_en_el_frontmatter_y_una_revision_ausente_falla() -> None:

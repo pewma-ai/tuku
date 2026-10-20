@@ -7,7 +7,7 @@ da por cierto sin comprobarlo, y que si falta produce fallas mudas más adelante
 - El frontmatter OKF con `from` y `to` resueltos. Sin eso, ningún encabezado de
   día puede fecharse, porque el año sale del rango (`ahora.py`).
 - Los siete encabezados de día dentro del rango del ciclo.
-- El `type` y el `status` que `reglas/types.md` y el libro de estilo fijan para
+- El `type` y el `status` que `reglas/types.user.md` y el libro de estilo fijan para
   un ciclo. De `to` sale dónde termina, así que no hace falta marcarlo aparte
   en el cuerpo.
 
@@ -27,7 +27,7 @@ from tuku import ahora as _ahora
 from tuku import archivo
 
 #: Lo que un ciclo declara en su frontmatter. `Logbook` porque `AHORA.md` y una
-#: bitácora cerrada son el mismo tipo de archivo (ver `reglas/types.md`).
+#: bitácora cerrada son el mismo tipo de archivo (ver `reglas/types.user.md`).
 TYPE_DEL_CICLO = "Logbook"
 
 #: Un ciclo abierto es borrador. Pasa a `stable` cuando se archiva.
@@ -89,7 +89,7 @@ def lint(ahora: str) -> list[Hallazgo]:
 
     frontmatter = _frontmatter(ahora)
     for campo, esperado, correccion in (
-        ("type", TYPE_DEL_CICLO, "Es el `type` de un ciclo, y sale de `reglas/types.md`."),
+        ("type", TYPE_DEL_CICLO, "Es el `type` de un ciclo, y sale de `reglas/types.user.md`."),
         ("status", STATUS_ABIERTO, "Un ciclo abierto es borrador; `stable` es el archivado."),
     ):
         valor = frontmatter.get(campo)

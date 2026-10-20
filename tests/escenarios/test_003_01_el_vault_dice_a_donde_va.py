@@ -31,10 +31,12 @@ def test_003_01_el_vault_nace_con_su_tabla_y_el_doctor_la_aprueba() -> None:
 
 
 def test_003_01_la_tabla_sembrada_nombra_comandos_reales() -> None:
-    """Lo mismo, sobre `template/vanilla/AGENTS.md` en vivo y sin pasar por el CLI."""
-    agents = (RAIZ / "template" / "vanilla" / "AGENTS.md").read_text(encoding="utf-8")
+    """Lo mismo, sobre la skill del template en vivo y sin pasar por el CLI."""
+    agents = (
+        RAIZ / "template" / "vanilla" / "reglas" / "skills" / "asistente" / "SKILL.md"
+    ).read_text(encoding="utf-8")
     nombrados = doctor.comandos_de_despacho(agents)
-    assert nombrados, "el AGENTS.md del template no nombra ningún comando"
+    assert nombrados, "la skill del template no nombra ningún comando"
     faltan = doctor.inexistentes(nombrados, comandos())
     assert not faltan, f"el template nombra comandos que no existen: {faltan}"
 
@@ -46,8 +48,10 @@ def test_003_01_un_comando_inventado_es_un_error() -> None:
     assert "tuku scope crear" in revision.stdout, revision.stdout
     assert "Corrige la tabla" in revision.stdout, "no dice cómo corregirlo"
 
-    agents = corrida.ruta("mi-vault", "AGENTS.md").read_text(encoding="utf-8")
-    assert "`tuku scope crear`" in agents, "el doctor no debe reparar lo que encuentra"
+    agents = corrida.ruta("mi-vault", "reglas", "skills", "asistente", "SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    assert "tuku scope crear" in agents, "el doctor no debe reparar lo que encuentra"
 
 
 def test_003_01_sin_agents_md_no_hay_despacho() -> None:

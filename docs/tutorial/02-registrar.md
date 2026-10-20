@@ -19,7 +19,7 @@ La hora y el formato los pone el comando, no el agente. Pregúntale al agente qu
 
 > [!check] Qué debería pasar
 > - Hay una segunda línea, con otra hora, bajo el mismo día.
-> - Puede llevar una palabra entre asteriscos, como `**señal**` o `**fricción**`. Es la clasificación, y la eligió el agente de la tabla de `LIBRO-DE-ESTILO.md`, sección `### Clasificaciones`.
+> - Puede llevar una palabra entre asteriscos, como `**señal**` o `**fricción**`. Es la clasificación, y la eligió el agente de la tabla de `reglas/clasificaciones.user.md`, que el capítulo Registro de `LIBRO-DE-ESTILO.md` incluye.
 
 La clasificación es opcional y la única decisión del agente en un registro. Si quieres otra palabra, edita la tabla del libro: es tuya.
 

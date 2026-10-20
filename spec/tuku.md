@@ -82,7 +82,7 @@ flowchart LR
     PC -->|"el rango de --from a --to;<br/>con semana, el que contiene --from<br/>y sin --from, el día siguiente al to anterior;<br/>si ya lo cubre, solo verifica"| AH
     PC -->|"rechaza un --from que no sea<br/>el día siguiente al to del anterior,<br/>salvo repetir el ciclo abierto"| AH
     PC -->|"un --from anterior al del ciclo abierto<br/>es un ciclo pasado, sin verificar"| BI
-    PC -->|"el nombre avanza en cycle_name;<br/>repetir el ciclo abierto lo conserva;<br/>--name fuera de la lista, solo con --force"| CF
+    PC -->|"el nombre avanza en la tabla de ciclo.user.md;<br/>repetir el ciclo abierto lo conserva;<br/>--name fuera de la lista, solo con --force"| CF
     PC -.->|"si hay una bitácora anterior"| BI
     PC -->|"con bitácora anterior, abre<br/>revisar la bitácora anterior<br/>como tuku todo open"| PE
 

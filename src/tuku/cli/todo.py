@@ -104,8 +104,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
                 dest="horizon",
                 default=None,
                 help=(
-                    "escalón del pendiente sin fecha, de `### Horizontes` en el libro de "
-                    "estilo; por defecto, el primero"
+                    "escalón del pendiente sin fecha, de la tabla de "
+                    "`reglas/pendientes.user.md`; por defecto, el primero"
                 ),
             )
 

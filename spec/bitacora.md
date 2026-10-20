@@ -78,15 +78,15 @@ El costo que la mantiene honesta: la lista vive en el código del linter, así q
 
 **Abierta, del autor.** `**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`. Son **semánticos**: ningún comando actúa sobre ellos. Sirven para leer, filtrar y destilar. Si el autor usa un tipo nuevo se acepta, y en un ciclo posterior se le pregunta qué significa para formalizarlo.
 
-**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos son del autor y viven en `reglas/`, cada uno en el archivo de su entidad, bajo un capítulo `##` con una sola tabla (semillas en [`../template/vanilla/reglas/`](../template/vanilla/reglas/)). De ahí los lee el comando, y el libro de estilo transcluye cada archivo en el capítulo de su entidad ([vault.md](vault.md), "El libro de estilo"):
+**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos son del autor y viven en `reglas/`, cada uno en su archivo `X.user.md`, con una sola tabla (semillas en [`../template/vanilla/reglas/`](../template/vanilla/reglas/)). De ahí los lee el comando, y el libro de estilo transcluye cada archivo en el capítulo de su entidad ([vault.md](vault.md), "El libro de estilo"):
 
-| Vocabulario abierto | Archivo | Capítulo |
+| Vocabulario abierto | Archivo | Capítulo del libro |
 | --- | --- | --- |
-| Clasificaciones de registro | `reglas/bitacora.md` | `## Clasificaciones` |
-| Horizontes de pendientes | `reglas/pendientes.md` | `## Horizontes` |
-| Tipos de nota | `reglas/notas.md` | `## Tipos de nota` |
+| Clasificaciones de registro | `reglas/clasificaciones.user.md` | Registro |
+| Horizontes de pendientes | `reglas/pendientes.user.md` | Pendiente |
+| Tipos de nota | `reglas/notas.user.md` | Nota |
 
-Formalizar un tipo nuevo es agregar una fila a la tabla del capítulo que corresponda. No hay segunda copia en ninguna parte, así que **el archivo, el nombre del capítulo y los encabezados de su tabla son contrato**: renombrarlos rompe al comando, y un capítulo con más de una tabla lo confunde, por eso `tuku doctor style` lo reporta.
+Formalizar un tipo nuevo es agregar una fila a la tabla del archivo que corresponda. No hay segunda copia en ninguna parte, así que **el archivo y los encabezados de su tabla son contrato**: renombrarlos rompe al comando, y un archivo con más de una tabla lo confunde, por eso `tuku doctor style` lo reporta.
 
 Ese contrato es el que hay y **no crece**. Cualquier **dato nuevo que una automatización necesite** no se agrega aquí, va a la sección de datos de `reglas/config.tuku.md`, y el libro de estilo lo transcluye si el autor necesita verlo mientras escribe. Así el dato tiene un solo lugar donde se edita. El comando lee la estructura visible, nunca una marca invisible ([markdown.md](markdown.md), "Datos de máquina en estructura visible"), y la ausencia del archivo o del capítulo es un error ruidoso.
 

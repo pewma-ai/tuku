@@ -22,10 +22,10 @@ Y la revisión `despacho` confirma que todos los comandos existen
 
 ## Escenario: un comando que no existe en la tabla es un error
 
-Dado un `AGENTS.md` que nombra un comando inventado
+Dado un archivo de la skill del asistente que nombra un comando inventado
 ```bash
-sed -i.bak 's/`tuku scope create`/`tuku scope crear`/' mi-vault/AGENTS.md
-rm mi-vault/AGENTS.md.bak
+sed -i.bak 's/tuku scope create/tuku scope crear/' mi-vault/reglas/skills/asistente/SKILL.md
+rm mi-vault/reglas/skills/asistente/SKILL.md.bak
 ```
 Cuando se corre
 ```bash
@@ -39,7 +39,7 @@ Y no toca el archivo en disco
 Dado un vault al que le falta su `AGENTS.md`
 ```bash
 cp mi-vault/AGENTS.md agents-respaldo.md
-rm mi-vault/AGENTS.md
+rm mi-vault/reglas/skills/asistente/SKILL.md
 ```
 Cuando se corre
 ```bash
@@ -47,7 +47,7 @@ tuku doctor --vault mi-vault
 ```
 Entonces el doctor lo reporta y dice qué se pierde sin él
 ```bash
-cp agents-respaldo.md mi-vault/AGENTS.md
+cp agents-respaldo.md mi-vault/reglas/skills/asistente/SKILL.md
 ```
 
 ## Aceptación humana (en Obsidian)

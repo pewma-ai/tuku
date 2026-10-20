@@ -1,6 +1,6 @@
 """Test del escenario 001-04-init-author.
 
-`--author` deja el nombre en `reglas/autor.md`, y un
+`--author` deja el nombre en `reglas/autor.user.md`, y un
 nombre en blanco deja la línea intacta y el vault operable.
 
 Ejecutable directo: `python3 tests/escenarios/test_001_04_init_author.py`
@@ -23,22 +23,22 @@ from tuku.cli import EXITO  # noqa: E402
 SLUG = "001-04-init-author"
 FECHA_FIJA = date(2026, 8, 11)
 AUTOR = "ARTURO PEREZ-REVERTE (Arturo)"
-MARCADOR = "**Nombre del autor:**"
+PLACEHOLDER = "PEDIR AL AUTOR!"
 
 
-def _linea_del_autor(vault: Path) -> str:
-    autor = (vault / "reglas" / "autor.md").read_text(encoding="utf-8")
-    return next(ln for ln in autor.splitlines() if ln.lstrip().startswith(MARCADOR))
+def _fila_nombre(vault: Path) -> str:
+    autor = (vault / "reglas" / "autor.user.md").read_text(encoding="utf-8")
+    return next(ln for ln in autor.splitlines() if ln.lstrip().lower().startswith("| nombre"))
 
 
 def test_001_04_init_author_escribe_el_nombre_en_reglas_autor() -> None:
-    corrida = gherkin.correr(SLUG, "el nombre del autor queda en reglas/autor.md")
+    corrida = gherkin.correr(SLUG, "el nombre del autor queda en reglas/autor.user.md")
     assert corrida.codigo == EXITO, corrida.stderr
     destino = corrida.ruta("mi-vault")
 
-    autor = (destino / "reglas" / "autor.md").read_text(encoding="utf-8")
-    assert f"{MARCADOR} {AUTOR}" in autor, f"el nombre no llegó a autor.md: {autor[:400]!r}"
-    assert "Nombre del autor:** por declarar" not in autor, "quedó el placeholder sin sustituir"
+    fila = _fila_nombre(destino)
+    assert AUTOR in fila, f"el nombre no llegó a autor.user.md: {fila!r}"
+    assert PLACEHOLDER not in fila, "quedó el placeholder sin sustituir"
 
 
 def test_001_04_un_nombre_en_blanco_deja_el_vault_operable_sin_nombre() -> None:
@@ -46,8 +46,8 @@ def test_001_04_un_nombre_en_blanco_deja_el_vault_operable_sin_nombre() -> None:
     assert corrida.codigo == EXITO, corrida.stderr
 
     vault = corrida.ruta("en-blanco")
-    linea = _linea_del_autor(vault)
-    assert linea.startswith(f"{MARCADOR} por declarar"), f"se tocó la línea: {linea!r}"
+    fila = _fila_nombre(vault)
+    assert PLACEHOLDER in fila, f"se tocó la fila: {fila!r}"
     assert (vault / "AHORA.md").is_file(), "el vault no quedó operable"
 
 
