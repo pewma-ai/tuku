@@ -51,11 +51,17 @@ tuku doctor
 
 > [!check] Qué debería pasar
 > - Muestra los hallazgos y los avisos, o dice que todo está sano.
-> - Con `tuku doctor --verbose` ves también cada revisión que salió bien.
+
+Con `tuku doctor --verbose` ves también cada revisión que salió bien.
 
 ### Edita a mano y doctor lo acepta
 
-Abre `AHORA.md` y corrige una palabra de un registro.
+> [!warning] Edita a mano
+> Abre `AHORA.md` y agrega unas palabras al final de un registro. Corre `tuku doctor`.
+>
+> ```edit
+> AHORA.md: anota " (revisado)" en el primer registro
+> ```
 
 > [!check] Qué debería pasar
 > - `tuku doctor` sigue sano.
@@ -64,11 +70,17 @@ El vault es tuyo y lo puedes editar con cualquier programa. Lo que el agente no 
 
 ### Hazlo enojar
 
-Abre `PENDIENTES.md` y borra una fila a mano. Corre `tuku doctor`.
+> [!warning] Edita a mano
+> Abre `PENDIENTES.md` y borra una fila. Corre `tuku doctor`. Al terminar, deshaz el cambio antes de seguir.
+>
+> ```edit
+> PENDIENTES.md: borra la fila 1
+> deshacer
+> ```
 
 > [!check] Qué debería pasar
 > - Reporta que el registro `**pendiente**` de `AHORA.md` no tiene su fila.
 
-`doctor` cruza `AHORA.md` con `PENDIENTES.md` y avisa cuando dejan de coincidir. Deshaz el cambio antes de seguir.
+`doctor` cruza `AHORA.md` con `PENDIENTES.md` y avisa cuando dejan de coincidir.
 
 Siguiente: [6. El día completo](06-el-dia-completo.md).

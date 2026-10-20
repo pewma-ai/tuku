@@ -7,6 +7,9 @@
     uv run python tests/scripts/test-tui.py 004-03 --raw
     uv run python tests/scripts/test-tui.py 005-06
     uv run python tests/scripts/test-tui.py 005-06 --escenario Paula
+    uv run python tests/scripts/test-tui.py tutorial          # los diez capítulos
+    uv run python tests/scripts/test-tui.py tutorial 3-6      # o 6, o 1,4,7
+    uv run python tests/scripts/test-tui.py tutorial 6 --listar
 
 Sirve para cualquier escenario con agente. En una conversación (epic 004, plan
 ```autor```), Damián lo interpreta Claude (Sonnet, esfuerzo bajo) con el plan;
@@ -16,6 +19,11 @@ escribe, y un archivo con varios escenarios corre todos o el que `--escenario`
 nombre. Responde el agente del arnés
 (`TUKU_AGENTE`, `agy` por defecto). Al terminar deja el vault y el
 `conversation-log.md` en `playground/`, como la conversación a mano.
+
+`tutorial` corre `docs/tutorial/` como prueba: las frases son los `> [!tip]` de cada
+capítulo y cada `> [!check]` lo juzga Claude contra lo que cambió en el vault
+(`--sin-juez` los deja para leer). Cada capítulo parte del vault del anterior,
+archivado en `playground/010-NN-…/`, así que uno suelto exige haber corrido el previo.
 """
 
 from __future__ import annotations
@@ -32,13 +40,22 @@ import agente
 import conversar
 import gherkin
 import tui
+import tutorial
 
 
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
-    p.add_argument("id", help="el escenario, por ejemplo 004-03 o 005-06")
+    p.add_argument("id", help="el escenario, por ejemplo 004-03 o 005-06, o `tutorial`")
+    p.add_argument(
+        "capitulos", nargs="?", default="", help="con `tutorial`: 6, 3-6 o 1,4,7; sin él, todos"
+    )
+    p.add_argument(
+        "--listar", action="store_true", help="con `tutorial`: solo mostrar los pasos"
+    )
+    p.add_argument("--sin-juez", action="store_true", help="con `tutorial`: los check, a mano")
+    p.add_argument("--modelo-juez", default="sonnet")
     p.add_argument(
         "--escenario", help="solo el escenario del archivo cuyo título contiene esto"
     )
@@ -49,6 +66,8 @@ def main(argv: list[str]) -> int:
     p.add_argument("--esfuerzo-damian", default="low")
     args = p.parse_args(argv)
 
+    if args.id == "tutorial":
+        return _tutorial(args)
     motivo = agente.motivo_no_disponible()
     if motivo is not None:
         print(f"test-tui: {motivo}", file=sys.stderr)
@@ -78,6 +97,45 @@ def main(argv: list[str]) -> int:
     if len(resultados) > 1:
         vista.resumen([(x.titulo, c.ok) for x, c in zip(planes, resultados, strict=True)])
     return 0 if all(c.ok for c in resultados) else 2
+
+
+def _tutorial(args: argparse.Namespace) -> int:
+    """Los capítulos pedidos del tutorial, en orden, cada uno sobre el vault del anterior."""
+    try:
+        numeros = tutorial.rango(args.capitulos, max(tutorial.archivos()))
+        capitulos = [tutorial.leer_capitulo(n) for n in numeros]
+        if args.listar:
+            for cap in capitulos:
+                print(f"{cap.archivo.name} · {cap.titulo}")
+                for paso in cap.pasos:
+                    print(f"  [{paso.tipo}] {paso.titulo or paso.seccion}: {paso.texto[:70]!r}")
+                    for check in paso.checks:
+                        print(f"      ✓? {check[:90]}")
+            return 0
+        motivo = agente.motivo_no_disponible()
+        if motivo is not None:
+            print(f"test-tui: {motivo}", file=sys.stderr)
+            return 1
+        juez = None
+        if not args.sin_juez:
+
+            def juez(prompt: str, total: int) -> list[tuple[bool, str]]:
+                return tutorial.juzgar(prompt, total, args.modelo_juez)
+
+        vista = tui.Vista(raw=args.raw)
+        resultados = [
+            tutorial.correr_capitulo(cap, vista, juez=juez, turnos=args.turnos)
+            for cap in capitulos
+        ]
+    except (
+        tutorial.CapituloNoEncontrado,
+        tutorial.EdicionInvalida,
+        tui.EscenarioNoEncontrado,
+    ) as e:
+        print(f"test-tui: {e}", file=sys.stderr)
+        return 1
+    vista.resumen([(f"{r.capitulo.numero}. {r.capitulo.titulo}", r.ok) for r in resultados])
+    return 0 if all(r.ok for r in resultados) else 2
 
 
 def _correr_plan(plan: tui.Plan, args: argparse.Namespace, vista: tui.Vista) -> tui.Conclusion:

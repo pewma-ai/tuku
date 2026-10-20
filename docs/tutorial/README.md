@@ -18,6 +18,20 @@ Cada paso tiene tres partes:
 
 Y debajo, una o dos líneas con el porqué.
 
+Cuando te pido tocar un archivo tú, lo ves así. El bloque `edit` dice la edición exacta, para que sea repetible:
+
+> [!warning] Edita a mano
+> Lo que haces, en palabras.
+>
+> ```edit
+> ARCHIVO: reemplaza "viejo" por "nuevo"
+> ARCHIVO: borra la fila 1
+> ARCHIVO: anota " (revisado)" en el primer registro
+> deshacer
+> ```
+
+`deshacer` devuelve el archivo a como estaba cuando termina el paso.
+
 **Este tutorial describe cómo debe funcionar TUKU.** Si algo de un `check` no pasa, es un defecto del sistema o del tutorial: anótalo. Por eso sirve también de prueba.
 
 ## Sobre el comando `tuku`
