@@ -31,7 +31,7 @@ De lo que no depende de nada a lo que compone todo lo anterior.
 | 10 | [cli.md](cli.md) | El contrato de `tuku`: gramática, garantías, códigos de salida y forma de la salida |
 | 11 | [tuku.md](tuku.md) | La firma de cada comando y qué archivos lee y escribe, con lo pendiente marcado |
 | 12 | [agente.md](agente.md) | Qué cambia cuando quien ejecuta es un agente de IA |
-| 13 | [despacho.md](despacho.md) | El `AGENTS.md` de la raíz: los dos modos, la tabla de despacho y los límites |
+| 13 | [despacho.md](despacho.md) | El `AGENTS.md` de la raíz y la skill del asistente: los dos modos, los ejemplos de despacho y los límites |
 
 ## Fuera de alcance
 

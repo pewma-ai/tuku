@@ -95,7 +95,7 @@ Pendiente para una sesión propia. Temas que ya están sobre la mesa:
 El template ya está hecho ([`LIBRO-DE-ESTILO.md`](template/vanilla/LIBRO-DE-ESTILO.md) y [`reglas/`](template/vanilla/reglas/)). Esto reemplaza la dirección de "El libro de estilo estático" y la conversación sobre `reglas/config.tuku.md` de más arriba. Lo que quedó decidido:
 
 - **El libro es orientación, no la especificación completa.** Es de TUKU, legible para una persona y un agente, y los comandos hacen cumplir lo determinista. No repite lo que un comando verifica.
-- **Cada capítulo se basta solo para su tarea** (Registro, Pendiente, Ciclo, Ámbito, Nota, Cadencia, Formato OKF, Uso de Markdown...) y dice su "Lee también". `AGENTS.md` manda leer el capítulo una vez por sesión antes de la primera escritura de cada tipo. Se acepta que un agente se la salte; si pasa, la salida es una compuerta en el comando con estado local `.tuku/leidos`.
+- **Cada capítulo se basta solo para su tarea** (Registro, Pendiente, Ciclo, Ámbito, Nota, Cadencia, Formato OKF, Uso de Markdown...) y dice su "Lee también". La skill del asistente (`reglas/skills/asistente/SKILL.md`) manda leer el capítulo una vez por sesión antes de la primera escritura de cada tipo. Se acepta que un agente se la salte; si pasa, la salida es una compuerta en el comando con estado local `.tuku/leidos`.
 - **Los únicos `*.tuku.md` son `config.tuku.md` y `comandos.tuku.md`.** Desaparecen `bitacora.tuku.md`, `notas.tuku.md` y `subtipos/persona.tuku.md`, y su contenido vive en el libro.
 - **Lo del autor está en `reglas/*.user.md`**, con lo mínimo: frontmatter `type: Style Guide`, `editable: true`, `modified_time` (null hasta que el agente guarda una preferencia) y `rules` (sus reglas de edición); el cuerpo es solo su tabla o su texto, **sin encabezado**. Los encabezados `###` y las frases viven en el libro. `lenguaje` se fundió en `autor.user.md` (tabla Campo y Valor), y `bitacora.md` pasó a `clasificaciones.user.md`.
 - **`cycle_name` salió de `config.tuku.md`** y vive en `reglas/ciclo.user.md`, como una tabla de dos columnas, `Ciclo` y `Días`, con una fila por ciclo en el orden en que se alternan. El código usa la primera columna; `Días` es informativa por ahora.
@@ -105,6 +105,8 @@ El template ya está hecho ([`LIBRO-DE-ESTILO.md`](template/vanilla/LIBRO-DE-EST
 
 ### Hecho el 2026-10-19
 
+- **Epic 004 con tests agénticos:** `test_004_01` a `test_004_05` corren la conversación con Damián simulado (`tests/scripts/conversacion.py`) y evalúan la tabla de deltas por turno; los cinco pasan. Para eso la skill ganó cuatro reglas: la decisión sin cuándo es un registro, lo que el autor deja sin resolver no se escribe, el ámbito no se pregunta, y `--at` vale también en `note create`.
+- **Asistente:** `AGENTS.md` quedó en invocación y límites; las reglas de trabajo y los ejemplos petición, capítulo y comando viven en `reglas/skills/asistente/SKILL.md`. El doctor lee ambos. `spec/despacho.md` y `spec/vault.md` al día.
 - **Specs:** `vault`, `bitacora`, `pendientes`, `notas`, `cli`, `markdown` al día con el libro y `reglas/*.user.md`; `ambitos` y `ciclo` con la capacidad marcada como provisional. **Docs:** glosario y tutoriales 01 a 04.
 - **Código:** `capitulos.primera_tabla`; `vocab`, `style`, `config`, `init`, `doctor`, `context` y `regenerate` leen los `.user.md` sin capítulos; `context` sin tema trae solo la tabla del autor; los textos con rutas viejas. **Tests:** unitarios y escenarios 001-04, 001-07, 003-11 y 005-05 adaptados; la suite no agéntica pasa.
 - **El agente de 003-11 falló sin la regla del día fuera del ciclo**, y la volvió a ganar al restaurarla como regla 5 del capítulo Registro. Es la prueba de que esa regla es de juicio y debe quedar en el libro.
@@ -117,9 +119,10 @@ El template ya está hecho ([`LIBRO-DE-ESTILO.md`](template/vanilla/LIBRO-DE-EST
 - **`**cadencia**`:** el libro ya no la reserva; `spec/bitacora.md` la sigue tratando como marca. Decidir.
 - **`doctor`:** revisar el frontmatter de los `.user.md` (`editable`, `modified_time`, `rules`) y avisar si `modified_time` es `null` y el archivo difiere del template. `autor.user.md` trae `PEDIR AL AUTOR!`: avisar si queda.
 - **La compuerta `.tuku/leidos`**, solo si se mide que los agentes se saltan la lectura del capítulo. Con 003-11 el agente sí lee `Registro`.
-- **`template/README.md`:** la fila de `CAPACIDAD.md` y el paso de instalar a mano.
+- **`template/README.md`:** la fila de `CAPACIDAD.md` y el paso de instalar a mano (la skill ya tiene su fila en la tabla).
 - **Epics:** `devel/epics.md` no nombra nada del libro viejo; revisar si 001 o 005 deben mencionar el libro por capítulos.
-- **Correr los demás agénticos** con el `AGENTS.md` nuevo (solo corrió 003-11).
+- **Correr los demás agénticos** con el `AGENTS.md` mínimo y la skill del asistente (solo corrió 003-11, y antes de la skill). Ver si el agente real carga la skill sin que falle el despacho.
+- **La skill vive en `reglas/skills/`**, que ningún arnés descubre solo: depende de que `AGENTS.md` la nombre. Si algún arnés no la carga, volver a `AGENTS.md` plano.
 
 ## Agente
 
@@ -165,7 +168,7 @@ Anotado desde el chat de specs el 2026-10-18. Lo de comandos y tests vive ademá
 
 ### Comandos
 
-- **`cycle_type` ya pasó a `cycle_name`, por un error de alcance.** El chat de specs lo hizo en [`config.py`](src/tuku/config.py) (`Configuracion.nombres_de_ciclo`, una tupla con `("semana",)` por defecto), en una línea de `CAMPOS_REQUERIDOS` de [`doctor.py`](src/tuku/doctor.py), en el template (`reglas/config.tuku.md` y su README) y en `test_config.py` y `test_init.py`. Revisarlo al integrar. Sigue sin uso: nada abre ciclos con él todavía.
+- **`cycle_type` pasó a `cycle_name` y luego a la tabla de `ciclo.user.md` (2026-10-19).** Lo que sigue describe el paso intermedio. El chat de specs lo hizo en [`config.py`](src/tuku/config.py) (`Configuracion.nombres_de_ciclo`, una tupla con `("semana",)` por defecto), en una línea de `CAMPOS_REQUERIDOS` de [`doctor.py`](src/tuku/doctor.py), en el template (`reglas/config.tuku.md` y su README) y en `test_config.py` y `test_init.py`. Revisarlo al integrar. Sigue sin uso: nada abre ciclos con él todavía.
 - **Vaults ya sembrados con `cycle_type`.** Ahora lo ignoran y usan `semana`. Decidir si `doctor config` avisa de la fila vieja.
 - **`process cycle`:** `--from`, `--to`, `--name`, `--force`, sin `--at`. Un `--from` anterior al del ciclo abierto escribe un ciclo histórico en `bitacoras/` con `--name` y sin verificar contra los vecinos ([`spec/ciclo.md`](spec/ciclo.md), "Abrir el siguiente ciclo").
 - **`doctor cycle` reporta hoyos y solapes** entre los ciclos de `bitacoras/`, sin rechazar nada. Hoy solo revisa `AHORA.md`.

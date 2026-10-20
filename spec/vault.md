@@ -43,9 +43,10 @@ reglas/                       # lo que decide el autor (X.user.md) y la configur
   clasificaciones.user.md     # del autor: la tabla de clasificaciones de registro
   pendientes.user.md          # del autor: la tabla de horizontes
   notas.user.md               # del autor: la tabla de tipos de nota
-  ciclo.user.md               # del autor: cómo es su ciclo
+  ciclo.user.md               # del autor: la tabla de ciclos (Ciclo y Días)
   types.user.md               # del autor: los `type` que agrega a los de TUKU
   comandos.tuku.md            # qué hace cada comando y cómo a mano. Lo escribe `tuku init`
+  skills/asistente/SKILL.md   # de TUKU: cómo despacha el agente lo que el autor dice (despacho.md)
   config.tuku.md              # TZ, tuku_template, tuku_version, origen, scope_default, date_format, context_note_limit
   plantilla/
     AHORA.md                  # de aquí sale un ciclo nuevo
