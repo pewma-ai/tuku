@@ -48,7 +48,8 @@ def _cmd_init(args: argparse.Namespace) -> int:
         print(f"tuku init: {e}", file=sys.stderr)
         return ENTORNO
     print(
-        f"vault sembrado en {destino}. Abre {destino / 'AHORA.md'} y escribe tu primera línea."
+        f"vault sembrado en {destino}. "
+        "Abre tu agente en esa carpeta y cuéntale tu primer hecho."
     )
     return EXITO
 
