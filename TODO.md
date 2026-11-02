@@ -23,6 +23,22 @@ Falta:
 
 Abrir y cerrar un ciclo es complejidad innecesaria: corta el flujo de trabajo y no deja ver lo que pasó hace poco en el mismo archivo. Se reemplaza por un `AHORA.md` que siempre muestra lo reciente y se archiva solo. Hasta implementarlo, el libro de estilo y el código siguen con ciclos. Los epics se revisan uno por uno después: el 006 se reformula y los 002, 005 y 010 se tocan.
 
+### Commit de seguridad y método
+
+**El commit de seguridad es `123f75c`** (2026-11-02): último con todo en verde, 352 tests, ruff y mypy. Si el trabajo de esta sección falla o el autor se arrepiente, se vuelve ahí: `git reset --hard 123f75c`, o `git revert` de los commits de bloque que siguen. Se trabaja directo sobre `devel`, sin rama, solo hacia adelante.
+
+Se implementa por bloques, uno por commit, y al cerrar cada uno los tests unitarios vuelven a verde (el hook de pre-commit lo exige): A, `PENDIENTES.md` con `Creado`; B, el formato nuevo de `AHORA.md`; C, el autoarchivado y las bitácoras históricas; D, quitar los ciclos y alinear libro, spec y tutorial. Los escenarios de `tests/escenarios/` no se ajustan en estos bloques: los de los epics 3 al 5 se revisan después epic por epic, y los de los epics 1 y 2 se reescriben al final.
+
+### Decisiones de implementación (2026-11-02, las toma el agente)
+
+- **`Creado`:** columna nueva de `PENDIENTES.md`, entre `Vence` y `Ámbito`, con el día de `--at`. No se modifica nunca. `esta semana` vence a los 7 días de `Creado`, `próxima semana` a los 14 y `fin de mes` el último día de ese mes menos uno. Una fila sin `Creado` (vault anterior) se toma como creada hoy. El 7 de la ventana es la clave `window_days` de `reglas/config.tuku.md`.
+- **El bloque de pendientes de `AHORA.md`** lista las filas sin fecha del primer horizonte y las que vencen en los próximos 7 días. Estar atrasado es `Vence` anterior a hoy o un horizonte cuyo plazo desde `Creado` ya pasó, y se calcula.
+- **El foco** es un callout `> [!abstract] Foco` al inicio, que solo escribe el autor; `tuku` lo conserva y lo descarta al archivar.
+- **Orden:** los días del más nuevo al más viejo y, dentro de cada día, lo más reciente arriba. Un registro con hora se inserta por su hora; uno sin hora conserva su orden relativo.
+- **Archivado:** la ventana es `archive_weeks` (2 por defecto) semanas completas desde el lunes, y la semana empieza el lunes. Las bitácoras históricas son semanales, de lunes a domingo, `bitacoras/bitacora-AAAAMMDD-AAAAMMDD.md`, con `from` y `to` en el frontmatter. Un registro de una semana archivada va a su bitácora y, si no existe, la crea.
+- **Páginas de ámbito:** siguen mostrando su actividad reciente derivada de las bitácoras, y la bitácora histórica es el origen de ese enlace.
+- **Vaults anteriores:** se ignora `cycle:` y `reglas/ciclo.user.md`; `doctor` avisa sin fallar.
+
 ### Cómo queda `AHORA.md`
 
 De arriba abajo:
