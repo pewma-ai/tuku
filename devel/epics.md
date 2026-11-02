@@ -84,8 +84,8 @@ Actualizado el 2026-11-02.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
-| 001 | Un TUKU mínimo instalable | `vacio` | cerrado | cerrado el 2026-09-19; seis escenarios en verde y verificación humana de instalación limpia y siembra offline completada |
-| 002 | El día uno, a mano | `vacio` → `primer-dia` | cerrado | cerrado el 2026-09-19; doce escenarios deterministas en verde y aceptación humana en playground/002-09 completada |
+| 001 | Un TUKU mínimo instalable | `vacio` | cerrado | reescrito y cerrado el 2026-11-03 para `AHORA.md` sin ciclos; seis escenarios en verde (`001-01` instala de verdad y va marcado `red`) |
+| 002 | El día uno, a mano | `vacio` → `primer-dia` | cerrado | reescrito y cerrado el 2026-11-03; doce escenarios deterministas en verde (diez en `002-13`, dos en `002-14`) y el recorrido entero ejecutado a mano en un vault aparte |
 | 003 | El día uno, dictado | `vacio` → `primer-dia` | cerrado | cerrado el 2026-11-02 por decisión del autor; cinco escenarios: `003-01` determinista; `003-10`, el día uno entero en un turno (fundió del `003-02` al `003-07` el 2026-10-16), y `003-11`, el día derivado, en verde con `agy`; `003-08` (`hermes`) y `003-09` (`claude`) en verde el 2026-09-20, sin repetir desde entonces. Sin la revisión a mano de `playground/003-*/` |
 | 004 | La conversación | `primer-dia` | cerrado | cerrado el 2026-11-02 por decisión del autor; cinco escenarios agénticos (`004-01` a `004-05`) con el conductor [`conversacion.py`](../tests/scripts/conversacion.py), en verde el 2026-10-20. Sin la revisión a mano de `playground/004-*` |
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | ocho documentos en `tests/escenarios/005-*`: 33 tests deterministas y 7 agénticos, todos en verde. Solo queda abierto B4 de la tabla de `005-00` (bajar un pendiente por la escalera de horizontes), que está en `TODO.md`; S5, S8 y E2 ya se resolvieron (E2 pasó al criterio del epic 006) |
@@ -95,17 +95,19 @@ Actualizado el 2026-11-02.
 
 ## Epic 001. Un TUKU mínimo instalable
 
-Que una persona nueva instale TUKU con un comando, siembre un vault en un directorio vacío y empiece a escribir el mismo día, sin configurar nada y sin saber qué es TUKU. Cubre la fase 0.
+Que una persona nueva instale TUKU con un comando, siembre un vault en un directorio vacío y encuentre `AHORA.md` listo con su foco para escribir el mismo día, sin configurar nada y sin saber qué es TUKU. Cubre la fase 0.
 
-- **Entregable:** `uv tool install git+https://github.com/pewma-ai/tuku.git@devel` deja `tuku` en PATH; `tuku init mi-vault` produce el estado cero sin tocar la red.
-- **Detalle completo:** [`../tests/escenarios/001-00-un-tuku-minimo-instalable.md`](../tests/escenarios/001-00-un-tuku-minimo-instalable.md). Seis escenarios en verde (`001-01` a `001-04`, `001-06` y `001-07`). Cerrado tras verificación humana de instalación y siembra offline.
+- **Entregable:** `uv tool install git+https://github.com/pewma-ai/tuku.git@devel` deja `tuku` en PATH; `tuku init mi-vault` produce el estado cero sin tocar la red ni leer el reloj: `AHORA.md` con su foco y ningún día, `PENDIENTES.md` con su tabla vacía y `reglas/config.tuku.md` con `window_days` y `archive_weeks`.
+- **Criterio de salida:** el árbol sembrado es idéntico a `template/vanilla/` salvo lo que `init` resuelve (`AHORA.md`, la configuración y el manual de comandos), un destino con contenido se rechaza salvo `--force`, `--author` deja el nombre en `reglas/autor.user.md` y `tuku doctor` da el vault por sano.
+- **Detalle completo:** [`../tests/escenarios/001-00-un-tuku-minimo-instalable.md`](../tests/escenarios/001-00-un-tuku-minimo-instalable.md). Seis escenarios (`001-01` a `001-04`, `001-06` y `001-07`).
 
 ## Epic 002. El día uno, a mano
 
-Alguien instala TUKU y empieza a usarlo el mismo día sobre un vault vacío. Todo lo que hace lo hace invocando `tuku` a mano: cada decisión del autor (`tuku entry create`, `tuku todo open`, `tuku note create`, etc.) deja huella cronológica en la bitácora del ciclo y aplica sus consecuencias de forma atómica e idempotente. Cubre las fases 1 y 2 completas, y la versión mínima de las fases 3 y 5.
+Alguien instala TUKU y vive sus primeras dos semanas sobre un vault recién sembrado, todo a mano con `tuku`: registra, promete pendientes, abre un ámbito con su jerarquía y escribe una nota. `AHORA.md` ordena los días del más nuevo al más viejo; al pasar al lunes que deja una semana fuera de la ventana, esa semana se archiva sola en `bitacoras/bitacora-AAAAMMDD-AAAAMMDD.md` (con `from` y `to`), y un registro de fecha antigua va a la bitácora que le toca. Cubre las fases 1 y 2 completas, y la versión mínima de las fases 3 y 5.
 
-- **Entregable:** ciclo abierto con plantilla completa, registros cronológicos, consecuencias aplicadas de forma atómica vía bitácora, fechado automático, ámbito creado con enlaces retroactivos y nota creada a petición.
-- **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). El día en cadena, un escenario por tramo ([`002-13`](../tests/escenarios/002-13-el-dia.md)), y sus casos borde sobre el vault final ([`002-14`](../tests/escenarios/002-14-casos-borde.md)); lo que no necesita el día está en unitarios. Se salda el principio 9 mediante `tuku regenerate`. Cerrado el 2026-09-19 tras verificación humana de notas y bitácora en Obsidian.
+- **Entregable:** registros que caen en su día y orden, pendientes con `Creado` y su ventana de `AHORA.md`, ámbito con jerarquía, nota enlazada, foco del autor conservado, autoarchivado en bitácoras semanales y registros antiguos enrutados.
+- **Criterio de salida:** la historia entera corre con el reloj inyectado (`TUKU_NOW`), cada paso sobre el vault del anterior y afirmando su `diff`; repetirla da `diff` vacío, `tuku regenerate` dice que todo estaba al día y `tuku doctor` dice que el vault está sano. Un derivado editado a mano se regenera idéntico y un pendiente abierto y cerrado a mano lo repara `tuku fix todo`. Las reglas deterministas viven en unitarios.
+- **Detalle completo:** [`../tests/escenarios/002-00-el-dia-uno-a-mano.md`](../tests/escenarios/002-00-el-dia-uno-a-mano.md). El día en cadena en [`002-13`](../tests/escenarios/002-13-el-dia.md) y sus reparaciones a mano en [`002-14`](../tests/escenarios/002-14-casos-borde.md). Se salda el principio 9 mediante `tuku regenerate`.
 
 ## Epic 003. El día uno, dictado
 

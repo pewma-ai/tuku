@@ -121,9 +121,9 @@ def _verificar_instalacion(raiz_tmp: Path, entorno: dict[str, str], bin_dir: Pat
     assert poblado.is_dir(), (
         f"tuku init no pobló ~/.tuku desde la copia empaquetada: {poblado} no existe"
     )
-    # La plantilla del ciclo, que es lo que `tuku init` lee para sembrar `AHORA.md`.
+    # La plantilla de AHORA.md, que es lo que `tuku init` lee para sembrar `AHORA.md`.
     assert (poblado / "reglas" / "plantilla" / "AHORA.md").is_file(), (
-        f"la copia empaquetada no trae la plantilla del ciclo: {list(poblado.iterdir())}"
+        f"la copia empaquetada no trae la plantilla de AHORA.md: {list(poblado.iterdir())}"
     )
     assert (poblado / "LIBRO-DE-ESTILO.md").is_file()
 

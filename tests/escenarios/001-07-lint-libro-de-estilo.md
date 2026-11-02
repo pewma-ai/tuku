@@ -7,7 +7,7 @@
 Dado un vault al que le falta la tabla de horizontes en `reglas/pendientes.user.md`
 
 ```bash
-tuku init mi-vault --at 2026-08-11
+tuku init mi-vault
 grep -v '^|' mi-vault/reglas/pendientes.user.md > t && mv t mi-vault/reglas/pendientes.user.md
 ```
 
@@ -26,7 +26,7 @@ Y `tuku context style` sale con código 1 nombrando el archivo
 Dado un vault donde la tabla de clasificaciones existe pero no declara ningún término
 
 ```bash
-tuku init mi-vault --at 2026-08-11
+tuku init mi-vault
 grep -vE '^\| `(progreso|decisión|fricción|señal|nota)`' mi-vault/reglas/clasificaciones.user.md > t && mv t mi-vault/reglas/clasificaciones.user.md
 ```
 
@@ -43,7 +43,7 @@ Entonces reporta una pregunta y sale con código 0: una pregunta informa, no rec
 Dado un vault donde `reglas/pendientes.user.md` lleva una segunda tabla
 
 ```bash
-tuku init mi-vault --at 2026-08-11
+tuku init mi-vault
 printf '\nOtra tabla:\n\n| A |\n| --- |\n| x |\n' >> mi-vault/reglas/pendientes.user.md
 ```
 

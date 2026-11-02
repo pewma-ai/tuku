@@ -1,7 +1,8 @@
 """Tests del escenario 002-14-casos-borde.
 
-Sobre el vault del día uno editado con un editor: cada lint nombra su corrección,
-`fix todo` y `regenerate` reparan, y un canónico roto no deja nada escrito.
+Sobre el vault de las dos semanas editado con un editor: `regenerate` rehace lo
+derivado hasta dejar el vault idéntico, y `fix todo` repara un pendiente abierto
+y cerrado a mano el mismo día.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_14_casos_borde.py`
 """
@@ -20,7 +21,7 @@ import gherkin  # noqa: E402
 from tuku.cli import EXITO, RECHAZO  # noqa: E402
 
 SLUG = "002-14-casos-borde"
-PERSONAL = "[personal](ambitos/personal/personal.md)"
+CARNET = "renovar el carnet"
 
 
 def test_002_14_un_derivado_editado_se_detecta_y_se_regenera() -> None:
@@ -34,14 +35,7 @@ def test_002_14_un_derivado_editado_se_detecta_y_se_regenera() -> None:
     assert regenerado.codigo == EXITO, regenerado.stderr
     for archivo in ("AHORA.md", "ambitos/PENDIENTES-AMBITOS.md"):
         assert archivo in regenerado.stdout, regenerado.stdout
-    diff = corrida.de("diff -r")
-    assert diff.codigo == 0, diff.stdout
-
-
-def test_002_14_una_fila_borrada_la_nombra_todo_lint() -> None:
-    corrida = gherkin.correr(SLUG, "una fila borrada a mano la nombra todo lint")
-    assert corrida.codigo == RECHAZO, corrida.stdout
-    assert "tuku todo open" in corrida.stdout, corrida.stdout
+    assert corrida.de("diff -r").codigo == 0
 
 
 def test_002_14_abierto_y_cerrado_el_mismo_dia_lo_repara_fix() -> None:
@@ -55,63 +49,11 @@ def test_002_14_abierto_y_cerrado_el_mismo_dia_lo_repara_fix() -> None:
 
     for partes in (("AHORA.md",), ("ambitos", "personal", "personal.md")):
         texto = corrida.ruta("mi-vault", *partes).read_text(encoding="utf-8")
-        assert "**pendiente**: renovar el carnet" not in texto, partes
-        assert "(Hecho): ~~renovar el carnet~~" in texto, partes
-
-
-def test_002_14_un_registro_a_una_categoria_lo_reporta_scope_lint() -> None:
-    corrida = gherkin.correr(SLUG, "un registro a una categoría")
-
-    lint = corrida.de("doctor scope")
-    assert lint.codigo == RECHAZO, lint.stdout
-    assert "gastos" in lint.stdout and "categoría" in lint.stdout, lint.stdout
-    ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
-    assert "- 20:00 - [gastos](ambitos/depto-centro/gastos) **progreso**:" in ahora
-
-
-def test_002_14_una_marca_cerrada_mal_escrita_la_reporta_entry_lint() -> None:
-    corrida = gherkin.correr(SLUG, "una marca cerrada mal escrita")
-
-    lint = corrida.de("doctor entry")
-    assert lint.codigo == RECHAZO, lint.stdout
-    assert "**Cadencia**" in lint.stdout and "**cadencia**" in lint.stdout, lint.stdout
-    ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
-    assert f"- 13:30 - {PERSONAL} **Cadencia**: revisar la caldera" in ahora
-    assert corrida.delta_de("mi-vault") == {
-        "AHORA.md": "modificado",
-        "ambitos/personal/personal.md": "modificado",
-    }
-
-
-def test_002_14_un_canonico_roto_hace_que_regenerate_no_escriba() -> None:
-    corrida = gherkin.correr(SLUG, "un canónico roto")
-    assert corrida.codigo == RECHAZO, corrida.stdout
-    assert "PENDIENTES.md" in corrida.stderr, corrida.stderr
-    assert corrida.delta_de("mi-vault") == {}, "el rechazo escribió"
-
-
-def test_002_14_corregir_un_pendiente_con_entry_update_arrastra_su_fila() -> None:
-    corrida = gherkin.correr(SLUG, "corregir un pendiente con entry update")
-
-    ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
-    assert (
-        f"- 21:32 - {PERSONAL} **pendiente**: llamar a la administradora por el reajuste"
-        in ahora
-    ), ahora
-    pendientes = corrida.ruta("mi-vault", "PENDIENTES.md").read_text(encoding="utf-8")
-    assert f"| {PERSONAL} | llamar a la administradora por el reajuste |" in pendientes, (
-        pendientes
-    )
-    assert corrida.de("tuku doctor todo").codigo == EXITO
-
-
-def test_002_14_una_fila_sin_registro_pendiente_la_nombra_todo_lint() -> None:
-    corrida = gherkin.correr(SLUG, "una fila sin registro pendiente")
-    assert corrida.codigo == RECHAZO, corrida.stdout
-    assert "llamar a la administradora" in corrida.stdout, corrida.stdout
+        assert f"**pendiente**: {CARNET}" not in texto, partes
+        assert f"(Hecho): ~~{CARNET}~~" in texto, partes
 
 
 if __name__ == "__main__":
-    import pytest
-
-    raise SystemExit(pytest.main([__file__, "-v"]))
+    test_002_14_un_derivado_editado_se_detecta_y_se_regenera()
+    test_002_14_abierto_y_cerrado_el_mismo_dia_lo_repara_fix()
+    print(f"ok: regenerate rehace lo derivado y fix repara (playground/{SLUG}/)")

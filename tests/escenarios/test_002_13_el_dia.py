@@ -1,7 +1,9 @@
 """Tests del escenario 002-13-el-dia.
 
-El día uno con un comando por hecho: cada escenario parte del vault del anterior
-y afirma su delta; repetir el día no cambia nada y el doctor lo da por sano.
+El día uno con un comando por hecho y las dos semanas siguientes, con el reloj
+inyectado: cada escenario parte del vault del anterior y afirma su delta. Los
+días de `AHORA.md` van del más nuevo al más viejo, la semana que sale de la
+ventana se archiva sola y repetir todo no cambia nada.
 
 Ejecutable directo: `python3 tests/escenarios/test_002_13_el_dia.py`
 """
@@ -16,51 +18,33 @@ sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 
 import gherkin  # noqa: E402
-from vault import placeholders_sin_sustituir  # noqa: E402
 
-from tuku import scope, todo  # noqa: E402
 from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "002-13-el-dia"
 
 #: Los escenarios en el orden de la cadena: cada uno copia el vault del anterior.
 CADENA = (
-    "la semana abre con el vault",
-    "los registros caen en su día y en orden",
-    "abrir los pendientes de hoy",
-    "cerrarlos el mismo día deja solo el cierre",
-    "un frente nuevo se crea sin tocar lo ya escrito",
-    "la nota del frente queda escrita y enlazada",
-    "los pendientes de mañana y pasado llegan a su día",
+    "los registros del martes caen en su día",
+    "los pendientes nacen con su Creado",
+    "cerrar un pendiente el mismo día",
+    "un ámbito con su jerarquía",
+    "una nota enlazada a su ámbito",
+    "el foco es del autor",
+    "el lunes 17 todavía no archiva",
+    "el lunes 24 archiva",
+    "un registro de fecha antigua",
     "repetir el día no cambia nada",
 )
 
 PERSONAL = "[personal](ambitos/personal/personal.md)"
-AMBITO = "depto-centro"
-DEPTO = f"[{AMBITO}](ambitos/{AMBITO}/{AMBITO}.md)"
 MARTES = "## Martes 11 de agosto"
-DIAS = (
-    "## Lunes 10 de agosto",
-    MARTES,
-    "## Miércoles 12 de agosto",
-    "## Jueves 13 de agosto",
-    "## Viernes 14 de agosto",
-    "## Sábado 15 de agosto",
-    "## Domingo 16 de agosto",
-)
 GGCC = "avisar de los GGCC a la administradora"
-MALETA = "comprar una maleta"
-CONSTANCIA_AMBITO = f"- 18:45 - {DEPTO} **nota**: abrí el ámbito"
 NOTA = "como-funciona-el-cobro-de-gastos-comunes-en-una-copropiedad"
 FIXTURE = Path(__file__).parent / "fixtures" / SLUG / "cuerpo-nota.md"
-
-#: Los cuatro pendientes fechados, en el orden en que se abren.
-FECHADOS = (
-    ("2026-08-13", PERSONAL, "comprar pasajes de tren"),
-    ("2026-08-12 09:00", PERSONAL, "pagar la sesión con el psicólogo"),
-    ("2026-08-13", PERSONAL, "llamar a la administradora"),
-    ("2026-08-12", DEPTO, "pagar los gastos comunes"),
-)
+BITACORA = "bitacoras/bitacora-20260810-20260816.md"
+VENTANA = "> [!todo] Pendientes de los próximos 7 días"
+FOCO_AUTOR = "> Cerrar la semana sin deuda con la administración."
 
 
 def _paso(titulo: str) -> gherkin.Corrida:
@@ -74,193 +58,220 @@ def _leer(corrida: gherkin.Corrida, *partes: str) -> str:
     return corrida.ruta("mi-vault", *partes).read_text(encoding="utf-8")
 
 
-def _region(ahora: str, encabezado: str) -> list[str]:
-    return ahora.split(encabezado, 1)[1].split("\n## ", 1)[0].splitlines()
+def _region(texto: str, encabezado: str) -> list[str]:
+    """Las líneas bajo `encabezado`, hasta el siguiente `## `."""
+    return texto.split(encabezado, 1)[1].split("\n## ", 1)[0].splitlines()
 
 
-def _registros(ahora: str, encabezado: str) -> list[str]:
-    return [linea for linea in _region(ahora, encabezado) if linea.startswith("- ")]
+def _registros(texto: str, encabezado: str) -> list[str]:
+    return [linea for linea in _region(texto, encabezado) if linea.startswith("- ")]
 
 
-def test_002_13_la_semana_abre_con_el_vault() -> None:
+def _horas(texto: str, encabezado: str) -> list[str]:
+    return [linea[2:7] for linea in _registros(texto, encabezado)]
+
+
+def _dias(texto: str) -> list[str]:
+    return [linea[3:] for linea in texto.splitlines() if linea.startswith("## ")]
+
+
+def _ventana(ahora: str) -> list[str]:
+    """Las líneas del bloque de pendientes de la ventana."""
+    bloque = ahora.split(VENTANA, 1)[1].split("\n\n", 1)[0].splitlines()
+    return [linea for linea in bloque if linea.startswith("> - ")]
+
+
+def _filas(pendientes: str) -> list[list[str]]:
+    filas = [ln for ln in pendientes.splitlines() if ln.startswith("| ")][2:]
+    return [[celda.strip() for celda in ln.strip("|").split("|")] for ln in filas]
+
+
+def test_002_13_los_registros_del_martes_caen_en_su_dia() -> None:
     corrida = _paso(CADENA[0])
     assert corrida.codigo == EXITO, corrida.stderr
-    assert "ya cubre" in corrida.stdout, corrida.stdout
-    assert corrida.delta_de("mi-vault") == {}
-
-    ahora = _leer(corrida, "AHORA.md")
-    assert "from: 2026-08-10" in ahora and "to: 2026-08-16" in ahora
-    for dia in DIAS:
-        assert dia in ahora, f"falta {dia}"
-    assert not placeholders_sin_sustituir(corrida.ruta("mi-vault"))
-
-
-def test_002_13_los_registros_caen_en_su_dia_y_en_orden() -> None:
-    corrida = _paso(CADENA[1])
     ahora = _leer(corrida, "AHORA.md")
 
-    martes = _registros(ahora, MARTES)
-    assert [linea[2:7] for linea in martes] == ["09:12", "11:30", "12:05", "18:40"], martes
-    for dia in DIAS:
-        if dia != MARTES:
-            assert _registros(ahora, dia) == [], f"se escribió en {dia}"
+    assert _dias(ahora) == ["Martes 11 de agosto"]
+    assert ahora.index("> [!abstract] Foco") < ahora.index(MARTES)
+    assert _horas(ahora, MARTES) == ["18:40", "12:05", "11:30", "10:00", "09:12"]
     assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
         "ambitos/personal/personal.md": "modificado",
     }
-
-    pagina = _leer(corrida, "ambitos", "personal", "personal.md")
-    assert "## Esta semana" in pagina
-    assert "- **señal**: la administradora responde los mensajes con varios días de atraso" in (
-        pagina
-    )
-    assert PERSONAL not in pagina and "- 09:12 - " not in pagina
-
     lint = corrida.de("doctor entry")
-    assert lint.codigo == EXITO, lint.stdout
-    assert "cachureo" in lint.stdout, lint.stdout
+    assert lint.codigo == EXITO and "cachureo" in lint.stdout, lint.stdout
 
 
-def test_002_13_abrir_los_pendientes_de_hoy() -> None:
-    corrida = _paso(CADENA[2])
+def test_002_13_los_pendientes_nacen_con_su_creado() -> None:
+    corrida = _paso(CADENA[1])
     assert corrida.codigo == EXITO, corrida.stderr
 
-    pendientes = _leer(corrida, "PENDIENTES.md")
-    assert f"| esta semana |  | {PERSONAL} | {GGCC} |" in pendientes, pendientes
-    assert todo.cuerpos(pendientes, "esta semana") == [MALETA, GGCC]
-    martes = _registros(_leer(corrida, "AHORA.md"), MARTES)
-    assert f"- 13:00 - {PERSONAL} **pendiente**: {MALETA}" in martes
-    assert f"- 14:20 - {PERSONAL} **pendiente**: {GGCC}" in martes
-    assert f"- **pendiente**: {GGCC}" in _leer(corrida, "ambitos", "personal", "personal.md")
-    assert corrida.delta_de("mi-vault") == {
-        "AHORA.md": "modificado",
-        "PENDIENTES.md": "modificado",
-        "ambitos/PENDIENTES-AMBITOS.md": "modificado",
-        "ambitos/personal/personal.md": "modificado",
-    }
-
-
-def test_002_13_cerrarlos_el_mismo_dia_deja_solo_el_cierre() -> None:
-    corrida = _paso(CADENA[3])
-    assert corrida.de("19:05").codigo == EXITO
-    assert corrida.de("19:10").codigo == EXITO
-
-    pendientes = _leer(corrida, "PENDIENTES.md")
-    assert todo.filas(pendientes) == [] and todo.CABECERA in pendientes
-    ahora = _leer(corrida, "AHORA.md")
-    pagina = _leer(corrida, "ambitos", "personal", "personal.md")
-    assert f"- 19:05 - {PERSONAL} (Hecho): ~~{GGCC}~~" in ahora
-    assert f"- 19:10 - {PERSONAL} (Hecho): ~~{MALETA}~~" in ahora
-    for texto in (ahora, pagina):
-        assert "**pendiente**" not in texto, "quedó una apertura cerrada el mismo día"
-        assert f"(Hecho): ~~{MALETA}~~" in texto
-
-
-def test_002_13_un_frente_nuevo_se_crea_sin_tocar_lo_ya_escrito() -> None:
-    corrida = _paso(CADENA[4])
-    assert corrida.codigo == EXITO, corrida.stderr
-    vault = corrida.ruta("mi-vault")
-    directorio = vault / "ambitos" / AMBITO
-
-    assert sorted(p.name for p in directorio.iterdir()) == [f"{AMBITO}.md"]
-
-    pagina = (directorio / f"{AMBITO}.md").read_text(encoding="utf-8")
-    assert f"![[../PENDIENTES-AMBITOS.md#^{AMBITO}]]" in pagina
-    assert "le mandé la boleta" not in pagina, (
-        "la mención suelta no mueve el registro a este ámbito"
-    )
-    ambitos = _leer(corrida, "ambitos", "PENDIENTES-AMBITOS.md")
-    assert f"> [!todo] Pendientes en **Depto Centro** ^{AMBITO}" in [
-        b.strip() for b in ambitos.split("\n\n")
+    filas = _filas(_leer(corrida, "PENDIENTES.md"))
+    assert [(f[0], f[1], f[4]) for f in filas] == [
+        ("esta semana", "", "comprar una maleta"),
+        ("esta semana", "", GGCC),
+        ("próxima semana", "", "renovar el seguro del local"),
+        ("con fecha", "2026-08-13", "llamar al contador"),
+        ("con fecha", "2026-08-31", "pagar la patente"),
     ]
-    assert not scope.lint_transclusiones(vault) and not scope.lint_callouts(vault)
+    assert {f[2] for f in filas} == {"2026-08-11"}
 
     ahora = _leer(corrida, "AHORA.md")
-    assert CONSTANCIA_AMBITO in _registros(ahora, MARTES)
+    assert _ventana(ahora) == [
+        f"> - {PERSONAL} - comprar una maleta",
+        f"> - {PERSONAL} - {GGCC}",
+        f"> - Ago/13 - {PERSONAL} - llamar al contador",
+    ]
+    jueves = _region(ahora, "## Jueves 13 de agosto")
+    assert jueves[1] == "> [!todo] Pendientes del día", jueves
+    assert _dias(ahora) == ["Jueves 13 de agosto", "Martes 11 de agosto"]
+
+    ambitos = _leer(corrida, "ambitos", "PENDIENTES-AMBITOS.md")
+    personal = ambitos.split("^personal\n", 1)[1].split("\n\n", 1)[0].splitlines()
+    assert len(personal) == 5, personal
+
+
+def test_002_13_cerrar_un_pendiente_el_mismo_dia_deja_solo_el_cierre() -> None:
+    corrida = _paso(CADENA[2])
+    assert corrida.de("doctor todo").codigo == EXITO, corrida.de("doctor todo").stdout
+
+    assert GGCC not in _leer(corrida, "PENDIENTES.md")
+    ahora = _leer(corrida, "AHORA.md")
+    assert not any(GGCC in linea for linea in _ventana(ahora))
+    martes = _registros(ahora, MARTES)
+    assert f"- 19:05 - {PERSONAL} (Hecho): ~~{GGCC}~~" in martes
+    assert "13:20" not in _horas(ahora, MARTES), "quedó la apertura cerrada el mismo día"
+
+
+def test_002_13_un_ambito_con_su_jerarquia() -> None:
+    corrida = _paso(CADENA[3])
+    assert corrida.de("doctor scope").codigo == EXITO, corrida.de("doctor scope").stdout
+    depto = "ambitos/depto-centro/depto-centro.md"
+    gastos = "ambitos/depto-centro/gastos/gastos.md"
+
+    assert "![[../PENDIENTES-AMBITOS.md#^depto-centro]]" in _leer(corrida, depto)
+    assert "![[../../PENDIENTES-AMBITOS.md#^gastos]]" in _leer(corrida, gastos)
+    assert "parent: depto-centro" in _leer(corrida, gastos)
+
+    ahora = _leer(corrida, "AHORA.md")
+    martes = _registros(ahora, MARTES)
+    assert f"- 19:30 - [depto-centro]({depto}) **nota**: abrí el ámbito" in martes
+    assert (
+        f"- 19:35 - [gastos]({gastos}) **nota**: abrí el ámbito bajo [depto-centro]({depto})"
+        in martes
+    )
+    boleta = next(x for x in martes if "18:40" in x)
+    assert "depto centro" in boleta and "](ambitos/depto-centro" not in boleta
+    assert "personal" in boleta, "crear el ámbito no mueve el registro"
+
     antes = corrida.antes["mi-vault/AHORA.md"].decode("utf-8").splitlines()
-    despues = ahora.splitlines()
-    despues.remove(CONSTANCIA_AMBITO)
+    despues = [x for x in ahora.splitlines() if "abrí el ámbito" not in x]
     assert despues == antes, "crear el ámbito no modifica ninguna línea ya escrita"
 
-    tocados = set(corrida.delta_de("mi-vault"))
-    assert tocados == {
-        "AHORA.md",
-        "ambitos/PENDIENTES-AMBITOS.md",
-        f"ambitos/{AMBITO}/{AMBITO}.md",
-    }, tocados
 
-
-def test_002_13_la_nota_del_frente_queda_escrita_y_enlazada() -> None:
-    corrida = _paso(CADENA[5])
-    assert corrida.de("note create").codigo == EXITO, corrida.stderr
+def test_002_13_una_nota_enlazada_a_su_ambito() -> None:
+    corrida = _paso(CADENA[4])
+    assert corrida.de("doctor note").codigo == EXITO, corrida.de("doctor note").stdout
 
     nota = _leer(corrida, "notas", f"{NOTA}.md")
     assert "type: Note" in nota and "created: 2026-08-11" in nota
     assert FIXTURE.read_text(encoding="utf-8").strip() in nota
-    assert f"[{AMBITO}](../ambitos/{AMBITO}/{AMBITO}.md)" in nota
+    assert "[depto-centro](../ambitos/depto-centro/depto-centro.md)" in nota
 
     enlace = f"[{NOTA}](notas/{NOTA}.md)"
-    assert f"- 21:15 - {DEPTO} **nota**: escribí la nota {enlace}" in _leer(corrida, "AHORA.md")
-    pagina = _leer(corrida, "ambitos", AMBITO, f"{AMBITO}.md")
+    depto = "[depto-centro](ambitos/depto-centro/depto-centro.md)"
+    constancia = f"- 21:15 - {depto} **nota**: escribí la nota {enlace}"
+    assert _registros(_leer(corrida, "AHORA.md"), MARTES)[0] == constancia
+    pagina = _leer(corrida, "ambitos", "depto-centro", "depto-centro.md")
     assert f"- **nota**: escribí la nota [{NOTA}](../../notas/{NOTA}.md)" in pagina
     assert corrida.delta_de("mi-vault") == {
         "AHORA.md": "modificado",
-        f"ambitos/{AMBITO}/{AMBITO}.md": "modificado",
+        "ambitos/depto-centro/depto-centro.md": "modificado",
         f"notas/{NOTA}.md": "nuevo",
     }
-    assert "sin hallazgos" in corrida.de("doctor note").stdout
 
 
-def test_002_13_los_pendientes_de_manana_y_pasado_llegan_a_su_dia() -> None:
-    corrida = _paso(CADENA[6])
-    pendientes = _leer(corrida, "PENDIENTES.md")
-    for dia, ambito, cuerpo in FECHADOS:
-        assert f"| con fecha | {dia} | {ambito} | {cuerpo} |" in pendientes, cuerpo
-    assert todo.cuerpos(pendientes, "esta semana") == []
-    assert "^" not in pendientes and "> [!todo]" not in pendientes
-
+def test_002_13_el_foco_es_del_autor_y_tuku_lo_conserva() -> None:
+    corrida = _paso(CADENA[5])
+    assert corrida.codigo == EXITO, corrida.stderr
     ahora = _leer(corrida, "AHORA.md")
-    martes = _region(ahora, "## Martes 11 de agosto")
-    promesas = [x for x in martes if x.startswith("- 21:3")]
-    assert [x.rsplit("**pendiente**: ", 1)[1] for x in promesas] == [
-        "comprar pasajes de tren",
-        "pagar la sesión con el psicólogo",
-        "llamar a la administradora",
-        "pagar los gastos comunes",
-    ]
-    for encabezado, dia in (
-        ("## Miércoles 12 de agosto", "2026-08-12"),
-        ("## Jueves 13 de agosto", "2026-08-13"),
-    ):
-        region = _region(ahora, encabezado)
-        assert region[1] == "> [!todo] Pendientes del día", region
-        callout = [x for x in region if x.startswith("> - ")]
-        esperado = [
-            f"> - {d[11:]} - {a} - {c}" if d[11:] else f"> - {a} - {c}"
-            for d, a, c in FECHADOS
-            if d.startswith(dia)
-        ]
-        assert sorted(callout) == sorted(esperado)
 
-    ambitos = _leer(corrida, "ambitos", "PENDIENTES-AMBITOS.md")
-    personal = ambitos.split("^personal\n", 1)[1].split("\n\n", 1)[0].splitlines()
-    assert personal == [
-        "> - Ago/12 09:00 - pagar la sesión con el psicólogo",
-        "> - Ago/13 - comprar pasajes de tren",
-        "> - Ago/13 - llamar a la administradora",
-    ]
-    depto = ambitos.split(f"^{AMBITO}\n", 1)[1].split("\n\n", 1)[0].splitlines()
-    assert depto == ["> - Ago/12 - pagar los gastos comunes"]
+    assert ahora.index("> [!abstract] Foco") < ahora.index(FOCO_AUTOR) < ahora.index(VENTANA)
+    assert _horas(ahora, MARTES)[0] == "21:40"
+    assert "Escribe aquí en qué concentrarte" not in ahora
 
-    assert corrida.de("doctor todo").codigo == EXITO
+
+def test_002_13_el_lunes_17_todavia_no_archiva() -> None:
+    corrida = _paso(CADENA[6])
+    assert corrida.de("tuku doctor").codigo == EXITO
+    assert "el vault está sano" in corrida.de("tuku doctor").stdout
+    ahora = _leer(corrida, "AHORA.md")
+
+    assert _dias(ahora) == ["Lunes 17 de agosto", "Jueves 13 de agosto", MARTES[3:]]
+    assert not corrida.ruta("mi-vault", "bitacoras").exists()
+    ventana = _ventana(ahora)
+    assert f"> - {PERSONAL} - comprar una maleta" in ventana
+    assert f"> - Ago/13 - {PERSONAL} - llamar al contador (atrasado)" in ventana
+
+
+def test_002_13_el_lunes_24_archiva_la_semana_que_salio_de_la_ventana() -> None:
+    corrida = _paso(CADENA[7])
+    assert "el vault está sano" in corrida.de("tuku doctor").stdout
+    ahora = _leer(corrida, "AHORA.md")
+
+    bitacora = _leer(corrida, BITACORA)
+    assert "type: Logbook" in bitacora
+    assert "from: 2026-08-10\nto: 2026-08-16\n" in bitacora
+    # Los registros del martes viajan en su orden, con la ruta vista desde `bitacoras/`.
+    previo = corrida.antes["mi-vault/AHORA.md"].decode("utf-8")
+    esperado = [
+        x.replace("](ambitos/", "](../ambitos/").replace("](notas/", "](../notas/")
+        for x in _registros(previo, MARTES)
+    ]
+    assert _registros(bitacora, MARTES) == esperado
+
+    assert FOCO_AUTOR in ahora
+    assert _dias(ahora) == [
+        "Lunes 31 de agosto",
+        "Lunes 24 de agosto",
+        "Lunes 17 de agosto",
+    ]
+    assert "Jueves 13" not in ahora and MARTES not in ahora
+    ventana = _ventana(ahora)
+    assert f"> - {PERSONAL} - comprar una maleta (atrasado)" in ventana
+    assert f"> - Ago/13 - {PERSONAL} - llamar al contador (atrasado)" in ventana
+
+    cambios = corrida.delta_de("mi-vault")
+    assert cambios[BITACORA] == "nuevo" and cambios["AHORA.md"] == "modificado"
+    assert "PENDIENTES.md" not in cambios, "archivar no toca los pendientes"
+
+
+def test_002_13_un_registro_de_fecha_antigua_va_a_su_bitacora() -> None:
+    corrida = _paso(CADENA[8])
+    assert corrida.codigo == EXITO, corrida.stderr
+
+    bitacora = _leer(corrida, BITACORA)
+    personal = PERSONAL.replace("](", "](../")
+    assert _registros(bitacora, "## Miércoles 12 de agosto") == [
+        f"- 10:00 - {personal} **señal**: el contador confirmó el plazo del miércoles"
+    ]
+    assert bitacora.index("Miércoles 12") < bitacora.index("Martes 11")
+
+    nueva = _leer(corrida, "bitacoras", "bitacora-20260727-20260802.md")
+    assert "from: 2026-07-27\nto: 2026-08-02\n" in nueva
+    assert _horas(nueva, "## Miércoles 29 de julio") == ["16:30"]
+
+    cambios = corrida.delta_de("mi-vault")
+    assert cambios[BITACORA] == "modificado"
+    assert cambios["bitacoras/bitacora-20260727-20260802.md"] == "nuevo"
+    assert "AHORA.md" not in cambios
 
 
 def test_002_13_repetir_el_dia_no_cambia_nada() -> None:
-    corrida = _paso(CADENA[7])
+    corrida = _paso(CADENA[9])
     assert corrida.delta_de("mi-vault") == {}, "repetir el día escribió"
-    assert "warning" in corrida.de("19:05").stderr
-    assert "al día" in corrida.de("regenerate").stdout
-    assert "el vault está sano" in corrida.de("doctor").stdout
+    assert "al día" in corrida.de("tuku regenerate").stdout
+    assert "el vault está sano" in corrida.de("tuku doctor").stdout
 
 
 if __name__ == "__main__":

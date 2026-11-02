@@ -8,7 +8,7 @@ Dado un directorio destino vacío
 Cuando se corre
 
 ```bash
-tuku init mi-vault --at 2026-08-11 --author "ARTURO PEREZ-REVERTE (Arturo)"
+tuku init mi-vault --author "ARTURO PEREZ-REVERTE (Arturo)"
 ```
 
 Entonces `reglas/autor.user.md` queda con ese nombre en la fila `Nombre` de su tabla
@@ -20,7 +20,7 @@ Dado el mismo destino
 Cuando se corre
 
 ```bash
-tuku init en-blanco --at 2026-08-11 --author "   "
+tuku init en-blanco --author "   "
 ```
 
 Entonces la fila `Nombre` queda intacta con su texto de partida

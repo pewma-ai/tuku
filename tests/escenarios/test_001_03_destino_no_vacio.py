@@ -43,7 +43,7 @@ def test_001_03_force_reemplaza_el_destino_no_vacio() -> None:
     destino = corrida.ruta("mi-vault")
     assert not (destino / CENTINELA).exists(), "force no reemplazó el contenido previo"
     assert (destino / "AHORA.md").is_file(), "force no dejó un vault operable"
-    assert "DD de mes" not in (destino / "AHORA.md").read_text(encoding="utf-8")
+    assert "Foco" in (destino / "AHORA.md").read_text(encoding="utf-8")
 
 
 if __name__ == "__main__":
