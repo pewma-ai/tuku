@@ -30,14 +30,15 @@ def test_los_lectores_aceptan_wikilink_y_link_markdown() -> None:
 
 
 def test_los_escritores_producen_markdown_con_la_ruta_completa() -> None:
-    fila = todo.Fila("esta semana", "", "personal", "comprar pan")
-    assert fila.linea() == f"| esta semana |  | {MD} | comprar pan |"
-    tabla = f"| Horizonte | Vence | Ámbito | Detalle |\n| - | - | - | - |\n{fila.linea()}\n"
+    fila = todo.Fila("esta semana", "", "2026-08-05", "personal", "comprar pan")
+    assert fila.linea() == f"| esta semana |  | 2026-08-05 | {MD} | comprar pan |"
+    cabecera = "| Horizonte | Vence | Creado | Ámbito | Detalle |\n| - | - | - | - | - |"
+    tabla = f"{cabecera}\n{fila.linea()}\n"
     assert todo.filas(tabla) == [fila]
     assert todo.filas(tabla.replace(MD, "[[personal]]")) == [fila]
 
     rutas = {"pewma": "ambitos/trabajo/pewma/pewma.md"}
-    anidada = todo.Fila("con fecha", "2026-09-08", "pewma", "x")
+    anidada = todo.Fila("con fecha", "2026-09-08", "2026-09-01", "pewma", "x")
     assert "[pewma](ambitos/trabajo/pewma/pewma.md)" in anidada.linea(rutas)
     assert (
         regenerate.linea_del_dia(anidada, rutas)

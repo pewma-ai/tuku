@@ -20,6 +20,8 @@ con la ruta calculada desde el archivo donde está.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 
 from tuku import archivo, link
@@ -79,11 +81,13 @@ def fix_link(vault: Path) -> Resultado:
     )
 
 
-def fix_todo(vault: Path) -> Resultado:
-    """Quita de `AHORA.md` los registros que abrieron un pendiente cerrado el mismo día.
+def fix_todo(vault: Path, *, now: datetime) -> Resultado:
+    """Repara `PENDIENTES.md` y `AHORA.md`.
 
-    Queda solo el `(Hecho)`. Después regenera lo que se deriva de `AHORA.md`.
-    Una segunda corrida no cambia nada.
+    Pasa la tabla anterior a `Creado` a la de cinco columnas, con el día de `now`
+    en las filas que no lo tenían. Quita de `AHORA.md` los registros que abrieron
+    un pendiente cerrado el mismo día: queda solo el `(Hecho)`. Después regenera
+    lo que se deriva. Una segunda corrida no cambia nada.
     """
     from tuku import regenerate, todo_core
     from tuku.config import archivo_vault
@@ -91,13 +95,24 @@ def fix_todo(vault: Path) -> Resultado:
     ruta = archivo_vault(vault, "AHORA.md")
     texto = archivo.leer(ruta)
     quitados = todo_core.cerrados_el_mismo_dia(texto)
-    if not quitados:
+    ruta_tabla = archivo_vault(vault, "PENDIENTES.md")
+    tabla = archivo.leer(ruta_tabla)
+    migrada = todo_core.migrar(tabla, now.date()) if todo_core.sin_creado(tabla) else tabla
+    if not quitados and migrada == tabla:
         return Resultado.hecho("fix todo: nada que reparar.")
-    archivo.escribir(ruta, todo_core.quitar_aperturas_cerradas(texto))
+    if migrada != tabla:
+        archivo.escribir(ruta_tabla, migrada)
+    if quitados:
+        archivo.escribir(ruta, todo_core.quitar_aperturas_cerradas(texto))
     regenerate.rehacer(vault, ["AHORA.md"])
     return Resultado.hecho(
         "\n".join(
             [
+                *(
+                    [f"PENDIENTES.md: columna `Creado` agregada, con {now.date().isoformat()}."]
+                    if migrada != tabla
+                    else []
+                ),
                 *(f"AHORA.md: quitado el que abrió {a.cuerpo!r} ({a.dia})." for a in quitados),
                 f"fix todo: {len(quitados)} registro(s) quitado(s).",
             ]
@@ -105,9 +120,12 @@ def fix_todo(vault: Path) -> Resultado:
     )
 
 
-TEMAS = {"link": fix_link, "todo": fix_todo}
+TEMAS: dict[str, Callable[[Path, datetime], Resultado]] = {
+    "link": lambda vault, now: fix_link(vault),
+    "todo": lambda vault, now: fix_todo(vault, now=now),
+}
 
 
-def corregir(vault: Path, tema: str) -> Resultado:
+def corregir(vault: Path, tema: str, *, now: datetime) -> Resultado:
     """Aplica el `fix` de un tema. Los temas son los de `doctor.TEMAS`."""
-    return TEMAS[tema](vault)
+    return TEMAS[tema](vault, now)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -96,9 +97,29 @@ def test_fix_con_hallazgos_mixtos_aplica_lo_determinista_y_lista_las_decisiones(
 
 def test_fix_alcanza_los_ciclos_cerrados_y_corregir_despacha_por_tema(tmp_path: Path) -> None:
     v = _vault(tmp_path, {"bitacoras/b.md": "- 09:00 - [[x]]\n", "ambitos/x/x.md": "# x\n"})
-    assert fix.corregir(v, "link").ok
+    assert fix.corregir(v, "link", now=datetime(2026, 8, 5, 9, 0)).ok
     assert (v / "bitacoras/b.md").read_text(encoding="utf-8") == (
         "- 09:00 - [x](../ambitos/x/x.md)\n"
     )
     with pytest.raises(KeyError):
-        fix.corregir(v, "inexistente")
+        fix.corregir(v, "inexistente", now=datetime(2026, 8, 5, 9, 0))
+
+
+def test_fix_todo_agrega_creado_a_la_tabla_anterior_y_no_repite(tmp_path: Path) -> None:
+    antigua = (
+        "| Horizonte | Vence | Ámbito | Detalle |\n| --- | --- | --- | --- |\n"
+        "| esta semana |  |  | una cosa |\n"
+    )
+    v = _vault(tmp_path, {"AHORA.md": "# Actividad diaria\n", "PENDIENTES.md": antigua})
+    ahora = datetime(2026, 8, 5, 9, 0)
+
+    r = fix.fix_todo(v, now=ahora)
+    assert r.ok and "`Creado`" in r.mensaje
+    assert (v / "PENDIENTES.md").read_text(encoding="utf-8").splitlines() == [
+        "| Horizonte | Vence | Creado | Ámbito | Detalle |",
+        "| --------- | ------ | ------ | ------ | ------- |",
+        "| esta semana |  | 2026-08-05 |  | una cosa |",
+    ]
+    assert (
+        fix.fix_todo(v, now=ahora + timedelta(days=3)).mensaje == "fix todo: nada que reparar."
+    )

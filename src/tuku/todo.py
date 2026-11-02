@@ -50,6 +50,12 @@ from tuku.todo_core import (
     CON_FECHA as CON_FECHA,
 )
 from tuku.todo_core import (
+    DIAS_PRIMER_ESCALON as DIAS_PRIMER_ESCALON,
+)
+from tuku.todo_core import (
+    DIAS_SEGUNDO_ESCALON as DIAS_SEGUNDO_ESCALON,
+)
+from tuku.todo_core import (
     ESCALERA as ESCALERA,
 )
 from tuku.todo_core import (
@@ -72,6 +78,9 @@ from tuku.todo_core import (
 )
 from tuku.todo_core import (
     abrir as abrir,
+)
+from tuku.todo_core import (
+    atrasada as atrasada,
 )
 from tuku.todo_core import (
     cambiar_ambito as cambiar_ambito,
@@ -119,7 +128,13 @@ from tuku.todo_core import (
     lint as lint,
 )
 from tuku.todo_core import (
+    migrar as migrar,
+)
+from tuku.todo_core import (
     parsear as parsear,
+)
+from tuku.todo_core import (
+    plazo as plazo,
 )
 from tuku.todo_core import (
     prefijo_de_marca as prefijo_de_marca,
@@ -132,6 +147,9 @@ from tuku.todo_core import (
 )
 from tuku.todo_core import (
     sin_consecuencia as sin_consecuencia,
+)
+from tuku.todo_core import (
+    sin_creado as sin_creado,
 )
 from tuku.todo_core import (
     slug as slug,
@@ -219,6 +237,7 @@ def plan_open(
         marca,
         horizon=horizon,
         due=due,
+        created=day or now.date(),
         escalera=escalera,
         rutas=state.tree.paths,
     )
@@ -258,7 +277,8 @@ def abrir_en_vault(
     escribe en la columna `Vence`: `AAAA-MM-DD` o `AAAA-MM-DD HH:MM`
     (`spec/pendientes.md`). Un `day` posterior a HOY (el de `now`) se rechaza: el
     registro de algo que todavía no se dijo no existe, y la fecha del pendiente va
-    en `due`. Con `due`, el horizonte es `con fecha`; sin ninguno de los dos, el
+    en `due`. `Creado` lleva el día de `--at` (`now` si falta) y no se modifica
+    después. Con `due`, el horizonte es `con fecha`; sin ninguno de los dos, el
     primer escalón del autor. La decisión es de `plan_open`.
     """
     state = State(

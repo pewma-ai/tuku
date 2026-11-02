@@ -107,6 +107,9 @@ def fecha_corta(fecha: date, formato: str = FORMATO_FECHA) -> str:
 #: Cuántas notas por tipo trae `tuku context note` si la config no dice otra cosa.
 LIMITE_DE_NOTAS = 25
 
+#: Cuántos días hacia adelante mira `AHORA.md` si la config no dice `window_days`.
+VENTANA_POR_DEFECTO = 7
+
 #: Cómo se llama el ciclo si `reglas/ciclo.user.md` no lo dice.
 CICLO_POR_DEFECTO = "semana"
 
@@ -124,6 +127,7 @@ class Preferencias:
     ambito_por_defecto: str | None = None
     formato_fecha: str = FORMATO_FECHA
     limite_de_notas: int = LIMITE_DE_NOTAS
+    window_days: int = VENTANA_POR_DEFECTO
     datos: dict[str, str] = field(default_factory=dict)
 
 
@@ -141,6 +145,7 @@ def leer_preferencias(vault: Path | None = None, *, texto: str | None = None) ->
         texto = archivo.leer(ruta) if ruta is not None and ruta.is_file() else ""
     datos = parsear_config_md(texto)
     limite = _limpio(datos, "context_note_limit")
+    ventana = _limpio(datos, "window_days")
     return Preferencias(
         zona_horaria=_limpio(datos, "TZ"),
         ambito_por_defecto=_limpio(datos, "scope_default") or None,
@@ -148,8 +153,35 @@ def leer_preferencias(vault: Path | None = None, *, texto: str | None = None) ->
         limite_de_notas=int(limite)
         if limite.isdigit() and int(limite) > 0
         else LIMITE_DE_NOTAS,
+        window_days=int(ventana) if ventana_valida(ventana) else VENTANA_POR_DEFECTO,
         datos=datos,
     )
+
+
+def ventana_valida(valor: str) -> bool:
+    """Whether `valor` is a positive integer, as `window_days` must be."""
+    return valor.isascii() and valor.isdigit() and int(valor) > 0
+
+
+def ventana_de_dias(vault: Path) -> int:
+    """El `window_days` de `reglas/config.tuku.md`, o 7 si falta o no es un entero positivo."""
+    return leer_preferencias(vault).window_days
+
+
+def escalera(vault: Path) -> tuple[str, ...]:
+    """La escalera de horizontes del autor (`reglas/pendientes.user.md`), con `con fecha`.
+
+    Sin un `reglas/pendientes.user.md` legible es la del template.
+    """
+    from tuku import todo_core
+
+    try:
+        horizontes = vocab.terminos(
+            vocab.leer_opcional(Path(vault), "reglas/pendientes.user.md"), "horizontes"
+        )
+    except vocab.VocabularioIncompleto:
+        horizontes = []
+    return todo_core.escalera_de(horizontes)
 
 
 def formato_fecha(vault: Path) -> str:

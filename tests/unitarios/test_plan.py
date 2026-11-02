@@ -131,14 +131,14 @@ def test_open_writes_the_record_and_the_row_at_the_first_horizon() -> None:
         f"- 14:20 - {PERSONAL} **pendiente**: pagar la patente"
     ]
     assert rows(plan.files["PENDIENTES.md"]) == [
-        f"| esta semana |  | {PERSONAL} | pagar la patente |"
+        f"| esta semana |  | 2026-08-11 | {PERSONAL} | pagar la patente |"
     ]
     assert plan.message == "pendiente abierto en «esta semana»: pagar la patente"
     assert plan.regenerate == ("AHORA.md", "PENDIENTES.md")
 
     quincena = state(horizons=("esta quincena", "este mes"))
     plan = change(plan_open(quincena, body="x", scope=None))
-    assert rows(plan.files["PENDIENTES.md"]) == ["| esta quincena |  |  | x |"]
+    assert rows(plan.files["PENDIENTES.md"]) == ["| esta quincena |  | 2026-08-11 |  | x |"]
 
 
 def test_open_without_day_or_hour_is_now_and_due_sets_the_date_horizon() -> None:
@@ -146,13 +146,16 @@ def test_open_without_day_or_hour_is_now_and_due_sets_the_date_horizon() -> None
     assert records(plan.files["AHORA.md"], "Miércoles 12 de agosto") == [
         f"- 09:00 - {PERSONAL} **pendiente**: pagar la patente"
     ]
+    assert rows(plan.files["PENDIENTES.md"]) == [
+        f"| esta semana |  | 2026-08-12 | {PERSONAL} | pagar la patente |"
+    ]
 
     con_fecha = change(plan_open(hour="21:30", due="2026-08-13"))
     assert records(con_fecha.files["AHORA.md"], "Martes 11 de agosto") == [
         f"- 21:30 - {PERSONAL} **pendiente**: pagar la patente"
     ]
     assert rows(con_fecha.files["PENDIENTES.md"]) == [
-        f"| con fecha | 2026-08-13 | {PERSONAL} | pagar la patente |"
+        f"| con fecha | 2026-08-13 | 2026-08-11 | {PERSONAL} | pagar la patente |"
     ]
     assert con_fecha.warnings == ()
 

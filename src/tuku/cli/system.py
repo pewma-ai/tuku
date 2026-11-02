@@ -124,7 +124,7 @@ def _crear_cmd_doctor(
 def _cmd_fix(args: argparse.Namespace) -> int:
     from tuku import fix
 
-    return traducir(fix.corregir(args.vault, args.tema), f"tuku fix {args.tema}")
+    return traducir(fix.corregir(args.vault, args.tema, now=args.now), f"tuku fix {args.tema}")
 
 
 def _cmd_regenerate(args: argparse.Namespace) -> int:

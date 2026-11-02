@@ -104,15 +104,16 @@ def _scope(vault: Path) -> str:
 
 
 def _todo(vault: Path, hoy: date, late: bool = False) -> str:
-    """Los pendientes abiertos; con `late`, solo los atrasados (`Vence` anterior a `hoy`)."""
-    from tuku import todo_core
+    """Los pendientes abiertos; con `late`, solo los atrasados (`todo_core.atrasada`)."""
+    from tuku import config, todo_core
 
     ruta = vault / "PENDIENTES.md"
     if not ruta.is_file():
         return "sin PENDIENTES.md."
     lineas = []
+    escalera = config.escalera(vault)
     for f in todo_core.filas(archivo.leer(ruta)):
-        vencido = f.dia is not None and f.dia < hoy
+        vencido = todo_core.atrasada(f, hoy, escalera)
         if late and not vencido:
             continue
         vence = f", vence {f.vence}" if f.vence else ""

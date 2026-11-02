@@ -112,6 +112,11 @@ def test_late_deja_solo_los_pendientes_cuyo_vence_ya_paso(vault: Path) -> None:
         == "sin pendientes atrasados."
     )
 
+    por_plazo = context.del_vault(vault, "todo", now=AHORA + timedelta(days=6), late=True)
+    assert "- esta semana, atrasado: ordenar el archivo (personal)" in por_plazo.mensaje, (
+        "sin Vence, atrasado es el plazo del escalón desde Creado"
+    )
+
 
 def test_late_sin_el_tema_todo_es_un_error_de_uso(
     vault: Path, capsys: pytest.CaptureFixture[str]

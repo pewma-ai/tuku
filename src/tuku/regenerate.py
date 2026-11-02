@@ -62,9 +62,9 @@ from collections.abc import Iterable, Mapping
 from datetime import date
 from pathlib import Path
 
-from tuku import archivo, link, scope, scope_tree, todo_core, vocab
+from tuku import archivo, link, scope, scope_tree, todo_core
 from tuku.ahora import dias
-from tuku.config import FORMATO_FECHA, archivo_vault, fecha_corta, formato_fecha
+from tuku.config import FORMATO_FECHA, archivo_vault, escalera, fecha_corta, formato_fecha
 from tuku.init import TukuHomeInvalido
 from tuku.resultado import Resultado
 from tuku.todo_core import SinTabla
@@ -258,13 +258,7 @@ def primer_escalon(vault: Path) -> str:
     It is the cycle in progress whatever the author calls it (`esta semana`,
     `este turno`). Without a readable `reglas/pendientes.user.md` it is the template's.
     """
-    try:
-        horizontes = vocab.terminos(
-            vocab.leer_opcional(Path(vault), "reglas/pendientes.user.md"), "horizontes"
-        )
-    except vocab.VocabularioIncompleto:
-        horizontes = []
-    return todo_core.escalera_de(horizontes)[0]
+    return escalera(vault)[0]
 
 
 def region_de_la_semana(

@@ -62,8 +62,9 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "Escribe en `AHORA.md`, bajo el día y en orden de hora, el registro "
             "`- HH:MM - [ámbito](ruta) **pendiente**: cuerpo`, agrega la fila a la "
             "tabla de `PENDIENTES.md` bajo su horizonte y regenera las vistas como "
-            "`tuku regenerate todo`. `--at` es cuándo se prometió y `--due`, cuándo "
-            "vence. Si el registro ya estaba, no lo repite."
+            "`tuku regenerate todo`. `--at` es cuándo se prometió (el día queda en la "
+            "columna `Creado`, que no se modifica) y `--due`, cuándo vence. Si el "
+            "registro ya estaba, no lo repite."
         ),
     )
     p_close = todo_v.add_parser(

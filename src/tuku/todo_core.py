@@ -11,7 +11,7 @@ import re
 import unicodedata
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 
 from tuku import link
 
@@ -42,15 +42,25 @@ _CIERRE_ENTRADA = re.compile(r"^\(Hecho\)(?P<clasif> \*\*[^*\n]+\*\*)?: (?P<cuer
 _CELDA = r"(?:[^|\n\\]|\\.)*"
 
 
-#: Una fila de la tabla: cuatro celdas. La cabecera y el separador tienen la
-#: misma forma y se descartan aparte.
+#: Una fila de la tabla: cinco celdas, o cuatro si viene de un vault anterior a
+#: `Creado`. La cabecera y el separador tienen la misma forma y se descartan aparte.
 _FILA = re.compile(
-    rf"^\|(?P<horizonte>{_CELDA})\|(?P<vence>{_CELDA})\|"
+    rf"^\|(?P<horizonte>{_CELDA})\|(?P<vence>{_CELDA})\|(?:(?P<creado>{_CELDA})\|)?"
     rf"(?P<ambito>{_CELDA})\|(?P<cuerpo>{_CELDA})\|\s*$"
 )
 
 
-CABECERA = "| Horizonte | Vence | Ámbito | Detalle |"
+CABECERA = "| Horizonte | Vence | Creado | Ámbito | Detalle |"
+
+
+#: La cabecera de la tabla anterior a `Creado`, que `migrar` reconoce.
+_CABECERA_ANTERIOR = "| Horizonte | Vence | Ámbito | Detalle |"
+
+
+#: Cuántos días dan el primer y el segundo escalón de la escalera, contados desde
+#: `Creado`. Cualquier otro escalón llega a fin de mes.
+DIAS_PRIMER_ESCALON = 7
+DIAS_SEGUNDO_ESCALON = 14
 
 
 #: La escalera del template vanilla, y solo el punto de partida: los escalones
@@ -87,8 +97,17 @@ class Fila:
 
     horizonte: str
     vence: str
+    creado: str
     ambito: str | None
     cuerpo: str
+
+    @property
+    def creado_dia(self) -> date | None:
+        """El día en que se abrió, o `None` si la fila no lo lleva o no se lee."""
+        try:
+            return date.fromisoformat(self.creado.strip()) if self.creado.strip() else None
+        except ValueError:
+            return None
 
     @property
     def dia(self) -> date | None:
@@ -108,7 +127,7 @@ class Fila:
         """La fila como línea de la tabla; el link se escribe desde `PENDIENTES.md`."""
         ambito = link.enlace_ambito(self.ambito, "PENDIENTES.md", rutas) if self.ambito else ""
         cuerpo = self.cuerpo.replace("|", r"\|")
-        return f"| {self.horizonte} | {self.vence} | {ambito} | {cuerpo} |"
+        return f"| {self.horizonte} | {self.vence} | {self.creado} | {ambito} | {cuerpo} |"
 
 
 class SinTabla(Exception):
@@ -141,6 +160,44 @@ def canonico(horizonte: str, escalera: tuple[str, ...] = ESCALERA) -> str:
         if slug(nombre) == buscado:
             return nombre
     return horizonte.strip()
+
+
+def _fin_de_mes(dia: date) -> date:
+    """El último día del mes de `dia`, menos uno."""
+    primero = date(dia.year + dia.month // 12, dia.month % 12 + 1, 1)
+    return primero - timedelta(days=2)
+
+
+def plazo(fila: Fila, hoy: date, escalera: tuple[str, ...] = ESCALERA) -> date | None:
+    """El día en que vence la fila, o `None` si no tiene plazo.
+
+    Con `Vence`, es esa fecha. Sin ella, el plazo sale del escalón de la fila
+    contado desde `Creado`. El escalón se reconoce por su posición en la escalera
+    del autor y no por su texto: el primero cuenta 7 días, el segundo 14 y
+    cualquier otro (el tercero, o el de una escalera de otro largo) llega al día
+    anterior al último de ese mes, nunca antes de `Creado`. `con fecha` y un
+    horizonte que no está en la escalera no tienen plazo sin `Vence`. Una fila sin
+    `Creado` (vault anterior) se toma como creada `hoy`.
+    """
+    if (vence := fila.dia) is not None:
+        return vence
+    propios = [slug(n) for n in escalera if slug(n) != slug(CON_FECHA)]
+    horizonte = slug(fila.horizonte)
+    if horizonte not in propios:
+        return None
+    creado = fila.creado_dia or hoy
+    posicion = propios.index(horizonte)
+    if posicion == 0:
+        return creado + timedelta(days=DIAS_PRIMER_ESCALON)
+    if posicion == 1:
+        return creado + timedelta(days=DIAS_SEGUNDO_ESCALON)
+    return max(creado, _fin_de_mes(creado))
+
+
+def atrasada(fila: Fila, hoy: date, escalera: tuple[str, ...] = ESCALERA) -> bool:
+    """Si el plazo de la fila es anterior a `hoy`. Se calcula, nunca se guarda."""
+    vence = plazo(fila, hoy, escalera)
+    return vence is not None and vence < hoy
 
 
 def parsear(linea: str) -> Marca | None:
@@ -225,6 +282,7 @@ def _parsear_fila(linea: str) -> Fila | None:
     return Fila(
         horizonte,
         m.group("vence").strip(),
+        (m.group("creado") or "").strip(),
         link.nombre_de(ambito) if ambito else None,
         m.group("cuerpo").strip().replace(r"\|", "|"),
     )
@@ -276,8 +334,9 @@ def abrir(
     pendientes: str,
     marca: Marca,
     *,
-    horizon: str = ESTA_SEMANA,
+    horizon: str | None = None,
     due: str = "",
+    created: date,
     escalera: tuple[str, ...] = ESCALERA,
     rutas: Mapping[str, str] | None = None,
 ) -> str:
@@ -286,12 +345,16 @@ def abrir(
     `spec/pendientes.md`: todo pendiente nuevo va a la tabla única de
     `PENDIENTES.md`, ordenado por escalón y por fecha.
 
+    `created` es el día en que se prometió (`--at`) y queda escrito en `Creado`
+    para siempre.
+
     Si el detalle ya existe no duplica la fila: un registro repetido en la
     bitácora no abre dos veces el mismo pendiente.
     """
     fila = Fila(
-        horizonte=canonico(horizon, escalera),
+        horizonte=canonico(horizon or escalera[0], escalera),
         vence=due.strip(),
+        creado=created.isoformat(),
         ambito=marca.ambito,
         cuerpo=marca.cuerpo,
     )
@@ -356,6 +419,42 @@ def cambiar_ambito(
             lineas[i] = linea[: m.start("ambito")] + f" {enlace} " + linea[m.end("ambito") :]
             return "".join(lineas), True
     return pendientes, False
+
+
+def migrar(pendientes: str, hoy: date) -> str:
+    """La tabla de cuatro columnas pasada a cinco, con `Creado` igual a `hoy`.
+
+    Cambia la cabecera, el separador y las filas sin `Creado`; una tabla que ya
+    tiene la columna vuelve igual.
+    """
+    lineas = pendientes.splitlines()
+    ini, fin = _rango_tabla(lineas)
+    cabecera = ini - 2
+    if cabecera < 0 or _compacta(lineas[cabecera]) != _compacta(_CABECERA_ANTERIOR):
+        return pendientes
+    lineas[cabecera] = CABECERA
+    lineas[ini - 1] = "| --------- | ------ | ------ | ------ | ------- |"
+    for i in range(ini, fin):
+        m = _FILA.match(lineas[i])
+        if m is not None and _parsear_fila(lineas[i]) is not None:
+            corte = m.end("vence") + 1
+            lineas[i] = f"{lineas[i][:corte]} {hoy.isoformat()} |{lineas[i][corte:]}"
+    texto = "\n".join(lineas)
+    return texto + "\n" if pendientes.endswith("\n") else texto
+
+
+def _compacta(linea: str) -> str:
+    return re.sub(r"\s+", " ", linea.strip())
+
+
+def sin_creado(pendientes: str) -> bool:
+    """Si la tabla es la anterior a `Creado`: su cabecera no tiene la columna."""
+    lineas = pendientes.splitlines()
+    try:
+        ini, _ = _rango_tabla(lineas)
+    except SinTabla:
+        return False
+    return ini >= 2 and _compacta(lineas[ini - 2]) == _compacta(_CABECERA_ANTERIOR)
 
 
 def horizontes(pendientes: str) -> list[str]:
@@ -555,8 +654,9 @@ def lint(
 ) -> list[str]:
     """Los hallazgos de `tuku doctor todo`, cada uno con su corrección. No lee disco.
 
-    Cinco revisiones:
+    Seis revisiones:
 
+    0. La tabla sin la columna `Creado` (`migrar`); la corrige `tuku fix todo`.
     1. Un detalle en más de una fila (regla 1).
     2. Una marca de `ahora` que la tabla no refleja (`sin_consecuencia`). La
        corrección es el comando original, que es idempotente.
@@ -568,7 +668,12 @@ def lint(
     5. Una fila sin registro `**pendiente**` en `ahora` ni en `historia` (los
        textos de las bitácoras cerradas): `huerfanas`.
     """
-    hallazgos = [
+    hallazgos = (
+        ["PENDIENTES.md: error: la tabla no tiene la columna `Creado`. Corre `tuku fix todo`."]
+        if sin_creado(pendientes)
+        else []
+    )
+    hallazgos += [
         f"PENDIENTES.md: error: {cuerpo!r} aparece en más de una fila. "
         f"Déjalo en una sola: un pendiente está en exactamente un horizonte."
         for cuerpo in duplicados(pendientes)

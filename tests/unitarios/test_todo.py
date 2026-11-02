@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -12,9 +13,11 @@ sys.path.insert(0, str(RAIZ / "src"))
 
 from tuku import todo  # noqa: E402
 
-VACIA = f"# Pendientes\n\n{todo.CABECERA}\n| --- | --- | --- | --- |\n"
+VACIA = f"# Pendientes\n\n{todo.CABECERA}\n| --- | --- | --- | --- | --- |\n"
 
 pytestmark = pytest.mark.unitario
+
+HOY = date(2026, 8, 5)
 
 P = "[personal](ambitos/personal/personal.md)"
 
@@ -65,25 +68,27 @@ def test_abrir_copia_el_cuerpo_literal_es_idempotente_y_con_fecha_va_a_vence() -
     marca = todo.parsear("- 14:20 - [[personal]] **pendiente**: avisar de los GGCC")
     assert marca is not None
 
-    una = todo.abrir(VACIA, marca)
+    una = todo.abrir(VACIA, marca, created=HOY)
 
-    assert f"| esta semana |  | {P} | avisar de los GGCC |" in una
+    assert f"| esta semana |  | 2026-08-05 | {P} | avisar de los GGCC |" in una
     assert todo.cuerpos(una, "esta semana") == ["avisar de los GGCC"]
-    assert todo.abrir(una, marca) == una, "un registro repetido no abre dos veces"
+    assert todo.abrir(una, marca, created=HOY) == una, "un registro repetido no abre dos veces"
 
     marca = todo.Marca(todo.ABRE, "personal", "pagar la sesión")
 
-    fila = todo.filas(todo.abrir(VACIA, marca, horizon=todo.CON_FECHA, due="2026-08-12"))[0]
+    fila = todo.filas(
+        todo.abrir(VACIA, marca, horizon=todo.CON_FECHA, due="2026-08-12", created=HOY)
+    )[0]
     assert (fila.horizonte, fila.vence) == (todo.CON_FECHA, "2026-08-12")
 
     with pytest.raises(todo.SinTabla):
-        todo.abrir("# Pendientes\n\nsin tabla acá.\n", marca)
+        todo.abrir("# Pendientes\n\nsin tabla acá.\n", marca, created=HOY)
 
 
 def test_cerrar_borra_la_fila_y_solo_si_hay_pareja_literal() -> None:
     abre = todo.Marca(todo.ABRE, "personal", "avisar de los GGCC")
     cierra = todo.Marca(todo.CIERRA, "personal", "avisar de los GGCC")
-    con_fila = todo.abrir(VACIA, abre)
+    con_fila = todo.abrir(VACIA, abre, created=HOY)
 
     texto, hubo_pareja = todo.cerrar(con_fila, cierra)
     assert hubo_pareja and todo.filas(texto) == []
@@ -140,12 +145,14 @@ def test_el_horizonte_se_normaliza_y_la_escalera_es_la_del_autor() -> None:
         todo.Marca("**pendiente**", "[[personal]]", "pagar la patente"),
         horizon="con fecha",
         due="2026-08-20",
+        created=HOY,
         escalera=escalera,
     )
     tabla = todo.abrir(
         tabla,
         todo.Marca("**pendiente**", "[[personal]]", "llamar al fletero"),
         horizon="esta quincena",
+        created=HOY,
         escalera=escalera,
     )
     assert [f.horizonte for f in todo.filas(tabla)] == ["esta quincena", "con fecha"]
@@ -162,8 +169,8 @@ AHORA_CON_MARCAS = (
 
 
 def _tabla(*cuerpos: str) -> str:
-    filas = "".join(f"| esta semana |  | [[personal]] | {c} |\n" for c in cuerpos)
-    return f"{todo.CABECERA}\n| --- | --- | --- | --- |\n{filas}"
+    filas = "".join(f"| esta semana |  | 2026-08-05 | [[personal]] | {c} |\n" for c in cuerpos)
+    return f"{todo.CABECERA}\n| --- | --- | --- | --- | --- |\n{filas}"
 
 
 def test_sin_consecuencia_encuentra_aperturas_y_cierres_sin_aplicar() -> None:
@@ -222,11 +229,11 @@ def test_los_links_y_los_espacios_no_cuentan_al_buscar_un_pendiente() -> None:
     cierra_con = todo.Marca(todo.CIERRA, "personal", CON_LINK)
     cierra_sin = todo.Marca(todo.CIERRA, "personal", SIN_LINK)
 
-    una = todo.abrir(VACIA, sin)
-    assert todo.abrir(una, con) == una
+    una = todo.abrir(VACIA, sin, created=HOY)
+    assert todo.abrir(una, con, created=HOY) == una
 
     for fila, cierre in [(sin, cierra_con), (con, cierra_sin)]:
-        texto, hubo_pareja = todo.cerrar(todo.abrir(VACIA, fila), cierre)
+        texto, hubo_pareja = todo.cerrar(todo.abrir(VACIA, fila, created=HOY), cierre)
         assert hubo_pareja and todo.filas(texto) == []
 
     assert todo.duplicados(_tabla(CON_LINK, SIN_LINK)) == [SIN_LINK]
@@ -237,8 +244,8 @@ def test_los_links_y_los_espacios_no_cuentan_al_buscar_un_pendiente() -> None:
     assert [(c.cuerpo, c.marca) for c in faltan] == [(SIN_LINK, todo.CIERRA)]
 
     con_espacios = todo.Marca(todo.ABRE, "personal", "pagar  la\tluz ")
-    base = todo.abrir(VACIA, todo.Marca(todo.ABRE, "personal", "pagar la luz"))
-    assert todo.abrir(base, con_espacios) == base
+    base = todo.abrir(VACIA, todo.Marca(todo.ABRE, "personal", "pagar la luz"), created=HOY)
+    assert todo.abrir(base, con_espacios, created=HOY) == base
     sin_fila, hubo_pareja = todo.cerrar(
         base, todo.Marca(todo.CIERRA, "personal", "pagar   la luz")
     )
@@ -248,13 +255,13 @@ def test_los_links_y_los_espacios_no_cuentan_al_buscar_un_pendiente() -> None:
     nueva, hubo = todo.reemplazar_cuerpo(tabla, CON_LINK, "avisar a Carmen mañana")
     assert hubo
     assert todo.cuerpos(nueva) == ["avisar a Carmen mañana"]
-    assert "| esta semana |  | [[personal]] |" in nueva
+    assert "| esta semana |  | 2026-08-05 | [[personal]] |" in nueva
     assert todo.reemplazar_cuerpo(tabla, "otra cosa", "x") == (tabla, False)
 
 
 def test_un_pipe_en_el_cuerpo_no_rompe_la_tabla() -> None:
-    texto = todo.abrir(VACIA, todo.Marca(todo.ABRE, "personal", "luz | agua"))
-    texto = todo.abrir(texto, todo.Marca(todo.ABRE, "personal", "comprar pan"))
+    texto = todo.abrir(VACIA, todo.Marca(todo.ABRE, "personal", "luz | agua"), created=HOY)
+    texto = todo.abrir(texto, todo.Marca(todo.ABRE, "personal", "comprar pan"), created=HOY)
     assert sorted(todo.cuerpos(texto)) == ["comprar pan", "luz | agua"]
     sin_fila, hubo_pareja = todo.cerrar(
         texto, todo.Marca(todo.CIERRA, "personal", "luz | agua")
@@ -332,7 +339,7 @@ def test_lint_nombra_el_comando_que_corrige_cada_hallazgo() -> None:
         in hallazgo
     )
 
-    tabla = todo.CABECERA + "\n| --- | --- | --- | --- |\n"
+    tabla = todo.CABECERA + "\n| --- | --- | --- | --- | --- |\n"
     hallazgos = todo.lint(tabla, DIA_CERRADO)
     assert any("AHORA.md:2:" in h and "tuku fix todo" in h for h in hallazgos), hallazgos
 
@@ -360,3 +367,96 @@ def test_las_aperturas_cerradas_el_mismo_dia_se_detectan_y_se_quitan() -> None:
     assert "**pendiente**: avisar a [Carmen](notas/carmen.md)" in texto
     assert todo.quitar_aperturas_cerradas(texto) == texto
     assert todo.quitar_aperturas_cerradas(DIA_CERRADO, "otro") == DIA_CERRADO
+
+
+# --- Creado y plazos --------------------------------------------------------
+
+ESCALERA_3 = todo.escalera_de(["esta quincena", "próxima quincena", "este turno"])
+
+
+def _fila(horizonte: str, creado: str, vence: str = "") -> todo.Fila:
+    return todo.Fila(horizonte, vence, creado, None, "algo")
+
+
+def test_la_fila_sin_creado_es_la_de_un_vault_anterior_y_se_lee_creada_hoy() -> None:
+    antigua = "| esta semana |  | [[personal]] | una cosa |"
+    (fila,) = todo.filas(_con(antigua))
+    assert (fila.creado, fila.creado_dia, fila.cuerpo) == ("", None, "una cosa")
+    assert todo.plazo(fila, HOY) == HOY + timedelta(days=7)
+    assert not todo.atrasada(fila, HOY + timedelta(days=30)), "sin Creado siempre es de hoy"
+
+    (vacia,) = todo.filas(_con("| esta semana |  |  | [[personal]] | una cosa |"))
+    assert vacia.creado_dia is None and todo.plazo(vacia, HOY) == HOY + timedelta(days=7)
+
+
+def test_cada_escalon_vence_por_su_posicion_y_no_por_su_texto() -> None:
+    creado = "2026-08-05"
+    esperado = {
+        "esta quincena": date(2026, 8, 12),
+        "próxima quincena": date(2026, 8, 19),
+        "este turno": date(2026, 8, 30),
+    }
+    for horizonte, vence in esperado.items():
+        assert todo.plazo(_fila(horizonte, creado), HOY, ESCALERA_3) == vence, horizonte
+
+    assert todo.plazo(_fila("esta semana", creado), HOY) == date(2026, 8, 12)
+    assert todo.plazo(_fila("próxima semana", creado), HOY) == date(2026, 8, 19)
+    assert todo.plazo(_fila("fin de mes", creado), HOY) == date(2026, 8, 30)
+    assert todo.plazo(_fila("fin de mes", "2026-12-10"), HOY) == date(2026, 12, 30)
+    assert todo.plazo(_fila("fin de mes", "2028-02-03"), HOY) == date(2028, 2, 28)
+    assert todo.plazo(_fila("fin de mes", "2026-08-31"), HOY) == date(2026, 8, 31), (
+        "nunca antes de Creado"
+    )
+
+    assert todo.plazo(_fila("con fecha", creado), HOY) is None
+    assert todo.plazo(_fila("algún día", creado), HOY) is None
+
+
+def test_atrasada_por_vence_o_por_el_plazo_desde_creado() -> None:
+    creado = "2026-08-05"
+    assert not todo.atrasada(_fila("esta semana", creado), date(2026, 8, 12))
+    assert todo.atrasada(_fila("esta semana", creado), date(2026, 8, 13))
+    assert not todo.atrasada(_fila("próxima semana", creado), date(2026, 8, 19))
+    assert todo.atrasada(_fila("próxima semana", creado), date(2026, 8, 20))
+
+    con_fecha = _fila("con fecha", creado, vence="2026-08-10")
+    assert todo.atrasada(con_fecha, date(2026, 8, 11))
+    assert not todo.atrasada(con_fecha, date(2026, 8, 10))
+    assert not todo.atrasada(_fila("con fecha", creado), date(2030, 1, 1)), "sin plazo"
+
+    asi = _fila("esta semana", creado, vence="2026-09-01")
+    assert not todo.atrasada(asi, date(2026, 8, 20)), "un Vence manda sobre el escalón"
+
+
+def test_el_plazo_se_calcula_sobre_el_texto_de_la_tabla() -> None:
+    tabla = _con(
+        "| esta semana |  | 2026-08-01 |  | vieja |",
+        "| próxima semana |  | 2026-08-01 |  | media |",
+        "| fin de mes |  | 2026-08-01 |  | larga |",
+        "| con fecha | 2026-08-20 | 2026-08-01 |  | fechada |",
+    )
+    hoy = date(2026, 8, 16)
+    assert [f.cuerpo for f in todo.filas(tabla) if todo.atrasada(f, hoy)] == ["vieja", "media"]
+    assert [f.cuerpo for f in todo.filas(tabla) if todo.atrasada(f, date(2026, 8, 31))] == [
+        "vieja",
+        "media",
+        "larga",
+        "fechada",
+    ]
+
+
+def test_migrar_pasa_la_tabla_de_cuatro_columnas_a_cinco_y_es_idempotente() -> None:
+    antigua = (
+        "# Pendientes\n\n| Horizonte | Vence | Ámbito | Detalle |\n| --- | --- | --- | --- |\n"
+        f"| esta semana |  | {P} | una cosa |\n| con fecha | 2026-08-12 |  | otra |\n"
+    )
+    assert todo.sin_creado(antigua) and not todo.sin_creado(VACIA)
+    (hallazgo,) = todo.lint(antigua)
+    assert "`Creado`" in hallazgo and "tuku fix todo" in hallazgo
+
+    nueva = todo.migrar(antigua, HOY)
+    assert nueva.splitlines()[2] == todo.CABECERA
+    assert f"| esta semana |  | 2026-08-05 | {P} | una cosa |" in nueva
+    assert "| con fecha | 2026-08-12 | 2026-08-05 |  | otra |" in nueva
+    assert not todo.sin_creado(nueva) and todo.lint(nueva) == []
+    assert todo.migrar(nueva, date(2030, 1, 1)) == nueva

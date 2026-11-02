@@ -291,7 +291,7 @@ def revisar_config(config_md: str | None) -> Revision:
             False,
         )
 
-    from tuku.config import parsear_config_md, zona_valida
+    from tuku.config import parsear_config_md, ventana_valida, zona_valida
 
     campos = parsear_config_md(config_md)
     faltan = [c for c in CAMPOS_REQUERIDOS if not campos.get(c)]
@@ -310,6 +310,15 @@ def revisar_config(config_md: str | None) -> Revision:
             f"reglas/config.tuku.md: error: la `TZ` «{campos['TZ']}» no es una zona horaria "
             "que este sistema conozca (por ejemplo `America/Santiago`). Hasta que se "
             "corrija, los comandos usan la zona del sistema.",
+            False,
+        )
+
+    ventana = campos.get("window_days", "").strip("`").strip()
+    if "window_days" in campos and not ventana_valida(ventana):
+        return Revision(
+            "config",
+            f"reglas/config.tuku.md: error: `window_days` «{ventana}» no es un entero "
+            "positivo. Escribe los días que mira `AHORA.md` hacia adelante (por ejemplo `7`).",
             False,
         )
 
