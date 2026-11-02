@@ -1,7 +1,7 @@
 """Tests del escenario 005-01-las-dos-semanas-de-andrea.
 
-Dos semanas de la Pyme del corpus con un comando por hecho. La segunda cae sobre
-una primera ya archivada en `bitacoras/`: el vault deja de estar vacío.
+Dos semanas de la Pyme del corpus con un comando por hecho. El lunes siguiente la
+primera pasa sola a `bitacoras/`: el vault deja de estar vacío.
 
 Ejecutable directo: `python3 tests/escenarios/test_005_01_las_dos_semanas_de_andrea.py`
 """
@@ -19,6 +19,7 @@ sys.path.insert(0, str(RAIZ / "tests" / "scripts"))
 import gherkin  # noqa: E402
 from vault import placeholders_sin_sustituir  # noqa: E402
 
+from tuku import todo  # noqa: E402
 from tuku.cli import EXITO  # noqa: E402
 
 SLUG = "005-01-las-dos-semanas-de-andrea"
@@ -26,8 +27,8 @@ SLUG = "005-01-las-dos-semanas-de-andrea"
 CADENA = (
     "el árbol de Andrea nace con su negocio",
     "la primera semana se registra día por día",
-    "la semana se cierra a mano y abre la siguiente",
-    "la segunda semana cae sobre lo ya escrito",
+    "la segunda semana cae sobre la primera",
+    "el lunes 24 la primera semana pasa a bitácoras",
     "repetir la segunda semana deja el vault igual",
 )
 
@@ -87,8 +88,6 @@ ABIERTOS_AL_16 = {
         "cerrar la cotización de Colegio Los Robles durante la semana del 17 de agosto",
     ),
 }
-REVISION = (CON_FECHA, "2026-08-17", "", "revisar la bitácora anterior")
-
 #: La tabla al domingo 23: lo de la primera semana que se cumplió salió, y lo que se
 #: prometió en la segunda entró. Lo único que se arrastra intacto es lo que nadie cerró.
 ABIERTOS_AL_23 = {
@@ -116,7 +115,7 @@ ABIERTOS_AL_23 = {
     ),
 }
 
-BITACORA_1 = "bitacoras/bitacora-2026-08-10-2026-08-16.md"
+BITACORA_1 = "bitacoras/bitacora-20260810-20260816.md"
 LINK = re.compile(r"\]\(([^)]+)\)")
 
 
@@ -137,10 +136,15 @@ def _filas(pendientes: str) -> list[tuple[str, str, str, str]]:
     for linea in pendientes.splitlines():
         if not linea.startswith("|") or linea.startswith("| Horizonte") or "---" in linea[:6]:
             continue
-        h, v, a, d = (c.strip() for c in linea.strip().strip("|").split("|", 3))
+        h, v, _, a, d = (c.strip() for c in linea.strip().strip("|").split("|", 4))
         nombre = re.match(r"\[([^\]]+)\]", a)
         filas.append((h, v, nombre.group(1) if nombre else "", d))
     return filas
+
+
+def _creados(pendientes: str) -> dict[str, str]:
+    """El día en que se prometió cada pendiente abierto, por detalle."""
+    return {f.cuerpo: f.creado for f in todo.filas(pendientes)}
 
 
 def _registros(ahora: str, dia: str) -> list[str]:
@@ -193,8 +197,14 @@ def test_005_01_la_primera_semana_deja_los_pendientes_que_no_cerro() -> None:
     martes = _registros(ahora, "## Martes 11 de agosto")
     assert any("(Hecho)" in x and "pedir cuadernos universitarios" in x for x in martes)
     horas = [re.match(r"- (\d\d:\d\d)", x).group(1) for x in martes]  # type: ignore[union-attr]
-    assert horas == sorted(horas)
-    assert "## Domingo 16 de agosto" in ahora
+    assert horas == sorted(horas, reverse=True)
+    dias = re.findall(r"^## (\w+ \d+) de agosto$", ahora, re.M)
+    assert [d.split()[1] for d in dias] == [str(n) for n in range(16, 9, -1)], dias
+    assert not (corrida.ruta("mi-vault") / "bitacoras").exists(), "archivó antes de tiempo"
+    creados = _creados(_leer(corrida, "PENDIENTES.md"))
+    assert creados["enviar los tres últimos F29 y el balance al banco"] == "2026-08-12"
+    cotizacion = "cerrar la cotización de Colegio Los Robles durante la semana del 17 de agosto"
+    assert creados[cotizacion] == "2026-08-16"
     _sin_errores(corrida)
 
 
@@ -211,42 +221,48 @@ def test_005_01_un_pendiente_con_dia_nace_con_fecha_y_uno_pospuesto_en_su_escalo
     assert any("**pendiente**" in x and "reunión de apoderados" in x for x in lunes)
 
 
-def test_005_01_la_semana_archivada_se_lee_desde_bitacoras() -> None:
+def test_005_01_la_ventana_conserva_las_dos_semanas() -> None:
     corrida = _paso(CADENA[2])
+    ahora = _leer(corrida, "AHORA.md")
+    dias = re.findall(r"^## (\w+ \d+) de agosto$", ahora, re.M)
+    assert [d.split()[1] for d in dias] == [str(n) for n in range(23, 9, -1)], dias
+    assert not (corrida.ruta("mi-vault") / "bitacoras").exists(), "archivó antes de tiempo"
+    assert not placeholders_sin_sustituir(corrida.ruta("mi-vault"))
+    _sin_errores(corrida)
+
+
+def test_005_01_la_segunda_semana_cierra_lo_de_la_primera_y_suma_lo_suyo() -> None:
+    corrida = _paso(CADENA[2])
+    assert set(_filas(_leer(corrida, "PENDIENTES.md"))) == ABIERTOS_AL_23
+    ahora = _leer(corrida, "AHORA.md")
+    # el cierre de lo prometido en la semana anterior queda en el día en que se dijo
+    lunes = _registros(ahora, "## Lunes 17 de agosto")
+    assert any("(Hecho)" in x and "cotizar de nuevo a Liceo Técnico Andes" in x for x in lunes)
+
+
+def test_005_01_el_lunes_la_primera_semana_se_lee_desde_bitacoras() -> None:
+    corrida = _paso(CADENA[3])
     cerrada = _leer(corrida, BITACORA_1)
     assert (
         "status: stable" in cerrada
         and "from: 2026-08-10" in cerrada
         and "to: 2026-08-16" in cerrada
     )
-    assert "## Domingo 16 de agosto" in cerrada
+    assert "## Domingo 16 de agosto" in cerrada and "## Lunes 17" not in cerrada
     enlaces = LINK.findall(cerrada)
-    assert enlaces, "la bitácora cerrada no enlaza ningún ámbito"
+    assert enlaces, "la bitácora no enlaza ningún ámbito"
     for destino in enlaces:
         assert corrida.ruta("mi-vault", "bitacoras", destino).resolve().exists(), destino
     _sin_errores(corrida)
 
 
-def test_005_01_la_segunda_semana_abre_con_la_revision_de_la_anterior() -> None:
-    corrida = _paso(CADENA[2])
-    ahora = _leer(corrida, "AHORA.md")
-    assert (
-        "from: 2026-08-17" in ahora and "to: 2026-08-23" in ahora and "status: draft" in ahora
-    )
-    lunes = ahora.split("## Lunes 17 de agosto", 1)[1].split("\n## ", 1)[0]
-    assert "revisar la bitácora anterior" in lunes
-    assert set(_filas(_leer(corrida, "PENDIENTES.md"))) == ABIERTOS_AL_16 | {REVISION}
-    assert not placeholders_sin_sustituir(corrida.ruta("mi-vault"))
-
-
-def test_005_01_la_segunda_semana_cierra_lo_de_la_primera_y_suma_lo_suyo() -> None:
+def test_005_01_ahora_md_conserva_el_foco_y_suelta_la_semana_archivada() -> None:
     corrida = _paso(CADENA[3])
-    assert set(_filas(_leer(corrida, "PENDIENTES.md"))) == ABIERTOS_AL_23 | {REVISION}
     ahora = _leer(corrida, "AHORA.md")
-    # el cierre de lo prometido en la semana anterior queda en el día en que se dijo
-    lunes = _registros(ahora, "## Lunes 17 de agosto")
-    assert any("(Hecho)" in x and "cotizar de nuevo a Liceo Técnico Andes" in x for x in lunes)
-    _sin_errores(corrida)
+    assert "> [!abstract] Foco" in ahora
+    dias = re.findall(r"^## (\w+ \d+) de agosto$", ahora, re.M)
+    assert [d.split()[1] for d in dias] == [str(n) for n in range(24, 16, -1)], dias
+    assert set(_filas(_leer(corrida, "PENDIENTES.md"))) == ABIERTOS_AL_23
 
 
 def test_005_01_cada_pagina_de_ambito_cuenta_lo_suyo() -> None:
@@ -255,9 +271,12 @@ def test_005_01_cada_pagina_de_ambito_cuenta_lo_suyo() -> None:
         corrida, "ambitos", "negocio", "clientes", "colegio-los-robles", "colegio-los-robles.md"
     )
     assert "![[../../../PENDIENTES-AMBITOS.md#^colegio-los-robles]]" in robles
-    # la página cuenta el ciclo abierto: aprobación el martes, despacho el viernes
-    assert robles.index("Martes 18 de agosto") < robles.index("Viernes 21 de agosto")
+    # la ventana cuenta lo más nuevo primero: despacho el viernes, aprobación el martes
+    assert robles.index("Viernes 21 de agosto") < robles.index("Martes 18 de agosto")
     assert "aprobó la cotización completa" in robles
+    # la solicitud de la primera semana ya está en las bitácoras
+    reciente = robles.split("## Actividad reciente", 1)[1]
+    assert "solicitó cotización de reposición" in reciente
 
 
 def test_005_01_repetir_la_semana_deja_el_vault_igual() -> None:

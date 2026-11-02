@@ -174,8 +174,13 @@ def test_003_10_los_de_manana_se_prometen_hoy_y_vencen_manana() -> None:
     assert sorted(_ambito_de(x) or "" for x in aperturas) == sorted(
         vault.nombre_comparable(a) for a, _ in DE_MANANA.values()
     ), "\n".join(aperturas)
-    fechados = {f.cuerpo: f.vence for f in todo.filas(_pendientes(corrida))}
+    filas = todo.filas(_pendientes(corrida))
+    fechados = {f.cuerpo: f.vence for f in filas}
     assert fechados == {c: vence for c, (_, vence) in DE_MANANA.items()}, fechados
+    assert {f.creado for f in filas} == {"2026-08-11"}, "se prometieron el martes 11"
+    assert all(c in _dia(corrida, MIERCOLES) for c in DE_MANANA), (
+        "el miércoles 12 de AHORA.md no lista los dos pendientes"
+    )
     assert not _registros(_dia(corrida, MIERCOLES)), "escribió registros en el miércoles 12"
 
 

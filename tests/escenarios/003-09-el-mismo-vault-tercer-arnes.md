@@ -11,7 +11,7 @@ El turno del agente declara `TUKU_NOW="2026-08-11 22:00"` en el fence ```agente`
 ## Estado inicial
 
 ```bash
-tuku init mi-vault --at 2026-08-11
+tuku init mi-vault
 ```
 
 ## Escenario: un tercer agente, el mismo comando

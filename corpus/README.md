@@ -17,7 +17,7 @@ Ninguno basta solo.
 
 | | faena | pyme |
 | --- | --- | --- |
-| Ciclo | El turno: nueve días arriba, cuatro de descanso | La semana, lunes a domingo |
+| Ritmo | El turno: nueve días arriba, cuatro de descanso | La semana, lunes a domingo |
 | Dominio | El del autor del diseño | Ajeno, comercial, calendario impuesto |
 | `**cadencia**` | **Ninguna** | Doce: dos de evento, una de ausencia |
 | Traspaso de rol | Con hora, parte el día en dos | No aplica |

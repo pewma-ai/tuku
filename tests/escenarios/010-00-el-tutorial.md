@@ -14,7 +14,7 @@ Una persona nueva sigue el tutorial de Andrea de principio a fin, sobre un vault
 
 - **Cada paso** deja un delta del vault y cada `check` se juzga contra él.
 - **Las invariantes comunes** valen en todos los pasos: cada cambio del vault tiene su comando `tuku` en la traza, el agente no sale del vault y `tuku doctor` queda sano al final de cada capítulo.
-- **Lo que se mira a mano** es lo que ningún archivo registra: si la pregunta de ambigüedad del agente era la correcta, y si el aviso de cambio de ciclo se entiende.
+- **Lo que se mira a mano** es lo que ningún archivo registra: si la pregunta de ambigüedad del agente era la correcta, y si el agente trata el lunes como un día más, sin avisos ni preguntas de más.
 
 ## Escenarios del epic
 
@@ -30,14 +30,14 @@ Cada escenario es un capítulo, y su fuente es el capítulo. Se corre con `uv ru
 | `010-06` | [El día completo](../../docs/tutorial/06-el-dia-completo.md) | El vault del 05 | Epic 003 |
 | `010-07` | [Conversar](../../docs/tutorial/07-conversar.md) | El vault del 06 | Epic 004 |
 | `010-08` | [Una semana después](../../docs/tutorial/08-una-semana-despues.md) | El vault del 07 | Epic 005 |
-| `010-09` | [Cerrar la semana](../../docs/tutorial/09-cerrar-la-semana.md) | El vault del 08 | Epic 006 |
-| `010-10` | [Lo que nadie pidió](../../docs/tutorial/10-lo-que-nadie-pidio.md) | El vault del 09, con meses de historia | Epic 007 |
+| `010-09` | [Pasar de semana](../../docs/tutorial/09-pasar-de-semana.md) | El vault del 08 | Epic 005 |
+| `010-10` | [Lo que nadie pidió](../../docs/tutorial/10-lo-que-nadie-pidio.md) | El vault del 09 | Epic 007 |
 
-Los capítulos 1 a 6 dependen de lo que ya existe. Los capítulos 7 y 8 ya tienen sus epics (004 y 005). Los 9 y 10 corren contra una promesa: salen en rojo hasta que los epics 006 y 007 los construyan, y eso es lo esperado.
+Los capítulos 1 a 6 dependen de lo que ya existe. Los capítulos 7 y 8 ya tienen sus epics (004 y 005). El 9 depende de lo que el epic 005 ya construyó: el foco, la ventana de `AHORA.md` y el archivado solo. El 10 corre contra una promesa: sale en rojo hasta que el epic 007 lo construya, y eso es lo esperado.
 
 ## Estado inicial común
 
-Todos parten del `tuku init mi-vault` del capítulo 1, con el reloj en el lunes de Andrea: `TUKU_NOW="2026-08-17 08:30"`. Cada capítulo avanza el reloj lo que su historia pide (el 6 termina a media tarde del lunes, el 7 es el martes, el 9 es el lunes siguiente).
+Todos parten del `tuku init mi-vault` del capítulo 1, con el reloj en el lunes de Andrea: `TUKU_NOW="2026-08-17 08:30"`. Cada capítulo avanza el reloj lo que su historia pide (el 6 termina a media tarde del lunes, el 7 es el martes, el 8 el viernes 21, el 9 salta al lunes 24 y al lunes 31, cuando la semana del 17 sale de la ventana y pasa a `bitacoras/`, y el 10 es el 1 de septiembre).
 
 ## Qué se mira a mano
 

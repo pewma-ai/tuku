@@ -17,18 +17,18 @@ Un epic se abre escribiendo dos cosas a la vez, antes de implementar nada: sus e
 
 Las fases cortan **por primitiva** (registro, pendientes, ámbitos, cadencias, notas); los epics cortan **por el estado inicial del vault**. El motivo es el criterio de entrega: "los pendientes funcionan" no es una experiencia que alguien pueda usar; "el día uno funciona" sí lo es.
 
-Un epic puede abarcar varias fases (el 002 hace la versión mínima de las fases 3 y 5, y el 005 las completa contra un vault poblado), fundir una fase con LLM y una sin él (el 006 junta la 6 y la 7), o una fase puede partirse entre varios epics (la fase 1 la construye el 002 a mano, el 003 dictada y el 004 conversada).
+Un epic puede abarcar varias fases (el 002 hace la versión mínima de las fases 3 y 5, y el 005 las completa contra un vault poblado), fundir una fase con LLM y una sin él (el 006 junta la 4 y la 7), o una fase puede partirse entre varios epics (la fase 1 la construye el 002 a mano, el 003 dictada y el 004 conversada).
 
 | Fase | Nombre | Qué se puede hacer al terminarla | LLM | Fixture | Epic |
 | --- | --- | --- | --- | --- | --- |
 | 0 | El vault que se puede abrir | Empezar a escribir a mano | no | `vacio` | 001 |
 | 1 | El registro | Dictar y que quede bien escrito | parcial | `primer-dia` | 002 a mano, 003 dictado, 004 conversado |
-| 2 | Pendientes | Que no se olvide nada | no | `ciclo-en-curso` | 002 |
-| 3 | El árbol de ámbitos | Que cada cosa tenga su lugar | no | `ciclo-en-curso` | 002 mínimo, 005 completo |
-| 4 | Cadencias | Que el sistema recuerde solo | no | `ciclo-en-curso` | 006 |
-| 5 | Notas y enlaces | Que el tejido se mantenga | no | `ciclo-en-curso` | 002 mínimo, 005 completo |
-| 6 | El ciclo | Abrir y cerrar sin perder nada | no | `ciclo-por-cerrar` | 006 |
-| 7 | Plan y resumen | Que la propuesta valga la pena leerla | sí | `ciclo-por-cerrar` | 006 |
+| 2 | Pendientes | Que no se olvide nada | no | `poblado` | 002 |
+| 3 | El árbol de ámbitos | Que cada cosa tenga su lugar | no | `poblado` | 002 mínimo, 005 completo |
+| 4 | Cadencias | Que el sistema recuerde solo | no | `poblado` | 006 |
+| 5 | Notas y enlaces | Que el tejido se mantenga | no | `poblado` | 002 mínimo, 005 completo |
+| 6 | La ventana | `AHORA.md` muestra lo reciente y se archiva solo en `bitacoras/` | no | `poblado` | 005 |
+| 7 | Foco y resumen | Que lo que se propone para la semana valga la pena leerlo | sí | `poblado` | 006 |
 | 9 | Inferencia semántica | Que note cosas que nadie pidió | sí | `historico` | 007 |
 
 La numeración salta la fase 8 porque el endurecimiento pasó a la Wishlist: no agrega capacidades, cierra huecos.
@@ -70,9 +70,8 @@ Toda prueba afirma el diff (`delta`) entre el estado inicial y el resultante, nu
 | --- | --- | --- |
 | `vacio` | recién instalado con `tuku init` | que se pueda empezar (Epic 001) |
 | `primer-dia` | un registro inyectado en su día | el registro y consecuencias inmediatas (Epics 002 y 003) |
-| `ciclo-en-curso` | varios días, pendientes en escalones, cadencias vigentes | casi todo el tejido (Epic 005) |
-| `ciclo-por-cerrar` | ciclo completo sin cerrar | el cierre y apertura de ciclo (Epic 006) |
-| `historico` | varios ciclos cerrados | archivado, enlaces antiguos e inferencia (Epic 007) |
+| `poblado` | dos semanas de uso, la primera ya en `bitacoras/`, pendientes en escalones | casi todo el tejido y la ventana de `AHORA.md` (Epic 005), las cadencias y el foco (Epic 006) |
+| `historico` | varias semanas en `bitacoras/` | enlaces antiguos e inferencia (Epic 007) |
 
 ### Superficie del CLI
 
@@ -86,12 +85,12 @@ Actualizado el 2026-11-02.
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | cerrado | reescrito y cerrado el 2026-11-03 para `AHORA.md` sin ciclos; seis escenarios en verde (`001-01` instala de verdad y va marcado `red`) |
 | 002 | El día uno, a mano | `vacio` → `primer-dia` | cerrado | reescrito y cerrado el 2026-11-03; doce escenarios deterministas en verde (diez en `002-13`, dos en `002-14`) y el recorrido entero ejecutado a mano en un vault aparte |
-| 003 | El día uno, dictado | `vacio` → `primer-dia` | cerrado | cerrado el 2026-11-02 por decisión del autor; cinco escenarios: `003-01` determinista; `003-10`, el día uno entero en un turno (fundió del `003-02` al `003-07` el 2026-10-16), y `003-11`, el día derivado, en verde con `agy`; `003-08` (`hermes`) y `003-09` (`claude`) en verde el 2026-09-20, sin repetir desde entonces. Sin la revisión a mano de `playground/003-*/` |
-| 004 | La conversación | `primer-dia` | cerrado | cerrado el 2026-11-02 por decisión del autor; cinco escenarios agénticos (`004-01` a `004-05`) con el conductor [`conversacion.py`](../tests/scripts/conversacion.py), en verde el 2026-10-20. Sin la revisión a mano de `playground/004-*` |
-| 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | ocho documentos en `tests/escenarios/005-*`: 33 tests deterministas y 7 agénticos, todos en verde. Solo queda abierto B4 de la tabla de `005-00` (bajar un pendiente por la escalera de horizontes), que está en `TODO.md`; S5, S8 y E2 ya se resolvieron (E2 pasó al criterio del epic 006) |
-| 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
+| 003 | El día uno, dictado | `vacio` → `primer-dia` | cerrado | cerrado el 2026-11-02 por decisión del autor; cinco escenarios: `003-01` determinista; `003-10`, el día uno entero en un turno (fundió del `003-02` al `003-07` el 2026-10-16), y `003-11`, el día dicho por su nombre («el viernes pasado»), reescrito para `AHORA.md` sin ciclos y sin volver a correr con agente; `003-08` (`hermes`) y `003-09` (`claude`) en verde el 2026-09-20, sin repetir desde entonces. Sin la revisión a mano de `playground/003-*/` |
+| 004 | La conversación | `primer-dia` | cerrado | cerrado el 2026-11-02 por decisión del autor; cinco escenarios agénticos (`004-01` a `004-05`) con el conductor [`conversacion.py`](../tests/scripts/conversacion.py), en verde el 2026-10-20; el vault de partida (`004-00`) se reescribió para `AHORA.md` sin ciclos y es determinista. Sin la revisión a mano de `playground/004-*` |
+| 005 | El día ciento cincuenta | `poblado` | escenarios reescritos | ocho documentos en `tests/escenarios/005-*` rehechos para `AHORA.md` sin ciclos el 2026-11-03: 34 tests deterministas en verde y 7 agénticos sin volver a correr. Solo queda abierto B4 de la tabla de `005-00` (bajar un pendiente por la escalera de horizontes), que está en `TODO.md` |
+| 006 | Lo que vuelve solo | `poblado` | sin empezar | el diseño de las cadencias sin apertura de ciclo, sus escenarios y su capítulo del tutorial |
 | 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
-| 010 | El tutorial entero | `vacio` → `ciclo-en-curso` | en curso | el arnés `test-tui tutorial` ya corre los capítulos. En el último recorrido pasaron 1, 2, 3, 6 y 7; 4, 5 y 8 fallan por el modelo barato y el sandbox de `agy`, no por el texto; 9 y 10 prometen lo de los epics 006 y 007 |
+| 010 | El tutorial entero | `vacio` → `poblado` | en curso | el arnés `test-tui tutorial` ya corre los capítulos. En el último recorrido (anterior a `AHORA.md` sin ciclos) pasaron 1, 2, 3, 6 y 7; 4, 5 y 8 fallan por el modelo barato y el sandbox de `agy`, no por el texto. Los capítulos 1, 2, 3, 5, 8 y 10 se ajustaron y el 9 es nuevo (`09-pasar-de-semana.md`), sin recorrer todavía; el 10 promete lo del epic 007 |
 
 ## Epic 001. Un TUKU mínimo instalable
 
@@ -127,7 +126,7 @@ Replica, y nada más. Un turno, un dictado, el mismo vault de salida. La convers
 
 El autor deja de dictar y conversa: el agente delibera, pregunta, cambia de rumbo a media sesión y solo al final ejecuta. Es donde los `AGENTS.md` del vault se refinan contra fricción real, y donde se construye el conductor que sostiene una sesión de varios turnos con un adaptador por arnés.
 
-Se prueba con dos agentes, uno del lado del autor y otro del lado de TUKU. No agrega fixture: sigue siendo el día uno.
+Se prueba con dos agentes, uno del lado del autor y otro del lado de TUKU. No agrega fixture: sigue siendo el día uno, con el vault de partida armado a mano por el `004-00` bajo un reloj fijado (`export TUKU_NOW`).
 
 - **Entregable:** conductor de sesión multi-turno reutilizable, límites del vault verificables como diff vacío, y el `AGENTS.md`, la skill y el libro corregidos por lo que la conversación rompa.
 - **Criterio de salida:** una conversación en que el autor se contradice y rectifica deja el vault en el estado que pidió al final, y ninguna prohibición de la tabla de límites se rompe en el camino.
@@ -139,24 +138,27 @@ Se prueba con dos agentes, uno del lado del autor y otro del lado de TUKU. No ag
 
 ## Epic 005. El día ciento cincuenta
 
-Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumulado (ámbitos poblados, notas escritas, historial de pendientes). Segunda vuelta de capacidades donde aparecen las notas con "Ver además" que el agente enlaza desde el primer día a partir de `tuku context`, los pendientes asignados a su ámbito y las versiones completas de los ámbitos. Cubre fases 3 y 5 completas. Las cadencias van en el 006 y los destilados en el 007 (fase 9).
+Lo mismo del epic 002 sobre un vault que ya tiene meses encima con activo acumulado (ámbitos poblados, notas escritas, historial de pendientes y una bitácora semanal archivada sola). Segunda vuelta de capacidades donde aparecen las notas con "Ver además" que el agente enlaza desde el primer día a partir de `tuku context`, los pendientes asignados a su ámbito y las versiones completas de los ámbitos. Cubre fases 3 y 5 completas, y la 6: la ventana de `AHORA.md` que conserva dos semanas y el lunes en que la primera pasa a `bitacoras/` sin que nadie lo pida. Los horizontes vencidos se calculan desde `Creado` y `tuku context todo --late` los informa. Las cadencias van en el 006 y los destilados en el 007 (fase 9).
 
-- **Criterio de salida:** inyectar un ciclo de `mac-jpgil` sobre un vault poblado produce registros con su ámbito, enlazados a las notas que `tuku context` ofrece, y notas tejidas, sin intervención del autor.
+- **Criterio de salida:** inyectar las dos semanas de la Pyme con el reloj fijado deja el vault sano: registros con su ámbito, enlazados a las notas que `tuku context` ofrece, notas tejidas, la primera semana en `bitacoras/` y los atrasados informados, sin intervención del autor.
+- **Detalle completo:** [`../tests/escenarios/005-00-el-dia-ciento-cincuenta.md`](../tests/escenarios/005-00-el-dia-ciento-cincuenta.md).
 
 > [!tip] Mirar en VAULT al abrir el epic
 > - [`VAULT/scratchpad/tuku-docs/corpus-regresion/contrato-de-regeneracion.md`](VAULT/scratchpad/tuku-docs/corpus-regresion/contrato-de-regeneracion.md): tabla de artefactos con su criterio de igualdad (idéntico si lo produce un proceso determinista, equivalente si lo redacta un agente). Es la base para convertir el principio 9 en un test sobre un vault poblado.
 > - [`VAULT/spec/notas.md`](VAULT/spec/notas.md): las tres clases de nota (libre, de estructura, de inducción) y la pregunta que decide el "Ver además": ¿la página se revisita y se cura, o se escribe una vez?
 > - [`VAULT/spec/entidades.md`](VAULT/spec/entidades.md): prácticas heredadas por tipo, y el patrón de proponer una página en blanco cuando un nombre se repite.
 
-## Epic 006. Abrir y cerrar el ciclo
+## Epic 006. Lo que vuelve solo
 
-Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo valga la pena leerlo. Las cadencias entran acá porque emiten en la apertura del ciclo. Cubre fases 6 y 7, más lo restante de la 4. La mecánica determinista (abrir, promover pendientes, aplanar transclusiones, archivar ciclos, ramas de ámbitos y notas) se prueba con archivos inyectados antes de conectar el LLM para plan y resumen.
+Que lo que el autor declaró una vez vuelva sin que lo pida, y que lo propuesto para la semana valga la pena leerlo. Ya no hay un ciclo que abrir ni cerrar: `AHORA.md` se archiva solo (epic 005) y lo que falta es lo que se emite. Cubre la fase 4 y la 7.
 
-- **Criterio de salida:** abrir dos veces no duplica; cerrar dos veces no vuelve a mover; prueba que falla a propósito si se aplana antes del resumen. Plan calcula capacidad contra lo declarado.
-- **El cambio de ciclo:** el lunes, un `entry create` fuera del ciclo abierto se rechaza (ya existe) y el flujo sigue: el agente avisa al autor, cierra el ciclo que terminó, abre el siguiente (si el nombre no es `semana`, pregunta el rango) y recién escribe el registro. Pedir abrir el ciclo ya abierto solo verifica. Falta `cycle close`, que es de comandos ([`TODO.md`](../TODO.md)), y el escenario del flujo completo (rechazo, aviso, cierre, `process cycle`, registro), que es la promesa del [capítulo 5 del tutorial](../docs/tutorial/09-cerrar-la-semana.md).
-- **Horizontes vencidos:** al abrir el ciclo siguiente, un pendiente cuyo horizonte ya pasó (los `esta semana` de la semana cerrada) se marca atrasado en `tuku context todo`, sin moverlo de escalón. El autor decide si lo posterga; TUKU no corre un compromiso por su cuenta.
+- **Cadencias.** Un `CADENCIAS.md` emite un pendiente con fecha por cada vez que la regla cae en la ventana de `AHORA.md` (`window_days`). No hay apertura que lo dispare: lo evalúa el primer comando que escribe, como el archivado, y emitir es idempotente (dos pasadas no duplican). El diseño decide qué hace con una cadencia de día exacto que cae fuera de la ventana, y con las que emiten algo distinto de un pendiente (el foco, la revisión de la semana, que siembra [`ambitos/CADENCIAS.md`](../template/vanilla/ambitos/CADENCIAS.md)).
+- **Capacidad.** El plan de la ventana se calcula contra lo declarado en `ambitos/personal/CAPACIDAD.md`; la traducción de «el próximo turno» a un `--due` la hace el agente con ese ritmo ([`TODO.md`](../TODO.md), «Pendientes que no son una ventana de días»).
+- **Foco y resumen (con LLM).** El foco de `AHORA.md` lo escribe solo el autor. El agente puede proponerlo leyendo la ventana, los atrasados y la bitácora recién archivada, y también un resumen de la semana que salió; ambos esperan el sí del autor, y TUKU no escribe ninguno por su cuenta.
+- **Criterio de salida:** emitir dos veces no duplica; borrar una cadencia o su ámbito deja lo ya emitido; el foco no cambia sin el sí del autor; una propuesta rechazada no deja rastro (principio 3). Se abre, como todo epic, escribiendo sus escenarios y su capítulo del tutorial.
+- **Ya resuelto.** Un pendiente cuyo horizonte pasó se marca atrasado y no se mueve de escalón: lo calcula `tuku context todo --late` desde `Creado` ([`005-04`](../tests/escenarios/005-04-los-atrasados-se-calculan.md)), y el autor decide si lo posterga.
 
-> [!tip] Mirar en VAULT al diseñar cadencias y cierre
+> [!tip] Mirar en VAULT al diseñar cadencias y foco
 > - [`VAULT/spec/cadencias.md`](VAULT/spec/cadencias.md): los cinco disparadores, en particular la cadencia por ausencia de actividad ("un cliente sin contacto hace cuatro semanas"), la más valiosa y la única que ningún cuaderno tiene. Y "el reporte es la memoria": lo que se conserva de un período largo es su relato.
 > - [`VAULT/old/decisiones/0006-regla-muere-emitido-sobrevive.md`](VAULT/old/decisiones/0006-regla-muere-emitido-sobrevive.md): al borrar una cadencia o su ámbito, lo ya emitido sobrevive y la referencia colgante no es error. Verificar que [`spec/cadencias.md`](borradores/cadencias.md) lo diga.
 > - [`VAULT/old/decisiones/0010-friccion-no-se-declara.md`](VAULT/old/decisiones/0010-friccion-no-se-declara.md): la fricción no se etiqueta al escribir, se descubre en el cierre contrastando plan y actividad. Evidencia: 59 hitos, 22 decisiones y 0 fricciones en 8 ciclos reales. Útil para el resumen del cierre.
@@ -164,7 +166,7 @@ Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo 
 
 ## Epic 007. Que note lo que nadie pidió
 
-El agente deja de responder y empieza a observar: infiere ámbitos y notas tipadas desde el histórico, detecta recurrencias que nadie declaró como cadencia y propone sin ejecutar. Cubre fase 9.
+El agente deja de responder y empieza a observar: infiere ámbitos y notas tipadas desde el histórico (las bitácoras semanales de `bitacoras/`, con sus enlaces a los ámbitos), detecta recurrencias que nadie declaró como cadencia y propone sin ejecutar. Cubre fase 9; parte del estado `historico` y sigue al epic 006 por las cadencias que propone.
 
 - **Criterio de salida:** la prueba dura es negativa: rechazar una propuesta no deja rastro en ninguna primitiva (principio 3).
 
@@ -176,11 +178,12 @@ El agente deja de responder y empieza a observar: infiere ámbitos y notas tipad
 
 ## Epic 010. El tutorial entero
 
-Que alguien pueda seguir el [tutorial](../docs/tutorial/README.md) de principio a fin sobre un vault vacío y que cada paso haga lo que el capítulo dice. El tutorial es la promesa a quien va a usar TUKU; este epic es la prueba de que se cumple, y marca qué capítulos faltan construir.
+Que alguien pueda seguir el [tutorial](../docs/tutorial/README.md) de principio a fin sobre un vault vacío y que cada paso haga lo que el capítulo dice. El tutorial es la promesa a quien va a usar TUKU; este epic es la prueba de que se cumple, y marca qué capítulos faltan construir: hoy solo el 10, que promete lo del epic 007.
 
 - **Los pasos no se copian.** Cada capítulo es un escenario (`010-NN`, con `NN` el número del capítulo). Su fuente es el capítulo: los bloques `> [!tip]` son lo que el autor dicta, tal cual y en orden, y los `> [!check]` son lo que se afirma después de cada paso. Los escenarios solo nombran el capítulo y su estado inicial; si el tutorial cambia, la prueba cambia con él.
 - **Qué se verifica sin leer:** las invariantes de siempre en cada paso (cada cambio del vault tiene su comando `tuku`, el agente no sale del vault, `tuku doctor` sano). Cada `check` se juzga contra el delta del vault del paso; lo que ningún archivo muestra, como la pregunta del agente, lo juzga quien lee.
 - **Entregable:** el arnés que extrae pasos y `check` de un capítulo y los corre con `test-tui`, y la corrida completa en cadena de los diez capítulos, con el vault de cada uno archivado en `playground/`.
+- **Los relojes:** cada capítulo corre con su `TUKU_NOW` (`tests/scripts/tutorial.py`), y un paso titulado «el lunes» salta al lunes siguiente. El capítulo 9 usa dos lunes (el 24 y el 31) para que la semana del 17 salga de la ventana y se archive sola.
 - **Criterio de salida:** los diez capítulos en verde con un agente real sobre un vault que parte del `tuku init` del capítulo 1.
 - **Detalle completo:** [`../tests/escenarios/010-00-el-tutorial.md`](../tests/escenarios/010-00-el-tutorial.md).
 

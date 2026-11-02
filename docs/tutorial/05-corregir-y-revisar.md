@@ -12,7 +12,7 @@ Te equivocas, o el agente te entiende mal. Corregir también se dicta.
 > [!check] Qué debería pasar
 > - El registro y la fila de `PENDIENTES.md` dicen «seis y media», los dos.
 
-Si uno cambiara y el otro no, el pendiente ya no se podría cerrar, porque cerrar es repetir su texto. Por eso corregir es un solo comando. Corrige el texto: la columna `Vence` se queda como estaba, porque todavía no hay un comando que la cambie.
+Si uno cambiara y el otro no, el pendiente ya no se podría cerrar, porque cerrar es repetir su texto. Por eso corregir es un solo comando. Corrige el texto: las columnas `Vence` y `Creado` se quedan como estaban, porque todavía no hay un comando que las cambie.
 
 ## Renombrar un frente
 

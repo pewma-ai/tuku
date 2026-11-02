@@ -1,19 +1,19 @@
 # 005-06 · El agente con historia
 
-> **Principio:** [P3 (el agente es un secretario, no un dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Brief:** [La organización emerge](../../docs/brief.md#L49) · **Spec:** [`spec/agente.md`](../../devel/VAULT/spec-anterior/agente.md), [`spec/ambitos.md`](../../devel/VAULT/spec-anterior/ambitos.md), [`spec/flujo-informacion.md`](../../devel/borradores/flujo-informacion.md) · **Tutorial:** [capítulo 4](../../docs/tutorial/04-una-semana-despues.md)
+> **Principio:** [P3 (el agente es un secretario, no un dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Brief:** [La organización emerge](../../docs/brief.md#L49) · **Spec:** [`spec/flujo-informacion.md`](../../devel/borradores/flujo-informacion.md), capítulos Registro y Ámbito del [libro de estilo](../../template/vanilla/LIBRO-DE-ESTILO.md) · **Tutorial:** [capítulo 8](../../docs/tutorial/08-una-semana-despues.md)
 
 Con dos semanas de historia, lo que Andrea dice ya no lleva el nombre completo ni el ámbito: dice «la Patricia» y «la Paula». El agente elige el ámbito leyendo las keywords de las páginas, escribe lo que ella dijo tal como lo dijo, y no adivina cuando dos personas se llaman igual.
 
-Estos escenarios llevan un agente, así que cuestan tokens y quedan fuera de la corrida por defecto (marca `agentic`). Cada uno parte del vault de la segunda semana de [`005-01`](005-01-las-dos-semanas-de-andrea.md).
+Estos escenarios llevan un agente, así que cuestan tokens y quedan fuera de la corrida por defecto (marca `agentic`). Cada uno parte del vault de Andrea al lunes 24 de [`005-01`](005-01-las-dos-semanas-de-andrea.md).
 
 ## Escenario: una keyword única decide el ámbito
 
-Dado el vault de la segunda semana, con `Patricia` entre las keywords del liceo y de nadie más
+Dado el vault de Andrea al lunes 24, con `Patricia` entre las keywords del liceo y de nadie más
 ```bash
-cp -r ../../005-01-las-dos-semanas-de-andrea/la-segunda-semana-cae-sobre-lo/mi-vault .
+cp -r ../../005-01-las-dos-semanas-de-andrea/el-lunes-24-la-primera-semana/mi-vault .
 ```
 Cuando Andrea cuenta una llamada con el nombre de pila
-```agente TUKU_NOW="2026-08-23 22:30"
+```agente TUKU_NOW="2026-08-24 22:30"
 Hablé con la Patricia del precio y quedó conforme.
 ```
 Entonces esa frase se traduce en un solo registro, del ámbito del liceo
@@ -21,16 +21,16 @@ Entonces esa frase se traduce en un solo registro, del ámbito del liceo
 tuku entry create --scope liceo-tecnico-andes --body "<la frase tal como la dijo>"
 ```
 Y el cuerpo conserva las palabras de Andrea: la Patricia sin apellido y el texto sin links
-Y el registro cae en el domingo 23, y el delta es `AHORA.md` y la página del liceo
+Y el registro cae en el lunes 24, sobre el de las 08:30, y el delta es `AHORA.md` y la página del liceo
 
 ## Escenario: dos personas con el mismo nombre esperan al autor
 
 Dado el mismo vault, donde `Paula` es keyword del catálogo (Paula Ibáñez, la diseñadora) y la Escuela Los Maitenes tiene a Paula Reyes, su jefa de UTP
 ```bash
-cp -r ../../005-01-las-dos-semanas-de-andrea/la-segunda-semana-cae-sobre-lo/mi-vault .
+cp -r ../../005-01-las-dos-semanas-de-andrea/el-lunes-24-la-primera-semana/mi-vault .
 ```
 Cuando Andrea nombra a una Paula sin decir cuál
-```agente TUKU_NOW="2026-08-23 22:30"
+```agente TUKU_NOW="2026-08-24 22:30"
 Le mandé el catálogo a la Paula.
 ```
 Entonces el agente pregunta a cuál Paula se refiere, nombrando a las dos

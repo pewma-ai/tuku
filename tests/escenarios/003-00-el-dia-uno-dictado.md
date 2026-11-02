@@ -28,6 +28,6 @@ El autor dicta su primer día en lenguaje natural y el agente ejecuta las operac
 ### Escenarios agénticos (`-m agentic`)
 
 - [`003-10-el-dia-uno-en-un-turno.md`](003-10-el-dia-uno-en-un-turno.md) — El criterio de salida: el día uno dictado entero en un turno deja un vault equivalente al del Epic 002, con lo que no se anota en el mismo turno (una consulta, una instrucción, una pregunta, un cierre ambiguo y un pedido sin comando).
-- [`003-11-el-dia-que-no-se-dicta.md`](003-11-el-dia-que-no-se-dicta.md) — Un hecho con hora y sin día cae en el último día del ciclo que ya tiene registros.
+- [`003-11-el-dia-que-no-se-dicta.md`](003-11-el-dia-que-no-se-dicta.md) — Un hecho con hora y el día por su nombre («el viernes pasado») cae en ese día de `AHORA.md`, sin abrir otro.
 - [`003-08-el-mismo-vault-otro-arnes.md`](003-08-el-mismo-vault-otro-arnes.md) — Portabilidad: evalúa que las reglas operativas dependen del vault y no del arnés de ejecución (`hermes`).
 - [`003-09-el-mismo-vault-tercer-arnes.md`](003-09-el-mismo-vault-tercer-arnes.md) — Portabilidad, tercer caso: el mismo dictado bajo `claude` con sonnet en esfuerzo bajo, el único arnés que no descubre solo el `AGENTS.md`.

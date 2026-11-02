@@ -11,7 +11,7 @@ El turno del agente declara `TUKU_NOW="2026-08-11 22:00"` en el fence ```agente`
 ## Estado inicial
 
 ```bash
-tuku init mi-vault --at 2026-08-11
+tuku init mi-vault
 ```
 
 ## Escenario: el día uno entero, con lo que no se anota, en un turno
@@ -47,7 +47,7 @@ tuku todo open --at 2026-08-11 --due "2026-08-12 09:00" --scope personal --body 
 tuku todo open --at 2026-08-11 --due "2026-08-12 09:30" --scope depto-centro --body "..."
 ```
 Y cada registro tiene su hora, su ámbito y su marca cerrada según la tabla de verdad
-Y los dos pendientes de mañana se prometen el martes 11 y vencen el miércoles 12 a las 09:00 y a las 09:30
+Y los dos pendientes de mañana se prometen el martes 11 (`Creado`) y vencen el miércoles 12 a las 09:00 y a las 09:30, y `AHORA.md` los lista en el miércoles 12
 Y la consulta del pase escolar no deja nada escrito, y la respuesta nombra `AHORA.md` y `PENDIENTES.md`
 Y ni "recuérdame" ni la pregunta por los pendientes entran a `AHORA.md`
 Y el cuerpo del registro de las 18:40 queda como lo dictó el autor, sin links nuevos, y el martes tiene la constancia de haber abierto `depto-centro`

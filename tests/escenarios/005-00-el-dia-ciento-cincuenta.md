@@ -1,15 +1,15 @@
 # Epic 005 · El día ciento cincuenta
 
-> **Marco:** [Brief de TUKU](../../docs/brief.md) · [Principios normativos](../../docs/principios.md) · [Especificaciones](../../spec/README.md) · [Corpus de la Pyme](../../corpus/referencia/referencia-pyme.md) · [Tutorial, capítulo 4](../../docs/tutorial/04-una-semana-despues.md)
+> **Marco:** [Brief de TUKU](../../docs/brief.md) · [Principios normativos](../../docs/principios.md) · [Especificaciones](../../spec/README.md) · [Corpus de la Pyme](../../corpus/referencia/referencia-pyme.md) · [Tutorial, capítulo 8](../../docs/tutorial/08-una-semana-despues.md)
 
-Lo del epic 002 sobre un vault que ya tiene historia: ámbitos anidados con registros, pendientes en varios escalones, una bitácora cerrada y notas. El vault deja de ser una página en blanco y cada comando se enfrenta a lo que ya hay.
+Lo del epic 002 sobre un vault que ya tiene historia: ámbitos anidados con registros, pendientes en varios escalones, una bitácora semanal y notas. El vault deja de ser una página en blanco y cada comando se enfrenta a lo que ya hay.
 
 ## Qué entrega el epic
 
-1. **Las dos semanas de Andrea Bustos** ([`referencia-pyme.md`](../../corpus/referencia/referencia-pyme.md)) escritas con un comando por hecho, la primera archivada a mano en `bitacoras/` y la segunda sobre ella: el vault poblado del que parten los demás escenarios.
+1. **Las dos semanas de Andrea Bustos** ([`referencia-pyme.md`](../../corpus/referencia/referencia-pyme.md)) escritas con un comando por hecho, con el reloj fijado en cada domingo (`export TUKU_NOW`). El lunes 24 la primera pasa sola a `bitacoras/`: el vault poblado del que parten los demás escenarios.
 2. **Lo derivado se reconstruye** sobre ese vault (principio 9), y un vault armado comando a comando ya está regenerado.
-3. **Reorganizar con historia** sin romper un link, bitácoras cerradas incluidas (principio 7).
-4. **Los pendientes atrasados se calculan** y un comando los informa y las filas quedan donde están.
+3. **Reorganizar con historia** sin romper un link, bitácoras semanales incluidas (principio 7).
+4. **Los pendientes atrasados se calculan**, por `Vence` o por el plazo del horizonte desde `Creado`, y un comando los informa mientras las filas quedan donde están.
 5. **Las notas tejidas**: el `## Ver además` verificable y la primera nota tipada, una persona.
 6. **El agente con historia**: elige el ámbito por las keywords y espera al autor cuando dos personas tienen el mismo nombre.
 
@@ -24,18 +24,19 @@ Lo del epic 002 sobre un vault que ya tiene historia: ámbitos anidados con regi
 
 Cada `.md` parte del vault que deja el `005-01`; dentro de él los escenarios se encadenan.
 
-- [`005-01-las-dos-semanas-de-andrea.md`](005-01-las-dos-semanas-de-andrea.md): el árbol del negocio, la primera semana, el cierre a mano, la segunda semana y repetirla sin cambios.
+- [`005-01-las-dos-semanas-de-andrea.md`](005-01-las-dos-semanas-de-andrea.md): el árbol del negocio, la primera semana, la segunda sobre ella (la ventana conserva las dos), el lunes 24 en que la primera pasa a `bitacoras/`, y repetir la segunda sin cambios.
 - [`005-02-lo-derivado-se-reconstruye.md`](005-02-lo-derivado-se-reconstruye.md): borrar lo derivado y regenerar devuelve el mismo vault.
-- [`005-03-reorganizar-con-historia.md`](005-03-reorganizar-con-historia.md): mover y renombrar ámbitos anidados, con una bitácora cerrada que los enlaza.
+- [`005-03-reorganizar-con-historia.md`](005-03-reorganizar-con-historia.md): mover y renombrar ámbitos anidados, con una bitácora semanal que los enlaza.
 - [`005-04-los-atrasados-se-calculan.md`](005-04-los-atrasados-se-calculan.md): qué venció, con cada fila donde estaba.
 - [`005-05-las-notas-de-la-pyme.md`](005-05-las-notas-de-la-pyme.md): notas con `## Ver además` y la primera nota tipada.
 - [`005-06-el-agente-con-historia.md`](005-06-el-agente-con-historia.md): la Patricia y las dos Paulas. Agéntico.
+- [`005-07-el-limite-de-las-notas.md`](005-07-el-limite-de-las-notas.md): treinta personas y `context note` trae las veinticinco más recientes. Uno determinista y uno agéntico.
 
 ## Por qué el vault tiene dos semanas y no ciento cincuenta días
 
-El nombre del epic es el estado inicial (`ciclo-en-curso`: un vault con meses encima), no una cantidad. Lo que cambia de un vault vacío a uno poblado es que las cosas existen: un ámbito tiene registros, un pendiente viene de otra semana, un link apunta a una bitácora cerrada. Dos semanas del corpus bastan para eso, y repetirlas hasta llegar a ciento cincuenta días probaría el volumen y no el comportamiento. El volumen es una prueba de rendimiento y no pertenece a este epic.
+El nombre del epic es el estado inicial (`poblado`: un vault con meses encima), no una cantidad. Lo que cambia de un vault vacío a uno poblado es que las cosas existen: un ámbito tiene registros, un pendiente viene de otra semana, un link apunta a una bitácora cerrada. Dos semanas del corpus bastan para eso, y repetirlas hasta llegar a ciento cincuenta días probaría el volumen y no el comportamiento. El volumen es una prueba de rendimiento y no pertenece a este epic.
 
-Un vault no puede llegar a ser más que eso por comandos, porque `tuku cycle close` es del epic 006: la primera semana se archiva como lo haría Andrea con un editor (principio 1), y el escenario `005-01` lo escribe paso a paso.
+Con el reloj fijado en el domingo 23 la ventana conserva las dos semanas, y el primer comando del lunes 24 archiva la primera sin que nadie lo pida: el vault tiene `AHORA.md` con la segunda semana y `bitacoras/` con la primera.
 
 ## Cómo se leyó el corpus
 
@@ -55,11 +56,11 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 
 | Id | Pendiente |
 | --- | --- |
-| ~~S1~~ | ~~Los verbos de crear son tres: `entry add`, `scope create` y `note create`, más `todo open` y `cycle open`. `add` es el que desentona.~~ Resuelto el 2026-10-17: `entry add` pasó a `entry create`. `todo open` y `cycle open` se quedan, porque abren algo que después se cierra |
+| ~~S1~~ | ~~Los verbos de crear son tres: `entry add`, `scope create` y `note create`, más `todo open`. `add` es el que desentona.~~ Resuelto el 2026-10-17: `entry add` pasó a `entry create`. `todo open` se queda, porque abre algo que después se cierra |
 | ~~S2~~ | ~~`scope keywords NOMBRE PALABRA...` usa un sustantivo como verbo, y las keywords se dan de dos formas.~~ Resuelto el 2026-10-17: `scope update NOMBRE --keyword P` es la única forma; `--keyword` es repetible o admite varias palabras separadas por coma, y los espacios de una palabra pasan a guion (kebab-case). `scope create` usa la misma regla |
-| ~~S3~~ | ~~Los temas de `doctor`, `fix` y `regenerate` son tres listas distintas; `doctor scope` se rechaza aunque `doctor` corre el lint de ámbitos.~~ Resuelto el 2026-10-17: un tema es el nombre de la cosa y `link`, `todo` y `scope` significan lo mismo en los tres comandos. `doctor TEMA` acepta el nombre de cada una de sus revisiones (`config`, `version`, `types`, `files`, `frontmatter`, `dispatch`, `link`, `cycle`, `entry`, `todo`, `style`, `scope`) y solo corre esa; `fix` acepta los que tienen arreglo (`link`, `todo`) y `regenerate` los que tienen derivado (`todo`, `scope`, `comandos`). Cada comando rechaza los que no le tienen sentido |
+| ~~S3~~ | ~~Los temas de `doctor`, `fix` y `regenerate` son tres listas distintas; `doctor scope` se rechaza aunque `doctor` corre el lint de ámbitos.~~ Resuelto el 2026-10-17: un tema es el nombre de la cosa y `link`, `todo` y `scope` significan lo mismo en los tres comandos. `doctor TEMA` acepta el nombre de cada una de sus revisiones (`config`, `version`, `types`, `files`, `frontmatter`, `dispatch`, `link`, `archive`, `entry`, `todo`, `style`, `scope`) y solo corre esa; `fix` acepta los que tienen arreglo (`link`, `todo`) y `regenerate` los que tienen derivado (`todo`, `scope`, `comandos`). Cada comando rechaza los que no le tienen sentido |
 | ~~S4~~ | ~~Los alias en español cubrían la mitad de las opciones.~~ Resuelto el 2026-10-17 (lo decidió el autor): se quitan todos. Cada opción tiene una sola forma, en inglés (`--body`, `--scope`, `--at`, `--parent`, `--due`, `--horizon`, `--variant`, `--author`, `--body-file`, `--no-record`) |
-| ~~S5~~ | ~~`--at` significaba tres cosas.~~ Resuelto el 2026-10-18: `entry update` y `entry move` ubican con `--match`, y `002-13` y `005-01` abren el ciclo con `process cycle --from`. Esos dos escenarios (y los que parten de ellos) fallan hasta que el comando acepte `--from` ([`TODO.md`](../../TODO.md), «Ciclos con nombre») |
+| ~~S5~~ | ~~`--at` significaba tres cosas.~~ Resuelto el 2026-10-18: `entry update` y `entry move` ubican con `--match`, y `--at` es siempre cuándo ocurrió |
 | ~~S6~~ | ~~El CLI no tenía comandos de lectura: ni `todo list`, ni `scope list` o `scope tree`, ni `note list`.~~ Resuelto el 2026-10-18: `tuku context [TEMA] [--since]` lee `entry`, `scope` (el árbol con sus keywords), `todo` (abiertos y atrasados), `style` y `note` (las enlazables). No hay verbo `list`: B1 y B4 ya no dependen de decidirlo |
 | ~~S7~~ | ~~`doctor note` aceptaba un archivo y los demás lint no; `vocab` y `style` eran nouns con un solo verbo.~~ Resuelto el 2026-10-18: `tuku doctor [TEMA] [ARCHIVO]` es la única entrada de revisión, `ARCHIVO` solo vale con `note`, y `vocab` y `style` se retiraron (`context style`) |
 | ~~S8~~ | ~~Falta el campo `tuku_template` de `reglas/config.tuku.md`.~~ El campo existe: `tuku init --variant` lo escribe, `doctor` lo exige y `test_init.py` lo cubre |
@@ -81,11 +82,11 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 
 | Id | Pendiente | Test |
 | --- | --- | --- |
-| ~~B1~~ | ~~Ningún comando informaba los atrasados: `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo.~~ Resuelto el 2026-10-18: `tuku context todo --late` deja solo los pendientes con `Vence` anterior a hoy. El atraso por horizonte expirado sigue en E2 | ~~`005-04` (2 rojos y 2 guardas)~~ |
+| ~~B1~~ | ~~Ningún comando informaba los atrasados: `spec/pendientes.md` dice «un comando lo informa» sin nombrarlo.~~ Resuelto el 2026-10-18: `tuku context todo --late` deja los pendientes atrasados: con `Vence` anterior a hoy o con el plazo de su horizonte, desde `Creado`, vencido | ~~`005-04` (2 rojos y 2 guardas)~~ |
 | ~~B2~~ | ~~No existía una nota tipada: `note create` no tenía `--subtype` y no se sembraba el archivo de reglas del tipo.~~ Resuelto el 2026-10-18: `note create --subtype persona` escribe el campo y rechaza un tipo que `### Tipos de nota` no lista; `tuku init` siembra `reglas/subtipos/persona.tuku.md`; y los links que `note create` pone al enlazar entran a `## Ver además` con el motivo «mencionada en el cuerpo» | ~~`005-05` tipada (3 rojos)~~ |
 | ~~B3~~ | ~~Las keywords repetidas entre ámbitos pasaban sin aviso: `scope update escuela-los-maitenes --keyword Paula` salía con 0 y `tuku doctor` decía que el vault estaba sano, con `Paula` ya en `catalogo-marzo`.~~ Resuelto el 2026-10-18: `scope create` y `scope update` avisan por stderr (código 0) cuando la palabra, o el nombre de un ámbito, ya nombra a otro, y `tuku doctor scope` lo pregunta sin fallar | ~~`test_scope_keywords`~~ |
 | B4 | `spec/pendientes.md` nombra «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`: la escalera de horizontes no se baja con un comando. Falta el nombre y la forma. Pasa a [`TODO.md`](../../TODO.md), porque modifica un comando | sin test: se escribe cuando B4 tenga nombre |
-| ~~B5~~ | ~~El rechazo de `process cycle` con un ciclo con registros decía «mueve AHORA.md a bitacoras/…». Quien lo seguía al pie de la letra dejaba 9 links rotos en la bitácora (están a un nivel más adentro) y `doctor` fallaba sin que `fix link` pudiera repararlos.~~ Resuelto el 2026-10-18: el rechazo de `process cycle` y el de `entry create` fuera del ciclo dicen cómo archivar a mano (`ahora.como_cerrar`): copiar a la bitácora, `status: stable` y bajar un nivel los links (`](ambitos/` pasa a `](../ambitos/`). Mientras archivar el ciclo sea del epic 006 | ~~unitario `test_cycle_open`; `005-01` lo hace a mano~~ |
+| ~~B5~~ | ~~Archivar a mano dejaba los links de la bitácora rotos (están a un nivel más adentro).~~ Resuelto: `AHORA.md` se archiva solo y recalcula las rutas de cada registro | ~~`test_archive`; `005-01` el lunes 24~~ |
 
 ### C. El agente
 
@@ -99,17 +100,17 @@ La superficie decidida el 2026-10-18 vive en [`spec/tuku.md`](../../spec/tuku.md
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
 | ~~D1~~ | ~~[`devel/epics.md`](../../devel/epics.md) describe el 005 con «enlaces automáticos desde el primer día» y asignación de ámbito «sin intervención», y `spec/ambitos.md` dice que el cuerpo no se enlaza.~~ Resuelto el 2026-10-18: el ámbito se asigna solo con `--scope` y las notas las enlaza el agente con `tuku context note` de referencia, sin autolink de los comandos. El criterio de salida del 005 lo dice así | `devel/epics.md`, criterio de salida del 005 |
 | ~~D2~~ | ~~El epic dice «resto de la fase 4» (cadencias) y «destilados».~~ Resuelto el 2026-10-18: las cadencias quedan en el 006 y los destilados en la fase 9 (epic 007) | `devel/epics.md` |
-| ~~D3~~ | ~~La página de un ámbito mostraba solo el ciclo abierto: al archivar la primera semana desaparecía el hilo de la cotización de Los Robles. `## Esta semana` y `## Actividad reciente` no estaban en ninguna spec.~~ Resuelto: `spec/ambitos.md` define las dos secciones (el ciclo abierto y los doce meses de bitácoras cerradas) y `tuku regenerate scope` las rehace | ~~`scope.py`, `spec/ambitos.md`~~ |
+| ~~D3~~ | ~~La página de un ámbito mostraba solo lo abierto: al archivar la primera semana desaparecía el hilo de la cotización de Los Robles.~~ Resuelto: el capítulo Ámbito del libro define las dos secciones (`## Esta semana`, lo que está en `AHORA.md`, y `## Actividad reciente`, los doce meses de bitácoras) y `tuku regenerate scope` las rehace | ~~`scope.py`, `spec/ambitos.md`~~ |
 | ~~D4~~ | ~~Un ámbito padre lista a sus hijos directos y los clientes de `negocio` cuelgan de la categoría `clientes`: ninguna página decía dónde están.~~ Resuelto con A1: el callout de hijos lista los ámbitos y, después, cada categoría con los suyos (`spec/ambitos.md`, `scope create`) | ~~`spec/ambitos.md`~~ |
 | ~~D5~~ | ~~El corpus de la Pyme contradice a la spec (`AGENTS.md` y `CADENCIAS.md` obligatorios, registros sobre categorías y personas, 17 de 29 `(Hecho)` sin pendiente abierto, un horizonte `sin fecha`, una Parte 3 con pendientes que la Parte 2 no abre).~~ Resuelto el 2026-10-18: el corpus no se reescribe y lo dice en su cabecera, con la lista de diferencias | ~~`corpus/referencia/referencia-pyme.md`~~ |
-| ~~D6~~ | ~~El pendiente que abre `process cycle` («revisar la bitácora anterior») nace sin ámbito y con la hora del reloj, y su cierre caía en `personal`: apertura y cierre quedaban en ámbitos distintos.~~ Resuelto el 2026-10-18: `todo close` sin `--scope` escribe el `(Hecho)` en el ámbito de la fila que cierra, y solo si no tiene usa el `scope_default` (`spec/pendientes.md`). Valía para cualquier pendiente con ámbito: `ordenar la bodega` se cerraba en `personal` | ~~`test_cierre_vault`~~ |
+| ~~D6~~ | ~~El cierre de un pendiente sin `--scope` caía en `personal` y no en el ámbito de la apertura.~~ Resuelto el 2026-10-18: `todo close` sin `--scope` escribe el `(Hecho)` en el ámbito de la fila que cierra, y solo si no tiene usa el `scope_default` | ~~`test_cierre_vault`~~ |
 
 ### E. De las pruebas mismas
 
 | Id | Pendiente |
 | --- | --- |
 | ~~E1~~ | ~~Dos tests del `005-04` pasaban sin probar nada hasta que existiera B1.~~ Resuelto el 2026-10-18 con B1 |
-| ~~E2~~ | ~~Falta el atraso por horizonte expirado (los cinco `esta semana` que siguen en `PENDIENTES.md` pasada la semana).~~ Pasa al criterio del epic 006 ([`devel/epics.md`](../../devel/epics.md)): al abrir el ciclo siguiente, el pendiente de horizonte vencido se marca atrasado y el autor decide si lo posterga |
+| ~~E2~~ | ~~Falta el atraso por horizonte expirado (los `esta semana` que siguen en `PENDIENTES.md` pasada la semana).~~ Resuelto: el plazo se cuenta desde `Creado` y `tuku context todo --late` lo informa (`005-04`) |
 | ~~E3~~ | ~~Cuatro tests del `005-05` caían en cascada de otros.~~ Resuelto el 2026-10-18 con A3 y B2 |
 
 ## Decisiones por confirmar
@@ -135,4 +136,4 @@ Entonces el epic parte de cero
 
 ## Criterio de salida
 
-Las dos semanas del corpus sobre un vault que ya tiene historia dejan el vault sano, regenerable byte a byte, reorganizable sin romper un link, con los atrasados informados por un comando y con una nota tipada. El agente elige el ámbito por las palabras que lo delatan y, cuando dos candidatos calzan, no adivina.
+Las dos semanas del corpus sobre un vault que ya tiene historia dejan el vault sano, con la primera semana archivada sola en `bitacoras/`, regenerable byte a byte, reorganizable sin romper un link, con los atrasados informados por un comando y con una nota tipada. El agente elige el ámbito por las palabras que lo delatan y, cuando dos candidatos calzan, no adivina.

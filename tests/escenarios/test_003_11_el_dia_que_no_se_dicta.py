@@ -2,10 +2,8 @@
 
 Escenario: 003-11-el-dia-que-no-se-dicta.md
 
-El día no se dicta: se deriva del vault. El ciclo abierto va del 11 al 17 de
-agosto y HOY cae fuera, así que el día lo decide la regla del comando: el
-último del ciclo que ya tiene registros, que acá es el miércoles por el
-pendiente que siembra el estado inicial.
+El día se dicta por su nombre ("el viernes pasado"), no por su fecha: el agente
+la deriva del calendario y el registro cae en ese día de `AHORA.md`.
 
 Ejecutable directo: `python3 tests/escenarios/test_003_11_el_dia_que_no_se_dicta.py`
 """
@@ -27,8 +25,8 @@ import gherkin  # noqa: E402
 from tuku import todo  # noqa: E402
 
 SLUG = "003-11-el-dia-que-no-se-dicta"
-TITULO = "el registro va al último día"
-MIERCOLES = "## Miércoles 12 de agosto"
+TITULO = "el registro va al viernes pasado"
+VIERNES = "## Viernes 21 de agosto"
 
 #: Lo que toca un registro sin consecuencia en `depto-centro`, del gemelo `002-13`.
 DELTA_SIN_CONSECUENCIA = {
@@ -41,9 +39,12 @@ sin_arnes = pytest.mark.skipif(
 )
 
 
-def _miercoles(corrida: gherkin.Corrida) -> list[str]:
-    ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
-    dia = ahora.split(MIERCOLES, 1)[1].split("\n## ", 1)[0]
+def _ahora(corrida: gherkin.Corrida) -> str:
+    return corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
+
+
+def _viernes(corrida: gherkin.Corrida) -> list[str]:
+    dia = _ahora(corrida).split(VIERNES, 1)[1].split("\n## ", 1)[0]
     return [x for x in dia.splitlines() if x.startswith("- ")]
 
 
@@ -56,13 +57,15 @@ def test_003_11_un_solo_comando() -> None:
 
 @pytest.mark.agentic
 @sin_arnes
-def test_003_11_el_registro_cae_en_el_ultimo_dia_con_registros() -> None:
-    registros = _miercoles(gherkin.correr(SLUG, TITULO))
+def test_003_11_el_registro_abre_el_viernes_y_no_nace_el_martes() -> None:
+    corrida = gherkin.correr(SLUG, TITULO)
+    registros = _viernes(corrida)
     horas = [x[2:7] for x in registros]
-    assert horas[-1] == "10:15" and "09:30" in horas, (
-        f"el registro de las 10:15 debía cerrar el miércoles:\n{registros}"
+    assert horas[0] == "17:00" and "09:30" in horas, (
+        f"el registro de las 17:00 debía abrir el viernes:\n{registros}"
     )
-    assert not any(m in registros[-1] for m in (todo.ABRE, todo.CIERRA)), registros[-1]
+    assert not any(m in registros[0] for m in (todo.ABRE, todo.CIERRA)), registros[0]
+    assert "## Martes 25 de agosto" not in _ahora(corrida), "el hecho no era de hoy"
 
 
 @pytest.mark.agentic
@@ -76,6 +79,6 @@ if __name__ == "__main__":
         print(f"saltado: {agente.motivo_no_disponible()}")
         raise SystemExit(0)
     test_003_11_un_solo_comando()
-    test_003_11_el_registro_cae_en_el_ultimo_dia_con_registros()
+    test_003_11_el_registro_abre_el_viernes_y_no_nace_el_martes()
     test_003_11_el_delta_es_el_de_un_registro_sin_consecuencia()
     print(f"ok: 3 afirmaciones (queda en playground/{SLUG}/)")

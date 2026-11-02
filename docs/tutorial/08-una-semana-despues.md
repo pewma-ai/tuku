@@ -48,9 +48,9 @@ Cuando ya haya vencido algún pendiente, pregunta:
 > ¿Qué tengo atrasado?
 
 > [!check] Qué debería pasar
-> - El agente lista los pendientes cuyo `Vence` ya pasó, del más antiguo al más reciente.
+> - El agente lista los pendientes atrasados: los que tienen `Vence` y ya pasó, y los de un horizonte cuyo plazo, contado desde `Creado`, ya pasó. Del más antiguo al más reciente.
 > - Ningún archivo cambió.
 
 Un atraso es información, no una orden: TUKU no corre un compromiso por su cuenta. Tú decides si lo cumples, lo pospones o lo cierras.
 
-Siguiente: [9. Cerrar la semana](09-cerrar-la-semana.md).
+Siguiente: [9. Pasar de semana](09-pasar-de-semana.md).

@@ -1,6 +1,6 @@
 # Tutorial
 
-> Una semana de trabajo de Andrea, dictada a un agente. Cada paso dice qué decirle, qué debería pasar y por qué.
+> Las primeras semanas de trabajo de Andrea, dictadas a un agente. Cada paso dice qué decirle, qué debería pasar y por qué.
 
 Vas a instalar TUKU, abrir un agente sobre una carpeta y hablarle como le hablarías a un secretario. Tú hablas. El agente decide qué comando `tuku` corresponde. El comando escribe los archivos.
 
@@ -54,7 +54,7 @@ Vende insumos escolares a colegios y trabaja sola. Sus clientes son Los Robles y
 | 6 | [El día completo](06-el-dia-completo.md) | Una jornada dictada de corrido |
 | 7 | [Conversar](07-conversar.md) | Deliberar sin que se escriba nada hasta que ratifiques |
 | 8 | [Una semana después](08-una-semana-despues.md) | El agente entiende de qué hablas con el historial |
-| 9 | [Cerrar la semana](09-cerrar-la-semana.md) | Cambiar de ciclo sin perder nada, y lo que vuelve solo |
+| 9 | [Pasar de semana](09-pasar-de-semana.md) | Tu foco, y cómo `AHORA.md` se archiva solo sin perder nada |
 | 10 | [Lo que nadie pidió](10-lo-que-nadie-pidio.md) | Propuestas del agente y rechazos sin rastro |
 | | [Conclusión](99-conclusion.md) | Lo que hiciste y por qué funciona |
 

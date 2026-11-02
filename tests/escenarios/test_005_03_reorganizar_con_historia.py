@@ -1,7 +1,7 @@
 """Tests del escenario 005-03-reorganizar-con-historia.
 
 Mover y renombrar ámbitos anidados en un vault con dos semanas y una bitácora
-cerrada: ningún link queda sin resolver, ni siquiera los del archivo histórico.
+semanal: ningún link queda sin resolver, ni siquiera los del archivo histórico.
 
 Ejecutable directo: `python3 tests/escenarios/test_005_03_reorganizar_con_historia.py`
 """
@@ -25,8 +25,8 @@ BASE = "005-01-las-dos-semanas-de-andrea"
 CADENA_BASE = (
     "el árbol de Andrea nace con su negocio",
     "la primera semana se registra día por día",
-    "la semana se cierra a mano y abre la siguiente",
-    "la segunda semana cae sobre lo ya escrito",
+    "la segunda semana cae sobre la primera",
+    "el lunes 24 la primera semana pasa a bitácoras",
 )
 REORGANIZAR = "mover y renombrar ámbitos anidados mantiene cada link"
 CONSERVA = "lo que el ámbito tenía sigue siendo suyo"
@@ -71,15 +71,15 @@ def test_005_03_toda_mencion_usa_la_ruta_y_el_nombre_nuevos() -> None:
             assert viejo not in texto, f"{archivo.relative_to(corrida.dir)} nombra {viejo!r}"
 
 
-def test_005_03_todo_link_del_vault_resuelve_incluida_la_bitacora_cerrada() -> None:
+def test_005_03_todo_link_del_vault_resuelve_incluida_la_bitacora_semanal() -> None:
     corrida = _correr(REORGANIZAR)
-    cerrada = corrida.ruta("mi-vault", "bitacoras", "bitacora-2026-08-10-2026-08-16.md")
+    semanal = corrida.ruta("mi-vault", "bitacoras", "bitacora-20260810-20260816.md")
     for archivo in _archivos(corrida):
         for destino in LINK.findall(archivo.read_text(encoding="utf-8")):
             if destino.startswith(("http", "file:")):
                 continue
             assert (archivo.parent / destino).resolve().exists(), f"{archivo.name}: {destino}"
-    assert "../ambitos/negocio/temporada-marzo/canal-feria/canal-feria.md" in cerrada.read_text(
+    assert "../ambitos/negocio/temporada-marzo/canal-feria/canal-feria.md" in semanal.read_text(
         encoding="utf-8"
     )
     assert corrida.de("tuku doctor").codigo == EXITO

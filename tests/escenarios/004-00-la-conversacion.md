@@ -36,7 +36,8 @@ Todos los escenarios parten del martes 11 de agosto de [`referencia-faena.md`](.
 Dado un directorio vacío
 Cuando se siembra el vault y se abren cuatro frentes, cada uno con su pendiente del martes 11
 ```bash
-tuku init mi-vault --at 2026-08-11
+export TUKU_NOW="2026-08-12 21:00"
+tuku init mi-vault
 cd mi-vault
 tuku scope create tuku --at "2026-08-11 09:15"
 tuku scope create transformacion-digital --at "2026-08-11 10:00"

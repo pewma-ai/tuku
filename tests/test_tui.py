@@ -290,9 +290,9 @@ def test_un_escenario_con_frases_literales_se_lee_como_un_plan_por_escenario() -
     assert [p.literal for p in planes] == [True, True]
     patricia, paula = planes
     assert patricia.pasos == ["Hablé con la Patricia del precio y quedó conforme."]
-    assert patricia.ahora_en(1) == "2026-08-23 22:30"
+    assert patricia.ahora_en(1) == "2026-08-24 22:30"
     assert paula.pasos == ["Le mandé el catálogo a la Paula."]
-    assert paula.base == ("005-01-las-dos-semanas-de-andrea", "la-segunda-semana-cae-sobre-lo")
+    assert paula.base == ("005-01-las-dos-semanas-de-andrea", "el-lunes-24-la-primera-semana")
     assert paula.preparacion == []
     assert any("pregunta a cuál Paula" in x for x in paula.entonces)
     assert any("pregunta por la Paula" in x for x in paula.a_mano)
@@ -301,7 +301,7 @@ def test_un_escenario_con_frases_literales_se_lee_como_un_plan_por_escenario() -
 def test_un_escenario_sin_base_lleva_sus_comandos_de_preparacion() -> None:
     [plan] = tui.leer_planes("003-10")
     assert plan.base is None
-    assert plan.preparacion == ["tuku init mi-vault --at 2026-08-11"]
+    assert plan.preparacion == ["tuku init mi-vault"]
     assert plan.ahora_en(1) == "2026-08-11 22:00"
 
 

@@ -1,8 +1,8 @@
 # 005-01 · Las dos semanas de Andrea
 
-> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P2 (organización emerge del uso)](../../docs/principios.md#L17), [P6 (conjunto canónico)](../../docs/principios.md#L55), [P7 (carpetas archivan, enlaces conectan)](../../docs/principios.md#L65), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Triangulación tiempo × compromiso](../../docs/brief.md#L27) · **Spec:** [`spec/ambitos.md`](../../devel/VAULT/spec-anterior/ambitos.md), [`spec/pendientes.md`](../../devel/VAULT/spec-anterior/pendientes.md), [`spec/ciclo.md`](../../devel/borradores/ciclo.md), [`spec/bitacora.md`](../../devel/VAULT/spec-anterior/bitacora.md)
+> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P2 (organización emerge del uso)](../../docs/principios.md#L17), [P6 (conjunto canónico)](../../docs/principios.md#L55), [P7 (carpetas archivan, enlaces conectan)](../../docs/principios.md#L65), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Triangulación tiempo × compromiso](../../docs/brief.md#L27) · **Spec:** [`spec/tuku.md`](../../spec/tuku.md), capítulo AHORA.md y las bitácoras del [libro de estilo](../../template/vanilla/LIBRO-DE-ESTILO.md)
 
-Andrea Bustos, dueña de una Pyme de insumos escolares, registra con un comando por hecho las dos semanas del [corpus](../../corpus/referencia/referencia-pyme.md), y la segunda cae sobre una primera que ya está cerrada en `bitacoras/`: el vault deja de estar vacío y cada comando se enfrenta a lo que ya hay.
+Andrea Bustos, dueña de una Pyme de insumos escolares, registra con un comando por hecho las dos semanas del [corpus](../../corpus/referencia/referencia-pyme.md). El lunes siguiente la primera pasa sola a `bitacoras/`: el vault deja de estar vacío y cada comando se enfrenta a lo que ya hay.
 
 Los comandos salen de la Parte 2 del corpus (la tabla de verdad), con cuatro ajustes y una adición que dicen cómo se lee esa tabla bajo la spec de hoy:
 
@@ -11,13 +11,15 @@ Los comandos salen de la Parte 2 del corpus (la tabla de verdad), con cuatro aju
 - Un `(Hecho)` cierra un pendiente solo si ese pendiente estaba abierto. Los que no (por ejemplo «revisar stock de bodega») son registros normales, con `**progreso**`.
 - Un pendiente con día nace `con fecha` (`--due`), y uno que el corpus pospone nace en `próxima semana` (`--horizon`).
 - Una adición del escenario: el miércoles 19, Paula Reyes, jefa de UTP de la Escuela Los Maitenes, pide el catálogo. Pone a una segunda Paula en la historia, y el [`005-06`](005-06-el-agente-con-historia.md) la necesita.
+- El reloj avanza con el escenario (`export TUKU_NOW=…`): el domingo 16 y el domingo 23 por la noche, y el lunes 24, cuando cae la primera semana fuera de la ventana de `AHORA.md`.
 
 ## Escenario: el árbol de Andrea nace con su negocio
 
 Dado un directorio vacío
 Cuando se siembra el vault y se abren los frentes de la Pyme, con las palabras que los delatan
 ```bash
-tuku init mi-vault --at 2026-08-10 --author "Andrea Bustos"
+export TUKU_NOW="2026-08-10 08:00"
+tuku init mi-vault --author "Andrea Bustos"
 cd mi-vault
 tuku scope create negocio --at "2026-08-10 07:40" --keyword Kelluwün
 tuku scope create colegio-los-robles --parent negocio/clientes --at "2026-08-10 07:41" --keyword "Los Robles" --keyword Rodolfo --keyword Cifuentes
@@ -46,12 +48,14 @@ tuku doctor scope
 tuku doctor
 ```
 
+
 ## Escenario: la primera semana se registra día por día
 
 Dado el vault con los frentes abiertos
 ```bash
 cp -r ../el-arbol-de-andrea-nace-con-su/mi-vault .
 cd mi-vault
+export TUKU_NOW="2026-08-16 23:00"
 ```
 Cuando el lunes 10 se registra lo que Andrea contó
 ```bash
@@ -127,42 +131,22 @@ tuku entry create --at "2026-08-16 20:15" --scope temporada-marzo --body "**deci
 tuku todo open --at "2026-08-16 20:20" --scope temporada-marzo --body "confirmar a Gloria Pinto el pedido de marzo por la mitad del volumen"
 tuku todo open --at "2026-08-16 20:30" --scope negocio --body "cerrar la cotización de Colegio Los Robles durante la semana del 17 de agosto"
 ```
-Entonces `AHORA.md` tiene los siete días de la semana, y cada hecho está en su día y en orden de hora
-Y `PENDIENTES.md` queda con los seis pendientes que la semana no alcanzó a cerrar
+Entonces `AHORA.md` tiene los siete días de la semana, del domingo 16 al lunes 10, y cada hecho está en su día y en orden de hora, el más reciente arriba
+Y `PENDIENTES.md` queda con los seis pendientes que la semana no alcanzó a cerrar, cada uno con `Creado` el día en que Andrea lo prometió
 Y cada cierre saca su fila y, cuando abría y cerraba el mismo día, también la apertura
+Y `bitacoras/` sigue vacía
 Y `tuku doctor` dice que el vault está sano
 ```bash
 tuku doctor
 ```
 
-## Escenario: la semana se cierra a mano y abre la siguiente
+## Escenario: la segunda semana cae sobre la primera
 
-Dado el vault al domingo 16, con la semana escrita
+Dado el vault al domingo 16, con la primera semana escrita
 ```bash
 cp -r ../la-primera-semana-se-registra/mi-vault .
 cd mi-vault
-```
-Cuando se archiva la semana como lo haría Andrea con un editor, y se abre la siguiente
-```bash
-mkdir bitacoras
-sed -e 's/^status: draft/status: stable/' -e 's|](ambitos/|](../ambitos/|g' AHORA.md > bitacoras/bitacora-2026-08-10-2026-08-16.md
-rm AHORA.md
-tuku process cycle --from 2026-08-17
-```
-Entonces `bitacoras/bitacora-2026-08-10-2026-08-16.md` tiene los registros de la semana, `status: stable`, y los links de cada ámbito resuelven desde `bitacoras/`
-Y `AHORA.md` es la semana del 17 al 23, vacía de registros salvo el pendiente de revisar la bitácora anterior, con vencimiento el lunes 17
-Y los seis pendientes de la primera semana siguen en `PENDIENTES.md`, sin duplicarse
-Y `tuku doctor` dice que el vault está sano
-```bash
-tuku doctor
-```
-
-## Escenario: la segunda semana cae sobre lo ya escrito
-
-Dado el vault con la primera semana archivada y la segunda abierta
-```bash
-cp -r ../la-semana-se-cierra-a-mano-y/mi-vault .
-cd mi-vault
+export TUKU_NOW="2026-08-23 23:00"
 ```
 Cuando el lunes 17 se registra lo que Andrea contó
 ```bash
@@ -231,8 +215,30 @@ tuku entry create --at "2026-08-23 19:50" --scope negocio --body "**aprendizaje*
 tuku todo open --at "2026-08-23 20:10" --scope bodega --body "realizar el inventario de fin de mes con Katia Fuenzalida"
 tuku todo open --at "2026-08-23 20:15" --scope escuela-los-maitenes --body "decidir si se acepta el pedido de Escuela Los Maitenes a sesenta días"
 ```
-Entonces los pendientes de la primera semana que se cumplieron salieron de `PENDIENTES.md` y su cierre quedó en el día en que se dijo
+Entonces `AHORA.md` tiene los catorce días, del domingo 23 al lunes 10, y `bitacoras/` sigue vacía: la ventana conserva la semana anterior completa y la actual
+Y los pendientes de la primera semana que se cumplieron salieron de `PENDIENTES.md` y su cierre quedó en el día en que se dijo
 Y la tabla de `PENDIENTES.md` tiene los pendientes que siguen abiertos, cada uno en su horizonte, y ninguno repetido
+Y `tuku doctor` dice que el vault está sano
+```bash
+tuku doctor
+```
+
+## Escenario: el lunes 24 la primera semana pasa a bitácoras
+
+Dado el vault al domingo 23, con las dos semanas en `AHORA.md`
+```bash
+cp -r ../la-segunda-semana-cae-sobre-la/mi-vault .
+cd mi-vault
+export TUKU_NOW="2026-08-24 08:30"
+```
+Cuando el lunes 24 Andrea escribe su primer registro de la semana
+```bash
+tuku entry create --at "2026-08-24 08:30" --scope liceo-tecnico-andes --body "**progreso**: repasar con Patricia Lillo la propuesta que presenta hoy al consejo"
+```
+Entonces `bitacoras/bitacora-20260810-20260816.md` tiene los registros del lunes 10 al domingo 16, con `from: 2026-08-10`, `to: 2026-08-16` y los links de cada ámbito resueltos desde `bitacoras/`
+Y `AHORA.md` conserva el foco y los días del lunes 24 al lunes 17, sin los de la primera semana
+Y los seis pendientes de la primera semana siguen en `PENDIENTES.md`, sin duplicarse
+Y la página de `colegio-los-robles` sigue contando el hilo de la cotización completo, con la solicitud de la primera semana
 Y `tuku doctor` dice que el vault está sano
 ```bash
 tuku doctor
@@ -240,10 +246,11 @@ tuku doctor
 
 ## Escenario: repetir la segunda semana deja el vault igual
 
-Dado el vault al domingo 23
+Dado el vault con la primera semana ya en `bitacoras/`
 ```bash
-cp -r ../la-segunda-semana-cae-sobre-lo/mi-vault .
+cp -r ../el-lunes-24-la-primera-semana/mi-vault .
 cd mi-vault
+export TUKU_NOW="2026-08-24 09:00"
 ```
 Cuando se repite el lunes 17 sin cambiar una palabra
 ```bash
@@ -324,9 +331,9 @@ tuku doctor
 
 ## Qué se mira a mano
 
-- La bitácora cerrada de la primera semana se lee entera con un editor de texto, y sus links abren las páginas de los ámbitos.
+- La bitácora de la primera semana se lee entera con un editor de texto, y sus links abren las páginas de los ámbitos.
 - La página de `colegio-los-robles` cuenta el hilo de la cotización: solicitud, envío, silencio, llamada, aprobación y despacho, en ese orden.
-- El lunes 17 muestra el pendiente de revisar la bitácora anterior antes del primer registro.
+- El lunes 24 de `AHORA.md` lleva el foco de Andrea arriba, y el último registro de cada día queda primero.
 
 ## Aceptación humana (en Obsidian)
 

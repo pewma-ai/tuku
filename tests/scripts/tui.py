@@ -590,7 +590,13 @@ def evaluar(plan: Plan, turnos: list[dict[str, Any]], doctor: tuple[int, str]) -
     )
 
 
-_ARRANQUE = "import sys; from tuku.cli import main; sys.exit(main(sys.argv[1:]))"
+#: El CLI del checkout, con el reloj de `TUKU_NOW` si el entorno lo trae.
+_ARRANQUE = (
+    "import os, sys; from datetime import datetime; from tuku.cli import main; "
+    "n = os.environ.get('TUKU_NOW'); "
+    "t = datetime.fromisoformat(n.replace(' ', 'T')) if n else None; "
+    "sys.exit(main(sys.argv[1:], now=t))"
+)
 
 
 def correr_doctor(vault: Path) -> tuple[int, str]:
@@ -638,8 +644,9 @@ def sembrar(plan: Plan, slug: str, escenario: str) -> Path:
         if trabajo.exists():
             shutil.rmtree(trabajo)
         trabajo.mkdir(parents=True)
+    fijas: dict[str, str] = {}
     for comando in plan.preparacion:
-        _correr_comando(comando, trabajo)
+        _correr_comando(comando, trabajo, fijas)
     v = trabajo / "mi-vault"
     if not v.is_dir():
         raise EscenarioNoEncontrado(
@@ -649,10 +656,17 @@ def sembrar(plan: Plan, slug: str, escenario: str) -> Path:
     return v
 
 
-def _correr_comando(comando: str, donde: Path) -> None:
-    """Un comando del `Dado`: `tuku …` con el CLI del checkout, o shell."""
-    entorno = {**os.environ, "TUKU_HOME": str(RAIZ_REPO)}
+def _correr_comando(comando: str, donde: Path, fijas: dict[str, str]) -> None:
+    """Un comando del `Dado`: `tuku …` con el CLI del checkout, o shell.
+
+    `export VAR=valor` fija una variable para los comandos que siguen.
+    """
+    entorno = {**os.environ, "TUKU_HOME": str(RAIZ_REPO), **fijas}
     partes = shlex.split(comando)
+    if len(partes) == 2 and partes[0] == "export" and "=" in partes[1]:
+        nombre, _, valor = partes[1].partition("=")
+        fijas[nombre] = valor
+        return
     while partes and "=" in partes[0] and not partes[0].startswith(("-", "/")):
         nombre, _, valor = partes.pop(0).partition("=")
         entorno[nombre] = valor

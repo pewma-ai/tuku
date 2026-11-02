@@ -35,7 +35,7 @@ Una frase puede traer dos cosas, un hecho y un compromiso, y el agente las separ
 > - La fila tiene el horizonte `fin de mes` y la columna `Vence` vacía.
 > - Nadie inventó un «31 de agosto».
 
-Un pendiente sin fecha cuelga de un **horizonte**, un escalón de la escalera que defines en `reglas/pendientes.user.md`: `esta semana`, `próxima semana`, `fin de mes`. Si no dices nada, nace en `esta semana` y aparece en el recuadro «Pendientes de esta semana» al inicio de `AHORA.md`. Postergar es mover la fila a un escalón más lejano, y lo decides tú.
+Un pendiente sin fecha cuelga de un **horizonte**, un escalón de la escalera que defines en `reglas/pendientes.user.md`: `esta semana`, `próxima semana`, `fin de mes`. Si no dices nada, nace en `esta semana` y aparece en el recuadro «Pendientes de los próximos 7 días» al inicio de `AHORA.md`. El plazo de un escalón se cuenta desde el día en que abriste el pendiente (`Creado`): `esta semana` son 7 días, y pasado el plazo el pendiente figura como atrasado. Postergar es mover la fila a un escalón más lejano, y lo decides tú.
 
 ## Cerrar
 

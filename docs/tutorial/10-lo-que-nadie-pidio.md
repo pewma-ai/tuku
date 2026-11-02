@@ -8,7 +8,7 @@ El agente cruza los tres ejes ([`brief.md`](../brief.md#los-tres-ejes)): cuándo
 
 > [!check] Qué debería pasar
 > El agente propone, sin ejecutar, cosas como:
-> - Una cotización que lleva cinco semanas pasando de un ciclo a otro sin avance.
+> - Una cotización que lleva cinco semanas pasando de una semana a otra sin avance.
 > - Un cliente regular que dejó de comprar hace cuatro meses.
 > - Una tarea de los lunes que se repite y nunca declaraste como cadencia.
 >

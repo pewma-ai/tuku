@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -160,6 +161,27 @@ def test_el_00_solo_prepara_el_epic_si_su_escenario_lo_dice(
     )
     monkeypatch.setattr(gherkin, "ESCENARIOS", tmp_path)
     assert (gherkin._escenario_de_preparacion("999") is not None) is prepara
+
+
+def test_export_fija_el_reloj_de_los_comandos_que_siguen(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """`export TUKU_NOW=…` es el hoy del escenario, también para el shell."""
+    (tmp_path / "999-01-reloj.md").write_text(
+        "# 999-01\n\n## Escenario: reloj\n\nCuando se fija el reloj\n```bash\n"
+        'export TUKU_NOW="2026-08-11 08:00"\ntuku init mi-vault\ncd mi-vault\n'
+        'tuku entry create --at "2026-08-11 09:00" --body hola\necho $TUKU_NOW\n```\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(gherkin, "ESCENARIOS", tmp_path)
+    try:
+        corrida = gherkin.correr("999-01-reloj", "reloj")
+        ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
+        assert "## Martes 11 de agosto" in ahora, "el registro se archivó: no hubo reloj"
+        assert corrida.stdout.strip() == "2026-08-11 08:00"
+    finally:
+        for raiz in (vault.BANCO, vault.ARCHIVO):
+            shutil.rmtree(raiz / "999-01-reloj", ignore_errors=True)
 
 
 def _agy() -> agente.Arnes:

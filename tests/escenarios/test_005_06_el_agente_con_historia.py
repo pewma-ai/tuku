@@ -26,12 +26,12 @@ BASE = "005-01-las-dos-semanas-de-andrea"
 CADENA_BASE = (
     "el árbol de Andrea nace con su negocio",
     "la primera semana se registra día por día",
-    "la semana se cierra a mano y abre la siguiente",
-    "la segunda semana cae sobre lo ya escrito",
+    "la segunda semana cae sobre la primera",
+    "el lunes 24 la primera semana pasa a bitácoras",
 )
 PATRICIA = "una keyword única decide el ámbito"
 PAULA = "dos personas con el mismo nombre esperan al autor"
-DOMINGO = "## Domingo 23 de agosto"
+LUNES = "## Lunes 24 de agosto"
 LINK = re.compile(r"\[[^\]]*\]\([^)]*\)")
 
 sin_arnes = pytest.mark.skipif(
@@ -45,9 +45,9 @@ def _correr(titulo: str) -> gherkin.Corrida:
     return gherkin.correr(SLUG, titulo)
 
 
-def _domingo(corrida: gherkin.Corrida) -> list[str]:
+def _lunes(corrida: gherkin.Corrida) -> list[str]:
     ahora = corrida.ruta("mi-vault", "AHORA.md").read_text(encoding="utf-8")
-    dia = ahora.split(DOMINGO, 1)[1].split("\n## ", 1)[0]
+    dia = ahora.split(LUNES, 1)[1].split("\n## ", 1)[0]
     return [x for x in dia.splitlines() if re.match(r"- \d\d:\d\d - ", x)]
 
 
@@ -72,13 +72,13 @@ def test_005_06_el_cuerpo_conserva_las_palabras_de_andrea_y_no_se_enlaza() -> No
     cuerpo = _flag(argv, "--body") or ""
     assert "Patricia" in cuerpo and "Lillo" not in cuerpo, cuerpo
     assert not LINK.search(cuerpo.split("**", 2)[-1]), f"el cuerpo se enlazó solo: {cuerpo}"
-    registro = next(x for x in _domingo(corrida) if "Patricia" in x)
+    registro = next(x for x in _lunes(corrida) if "precio" in x)
     assert "(ambitos/negocio/clientes/liceo-tecnico-andes/liceo-tecnico-andes.md)" in registro
 
 
 @pytest.mark.agentic
 @sin_arnes
-def test_005_06_el_registro_de_la_patricia_toca_solo_el_ciclo_y_la_pagina_del_liceo() -> None:
+def test_005_06_el_registro_de_la_patricia_toca_solo_ahora_y_la_pagina_del_liceo() -> None:
     corrida = _correr(PATRICIA)
     assert set(corrida.delta_de("mi-vault")) == {
         "AHORA.md",

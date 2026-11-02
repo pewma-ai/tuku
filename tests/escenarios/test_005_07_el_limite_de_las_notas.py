@@ -27,8 +27,8 @@ BASE = "005-01-las-dos-semanas-de-andrea"
 CADENA_BASE = (
     "el árbol de Andrea nace con su negocio",
     "la primera semana se registra día por día",
-    "la semana se cierra a mano y abre la siguiente",
-    "la segunda semana cae sobre lo ya escrito",
+    "la segunda semana cae sobre la primera",
+    "el lunes 24 la primera semana pasa a bitácoras",
 )
 LIMITE = "context note trae las veinticinco más recientes"
 ENLAZA = "el agente enlaza a quien context ofrece y a nadie más"

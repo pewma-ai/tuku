@@ -18,7 +18,7 @@ La hora y el formato los pone el comando, no el agente. Pregúntale al agente qu
 > Estamos abajo en cuadernos universitarios de cien hojas y en témperas de doce colores.
 
 > [!check] Qué debería pasar
-> - Hay una segunda línea, con otra hora, bajo el mismo día.
+> - Hay una segunda línea, con otra hora, bajo el mismo día y arriba de la primera: lo más reciente va primero.
 
 Un registro puede llevar una palabra entre asteriscos, como `**señal**` o `**fricción**`: es la clasificación, y el agente la elige de la tabla de `reglas/clasificaciones.user.md`.
 

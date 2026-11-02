@@ -66,6 +66,9 @@ _PASO = re.compile(rf"^({'|'.join(_PALABRAS)})\b(.*)$")
 _FENCE = re.compile(r'^```(\w*)(?:\s+TUKU_NOW="([^"]*)")?\s*$')
 _TITULO = re.compile(r"^##\s+Escenario:\s*(.+?)\s*$")
 _CD = re.compile(r"^cd\s+(\S+)$")
+#: `export TUKU_NOW="2026-08-11 08:00"`: fija una variable para los comandos que
+#: siguen en el escenario, como en una terminal. Es el reloj de un día entero.
+_EXPORT = re.compile(r"^export\s+([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
 
 #: El encabezado que hace de `Background`: sus comandos corren antes de cada
 #: escenario del archivo. Es donde un paso de la cadena declara de qué estado
@@ -450,9 +453,16 @@ def _correr_tuku(argv: list[str], entorno: dict[str, str]) -> tuple[int, str, st
     return codigo, out.getvalue(), err.getvalue()
 
 
-def _correr_bash(comando: str, dir: Path) -> tuple[int, str, str]:
+def _correr_bash(
+    comando: str, dir: Path, entorno: dict[str, str] | None = None
+) -> tuple[int, str, str]:
     p = subprocess.run(
-        ["bash", "-c", comando], cwd=dir, capture_output=True, text=True, check=False
+        ["bash", "-c", comando],
+        cwd=dir,
+        capture_output=True,
+        text=True,
+        check=False,
+        env={**os.environ, **(entorno or {})},
     )
     return p.returncode, p.stdout, p.stderr
 
@@ -615,6 +625,7 @@ def correr(slug: str, titulo: str) -> Corrida:
     os.environ["TUKU_HOME"] = str(RAIZ_REPO)
     os.chdir(dir)
     actual = dir
+    fijas: dict[str, str] = {}
     try:
         for paso in escenario.todos_los_pasos:
             if paso.tipo == "Cuando" and not antes:
@@ -624,7 +635,12 @@ def correr(slug: str, titulo: str) -> Corrida:
                 turnos.append(_correr_agente(paso, dir, conversacion))
             for comando in paso.comandos:
                 entorno, partes = _separar_entorno(shlex.split(comando))
-                if cd := _CD.match(comando):
+                entorno = {**fijas, **entorno}
+                if fija := _EXPORT.match(comando):
+                    valor = shlex.split(fija.group(2))
+                    fijas[fija.group(1)] = valor[0] if valor else ""
+                    codigo, salida, error = 0, "", ""
+                elif cd := _CD.match(comando):
                     # Como en una terminal: los comandos que siguen corren ahí.
                     actual = (actual / cd.group(1)).resolve()
                     os.chdir(actual)
@@ -632,7 +648,7 @@ def correr(slug: str, titulo: str) -> Corrida:
                 elif partes and partes[0] == "tuku":
                     codigo, salida, error = _correr_tuku(partes[1:], entorno)
                 else:
-                    codigo, salida, error = _correr_bash(comando, actual)
+                    codigo, salida, error = _correr_bash(comando, actual, entorno)
                 resultados.append(Resultado(comando, codigo, salida, error))
                 if codigo != 0 and paso.tipo != "Cuando":
                     pista = ""

@@ -1,6 +1,6 @@
 # 005-05 · Las notas de la Pyme
 
-> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P6 (conjunto canónico)](../../docs/principios.md#L55), [P8 (lo que se infiere sobre alguien se le podría mostrar)](../../docs/principios.md#L71) · **Brief:** [Ámbito × deliberación](../../docs/brief.md#L25) · **Spec:** [`spec/notas.md`](../../devel/VAULT/spec-anterior/notas.md), [`spec/ambitos.md`](../../devel/VAULT/spec-anterior/ambitos.md)
+> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P6 (conjunto canónico)](../../docs/principios.md#L55), [P8 (lo que se infiere sobre alguien se le podría mostrar)](../../docs/principios.md#L71) · **Brief:** [Ámbito × deliberación](../../docs/brief.md#L25) · **Spec:** capítulos Nota y Ámbito del [libro de estilo](../../template/vanilla/LIBRO-DE-ESTILO.md)
 
 Con dos semanas de operación hay ideas que valen más que un día: cómo se cotiza, cómo se paga cada canal, cuánto se puede confiar en cada proveedor, y quién es Patricia Lillo. Esas ideas van a `notas/`, cada una cerrada con sus enlaces y el motivo de cada uno, y la primera sobre alguien se escribe como una nota tipada.
 
@@ -8,14 +8,15 @@ Los cuerpos salen de [`fixtures/005-05-las-notas-de-la-pyme/`](fixtures/005-05-l
 
 ## Escenario: las notas del negocio se escriben y pasan el lint
 
-Dado el vault de la segunda semana de Andrea
+Dado el vault de Andrea al lunes 24
 ```bash
-cp -r ../../005-01-las-dos-semanas-de-andrea/la-segunda-semana-cae-sobre-lo/mi-vault .
+cp -r ../../005-01-las-dos-semanas-de-andrea/el-lunes-24-la-primera-semana/mi-vault .
 cp ../../tests/escenarios/fixtures/005-05-las-notas-de-la-pyme/*.md .
 ```
 Cuando Andrea guarda tres ideas del negocio
 ```bash
 cd mi-vault
+export TUKU_NOW="2026-08-24 09:00"
 tuku note create "Cómo cotizo" --body-file ../como-cotizo.md --scope negocio --at "2026-08-23 20:00"
 tuku note create "Condiciones de pago por canal" --body-file ../condiciones-de-pago.md --scope negocio --at "2026-08-23 20:05"
 tuku note create "Proveedores y sus plazos reales" --body-file ../plazos-de-los-proveedores.md --scope negocio --at "2026-08-23 20:10"
@@ -71,6 +72,7 @@ cp ../../tests/escenarios/fixtures/005-05-las-notas-de-la-pyme/patricia-lillo.md
 Cuando Andrea guarda lo que sabe de Patricia Lillo, del Liceo Técnico Andes
 ```bash
 cd mi-vault
+export TUKU_NOW="2026-08-24 09:00"
 tuku note create "Patricia Lillo" --subtype persona --body-file ../patricia-lillo.md --scope liceo-tecnico-andes --at "2026-08-23 20:20"
 ```
 Entonces `notas/patricia-lillo.md` tiene `type: Note` y `subtype: persona`, y su `## Ver además` enlaza el ámbito del liceo con su motivo

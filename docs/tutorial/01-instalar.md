@@ -20,7 +20,7 @@ Todo son archivos de texto y cualquier programa los lee. Para mirarlos conviene 
 
 | Archivo | Qué guarda |
 | --- | --- |
-| `AHORA.md` | Lo que pasó, con su hora. Un encabezado por cada día de la semana en curso |
+| `AHORA.md` | Tu foco arriba y, debajo, lo que pasó con su hora, un encabezado por día y el más reciente primero. Lo viejo pasa solo a `bitacoras/` |
 | `PENDIENTES.md` | Lo que sigue abierto y cuándo vence |
 | `AGENTS.md` | Cómo te invocan y los límites de tu agente. Sus reglas de trabajo están en `reglas/skills/asistente/SKILL.md` |
 | `LIBRO-DE-ESTILO.md` | Cómo opera TUKU, capítulo por capítulo. Tu vocabulario (clasificaciones, horizontes y tipos de nota) está en `reglas/*.user.md` y el libro lo incluye |
@@ -30,7 +30,7 @@ Todo son archivos de texto y cualquier programa los lee. Para mirarlos conviene 
 Los nombres en MAYÚSCULAS son de TUKU y los de minúsculas son tuyos.
 
 > [!check] Qué debería pasar
-> - `AHORA.md` tiene siete encabezados, de lunes a domingo, con las fechas de la semana en curso.
+> - `AHORA.md` tiene solo el foco, un recuadro para que escribas en qué concentrarte. Los días aparecen con el primer registro.
 > - `ambitos/` tiene una sola carpeta, `personal`.
 > - `PENDIENTES.md` está vacío.
 
