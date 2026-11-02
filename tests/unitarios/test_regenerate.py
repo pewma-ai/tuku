@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import pytest
@@ -23,9 +23,7 @@ def _desfasado(tmp_path: Path) -> Path:
     v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
     ahora = v / "AHORA.md"
     ahora.write_text(
-        ahora.read_text(encoding="utf-8").replace(
-            "## Martes 11 de agosto\n", f"## Martes 11 de agosto\n{A_MANO}\n"
-        ),
+        ahora.read_text(encoding="utf-8") + f"\n## Martes 11 de agosto\n{A_MANO}\n",
         encoding="utf-8",
     )
     (v / VISTA).unlink()
@@ -119,3 +117,38 @@ def test_libro_trae_la_prosa_de_tuku_y_no_toca_lo_del_autor_ni_los_valores(
     libro.write_text(original + "\nUna línea que el autor agregó.\n", encoding="utf-8")
     aviso = doctor.revisar_vault(v)
     assert aviso.ok and "difiere" in aviso.mensaje and "LIBRO-DE-ESTILO.md" in aviso.mensaje
+
+
+def test_regenerate_todo_conserva_el_foco_crea_los_dias_y_la_segunda_corrida_no_cambia_nada(
+    tmp_path: Path,
+) -> None:
+    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    ahora = v / "AHORA.md"
+    foco = "> [!abstract] Foco\n> Cerrar el trimestre.\n"
+    ahora.write_text(
+        ahora.read_text(encoding="utf-8").replace(
+            "> [!abstract] Foco\n> Escribe aquí en qué concentrarte estos días.\n", foco
+        ),
+        encoding="utf-8",
+    )
+    tabla = v / "PENDIENTES.md"
+    tabla.write_text(
+        tabla.read_text(encoding="utf-8")
+        + "| con fecha | 2026-08-14 | 2026-08-01 |  | pagar la patente |\n"
+        + "| esta semana |  | 2026-08-12 |  | ordenar el escritorio |\n",
+        encoding="utf-8",
+    )
+    hoy = datetime(2026, 8, 12, 9, 0)
+    assert main(["regenerate", "todo", "--vault", str(v)], now=hoy) == EXITO
+
+    texto = ahora.read_text(encoding="utf-8")
+    assert foco in texto
+    assert "> [!todo] Pendientes de los próximos 7 días" in texto
+    assert (
+        "## Viernes 14 de agosto\n> [!todo] Pendientes del día\n> - pagar la patente" in texto
+    )
+    assert "## Miércoles 12" not in texto, "hoy sin registros ni pendientes con fecha no nace"
+
+    antes = {p: p.read_bytes() for p in v.rglob("*.md")}
+    assert main(["regenerate", "todo", "--vault", str(v)], now=hoy) == EXITO
+    assert {p: p.read_bytes() for p in v.rglob("*.md")} == antes

@@ -66,24 +66,24 @@ def nombre_del_ciclo(texto: str) -> str:
 def fecha_del_dia(encabezado: str, desde: date, hasta: date) -> date | None:
     """La fecha de un `## Martes 11 de agosto`, o `None` si no es un día.
 
-    El año se prueba contra el rango porque el encabezado no lo lleva; así el
-    ciclo que cruza el año no rompe la lectura.
+    El encabezado no lleva año: se elige el que deja la fecha más cerca del rango
+    `desde`-`hasta`, que es 0 días si cae dentro. Así un día de la ventana de
+    pendientes, posterior al fin del rango, y el rango que cruza el año se leen bien.
     """
     m = _DIA.match(encabezado)
     if m is None or m.group(2) not in MESES:
         return None
     dia, mes = int(m.group(1)), MESES.index(m.group(2)) + 1
-    for anio in (desde.year, hasta.year):
+    mejor: tuple[int, date] | None = None
+    for anio in range(desde.year - 1, hasta.year + 2):
         try:
             candidata = date(anio, mes, dia)
         except ValueError:
             continue
-        if desde <= candidata <= hasta:
-            return candidata
-    try:
-        return date(desde.year, mes, dia)
-    except ValueError:
-        return None
+        distancia = max((desde - candidata).days, (candidata - hasta).days, 0)
+        if mejor is None or distancia < mejor[0]:
+            mejor = (distancia, candidata)
+    return mejor[1] if mejor else None
 
 
 def dias(ahora: str) -> list[tuple[int, str, date | None]]:
@@ -106,3 +106,37 @@ def encabezado_de(fecha: date) -> str:
     interfaz.
     """
     return f"## {DIAS[fecha.weekday()]} {fecha.day} de {MESES[fecha.month - 1]}"
+
+
+def insertar_dia(
+    lineas: list[str], fecha: date, limites: tuple[date, date]
+) -> tuple[list[str], int]:
+    """`lineas` con el encabezado de `fecha` en su lugar, y el índice de ese encabezado.
+
+    Los días van del más nuevo al más viejo: el nuevo queda antes del primer día
+    más antiguo que él, o al final si todos los que hay son más nuevos. Un día ya
+    presente no se duplica.
+    """
+    encabezado = encabezado_de(fecha)
+    for i, linea in enumerate(lineas):
+        if linea.strip() == encabezado:
+            return lineas, i
+    destino = len(lineas)
+    for i, linea in enumerate(lineas):
+        if linea.startswith("## "):
+            existente = fecha_del_dia(linea, *limites)
+            if existente is not None and existente < fecha:
+                destino = i
+                break
+    if destino == len(lineas):
+        # Al final de los días, pero antes del `---` que cierra el archivo.
+        ultimo = max((i for i, x in enumerate(lineas) if x.startswith("## ")), default=None)
+        if ultimo is not None:
+            destino = next(
+                (i for i in range(ultimo + 1, len(lineas)) if lineas[i].strip() == "---"),
+                len(lineas),
+            )
+    antes = lineas[:destino]
+    if antes and antes[-1].strip():
+        antes = [*antes, ""]
+    return [*antes, encabezado, "", *lineas[destino:]], len(antes)

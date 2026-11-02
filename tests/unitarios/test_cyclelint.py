@@ -33,8 +33,15 @@ def test_un_defecto_del_frontmatter_o_del_dia_es_un_hallazgo_que_lo_nombra() -> 
     sin_fechas = SANO.replace("2026-09-07", "AAAA-MM-DD").replace("2026-09-13", "AAAA-MM-DD")
     assert any("frontmatter" in h.defecto for h in lint(sin_fechas))
 
-    [fuera] = lint(SANO.replace("## Lunes 7 de septiembre", "## Lunes 21 de septiembre"))
+    [fuera] = lint(SANO.replace("## Lunes 7 de septiembre", "## Lunes 31 de agosto"))
     assert "fuera del ciclo abierto" in fuera.defecto
+
+    proximo = SANO.replace("## Lunes 7 de septiembre", "## Lunes 14 de septiembre")
+    assert lint(proximo) == [], (
+        "un día de la ventana, sin registros, puede estar después del fin"
+    )
+    [con_registro] = lint(proximo + "- 09:00 - algo\n")
+    assert "fuera del ciclo abierto" in con_registro.defecto
 
     [sin_type] = lint(SANO.replace(f"type: {TYPE_DEL_CICLO}\n", ""))
     assert "no declara `type`" in sin_type.defecto

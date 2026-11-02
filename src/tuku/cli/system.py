@@ -132,7 +132,10 @@ def _cmd_regenerate(args: argparse.Namespace) -> int:
 
     nombre = f"tuku regenerate {args.tema}" if args.tema else "tuku regenerate"
     return traducir(
-        regenerate.regenerar(args.vault, tema=args.tema, comandos=manual.del_cli()), nombre
+        regenerate.regenerar(
+            args.vault, tema=args.tema, comandos=manual.del_cli(), hoy=args.now.date()
+        ),
+        nombre,
     )
 
 

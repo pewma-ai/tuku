@@ -13,8 +13,8 @@ AHORA = (
     "to: 2026-09-13\n"
     "---\n\n"
     "# Actividad diaria\n\n"
-    "## Lunes 7 de septiembre\n\n"
     "## Domingo 13 de septiembre\n\n"
+    "## Lunes 7 de septiembre\n\n"
     "---\n"
     "(lo que el autor escriba al final)\n"
 )
@@ -43,24 +43,62 @@ def test_componer_arma_la_linea_del_registro() -> None:
     )
 
 
-def test_un_registro_sin_hora_toma_la_del_anterior_y_uno_nuevo_va_al_final() -> None:
-    previas = ["- 09:45 - registro", "- llamé a Rodolfo", "- 23:59 - fin"]
-    assert _claves(previas) == [(9, 45), (9, 45), (23, 59)]
-    assert _claves(["- llamé a Rodolfo"], nuevas=True) == [(24, 0)]
+def _seccion(texto: str, dia: str) -> list[str]:
+    return texto.split(f"## {dia}\n", 1)[1].split("\n\n", 1)[0].splitlines()
+
+
+def test_la_clave_de_un_registro_sin_hora_es_la_del_mas_antiguo_que_le_sigue() -> None:
+    previas = [
+        "- 23:59 - fin",
+        "- llamé a Rodolfo",
+        "- 09:45 - registro",
+        "- sin hora al fondo",
+    ]
+    assert _claves(previas) == [(23, 59), (9, 45), (9, 45), (0, 0)]
     with pytest.raises(ValueError, match="un registro empieza con '- '"):
         add(AHORA, ["09:45 - falta guion inicial"], dia="Lunes 7 de septiembre")
 
+
+def test_add_ordena_por_hora_descendente_y_el_nuevo_queda_arriba_entre_iguales() -> None:
     dia = "Lunes 7 de septiembre"
     texto = add(AHORA, ["- 10:00 - **nota**: primero"], dia=dia)
-    texto = add(texto, ["- llamé a Rodolfo"], dia=dia)
     texto = add(texto, ["- 08:00 - **nota**: temprano", "- 11:00 - **nota**: después"], dia=dia)
-    seccion = texto.split(f"## {dia}\n", 1)[1].split("\n\n", 1)[0].splitlines()
-    assert seccion == [
-        "- 08:00 - **nota**: temprano",
-        "- 10:00 - **nota**: primero",
-        "- llamé a Rodolfo",
+    assert _seccion(texto, dia) == [
         "- 11:00 - **nota**: después",
+        "- 10:00 - **nota**: primero",
+        "- 08:00 - **nota**: temprano",
     ]
+    texto = add(texto, ["- 10:00 - **nota**: otro a la misma hora"], dia=dia)
+    assert _seccion(texto, dia)[1:3] == [
+        "- 10:00 - **nota**: otro a la misma hora",
+        "- 10:00 - **nota**: primero",
+    ]
+
+    desordenadas = add(
+        AHORA, ["- 15:00 - tarde", "- 09:00 - temprano", "- 12:00 - mediodia"], dia=dia
+    )
+    assert _seccion(desordenadas, dia) == [
+        "- 15:00 - tarde",
+        "- 12:00 - mediodia",
+        "- 09:00 - temprano",
+    ]
+
+
+def test_un_registro_nuevo_sin_hora_queda_arriba_y_uno_existente_conserva_su_lugar() -> None:
+    dia = "Lunes 7 de septiembre"
+    base = add(AHORA, ["- 11:00 - a", "- 09:00 - b"], dia=dia)
+    texto = add(base, ["- llamé a Rodolfo"], dia=dia)
+    assert _seccion(texto, dia) == ["- llamé a Rodolfo", "- 11:00 - a", "- 09:00 - b"]
+
+    con_hora = add(texto, ["- 11:00 - c", "- 10:00 - d"], dia=dia)
+    assert _seccion(con_hora, dia) == [
+        "- 11:00 - c",
+        "- llamé a Rodolfo",
+        "- 11:00 - a",
+        "- 10:00 - d",
+        "- 09:00 - b",
+    ]
+    assert add(con_hora, ["- llamé a Rodolfo"], dia=dia) == con_hora, "idempotente"
 
 
 def test_add_respeta_lo_que_viene_despues_del_dia() -> None:
@@ -76,7 +114,7 @@ def test_add_respeta_lo_que_viene_despues_del_dia() -> None:
     assert add(AHORA, [], dia="Lunes 7 de septiembre") == AHORA
 
 
-def test_add_es_idempotente_ordena_y_no_duplica_menciones_enlazadas() -> None:
+def test_add_es_idempotente_y_no_duplica_menciones_enlazadas() -> None:
     dia = "Lunes 7 de septiembre"
     linea = "- 10:00 - una línea"
     primero = add(AHORA, [linea], dia=dia)
@@ -87,20 +125,38 @@ def test_add_es_idempotente_ordena_y_no_duplica_menciones_enlazadas() -> None:
     con_mencion = add(AHORA, [enlazada], dia=dia)
     assert add(con_mencion, ["- 18:40 - la boleta del depto centro"], dia=dia) == con_mencion
 
-    texto = add(AHORA, ["- 15:00 - tarde", "- 09:00 - temprano", "- 12:00 - mediodia"], dia=dia)
-    assert texto.index("- 09:00 - temprano") < texto.index("- 12:00 - mediodia")
-    assert texto.index("- 12:00 - mediodia") < texto.index("- 15:00 - tarde")
 
-
-def test_add_resuelve_el_dia_y_lo_inserta_en_orden() -> None:
+def test_add_crea_el_dia_en_su_lugar_entre_los_del_mas_nuevo_al_mas_viejo() -> None:
     assert add(AHORA, ["- 10:00 - r1"], day="Lunes 7 de septiembre") == add(
         AHORA, ["- 10:00 - r1"], dia="## Lunes 7 de septiembre"
     )
     texto = add(AHORA, ["- 11:00 - registro miércoles"], dia="Miércoles 9 de septiembre")
     assert (
-        texto.index("## Lunes 7 de septiembre")
+        texto.index("## Domingo 13 de septiembre")
         < texto.index("## Miércoles 9 de septiembre")
-        < texto.index("## Domingo 13 de septiembre")
+        < texto.index("## Lunes 7 de septiembre")
+    )
+    nuevo = add(texto, ["- 08:00 - r"], dia="Martes 8 de septiembre")
+    assert (
+        nuevo.index("## Miércoles 9") < nuevo.index("## Martes 8") < nuevo.index("## Lunes 7")
+    )
+    assert add(nuevo, ["- 08:00 - r"], dia="Martes 8 de septiembre") == nuevo
+
+    sin_lunes = AHORA.replace("## Lunes 7 de septiembre\n\n", "")
+    assert add(sin_lunes, ["- 08:00 - r"], dia="Lunes 7 de septiembre").endswith(
+        "## Lunes 7 de septiembre\n- 08:00 - r\n\n---\n(lo que el autor escriba al final)\n"
+    ), "un día más viejo que todos va antes del cierre del archivo"
+
+
+def test_add_conserva_el_callout_de_pendientes_del_dia() -> None:
+    con_callout = AHORA.replace(
+        "## Lunes 7 de septiembre\n",
+        "## Lunes 7 de septiembre\n> [!todo] Pendientes del día\n> - llamar\n",
+    )
+    texto = add(con_callout, ["- 10:00 - r"], dia="Lunes 7 de septiembre")
+    assert (
+        "## Lunes 7 de septiembre\n> [!todo] Pendientes del día\n> - llamar\n\n- 10:00 - r"
+        in texto
     )
 
 

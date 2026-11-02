@@ -73,8 +73,8 @@ def test_leer_config_sobre_template_vanilla() -> None:
     assert "esta semana" in abiertos
     assert "persona" in abiertos
 
-    assert "## Lunes DD de mes" in cfg.plantilla_ahora
-    assert "## Domingo DD de mes" in cfg.plantilla_ahora
+    assert "> [!abstract] Foco" in cfg.plantilla_ahora
+    assert "## " not in cfg.plantilla_ahora, "la plantilla no pregenera días"
 
 
 def test_leer_config_en_memoria_sin_disco(tmp_path: Path) -> None:

@@ -27,7 +27,12 @@ def _cmd_entry_create(args: argparse.Namespace) -> int:
 def _cmd_entry_update(args: argparse.Namespace) -> int:
     return traducir(
         entry.actualizar_en_vault(
-            args.vault, match=args.match, body=args.body, day=args.at.dia, hour=args.at.hora
+            args.vault,
+            match=args.match,
+            body=args.body,
+            day=args.at.dia,
+            hour=args.at.hora,
+            now=args.now,
         ),
         "tuku entry update",
     )
@@ -36,7 +41,12 @@ def _cmd_entry_update(args: argparse.Namespace) -> int:
 def _cmd_entry_move(args: argparse.Namespace) -> int:
     return traducir(
         entry.mover_en_vault(
-            args.vault, match=args.match, scope=args.scope, day=args.at.dia, hour=args.at.hora
+            args.vault,
+            match=args.match,
+            scope=args.scope,
+            day=args.at.dia,
+            hour=args.at.hora,
+            now=args.now,
         ),
         "tuku entry move",
     )
@@ -56,7 +66,7 @@ def _ubicacion(o: Opciones) -> None:
         "--match",
         required=True,
         metavar="TEXTO",
-        help="un fragmento del cuerpo actual; se elige el último registro que calza",
+        help="un fragmento del cuerpo actual; se elige el registro más reciente que calza",
     )
 
 
@@ -93,7 +103,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "update",
         help="corrige el cuerpo de un registro ya escrito",
         description=(
-            "Reemplaza el cuerpo del último registro de `AHORA.md` que contiene el "
+            "Reemplaza el cuerpo del registro más reciente de `AHORA.md` que contiene el "
             "fragmento de `--match` (sin distinguir mayúsculas ni tildes), sin tocar hora "
             "ni ámbito. `CUÁNDO` acota la búsqueda a un día o a un minuto. Si es un "
             "pendiente, reemplaza igual su fila en `PENDIENTES.md`: las dos copias deben "
@@ -109,7 +119,7 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         "move",
         help="cambia el ámbito de un registro ya escrito",
         description=(
-            "Cambia el link de ámbito del último registro de `AHORA.md` que contiene el "
+            "Cambia el link de ámbito del registro más reciente de `AHORA.md` que contiene el "
             "fragmento de `--match`, sin tocar hora ni cuerpo. Con `CUÁNDO` fuera del "
             "ciclo en curso, busca en la bitácora de `bitacoras/` que cubre ese día. Si es "
             "un pendiente abierto, su fila de `PENDIENTES.md` cambia de ámbito con él."

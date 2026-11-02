@@ -160,7 +160,9 @@ def test_sin_at_es_el_instante_de_main_y_el_scope_default_viene_de_la_config(
         == EXITO
     )
     assert main(["todo", "close", "pagar"], now=AHORA) == EXITO
-    assert _registros(vault, MIERCOLES)[-1] == f"- 09:00 - {PERSONAL} (Hecho): ~~pagar~~"
+    assert _registros(vault, MIERCOLES)[0] == f"- 09:00 - {PERSONAL} (Hecho): ~~pagar~~", (
+        "lo más reciente arriba"
+    )
 
     config = (vault / "reglas" / "config.tuku.md").read_text(encoding="utf-8")
     monkeypatch.chdir(tmp_path)
@@ -171,7 +173,7 @@ def test_sin_at_es_el_instante_de_main_y_el_scope_default_viene_de_la_config(
 
     _config(vault, lambda t: "\n".join(x for x in t.splitlines() if "`scope_default`" not in x))
     assert _correr("--vault", str(vault), "--at", f"{HOY} 10:00") == EXITO
-    assert _registros(vault)[-1] == f"- 10:00 - {CUERPO}", "sin scope_default no lleva ámbito"
+    assert _registros(vault)[0] == f"- 10:00 - {CUERPO}", "sin scope_default no lleva ámbito"
 
     antes = _registros(vault)
     _config(vault, lambda _t: config.replace("| `personal` ", "| `casa`     "))

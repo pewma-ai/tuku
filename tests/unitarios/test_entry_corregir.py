@@ -26,10 +26,10 @@ to: 2026-08-16
 
 ## Martes 11 de agosto
 
-- 07:00 - [personal](ambitos/personal/personal.md) llamé a Rodolfo por la cotización
-- 07:00 - [personal](ambitos/personal/personal.md) **señal**: el Colegio pagó tarde
-- 07:00 - [personal](ambitos/personal/personal.md) llamé a Rodolfo por el presupuesto
 - [personal](ambitos/personal/personal.md) recordé la reunión con Ximena
+- 07:00 - [personal](ambitos/personal/personal.md) llamé a Rodolfo por el presupuesto
+- 07:00 - [personal](ambitos/personal/personal.md) **señal**: el Colegio pagó tarde
+- 07:00 - [personal](ambitos/personal/personal.md) llamé a Rodolfo por la cotización
 """
 
 
@@ -44,16 +44,16 @@ def _ahora(vault: Path) -> str:
     return (vault / "AHORA.md").read_text(encoding="utf-8")
 
 
-def test_lee_los_registros_y_ubica_el_ultimo_que_calza_sin_mayusculas_ni_tildes() -> None:
+def test_lee_los_registros_y_ubica_el_mas_reciente_que_calza_sin_mayusculas_ni_tildes() -> None:
     lista = entry.registros(TRES)
     assert [(r.hora, r.cuerpo[:6]) for r in lista] == [
+        ("", "record"),
         ("07:00", "llamé "),
         ("07:00", "**seña"),
         ("07:00", "llamé "),
-        ("", "record"),
     ]
     assert {r.dia for r in lista} == {"Martes 11 de agosto"}
-    assert lista[0].ambito == "personal"
+    assert lista[1].ambito == "personal"
 
     r = entry.ubicar(TRES, "llame a RODOLFO")
     assert r is not None and r.cuerpo.endswith("el presupuesto")
@@ -64,7 +64,9 @@ def test_lee_los_registros_y_ubica_el_ultimo_que_calza_sin_mayusculas_ni_tildes(
     assert entry.ubicar(TRES, "punto del plan") is None
 
 
-def test_update_corrige_el_ultimo_registro_la_fila_y_conserva_la_marca(vault: Path) -> None:
+def test_update_corrige_el_registro_mas_reciente_la_fila_y_conserva_la_marca(
+    vault: Path,
+) -> None:
     todo.abrir_en_vault(
         vault,
         body="enviar la cotización",

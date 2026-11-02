@@ -15,9 +15,9 @@ pendiente `revisar la bitácora anterior`, con vencimiento el primer día.
 **Qué lee y escribe:** lee `reglas/plantilla/AHORA.md`, `reglas/config.tuku.md`
 y `bitacoras/`; lee y escribe `AHORA.md`; un ciclo pasado se escribe en
 `bitacoras/`; y escribe `PENDIENTES.md` y sus vistas.
-**A mano:** copiar `reglas/plantilla/AHORA.md` a `AHORA.md`, sustituir `cycle`,
-`from` y `to` del frontmatter y dejar un encabezado de día por cada fecha del
-rango; con una bitácora anterior, abrir `revisar la bitácora anterior` con
+**A mano:** copiar `reglas/plantilla/AHORA.md` a `AHORA.md` y sustituir `cycle`,
+`from` y `to` del frontmatter; los días nacen con el primer registro o pendiente con
+fecha que los pida. Con una bitácora anterior, abrir `revisar la bitácora anterior` con
 `tuku todo open --due <el primer día>`.
 """
 
@@ -69,10 +69,10 @@ def instantiate(
 ) -> str:
     """The template of `AHORA.md` for the cycle `name` that runs from `start` to `end`.
 
-    It fills the frontmatter and writes one heading per date of the range. A day
-    takes the block of the template that has its weekday (`## Martes DD de mes`),
-    or the first block when the template has none for it, so a cycle of 8 or 14
-    days has 8 or 14 headings.
+    It fills the frontmatter. The current template has no day headings (a day is
+    born when a record or a dated todo needs it), so nothing else is written. A
+    template of an older vault that still has `## Martes DD de mes` blocks gets one
+    heading per date of the range, taking the block of its weekday or the first one.
     """
     text = template.replace("from: AAAA-MM-DD", f"from: {start.isoformat()}")
     text = text.replace("to: AAAA-MM-DD", f"to: {end.isoformat()}")

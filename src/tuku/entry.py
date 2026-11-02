@@ -29,27 +29,23 @@ if TYPE_CHECKING:
 
 _HORA = re.compile(r"^- (\d{2}):(\d{2}) - ")
 
-#: Un registro sin hora va al final de su día (`spec/bitacora.md`).
-_AL_FINAL = (24, 0)
 
+def _claves(lineas: list[str]) -> list[tuple[int, int]]:
+    """La clave de orden de cada línea: su hora, o la del registro más antiguo que le sigue.
 
-def _claves(lineas: list[str], *, nuevas: bool = False) -> list[tuple[int, int]]:
-    """La clave de orden de cada línea: su hora, o la del registro anterior si no tiene.
-
-    Así un registro sin hora queda donde está, y el siguiente que llega con hora
-    se ubica a continuación si su hora es igual o mayor. Uno nuevo sin hora va al
-    final del día.
+    Los registros van del más reciente al más antiguo, así que el siguiente es el
+    inmediatamente más antiguo. Un registro sin hora queda donde está, y el
+    registro nuevo con hora se ubica sobre el primero de hora igual o menor. Sin
+    registro más antiguo, la clave es 00:00.
     """
     claves: list[tuple[int, int]] = []
-    previa = (0, 0)
-    for linea in lineas:
+    siguiente = (0, 0)
+    for linea in reversed(lineas):
         m = _HORA.match(linea)
         if m is not None:
-            previa = (int(m.group(1)), int(m.group(2)))
-        elif nuevas:
-            previa = _AL_FINAL
-        claves.append(previa)
-    return claves
+            siguiente = (int(m.group(1)), int(m.group(2)))
+        claves.append(siguiente)
+    return claves[::-1]
 
 
 def _sin_links(linea: str) -> str:
@@ -62,10 +58,12 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
 
     Idempotente: una línea que ya está bajo ese día no se vuelve a escribir.
 
-    `day`/`dia` es el encabezado del día, con o sin el `## ` inicial. Las líneas
-    nuevas se copian tal cual llegan; el orden final es por hora, y en empate
-    las que ya estaban van antes que las nuevas (sort estable). Ninguna otra
-    sección del archivo se toca.
+    `day`/`dia` es el encabezado del día, con o sin el `## ` inicial; si no existe
+    se crea en su lugar, entre los días del más nuevo al más viejo. Dentro del día
+    el orden es por hora descendente: lo más reciente arriba. Un registro nuevo
+    sin hora toma la hora del que quede inmediatamente debajo de él (el primero
+    del día, es decir el más reciente) y entre claves iguales el nuevo queda
+    arriba. Ninguna otra sección del archivo se toca.
     """
     valor_dia = day or dia
     encabezado = valor_dia if valor_dia.startswith("## ") else f"## {valor_dia}"
@@ -74,33 +72,23 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     try:
         ini = next(i for i, linea in enumerate(src) if linea.strip() == encabezado)
     except StopIteration:
-        from tuku.ahora import como_cerrar, fecha_del_dia, rango
+        from tuku.ahora import como_cerrar, fecha_del_dia, insertar_dia, rango
 
         limites = rango(ahora)
-        if limites is not None:
-            desde, hasta = limites
-            f_nueva = fecha_del_dia(encabezado, desde, hasta)
-            if f_nueva is not None and desde <= f_nueva <= hasta:
-                insert_idx = len(src)
-                for i, linea in enumerate(src):
-                    if linea.startswith("## "):
-                        f_existente = fecha_del_dia(linea, desde, hasta)
-                        if f_existente is not None and f_existente > f_nueva:
-                            insert_idx = i
-                            break
-                src = [*src[:insert_idx], encabezado, "", *src[insert_idx:]]
-                ini = insert_idx
-            else:
-                msg = (
-                    f"el día {encabezado!r} cae fuera del ciclo abierto "
-                    f"({desde.isoformat()} a {hasta.isoformat()}). Si el registro es "
-                    f"de este ciclo, corrige la fecha; si empezó uno nuevo, cierra "
-                    f"este antes: {como_cerrar(desde, hasta)}, y corre "
-                    "`tuku process cycle`."
-                )
-                raise ValueError(msg) from None
-        else:
+        if limites is None:
             raise ValueError(f"no existe el encabezado {encabezado!r} en AHORA.md") from None
+        desde, hasta = limites
+        f_nueva = fecha_del_dia(encabezado, desde, hasta)
+        if f_nueva is None or not desde <= f_nueva <= hasta:
+            msg = (
+                f"el día {encabezado!r} cae fuera del ciclo abierto "
+                f"({desde.isoformat()} a {hasta.isoformat()}). Si el registro es "
+                f"de este ciclo, corrige la fecha; si empezó uno nuevo, cierra "
+                f"este antes: {como_cerrar(desde, hasta)}, y corre "
+                "`tuku process cycle`."
+            )
+            raise ValueError(msg) from None
+        src, ini = insertar_dia(src, f_nueva, limites)
 
     # La sección del día termina en el siguiente día o en el `---` que cierra el
     # ciclo. Sin ese segundo corte, escribir en el último día se lleva por delante
@@ -113,7 +101,13 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
         ),
         len(src),
     )
-    previas = [linea for linea in src[ini + 1 : fin] if linea.startswith("- ")]
+    seccion_previa = src[ini + 1 : fin]
+    # Lo que va antes del primer registro (el callout de pendientes del día) se conserva.
+    primero = next((i for i, x in enumerate(seccion_previa) if x.startswith("- ")), None)
+    cabecera = seccion_previa[: primero if primero is not None else len(seccion_previa)]
+    while cabecera and not cabecera[-1].strip():
+        cabecera.pop()
+    previas = [linea for linea in seccion_previa if linea.startswith("- ")]
     # Idempotencia (principio 9, y `DEVEL.md`): una línea idéntica bajo el mismo
     # día es el mismo registro escrito dos veces, no dos hechos. Dos hechos de
     # verdad difieren en algo, aunque sea la hora. Se compara sin links: una
@@ -124,12 +118,21 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     vistas = {_sin_links(p) for p in previas}
     nuevas = [x for linea in lineas if _sin_links(x := linea.rstrip("\n")) not in vistas]
 
-    con_clave = [
-        *zip(_claves(previas), previas, strict=True),
-        *zip(_claves(nuevas, nuevas=True), nuevas, strict=True),
+    claves_previas = _claves(previas)
+    tope = max(claves_previas, default=(0, 0))
+    clave_nueva = [
+        (int(m.group(1)), int(m.group(2))) if (m := _HORA.match(x)) else tope for x in nuevas
     ]
-    ordenadas = [linea for _, linea in sorted(con_clave, key=lambda par: par[0])]
-    seccion = [encabezado, *ordenadas, ""]
+    # Descendente por hora; entre claves iguales, los nuevos antes que los que ya
+    # estaban, y cada grupo en su orden.
+    con_clave = [
+        *((k, 1, i, x) for i, (k, x) in enumerate(zip(claves_previas, previas, strict=True))),
+        *((k, 0, i, x) for i, (k, x) in enumerate(zip(clave_nueva, nuevas, strict=True))),
+    ]
+    ordenadas = [
+        x for *_, x in sorted(con_clave, key=lambda t: ((-t[0][0], -t[0][1]), t[1], t[2]))
+    ]
+    seccion = [encabezado, *cabecera, *([""] if cabecera and ordenadas else []), *ordenadas, ""]
 
     texto = "\n".join([*src[:ini], *seccion, *src[fin:]])
     if ahora.endswith("\n") and not texto.endswith("\n"):
@@ -256,7 +259,11 @@ def add_al_vault(
     state = State(
         ambitos.read_tree(vault), logbook=archivo.leer(archivo_vault(vault, "AHORA.md"))
     )
-    return apply(vault, plan_add(state, body=body, scope=scope, day=day, hour=hour, now=now))
+    return apply(
+        vault,
+        plan_add(state, body=body, scope=scope, day=day, hour=hour, now=now),
+        today=now.date(),
+    )
 
 
 def rechazo_de_marca(
@@ -304,6 +311,8 @@ _REGISTRO = re.compile(
 def registros(texto: str) -> list[Registro]:
     """Los registros de `AHORA.md` o de una bitácora, en el orden del archivo.
 
+    En `AHORA.md` el más reciente va primero.
+
     Solo cuentan las líneas bajo un encabezado de día (`## Martes 25 de agosto`):
     el plan puede tener listas y no son registros.
     """
@@ -338,11 +347,12 @@ def _comparable(texto: str) -> str:
 def ubicar(
     texto: str, fragmento: str, *, dia: str | None = None, hora: str | None = None
 ) -> Registro | None:
-    """El último registro cuyo cuerpo contiene `fragmento`, o `None`.
+    """El registro más reciente cuyo cuerpo contiene `fragmento`, o `None`.
 
-    El último porque es el caso común: el autor dijo tres cosas a las 07:00 y
-    "no era eso" habla de la última. Si el que se corrige es otro, un fragmento
-    más largo lo distingue. `dia` (sin `## `) y `hora` acotan la búsqueda.
+    El más reciente porque es el caso común: el autor dijo tres cosas a las 07:00 y
+    "no era eso" habla de la última. `AHORA.md` va del más nuevo al más viejo, así
+    que es el primero del archivo. Si el que se corrige es otro, un fragmento más
+    largo lo distingue. `dia` (sin `## `) y `hora` acotan la búsqueda.
     """
     buscado = _comparable(fragmento)
     candidatos = [
@@ -352,7 +362,7 @@ def ubicar(
         and (dia is None or r.dia == dia)
         and (hora is None or r.hora == hora)
     ]
-    return candidatos[-1] if candidatos else None
+    return candidatos[0] if candidatos else None
 
 
 def _con_linea(texto: str, n: int, nueva: str) -> str:
@@ -384,7 +394,13 @@ def _no_calza(
 
 
 def actualizar_en_vault(
-    vault: Path, *, match: str, body: str, day: date | None = None, hour: str | None = None
+    vault: Path,
+    *,
+    match: str,
+    body: str,
+    day: date | None = None,
+    hour: str | None = None,
+    now: datetime | None = None,
 ) -> Resultado:
     """Corrige el cuerpo de un registro de `AHORA.md`, y lo que ese cuerpo sostiene.
 
@@ -437,7 +453,7 @@ def actualizar_en_vault(
             if hubo:
                 archivo.escribir(pendientes_path, tabla)
                 filas = 1
-    regenerate.rehacer(vault, ["AHORA.md", "PENDIENTES.md"])
+    regenerate.rehacer(vault, ["AHORA.md", "PENDIENTES.md"], hoy=now.date() if now else None)
 
     detalle = " y su fila en PENDIENTES.md" if filas else ""
     return Resultado.hecho(f"corregí el registro {_donde(r)}{detalle}:\n{prefijo}{cuerpo}")
@@ -455,7 +471,13 @@ def _bitacora_de(vault: Path, dia: date) -> Path | None:
 
 
 def mover_en_vault(
-    vault: Path, *, match: str, scope: str, day: date | None = None, hour: str | None = None
+    vault: Path,
+    *,
+    match: str,
+    scope: str,
+    day: date | None = None,
+    hour: str | None = None,
+    now: datetime | None = None,
 ) -> Resultado:
     """Cambia el ámbito de un registro, en `AHORA.md` o en un ciclo cerrado.
 
@@ -508,7 +530,7 @@ def mover_en_vault(
         if hubo:
             archivo.escribir(pendientes_path, tabla)
             filas = 1
-    regenerate.rehacer(vault, [relativa, "PENDIENTES.md"])
+    regenerate.rehacer(vault, [relativa, "PENDIENTES.md"], hoy=now.date() if now else None)
 
     detalle = " y su fila en PENDIENTES.md" if filas else ""
     return Resultado.hecho(f"moví el registro {_donde(r)} a {nombre}{detalle}:\n{nueva}")

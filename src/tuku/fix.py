@@ -104,7 +104,7 @@ def fix_todo(vault: Path, *, now: datetime) -> Resultado:
         archivo.escribir(ruta_tabla, migrada)
     if quitados:
         archivo.escribir(ruta, todo_core.quitar_aperturas_cerradas(texto))
-    regenerate.rehacer(vault, ["AHORA.md"])
+    regenerate.rehacer(vault, ["AHORA.md"], hoy=now.date())
     return Resultado.hecho(
         "\n".join(
             [

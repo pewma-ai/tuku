@@ -7,7 +7,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 from tuku.cli import EXITO, main
-from tuku.cycle import abrir_en_vault, tiene_registros
+from tuku.cycle import abrir_en_vault, instantiate, tiene_registros
 from tuku.init import init
 
 RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
@@ -38,6 +38,14 @@ def _dias(texto: str) -> int:
     return len(re.findall(r"^## \w+ \d+ de \w+$", texto, re.MULTILINE))
 
 
+def _con_un_registro(vault: Path) -> None:
+    """Un registro del martes 8: el día nace con él."""
+    (vault / "AHORA.md").write_text(
+        _ahora(vault) + "\n## Martes 8 de septiembre\n- 09:00 - **nota**: no se pierde\n",
+        encoding="utf-8",
+    )
+
+
 def test_repetir_el_ciclo_abierto_lo_verifica_y_sin_registros_lo_regenera(
     tmp_path: Path,
 ) -> None:
@@ -57,28 +65,16 @@ def test_repetir_el_ciclo_abierto_lo_verifica_y_sin_registros_lo_regenera(
     ok, _ = _abrir(vault, desde=SEMANA_1, hasta=date(2026, 9, 14), nombre="turno")
     assert ok, "sin registros se regenera, que es como se corrige su --to"
     assert "cycle: turno" in _ahora(vault) and "to: 2026-09-14" in _ahora(vault)
-    assert _dias(_ahora(vault)) == 8
+    assert _dias(_ahora(vault)) == 0, "la plantilla no pregenera días"
 
-    (vault / "AHORA.md").write_text(
-        _ahora(vault).replace(
-            "## Martes 8 de septiembre",
-            "## Martes 8 de septiembre\n- 09:00 - **nota**: no se pierde",
-        ),
-        encoding="utf-8",
-    )
+    _con_un_registro(vault)
     ok, mensaje = _abrir(vault, desde=SEMANA_1, hasta=date(2026, 9, 16), nombre="turno")
     assert not ok and "tiene registros" in mensaje and "no se pierde" in _ahora(vault)
 
 
 def test_un_ciclo_con_registros_no_se_pisa(tmp_path: Path) -> None:
     vault = _vault(tmp_path)
-    (vault / "AHORA.md").write_text(
-        _ahora(vault).replace(
-            "## Martes 8 de septiembre",
-            "## Martes 8 de septiembre\n- 09:00 - **nota**: no se pierde",
-        ),
-        encoding="utf-8",
-    )
+    _con_un_registro(vault)
 
     ok, mensaje = _abrir(vault, desde=date(2026, 9, 14))
 
@@ -112,7 +108,7 @@ def test_el_nombre_avanza_en_la_tabla_de_ciclos_y_uno_fuera_pide_force(
     assert not ok and "--to" in mensaje, "con otro nombre el rango no se deduce"
 
     ok, _ = _abrir(vault, desde=date(2026, 9, 14), hasta=date(2026, 9, 21))
-    assert ok and "cycle: turno" in _ahora(vault) and _dias(_ahora(vault)) == 8
+    assert ok and "cycle: turno" in _ahora(vault) and "to: 2026-09-21" in _ahora(vault)
 
     ok, _ = _abrir(vault, hasta=date(2026, 9, 26))
     assert ok and "cycle: descanso" in _ahora(vault) and "from: 2026-09-22" in _ahora(vault)
@@ -137,7 +133,7 @@ def test_un_ciclo_pasado_se_guarda_en_bitacoras_sin_tocar_ahora(tmp_path: Path) 
     pasado = vault / "bitacoras" / "bitacora-2026-08-10-2026-08-16-semana.md"
     assert ok and pasado.is_file()
     texto = pasado.read_text(encoding="utf-8")
-    assert "status: stable" in texto and "cycle: semana" in texto and _dias(texto) == 7
+    assert "status: stable" in texto and "cycle: semana" in texto and _dias(texto) == 0
     assert _ahora(vault) == antes
 
     ok, mensaje = _abrir(vault, desde=date(2026, 8, 12), nombre="semana")
@@ -173,13 +169,22 @@ def test_la_semana_se_siembra_de_lunes_a_domingo_desde_cualquier_dia(tmp_path: P
     assert (
         "from: 2026-09-07" in ahora and "to: 2026-09-13" in ahora and "cycle: semana" in ahora
     )
-    assert "## Lunes 7 de septiembre" in ahora and "## Domingo 13 de septiembre" in ahora
+    assert "> [!abstract] Foco" in ahora and _dias(ahora) == 0
     assert "AAAA-MM-DD" not in ahora and "NOMBRE" not in ahora
 
     sembrado = init(tmp_path / "b", desde=date(2026, 9, 9), home=RAIZ_REPO)
     assert "from: 2026-09-07" in _ahora(sembrado) and "cycle: semana" in _ahora(sembrado)
     ok, mensaje = _abrir(sembrado, desde=date(2026, 9, 9))
     assert ok and "ya cubre" in mensaje, "init y process cycle abren la misma semana"
+
+
+def test_una_plantilla_con_dias_pregenerados_se_expande_a_un_encabezado_por_fecha() -> None:
+    antigua = (
+        "---\ntype: Logbook\ncycle: NOMBRE\nfrom: AAAA-MM-DD\nto: AAAA-MM-DD\n---\n"
+        "# Actividad diaria\n\n## Lunes DD de mes\n\n## Martes DD de mes\n"
+    )
+    texto = instantiate(antigua, SEMANA_1, date(2026, 9, 14), "turno")
+    assert _dias(texto) == 8 and "## Lunes 14 de septiembre" in texto
 
 
 def test_el_pendiente_de_revisar_la_bitacora_anterior_se_abre_una_sola_vez(

@@ -207,7 +207,7 @@ def crear(
     if (vault / "PENDIENTES.md").is_file():
         from tuku import regenerate
 
-        regenerate.rehacer(vault, ["ambitos/", "AHORA.md", "bitacoras/"])
+        regenerate.rehacer(vault, ["ambitos/", "AHORA.md", "bitacoras/"], hoy=today)
 
     return directorio
 
@@ -498,7 +498,8 @@ def actividad_reciente(
 
     `cerradas` son las bitácoras, como (ruta desde el vault, texto). Entran los días
     de los últimos doce meses, agrupados bajo `### Octubre 2026`, del mes más reciente
-    al más antiguo, y cada línea lleva su día: `- 12 - entregué 40 cuadernos`.
+    al más antiguo y, dentro del mes, del día más nuevo al más viejo. Cada línea lleva su
+    día: `- 12 - entregué 40 cuadernos`.
     """
     from tuku.ahora import fecha_del_dia, rango
     from tuku.init import MESES
@@ -523,7 +524,9 @@ def actividad_reciente(
     bloques = ["## Actividad reciente"]
     for anio, mes in sorted(por_mes, reverse=True):
         bloques.append(f"### {MESES[mes - 1].capitalize()} {anio}")
-        bloques.extend(linea for _, linea in sorted(por_mes[(anio, mes)], key=lambda x: x[0]))
+        bloques.extend(
+            linea for _, linea in sorted(por_mes[(anio, mes)], key=lambda x: x[0], reverse=True)
+        )
     return "\n".join(bloques)
 
 

@@ -65,6 +65,15 @@ def test_entry_lee_los_dias_desde_since_tambien_en_un_ciclo_cerrado(vault: Path)
     assert "llamé a [don Rodolfo]" in salida
     assert "entregué los cuadernos" not in salida
 
+    todo_el_rango = context.del_vault(vault, "entry", "5", now=AHORA).mensaje
+    dias = [linea for linea in todo_el_rango.splitlines() if linea.startswith("## ")]
+    assert dias == [
+        "## Martes 11 de agosto",
+        "## Lunes 10 de agosto",
+        "## Domingo 9 de agosto",
+        "## Sábado 8 de agosto",
+    ], "del más nuevo al más viejo, como AHORA.md"
+
 
 def test_scope_todo_y_note(vault: Path) -> None:
     assert (

@@ -62,7 +62,7 @@ def _ciclos(vault: Path) -> list[Path]:
 
 
 def registros_desde(vault: Path, inicio: date) -> list[tuple[date, str, list[str]]]:
-    """Los días desde `inicio` con sus líneas de registro, de los ciclos que cruza."""
+    """Los días desde `inicio` con sus líneas de registro, del más nuevo al más viejo."""
     from tuku.ahora import fecha_del_dia, rango
     from tuku.entry import registros
 
@@ -82,6 +82,8 @@ def registros_desde(vault: Path, inicio: date) -> list[tuple[date, str, list[str
             if not dias or dias[-1][1] != r.dia:
                 dias.append((fecha, r.dia, []))
             dias[-1][2].append(lineas[r.linea])
+    # Del más nuevo al más viejo, como `AHORA.md`.
+    dias.sort(key=lambda d: d[0], reverse=True)
     return dias
 
 

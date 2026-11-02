@@ -33,7 +33,7 @@ from pathlib import Path
 
 from tuku import archivo
 from tuku import scope_tree as ambitos
-from tuku.config import ambito_por_defecto, archivo_vault, leer_config
+from tuku.config import ambito_por_defecto, archivo_vault, escalera, leer_config
 from tuku.entry import componer, stamp
 from tuku.plan import Change, State, apply
 from tuku.resultado import Resultado
@@ -290,7 +290,7 @@ def abrir_en_vault(
     plan = plan_open(
         state, body=body, scope=scope, horizon=horizon, due=due, day=day, hour=hour, now=now
     )
-    return apply(vault, plan, skip=() if regenerar else ("todo",))
+    return apply(vault, plan, skip=() if regenerar else ("todo",), today=now.date())
 
 
 def plan_close(
@@ -380,7 +380,7 @@ def cerrar_en_vault(
         default_scope=ambito_por_defecto(vault),
     )
     plan = plan_close(state, body=body, scope=scope, day=day, hour=hour, now=now)
-    return apply(vault, plan, skip=() if regenerar else ("todo",))
+    return apply(vault, plan, skip=() if regenerar else ("todo",), today=now.date())
 
 
 def hallazgos_del_vault(vault: Path) -> list[str]:
@@ -396,7 +396,7 @@ def hallazgos_del_vault(vault: Path) -> list[str]:
         vistas["AHORA.md"] = (
             ahora,
             regenerate.vistas_en_ahora(
-                ahora, pendientes, scope_tree.rutas(vault), regenerate.primer_escalon(vault)
+                ahora, pendientes, scope_tree.rutas(vault), escalera(vault)
             ),
         )
     ambitos_path = vault / regenerate.ARCHIVO_AMBITOS

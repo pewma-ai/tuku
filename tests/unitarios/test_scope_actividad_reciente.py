@@ -25,7 +25,8 @@ def test_agrupa_por_mes_del_mas_reciente_al_mas_antiguo_y_deja_fuera_lo_de_hace_
         "2026-09-28",
         "2026-10-04",
         f"## Jueves 1 de octubre\n\n- 10:00 - {ENLACE} entregué 40 cuadernos\n\n"
-        f"## Martes 29 de septiembre\n\n- 09:00 - {ENLACE} cotizé la reposición\n",
+        f"## Martes 29 de septiembre\n\n- 09:00 - {ENLACE} cotizé la reposición\n\n"
+        f"## Lunes 28 de septiembre\n\n- 09:00 - {ENLACE} pedí la factura\n",
     )
     vieja = _bitacora(
         "2025-08-04",
@@ -45,4 +46,7 @@ def test_agrupa_por_mes_del_mas_reciente_al_mas_antiguo_y_deja_fuera_lo_de_hace_
     assert recientes.index("### Octubre 2026") < recientes.index("### Septiembre 2026")
     assert "- 1 - entregué 40 cuadernos" in recientes
     assert "- 29 - cotizé la reposición" in recientes
+    assert recientes.index("- 29 - ") < recientes.index("- 28 - "), (
+        "dentro del mes, el día más nuevo arriba"
+    )
     assert "esto ya no cuenta" not in recientes

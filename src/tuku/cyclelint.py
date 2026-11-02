@@ -6,7 +6,8 @@ da por cierto sin comprobarlo, y que si falta produce fallas mudas más adelante
 
 - El frontmatter OKF con `from` y `to` resueltos. Sin eso, ningún encabezado de
   día puede fecharse, porque el año sale del rango (`ahora.py`).
-- Los siete encabezados de día dentro del rango del ciclo.
+- Los encabezados de día dentro del rango del ciclo. Un día posterior a `to` sin
+  registros es válido: nace por un pendiente con fecha dentro de la ventana.
 - El `type` y el `status` que `reglas/types.user.md` y el libro de estilo fijan para
   un ciclo. De `to` sale dónde termina, así que no hace falta marcarlo aparte
   en el cuerpo.
@@ -25,6 +26,7 @@ from pathlib import Path
 
 from tuku import ahora as _ahora
 from tuku import archivo
+from tuku.entry import registros
 
 #: Lo que un ciclo declara en su frontmatter. `Logbook` porque `AHORA.md` y una
 #: bitácora cerrada son el mismo tipo de archivo (ver `reglas/types.user.md`).
@@ -66,6 +68,7 @@ def lint(ahora: str) -> list[Hallazgo]:
         )
     else:
         desde, hasta = rango
+        con_registros = {f"## {r.dia}" for r in registros(ahora)}
         for n, texto, fecha in _ahora.dias(ahora):
             if fecha is None:
                 hallazgos.append(
@@ -76,7 +79,7 @@ def lint(ahora: str) -> list[Hallazgo]:
                         "Escríbelo como `## Lunes 7 de septiembre`, con el mes en palabras.",
                     )
                 )
-            elif not desde <= fecha <= hasta:
+            elif fecha < desde or (fecha > hasta and texto in con_registros):
                 hallazgos.append(
                     Hallazgo(
                         n,

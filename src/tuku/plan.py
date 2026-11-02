@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 from tuku import archivo
@@ -54,12 +55,19 @@ class Change:
     pages: tuple[str, ...] = ()
 
 
-def apply(vault: Path, plan: Change | Resultado, *, skip: Iterable[str] = ()) -> Resultado:
+def apply(
+    vault: Path,
+    plan: Change | Resultado,
+    *,
+    skip: Iterable[str] = (),
+    today: date | None = None,
+) -> Resultado:
     """Carry out a plan: a rejection is returned as is, a `Change` is written.
 
     Only the files whose text differs from the disk are written, so repeating a
     command leaves no trace. `skip` leaves out a regeneration theme
-    (`todo` with `--no-regenerate`).
+    (`todo` with `--no-regenerate`). `today` is the day of the command's `now`: with it
+    the regeneration also rebuilds the pending window and the days that need to exist.
     """
     from tuku import scope
     from tuku.regenerate import rehacer
@@ -74,7 +82,7 @@ def apply(vault: Path, plan: Change | Resultado, *, skip: Iterable[str] = ()) ->
         elif archivo.leer(path) != text:
             archivo.escribir(path, text)
     if plan.regenerate:
-        rehacer(vault, plan.regenerate, salvo=skip)
+        rehacer(vault, plan.regenerate, salvo=skip, hoy=today)
     for name in plan.pages:
         scope.actualizar_pagina(vault, name)
     return Resultado.hecho(plan.message, avisos=plan.warnings)
