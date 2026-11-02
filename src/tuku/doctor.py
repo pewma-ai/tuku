@@ -25,6 +25,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 from tuku import archivo, capitulos
@@ -322,6 +323,15 @@ def revisar_config(config_md: str | None) -> Revision:
             False,
         )
 
+    semanas = campos.get("archive_weeks", "").strip("`").strip()
+    if "archive_weeks" in campos and not ventana_valida(semanas):
+        return Revision(
+            "config",
+            f"reglas/config.tuku.md: error: `archive_weeks` «{semanas}» no es un entero "
+            "positivo. Escribe las semanas completas que conserva `AHORA.md`, por ejemplo `2`.",
+            False,
+        )
+
     return Revision("config", f"config: {len(campos)} campos declarados.", True)
 
 
@@ -483,6 +493,7 @@ class _Check:
     vault: Path
     comandos: frozenset[str] | None
     nota: Path | None
+    hoy: date | None = None
 
     def read(self, relative: str) -> str | None:
         return archivo_opcional(self.vault, relative)
@@ -551,8 +562,8 @@ def _check_link(c: _Check) -> list[Revision]:
 
 def _check_logbook(c: _Check) -> list[Revision]:
     """`cycle` and `entry` read the same file, so they run together."""
-    from tuku import cyclelint
-    from tuku.config import leer_config
+    from tuku import archive, cyclelint
+    from tuku.config import leer_config, semanas_de_archivo
     from tuku.lint import ERROR
     from tuku.lint import formatear as format_records
     from tuku.lint import lint as lint_records
@@ -564,6 +575,14 @@ def _check_logbook(c: _Check) -> list[Revision]:
     entry_findings = lint_records(ahora, abiertos=leer_config(c.vault).vocabularios_abiertos())
     entry_ok = not any(h.grado == ERROR for h in entry_findings)
     overlaps, gaps = cyclelint.gaps_and_overlaps(c.vault)
+    history = archive.lint_history(archive.read_history(c.vault))
+    stale = (
+        archive.lint_window(ahora, today=c.hoy, weeks=semanas_de_archivo(c.vault))
+        if c.hoy is not None
+        else []
+    )
+    overlaps = [*overlaps, *history]
+    gaps = [*gaps, *stale]
     cycle_ok = not cycle_findings and not overlaps
     if overlaps or gaps:
         errors = len(cycle_findings) + len(overlaps)
@@ -661,6 +680,7 @@ def revisar_vault(
     tema: str | None = None,
     verbose: bool = False,
     nota: Path | None = None,
+    hoy: date | None = None,
 ) -> Resultado:
     """Corre todos los lint sobre el vault y revisa lo que ninguno cubre.
 
@@ -675,12 +695,15 @@ def revisar_vault(
 
     `nota` es un archivo de nota suelto, solo para el tema `note`: no lee el vault.
 
+    `hoy` es el día del reloj de `cli.main`: con él `cycle` avisa de los días de
+    `AHORA.md` anteriores a la ventana de archivado. El doctor nunca archiva.
+
     Con `tema` informa solo esa revisión (`TEMAS`); el arreglo de los hallazgos de
     `link` y `todo` lo aplica `tuku fix TEMA`.
 
     Sin `verbose` el reporte trae solo los hallazgos y los avisos; ver `formatear`.
     """
-    check = _Check(vault, comandos, nota)
+    check = _Check(vault, comandos, nota, hoy)
     revisiones = [
         r for topics, run in _CHECKS if tema is None or tema in topics for r in run(check)
     ]

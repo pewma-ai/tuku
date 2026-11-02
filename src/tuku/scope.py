@@ -37,7 +37,8 @@ from collections.abc import Mapping, Sequence
 from datetime import date, datetime
 from pathlib import Path
 
-from tuku import archivo, link
+from tuku import archive, archivo, link
+from tuku.config import semanas_de_archivo
 from tuku.resultado import Resultado
 from tuku.scope_tree import (
     KEYWORDS_LINE,
@@ -763,8 +764,9 @@ def crear_con_constancia(
     existe no escribe nada, ni en este ciclo ni en uno posterior.
 
     **Se rechaza antes de tocar nada:** lo que haría fallar la propagación, o un
-    día fuera del ciclo abierto, se revisa antes de crear la carpeta, para que un
-    rechazo no deje un ámbito a medias.
+    día futuro, se revisa antes de crear la carpeta, para que un rechazo no deje un
+    ámbito a medias. Un día anterior a la ventana de `AHORA.md` deja su constancia
+    en la bitácora semanal que le corresponde.
 
     Con `parent`, el ámbito va dentro de la carpeta de otro, que debe existir. Si
     el ámbito ya existe en otro lugar se rechaza y se nombra `scope move`.
@@ -777,8 +779,9 @@ def crear_con_constancia(
     que nombran al nuevo (`registros_que_nombran`), para moverlos con `tuku entry move`.
     Sobre un ámbito que ya existe vuelve a listar sin crear nada.
     """
-    from tuku import context, entry, todo_core
+    from tuku import context, todo_core
 
+    archive.archivar_en_vault(vault, now.date())
     nombre = normalizar(nombre)
     if (rechazo := _rechazo_de_nombre(nombre)) is not None:
         return rechazo
@@ -818,7 +821,7 @@ def crear_con_constancia(
     when = day or now.date()
     hora = hour or now.strftime("%H:%M")
     if nuevo and ahora_path.is_file():
-        fits = entry.stamp(archivo.leer(ahora_path), [], day=when)
+        fits = archive.stamp(archivo.leer(ahora_path), {}, [], day=when, today=now.date())
         if isinstance(fits, Resultado):
             return fits
 
@@ -855,10 +858,20 @@ def crear_con_constancia(
                         f", en {bajo}" if bajo else ""
                     )
             constancia = registro_de_constancia(nombre, hour=hora, rutas=mapa, bajo=bajo)
-            stamped = entry.stamp(texto, [constancia], day=when)
-            if isinstance(stamped, Resultado):
-                return stamped
-            texto = stamped
+            placed = archive.stamp(
+                texto,
+                archive.read_history(vault),
+                [constancia],
+                day=when,
+                today=now.date(),
+                weeks=semanas_de_archivo(vault),
+            )
+            if isinstance(placed, Resultado):
+                return placed
+            texto = placed.logbook
+            for ruta, contenido in placed.extra.items():
+                (vault / ruta).parent.mkdir(parents=True, exist_ok=True)
+                archivo.escribir(vault / ruta, contenido)
         if texto != original:
             archivo.escribir(ahora_path, texto)
         actualizar_pagina(vault, nombre)
@@ -1024,13 +1037,17 @@ def _pedir_keywords(nombre: str) -> str:
     )
 
 
-def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
+def actualizar(
+    vault: Path, nombre: str, nuevas: Sequence[str], *, today: date | None = None
+) -> Resultado:
     """Suma `nuevas` a las `keywords` de la página del ámbito.
 
     Una keyword sirve para elegir el ámbito de lo que el autor dice, y no modifica ni
     enlaza lo que ya está escrito. Idempotente: lo que ya estaba, sin distinguir
     mayúsculas, guiones ni espacios, no se repite, y si nada es nuevo no escribe nada.
     """
+    if today is not None:
+        archive.archivar_en_vault(vault, today)
     resolved = resolve_scope(read_tree(vault), nombre)
     if isinstance(resolved, Resultado):
         return resolved
@@ -1062,7 +1079,9 @@ def actualizar(vault: Path, nombre: str, nuevas: Sequence[str]) -> Resultado:
     )
 
 
-def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
+def renombrar_en_vault(
+    vault: Path, viejo: str, nuevo: str, *, today: date | None = None
+) -> Resultado:
     """Renombra un ámbito y arregla todo lo que lo nombraba.
 
     Un ámbito no es una carpeta: es una carpeta, una página, un ancla de
@@ -1077,6 +1096,8 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     """
     from tuku import regenerate, rename
 
+    if today is not None:
+        archive.archivar_en_vault(vault, today)
     viejo, nuevo = canonico(vault, viejo), normalizar(nuevo)
     if (rechazo := _rechazo_de_nombre(nuevo)) is not None:
         return rechazo
@@ -1140,7 +1161,9 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str) -> Resultado:
     return Resultado.hecho(f"ámbito {viejo!r} renombrado a {nuevo!r}{detalle}.")
 
 
-def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Resultado:
+def mover_en_vault(
+    vault: Path, nombre: str, *, parent: str | None = None, today: date | None = None
+) -> Resultado:
     """Mueve un ámbito dentro de otro (o a la raíz de `ambitos/`) y arregla sus links.
 
     Un ámbito movido cambia de ruta, y la ruta está en cada link que lo nombra,
@@ -1154,6 +1177,8 @@ def mover_en_vault(vault: Path, nombre: str, *, parent: str | None = None) -> Re
     """
     from tuku import link, regenerate
 
+    if today is not None:
+        archive.archivar_en_vault(vault, today)
     nombre = canonico(vault, nombre)
     origen = directorio_de(vault, nombre)
     if origen is None:

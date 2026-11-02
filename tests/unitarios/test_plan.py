@@ -168,11 +168,10 @@ def test_open_warns_when_the_deadline_has_passed_or_precedes_the_promise() -> No
     assert change(plan_open(day=None, hour=None, due="2026-08-12 10:00")).warnings == ()
 
 
-def test_open_rejects_a_future_day_an_unknown_scope_and_a_day_outside_the_cycle() -> None:
+def test_open_rejects_a_future_day_and_an_unknown_scope() -> None:
     assert "--due 2026-08-13" in rejection(plan_open(day=date(2026, 8, 13)))
     assert "tuku scope create casa" in rejection(plan_open(scope="casa"))
     assert "no existe el ámbito" in rejection(plan_open(scope="  ")), "en blanco es un error"
-    assert "fuera del ciclo" in rejection(plan_open(day=date(2026, 7, 1)))
 
 
 def test_open_twice_leaves_one_record_and_one_row_even_if_the_links_differ() -> None:
@@ -254,10 +253,9 @@ def test_add_takes_the_hour_from_now_only_when_the_day_is_today() -> None:
     ]
 
 
-def test_add_rejects_a_future_day_an_unknown_scope_and_a_day_outside_the_cycle() -> None:
+def test_add_rejects_a_future_day_and_an_unknown_scope() -> None:
     assert "todo open --due 2026-08-13" in rejection(plan_add(day=date(2026, 8, 13)))
     assert "tuku scope create casa" in rejection(plan_add(scope="casa"))
-    assert "fuera del ciclo" in rejection(plan_add(day=date(2026, 7, 1)))
 
 
 def test_add_sends_open_and_close_marks_to_their_command() -> None:
@@ -325,12 +323,67 @@ def test_note_keeps_an_existing_note_and_does_not_repeat_the_record() -> None:
     assert list(sin_ahora.files) == ["notas/contrato-del-colegio.md"]
 
 
-def test_note_rejects_a_bad_title_subtype_scope_or_day() -> None:
+def test_note_rejects_a_bad_title_subtype_scope_or_future_day() -> None:
     assert "sin letras ni números" in rejection(plan_note(title="¿?"))
     sin_tipo = rejection(plan_note(subtype="cliente"))
     assert "no es un tipo de nota" in sin_tipo and "`persona`" in sin_tipo
     assert "tuku scope create casa" in rejection(plan_note(scope="casa"))
-    assert "fuera del ciclo" in rejection(plan_note(day=date(2026, 7, 1)))
+    assert "todavía no llega" in rejection(plan_note(day=date(2026, 8, 13)))
+
+
+# --- registro con fecha anterior a la ventana --------------------------------
+
+ANTIGUO = date(2026, 7, 1)
+SEMANA = "bitacoras/bitacora-20260629-20260705.md"
+BITACORA = (
+    "---\ntype: Logbook\nstatus: stable\nfrom: 2026-06-29\nto: 2026-07-05\n---\n"
+    "# Actividad diaria\n\n## Miércoles 1 de julio\n\n- 08:00 - desayuno\n"
+)
+
+
+def test_a_record_before_the_window_goes_to_the_logbook_of_its_week_with_its_links() -> None:
+    plan = change(plan_open(day=ANTIGUO, hour="14:20"))
+    assert plan.files["AHORA.md"] == LOGBOOK, "AHORA.md no recibe el día antiguo"
+    assert "bitacoras/" in plan.regenerate
+    assert plan.files[SEMANA].startswith(
+        "---\ntype: Logbook\nstatus: stable\nfrom: 2026-06-29\nto: 2026-07-05\n---\n"
+    )
+    assert records(plan.files[SEMANA], "Miércoles 1 de julio") == [
+        "- 14:20 - [personal](../ambitos/personal/personal.md) **pendiente**: pagar la patente"
+    ]
+    assert rows(plan.files["PENDIENTES.md"]) == [
+        f"| esta semana |  | 2026-07-01 | {PERSONAL} | pagar la patente |"
+    ]
+
+    st = State(TREE, logbook=LOGBOOK, history={SEMANA: BITACORA})
+    completada = entry.plan_add(
+        st, body="llamé a Rodolfo", scope=None, day=ANTIGUO, hour="09:00", now=AHORA
+    )
+    assert records(change(completada).files[SEMANA], "Miércoles 1 de julio") == [
+        "- 09:00 - llamé a Rodolfo",
+        "- 08:00 - desayuno",
+    ]
+
+    una_vez = State(TREE, logbook=LOGBOOK, history={SEMANA: change(completada).files[SEMANA]})
+    otra = entry.plan_add(
+        una_vez, body="llamé a Rodolfo", scope=None, day=ANTIGUO, hour="09:00", now=AHORA
+    )
+    assert change(otra).files[SEMANA] == change(completada).files[SEMANA], "idempotente"
+
+    nota = note.NoteState(TREE, logbook=LOGBOOK, notes=frozenset(), history={SEMANA: BITACORA})
+    creada = note.plan_create(
+        nota,
+        title="Contrato",
+        body="x",
+        scope="personal",
+        day=ANTIGUO,
+        hour="10:00",
+        record=True,
+        subtype=None,
+        now=AHORA,
+    )
+    assert "AHORA.md" not in change(creada).files
+    assert "(../notas/contrato.md)" in change(creada).files[SEMANA]
 
 
 # --- el ejecutor --------------------------------------------------------------

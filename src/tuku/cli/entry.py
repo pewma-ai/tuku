@@ -90,7 +90,9 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
             "`- HH:MM - [ámbito](ambitos/ámbito/ámbito.md) **marca**: cuerpo`. Quien "
             "invoca decide los campos; el comando les da la forma. Un `**pendiente**` o "
             "un `(Hecho)` se rechaza: abrir y cerrar pendientes es de `tuku todo open` "
-            "y `tuku todo close`."
+            "y `tuku todo close`. Con `--at` de un día anterior a la ventana de `AHORA.md` "
+            "(`archive_weeks`), la línea va a `bitacoras/bitacora-AAAAMMDD-AAAAMMDD.md`, la "
+            "bitácora semanal de ese día, que se crea si falta."
         ),
     )
     create = Opciones(create_p)
@@ -105,7 +107,8 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         description=(
             "Reemplaza el cuerpo del registro más reciente de `AHORA.md` que contiene el "
             "fragmento de `--match` (sin distinguir mayúsculas ni tildes), sin tocar hora "
-            "ni ámbito. `CUÁNDO` acota la búsqueda a un día o a un minuto. Si es un "
+            "ni ámbito. `CUÁNDO` acota la búsqueda a un día o a un minuto, y un día que ya "
+            "salió de `AHORA.md` se busca en `bitacoras/`. Si es un "
             "pendiente, reemplaza igual su fila en `PENDIENTES.md`: las dos copias deben "
             "coincidir para que el pendiente se pueda cerrar."
         ),
@@ -120,8 +123,9 @@ def registrar(sub: Subparsers) -> dict[tuple[str, str | None], Handler]:
         help="cambia el ámbito de un registro ya escrito",
         description=(
             "Cambia el link de ámbito del registro más reciente de `AHORA.md` que contiene el "
-            "fragmento de `--match`, sin tocar hora ni cuerpo. Con `CUÁNDO` fuera del "
-            "ciclo en curso, busca en la bitácora de `bitacoras/` que cubre ese día. Si es "
+            "fragmento de `--match`, sin tocar hora ni cuerpo. Con `CUÁNDO` de un "
+            "día que ya salió de `AHORA.md`, busca en la bitácora de `bitacoras/` que lo "
+            "cubre. Si es "
             "un pendiente abierto, su fila de `PENDIENTES.md` cambia de ámbito con él."
         ),
     )

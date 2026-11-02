@@ -13,11 +13,12 @@ clock is read once, by `cli.main`, and travels down as `now`.
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
 from tuku import archivo
+from tuku.config import SEMANAS_POR_DEFECTO
 from tuku.resultado import Resultado
 from tuku.scope_tree import Tree
 
@@ -28,7 +29,9 @@ class State:
 
     `logbook` is `AHORA.md` and `todo` is `PENDIENTES.md`; a use case that does not
     read one leaves it empty. `horizons` are the author's steps (`reglas/pendientes.user.md`)
-    and `default_scope` is the config's `scope_default`.
+    and `default_scope` is the config's `scope_default`. `history` are the logbooks of
+    `bitacoras/` by path, and `weeks` the config's `archive_weeks`: with them a record
+    dated before the window goes to the logbook of its week (`archive.stamp`).
     """
 
     tree: Tree
@@ -36,6 +39,8 @@ class State:
     todo: str = ""
     horizons: tuple[str, ...] = ()
     default_scope: str | None = None
+    history: Mapping[str, str] = field(default_factory=dict)
+    weeks: int = SEMANAS_POR_DEFECTO
 
 
 @dataclass(frozen=True)

@@ -110,6 +110,9 @@ LIMITE_DE_NOTAS = 25
 #: Cuántos días hacia adelante mira `AHORA.md` si la config no dice `window_days`.
 VENTANA_POR_DEFECTO = 7
 
+#: Cuántas semanas completas (desde el lunes) conserva `AHORA.md` sin `archive_weeks`.
+SEMANAS_POR_DEFECTO = 2
+
 #: Cómo se llama el ciclo si `reglas/ciclo.user.md` no lo dice.
 CICLO_POR_DEFECTO = "semana"
 
@@ -128,6 +131,7 @@ class Preferencias:
     formato_fecha: str = FORMATO_FECHA
     limite_de_notas: int = LIMITE_DE_NOTAS
     window_days: int = VENTANA_POR_DEFECTO
+    archive_weeks: int = SEMANAS_POR_DEFECTO
     datos: dict[str, str] = field(default_factory=dict)
 
 
@@ -146,6 +150,7 @@ def leer_preferencias(vault: Path | None = None, *, texto: str | None = None) ->
     datos = parsear_config_md(texto)
     limite = _limpio(datos, "context_note_limit")
     ventana = _limpio(datos, "window_days")
+    semanas = _limpio(datos, "archive_weeks")
     return Preferencias(
         zona_horaria=_limpio(datos, "TZ"),
         ambito_por_defecto=_limpio(datos, "scope_default") or None,
@@ -154,18 +159,24 @@ def leer_preferencias(vault: Path | None = None, *, texto: str | None = None) ->
         if limite.isdigit() and int(limite) > 0
         else LIMITE_DE_NOTAS,
         window_days=int(ventana) if ventana_valida(ventana) else VENTANA_POR_DEFECTO,
+        archive_weeks=int(semanas) if ventana_valida(semanas) else SEMANAS_POR_DEFECTO,
         datos=datos,
     )
 
 
 def ventana_valida(valor: str) -> bool:
-    """Whether `valor` is a positive integer, as `window_days` must be."""
+    """Whether `valor` is a positive integer, as `window_days` and `archive_weeks` must be."""
     return valor.isascii() and valor.isdigit() and int(valor) > 0
 
 
 def ventana_de_dias(vault: Path) -> int:
     """El `window_days` de `reglas/config.tuku.md`, o 7 si falta o no es un entero positivo."""
     return leer_preferencias(vault).window_days
+
+
+def semanas_de_archivo(vault: Path) -> int:
+    """El `archive_weeks` de `reglas/config.tuku.md`, o 2 si falta o no es positivo."""
+    return leer_preferencias(vault).archive_weeks
 
 
 def escalera(vault: Path) -> tuple[str, ...]:

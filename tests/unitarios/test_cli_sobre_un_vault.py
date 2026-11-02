@@ -53,11 +53,11 @@ def test_un_rechazo_no_deja_nada_a_medias(
             ("entry", "create", "--body", "x", "--at", "2026-08-13 09:00"),
             "todo open --due 2026-08-13",
         ),
-        (("scope", "create", "depto-centro", "--at", "2026-09-01 10:00"), "fuera del ciclo"),
+        (("scope", "create", "depto-centro", "--at", "2026-09-01 10:00"), "todavía no llega"),
         (("note", "create", "una nota sin cuerpo", "--body", ""), "falta el cuerpo"),
         (
             ("note", "create", "otra nota", "--body", "da igual", "--at", "2026-09-01"),
-            "fuera del ciclo abierto",
+            "todavía no llega",
         ),
         *(
             (("note", "create", t, "--body", "x", "--at", f"{HOY} 10:00"), "")

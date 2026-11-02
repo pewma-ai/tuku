@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 import pytest
 
 from tuku.entry import _claves, add, componer
@@ -160,9 +162,16 @@ def test_add_conserva_el_callout_de_pendientes_del_dia() -> None:
     )
 
 
-def test_add_rechaza_un_dia_fuera_del_ciclo_o_inexistente() -> None:
-    with pytest.raises(ValueError, match="cae fuera del ciclo abierto"):
-        add(AHORA, ["- 10:00 - r"], dia="Martes 22 de septiembre")
+def test_add_crea_un_dia_fuera_del_rango_y_rechaza_si_no_hay_rango() -> None:
+    texto = add(AHORA, ["- 10:00 - r"], dia="Martes 22 de septiembre")
+    assert texto.index("## Martes 22 de septiembre") < texto.index(
+        "## Domingo 13 de septiembre"
+    )
+    assert "## Martes 22 de septiembre\n- 10:00 - r\n" in texto
+
+    lejano = add(AHORA, ["- 10:00 - r"], dia="Jueves 4 de marzo", fecha=date(2021, 3, 4))
+    assert lejano.index("## Lunes 7 de septiembre") < lejano.index("## Jueves 4 de marzo")
+
     with pytest.raises(ValueError, match="no existe el encabezado"):
         add(
             "## Lunes 7 de septiembre\n\n- 08:00 - texto\n",

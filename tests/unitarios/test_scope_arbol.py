@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from conftest import AHORA
 from tuku import init, scope
 from tuku.cli import EXITO, RECHAZO, main
 
@@ -21,7 +22,7 @@ def vault(tmp_path: Path) -> Path:
 
 
 def _tuku(vault: Path, *argv: str) -> int:
-    return main([*argv, "--vault", str(vault)])
+    return main([*argv, "--vault", str(vault)], now=AHORA)
 
 
 def _crear(vault: Path, nombre: str, *extra: str) -> int:

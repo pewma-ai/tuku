@@ -114,6 +114,7 @@ def _crear_cmd_doctor(
                 tema=args.tema,
                 verbose=args.verbose,
                 nota=args.file,
+                hoy=args.now.date(),
             ),
             "tuku doctor",
         )

@@ -193,14 +193,20 @@ def test_el_pendiente_de_revisar_la_bitacora_anterior_se_abre_una_sola_vez(
     sin_bitacora = _vault(tmp_path / "a")
     assert _filas(sin_bitacora) == [], "el primer ciclo no trae pendiente de revisión"
     assert (
-        main(["process", "cycle", "--from", "2026-09-14", "--vault", str(sin_bitacora)])
+        main(
+            ["process", "cycle", "--from", "2026-09-14", "--vault", str(sin_bitacora)],
+            now=AHORA,
+        )
         == EXITO
     )
     assert _filas(sin_bitacora) == []
 
     vault = _vault(tmp_path / "b")
     _cerrar_a_mano(vault)
-    assert main(["process", "cycle", "--from", "2026-09-14", "--vault", str(vault)]) == EXITO
+    assert (
+        main(["process", "cycle", "--from", "2026-09-14", "--vault", str(vault)], now=AHORA)
+        == EXITO
+    )
 
     (fila,) = _filas(vault)
     assert REVISAR in fila
@@ -209,7 +215,10 @@ def test_el_pendiente_de_revisar_la_bitacora_anterior_se_abre_una_sola_vez(
     assert REVISAR in lunes.split("## Martes")[0]
 
     antes = (vault / "PENDIENTES.md").read_bytes()
-    assert main(["process", "cycle", "--from", "2026-09-14", "--vault", str(vault)]) == EXITO
+    assert (
+        main(["process", "cycle", "--from", "2026-09-14", "--vault", str(vault)], now=AHORA)
+        == EXITO
+    )
     assert (vault / "PENDIENTES.md").read_bytes() == antes
 
 
@@ -222,5 +231,8 @@ def test_process_lista_los_de_tuku_y_los_del_autor_y_cycle_abre(
     assert main(["process", "--vault", str(vault)]) == EXITO
     salida = capsys.readouterr().out  # type: ignore[attr-defined]
     assert "- cycle: " in salida and "- procesos/cierre-de-mes.md: Cierre de mes" in salida
-    assert main(["process", "cycle", "--from", "2026-09-14", "--vault", str(vault)]) == EXITO
+    assert (
+        main(["process", "cycle", "--from", "2026-09-14", "--vault", str(vault)], now=AHORA)
+        == EXITO
+    )
     assert "from: 2026-09-14" in _ahora(vault)

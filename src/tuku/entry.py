@@ -20,7 +20,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from tuku import archivo, link
+from tuku import archive, archivo, link
 from tuku.plan import Change, State, apply
 from tuku.resultado import Resultado
 
@@ -53,13 +53,17 @@ def _sin_links(linea: str) -> str:
     return link.sin_links(linea).replace("-", " ").casefold()
 
 
-def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
+def add(
+    ahora: str, lineas: list[str], *, day: str = "", dia: str = "", fecha: date | None = None
+) -> str:
     """Devuelve `AHORA.md` con `lineas` insertadas bajo el encabezado `day` o `dia`.
 
     Idempotente: una línea que ya está bajo ese día no se vuelve a escribir.
 
     `day`/`dia` es el encabezado del día, con o sin el `## ` inicial; si no existe
-    se crea en su lugar, entre los días del más nuevo al más viejo. Dentro del día
+    se crea en su lugar, entre los días del más nuevo al más viejo, con el año de
+    `fecha` o, sin ella, el que deja el encabezado más cerca del rango del
+    frontmatter. Ningún día se rechaza por caer fuera de ese rango. Dentro del día
     el orden es por hora descendente: lo más reciente arriba. Un registro nuevo
     sin hora toma la hora del que quede inmediatamente debajo de él (el primero
     del día, es decir el más reciente) y entre claves iguales el nuevo queda
@@ -72,22 +76,14 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
     try:
         ini = next(i for i, linea in enumerate(src) if linea.strip() == encabezado)
     except StopIteration:
-        from tuku.ahora import como_cerrar, fecha_del_dia, insertar_dia, rango
+        from tuku.ahora import fecha_del_dia, insertar_dia, rango
 
         limites = rango(ahora)
         if limites is None:
             raise ValueError(f"no existe el encabezado {encabezado!r} en AHORA.md") from None
-        desde, hasta = limites
-        f_nueva = fecha_del_dia(encabezado, desde, hasta)
-        if f_nueva is None or not desde <= f_nueva <= hasta:
-            msg = (
-                f"el día {encabezado!r} cae fuera del ciclo abierto "
-                f"({desde.isoformat()} a {hasta.isoformat()}). Si el registro es "
-                f"de este ciclo, corrige la fecha; si empezó uno nuevo, cierra "
-                f"este antes: {como_cerrar(desde, hasta)}, y corre "
-                "`tuku process cycle`."
-            )
-            raise ValueError(msg) from None
+        f_nueva = fecha or fecha_del_dia(encabezado, *limites)
+        if f_nueva is None:
+            raise ValueError(f"el encabezado {encabezado!r} no es un día") from None
         src, ini = insertar_dia(src, f_nueva, limites)
 
     # La sección del día termina en el siguiente día o en el `---` que cierra el
@@ -143,14 +139,14 @@ def add(ahora: str, lineas: list[str], *, day: str = "", dia: str = "") -> str:
 def stamp(logbook: str, lines: list[str], *, day: date) -> str | Resultado:
     """`AHORA.md` text with `lines` under `day`, or the rejection if they do not fit.
 
-    `add` for the use cases: when the day falls outside the open cycle, or a line
+    `add` for the use cases: when `logbook` has no range to place the day, or a line
     is not a record, it returns the `Resultado` the command hands back as is.
     It does no I/O; the caller decides when to write.
     """
     from tuku.ahora import encabezado_de
 
     try:
-        return add(logbook, lines, day=encabezado_de(day))
+        return add(logbook, lines, day=encabezado_de(day), fecha=day)
     except ValueError as e:
         return Resultado.rechazo(str(e))
 
@@ -223,13 +219,15 @@ def plan_add(
     marca = todo_core.parsear(linea)
     if marca is not None:
         return Resultado.rechazo(rechazo_de_marca(marca, scope=scope, day=day, hour=hour))
-    stamped = stamp(state.logbook, [linea], day=when)
-    if isinstance(stamped, Resultado):
-        return stamped
+    placed = archive.stamp(
+        state.logbook, state.history, [linea], day=when, today=today, weeks=state.weeks
+    )
+    if isinstance(placed, Resultado):
+        return placed
     return Change(
-        {"AHORA.md": stamped},
+        {"AHORA.md": placed.logbook, **placed.extra},
         f"{linea}\nen {dia.removeprefix('## ')}.",
-        regenerate=("AHORA.md",),
+        regenerate=("AHORA.md", *(("bitacoras/",) if placed.extra else ())),
     )
 
 
@@ -254,10 +252,14 @@ def add_al_vault(
     La decisión es de `plan_add`; acá solo se lee el vault y se aplica.
     """
     from tuku import scope_tree as ambitos
-    from tuku.config import archivo_vault
+    from tuku.config import archivo_vault, semanas_de_archivo
 
+    archive.archivar_en_vault(vault, now.date())
     state = State(
-        ambitos.read_tree(vault), logbook=archivo.leer(archivo_vault(vault, "AHORA.md"))
+        ambitos.read_tree(vault),
+        logbook=archivo.leer(archivo_vault(vault, "AHORA.md")),
+        history=archive.read_history(vault),
+        weeks=semanas_de_archivo(vault),
     )
     return apply(
         vault,
@@ -411,23 +413,22 @@ def actualizar_en_vault(
     `tuku entry move`.
     """
     from tuku import regenerate, todo_core
-    from tuku.ahora import encabezado_de, rango
+    from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
     ahora_path = archivo_vault(vault, "AHORA.md")
     if not todo_core.canonizar(body):
         return Resultado.rechazo("falta el cuerpo corregido. Pasa --body con el texto nuevo.")
-    texto = archivo.leer(ahora_path)
-    limites = rango(texto)
-    if day is not None and limites is not None and not limites[0] <= day <= limites[1]:
-        return Resultado.rechazo(
-            f"el {day.isoformat()} no está en el ciclo en curso, y `entry update` corrige "
-            "solo AHORA.md. Un registro de un ciclo cerrado se corrige a mano en bitacoras/."
-        )
+    if now is not None:
+        archive.archivar_en_vault(vault, now.date())
+    ruta = _fuente(vault, ahora_path, day)
+    relativa = ruta.relative_to(vault).as_posix()
+    body = link.rebasar(body, "AHORA.md", relativa)
+    texto = archivo.leer(ruta)
     dia = encabezado_de(day).removeprefix("## ") if day else None
     r = ubicar(texto, match, dia=dia, hora=hour)
     if r is None:
-        return _no_calza(match, "AHORA.md", dia, hour)
+        return _no_calza(match, relativa, dia, hour)
     # La marca (`**pendiente**:`) es de la ontología cerrada y la corrección no la
     # cambia: `--body` dice el texto, y el registro conserva lo que es.
     marca = "" if todo_core.prefijo_de_marca(body) else todo_core.prefijo_de_marca(r.cuerpo)
@@ -437,7 +438,7 @@ def actualizar_en_vault(
 
     original = texto.splitlines()[r.linea]
     prefijo = original[: len(original) - len(r.cuerpo)]
-    archivo.escribir(ahora_path, _con_linea(texto, r.linea, prefijo + cuerpo))
+    archivo.escribir(ruta, _con_linea(texto, r.linea, prefijo + cuerpo))
 
     # La fila del pendiente lleva el mismo texto que el registro, sin la marca, y
     # se busca sin links: la bitácora puede llevar uno que la tabla no tiene.
@@ -453,10 +454,26 @@ def actualizar_en_vault(
             if hubo:
                 archivo.escribir(pendientes_path, tabla)
                 filas = 1
-    regenerate.rehacer(vault, ["AHORA.md", "PENDIENTES.md"], hoy=now.date() if now else None)
+    regenerate.rehacer(vault, [relativa, "PENDIENTES.md"], hoy=now.date() if now else None)
 
     detalle = " y su fila en PENDIENTES.md" if filas else ""
     return Resultado.hecho(f"corregí el registro {_donde(r)}{detalle}:\n{prefijo}{cuerpo}")
+
+
+def _fuente(vault: Path, ahora: Path, dia: date | None) -> Path:
+    """The file where the record of `dia` lives: `AHORA.md`, or the logbook that covers it.
+
+    A day `AHORA.md` has stays there; one it does not goes to the logbook (either name
+    style) whose `from`-`to` contains it, if any.
+    """
+    from tuku.ahora import encabezado_de
+
+    if dia is None:
+        return ahora
+    encabezado = encabezado_de(dia)
+    if any(x.strip() == encabezado for x in archivo.leer(ahora).splitlines()):
+        return ahora
+    return _bitacora_de(vault, dia) or ahora
 
 
 def _bitacora_de(vault: Path, dia: date) -> Path | None:
@@ -497,17 +514,17 @@ def mover_en_vault(
         return resolved
     nombre = resolved
 
+    if now is not None:
+        archive.archivar_en_vault(vault, now.date())
     ruta = archivo_vault(vault, "AHORA.md")
     if day is not None:
+        ruta = _fuente(vault, ruta, day)
         limites = rango(archivo.leer(ruta))
-        if limites is None or not limites[0] <= day <= limites[1]:
-            cerrada = _bitacora_de(vault, day)
-            if cerrada is None:
-                return Resultado.rechazo(
-                    f"ni AHORA.md ni ninguna bitácora de bitacoras/ cubre el "
-                    f"{day.isoformat()}. Revisa la fecha de CUÁNDO."
-                )
-            ruta = cerrada
+        if ruta.name == "AHORA.md" and (limites is None or not limites[0] <= day <= limites[1]):
+            return Resultado.rechazo(
+                f"ni AHORA.md ni ninguna bitácora de bitacoras/ cubre el "
+                f"{day.isoformat()}. Revisa la fecha de CUÁNDO."
+            )
     relativa = ruta.relative_to(vault).as_posix()
     texto = archivo.leer(ruta)
     dia = encabezado_de(day).removeprefix("## ") if day else None

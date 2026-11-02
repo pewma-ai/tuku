@@ -28,13 +28,20 @@ el pendiente bajo su día y en el callout de su ámbito.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import date, datetime
 from pathlib import Path
 
-from tuku import archivo
+from tuku import archive, archivo
 from tuku import scope_tree as ambitos
-from tuku.config import ambito_por_defecto, archivo_vault, escalera, leer_config
-from tuku.entry import componer, stamp
+from tuku.config import (
+    ambito_por_defecto,
+    archivo_vault,
+    escalera,
+    leer_config,
+    semanas_de_archivo,
+)
+from tuku.entry import componer
 from tuku.plan import Change, State, apply
 from tuku.resultado import Resultado
 from tuku.todo_core import (
@@ -221,17 +228,24 @@ def plan_open(
     horizon = CON_FECHA if due else canonico(horizon or escalera[0], escalera)
 
     logbook = state.logbook
-    if not is_registered(logbook, marca):
+    extra: Mapping[str, str] = {}
+    when = day or now.date()
+    donde = archive.text_for(
+        logbook, state.history, day=when, today=now.date(), weeks=state.weeks
+    )
+    if not is_registered(donde, marca):
         linea = componer(
             hora=hour or now.strftime("%H:%M"),
             scope=limpio_scope,
             body=f"{ABRE}: {marca.cuerpo}",
             rutas=state.tree.paths,
         )
-        stamped = stamp(logbook, [linea], day=day or now.date())
-        if isinstance(stamped, Resultado):
-            return stamped
-        logbook = stamped
+        placed = archive.stamp(
+            logbook, state.history, [linea], day=when, today=now.date(), weeks=state.weeks
+        )
+        if isinstance(placed, Resultado):
+            return placed
+        logbook, extra = placed.logbook, placed.extra
     rows = abrir(
         state.todo,
         marca,
@@ -242,10 +256,10 @@ def plan_open(
         rutas=state.tree.paths,
     )
     return Change(
-        {"AHORA.md": logbook, "PENDIENTES.md": rows},
+        {"AHORA.md": logbook, "PENDIENTES.md": rows, **extra},
         f"pendiente abierto en «{horizon}»: {marca.cuerpo}",
         warnings=avisos_de_plazo(due, day, hour, now),
-        regenerate=("AHORA.md", "PENDIENTES.md"),
+        regenerate=("AHORA.md", "PENDIENTES.md", *(("bitacoras/",) if extra else ())),
     )
 
 
@@ -281,11 +295,14 @@ def abrir_en_vault(
     después. Con `due`, el horizonte es `con fecha`; sin ninguno de los dos, el
     primer escalón del autor. La decisión es de `plan_open`.
     """
+    archive.archivar_en_vault(vault, now.date())
     state = State(
         ambitos.read_tree(vault),
         logbook=archivo.leer(archivo_vault(vault, "AHORA.md")),
         todo=archivo.leer(archivo_vault(vault, "PENDIENTES.md")),
         horizons=tuple(leer_config(vault).horizontes),
+        history=archive.read_history(vault),
+        weeks=semanas_de_archivo(vault),
     )
     plan = plan_open(
         state, body=body, scope=scope, horizon=horizon, due=due, day=day, hour=hour, now=now
@@ -322,21 +339,28 @@ def plan_close(
     rows, paired = cerrar(state.todo, marca)
 
     logbook = state.logbook
-    if not is_registered(logbook, marca):
+    extra: Mapping[str, str] = {}
+    when = day or now.date()
+    donde = archive.text_for(
+        logbook, state.history, day=when, today=now.date(), weeks=state.weeks
+    )
+    if not is_registered(donde, marca):
         linea = componer(
             hora=hour or now.strftime("%H:%M"),
             scope=scope if scope is not None else found,
             body=cierre(marca.cuerpo),
             rutas=state.tree.paths,
         )
-        stamped = stamp(logbook, [linea], day=day or now.date())
-        if isinstance(stamped, Resultado):
-            return stamped
-        logbook = stamped
+        placed = archive.stamp(
+            logbook, state.history, [linea], day=when, today=now.date(), weeks=state.weeks
+        )
+        if isinstance(placed, Resultado):
+            return placed
+        logbook, extra = placed.logbook, placed.extra
     logbook = quitar_aperturas_cerradas(logbook, marca.cuerpo)
 
-    files = {"AHORA.md": logbook, "PENDIENTES.md": rows}
-    regenerate = ("AHORA.md", "PENDIENTES.md")
+    files = {"AHORA.md": logbook, "PENDIENTES.md": rows, **extra}
+    regenerate = ("AHORA.md", "PENDIENTES.md", *(("bitacoras/",) if extra else ()))
     if not paired:
         return Change(
             files,
@@ -373,11 +397,14 @@ def cerrar_en_vault(
     `scope_default` de la config. Con `scope`, manda `scope`. La decisión es de
     `plan_close`.
     """
+    archive.archivar_en_vault(vault, now.date())
     state = State(
         ambitos.read_tree(vault),
         logbook=archivo.leer(archivo_vault(vault, "AHORA.md")),
         todo=archivo.leer(archivo_vault(vault, "PENDIENTES.md")),
         default_scope=ambito_por_defecto(vault),
+        history=archive.read_history(vault),
+        weeks=semanas_de_archivo(vault),
     )
     plan = plan_close(state, body=body, scope=scope, day=day, hour=hour, now=now)
     return apply(vault, plan, skip=() if regenerar else ("todo",), today=now.date())

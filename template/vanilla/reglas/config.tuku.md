@@ -13,3 +13,4 @@ type: Config
 | `date_format`        | `MMM/DD`         | Cómo se escribe la fecha de un pendiente en el callout de su ámbito: `MMM` es el mes abreviado (`Ago`), `MM` el mes en número, `DD` el día y `AAAA` el año |
 | `context_note_limit` | `25`             | Cuántas notas de cada tipo enlazable trae `tuku context note`, las de `updated` más reciente                                                               |
 | `window_days`        | `7`              | Cuántos días hacia adelante mira `AHORA.md` para listar pendientes                                                                                         |
+| `archive_weeks`      | `2`              | Cuántas semanas completas, desde el lunes, conserva `AHORA.md`; lo anterior pasa a `bitacoras/`                                                            |

@@ -126,12 +126,43 @@ def test_update_corrige_el_registro_mas_reciente_la_fila_y_conserva_la_marca(
     )
 
 
-def test_update_rechaza_sin_registro_que_calce_y_fuera_del_ciclo(vault: Path) -> None:
+def test_update_rechaza_sin_registro_que_calce(vault: Path) -> None:
     antes = _ahora(vault)
     r = entry.actualizar_en_vault(vault, match="nada de esto", body="x")
     assert not r.ok and "ningún registro de AHORA.md contiene «nada de esto»" in r.mensaje
     r = entry.actualizar_en_vault(vault, match="x", body="y", day=date(2026, 7, 6))
-    assert not r.ok and "solo AHORA.md" in r.mensaje
+    assert not r.ok and "ningún registro de AHORA.md del Lunes 6 de julio" in r.mensaje
+    assert _ahora(vault) == antes
+
+
+def test_update_corrige_un_registro_de_una_bitacora_con_cualquiera_de_los_dos_nombres(
+    vault: Path,
+) -> None:
+    (vault / "bitacoras").mkdir()
+    nueva = vault / "bitacoras" / "bitacora-20260803-20260809.md"
+    vieja = vault / "bitacoras" / "bitacora-2026-07-27-2026-08-02-semana.md"
+    for ruta, desde, hasta, dia in (
+        (nueva, "2026-08-03", "2026-08-09", "Miércoles 5 de agosto"),
+        (vieja, "2026-07-27", "2026-08-02", "Miércoles 29 de julio"),
+    ):
+        ruta.write_text(
+            f"---\ntype: Logbook\nstatus: stable\nfrom: {desde}\nto: {hasta}\n---\n\n"
+            f"## {dia}\n\n- 10:00 - hablé con don Rodolfo\n",
+            encoding="utf-8",
+        )
+    antes = _ahora(vault)
+    for ruta, fecha in ((nueva, date(2026, 8, 5)), (vieja, date(2026, 7, 29))):
+        r = entry.actualizar_en_vault(
+            vault,
+            match="Rodolfo",
+            body="hablé con [don Rodolfo](notas/rodolfo.md)",
+            day=fecha,
+            now=AHORA,
+        )
+        assert r.ok, r.mensaje
+        assert "- 10:00 - hablé con [don Rodolfo](../notas/rodolfo.md)" in ruta.read_text(
+            encoding="utf-8"
+        )
     assert _ahora(vault) == antes
 
 

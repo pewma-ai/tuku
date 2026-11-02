@@ -26,18 +26,23 @@ def _cmd_scope_create(args: argparse.Namespace) -> int:
 
 
 def _cmd_scope_update(args: argparse.Namespace) -> int:
-    return traducir(scope.actualizar(args.vault, args.name, args.keyword), "tuku scope update")
+    return traducir(
+        scope.actualizar(args.vault, args.name, args.keyword, today=args.now.date()),
+        "tuku scope update",
+    )
 
 
 def _cmd_scope_move(args: argparse.Namespace) -> int:
     return traducir(
-        scope.mover_en_vault(args.vault, args.name, parent=args.parent), "tuku scope move"
+        scope.mover_en_vault(args.vault, args.name, parent=args.parent, today=args.now.date()),
+        "tuku scope move",
     )
 
 
 def _cmd_scope_rename(args: argparse.Namespace) -> int:
     return traducir(
-        scope.renombrar_en_vault(args.vault, args.name, args.nuevo), "tuku scope rename"
+        scope.renombrar_en_vault(args.vault, args.name, args.nuevo, today=args.now.date()),
+        "tuku scope rename",
     )
 
 

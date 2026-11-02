@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from tuku import archivo
+from tuku import archive, archivo
 from tuku.ahora import SEMANA, como_cerrar, nombre_del_ciclo, rango
 from tuku.config import leer_config, resolver_plantilla_ahora
 from tuku.init import DIAS, MESES
@@ -231,6 +231,7 @@ def abrir_en_vault(
     Without `desde` the cycle starts the day after the previous one ends (the open
     `AHORA.md` or, once archived, the latest logbook) and, with no previous, today.
     """
+    archive.archivar_en_vault(vault, now.date())
     names = leer_config(vault).nombres_de_ciclo
     if nombre is not None and nombre not in names and not force:
         return Resultado.rechazo(

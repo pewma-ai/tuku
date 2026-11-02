@@ -23,13 +23,12 @@ from __future__ import annotations
 import re
 import unicodedata
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
 
-from tuku import archivo, link
-from tuku.config import leer_config
-from tuku.entry import stamp
+from tuku import archive, archivo, link
+from tuku.config import SEMANAS_POR_DEFECTO, leer_config, semanas_de_archivo
 from tuku.plan import Change, apply
 from tuku.resultado import Resultado
 from tuku.scope_tree import Tree, read_tree, resolve_scope
@@ -265,6 +264,8 @@ class NoteState:
     logbook: str | None
     notes: frozenset[str]
     note_types: tuple[str, ...] = ()
+    history: Mapping[str, str] = field(default_factory=dict)
+    weeks: int = SEMANAS_POR_DEFECTO
 
 
 def plan_create(
@@ -283,10 +284,11 @@ def plan_create(
     """The change of `tuku note create`: the note and its record in `AHORA.md`, or a rejection.
 
     **Nada se escribe hasta que todo cabe.** La constancia se compone y se prueba
-    contra `AHORA.md` en memoria antes de tocar el disco, porque si el día cae
-    fuera del ciclo abierto la operación se rechaza entera. Escribir la nota
-    primero dejaba el vault a medias, con una nota que nada registra, y el
-    rechazo salía como traceback.
+    contra `AHORA.md` en memoria antes de tocar el disco, porque si el día es
+    futuro la operación se rechaza entera. Escribir la nota primero dejaba el
+    vault a medias, con una nota que nada registra, y el rechazo salía como
+    traceback. La constancia de un día anterior a la ventana va a la bitácora
+    semanal que le corresponde.
     """
     if not slug(title):
         return Resultado.rechazo(
@@ -323,13 +325,30 @@ def plan_create(
         constancia = registro_de_constancia(
             Path(nombre), hour=hora, scope=scope, rutas=state.tree.paths
         )
-        if constancia not in state.logbook:
-            stamped = stamp(state.logbook, [constancia], day=hoy)
-            if isinstance(stamped, Resultado):
-                return stamped
-            files["AHORA.md"] = stamped
+        donde = archive.text_for(
+            state.logbook, state.history, day=hoy, today=now.date(), weeks=state.weeks
+        )
+        if constancia not in donde:
+            placed = archive.stamp(
+                state.logbook,
+                state.history,
+                [constancia],
+                day=hoy,
+                today=now.date(),
+                weeks=state.weeks,
+            )
+            if isinstance(placed, Resultado):
+                return placed
+            if placed.logbook != state.logbook:
+                files["AHORA.md"] = placed.logbook
+            files.update(placed.extra)
             pages = (scope,) if scope else ()
-    return Change(files, f"nota creada en {state.tree.vault / ruta}.", pages=pages)
+    return Change(
+        files,
+        f"nota creada en {state.tree.vault / ruta}.",
+        regenerate=("bitacoras/",) if any(k.startswith("bitacoras/") for k in files) else (),
+        pages=pages,
+    )
 
 
 def crear_con_constancia(
@@ -358,6 +377,7 @@ def crear_con_constancia(
     la constancia solo se añade si no estaba. `record=False` la omite. La decisión
     es de `plan_create`.
     """
+    archive.archivar_en_vault(vault, now.date())
     dir_notas = vault / "notas"
     ahora_path = vault / "AHORA.md"
     state = NoteState(
@@ -367,6 +387,8 @@ def crear_con_constancia(
         if dir_notas.is_dir()
         else frozenset(),
         note_types=tuple(leer_config(vault).tipos_nota) if subtype is not None else (),
+        history=archive.read_history(vault),
+        weeks=semanas_de_archivo(vault),
     )
     plan = plan_create(
         state,
@@ -415,6 +437,7 @@ def renombrar_en_vault(vault: Path, viejo: str, nuevo: str, *, now: datetime) ->
     """
     from tuku import rename
 
+    archive.archivar_en_vault(vault, now.date())
     if not nuevo.strip():
         return Resultado.rechazo("falta el título nuevo. Pasa el nombre que quieres darle.")
     origen = vault / "notas" / f"{slug(viejo)}.md"

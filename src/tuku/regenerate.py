@@ -62,7 +62,7 @@ from collections.abc import Iterable, Mapping
 from datetime import date, timedelta
 from pathlib import Path
 
-from tuku import archivo, link, scope, scope_tree, todo_core
+from tuku import archive, archivo, link, scope, scope_tree, todo_core
 from tuku.ahora import dias, insertar_dia, rango
 from tuku.config import (
     FORMATO_FECHA,
@@ -148,14 +148,17 @@ def regenerar(
     `tuku` instalado: se deriva de él y no del canónico, y regenerarlo es la
     forma de ponerlo al día tras actualizar TUKU. Solo escribe lo que cambió.
 
-    `hoy` es el día del reloj de `cli.main`: con él se rehace además el bloque de
-    pendientes de los próximos días de `AHORA.md` y nacen los días que lo piden.
+    `hoy` es el día del reloj de `cli.main`: con él se archiva primero lo que quedó
+    fuera de la ventana de `AHORA.md`, y se rehace además el bloque de pendientes de
+    los próximos días y nacen los días que lo piden.
     """
     cambiados: list[str] = []
 
     if tema not in ("comandos", "libro"):
         if (rechazo := _rechazo_del_canonico(vault)) is not None:
             return rechazo
+        if hoy is not None:
+            archive.archivar_en_vault(vault, hoy)
         derivados = _rehacer(vault, vistas=tema != "scope", paginas=tema != "todo", hoy=hoy)
         cambiados += [p.relative_to(vault).as_posix() for p in derivados]
         if tema != "todo":

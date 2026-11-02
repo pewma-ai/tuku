@@ -130,6 +130,7 @@ def test_las_preferencias_salen_de_un_solo_lector_con_su_default(tmp_path: Path)
     assert por_defecto.ambito_por_defecto is None
     assert (por_defecto.formato_fecha, por_defecto.limite_de_notas) == ("MMM/DD", 25)
     assert por_defecto.window_days == 7
+    assert por_defecto.archive_weeks == 2
 
     texto = (
         "| Campo | Valor | Qué |\n| --- | --- | --- |\n"
@@ -137,14 +138,18 @@ def test_las_preferencias_salen_de_un_solo_lector_con_su_default(tmp_path: Path)
         "| `scope_default` | `casa` | x |\n| `date_format` | `DD/MM` | x |\n"
         "| `context_note_limit` | `diez` | x |\n"
         "| `window_days` | `10` | x |\n"
+        "| `archive_weeks` | `3` | x |\n"
     )
     prefs = leer_preferencias(texto=texto)
     assert prefs.zona_horaria == "Europe/Madrid"
     assert (prefs.ambito_por_defecto, prefs.formato_fecha) == ("casa", "DD/MM")
     assert prefs.limite_de_notas == 25, "un límite que no es un entero cae al default"
-    assert prefs.window_days == 10
+    assert (prefs.window_days, prefs.archive_weeks) == (10, 3)
     for malo in ("0", "-3", "siete", "2.5"):
         assert leer_preferencias(texto=f"| `window_days` | `{malo}` | x |\n").window_days == 7
+        assert (
+            leer_preferencias(texto=f"| `archive_weeks` | `{malo}` | x |\n").archive_weeks == 2
+        )
 
 
 def test_el_reloj_sigue_la_zona_de_la_config_y_una_invalida_avisa(
@@ -178,6 +183,8 @@ def test_doctor_rechaza_una_tz_que_el_sistema_no_conoce() -> None:
 
     base = config("America/Santiago")
     assert revisar_config(base + "| `window_days` | `14` | x |\n").sano
-    for valor in ("0", "siete", "-1"):
-        invalida = revisar_config(base + f"| `window_days` | `{valor}` | x |\n")
-        assert not invalida.sano and "`window_days`" in invalida.salida
+    assert revisar_config(base + "| `archive_weeks` | `3` | x |\n").sano
+    for campo in ("window_days", "archive_weeks"):
+        for valor in ("0", "siete", "-1"):
+            invalida = revisar_config(base + f"| `{campo}` | `{valor}` | x |\n")
+            assert not invalida.sano and f"`{campo}`" in invalida.salida
