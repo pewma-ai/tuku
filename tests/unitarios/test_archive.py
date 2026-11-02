@@ -19,9 +19,6 @@ P_ARCHIVADO = "[personal](../ambitos/personal/personal.md)"
 AHORA = f"""---
 type: Logbook
 status: draft
-cycle: semana
-from: 2026-10-26
-to: 2026-11-01
 ---
 # Actividad diaria
 
@@ -111,7 +108,7 @@ def test_una_semana_completa_viaja_sola_con_sus_registros_y_sus_links_recalculad
     )
     assert "Foco" not in bitacora and "Pendientes" not in bitacora
     assert "## Lunes 2 de noviembre" in ahora and "Foco" in ahora
-    assert "cena con" not in ahora and "from: 2026-11-02\nto: 2026-11-15" in ahora
+    assert "cena con" not in ahora and "from:" not in ahora
     assert plan.regenerate == ("AHORA.md", "bitacoras/")
 
 
@@ -166,27 +163,32 @@ def test_archivar_dos_veces_no_cambia_nada() -> None:
     assert otra.files == {} and otra.message == ""
 
 
-def test_sin_dias_antiguos_ni_rango_lejano_no_hay_cambio() -> None:
+def test_sin_dias_antiguos_no_hay_cambio() -> None:
     assert _plan(AHORA, date(2026, 11, 2)).files.keys() == {"AHORA.md", DOMINGO_25}
     sin_antiguos = "".join(AHORA.partition("## Domingo 25")[0:1])
     assert _plan(sin_antiguos, date(2026, 11, 2)).files == {}
-    sin_rango = AHORA.replace("from: 2026-10-26\nto: 2026-11-01\n", "")
-    assert _plan(sin_rango, date(2026, 12, 25)).files == {}
 
 
 def test_un_dia_sin_registros_se_descarta_sin_crear_bitacora() -> None:
     vacio = (
-        "---\nfrom: 2026-10-19\nto: 2026-10-25\n---\n# Actividad diaria\n\n"
+        "---\ntype: Logbook\n---\n# Actividad diaria\n\n"
         "## Lunes 19 de octubre\n\n"
     )
     plan = _plan(vacio, date(2026, 11, 9))
     assert set(plan.files) == {"AHORA.md"} and "## Lunes 19" not in plan.files["AHORA.md"]
 
 
-def test_un_rango_muy_lejano_se_mueve_para_que_los_dias_nuevos_tengan_su_año() -> None:
-    vacio = "---\nfrom: 2026-01-05\nto: 2026-01-11\n---\n# Actividad diaria\n"
-    plan = _plan(vacio, date(2026, 12, 7))
-    assert "from: 2026-11-30\nto: 2026-12-13" in plan.files["AHORA.md"]
+def test_un_ahora_sembrado_con_ciclos_pierde_cycle_from_y_to_al_escribir() -> None:
+    viejo = (
+        "---\ntype: Logbook\nstatus: draft\ncycle: semana\nfrom: 2026-01-05\nto: 2026-01-11\n"
+        "---\n# Actividad diaria\n\n## Lunes 7 de diciembre\n\n- 08:00 - hoy\n"
+    )
+    plan = _plan(viejo, date(2026, 12, 7))
+    assert plan.files["AHORA.md"].startswith("---\ntype: Logbook\nstatus: draft\n---\n")
+    assert "- 08:00 - hoy" in plan.files["AHORA.md"] and plan.message == ""
+    assert _plan(plan.files["AHORA.md"], date(2026, 12, 7)).files == {}
+    assert len(archive.lint_legacy(viejo, ciclo_user_md=True)) == 2
+    assert archive.lint_legacy(plan.files["AHORA.md"], ciclo_user_md=False) == []
 
 
 # --- sobre un vault ------------------------------------------------------------
@@ -194,7 +196,7 @@ def test_un_rango_muy_lejano_se_mueve_para_que_los_dias_nuevos_tengan_su_año() 
 
 @pytest.fixture
 def vault(tmp_path: Path) -> Path:
-    return init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 10, 26))
+    return init.init(tmp_path / "v", home=RAIZ_REPO)
 
 
 def _tuku(vault: Path, ahora: datetime, *argv: str) -> int:
@@ -247,7 +249,6 @@ ESCRIBEN: list[tuple[str, ...]] = [
     ("scope", "move", "casa", "--parent", "personal"),
     ("scope", "rename", "casa", "hogar"),
     ("regenerate", "scope"),
-    ("process", "cycle"),
 ]
 
 
@@ -266,7 +267,7 @@ def test_cada_comando_que_escribe_archiva_primero(vault: Path, argv: tuple[str, 
 def test_los_comandos_que_solo_leen_no_archivan(vault: Path) -> None:
     assert _tuku(vault, SEMANA_1, "entry", "create", "--body", "algo de la semana") == EXITO
     foto = _foto(vault)
-    for argv in (("context",), ("context", "entry"), ("doctor",), ("doctor", "cycle")):
+    for argv in (("context",), ("context", "entry"), ("doctor",), ("doctor", "archive")):
         _tuku(vault, LUNES_2, *argv)
         assert _foto(vault) == foto, argv
 
@@ -308,15 +309,37 @@ def test_un_dia_futuro_se_rechaza_y_no_deja_nada(vault: Path) -> None:
     assert archivado == {} or all(k.startswith("bitacoras/") for k in archivado)
 
 
-def test_doctor_cycle_avisa_de_los_dias_antiguos_sin_archivarlos(
+def test_doctor_archive_avisa_de_los_dias_antiguos_sin_archivarlos(
     vault: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     assert _tuku(vault, SEMANA_1, "entry", "create", "--body", "del miércoles") == EXITO
     capsys.readouterr()
-    assert _tuku(vault, LUNES_2, "doctor", "cycle") == EXITO
+    assert _tuku(vault, LUNES_2, "doctor", "archive") == EXITO
     salida = capsys.readouterr()
     assert "aviso: el día 2026-10-28 es anterior a la ventana" in salida.out + salida.err
     assert "del miércoles" in _leer(vault, "AHORA.md")
+
+
+def test_un_vault_sembrado_con_ciclos_funciona_y_doctor_avisa_sin_fallar(
+    vault: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ahora = vault / "AHORA.md"
+    ahora.write_text(
+        _leer(vault, "AHORA.md").replace(
+            "status: draft\n",
+            "status: draft\ncycle: semana\nfrom: 2026-10-26\nto: 2026-11-01\n",
+        ),
+        encoding="utf-8",
+    )
+    (vault / "reglas" / "ciclo.user.md").write_text("| Ciclo | Días |\n|---|---|\n", "utf-8")
+    capsys.readouterr()
+    assert _tuku(vault, SEMANA_1, "doctor", "archive") == EXITO
+    salida = capsys.readouterr()
+    assert "`cycle`, `from` o `to`" in salida.out + salida.err
+    assert "reglas/ciclo.user.md: aviso" in salida.out + salida.err
+
+    assert _tuku(vault, SEMANA_1, "entry", "create", "--body", "hoy") == EXITO
+    assert "cycle:" not in _leer(vault, "AHORA.md") and "hoy" in _leer(vault, "AHORA.md")
 
 
 def test_doctor_avisa_de_dias_antiguos_y_falla_si_la_bitacora_no_dice_su_nombre() -> None:

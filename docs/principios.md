@@ -20,7 +20,7 @@ Cero configuración inicial. El primer día hay una página en blanco y una sola
 
 Corolario de diseño: **lo que debe emerger no se especifica por adelantado**. Se deja espacio para que la práctica aparezca sola, y cuando se consolida, se anota como regla.
 
-Segundo corolario: **nada de lo que sirve para anticipar puede ser requisito para registrar**. Declarar recurrencias o dimensionar cuánto cabe en un ciclo son piezas deseables, no puertas de entrada. Sin ellas el sistema registra y devuelve lo registrado; con ellas además se adelanta. 
+Segundo corolario: **nada de lo que sirve para anticipar puede ser requisito para registrar**. Declarar recurrencias o dimensionar cuánto cabe en una semana son piezas deseables, no puertas de entrada. Sin ellas el sistema registra y devuelve lo registrado; con ellas además se adelanta. 
 
 ### 3. El agente es un secretario, no un dueño
 

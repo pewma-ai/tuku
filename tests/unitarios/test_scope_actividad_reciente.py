@@ -1,4 +1,4 @@
-"""`## Actividad reciente`: lo del ámbito en los ciclos cerrados de los últimos doce meses."""
+"""`## Actividad reciente`: lo del ámbito en las bitácoras de los últimos doce meses."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ def _bitacora(desde: str, hasta: str, dias: str) -> str:
 def test_agrupa_por_mes_del_mas_reciente_al_mas_antiguo_y_deja_fuera_lo_de_hace_mas_de_un_ano(
     tmp_path: Path,
 ) -> None:
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 10, 12))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     scope.crear(v, "colegio-los-robles")
     (v / "bitacoras").mkdir()
     reciente = _bitacora(
@@ -38,7 +38,7 @@ def test_agrupa_por_mes_del_mas_reciente_al_mas_antiguo_y_deja_fuera_lo_de_hace_
     )
     (v / "bitacoras" / "bitacora-2025-08-04-2025-08-10.md").write_text(vieja, encoding="utf-8")
 
-    scope.actualizar_pagina(v, "colegio-los-robles")
+    scope.actualizar_pagina(v, "colegio-los-robles", date(2026, 10, 5))
     pagina = (v / "ambitos/colegio-los-robles/colegio-los-robles.md").read_text(
         encoding="utf-8"
     )

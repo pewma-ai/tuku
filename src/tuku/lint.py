@@ -10,12 +10,9 @@ Fase 1 de `devel/epics.md`, criterio de salida. Las dos ontologías de
   se reporta como pregunta para formalizarlo después, nunca como error. Un lint
   que rechaza vocabulario nuevo impide que la organización emerja.
 
-Un registro fuera del rango del ciclo abierto también es error, y el lint no
-inventa los días que faltan para acomodarlo.
-
 **Qué lee y escribe:** lee `AHORA.md` y los vocabularios de `reglas/`. **No escribe.**
 Verificar y corregir son operaciones distintas (`spec/cli.md`).
-**A mano:** leer los registros del ciclo comparando las marcas contra el libro
+**A mano:** leer los registros comparando las marcas contra el libro
 de estilo.
 """
 
@@ -23,7 +20,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import date
 
 from tuku import ahora as _ahora
 from tuku import link
@@ -66,41 +62,20 @@ class Hallazgo:
 def lint(ahora: str, *, abiertos: list[str]) -> list[Hallazgo]:
     """Los hallazgos de `AHORA.md`, en orden de aparición. No modifica nada."""
     hallazgos: list[Hallazgo] = []
-    rango = _ahora.rango(ahora)
     cerrada_plegada = {marca.casefold(): marca for marca in CERRADA}
     cerrada_plegada[TACHADA.casefold()] = "(Hecho)"
     abiertos_plegados = {termino.casefold() for termino in abiertos}
-    dia_actual: date | None = None
-    dia_fuera = False
     en_dia = False
 
     for n, linea in enumerate(ahora.splitlines(), start=1):
         if linea.startswith("#"):
             en_dia = _ahora.es_dia(linea)
         if linea.startswith("## "):
-            dia_fuera = False
-            dia_actual = None
-            if rango is not None:
-                desde, hasta = rango
-                dia_actual = _ahora.fecha_del_dia(linea, desde, hasta)
-                dia_fuera = dia_actual is not None and not (desde <= dia_actual <= hasta)
             continue
 
         # Un registro sin hora es válido en un día pasado (`spec/bitacora.md`).
         if not (_HORA.match(linea) or (en_dia and linea.startswith("- "))):
             continue
-
-        if dia_fuera and dia_actual is not None:
-            desde, hasta = rango  # type: ignore[misc]
-            hallazgos.append(
-                Hallazgo(
-                    n,
-                    ERROR,
-                    f"el registro cae en {dia_actual.isoformat()}, fuera del ciclo "
-                    f"abierto ({desde.isoformat()} a {hasta.isoformat()})",
-                    "Muévelo al ciclo que le corresponde, o abre ese ciclo.",
-                )
-            )
 
         cierre = _CIERRE.match(linea)
         if cierre is not None and cierre.group("texto") != "Hecho":

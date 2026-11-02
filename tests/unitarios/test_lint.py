@@ -36,7 +36,7 @@ to: 2026-08-17
 """
 
 
-CABECERA = "---\ntype: Logbook\nstatus: draft\nfrom: 2026-08-11\nto: 2026-08-17\n---\n\n"
+CABECERA = "---\ntype: Logbook\nstatus: draft\n---\n\n"
 
 
 def test_lint_de_lo_valido_o_sin_registros_no_tiene_hallazgos() -> None:
@@ -84,11 +84,9 @@ def test_un_vocabulario_abierto_no_declarado_es_pregunta_y_declarado_no_dice_nad
     assert lint.lint(declarado, abiertos=["llamada"]) == [], "sin distinguir mayúsculas"
 
 
-def test_un_registro_fuera_del_ciclo_abierto_es_error() -> None:
-    texto = f"{CABECERA}## Martes 25 de agosto\n- 09:00 - registro fuera de ciclo\n"
-    [error] = [h for h in lint.lint(texto, abiertos=[]) if h.grado == ERROR]
-    assert "fuera del ciclo abierto" in error.defecto
-    assert "Muévelo al ciclo que le corresponde" in error.correccion
+def test_un_registro_de_cualquier_dia_es_valido() -> None:
+    texto = f"{CABECERA}## Martes 25 de agosto\n- 09:00 - registro de un día antiguo\n"
+    assert lint.lint(texto, abiertos=[]) == []
 
 
 def test_formatear_y_str_de_los_hallazgos() -> None:

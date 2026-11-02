@@ -1,8 +1,8 @@
 """tuku init: siembra un vault nuevo copiando una variante de `template/`.
 
 Reemplaza a `install.sh` y a `src/install_test_scenario.py`. Copia
-`<TUKU_HOME>/template/<variante>` al destino y resuelve las fechas del primer
-ciclo en `AHORA.md`. **No toca la red:** es copia de archivos y nada más.
+`<TUKU_HOME>/template/<variante>` al destino y escribe el
+`AHORA.md` desde su plantilla. **No toca la red:** es copia de archivos y nada más.
 
 `TUKU_HOME` es el árbol de TUKU instalado. Se resuelve, en este orden:
 
@@ -23,14 +23,13 @@ from __future__ import annotations
 import hashlib
 import os
 import shutil
-from datetime import date, timedelta
 from importlib import metadata
 from pathlib import Path
 
 _PAQUETE = Path(__file__).resolve().parent
 _HOME_EMPAQUETADO = _PAQUETE / "_home"
 
-#: Los días en el orden del ciclo, que va de lunes a domingo (`spec/ciclo.md`).
+#: Los días de la semana, de lunes a domingo.
 DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 MESES = [
     "enero",
@@ -235,40 +234,6 @@ def _sembrar_version(destino: Path, version: str) -> None:
     config.write_text(contenido, encoding="utf-8")
 
 
-def lunes_de_esta_semana(hoy: date) -> date:
-    return hoy - timedelta(days=hoy.weekday())
-
-
-def _sembrar_ahora(contenido: str, desde: date) -> str:
-    """Reemplaza los placeholders de `AHORA.md` por fechas reales.
-
-    Soporta plantillas con día inicial y final, y plantillas completas de 7 días.
-    """
-    hasta = desde + timedelta(days=6)
-    dia_inicio = f"## {DIAS[desde.weekday()]} {desde.day} de {MESES[desde.month - 1]}"
-    dia_fin = f"## {DIAS[hasta.weekday()]} {hasta.day} de {MESES[hasta.month - 1]}"
-
-    contenido = contenido.replace("from: AAAA-MM-DD", f"from: {desde.isoformat()}")
-    contenido = contenido.replace("to: AAAA-MM-DD", f"to: {hasta.isoformat()}")
-    contenido = contenido.replace("cycle: NOMBRE", "cycle: semana")
-
-    solo_extremos = (
-        "## Lunes DD de mes" in contenido
-        and "## Domingo DD de mes" in contenido
-        and "## Martes DD de mes" not in contenido
-    )
-    if solo_extremos:
-        contenido = contenido.replace("## Lunes DD de mes", dia_inicio)
-        contenido = contenido.replace("## Domingo DD de mes", dia_fin)
-    else:
-        for i in range(7):
-            fecha = desde + timedelta(days=i)
-            placeholder = f"## {DIAS[i]} DD de mes"
-            real = f"## {DIAS[fecha.weekday()]} {fecha.day} de {MESES[fecha.month - 1]}"
-            contenido = contenido.replace(placeholder, real)
-    return contenido
-
-
 def _sembrar_autor(destino: Path, autor: str) -> None:
     """Escribe el nombre del autor en la fila `Nombre` de `reglas/autor.user.md`.
 
@@ -317,7 +282,6 @@ def init(
     variante: str | None = None,
     author: str | None = None,
     autor: str | None = None,
-    desde: date,
     force: bool = False,
     home: Path | str | None = None,
     comandos: str | None = None,
@@ -325,9 +289,8 @@ def init(
     """Siembra un vault de la `variant` en `destino` y devuelve su ruta.
 
     Sembrar en un directorio que ya tiene contenido se rechaza con
-    `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. El ciclo
-    sembrado es la semana de lunes a domingo que contiene `desde`, que quien
-    invoca resuelve con su reloj. `author`, si
+    `DestinoNoVacio`, salvo `force=True`, que lo reemplaza entero. `AHORA.md`
+    nace de `reglas/plantilla/AHORA.md`, sin días. `author`, si
     se pasa y no viene vacío, se escribe en `reglas/autor.user.md`. `comandos`, si
     se pasa, es `reglas/comandos.tuku.md`: lo compone la capa del CLI, que es la
     que conoce los comandos.
@@ -352,17 +315,10 @@ def init(
 
     shutil.copytree(variante_dir, destino, dirs_exist_ok=True)
 
-    desde = lunes_de_esta_semana(desde)
     ahora = destino / "AHORA.md"
     plantilla_ahora = destino / "reglas" / "plantilla" / "AHORA.md"
     if plantilla_ahora.is_file():
-        ahora.write_text(
-            _sembrar_ahora(plantilla_ahora.read_text(encoding="utf-8"), desde), encoding="utf-8"
-        )
-    elif ahora.exists():
-        ahora.write_text(
-            _sembrar_ahora(ahora.read_text(encoding="utf-8"), desde), encoding="utf-8"
-        )
+        shutil.copyfile(plantilla_ahora, ahora)
 
     _sembrar_tz(destino)
     _sembrar_version(destino, version_del_home(home_dir) or version_de_tuku())

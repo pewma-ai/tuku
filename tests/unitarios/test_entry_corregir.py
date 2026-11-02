@@ -35,7 +35,7 @@ to: 2026-08-16
 
 @pytest.fixture
 def vault(tmp_path: Path) -> Path:
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     scope.crear(v, "colegio-los-robles")
     return v
 

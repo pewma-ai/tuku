@@ -38,7 +38,7 @@ _AUTOR = re.compile(r'^```autor(?:\s+TUKU_NOW="([^"]*)")?\s*$')
 _ITEM = re.compile(r"^(\d+)\.\s+(.*)$")
 _TITULO = re.compile(r"^##\s+Escenario:\s*(.+?)\s*$")
 _FILA = re.compile(r"^\|\s*(\d+)\s*\|[^|]*\|\s*(.+?)\s*\|\s*$")
-_COMANDO = re.compile(r"`(?:tuku\s+)?((?:scope|todo|entry|note|cycle)\s+\w+)[^`]*`")
+_COMANDO = re.compile(r"`(?:tuku\s+)?((?:scope|todo|entry|note)\s+\w+)[^`]*`")
 _COPIA = re.compile(r"^cp -r \.\./\.\./([^/\s]+)/([^/\s]+)/mi-vault \.$")
 
 
@@ -626,7 +626,7 @@ def sembrar(plan: Plan, slug: str, escenario: str) -> Path:
     """El vault donde corre un plan literal, armado como lo arma su `Dado`.
 
     Con `cp -r` de otro escenario, parte de ese vault; el resto de los comandos
-    (`tuku init mi-vault --at …`) corren en el banco, con el CLI del checkout.
+    (`tuku init mi-vault`) corren en el banco, con el CLI del checkout.
     """
     if plan.base is not None:
         v = conversar.preparar(asegurar_base(plan), slug, escenario)

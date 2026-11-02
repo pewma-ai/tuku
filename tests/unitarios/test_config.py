@@ -61,7 +61,6 @@ def test_leer_config_sobre_template_vanilla() -> None:
     assert cfg.vault == vanilla
     # En el template la zona es el placeholder; `tuku init` la sustituye al sembrar.
     assert cfg.zona_horaria == "TZ-DEL-SISTEMA"
-    assert cfg.nombres_de_ciclo == ("semana",)
     assert cfg.autor is None
 
     assert "progreso" in cfg.clasificaciones
@@ -90,9 +89,6 @@ def test_leer_config_en_memoria_sin_disco(tmp_path: Path) -> None:
         "reglas/notas.user.md": (
             "| Tipo | Significa |\n| --- | --- |\n| `persona` | alguien |\n"
         ),
-        "reglas/ciclo.user.md": (
-            "| Ciclo | Días |\n| --- | --- |\n| `turno` | 8 |\n| `descanso` | 6 |\n"
-        ),
     }
     texto_plantilla = "PLANTILLA PERSONALIZADA"
 
@@ -104,7 +100,6 @@ def test_leer_config_en_memoria_sin_disco(tmp_path: Path) -> None:
         texto_plantilla_ahora=texto_plantilla,
     )
     assert cfg.zona_horaria == "UTC"
-    assert cfg.nombres_de_ciclo == ("turno", "descanso")
     assert cfg.autor == "Test Bot"
     assert cfg.clasificaciones == ["alfa"]
     assert cfg.plantilla_ahora == "PLANTILLA PERSONALIZADA"

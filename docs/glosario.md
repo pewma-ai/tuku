@@ -9,21 +9,21 @@
 | **Vault** | El repositorio completo del autor: bitácoras, pendientes, notas, ámbitos y sus reglas. Es todo el directorio, no un archivo. |
 | **TUKU** | El software que mantiene ese vault: las reglas, los comandos y el agente. No es el vault. |
 | **MaC** | *Management as Code*, la metodología de PEWMA.AI de la que TUKU es la variante personal. |
-| **Estado cero** | El vault recién instalado, antes de la primera palabra: infraestructura vacía y un ciclo semanal abierto. |
-| **Primitiva** | Cada uno de los tipos de cosa que el sistema guarda: bitácora, pendientes, notas, ámbitos y cadencias. El ciclo no es una: es un proceso que se compone sobre ellas. |
+| **Estado cero** | El vault recién instalado, antes de la primera palabra: infraestructura vacía y un `AHORA.md` con solo el foco. |
+| **Primitiva** | Cada uno de los tipos de cosa que el sistema guarda: bitácora, pendientes, notas, ámbitos y cadencias. La ventana de `AHORA.md` no es una: es una vista que se compone sobre ellas. |
 
 ## Los archivos
 
 | Archivo o carpeta | Qué guarda |
 |---|---|
-| `AHORA.md` | El ciclo en curso: los registros de cada día y, bajo cada día, sus pendientes con fecha, propagados desde `PENDIENTES.md`. |
-| `bitacoras/` | Los ciclos ya cerrados, inmutables y autocontenidos. |
+| `AHORA.md` | Lo reciente: el foco, los pendientes de la ventana y los registros de cada día, del más nuevo al más viejo, con sus pendientes con fecha propagados desde `PENDIENTES.md`. |
+| `bitacoras/` | Las semanas archivadas, de lunes a domingo, una bitácora por semana: inmutables y autocontenidas. |
 | `PENDIENTES.md` | Todos los compromisos abiertos. Fuente de verdad, nunca derivado. |
 | `ambitos/` | El árbol de frentes de actividad de la vida del autor. |
 | `notas/` | El zettelkasten: notas libres y notas tipadas. |
 | `reglas/` | Las reglas de las automatizaciones, en prosa, y la configuración del vault. |
-| `planes/` | Un plan por ciclo, escrito antes de empezarlo. |
-| `reportes/` | Lo generado que el autor lee: resúmenes de ciclo, cadencias, pendientes por actividad. |
+| `planes/` | Un plan por semana, escrito antes de empezarla. |
+| `reportes/` | Lo generado que el autor lee: resúmenes de la semana, cadencias, pendientes por actividad. |
 | `archivado/` | Ramas cerradas, con sus enlaces todavía resolviendo. |
 | `AGENTS.md` | Reglas que aplican a un directorio y a todo lo que cuelga de él. Uno por carpeta. |
 | `CADENCIAS.md` | Las cadencias de un directorio. Existe donde se declaró la primera. |
@@ -55,11 +55,11 @@
 | **Callout** | El bloque `> [!todo]` que agrupa pendientes: los del día bajo cada día de `AHORA.md`, y los de cada ámbito en `ambitos/PENDIENTES-AMBITOS.md`. |
 | **Transclusión** | Mostrar un texto en otro archivo sin copiarlo, con `![[archivo#^ancla]]`. Se usa cuando el origen ya agrupa contiguo lo que el destino muestra. Es una de las tres extensiones de Obsidian que TUKU admite ([`../devel/VAULT/spec-anterior/markdown.md`](../devel/VAULT/spec-anterior/markdown.md)) y el único wikilink que escribe: se reconoce por el `!` inicial, y los demás enlaces son links Markdown. |
 | **Propagación** | Escribir una copia derivada donde hace falta, cuando el origen no agrupa contiguo lo que el destino muestra. Un comando la produce y la regenera; si discrepa de la fuente, la que está mal es la copia. |
-| **Ciclo** | La ventana de tiempo que se abre, se planifica y se cierra. Semanal por defecto, o el turno real del autor. |
+| **Ventana** | Los días que `AHORA.md` muestra: `archive_weeks` semanas completas desde el lunes hacia atrás y, hacia adelante, los `window_days` días de pendientes. Lo anterior se archiva solo en `bitacoras/`. |
 | **Cadencia** | Una regla que emite un pendiente con fecha cada cierto tiempo. Vive en el `CADENCIAS.md` del ámbito al que pertenece. |
 | **Bruto** | Lo que rinde un día del autor antes de restar nada. Se declara una sola vez, en `ambitos/personal/CAPACIDAD.md`. |
-| **Costo fijo** | Lo que un ámbito consume del ciclo antes de que se planifique nada: un turno, un traslado, un rol operativo. Se resta del bruto, y varios se acumulan. |
-| **Capacidad** | Lo que queda del bruto después de restar los costos fijos. Es contra eso que se planifica, no contra el ciclo entero. |
+| **Costo fijo** | Lo que un ámbito consume del tiempo antes de que se planifique nada: un turno, un traslado, un rol operativo. Se resta del bruto, y varios se acumulan. |
+| **Capacidad** | Lo que queda del bruto después de restar los costos fijos. Es contra eso que se planifica, no contra el bruto. |
 | **Vocabulario de magnitud** | Las cuatro etiquetas cerradas con que se declara cuánto consume un bruto o un costo fijo: `el día entero`, `casi todo el día`, `media jornada`, `un rato`. Nunca horas: pedir un número es la fricción que este vocabulario evita. |
 
 ## El árbol de ámbitos

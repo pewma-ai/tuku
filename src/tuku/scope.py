@@ -185,8 +185,7 @@ def crear(
     Si ya existe no toca nada: `spec/ambitos.md` no admite dos ámbitos con el
     mismo nombre, y volver a crearlo no es un error del autor. Las `palabras`
     son las `keywords` de la página nueva; el nombre no va en la lista, porque ya es
-    el de la carpeta. `today` fecha la sección de actividad cuando `AHORA.md` no trae
-    ciclo del que tomarla.
+    el de la carpeta. `today` fecha la sección de actividad.
     """
     valor = normalizar(name)
     directorio = (padre or vault / "ambitos") / valor
@@ -495,7 +494,7 @@ def actividad_reciente(
     pagina: str,
     hoy: date,
 ) -> str:
-    """La sección `## Actividad reciente`: los registros del ámbito en los ciclos cerrados.
+    """La sección `## Actividad reciente`: los registros del ámbito en las bitácoras.
 
     `cerradas` son las bitácoras, como (ruta desde el vault, texto). Entran los días
     de los últimos doce meses, agrupados bajo `### Octubre 2026`, del mes más reciente
@@ -543,18 +542,15 @@ def actualizar_contenido_pagina(
     """Actualiza o incorpora `## Esta semana` y `## Actividad reciente` en el ámbito.
 
     Con `cerradas` (las bitácoras de `bitacoras/`), `## Actividad reciente` se rehace
-    desde ellas, contando los doce meses desde el inicio del ciclo abierto: lo derivado
-    depende de lo canónico y no del reloj. Sin `cerradas` se conserva lo que la página
-    ya trae.
+    desde ellas, contando los doce meses hasta `hoy`. Sin `cerradas` se conserva lo
+    que la página ya trae.
     """
-    from tuku.ahora import rango
     from tuku.init import MESES
 
     actividad = extraer_actividad_ambito(ahora_texto, nombre_ambito, pagina=pagina)
     seccion_semana = formatear_esta_semana(actividad).strip()
 
-    limites = rango(ahora_texto) if ahora_texto else None
-    fecha_ref = limites[0] if limites else hoy
+    fecha_ref = hoy
     vacia = "## Actividad reciente"
     if fecha_ref is not None:
         vacia += f"\n### {MESES[fecha_ref.month - 1].capitalize()} {fecha_ref.year}"
@@ -579,8 +575,11 @@ def actualizar_contenido_pagina(
     return f"{base}\n\n{seccion_semana}\n\n{seccion_reciente}\n"
 
 
-def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
-    """Regenera la actividad en la página del ámbito. Devuelve la ruta si cambió."""
+def actualizar_pagina(vault: Path, nombre: str, hoy: date | None = None) -> Path | None:
+    """Regenera la actividad en la página del ámbito. Devuelve la ruta si cambió.
+
+    Sin `hoy` la sección `## Actividad reciente` se conserva como está.
+    """
     pagina = page_of(carpeta(vault, nombre))
     if not pagina.is_file():
         return None
@@ -599,6 +598,7 @@ def actualizar_pagina(vault: Path, nombre: str) -> Path | None:
         nombre,
         pagina=pagina.relative_to(vault).as_posix(),
         cerradas=cerradas,
+        hoy=hoy,
     )
     if nuevo != actual:
         archivo.escribir(pagina, nuevo)
@@ -761,7 +761,7 @@ def crear_con_constancia(
     Crear un ámbito es una decisión del autor sobre su estructura, así que deja
     huella en `AHORA.md`, en el día `day` (HOY si falta) y a la hora `hour` (AHORA
     si falta). Solo la deja quien crea la carpeta: correrlo sobre un ámbito que ya
-    existe no escribe nada, ni en este ciclo ni en uno posterior.
+    existe no escribe nada.
 
     **Se rechaza antes de tocar nada:** lo que haría fallar la propagación, o un
     día futuro, se revisa antes de crear la carpeta, para que un rechazo no deje un
@@ -841,7 +841,11 @@ def crear_con_constancia(
         if not r.ok:
             return r
         return Resultado.hecho(
-            "\n".join(filter(None, (r.mensaje, _registros_previos(vault, nombre, inicio)))),
+            "\n".join(
+                filter(
+                    None, (r.mensaje, _registros_previos(vault, nombre, inicio, now.date()))
+                )
+            ),
             avisos=r.avisos,
         )
     if ahora_path.is_file() and pagina_path.is_file():
@@ -874,17 +878,17 @@ def crear_con_constancia(
                 archivo.escribir(vault / ruta, contenido)
         if texto != original:
             archivo.escribir(ahora_path, texto)
-        actualizar_pagina(vault, nombre)
+        actualizar_pagina(vault, nombre, now.date())
         if nuevo and padre is not None:
             ambito_padre, _ = _donde_cuelga(vault, padre)
             if ambito_padre is not None:
                 # la constancia enlaza al padre, y la actividad de su página la cuenta
-                actualizar_pagina(vault, ambito_padre.name)
+                actualizar_pagina(vault, ambito_padre.name, now.date())
 
     mensaje = f"ámbito creado en {directorio}." if nuevo else f"el ámbito {nombre} ya existe."
     if nuevo and not palabras:
         mensaje += "\n" + _pedir_keywords(nombre)
-    if previos := _registros_previos(vault, nombre, inicio):
+    if previos := _registros_previos(vault, nombre, inicio, now.date()):
         mensaje += "\n" + previos
     avisos = avisos_de_keywords(vault, nombre, palabras) if nuevo else ()
     return Resultado.hecho(mensaje, avisos=avisos)
@@ -904,7 +908,7 @@ def _plegar(texto: str) -> str:
 
 
 def registros_que_nombran(
-    vault: Path, nombre: str, inicio: date
+    vault: Path, nombre: str, inicio: date, hoy: date | None = None
 ) -> tuple[list[tuple[date, str | None, str, str]], int]:
     """Los registros de otros ámbitos que nombran a `nombre`, y cuántas bitácoras quedan atrás.
 
@@ -922,7 +926,7 @@ def registros_que_nombran(
         "|".join(rf"(?<!\w){re.escape(c)}(?!\w)" for c in sorted(claves, key=len, reverse=True))
     )
     hallados: list[tuple[date, str | None, str, str]] = []
-    for fecha, _, lineas in context.registros_desde(vault, inicio):
+    for fecha, _, lineas in context.registros_desde(vault, inicio, hoy):
         for linea in lineas:
             m = _REGISTRO_LINEA.match(linea)
             if m is None:
@@ -950,9 +954,9 @@ def registros_que_nombran(
     return hallados, anteriores
 
 
-def _registros_previos(vault: Path, nombre: str, inicio: date) -> str:
+def _registros_previos(vault: Path, nombre: str, inicio: date, hoy: date) -> str:
     """El bloque de la salida de `scope create` con los registros que ya nombran al ámbito."""
-    hallados, anteriores = registros_que_nombran(vault, nombre, inicio)
+    hallados, anteriores = registros_que_nombran(vault, nombre, inicio, hoy)
     lineas: list[str] = []
     if hallados:
         lineas.append(

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import sys
-from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -97,7 +96,7 @@ def test_el_log_lista_comandos_y_delta_cuando_los_hay() -> None:
 
 
 def test_el_log_es_una_nota_que_el_doctor_acepta(tmp_path: Path) -> None:
-    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO)
     estado = {"ahora": "2026-08-12 21:00", "modelo": "m", "turnos": []}
     (v / conversar.LOG).write_text(
         conversar.renderizar(estado, "Conversación"), encoding="utf-8"
@@ -108,7 +107,7 @@ def test_el_log_es_una_nota_que_el_doctor_acepta(tmp_path: Path) -> None:
 def test_un_escenario_agentico_deja_su_conversacion_en_el_vault(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO)
 
     def _turno(vault: Path, prompt: str, **_: object) -> agente.Turno:
         (vault / "borrador.txt").write_text("x\n", encoding="utf-8")
@@ -137,13 +136,13 @@ def test_un_escenario_agentico_deja_su_conversacion_en_el_vault(
 
 
 def test_sin_turnos_el_escenario_no_deja_log(tmp_path: Path) -> None:
-    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO)
     gherkin._dejar_la_conversacion(tmp_path, {"ahora": None, "turnos": []}, "dicta")
     assert not (v / conversar.LOG).exists()
 
 
 def test_el_log_no_deja_links_de_la_respuesta_que_el_doctor_lea(tmp_path: Path) -> None:
-    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "mi-vault", home=RAIZ_REPO)
     respuesta = (
         "Quedó en [tesis](ambitos/no-existe/no-existe.md) y en [[otra-nota-que-no-existe]].\n"
         "```markdown\n- [x](ambitos/no-existe/no-existe.md)\n```"
@@ -160,7 +159,7 @@ def test_el_log_no_deja_links_de_la_respuesta_que_el_doctor_lea(tmp_path: Path) 
 def test_cada_turno_deja_junto_al_vault_lo_que_devolvio_el_arnes_sin_filtrar(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    v = init.init(tmp_path / "esc" / "mi-vault", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "esc" / "mi-vault", home=RAIZ_REPO)
 
     def _turno(vault: Path, prompt: str, **_: object) -> agente.Turno:
         return agente.Turno(

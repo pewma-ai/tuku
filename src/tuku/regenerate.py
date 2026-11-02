@@ -63,7 +63,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from tuku import archive, archivo, link, scope, scope_tree, todo_core
-from tuku.ahora import dias, insertar_dia, rango
+from tuku.ahora import dias, insertar_dia
 from tuku.config import (
     FORMATO_FECHA,
     VENTANA_POR_DEFECTO,
@@ -402,8 +402,8 @@ def vistas_en_ahora(
     """`AHORA.md` con la región de cada día y el bloque de la ventana regenerados.
 
     Reemplaza cada región entera, así que regenerar dos veces no duplica ninguna
-    línea. Un día cuyo encabezado no se puede fechar (el ciclo sin `from`/`to`
-    resueltos) se deja intacto: sin fecha no hay nada que derivar.
+    línea. Un día cuyo encabezado no se puede fechar (sin `hoy` ni rango) se deja
+    intacto: sin fecha no hay nada que derivar.
 
     Con `hoy` además: el bloque de pendientes de los próximos `ventana` días se
     reescribe bajo el título (el foco no se toca) y cada día de esa ventana que
@@ -413,19 +413,18 @@ def vistas_en_ahora(
     todas = todo_core.filas(pendientes)
     lineas = ahora.splitlines()
 
-    limites = rango(ahora)
-    if hoy is not None and limites is not None:
+    if hoy is not None:
         pedidos = {
             f.dia
             for f in todas
             if f.dia is not None and hoy <= f.dia <= hoy + timedelta(days=ventana)
         }
         for fecha in sorted(pedidos):
-            lineas, _ = insertar_dia(lineas, fecha, limites)
+            lineas, _ = insertar_dia(lineas, fecha)
 
     # De atrás hacia adelante: reemplazar una sección corre los índices de las
     # que vienen después, y los de `dias()` son sobre el texto original.
-    for ini, _, dia in reversed(dias("\n".join(lineas) + "\n")):
+    for ini, _, dia in reversed(dias("\n".join(lineas) + "\n", hoy)):
         if dia is None:
             continue
         fin = _fin_de_seccion(lineas, ini)
@@ -579,7 +578,7 @@ def _rehacer(
             cambiados.append(ruta_ahora)
 
     for a in scope_tree.leer(vault) if paginas else []:
-        pag_mod = scope.actualizar_pagina(vault, a.nombre)
+        pag_mod = scope.actualizar_pagina(vault, a.nombre, hoy)
         if pag_mod and pag_mod not in cambiados:
             cambiados.append(pag_mod)
 

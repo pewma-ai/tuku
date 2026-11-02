@@ -263,7 +263,7 @@ def _sujeto(argv: list[str]) -> tuple[str, ...]:
 LEEN = ("doctor", "vocab", "style", "context")
 
 #: Los comandos con subcomando: su verbo son dos palabras (`entry create`).
-GRUPOS = ("cycle", "entry", "todo", "scope", "note", "process")
+GRUPOS = ("entry", "todo", "scope", "note", "process")
 
 
 def escribe(argv: list[str]) -> bool:

@@ -126,7 +126,7 @@ def test_los_errores_de_uso_salen_con_el_codigo_de_uso(
 @pytest.fixture
 def vault(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Un vault sembrado, y el directorio actual dentro de él."""
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     monkeypatch.chdir(v)
     return v
 

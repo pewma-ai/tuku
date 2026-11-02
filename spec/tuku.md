@@ -79,7 +79,7 @@ flowchart LR
     TODO -->|"deja constancia"| AH
     SCOPE -->|"crea y reorganiza"| AM
     NOTE -->|"escribe"| NO
-    PROC -->|"abre el ciclo"| AH
+    PROC -.->|"lista procesos/"| VAULT
     CTX -.->|"lee, sin escribir"| VAULT
     MANT -.->|"doctor revisa"| VAULT
     MANT -->|"regenerate rehace"| DER
@@ -88,8 +88,8 @@ flowchart LR
     classDef lee fill:#fce7f3,color:#831843,stroke:#f9a8d4
     classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
     classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
-    class INIT,ENTRY,TODO,SCOPE,NOTE,PROC escribe
-    class CTX lee
+    class INIT,ENTRY,TODO,SCOPE,NOTE escribe
+    class CTX,PROC lee
     class MANT escribe
     class AH,PE,AM,NO,LI archivo
     class DER derivado
@@ -98,10 +98,10 @@ flowchart LR
 ## Sembrar
 
 ```text
-tuku init DIR [--variant] [--author] [--at] [--force]
+tuku init DIR [--variant] [--author] [--force]
 ```
 
-Copia el template al directorio sin tocar la red y deja el primer ciclo abierto. Rechaza un destino con contenido salvo `--force`.
+Copia el template al directorio sin tocar la red y siembra `AHORA.md` con el foco, sin días. Rechaza un destino con contenido salvo `--force`.
 
 ## entry
 
@@ -111,7 +111,7 @@ tuku entry update [CUÁNDO] --match TEXTO --body
 tuku entry move [CUÁNDO] --match TEXTO --scope
 ```
 
-Escribe y corrige registros de la bitácora, en orden de hora. `--match` ubica el último registro que calza, y `CUÁNDO` busca en un ciclo cerrado. Rechaza un día fuera del ciclo abierto y dice cómo cambiar de ciclo. Qué es un registro y cómo se escribe está en el capítulo Registro del libro.
+Escribe y corrige registros de la bitácora, en orden de hora. `--match` ubica el último registro que calza, y `CUÁNDO` busca en una bitácora. Un registro de fecha antigua va a la bitácora semanal de ese día; un día futuro se rechaza. Qué es un registro y cómo se escribe está en el capítulo Registro del libro.
 
 ## todo
 
@@ -133,7 +133,7 @@ tuku scope rename NOMBRE NUEVO
 tuku scope archive NOMBRE                                           # pendiente
 ```
 
-Crea y reorganiza el árbol de `ambitos/`. `move` y `rename` recalculan los links de todo el vault, también los de las bitácoras cerradas. Capítulo Ámbito.
+Crea y reorganiza el árbol de `ambitos/`. `move` y `rename` recalculan los links de todo el vault, también los de las bitácoras. Capítulo Ámbito.
 
 ## note
 
@@ -149,10 +149,9 @@ Escribe la nota en `notas/` y deja su constancia en la bitácora. Capítulo Nota
 
 ```text
 tuku process
-tuku process cycle [--from] [--to] [--name]
 ```
 
-Una rutina con nombre. Sin nombre lista las de `tuku` y las que el autor escribe en `procesos/`. `process cycle` abre el siguiente ciclo, o repite el abierto y solo verifica. Capítulo Ciclo.
+Una rutina con nombre. Sin nombre lista las que el autor escribe en `procesos/` y las que `tuku` traiga como comando, hoy ninguna. Solo lee.
 
 ## context
 
@@ -170,7 +169,7 @@ tuku fix TEMA
 tuku regenerate [TEMA]
 ```
 
-Se distinguen por lo que escriben. `doctor` no escribe nada y verifica el vault entero o un tema. `fix` repara solo lo determinista y devuelve lo demás como decisiones. `regenerate` rehace solo lo derivado: las vistas de pendientes, la actividad de los ámbitos, `reglas/comandos.tuku.md` y el libro de estilo.
+Se distinguen por lo que escriben. `doctor` no escribe nada y verifica el vault entero o un tema; `doctor archive` revisa que cada bitácora semanal diga en `from` y `to` lo que dice su nombre y avisa de los días de `AHORA.md` anteriores a la ventana y de lo que dejaron los ciclos de un vault anterior. `fix` repara solo lo determinista y devuelve lo demás como decisiones. `regenerate` rehace solo lo derivado: las vistas de pendientes, la actividad de los ámbitos, `reglas/comandos.tuku.md` y el libro de estilo.
 
 ## La ayuda es la spec del detalle
 

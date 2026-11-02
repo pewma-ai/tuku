@@ -15,7 +15,6 @@ from tuku.cli.helpers import (
     RECHAZO,
     Handler,
     Subparsers,
-    fecha,
     traducir,
 )
 from tuku.cli.opciones import Opciones
@@ -37,7 +36,6 @@ def _cmd_init(args: argparse.Namespace) -> int:
             args.dir,
             variant=args.variant,
             author=args.author,
-            desde=args.at.dia or args.now.date(),
             force=args.force,
             comandos=manual.del_cli(),
         )
@@ -81,22 +79,6 @@ def _cmd_process(args: argparse.Namespace) -> int:
     from tuku import process
 
     return traducir(process.listar(args.vault), "tuku process")
-
-
-def _cmd_process_cycle(args: argparse.Namespace) -> int:
-    from tuku import cycle
-
-    return traducir(
-        cycle.abrir_en_vault(
-            args.vault,
-            desde=args.desde,
-            hasta=args.hasta,
-            nombre=args.nombre,
-            force=args.force,
-            now=args.now,
-        ),
-        "tuku process cycle",
-    )
 
 
 def _crear_cmd_doctor(
@@ -148,7 +130,7 @@ def registrar(
         help="siembra un vault nuevo en un directorio",
         description=(
             "Copia el template al directorio destino. Escribe `AHORA.md` desde "
-            "`reglas/plantilla/AHORA.md` con las fechas del primer ciclo, la zona horaria "
+            "`reglas/plantilla/AHORA.md`, la zona horaria "
             "de esta máquina en `reglas/config.tuku.md` y, si se da, el autor en "
             "`reglas/autor.user.md`. Rechaza un destino con contenido y el home del usuario."
         ),
@@ -172,7 +154,6 @@ def registrar(
         default=None,
         help="nombre del autor para reglas/autor.user.md; opcional",
     )
-    Opciones(init_p).at("un día de la semana del primer ciclo, AAAA-MM-DD; por defecto, hoy")
     init_p.add_argument(
         "--force",
         action="store_true",
@@ -183,57 +164,11 @@ def registrar(
         "process",
         help="las rutinas con nombre: las de tuku y las de procesos/",
         description=(
-            "Sin nombre, lista los procesos: los de `tuku`, que corren como comando, y los "
-            "que el autor escribe en `procesos/`, que el agente ejecuta leyendo su archivo."
+            "Lista los procesos del autor: los archivos `.md` de `procesos/`, que el agente "
+            "ejecuta leyendo su archivo."
         ),
     )
     Opciones(process_p).vault("vault a leer")
-    process_v = process_p.add_subparsers(dest="verb", required=False)
-    process_cycle_p = process_v.add_parser(
-        "cycle",
-        help="abre, repite o guarda un ciclo de AHORA.md",
-        description=(
-            "Copia `reglas/plantilla/AHORA.md` a `AHORA.md` con `cycle`, `from` y `to` del "
-            "ciclo y un encabezado de día por cada fecha del rango. Sin `--from` empieza el "
-            "día siguiente al `to` del ciclo anterior (el abierto o la bitácora más "
-            "reciente de `bitacoras/`) y, sin anterior, hoy. Con `semana` basta un día "
-            "cualquiera, que abre la semana de lunes a domingo que lo contiene; con otro "
-            "nombre de la tabla de `reglas/ciclo.user.md` hay que dar `--to`. El nombre es "
-            "el siguiente de esa tabla, o `--name` (uno que no declara se rechaza salvo con "
-            "`--force`). Rechaza un `--from` que deje hoyos o solapes, y abrir otro ciclo "
-            "mientras el abierto tiene registros; repetir el ciclo abierto solo lo "
-            "verifica, o lo regenera si no tiene registros. Un `--from` anterior al ciclo "
-            "abierto guarda un ciclo pasado en `bitacoras/` sin verificarlo, y pide "
-            "`--name`. Con una bitácora anterior, abre en `PENDIENTES.md` el pendiente de "
-            "revisarla."
-        ),
-    )
-    Opciones(process_cycle_p).vault("vault a verificar o abrir")
-    process_cycle_p.add_argument(
-        "--from",
-        dest="desde",
-        type=fecha,
-        default=None,
-        help="primer día del ciclo, AAAA-MM-DD; con `semana`, un día cualquiera de la semana",
-    )
-    process_cycle_p.add_argument(
-        "--to",
-        dest="hasta",
-        type=fecha,
-        default=None,
-        help="último día del ciclo, AAAA-MM-DD; obligatorio si el nombre no es `semana`",
-    )
-    process_cycle_p.add_argument(
-        "--name",
-        dest="nombre",
-        default=None,
-        help="nombre del ciclo; por defecto, el siguiente de `reglas/ciclo.user.md`",
-    )
-    process_cycle_p.add_argument(
-        "--force",
-        action="store_true",
-        help="acepta un `--name` que `reglas/ciclo.user.md` no declara",
-    )
 
     doctor_p = sub.add_parser(
         "doctor",
@@ -356,7 +291,6 @@ def registrar(
     return {
         ("init", None): _cmd_init,
         ("process", None): _cmd_process,
-        ("process", "cycle"): _cmd_process_cycle,
         ("doctor", None): _crear_cmd_doctor(comandos_fn, doctor_p),
         ("fix", None): _cmd_fix,
         ("regenerate", None): _cmd_regenerate,

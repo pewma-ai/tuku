@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 from tuku import scope
 
+HOY = date(2026, 8, 12)
 AHORA_EJEMPLO = """---
 type: Logbook
 status: draft
-from: 2026-08-11
-to: 2026-08-17
 ---
 
-# Ciclo
+# Actividad diaria
 
 ## Martes 11 de agosto
 - 09:12 - [[personal]] **señal**: la administradora responde con retraso
@@ -50,14 +51,15 @@ def test_actualizar_contenido_pagina_crea_secciones_es_idempotente_y_preserva_el
         "---\ntype: Scope\nkeywords: [depto-centro]\n---\n"
         "# depto-centro\n\n![[../PENDIENTES-AMBITOS.md#^depto-centro]]"
     )
-    res1 = scope.actualizar_contenido_pagina(base, AHORA_EJEMPLO, "depto-centro")
+    res1 = scope.actualizar_contenido_pagina(base, AHORA_EJEMPLO, "depto-centro", hoy=HOY)
     assert "## Esta semana" in res1
     assert "### Martes 11 de agosto" in res1
     assert "- le mandé la boleta de gastos comunes del depto-centro" in res1
     assert "- 18:40 - " not in res1
     assert "## Actividad reciente" in res1
     assert "### Agosto 2026" in res1
-    assert scope.actualizar_contenido_pagina(res1, AHORA_EJEMPLO, "depto-centro") == res1
+    otra = scope.actualizar_contenido_pagina(res1, AHORA_EJEMPLO, "depto-centro", hoy=HOY)
+    assert otra == res1
 
     con_resumen = (
         "---\ntype: Scope\nkeywords: [depto-centro]\n---\n# depto-centro\n\n"
@@ -67,7 +69,9 @@ def test_actualizar_contenido_pagina_crea_secciones_es_idempotente_y_preserva_el
         "### Julio 2026\n"
         "- Resumen generado por LLM que debe conservarse intacto.\n"
     )
-    res = scope.actualizar_contenido_pagina(con_resumen, AHORA_EJEMPLO, "depto-centro")
+    res = scope.actualizar_contenido_pagina(
+        con_resumen, AHORA_EJEMPLO, "depto-centro", hoy=HOY
+    )
     assert "### Julio 2026" in res
     assert "- Resumen generado por LLM que debe conservarse intacto." in res
     assert "### Martes 11 de agosto" in res

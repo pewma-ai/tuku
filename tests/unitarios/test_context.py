@@ -19,7 +19,7 @@ DIA = date(2026, 8, 10)
 
 @pytest.fixture
 def vault(tmp_path: Path) -> Path:
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     scope.crear(v, "colegio-los-robles", palabras=["don Rodolfo", "LR"])
     (v / "bitacoras").mkdir()
     (v / "bitacoras" / "bitacora-2026-08-03-2026-08-09.md").write_text(

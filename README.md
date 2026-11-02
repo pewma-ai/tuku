@@ -13,7 +13,7 @@ uv tool install --force "git+https://github.com/pewma-ai/tuku.git@devel"
 tuku init mi-vault
 ```
 
-`tuku init` copia el template a `mi-vault/` sin tocar la red y deja el primer ciclo abierto. Después, abrir un agente (Claude Code, Codex, Antigravity) sobre esa carpeta y contarle el primer hecho. Para empezar, el [tutorial](docs/tutorial/README.md) recorre una semana de trabajo en diez capítulos.
+`tuku init` copia el template a `mi-vault/` sin tocar la red y siembra `AHORA.md` con el foco. Después, abrir un agente (Claude Code, Codex, Antigravity) sobre esa carpeta y contarle el primer hecho. Para empezar, el [tutorial](docs/tutorial/README.md) recorre una semana de trabajo en diez capítulos.
 
 ## Cómo funciona
 

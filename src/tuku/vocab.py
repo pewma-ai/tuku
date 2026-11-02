@@ -7,7 +7,7 @@ el archivo o su tabla el error es ruidoso y no silencioso, que es lo que separa
 esto de marcar el documento con marcas invisibles.
 
 **Qué lee y escribe:** lee `reglas/clasificaciones.user.md`,
-`reglas/pendientes.user.md`, `reglas/notas.user.md` y `reglas/ciclo.user.md`. No escribe nada.
+`reglas/pendientes.user.md` y `reglas/notas.user.md`. No escribe nada.
 **A mano:** abrir esos archivos y leer su tabla.
 """
 
@@ -25,7 +25,6 @@ FUENTES = {
     "clasificaciones": "reglas/clasificaciones.user.md",
     "horizontes": "reglas/pendientes.user.md",
     "tipos-de-nota": "reglas/notas.user.md",
-    "ciclos": "reglas/ciclo.user.md",
 }
 
 #: Los archivos de `reglas/` que declaran vocabulario.

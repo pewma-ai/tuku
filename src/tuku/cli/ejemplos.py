@@ -13,12 +13,8 @@ import argparse
 
 #: Cada comando (`sustantivo` o `sustantivo verbo`) con sus ejemplos, uno por línea.
 EJEMPLOS: dict[str, tuple[str, ...]] = {
-    "init": ('tuku init mi-vault --author "Andrea Rojas" --at 2026-08-11',),
+    "init": ('tuku init mi-vault --author "Andrea Rojas"',),
     "process": ("tuku process",),
-    "process cycle": (
-        "tuku process cycle --from 2026-08-17",
-        "tuku process cycle --from 2026-08-11 --to 2026-08-18 --name turno",
-    ),
     "entry create": (
         'tuku entry create --body "entregué 40 cuadernos" --scope colegio-los-robles',
         'tuku entry create --body "llamé al contador" --at "2026-08-11 09:12"',

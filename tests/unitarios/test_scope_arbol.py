@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import date
 from pathlib import Path
 
 import pytest
@@ -18,7 +17,7 @@ CUERPO = "presentar el marco"
 
 @pytest.fixture
 def vault(tmp_path: Path) -> Path:
-    return init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    return init.init(tmp_path / "v", home=RAIZ_REPO)
 
 
 def _tuku(vault: Path, *argv: str) -> int:

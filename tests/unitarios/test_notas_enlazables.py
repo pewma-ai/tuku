@@ -40,7 +40,7 @@ def _nota(v: Path, nombre: str, subtype: str, titulo: str, aliases: str = "") ->
 
 @pytest.fixture
 def vault(tmp_path: Path) -> Path:
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     _nota(v, "rodolfo-cifuentes", "persona", "Rodolfo Cifuentes", "don Rodolfo")
     _nota(v, "teletrabajo", "idea", "Teletrabajo")
     return v

@@ -8,8 +8,8 @@ por eso este paso no necesita LLM.
 
 Operan **por registro**, no reconciliando el archivo. `PENDIENTES.md` es fuente
 de verdad y no se regenera desde las bitácoras (`spec/pendientes.md`, regla 7):
-un reconciliador borraría los pendientes abiertos en ciclos anteriores que el
-`AHORA.md` en curso ya no menciona. La idempotencia se paga a mano: abrir
+un reconciliador borraría los pendientes abiertos en semanas ya archivadas que
+`AHORA.md` ya no menciona. La idempotencia se paga a mano: abrir
 comprueba que la fila no esté, cerrar que la pareja exista.
 
 El archivo es **una sola tabla**, `| Horizonte | Vence | Ámbito | Detalle |`.
@@ -410,10 +410,10 @@ def cerrar_en_vault(
     return apply(vault, plan, skip=() if regenerar else ("todo",), today=now.date())
 
 
-def hallazgos_del_vault(vault: Path) -> list[str]:
+def hallazgos_del_vault(vault: Path, hoy: date | None = None) -> list[str]:
     """`lint` sobre el vault: lee los archivos y calcula las vistas esperadas."""
     from tuku import regenerate, scope_tree
-    from tuku.config import archivo_vault
+    from tuku.config import archivo_vault, formato_fecha, ventana_de_dias
 
     pendientes = archivo.leer(archivo_vault(vault, "PENDIENTES.md"))
     ahora_path = vault / "AHORA.md"
@@ -423,7 +423,13 @@ def hallazgos_del_vault(vault: Path) -> list[str]:
         vistas["AHORA.md"] = (
             ahora,
             regenerate.vistas_en_ahora(
-                ahora, pendientes, scope_tree.rutas(vault), escalera(vault)
+                ahora,
+                pendientes,
+                scope_tree.rutas(vault),
+                escalera(vault),
+                hoy=hoy,
+                ventana=ventana_de_dias(vault),
+                formato=formato_fecha(vault),
             ),
         )
     ambitos_path = vault / regenerate.ARCHIVO_AMBITOS
@@ -432,4 +438,4 @@ def hallazgos_del_vault(vault: Path) -> list[str]:
         regenerate.documento_del_vault(vault, pendientes),
     )
     historia = [archivo.leer(b) for b in sorted((vault / "bitacoras").glob("*.md"))]
-    return lint(pendientes, ahora, vistas=vistas, historia=historia)
+    return lint(pendientes, ahora, vistas=vistas, historia=historia, hoy=hoy)

@@ -30,7 +30,7 @@ Antes de cambiar un artefacto del vault, esta tabla dice qué más se toca. La p
 
 | Artefacto | Capítulo del libro | Módulos | Lo escriben |
 |---|---|---|---|
-| `AHORA.md` | Registro, Ciclo (borrador: [`ciclo.md`](devel/borradores/ciclo.md)) | [`entry.py`](src/tuku/entry.py), [`ahora.py`](src/tuku/ahora.py), [`cycle.py`](src/tuku/cycle.py), [`regenerate.py`](src/tuku/regenerate.py) | `tuku entry create`, `tuku process cycle`; la región del día, `tuku regenerate` (tema `todo`) |
+| `AHORA.md` y `bitacoras/` | Registro, AHORA.md y las bitácoras | [`entry.py`](src/tuku/entry.py), [`ahora.py`](src/tuku/ahora.py), [`archive.py`](src/tuku/archive.py), [`regenerate.py`](src/tuku/regenerate.py) | `tuku entry create`; el archivado, cualquier comando que escribe; la región del día, `tuku regenerate` (tema `todo`) |
 | `PENDIENTES.md` | Pendiente | [`todo.py`](src/tuku/todo.py) | `tuku todo open`, `tuku todo close` |
 | `ambitos/PENDIENTES-AMBITOS.md` | Pendiente, Ámbito | [`regenerate.py`](src/tuku/regenerate.py) | `tuku regenerate` (tema `todo`) |
 | `ambitos/<nombre>/<nombre>.md` | Ámbito | [`scope.py`](src/tuku/scope.py), [`link.py`](src/tuku/link.py) | `tuku scope create`, `tuku scope rename`; la actividad, `tuku regenerate` (tema `scope`) |

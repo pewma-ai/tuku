@@ -1,9 +1,6 @@
 ---
 type: Logbook
 status: draft
-cycle: NOMBRE
-from: AAAA-MM-DD
-to: AAAA-MM-DD
 ---
 # Actividad diaria
 

@@ -30,7 +30,6 @@ COMPLETO: dict[str, str | None] = {
     "reglas/clasificaciones.user.md": TABLA,
     "reglas/pendientes.user.md": TABLA,
     "reglas/notas.user.md": TABLA,
-    "reglas/ciclo.user.md": TABLA,
 }
 
 
@@ -65,7 +64,7 @@ def test_lo_completo_no_tiene_errores_y_cada_contrato_que_falta_es_uno() -> None
         assert (ruta, "falta el archivo") in [(h.archivo, h.defecto) for h in sin_archivo]
 
     vacio: dict[str, str | None] = dict.fromkeys(COMPLETO)
-    assert len(_errores(vacio)) == 5, "sin archivos, falta el autor y los cuatro de vocabulario"
+    assert len(_errores(vacio)) == 4, "sin archivos, falta el autor y los tres de vocabulario"
 
 
 def test_una_tabla_sin_terminos_es_pregunta_y_no_error() -> None:

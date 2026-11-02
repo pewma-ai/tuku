@@ -53,26 +53,32 @@ def desde(valor: str | None, hoy: date, por_defecto: int = DESDE_POR_DEFECTO) ->
         ) from None
 
 
-def _ciclos(vault: Path) -> list[Path]:
-    """`AHORA.md` y las bitácoras cerradas, de la más antigua a la más reciente."""
+def _archivos_de_registros(vault: Path) -> list[Path]:
+    """Las bitácoras y `AHORA.md`, de la más antigua a la más reciente."""
     cerradas = (
         sorted((vault / "bitacoras").glob("*.md")) if (vault / "bitacoras").is_dir() else []
     )
     return [*cerradas, vault / "AHORA.md"]
 
 
-def registros_desde(vault: Path, inicio: date) -> list[tuple[date, str, list[str]]]:
-    """Los días desde `inicio` con sus líneas de registro, del más nuevo al más viejo."""
-    from tuku.ahora import fecha_del_dia, rango
+def registros_desde(
+    vault: Path, inicio: date, hoy: date | None = None
+) -> list[tuple[date, str, list[str]]]:
+    """Los días desde `inicio` con sus líneas de registro, del más nuevo al más viejo.
+
+    `hoy` fecha los días de `AHORA.md`, que no declara rango.
+    """
+    from tuku.ahora import fecha_del_dia, limites_de, rango
     from tuku.entry import registros
 
     dias: list[tuple[date, str, list[str]]] = []
-    for ruta in _ciclos(vault):
+    for ruta in _archivos_de_registros(vault):
         if not ruta.is_file():
             continue
         texto = archivo.leer(ruta)
-        limites = rango(texto)
-        if limites is None or limites[1] < inicio:
+        limites = limites_de(texto, hoy)
+        propio = rango(texto)
+        if limites is None or (propio is not None and propio[1] < inicio):
             continue
         lineas = texto.splitlines()
         for r in registros(texto):
@@ -87,8 +93,8 @@ def registros_desde(vault: Path, inicio: date) -> list[tuple[date, str, list[str
     return dias
 
 
-def _entry(vault: Path, inicio: date) -> str:
-    dias = registros_desde(vault, inicio)
+def _entry(vault: Path, inicio: date, hoy: date) -> str:
+    dias = registros_desde(vault, inicio, hoy)
     if not dias:
         return f"sin registros desde el {inicio.isoformat()}."
     return "\n\n".join(f"## {dia}\n" + "\n".join(lineas) for _, dia, lineas in dias)
@@ -241,7 +247,10 @@ def del_vault(
     except ValueError as e:
         return Resultado.rechazo(str(e))
     secciones: dict[str, tuple[str, Callable[[], str]]] = {
-        "entry": (f"Registros desde el {inicio.isoformat()}", lambda: _entry(vault, inicio)),
+        "entry": (
+            f"Registros desde el {inicio.isoformat()}",
+            lambda: _entry(vault, inicio, hoy),
+        ),
         "scope": ("Ámbitos y sus keywords", lambda: _scope(vault)),
         "todo": (
             "Pendientes atrasados" if late else "Pendientes abiertos",

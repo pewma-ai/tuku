@@ -12,6 +12,10 @@ already in `bitacoras/` and the day of the command's `now`, and returns the
 yields an empty `Change`. `archivar_en_vault` is the use case every command that
 writes calls first; one that only reads (`context`, `doctor`) never does.
 
+`AHORA.md` declares no range: its day headings take the year nearest to `today`. A vault
+sown with cycles still carries `cycle`, `from` and `to` there; the first plan that writes
+drops them.
+
 `stamp` is the other half: a record dated before the window goes straight to the
 logbook of its week, created if missing, instead of `AHORA.md`.
 
@@ -39,10 +43,8 @@ from tuku.resultado import Resultado
 
 #: The name of a weekly logbook, relative to the vault.
 _NOMBRE = re.compile(r"^bitacoras/bitacora-(\d{8})-(\d{8})\.md$")
-_CAMPOS = re.compile(r"^(from|to):.*$")
-#: How far from `today` the range of `AHORA.md` may drift before it is moved: the year of
-#: a day heading is the one that leaves it nearest to that range, so it must stay close.
-_ANCLA = timedelta(days=90)
+#: The frontmatter fields of an `AHORA.md` sown with cycles, which no longer exist.
+_CAMPOS_DEL_CICLO = re.compile(r"^(cycle|from|to):")
 #: A line of the old derived region (`- [ambito](ruta) - detalle`): not a record.
 _REGION = re.compile(rf"^- {link.ENLACE} - ")
 
@@ -161,17 +163,17 @@ def _fusionar_dia(texto: str, fecha: date, registros: list[str]) -> str:
     return salida if salida.endswith("\n") else salida + "\n"
 
 
-def with_range(ahora: str, desde: date, hasta: date) -> str:
-    """`ahora` with `from` and `to` of its frontmatter set to the range."""
+def without_cycle(ahora: str) -> str:
+    """`ahora` without `cycle`, `from` and `to` in its frontmatter."""
     lineas = ahora.splitlines(keepends=True)
-    valores = {"from": desde.isoformat(), "to": hasta.isoformat()}
-    for i, linea in enumerate(lineas[:10]):
-        m = _CAMPOS.match(linea.rstrip("\n"))
-        if m is not None:
-            lineas[i] = f"{m.group(1)}: {valores[m.group(1)]}" + (
-                "\n" if linea.endswith("\n") else ""
-            )
-    return "".join(lineas)
+    if not lineas or lineas[0].strip() != "---":
+        return ahora
+    fin = next((i for i in range(1, len(lineas)) if lineas[i].strip() == "---"), None)
+    if fin is None:
+        return ahora
+    return "".join(
+        x for i, x in enumerate(lineas) if not (0 < i < fin and _CAMPOS_DEL_CICLO.match(x))
+    )
 
 
 def plan_archive(
@@ -185,20 +187,20 @@ def plan_archive(
 
     `history` holds the logbooks already in `bitacoras/`. A day whose week has a
     logbook is added to it; otherwise the weekly logbook is created. The links of each
-    record are recalculated for the new folder. The range of `AHORA.md`, which gives
-    the year of each day heading, follows the window when days leave or it drifts.
-    The `Change` is empty when nothing falls out.
+    record are recalculated for the new folder. The `Change` is empty when nothing
+    falls out and `AHORA.md` carries no leftover of the cycles.
     """
     vacio = Change({}, "")
-    limites = rango(logbook)
-    if limites is None:
-        return vacio
+    original = logbook
+    logbook = without_cycle(logbook)
     inicio = window_start(today, weeks)
     lineas = logbook.splitlines()
     work = dict(history)
     files: dict[str, str] = {}
     n = 0
-    antiguos = [(ini, fecha) for ini, _, fecha in dias(logbook) if fecha and fecha < inicio]
+    antiguos = [
+        (ini, fecha) for ini, _, fecha in dias(logbook, today) if fecha and fecha < inicio
+    ]
     for ini, fecha in reversed(antiguos):
         fin = _fin_de_seccion(lineas, ini)
         registros = _registros_de(lineas[ini + 1 : fin])
@@ -210,14 +212,12 @@ def plan_archive(
         del lineas[ini:fin]
     if antiguos:
         lineas = _sin_blancos_dobles(lineas)
-    lejos = today > limites[1] + _ANCLA or today < limites[0] - _ANCLA
-    if not antiguos and not lejos:
+    if not antiguos and logbook == original:
         return vacio
     texto = "\n".join(lineas)
     if logbook.endswith("\n") and not texto.endswith("\n"):
         texto += "\n"
-    texto = with_range(texto, inicio, max(limites[1], week_of(today)[1]))
-    if texto == logbook:
+    if texto == original:
         return vacio
     ordenados = {"AHORA.md": texto, **dict(sorted(files.items()))}
     return Change(
@@ -329,10 +329,27 @@ def lint_history(history: Mapping[str, str]) -> list[str]:
 def lint_window(ahora: str, *, today: date, weeks: int) -> list[str]:
     """Warnings for days of `AHORA.md` before the window; a writing command archives them."""
     inicio = window_start(today, weeks)
-    fuera = [fecha for _, _, fecha in dias(ahora) if fecha is not None and fecha < inicio]
+    fechas = (fecha for _, _, fecha in dias(ahora, today))
+    fuera = [fecha for fecha in fechas if fecha is not None and fecha < inicio]
     return [
         f"AHORA.md: aviso: el día {fecha.isoformat()} es anterior a la ventana de "
         f"{weeks} semana(s) (desde el {inicio.isoformat()}). Cualquier comando que escribe "
         "lo archiva en bitacoras/."
         for fecha in fuera
     ]
+
+
+def lint_legacy(ahora: str, *, ciclo_user_md: bool) -> list[str]:
+    """Warnings for what a vault sown with cycles still carries; commands ignore it."""
+    hallazgos: list[str] = []
+    if without_cycle(ahora) != ahora:
+        hallazgos.append(
+            "AHORA.md: aviso: el frontmatter trae `cycle`, `from` o `to` de los ciclos, que "
+            "ya no existen y se ignoran. El primer comando que escribe los quita."
+        )
+    if ciclo_user_md:
+        hallazgos.append(
+            "reglas/ciclo.user.md: aviso: los ciclos ya no existen y ningún comando lo lee. "
+            "Puedes borrarlo."
+        )
+    return hallazgos

@@ -89,5 +89,5 @@ def apply(
     if plan.regenerate:
         rehacer(vault, plan.regenerate, salvo=skip, hoy=today)
     for name in plan.pages:
-        scope.actualizar_pagina(vault, name)
+        scope.actualizar_pagina(vault, name, today)
     return Resultado.hecho(plan.message, avisos=plan.warnings)

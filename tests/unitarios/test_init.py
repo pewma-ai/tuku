@@ -8,7 +8,6 @@ from unittest import mock
 
 import pytest
 
-from conftest import AHORA
 from tuku.config import parsear_config_md
 from tuku.init import (
     TZ_FALLBACK,
@@ -46,7 +45,7 @@ def test_el_destino_nunca_es_el_home_ni_un_ancestro_ni_la_raiz(
         (enlace, True),
     ]:
         with pytest.raises(DestinoProhibido):
-            init(destino, force=force, desde=AHORA.date())
+            init(destino, force=force)
     assert (home / "documento.txt").is_file()
 
 
@@ -76,7 +75,7 @@ def test_la_zona_horaria_sale_del_entorno_o_del_sistema_o_del_fallback() -> None
 
 def test_init_sustituye_el_placeholder_por_la_zona_real(tmp_path: Path) -> None:
     with mock.patch.dict(os.environ, {"TZ": "Pacific/Easter"}):
-        vault = init(tmp_path / "v", home=RAIZ_REPO, desde=AHORA.date())
+        vault = init(tmp_path / "v", home=RAIZ_REPO)
 
     config = vault / "reglas" / "config.tuku.md"
     campos = parsear_config_md(config.read_text(encoding="utf-8"))

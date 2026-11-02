@@ -16,7 +16,7 @@ RAIZ_REPO = Path(__file__).resolve().parent.parent.parent
 
 @pytest.fixture
 def vault(tmp_path: Path) -> Path:
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=AHORA.date())
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     entry.add_al_vault(
         v,
         body="entregué 40 cuadernos al Colegio Los Robles",

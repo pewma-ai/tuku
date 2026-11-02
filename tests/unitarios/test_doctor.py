@@ -127,20 +127,19 @@ COMPLETO = {
     "reglas/clasificaciones.user.md": "---\ntype: Style Guide\n---\n",
     "reglas/pendientes.user.md": "---\ntype: Style Guide\n---\n",
     "reglas/notas.user.md": "---\ntype: Style Guide\n---\n",
-    "reglas/ciclo.user.md": "---\ntype: Style Guide\n---\n",
     "reglas/plantilla/AHORA.md": "---\ntype: Logbook\n---\n",
 }
 VALIDOS = ["Config", "Logbook", "Scope", "Style Guide", "Todo"]
 
 
 def test_el_vault_sembrado_y_una_pregunta_del_lint_no_fallan(tmp_path: Path) -> None:
-    sembrado = init.init(tmp_path / "limpio", home=RAIZ_REPO, desde=AHORA.date())
+    sembrado = init.init(tmp_path / "limpio", home=RAIZ_REPO)
     r = doctor.revisar_vault(sembrado)
     assert r.ok
     assert r.mensaje.splitlines()[-1] == "doctor: el vault está sano."
     assert "files:" not in r.mensaje
 
-    vault = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    vault = init.init(tmp_path / "v", home=RAIZ_REPO)
     entry.add_al_vault(
         vault,
         body="**cachureo**: ordené los cables",
@@ -163,7 +162,7 @@ def test_un_vault_completo_esta_sano_y_uno_con_defectos_los_nombra(tmp_path: Pat
     assert revisar_archivos(vault).sano
     revision = revisar_frontmatter(vault, tipos_validos=VALIDOS)
     assert revision.sano
-    assert "12 archivos" in revision.salida  # los 12 menos el AGENTS.md
+    assert "11 archivos" in revision.salida  # los 11 menos el AGENTS.md
     assert "AGENTS.md" not in revision.salida
     assert "plantilla/AHORA.md" not in revision.salida
 
@@ -217,7 +216,7 @@ def test_cada_tema_de_doctor_es_el_nombre_de_una_revision(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """`doctor TEMA` informa solo esa revisión; los temas son los nombres de las revisiones."""
-    vault = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    vault = init.init(tmp_path / "v", home=RAIZ_REPO)
     for tema in doctor.TEMAS:
         assert main(["doctor", tema, "--vault", str(vault)]) == EXITO, tema
         assert capsys.readouterr().out.strip() == f"doctor {tema}: sin hallazgos."
@@ -228,7 +227,7 @@ def test_cada_tema_de_doctor_es_el_nombre_de_una_revision(
 
 
 def test_doctor_scope_reporta_solo_el_lint_de_ambitos(tmp_path: Path) -> None:
-    vault = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    vault = init.init(tmp_path / "v", home=RAIZ_REPO)
     pagina = vault / "ambitos" / "personal" / "personal.md"
     pagina.write_text("x [[roto]]\n", encoding="utf-8")
 

@@ -174,7 +174,7 @@ Y viaja dentro del mismo comando que escribe, nunca en un paso aparte que alguie
 | Ámbitos | su página, su jerarquía, las keywords con que se elige y el ámbito de los registros que ya hablaban de él | `scope create`, `scope move`, `scope update`, `entry move` (todavía no existe) |
 | Notas | la nota en `notas/` y su constancia en la bitácora | `note create`, `doctor note` |
 | Cadencias | alta o cambio de una cadencia en su ámbito | `cadence …` (todavía no existe) |
-| Ciclo | apertura, cierre y archivo de la bitácora | `process cycle`, `cycle close` (todavía no existe) |
+| Archivo | el paso de lo que sale de la ventana de `AHORA.md` a su bitácora semanal | cualquier comando que escribe, `doctor archive` |
 | Propuesta | sugiere algo y espera aprobación | sin comando, a propósito |
 
 La lista es abierta. Agregar una consecuencia es agregar su regla y su comando, sin tocar el flujo. La propuesta es la única que no se ejecuta: se muestra y espera, y una rechazada no deja nada que limpiar. `tuku doctor` comprueba que lo derivado coincide con lo canónico y que el despacho nombra solo comandos que existen.
@@ -195,7 +195,7 @@ Lo mismo vale para las entidades subordinadas. Cada una cumple un rol que el aut
 
 ## No entra
 
-- El formato de cada archivo. Está en [`ciclo.md`](ciclo.md), [`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md), [`cadencias.md`](cadencias.md) y [`../VAULT/spec-anterior/bitacora.md`](../VAULT/spec-anterior/bitacora.md).
+- El formato de cada archivo. Está en [`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md), [`cadencias.md`](cadencias.md) y [`../VAULT/spec-anterior/bitacora.md`](../VAULT/spec-anterior/bitacora.md).
 - Cómo se comporta un agente de IA: silencio por defecto, reparto entre LLM y comando. Está en [`../VAULT/spec-anterior/agente.md`](../VAULT/spec-anterior/agente.md).
-- Lo que el sistema devuelve al autor: la consulta del estado, abrir un ciclo y encontrarse con lo que había olvidado. Está en [`ciclo.md`](ciclo.md) y [`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md).
+- Lo que el sistema devuelve al autor: la consulta del estado, abrir `AHORA.md` y encontrarse con lo que había olvidado. Está en [`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md).
 - Qué garantiza un comando, sus códigos de salida y cómo informa. Está en [`../VAULT/spec-anterior/cli.md`](../VAULT/spec-anterior/cli.md). Acá se dice dónde cae el comando dentro del flujo, no cuál es su contrato.

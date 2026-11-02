@@ -4,7 +4,7 @@
 
 Lo que hay dentro de una variante se copia tal cual. Nada de lo que está en este `README.md` viaja al vault del autor.
 
-El mecanismo que copia una variante y resuelve sus fechas es código, no template: vive en [`../src/tuku/init.py`](../src/tuku/init.py) y se ejecuta con `tuku init`.
+El mecanismo que copia una variante y resuelve sus valores es código, no template: vive en [`../src/tuku/init.py`](../src/tuku/init.py) y se ejecuta con `tuku init`.
 
 ## Variantes
 
@@ -22,7 +22,7 @@ Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2:
 | --- | --- |
 | `AGENTS.md` | Reglas de todo el repositorio |
 | `LIBRO-DE-ESTILO.md` | Cómo opera TUKU con cada entidad; lo del autor está en `reglas/` |
-| `AHORA.md` | Los días del primer ciclo sembrados, sin registros |
+| `AHORA.md` | El foco, sin días ni registros |
 | `PENDIENTES.md` | Los callouts de horizonte, vacíos |
 | `ambitos/AGENTS.md`, `ambitos/CADENCIAS.md` | Reglas y cadencias de toda la rama |
 | `ambitos/personal/` | La única rama inicial: `CAPACIDAD.md`, `personal.md` |
@@ -41,12 +41,11 @@ La tabla es la referencia, no un inventario cerrado: lo que importa es que cualq
 Copiar el contenido de la variante a un directorio vacío y hacer tres cosas:
 
 1. En `reglas/config.tuku.md`, poner la zona horaria.
-2. En `AHORA.md`, escribir `desde` y `hasta` con las fechas del primer ciclo. Por defecto es `semana`, que es el ritmo menos sorprendente para quien nunca ha usado esto.
-3. En `AHORA.md`, reemplazar los encabezados de día por los días reales de ese rango.
-4. Opcional: en `reglas/autor.user.md` poner el nombre del autor. Dejarlo en blanco no impide escribir; el autor lo completa cuando quiera.
+2. Copiar `reglas/plantilla/AHORA.md` a `AHORA.md`.
+3. Opcional: en `reglas/autor.user.md` poner el nombre del autor. Dejarlo en blanco no impide escribir; el autor lo completa cuando quiera.
 
-Después de los tres primeros ya se puede escribir. Todo lo demás emerge del uso.
+Después de los dos primeros ya se puede escribir. Todo lo demás emerge del uso.
 
 ## Por qué se instala a mano
 
-Porque tiene que poder hacerse sin TUKU. Un vault que solo se puede crear ejecutando un programa es un vault que dentro de veinte años no se puede crear. `tuku init` hace exactamente estos pasos y ninguno más, con `--author` para el paso 4.
+Porque tiene que poder hacerse sin TUKU. Un vault que solo se puede crear ejecutando un programa es un vault que dentro de veinte años no se puede crear. `tuku init` hace exactamente estos pasos y ninguno más, con `--author` para el paso 3.

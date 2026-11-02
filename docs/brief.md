@@ -33,12 +33,12 @@ El valor aparece en los cruces, y por eso los tres ejes son el diseño y no una 
 - **Tiempo × ámbito** es la pregunta operativa del día: qué toca ahora en este frente, y qué se prometió aquí que sigue sin hacerse.
 - **Ámbito × deliberación** es el foco: un frente cuyas conclusiones no se han movido en meses está pidiendo que se le baje la prioridad o se archive.
 - **Tiempo × deliberación** es la trazabilidad: por qué se decidió así, leído desde la acción que lo motivó.
-- **Los tres a la vez** es el diagnóstico: un pendiente que se arrastra cuatro ciclos, en un ámbito sin notas nuevas hace dos meses, dice que ese proyecto terminó y nadie lo declaró. Ningún eje por separado lo dice.
+- **Los tres a la vez** es el diagnóstico: un pendiente que se arrastra cuatro semanas, en un ámbito sin notas nuevas hace dos meses, dice que ese proyecto terminó y nadie lo declaró. Ningún eje por separado lo dice.
 
 De ahí salen las primitivas, en ese orden y no al revés: la bitácora sirve al tiempo, los ámbitos a la estructura, las notas a la deliberación, y los pendientes y las cadencias son lo que cruza el tiempo con las otras dos.
 
 > [!question] Lo que esta sección deja abierto #REVISAR
-> La capacidad ya tiene dónde vivir y cómo se declara ([`../devel/borradores/ciclo.md`](../devel/borradores/ciclo.md) y [`../devel/VAULT/spec-anterior/ambitos.md`](../devel/VAULT/spec-anterior/ambitos.md)), pero sigue sin ubicarse respecto de los ejes: cuelga del ámbito y se gasta en el tiempo, así que no es un cuarto eje sino lo que mide cuánto cabe en el cruce de los dos primeros. Falta decidir si eso merece decirse aquí, en el brief, o si basta con que esté en las specs.
+> La capacidad ya tiene dónde vivir y cómo se declara ([`../devel/VAULT/spec-anterior/ambitos.md`](../devel/VAULT/spec-anterior/ambitos.md)), pero sigue sin ubicarse respecto de los ejes: cuelga del ámbito y se gasta en el tiempo, así que no es un cuarto eje sino lo que mide cuánto cabe en el cruce de los dos primeros. Falta decidir si eso merece decirse aquí, en el brief, o si basta con que esté en las specs.
 
 ### Cómo funciona
 
@@ -60,4 +60,4 @@ Tres niveles, en este orden de importancia:
 
 Que cualquier persona quede gestionando con la disciplina de un project manager riguroso, sin haber estudiado gestión ni haberse vuelto una persona ordenada.
 
-Y el mejor momento del producto: **abrir un ciclo y encontrarse con lo que uno había olvidado que se había prometido.**
+Y el mejor momento del producto: **abrir `AHORA.md` y encontrarse con lo que uno había olvidado que se había prometido.**

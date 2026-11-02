@@ -7,7 +7,7 @@ que el texto no puede expresar, las aserciones sobre el resultado.
 
 **El escenario se lee como lo que hace una persona.** No lleva `TUKU_HOME=`, ni
 rutas de `playground/`, ni banderas que solo existen para el test: escribe
-`tuku init mi-vault --at 2026-08-11` y nada más. Lo que el test necesita lo
+`tuku init mi-vault` y nada más. Lo que el test necesita lo
 pone el runner alrededor:
 
 - el directorio de trabajo es `playground/<slug>/`, así que `mi-vault` cae

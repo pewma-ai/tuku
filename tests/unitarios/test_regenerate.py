@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -20,7 +20,7 @@ COMANDOS = Path("reglas") / "comandos.tuku.md"
 
 def _desfasado(tmp_path: Path) -> Path:
     """Un vault donde cada derivado está atrasado respecto de su fuente."""
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     ahora = v / "AHORA.md"
     ahora.write_text(
         ahora.read_text(encoding="utf-8") + f"\n## Martes 11 de agosto\n{A_MANO}\n",
@@ -94,7 +94,7 @@ def test_libro_trae_la_prosa_de_tuku_y_no_toca_lo_del_autor_ni_los_valores(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setenv("TUKU_HOME", str(RAIZ_REPO))
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     libro = v / "LIBRO-DE-ESTILO.md"
     autor, config = v / "reglas" / "clasificaciones.user.md", v / "reglas" / "config.tuku.md"
     original = libro.read_text(encoding="utf-8")
@@ -122,7 +122,7 @@ def test_libro_trae_la_prosa_de_tuku_y_no_toca_lo_del_autor_ni_los_valores(
 def test_regenerate_todo_conserva_el_foco_crea_los_dias_y_la_segunda_corrida_no_cambia_nada(
     tmp_path: Path,
 ) -> None:
-    v = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    v = init.init(tmp_path / "v", home=RAIZ_REPO)
     ahora = v / "AHORA.md"
     foco = "> [!abstract] Foco\n> Cerrar el trimestre.\n"
     ahora.write_text(

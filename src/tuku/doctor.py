@@ -61,7 +61,6 @@ ARCHIVOS_REQUERIDOS = (
     "reglas/clasificaciones.user.md",
     "reglas/pendientes.user.md",
     "reglas/notas.user.md",
-    "reglas/ciclo.user.md",
     "reglas/plantilla/AHORA.md",
 )
 
@@ -288,7 +287,7 @@ def revisar_config(config_md: str | None) -> Revision:
         return Revision(
             "config",
             "reglas/config.tuku.md: error: falta el archivo. "
-            "Es donde los comandos leen la zona horaria y el tipo de ciclo.",
+            "Es donde los comandos leen la zona horaria y las ventanas de `AHORA.md`.",
             False,
         )
 
@@ -459,11 +458,11 @@ def formatear(
     return "\n".join(lineas)
 
 
-def revisar_todo(vault: Path) -> Revision:
+def revisar_todo(vault: Path, hoy: date | None = None) -> Revision:
     """`doctor todo` sobre el vault, como una revisión del doctor."""
     from tuku import todo
 
-    h_todo = todo.hallazgos_del_vault(vault)
+    h_todo = todo.hallazgos_del_vault(vault, hoy)
     return Revision(
         "todo",
         "todo: sin hallazgos."
@@ -561,8 +560,8 @@ def _check_link(c: _Check) -> list[Revision]:
 
 
 def _check_logbook(c: _Check) -> list[Revision]:
-    """`cycle` and `entry` read the same file, so they run together."""
-    from tuku import archive, cyclelint
+    """`archive` and `entry` read the same file, so they run together."""
+    from tuku import archive
     from tuku.config import leer_config, semanas_de_archivo
     from tuku.lint import ERROR
     from tuku.lint import formatear as format_records
@@ -570,34 +569,30 @@ def _check_logbook(c: _Check) -> list[Revision]:
 
     ahora = c.read("AHORA.md")
     if ahora is None:
-        return [ausente("cycle", "AHORA.md"), ausente("entry", "AHORA.md")]
-    cycle_findings = cyclelint.lint(ahora)
+        return [ausente("archive", "AHORA.md"), ausente("entry", "AHORA.md")]
     entry_findings = lint_records(ahora, abiertos=leer_config(c.vault).vocabularios_abiertos())
     entry_ok = not any(h.grado == ERROR for h in entry_findings)
-    overlaps, gaps = cyclelint.gaps_and_overlaps(c.vault)
-    history = archive.lint_history(archive.read_history(c.vault))
-    stale = (
-        archive.lint_window(ahora, today=c.hoy, weeks=semanas_de_archivo(c.vault))
-        if c.hoy is not None
-        else []
-    )
-    overlaps = [*overlaps, *history]
-    gaps = [*gaps, *stale]
-    cycle_ok = not cycle_findings and not overlaps
-    if overlaps or gaps:
-        errors = len(cycle_findings) + len(overlaps)
-        cycle_text = "\n".join(
+    errors = archive.lint_history(archive.read_history(c.vault))
+    warnings = [
+        *archive.lint_legacy(ahora, ciclo_user_md=c.read("reglas/ciclo.user.md") is not None),
+        *(
+            archive.lint_window(ahora, today=c.hoy, weeks=semanas_de_archivo(c.vault))
+            if c.hoy is not None
+            else []
+        ),
+    ]
+    if errors or warnings:
+        archive_text = "\n".join(
             [
-                *(str(h) for h in cycle_findings),
-                *overlaps,
-                *gaps,
-                f"cycle lint: {errors} error(es), {len(gaps)} aviso(s).",
+                *errors,
+                *warnings,
+                f"archive lint: {len(errors)} error(es), {len(warnings)} aviso(s).",
             ]
         )
     else:
-        cycle_text = cyclelint.formatear(cycle_findings)
+        archive_text = "archive lint: sin hallazgos."
     return [
-        Revision("cycle", cycle_text, cycle_ok, aviso=cycle_ok and bool(gaps)),
+        Revision("archive", archive_text, not errors, aviso=not errors and bool(warnings)),
         Revision(
             "entry",
             format_records(entry_findings),
@@ -610,7 +605,7 @@ def _check_logbook(c: _Check) -> list[Revision]:
 def _check_todo(c: _Check) -> list[Revision]:
     if c.read("PENDIENTES.md") is None:
         return [ausente("todo", "PENDIENTES.md")]
-    return [revisar_todo(c.vault)]
+    return [revisar_todo(c.vault, c.hoy)]
 
 
 def _check_style(c: _Check) -> list[Revision]:
@@ -662,7 +657,7 @@ _CHECKS: tuple[tuple[tuple[str, ...], Callable[[_Check], list[Revision]]], ...] 
     (("frontmatter",), _check_frontmatter),
     (("dispatch",), _check_dispatch),
     (("link",), _check_link),
-    (("cycle", "entry"), _check_logbook),
+    (("archive", "entry"), _check_logbook),
     (("todo",), _check_todo),
     (("style",), _check_style),
     (("scope",), _check_scope),
@@ -695,7 +690,7 @@ def revisar_vault(
 
     `nota` es un archivo de nota suelto, solo para el tema `note`: no lee el vault.
 
-    `hoy` es el día del reloj de `cli.main`: con él `cycle` avisa de los días de
+    `hoy` es el día del reloj de `cli.main`: con él `archive` avisa de los días de
     `AHORA.md` anteriores a la ventana de archivado. El doctor nunca archiva.
 
     Con `tema` informa solo esa revisión (`TEMAS`); el arreglo de los hallazgos de

@@ -65,7 +65,6 @@ class Configuracion:
     vault: Path
     # De reglas/config.tuku.md
     zona_horaria: str
-    nombres_de_ciclo: tuple[str, ...]
     datos: dict[str, str]
     # De los archivos del autor en reglas/
     autor: str | None
@@ -112,9 +111,6 @@ VENTANA_POR_DEFECTO = 7
 
 #: Cuántas semanas completas (desde el lunes) conserva `AHORA.md` sin `archive_weeks`.
 SEMANAS_POR_DEFECTO = 2
-
-#: Cómo se llama el ciclo si `reglas/ciclo.user.md` no lo dice.
-CICLO_POR_DEFECTO = "semana"
 
 
 @dataclass(frozen=True)
@@ -308,7 +304,6 @@ def leer_config(
     return Configuracion(
         vault=vault,
         zona_horaria=prefs.zona_horaria,
-        nombres_de_ciclo=tuple(vocabs.get("ciclos", [])) or (CICLO_POR_DEFECTO,),
         datos=prefs.datos,
         autor=autor,
         vocabularios=vocabs,

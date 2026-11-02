@@ -562,24 +562,27 @@ def quitar_aperturas_cerradas(ahora: str, cuerpo: str | None = None) -> str:
     return "".join(x for n, x in enumerate(lineas, start=1) if n not in sobran)
 
 
-def sin_consecuencia(ahora: str, pendientes: str) -> list[ConsecuenciaPendiente]:
-    """Las marcas del ciclo en curso que la tabla no refleja.
+def sin_consecuencia(
+    ahora: str, pendientes: str, hoy: date | None = None
+) -> list[ConsecuenciaPendiente]:
+    """Las marcas de `AHORA.md` que la tabla no refleja.
 
     Es el modo de falla más caro del sistema y el único que no deja señal: un
     `**pendiente**` escrito a mano en `AHORA.md`, sin pasar por `tuku todo open`,
     deja un archivo perfectamente bien formado al que le falta la mitad. Nada lo
     delata al leerlo; solo cruzando los dos archivos aparece.
 
-    Dos casos, y ninguno mira `bitacoras/`: un pendiente que viene arrastrado de
-    un ciclo anterior está en la tabla sin marca en `AHORA.md`, y eso es correcto.
+    Dos casos, y ninguno mira `bitacoras/`: un pendiente que se archivó con su
+    semana está en la tabla sin marca en `AHORA.md`, y eso es correcto. `hoy` fecha
+    los días de `AHORA.md`.
 
-    1. Un `**pendiente**` que no está en la tabla, salvo que el mismo ciclo lo
+    1. Un `**pendiente**` que no está en la tabla, salvo que `AHORA.md` lo
        cierre después: abrir y cerrar el mismo día no deja fila, y está bien.
     2. Un `(Hecho)` cuyo cuerpo sigue en la tabla.
     """
     from tuku.ahora import dias
 
-    fechas = {i: fecha for i, _, fecha in dias(ahora)}
+    fechas = {i: fecha for i, _, fecha in dias(ahora, hoy)}
     ubicadas: list[ConsecuenciaPendiente] = []
     dia: date | None = None
     for i, linea in enumerate(ahora.splitlines()):
@@ -600,8 +603,8 @@ def huerfanas(pendientes: str, registros: Iterable[str]) -> list[Fila]:
     """Las filas de la tabla que ningún registro `**pendiente**` abrió.
 
     `registros` son los textos donde puede estar la apertura: `AHORA.md` y las
-    bitácoras cerradas, porque un pendiente arrastrado de un ciclo anterior
-    conserva su registro en la bitácora donde nació. Una fila sin apertura en
+    bitácoras, porque un pendiente de una semana archivada conserva su registro
+    en la bitácora donde nació. Una fila sin apertura en
     ninguno quedó así por una edición: el registro perdió su marca o se borró.
     """
     abiertos = {
@@ -651,6 +654,7 @@ def lint(
     *,
     vistas: Mapping[str, tuple[str | None, str]] | None = None,
     historia: Iterable[str] = (),
+    hoy: date | None = None,
 ) -> list[str]:
     """Los hallazgos de `tuku doctor todo`, cada uno con su corrección. No lee disco.
 
@@ -666,7 +670,7 @@ def lint(
     4. Un pendiente abierto y cerrado el mismo día: sobra el registro que lo
        abrió, y lo quita `tuku fix todo`.
     5. Una fila sin registro `**pendiente**` en `ahora` ni en `historia` (los
-       textos de las bitácoras cerradas): `huerfanas`.
+       textos de las bitácoras): `huerfanas`.
     """
     hallazgos = (
         ["PENDIENTES.md: error: la tabla no tiene la columna `Creado`. Corre `tuku fix todo`."]
@@ -682,7 +686,7 @@ def lint(
         hallazgos += [
             f"AHORA.md: error: {c.cuerpo!r} lleva {c.marca} y la tabla no lo refleja. "
             f"Corre `{c.comando}`."
-            for c in sin_consecuencia(ahora, pendientes)
+            for c in sin_consecuencia(ahora, pendientes, hoy)
         ]
     if ahora is not None:
         hallazgos += [

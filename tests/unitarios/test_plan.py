@@ -390,7 +390,7 @@ def test_a_record_before_the_window_goes_to_the_logbook_of_its_week_with_its_lin
 
 
 def test_apply_writes_only_what_differs_and_regenerates(tmp_path: Path) -> None:
-    vault = init.init(tmp_path / "v", home=RAIZ_REPO, desde=date(2026, 8, 10))
+    vault = init.init(tmp_path / "v", home=RAIZ_REPO)
 
     def abrir(
         body: str = "pagar la patente", *, regenerar: bool = True, due: str = ""

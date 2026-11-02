@@ -35,7 +35,7 @@ _ARRANQUE = "import sys; from tuku.cli import main; sys.exit(main(sys.argv[1:]))
 
 def _sembrar(v: Path) -> None:
     subprocess.run(
-        [sys.executable, "-c", _ARRANQUE, "init", str(v), "--at", "2026-08-11"],
+        [sys.executable, "-c", _ARRANQUE, "init", str(v)],
         env={**os.environ, "TUKU_HOME": str(vault.RAIZ_REPO)},
         check=True,
         capture_output=True,
@@ -79,8 +79,6 @@ def test_el_shim_escribe_en_el_vault_con_el_entorno_que_recibe_el_agente() -> No
                         "tuku",
                         "entry",
                         "create",
-                        "--at",
-                        "2026-08-11 09:12",
                         "--scope",
                         "personal",
                         "--body",

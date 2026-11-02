@@ -18,16 +18,16 @@ El vault se escribe en primera persona, en nombre del autor. Cuando su nombre ap
 
 ## Registro
 
-Un registro es una línea de la bitácora (`AHORA.md` mientras el ciclo está abierto): `- HH:MM - [ámbito](ruta) clasificación: cuerpo`. Debe cumplir:
+Un registro es una línea de la bitácora (`AHORA.md`, o su bitácora semanal si la fecha es antigua): `- HH:MM - [ámbito](ruta) clasificación: cuerpo`. Debe cumplir:
 1. **Un comando por registro.** Una frase del autor puede dar varios registros: un comando por cada uno, y nunca dos para un mismo hecho.
 2. **El hecho, no la conversación.** Lo dirigido a quien escucha («recuérdame», «anota», «guárdame») queda fuera.
 3. **Autocontenido.** Se va a leer en años, sin el resto del día. Las personas se nombran con su rol la primera vez y «el otro día» se convierte en una fecha.
 4. **Precisión.** No se agrega información inferida: lo que el hecho sugiere se propone y espera el sí del autor.
-5. **El día fuera del ciclo.** Si hoy cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros, con ese día explícito en `--at`. Un ciclo que quedó atrás no es motivo para cerrarlo: eso lo decide el autor.
+5. **Fecha antigua.** Un registro de un día anterior a la ventana de `AHORA.md` va solo a la bitácora semanal de ese día, con la fecha explícita en `--at`; el comando la crea si no existe y el registro no se rechaza ni se escribe en `AHORA.md`.
 6. **Una nota nombrada se enlaza.** `tuku context` ofrece las últimas notas de cada tipo enlazable con su título y sus `aliases`. La primera mención de una va como enlace en el `--body`, con el texto que dijo el autor: `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md)`. Si el nombre calza con dos notas, se pregunta; si con ninguna, no se enlaza ni se inventan rutas. Lo ya escrito no se enlaza hacia atrás por iniciativa propia: eso lo pide el autor.
 7. **Día y hora.** No vienen del dictado: se derivan de la jornada que describe. Sin dato, son hoy y ahora. Un día pasado va sin hora, al final de ese día: la hora de hoy sería inventada.
 8. **Voz y tiempo.** Los hechos van en pasado y primera persona, y lo que sigue vigente, en presente. Registro neutro, sin voseo. Lo evaluativo no va en el cuerpo: lo dice la clasificación.
-9. **Corregir es un comando.** `tuku entry update --match TEXTO --body …` cambia el cuerpo y `tuku entry move --match TEXTO --scope …` cambia el ámbito, siempre del último registro que calza. Para uno de un ciclo cerrado se antepone su día (`"2026-08-10"`). Un registro nunca se edita a mano.
+9. **Corregir es un comando.** `tuku entry update --match TEXTO --body …` cambia el cuerpo y `tuku entry move --match TEXTO --scope …` cambia el ámbito, siempre del último registro que calza. Para uno de una bitácora se antepone su día (`"2026-08-10"`). Un registro nunca se edita a mano.
 
 > [!example] Ejemplos tuku
 > ```bash
@@ -53,9 +53,10 @@ Un pendiente es un compromiso abierto: un registro con `**pendiente**` y una fil
 1. **Un comando abre y otro cierra.** Escriben el registro y la fila, y dejan constancia en la bitácora: no se suma un `entry create` ni se edita `PENDIENTES.md` a mano.
 2. **En infinitivo y sin mayúscula inicial.** «pagar la sesión con el psicólogo», y no «Pagar la sesión» ni «hay que pagar la sesión».
 3. **El cierre repite el texto.** `todo close` encuentra la fila por su detalle, palabra por palabra y sin contar los links: de eso depende que cerrarlo funcione sin que nadie interprete nada. Sin `--scope` cierra en el ámbito de la fila, y un pendiente abierto y cerrado el mismo día deja solo el cierre.
-4. **Dos fechas distintas.** `--at` es cuándo se prometió y nunca es un día futuro. `--due` es cuándo vence, con la hora si el autor la dijo («el viernes a las nueve»). No se combina con `--horizon`; un `--due` que ya pasó se acepta, y el comando avisa.
-5. **Postergar es deliberado.** Sin `--due`, nace en el primer horizonte; con `--horizon`, en el que se diga. Lo que se pospone ciclo tras ciclo no era un pendiente sino una nota.
-6. **Atrasado se calcula.** Un pendiente está atrasado si su `Vence` ya pasó o si el horizonte de su ciclo expiró: `tuku context todo` lo informa. Nada se mueve por calendario; mover un pendiente es decisión del autor.
+4. **Dos fechas distintas.** `--at` es cuándo se prometió, queda como `Creado` y nunca es un día futuro. `--due` es cuándo vence, con la hora si el autor la dijo («el viernes a las nueve»). No se combina con `--horizon`; un `--due` que ya pasó se acepta, y el comando avisa.
+5. **Postergar es deliberado.** Sin `--due`, nace en el primer horizonte; con `--horizon`, en el que se diga. Lo que se pospone semana tras semana no era un pendiente sino una nota.
+6. **Atrasado se calcula.** Un pendiente está atrasado si su `Vence` ya pasó o si el plazo de su horizonte, contado desde `Creado`, ya pasó: `tuku context todo` lo informa. Nada se mueve por calendario; mover un pendiente es decisión del autor.
+7. **Un pendiente que no es una ventana de días lleva fecha.** «Cuando esté en Santiago» no es un plazo, y «el próximo turno en el cerro» depende del ritmo del autor, que está en `ambitos/personal/CAPACIDAD.md`: el agente lo traduce a un `--due` con ese ritmo, o lo pregunta.
 
 > [!example] Ejemplos tuku
 > ```bash
@@ -69,25 +70,26 @@ Un `warning` en la salida es una alerta y no un fallo: el comando procedió.
 
 ### Horizontes
 
-Los horizontes son los plazos de `PENDIENTES.md`, del más cercano al más lejano. El primero es el ciclo en curso y se reconoce por su posición, no por su texto; `con fecha` es del sistema. Se escriben con espacios, y el comando también acepta guion (`esta-semana`).
+Los horizontes son los plazos de `PENDIENTES.md`, del más cercano al más lejano. Se reconocen por su posición, no por su texto, y su plazo se cuenta desde la columna `Creado`: el primero (`esta semana`) vence a los 7 días, el segundo (`próxima semana`) a los 14, y cualquier otro llega a fin de mes. El primero es donde nace un pendiente sin `--due`. `con fecha` es del sistema. Se escriben con espacios, y el comando también acepta guion (`esta-semana`).
 
 ### Horizontes del autor
 
 ![Horizontes](reglas/pendientes.user.md)
 
-## Ciclo
+## AHORA.md y las bitácoras
 
-El ciclo en curso es `AHORA.md`; los cerrados están en `bitacoras/`. `tuku process cycle` abre el siguiente, y cerrar el ciclo lo decide el autor, no el agente. Los ciclos y su orden están en la tabla del autor: el siguiente es el que sigue en ella. Con el nombre `semana` el rango es de lunes a domingo; con cualquier otro hay que decir hasta qué día va.
+`AHORA.md` es donde se escribe el día a día y siempre muestra lo reciente; lo anterior pasa solo a `bitacoras/`. De arriba abajo tiene:
+1. **El foco:** el callout `> [!abstract] Foco`, un texto breve que sugiere en qué concentrarse los próximos días. Solo lo escribe el autor; `tuku` lo conserva y lo descarta al archivar.
+2. **Los pendientes de la ventana:** los del primer horizonte y los que vencen en los próximos `window_days` días, que escribe `tuku`. Un pendiente con fecha aparece además bajo su día.
+3. **Los días,** del más nuevo al más viejo y, dentro de cada día, lo más reciente arriba. Un registro con hora se inserta por su hora; uno sin hora conserva su orden relativo.
 
-> [!example] Ejemplos tuku
-> ```bash
-> tuku process cycle --from 2026-08-17
-> tuku process cycle --from 2026-08-11 --to 2026-08-18 --name turno
-> ```
+Las bitácoras de `bitacoras/` son semanales, de lunes a domingo (`bitacora-20261019-20261025.md`), con `from` y `to` en su frontmatter. Debe cumplir:
+1. **El archivado se dispara solo al escribir.** `AHORA.md` conserva las últimas `archive_weeks` semanas completas desde el lunes; el primer comando que escribe después de esa ventana mueve lo anterior a la bitácora de su semana y la crea si falta. Un comando que solo lee no archiva.
+2. **Solo viajan los registros.** El foco y los pendientes de la semana archivada se descartan, y las rutas de los links se recalculan.
+3. **Una bitácora es inmutable.** Solo cambia para reparar rutas cuando se renombra un ámbito o una nota, y con `entry update` y `entry move`. Un registro de fecha antigua va a la suya (capítulo Registro).
+4. **El ámbito enlaza a su actividad** en las bitácoras: la página de cada ámbito lista lo suyo de los últimos doce meses.
 
-### Ciclos del autor
-
-![Ciclo](reglas/ciclo.user.md)
+Lee también: Registro y Pendiente.
 
 ## Ámbito
 
@@ -95,7 +97,7 @@ Un ámbito es un frente de actividad con identidad propia: una carpeta en `ambit
 1. **Un registro apunta a un ámbito, nunca a una categoría.** Una carpeta de `ambitos/` sin página propia es una categoría: agrupa y no tiene de qué hablar.
 2. **Un nombre, en kebab-case y único.** «Depto Centro» es `depto-centro` en la carpeta, la página y los enlaces, y dos ámbitos no se llaman igual aunque cuelguen de padres distintos. Un ámbito que no existe se rechaza: crearlo lo decide el autor.
 3. **Las keywords las dice el autor.** Se le preguntan al crear el ámbito y no se inventan. Van en kebab-case y sin el nombre del ámbito. Una palabra que ya nombra a otro ámbito es ambigua: se pregunta a cuál va.
-4. **Un ámbito dentro de otro.** `--parent` acepta el nombre o la ruta desde `ambitos/` (`negocio/clientes`). `scope move` y `scope rename` recalculan los links de todo el vault, también los de las bitácoras cerradas. Cada ámbito muestra solo lo suyo, no lo de sus hijos.
+4. **Un ámbito dentro de otro.** `--parent` acepta el nombre o la ruta desde `ambitos/` (`negocio/clientes`). `scope move` y `scope rename` recalculan los links de todo el vault, también los de las bitácoras. Cada ámbito muestra solo lo suyo, no lo de sus hijos.
 5. **Lo escrito antes de abrir un ámbito se reubica.** `scope create` lista los registros de otros ámbitos que lo nombran: se decide cuáles son suyos, se pregunta por los dudosos y se pasan con `entry move`, sin tocar el cuerpo.
 6. **La página.** Lo que el autor escribe va arriba. Debajo van secciones que reescriben los comandos (pendientes, actividad, hijos): lo escrito a mano ahí se pierde.
 7. **Archivar es caro y el sistema no lo inicia.** Propone, y el autor delibera qué pasa con los pendientes, las cadencias y los links de lo archivado.
@@ -109,7 +111,7 @@ Un ámbito es un frente de actividad con identidad propia: una carpeta en `ambit
 
 ## Capacidad
 
-La capacidad del autor vive en `ambitos/personal/CAPACIDAD.md` y se lee siempre al crear un ciclo nuevo, para estimar cuánto tiempo tiene. Si el autor lo considera necesario, un ámbito puede tener además su propio `CAPACIDAD.md`, con lo que cuesta sostener ese frente.
+La capacidad del autor vive en `ambitos/personal/CAPACIDAD.md` y se lee siempre al planificar, para estimar cuánto tiempo tiene. Si el autor lo considera necesario, un ámbito puede tener además su propio `CAPACIDAD.md`, con lo que cuesta sostener ese frente.
 
 ![Capacidad](ambitos/personal/CAPACIDAD.md)
 
@@ -136,7 +138,7 @@ Lee también: Uso de Markdown y Formato OKF.
 
 ## Cadencia
 
-Una cadencia es algo que vuelve: se declara una vez y genera un pendiente con fecha cada vez que toca. Se evalúan al cambiar de ciclo: al crear una semana, o el ciclo propio del autor, cada cadencia que cae en ese rango se convierte en un pendiente. No hay comando para declararla; se escribe en un `CADENCIAS.md`. Se leen en cascada: las de `ambitos/CADENCIAS.md` valen para todos los ámbitos, y las del `CADENCIAS.md` de un ámbito, solo dentro de él. Se acumulan: una cadencia más adentro no cancela la de arriba. Es lo contrario de un `AGENTS.md`, donde el más cercano prevalece.
+Una cadencia es algo que vuelve: se declara una vez y genera un pendiente con fecha cada vez que toca. Se evalúan al planificar los próximos días: cada cadencia que cae en esa ventana se convierte en un pendiente. No hay comando para declararla; se escribe en un `CADENCIAS.md`. Se leen en cascada: las de `ambitos/CADENCIAS.md` valen para todos los ámbitos, y las del `CADENCIAS.md` de un ámbito, solo dentro de él. Se acumulan: una cadencia más adentro no cancela la de arriba. Es lo contrario de un `AGENTS.md`, donde el más cercano prevalece.
 
 Cada cadencia es un encabezado `##` con tres campos de máquina y dos de persona:
 
@@ -174,14 +176,14 @@ MAYÚSCULAS es de TUKU y minúsculas es del autor. `AHORA.md`, `PENDIENTES.md`, 
 
 | Archivo | Qué guarda |
 | --- | --- |
-| `AHORA.md` | El ciclo en curso: aquí se escriben los registros del día |
+| `AHORA.md` | Lo reciente: el foco, los pendientes de la ventana y los registros de los últimos días |
 | `PENDIENTES.md` | Todo lo que está abierto |
 | `LIBRO-DE-ESTILO.md` | Estas convenciones, con las preferencias del autor incluidas |
 | `ambitos/` | Los frentes de la vida del autor, uno por carpeta |
 | `notas/` | Ideas que no pertenecen a un día |
 | `procesos/` | Los procedimientos con nombre del autor |
 | `reglas/` | Las preferencias del autor (`*.user.md`), la configuración y las skills (`skills/`) |
-| `bitacoras/` | Los ciclos cerrados. Aparece al cerrar el primero |
+| `bitacoras/` | Las semanas archivadas, una bitácora por semana. Aparece al archivar la primera |
 
 Los archivos `.user.md` son la memoria del autor: cuando dice cómo prefiere que se haga algo, el agente lo condensa ahí. Las reglas de cada uno están en su frontmatter.
 
@@ -203,7 +205,7 @@ Un campo es obligatorio, `type`, y dice qué clase de archivo es. Los nombres de
 | `Config` | `reglas/config.tuku.md` | Lo que las automatizaciones necesitan saber |
 | `Style Guide` | `LIBRO-DE-ESTILO.md` y los `reglas/*.user.md` | Las convenciones del vault y lo que el autor decide |
 
-Un `Logbook` lleva además `status` (`draft` mientras el ciclo está abierto, `stable` cuando se archiva), y `from`, `to` y `cycle`. Un `.user.md` lleva `editable: true`, `modified_time` (`null` hasta que se cambia) y `rules`.
+Un `Logbook` lleva además `status` (`draft` en `AHORA.md`, `stable` en una bitácora archivada); las bitácoras suman `from` y `to`, de lunes a domingo. Un `.user.md` lleva `editable: true`, `modified_time` (`null` hasta que se cambia) y `rules`.
 
 ### Tipos OKF propios
 
@@ -211,7 +213,7 @@ Un `Logbook` lleva además `status` (`draft` mientras el ciclo está abierto, `s
 
 ## Configuración
 
-Los valores que las automatizaciones necesitan saber de este vault.
+Los valores que las automatizaciones necesitan saber de este vault. `window_days` es cuántos días hacia adelante lista `AHORA.md` y `archive_weeks` cuántas semanas completas conserva.
 
 ![Configuración](reglas/config.tuku.md)
 

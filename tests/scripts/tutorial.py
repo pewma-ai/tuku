@@ -264,7 +264,6 @@ def correr_comando(comando: str, trabajo: Path, ahora: str) -> tuple[int, str]:
         raise CapituloNoEncontrado(f"el tutorial corre solo comandos `tuku`, no {comando!r}")
     argv = partes[1:]
     if argv[:1] == ["init"]:
-        argv = [*argv, "--at", ahora[:10]]
         cwd = trabajo
     else:
         cwd = trabajo / "mi-vault"

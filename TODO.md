@@ -19,15 +19,15 @@ Falta:
 - **Bajar un pendiente por la escalera de horizontes (B4 de [`005-00`](tests/escenarios/005-00-el-dia-ciento-cincuenta.md)).** [`devel/VAULT/spec-anterior/pendientes.md`](devel/VAULT/spec-anterior/pendientes.md) nombra las «postergaciones» como comandos de `tuku todo`, y `todo` solo tiene `open`, `close` y `lint`. Falta el nombre y la forma. El mismo comando serviría para corregir `Vence` (`--due`): hoy `entry update` cambia el texto del pendiente y deja la fecha como estaba, y el capítulo 5 del tutorial lo dice así. Propuesta: `tuku todo update "Llamar a Fabina" --horizon "próxima semana"`, sin verbo nuevo, igual que `entry update`. Modifica un comando, así que se hace donde se trabaja la superficie del CLI.
 - **Cada cambio de esta lista toca [`spec/tuku.md`](spec/tuku.md):** se quita el `# pendiente` de lo implementado y la línea de "Lo que se retira" de lo que sale del CLI. [`tests/unitarios/test_superficie.py`](tests/unitarios/test_superficie.py) falla y dice qué línea cambiar si se olvida.
 
-## AHORA.md sin ciclos (decidido el 2026-11-02, por implementar)
+## AHORA.md sin ciclos (decidido el 2026-11-02; implementado, faltan epics, escenarios y tutorial)
 
-Abrir y cerrar un ciclo es complejidad innecesaria: corta el flujo de trabajo y no deja ver lo que pasó hace poco en el mismo archivo. Se reemplaza por un `AHORA.md` que siempre muestra lo reciente y se archiva solo. Hasta implementarlo, el libro de estilo y el código siguen con ciclos. Los epics se revisan uno por uno después: el 006 se reformula y los 002, 005 y 010 se tocan.
+Abrir y cerrar un ciclo es complejidad innecesaria: corta el flujo de trabajo y no deja ver lo que pasó hace poco en el mismo archivo. Se reemplaza por un `AHORA.md` que siempre muestra lo reciente y se archiva solo. Los epics se revisan uno por uno después: el 006 se reformula y los 002, 005 y 010 se tocan; los escenarios de los epics 3 al 5 se ajustan epic por epic, los de los epics 1 y 2 se reescriben al final (`tuku init` ya no tiene `--at`) y el tutorial se reformula.
 
 ### Commit de seguridad y método
 
 **El commit de seguridad es `123f75c`** (2026-11-02): último con todo en verde, 352 tests, ruff y mypy. Si el trabajo de esta sección falla o el autor se arrepiente, se vuelve ahí: `git reset --hard 123f75c`, o `git revert` de los commits de bloque que siguen. Se trabaja directo sobre `devel`, sin rama, solo hacia adelante.
 
-Se implementa por bloques, uno por commit, y al cerrar cada uno los tests unitarios vuelven a verde (el hook de pre-commit lo exige): A, `PENDIENTES.md` con `Creado`; B, el formato nuevo de `AHORA.md`; C, el autoarchivado y las bitácoras históricas; D, quitar los ciclos y alinear libro, spec y tutorial. Los escenarios de `tests/escenarios/` no se ajustan en estos bloques: los de los epics 3 al 5 se revisan después epic por epic, y los de los epics 1 y 2 se reescriben al final.
+Se implementó por bloques, uno por commit: A, `PENDIENTES.md` con `Creado`; B, el formato nuevo de `AHORA.md`; C, el autoarchivado y las bitácoras semanales; D, quitar los ciclos y alinear libro, spec y textos del producto. Los escenarios de `tests/escenarios/` y `docs/tutorial/` no se tocaron en ningún bloque.
 
 ### Decisiones de implementación (2026-11-02, las toma el agente)
 
@@ -65,16 +65,11 @@ La tabla suma una columna `Creado` (`| Horizonte | Vence | Creado | Ámbito | De
 - **Son inmutables en lo posible.** Solo se tocan para reparar rutas cuando cambia el nombre de un ámbito o de una nota, y para corregir un registro (`entry update`, `entry move`).
 - **Un registro con fecha antigua** va a la bitácora que le corresponde, y si no existe la crea. No se rechaza por «fuera del ciclo».
 
-### Lo que desaparece
-
-`tuku process cycle`, `cycle close` (nunca existió), el rechazo de `entry create` por un día fuera del ciclo, el campo `cycle:`, `cycle_name` y `reglas/ciclo.user.md`, `doctor cycle` (se reemplaza por una revisión de las bitácoras históricas), el capítulo Ciclo del libro y [`devel/borradores/ciclo.md`](devel/borradores/ciclo.md). La capacidad «al crear un ciclo» pierde su disparador. La región de la semana del callout se reemplaza por la ventana de 7 días, y el horizonte que expiraba al cerrar un ciclo, por la fecha `Creado`.
-
 ### Abierto
 
 - **Pendientes que no son una ventana de días.** «Cuando esté en Santiago» es una condición, «el fin de semana» es una fecha y «próximo turno en el cerro» depende del ritmo de trabajo del autor. Propuesta: la fecha es lo único que `tuku` entiende; el agente traduce «próximo turno» a un `--due` usando lo que el autor escribió de su ritmo (`CAPACIDAD.md`); una condición es un horizonte propio de la tabla del autor que no vence nunca, y por lo tanto nunca está atrasado. Las cadencias no sirven: emiten pendientes por calendario, y una condición no es calendario.
-- **Las bitácoras son siempre semanales** (lunes a domingo) aunque la ventana sea otra, o su rango sigue a lo que se archivó.
-- **Qué hace la página de un ámbito con la bitácora histórica:** listar enlaces a las bitácoras que lo contienen, o seguir copiando su actividad reciente.
-- **Un vault ya sembrado con ciclos:** qué se hace con `cycle:` en sus bitácoras cerradas y con `reglas/ciclo.user.md`.
+- **Las páginas de ámbito** siguen copiando su actividad reciente desde las bitácoras. Falta decidir si basta con listar enlaces a las bitácoras que los contienen.
+- **Una condición no vence, y todavía no hay cómo decirlo.** Un horizonte propio de la tabla del autor que nunca vence no existe: cualquier fila desde la tercera llega a fin de mes. Hoy una condición se traduce a un `--due`.
 - **El comienzo de la semana** es el lunes, fijo o configurable.
 - **`Creado` y las postergaciones.** `esta semana` se mide desde `Creado`: no se decidió si el escalón dura 7 días desde esa fecha o llega hasta el domingo de esa semana, ni qué pasa al postergar con `todo update`: si `Creado` se conserva, un pendiente movido a `próxima semana` se mediría desde su creación y no desde la postergación. Quizá la columna deba llamarse `Desde` y reiniciarse al postergar.
 - **Vaults ya sembrados:** la tabla de `PENDIENTES.md` cambia de cuatro a cinco columnas, y las filas existentes no tienen `Creado`.
@@ -92,19 +87,17 @@ El libro de estilo estático dice el mecanismo (qué es una cadencia, cómo se d
 El template ya está hecho ([`LIBRO-DE-ESTILO.md`](template/vanilla/LIBRO-DE-ESTILO.md) y [`reglas/`](template/vanilla/reglas)). Lo que quedó decidido:
 
 - **El libro es orientación, no la especificación completa.** Es de TUKU, legible para una persona y un agente, y los comandos hacen cumplir lo determinista. No repite lo que un comando verifica.
-- **Cada capítulo se basta solo para su tarea** (Registro, Pendiente, Ciclo, Ámbito, Nota, Cadencia, Formato OKF, Uso de Markdown...) y dice su "Lee también". La skill del asistente (`reglas/skills/asistente/SKILL.md`) manda leer el capítulo una vez por sesión antes de la primera escritura de cada tipo. Se acepta que un agente se la salte; si pasa, la salida es una compuerta en el comando con estado local `.tuku/leidos`.
+- **Cada capítulo se basta solo para su tarea** (Registro, Pendiente, AHORA.md y las bitácoras, Ámbito, Nota, Cadencia, Formato OKF, Uso de Markdown...) y dice su "Lee también". La skill del asistente (`reglas/skills/asistente/SKILL.md`) manda leer el capítulo una vez por sesión antes de la primera escritura de cada tipo. Se acepta que un agente se la salte; si pasa, la salida es una compuerta en el comando con estado local `.tuku/leidos`.
 - **Los únicos `*.tuku.md` son `config.tuku.md` y `comandos.tuku.md`.** Desaparecen `bitacora.tuku.md`, `notas.tuku.md` y `subtipos/persona.tuku.md`, y su contenido vive en el libro.
 - **Lo del autor está en `reglas/*.user.md`**, con lo mínimo: frontmatter `type: Style Guide`, `editable: true`, `modified_time` (null hasta que el agente guarda una preferencia) y `rules` (sus reglas de edición); el cuerpo es solo su tabla o su texto, **sin encabezado**. Los encabezados `###` y las frases viven en el libro. `lenguaje` se fundió en `autor.user.md` (tabla Campo y Valor), y `bitacora.md` pasó a `clasificaciones.user.md`.
-- **`cycle_name` salió de `config.tuku.md`** y vive en `reglas/ciclo.user.md`, como una tabla de dos columnas, `Ciclo` y `Días`, con una fila por ciclo en el orden en que se alternan. El código usa la primera columna; `Días` es informativa por ahora.
 - **Las clasificaciones solo llegan con el capítulo Registro**; `tuku context` sin tema deja de traer el vocabulario.
 - **No hay `ambitos.user.md` ni `cadencias.user.md`.** Los ámbitos se infieren y se crean a petición del autor o por sugerencia de TUKU (regla fija en el capítulo Ámbito), y las cadencias se declaran dentro de los ámbitos. `lenguaje.user.md` tampoco existe.
 - **La capacidad del autor es texto abierto**, en `ambitos/personal/CAPACIDAD.md` (sin `Bruto` ni `Costo fijo`), que el libro transcluye. Si no se define, se infiere de las bitácoras. Un ámbito puede tener su propio `CAPACIDAD.md` si el autor lo considera necesario.
 
 ### Queda
 
-- **`Días` de `ciclo.user.md`** es solo texto. Si los largos variables (8, 10, 14) deben leerlo `process cycle` y las cadencias, hay que fijar su formato.
 - **Transclusiones fuera de `reglas/`.** `doctor style` carga las del libro por su ruta y `context style` las expande, pero no hay un test del caso `ambitos/personal/CAPACIDAD.md`.
-- **Cadencias al cambiar de ciclo** y **capacidad al crear un ciclo**: `process cycle` no las lee, y `devel/borradores/cadencias.md`, `devel/borradores/ciclo.md` y el capítulo Ámbito del libro no las describen así. La capacidad de cada proyecto, su lectura recursiva y las magnitudes se piensan aparte.
+- **Cadencias y capacidad sin disparador.** Sin ciclos que abrir, nada evalúa las cadencias ni lee la capacidad: el libro dice que se leen al planificar y `devel/borradores/cadencias.md` sigue hablando de ciclos. Lo reformula el epic 006, junto con la capacidad de cada proyecto, su lectura recursiva y las magnitudes.
 - **`doctor`:** revisar el frontmatter de los `.user.md` (`editable`, `modified_time`, `rules`) y avisar si `modified_time` es `null` y el archivo difiere del template. `autor.user.md` trae `PEDIR AL AUTOR!`: avisar si queda.
 - **`template/README.md`:** la fila de `CAPACIDAD.md` y el paso de instalar a mano (la skill ya tiene su fila en la tabla).
 - **Tutorial con `test-tui tutorial`:** en el último recorrido (2-8) pasaron 2, 3, 6 y 7. Fallan 4, 5 y 8 por el agente y el entorno, no por el texto: el modelo barato (`gemini-3.8-flash-low`) usa heredocs que `agy` niega, no contesta la fusión de frentes del capítulo 5, y el `tuku` del agente da a veces `PermissionError` al conectar con su socket. Los capítulos 9 y 10 prometen lo que dependen de los epics 006 y 007 y no se corrieron. Para cerrar: otro modelo o permitir en `agy` los comandos compuestos.
@@ -133,9 +126,8 @@ Anotado desde el chat de specs el 2026-10-18.
 
 ### Comandos
 
-- **Vaults ya sembrados con `cycle_type`.** Ahora lo ignoran y usan `semana`. Decidir si `doctor config` avisa de la fila vieja.
+- **Vaults ya sembrados con `cycle_type`.** Lo ignoran. Decidir si `doctor config` avisa de la fila vieja.
 - **`context cadence`:** las cadencias vigentes de todo el árbol en un texto, cada una con su `CADENCIAS.md` ([`devel/borradores/cadencias.md`](devel/borradores/cadencias.md)). La firma de `context` no cambia.
-- **El nombre de la bitácora cerrada lleva el ciclo** (`bitacora-DESDE-HASTA-CICLO.md`) cuando exista `cycle close`.
 
 ### Epics
-- **Epic 010, el tutorial entero** ([`010-00`](tests/escenarios/010-00-el-tutorial.md)). El arnés ya existe: `uv run python tests/scripts/test-tui.py tutorial [capítulos]` ([`tutorial.py`](tests/scripts/tutorial.py)). Falta correrlo con un agente real y ajustar lo que el primer pasaje destape. Las ediciones a mano son un callout `> [!warning] Edita a mano` con bloque `edit` y el arnés las aplica. Los capítulos 4, 5 y 8 fallan por el modelo barato y el sandbox de `agy` (ver "Queda" más arriba). Los capítulos 9 y 10 prometen lo que depende de los epics 006 y 007: el flujo del lunes (rechazo de `entry create`, aviso, cierre, `process cycle`), `cycle close`, la cadencia declarada que emite lo que falta de la semana en curso, y `tuku context todo --late`.
+- **Epic 010, el tutorial entero** ([`010-00`](tests/escenarios/010-00-el-tutorial.md)). El arnés ya existe: `uv run python tests/scripts/test-tui.py tutorial [capítulos]` ([`tutorial.py`](tests/scripts/tutorial.py)). Falta correrlo con un agente real y ajustar lo que el primer pasaje destape. Las ediciones a mano son un callout `> [!warning] Edita a mano` con bloque `edit` y el arnés las aplica. Los capítulos 4, 5 y 8 fallan por el modelo barato y el sandbox de `agy` (ver "Queda" más arriba). Los capítulos 9 y 10 prometen lo que depende de los epics 006 y 007: el flujo del lunes (que ahora es el autoarchivado), la cadencia declarada que emite lo que falta de la semana en curso, y `tuku context todo --late`.

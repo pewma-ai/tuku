@@ -63,7 +63,7 @@ def add(
     `day`/`dia` es el encabezado del día, con o sin el `## ` inicial; si no existe
     se crea en su lugar, entre los días del más nuevo al más viejo, con el año de
     `fecha` o, sin ella, el que deja el encabezado más cerca del rango del
-    frontmatter. Ningún día se rechaza por caer fuera de ese rango. Dentro del día
+    frontmatter, que solo tiene una bitácora. Dentro del día
     el orden es por hora descendente: lo más reciente arriba. Un registro nuevo
     sin hora toma la hora del que quede inmediatamente debajo de él (el primero
     del día, es decir el más reciente) y entre claves iguales el nuevo queda
@@ -79,16 +79,15 @@ def add(
         from tuku.ahora import fecha_del_dia, insertar_dia, rango
 
         limites = rango(ahora)
-        if limites is None:
+        if fecha is None and limites is None:
             raise ValueError(f"no existe el encabezado {encabezado!r} en AHORA.md") from None
-        f_nueva = fecha or fecha_del_dia(encabezado, *limites)
+        f_nueva = fecha or (fecha_del_dia(encabezado, *limites) if limites else None)
         if f_nueva is None:
             raise ValueError(f"el encabezado {encabezado!r} no es un día") from None
         src, ini = insertar_dia(src, f_nueva, limites)
 
-    # La sección del día termina en el siguiente día o en el `---` que cierra el
-    # ciclo. Sin ese segundo corte, escribir en el último día se lleva por delante
-    # la marca de fin de ciclo, que no es una línea de registro y se descartaría.
+    # La sección del día termina en el siguiente día o en un `---` suelto, que no es
+    # una línea de registro y se descartaría con el resto de la sección.
     fin = next(
         (
             i
@@ -477,7 +476,7 @@ def _fuente(vault: Path, ahora: Path, dia: date | None) -> Path:
 
 
 def _bitacora_de(vault: Path, dia: date) -> Path | None:
-    """La bitácora cerrada cuyo `from`–`to` contiene `dia`."""
+    """La bitácora cuyo `from`–`to` contiene `dia`."""
     from tuku.ahora import rango
 
     for ruta in sorted((vault / "bitacoras").glob("*.md")):
@@ -496,16 +495,16 @@ def mover_en_vault(
     hour: str | None = None,
     now: datetime | None = None,
 ) -> Resultado:
-    """Cambia el ámbito de un registro, en `AHORA.md` o en un ciclo cerrado.
+    """Cambia el ámbito de un registro, en `AHORA.md` o en una bitácora.
 
     El caso de uso de `tuku entry move`. Sirve para lo escrito antes de abrir un
     ámbito (`spec/ambitos.md`): el registro pasa al ámbito nuevo con su cuerpo
-    intacto. Un ciclo cerrado admite la corrección. Si el registro es un
+    intacto. Una bitácora admite la corrección. Si el registro es un
     pendiente abierto, su fila en `PENDIENTES.md` cambia de ámbito con él.
     """
     from tuku import regenerate, todo_core
     from tuku import scope_tree as ambitos
-    from tuku.ahora import encabezado_de, rango
+    from tuku.ahora import encabezado_de
     from tuku.config import archivo_vault
 
     tree = ambitos.read_tree(vault)
@@ -519,8 +518,9 @@ def mover_en_vault(
     ruta = archivo_vault(vault, "AHORA.md")
     if day is not None:
         ruta = _fuente(vault, ruta, day)
-        limites = rango(archivo.leer(ruta))
-        if ruta.name == "AHORA.md" and (limites is None or not limites[0] <= day <= limites[1]):
+        if ruta.name == "AHORA.md" and not any(
+            x.strip() == encabezado_de(day) for x in archivo.leer(ruta).splitlines()
+        ):
             return Resultado.rechazo(
                 f"ni AHORA.md ni ninguna bitácora de bitacoras/ cubre el "
                 f"{day.isoformat()}. Revisa la fecha de CUÁNDO."

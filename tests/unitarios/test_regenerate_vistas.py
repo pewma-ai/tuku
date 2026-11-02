@@ -254,7 +254,7 @@ def test_el_primer_escalon_del_autor_entra_a_la_ventana_aunque_lo_renombre(
     tmp_path: Path,
 ) -> None:
     raiz = Path(__file__).resolve().parent.parent.parent
-    vault = init.init(tmp_path / "v", home=raiz, desde=INSTANTE.date())
+    vault = init.init(tmp_path / "v", home=raiz)
     assert primer_escalon(vault) == "esta semana"
 
     reglas = vault / "reglas" / "pendientes.user.md"

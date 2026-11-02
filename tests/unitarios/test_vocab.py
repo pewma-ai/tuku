@@ -16,7 +16,6 @@ TEXTOS: dict[str, str | None] = {
         "| Horizonte | Alcance |\n|---|---|\n| `hoy` | Día en curso |\n"
     ),
     "reglas/notas.user.md": ("| Tipo | Propósito |\n|---|---|\n| `persona` | Ficha |\n"),
-    "reglas/ciclo.user.md": "| Ciclo | Días |\n|---|---|\n| `semana` | 7 |\n",
 }
 
 
@@ -25,7 +24,6 @@ def test_leer_extrae_los_terminos_falla_ruidoso_si_falta_uno_y_se_formatea() -> 
         "clasificaciones": ["reunión", "foco"],
         "horizontes": ["hoy"],
         "tipos-de-nota": ["persona"],
-        "ciclos": ["semana"],
     }
 
     sin_tabla = {**TEXTOS, "reglas/pendientes.user.md": "Solo prosa.\n"}
