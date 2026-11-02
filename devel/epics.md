@@ -80,14 +80,14 @@ Todo epic que añada comandos fija su superficie en un escenario propio: `tuku -
 
 ## Estado de los Epics
 
-Actualizado el 2026-10-20.
+Actualizado el 2026-11-02.
 
 | Epic | Nombre | Estado inicial | Estado | Qué falta para cerrarlo |
 | --- | --- | --- | --- | --- |
 | 001 | Un TUKU mínimo instalable | `vacio` | cerrado | cerrado el 2026-09-19; seis escenarios en verde y verificación humana de instalación limpia y siembra offline completada |
 | 002 | El día uno, a mano | `vacio` → `primer-dia` | cerrado | cerrado el 2026-09-19; doce escenarios deterministas en verde y aceptación humana en playground/002-09 completada |
-| 003 | El día uno, dictado | `vacio` → `primer-dia` | por cerrar | cinco escenarios: `003-01` determinista; `003-10`, el día uno entero en un turno (fundió del `003-02` al `003-07` el 2026-10-16), y `003-11`, el día derivado, en verde con `agy`; `003-08` (`hermes`) y `003-09` (`claude`) en verde el 2026-09-20, sin repetir desde entonces. Falta revisión a mano de los turnos de `playground/003-*/` contra criterio de salida |
-| 004 | La conversación | `primer-dia` | por cerrar | cinco escenarios agénticos (`004-01` a `004-05`) con el conductor [`conversacion.py`](../tests/scripts/conversacion.py), en verde el 2026-10-20. Falta revisión a mano de `playground/004-*` contra el criterio de salida |
+| 003 | El día uno, dictado | `vacio` → `primer-dia` | cerrado | cerrado el 2026-11-02 por decisión del autor; cinco escenarios: `003-01` determinista; `003-10`, el día uno entero en un turno (fundió del `003-02` al `003-07` el 2026-10-16), y `003-11`, el día derivado, en verde con `agy`; `003-08` (`hermes`) y `003-09` (`claude`) en verde el 2026-09-20, sin repetir desde entonces. Sin la revisión a mano de `playground/003-*/` |
+| 004 | La conversación | `primer-dia` | cerrado | cerrado el 2026-11-02 por decisión del autor; cinco escenarios agénticos (`004-01` a `004-05`) con el conductor [`conversacion.py`](../tests/scripts/conversacion.py), en verde el 2026-10-20. Sin la revisión a mano de `playground/004-*` |
 | 005 | El día ciento cincuenta | `ciclo-en-curso` | escenarios escritos | ocho documentos en `tests/escenarios/005-*`: 33 tests deterministas y 7 agénticos, todos en verde. Solo queda abierto B4 de la tabla de `005-00` (bajar un pendiente por la escalera de horizontes), que está en `TODO.md`; S5, S8 y E2 ya se resolvieron (E2 pasó al criterio del epic 006) |
 | 006 | Abrir y cerrar el ciclo | `ciclo-por-cerrar` | sin empezar | depende del epic 005 |
 | 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
