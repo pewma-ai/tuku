@@ -462,13 +462,15 @@ def revisar_todo(vault: Path, hoy: date | None = None) -> Revision:
     """`doctor todo` sobre el vault, como una revisión del doctor."""
     from tuku import todo
 
-    h_todo = todo.hallazgos_del_vault(vault, hoy)
+    h_todo, avisos = todo.hallazgos_del_vault(vault, hoy)
+    if not h_todo and not avisos:
+        return Revision("todo", "todo: sin hallazgos.", True)
+    cierre = f"todo: {len(h_todo)} error(es), {len(avisos)} aviso(s)."
     return Revision(
         "todo",
-        "todo: sin hallazgos."
-        if not h_todo
-        else "\n".join([*h_todo, f"todo: {len(h_todo)} error(es)."]),
+        "\n".join([*h_todo, *avisos, cierre]),
         not h_todo,
+        aviso=not h_todo,
     )
 
 

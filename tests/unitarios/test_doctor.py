@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from conftest import AHORA
-from tuku import doctor, entry, init
+from tuku import doctor, entry, init, todo
 from tuku.cli import EXITO, main
 from tuku.doctor import (
     TIPOS_REQUERIDOS,
@@ -235,3 +235,30 @@ def test_doctor_scope_reporta_solo_el_lint_de_ambitos(tmp_path: Path) -> None:
     assert "scope: " in con_tema.mensaje
     assert "wikilink" not in con_tema.mensaje, "el wikilink es del tema link"
     assert "wikilink" in doctor.revisar_vault(vault, tema="link").mensaje
+
+
+def test_el_bloque_de_pendientes_atrasado_por_el_calendario_es_un_aviso(tmp_path: Path) -> None:
+    vault = init.init(tmp_path / "v", home=RAIZ_REPO)
+    resultado = todo.abrir_en_vault(
+        vault,
+        body="pagar el seguro",
+        scope="personal",
+        due="2026-08-13 09:00",
+        day=date(2026, 8, 11),
+        hour="12:05",
+        now=AHORA,
+    )
+    assert resultado.ok, resultado.mensaje
+    assert doctor.revisar_vault(vault, tema="todo", hoy=date(2026, 8, 11)).ok
+
+    pasados = doctor.revisar_vault(vault, tema="todo", hoy=date(2026, 8, 20))
+    assert pasados.ok, pasados.mensaje
+    assert "aviso" in pasados.mensaje and "tuku regenerate todo" in pasados.mensaje
+
+    ahora = vault / "AHORA.md"
+    ahora.write_text(
+        ahora.read_text(encoding="utf-8").replace("> - 09:00 - ", "> - 10:00 - "),
+        encoding="utf-8",
+    )
+    roto = doctor.revisar_vault(vault, tema="todo", hoy=date(2026, 8, 20))
+    assert not roto.ok and "error" in roto.mensaje

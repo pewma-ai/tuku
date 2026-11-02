@@ -410,8 +410,14 @@ def cerrar_en_vault(
     return apply(vault, plan, skip=() if regenerar else ("todo",), today=now.date())
 
 
-def hallazgos_del_vault(vault: Path, hoy: date | None = None) -> list[str]:
-    """`lint` sobre el vault: lee los archivos y calcula las vistas esperadas."""
+def hallazgos_del_vault(vault: Path, hoy: date | None = None) -> tuple[list[str], list[str]]:
+    """`lint` sobre el vault: lee los archivos y calcula las vistas esperadas.
+
+    Devuelve `(errores, avisos)`. Un bloque de pendientes de `AHORA.md` que era el
+    correcto cuando se escribió y quedó atrás por el calendario (pasó un día sin
+    escribir) es un aviso: `tuku regenerate todo` lo rehace.
+    """
+    from tuku import ahora as ahora_mod
     from tuku import regenerate, scope_tree
     from tuku.config import archivo_vault, formato_fecha, ventana_de_dias
 
@@ -419,23 +425,43 @@ def hallazgos_del_vault(vault: Path, hoy: date | None = None) -> list[str]:
     ahora_path = vault / "AHORA.md"
     ahora = archivo.leer(ahora_path) if ahora_path.is_file() else None
     vistas: dict[str, tuple[str | None, str]] = {}
+    avisos: list[str] = []
     if ahora is not None:
-        vistas["AHORA.md"] = (
-            ahora,
-            regenerate.vistas_en_ahora(
-                ahora,
+        texto = ahora
+        rutas = scope_tree.rutas(vault)
+        ventana = ventana_de_dias(vault)
+        formato = formato_fecha(vault)
+
+        def esperada(dia: date | None) -> str:
+            return regenerate.vistas_en_ahora(
+                texto,
                 pendientes,
-                scope_tree.rutas(vault),
+                rutas,
                 escalera(vault),
-                hoy=hoy,
-                ventana=ventana_de_dias(vault),
-                formato=formato_fecha(vault),
-            ),
-        )
+                hoy=dia,
+                ventana=ventana,
+                formato=formato,
+            )
+
+        correcta = esperada(hoy)
+        if hoy is not None and correcta != ahora:
+            # Atrasada solo por el calendario: es la vista exacta de algún día
+            # anterior, el de la última vez que se escribió.
+            previos = sorted(
+                {d for _, _, d in ahora_mod.dias(ahora, hoy) if d is not None and d < hoy},
+                reverse=True,
+            )
+            if any(esperada(d) == ahora for d in previos):
+                avisos.append(
+                    "AHORA.md: aviso: el bloque de pendientes quedó atrás por el calendario. "
+                    "Corre `tuku regenerate todo`."
+                )
+                correcta = ahora
+        vistas["AHORA.md"] = (ahora, correcta)
     ambitos_path = vault / regenerate.ARCHIVO_AMBITOS
     vistas[regenerate.ARCHIVO_AMBITOS.as_posix()] = (
         archivo.leer(ambitos_path) if ambitos_path.is_file() else None,
         regenerate.documento_del_vault(vault, pendientes),
     )
     historia = [archivo.leer(b) for b in sorted((vault / "bitacoras").glob("*.md"))]
-    return lint(pendientes, ahora, vistas=vistas, historia=historia, hoy=hoy)
+    return lint(pendientes, ahora, vistas=vistas, historia=historia, hoy=hoy), avisos
