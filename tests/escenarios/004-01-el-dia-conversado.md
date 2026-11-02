@@ -1,6 +1,6 @@
 # 004-01 · El día conversado
 
-> **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/despacho.md`](../../spec/despacho.md), [`spec/agente.md`](../../spec/agente.md), [`spec/pendientes.md`](../../spec/pendientes.md)
+> **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/despacho.md`](../../devel/VAULT/spec-anterior/despacho.md), [`spec/agente.md`](../../devel/VAULT/spec-anterior/agente.md), [`spec/pendientes.md`](../../devel/VAULT/spec-anterior/pendientes.md)
 
 Damián cuenta su miércoles en doce turnos: consulta, aclara, piensa en voz alta, se interrumpe, descarta una idea, ratifica y, al final, reordena sus frentes y dice qué palabras delatan a `faena`. El vault queda como lo deja el dictado directo de lo ratificado.
 

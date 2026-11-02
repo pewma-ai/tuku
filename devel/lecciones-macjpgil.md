@@ -20,7 +20,7 @@ Lo que se miró: `AGENTS.md` de la raíz y los locales de `actividad/`, `notas/`
 
 `actividad/AGENTS.md` lo tiene resuelto de la única forma que se sostiene: orden estrictamente cronológico por hora del evento, y si no hay timestamp explícito, el registro se agrega al final del día sin reordenar nada de lo ya escrito.
 
-La spec manda y `- HH:MM -` sigue siendo el formato. Lo que esto aporta es un riesgo conocido para el experimento del epic: si el dictado real llega sin hora, la única hora que el comando puede estampar es la de escritura y no la del hecho, que es información distinta. Si eso aparece en el epic, cambia [`../spec/bitacora.md`](../spec/bitacora.md) por el camino que `epics.md` ya define, y si no aparece, no cambia nada. La regla de inserción de mac-jpgil (sin timestamp, al final del día, sin reordenar) sirve como respuesta ya probada para ese caso.
+La spec manda y `- HH:MM -` sigue siendo el formato. Lo que esto aporta es un riesgo conocido para el experimento del epic: si el dictado real llega sin hora, la única hora que el comando puede estampar es la de escritura y no la del hecho, que es información distinta. Si eso aparece en el epic, cambia [`VAULT/spec-anterior/bitacora.md`](VAULT/spec-anterior/bitacora.md) por el camino que `epics.md` ya define, y si no aparece, no cambia nada. La regla de inserción de mac-jpgil (sin timestamp, al final del día, sin reordenar) sirve como respuesta ya probada para ese caso.
 
 ### 2. La marca de cierre va antes del ámbito, no después
 
@@ -100,7 +100,7 @@ Un detalle que se pierde si no se anota: `summary` es obligatorio y **vacío es 
 
 ## Lo que aplica al epic 003
 
-La segunda pasada mira los mismos archivos preguntando otra cosa: no qué formato tiene el vault, sino **qué le exige el vault a un agente que entra a operarlo**. Es la pregunta del epic 003 y la que contesta [`../spec/despacho.md`](../spec/despacho.md).
+La segunda pasada mira los mismos archivos preguntando otra cosa: no qué formato tiene el vault, sino **qué le exige el vault a un agente que entra a operarlo**. Es la pregunta del epic 003 y la que contesta [`VAULT/spec-anterior/despacho.md`](VAULT/spec-anterior/despacho.md).
 
 ### 13. El dispatcher de la raíz cabe en treinta líneas
 
@@ -126,13 +126,13 @@ Sin esa cláusula el despacho se llama a sí mismo. Importa para el epic 003 má
 
 Cuando ningún trigger empareja, la regla es correr `ls procesos/*.MaC.md` y ver si algún nombre de proceso coincide con lo que el autor pidió. Si tampoco, preguntar.
 
-Con eso la tabla deja de tener que ser exhaustiva, que es lo que la hace envejecer mal. Es el mismo mecanismo de la lección 10 (el vocabulario se **genera** con un comando y no se materializa) aplicado al despacho, y es la respuesta ya probada al escape por proceso nombrado de [`../spec/despacho.md`](../spec/despacho.md).
+Con eso la tabla deja de tener que ser exhaustiva, que es lo que la hace envejecer mal. Es el mismo mecanismo de la lección 10 (el vocabulario se **genera** con un comando y no se materializa) aplicado al despacho, y es la respuesta ya probada al escape por proceso nombrado de [`VAULT/spec-anterior/despacho.md`](VAULT/spec-anterior/despacho.md).
 
 ### 17. Los triggers son literales del autor, no categorías del sistema
 
 La tabla dispara con `"recuérdame"`, `"comitea"`, `"crea nota sobre"`, `"qué tengo pendiente"`, `"IDEA-..."`. Ninguna fila se llama por el nombre de la primitiva.
 
-Es lo que hace que el despacho funcione con dictado y no con comandos disfrazados. La tabla de [`../spec/despacho.md`](../spec/despacho.md) tiene que hablar así o no dispara: una fila que dice "cuando el autor requiera crear una entidad de ámbito" no la activa nadie hablando.
+Es lo que hace que el despacho funcione con dictado y no con comandos disfrazados. La tabla de [`VAULT/spec-anterior/despacho.md`](VAULT/spec-anterior/despacho.md) tiene que hablar así o no dispara: una fila que dice "cuando el autor requiera crear una entidad de ámbito" no la activa nadie hablando.
 
 ### 18. Los límites se escriben como tabla de dos niveles, y son el caso negativo
 
@@ -144,7 +144,7 @@ Un límite escrito así es una afirmación verificable sobre el vault después d
 
 La diferencia central entre los dos sistemas está justo en el documento que este epic entrega. `AGENTS.md` de `mac-jpgil` no nombra un solo comando para la bitácora: el agente abre el archivo del día y escribe la línea. Funciona porque las reglas de formato están en `actividad/AGENTS.md` y el agente las lee.
 
-TUKU eligió lo contrario, y por buenas razones ([`../spec/agente.md`](../spec/agente.md)): quien escribe es el comando, que conoce el formato y aplica las consecuencias. Pero eso solo se sostiene si el `AGENTS.md` del vault lo dice, y hoy no lo dice. Un agente que lea el template actual hará lo natural, que es lo que hace `mac-jpgil`: editar `AHORA.md` a mano. Quedaría un archivo bien formado y ninguna consecuencia aplicada, que es el modo de falla más caro porque no deja señal.
+TUKU eligió lo contrario, y por buenas razones ([`VAULT/spec-anterior/agente.md`](VAULT/spec-anterior/agente.md)): quien escribe es el comando, que conoce el formato y aplica las consecuencias. Pero eso solo se sostiene si el `AGENTS.md` del vault lo dice, y hoy no lo dice. Un agente que lea el template actual hará lo natural, que es lo que hace `mac-jpgil`: editar `AHORA.md` a mano. Quedaría un archivo bien formado y ninguna consecuencia aplicada, que es el modo de falla más caro porque no deja señal.
 
 La lección 11 explica por qué esto no se arregla pidiéndolo con más énfasis. Ahí el post-write hook se olvidaba igual escrito en mayúsculas, y la solución fue sacarlo del turno del agente. Acá la salida equivalente ya está tomada: no hay hook que recordar, porque la consecuencia viaja dentro del mismo comando que escribe.
 

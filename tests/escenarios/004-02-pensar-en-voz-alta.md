@@ -1,6 +1,6 @@
 # 004-02 · Pensar en voz alta
 
-> **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/despacho.md`](../../spec/despacho.md), [`spec/agente.md`](../../spec/agente.md)
+> **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/despacho.md`](../../devel/VAULT/spec-anterior/despacho.md), [`spec/agente.md`](../../devel/VAULT/spec-anterior/agente.md)
 
 Damián piensa en voz alta cinco turnos y no ratifica nada. El vault termina igual que empezó.
 

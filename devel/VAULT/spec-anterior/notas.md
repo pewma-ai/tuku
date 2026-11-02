@@ -1,6 +1,6 @@
 # spec · notas
 
-> `notas/` es un zettelkasten de formato libre. Se justifica por el principio 6 de [`../docs/principios.md`](../docs/principios.md) (la deliberación como eje) y, para las notas sobre personas, por el principio 8.
+> `notas/` es un zettelkasten de formato libre. Se justifica por el principio 6 de [`../../../docs/principios.md`](../../../docs/principios.md) (la deliberación como eje) y, para las notas sobre personas, por el principio 8.
 
 Una nota vale mientras la idea conserve sentido y no pertenece a un momento.
 
@@ -53,7 +53,7 @@ aliases: [Rodolfo, don Rodolfo]
 
 `aliases` es el campo que Obsidian usa para lo mismo, así que el editor de referencia lo entiende sin configurar nada. `tuku` lo lee con su propio lector de frontmatter, como `type` y `subtype`.
 
-Enlazar una nota al registrar lo decide el agente, con `tuku context note` de referencia. Por cada tipo enlazable trae las últimas notas, de la de `updated` más reciente a la más antigua, cada una con su título y sus `aliases`. El tope por tipo es `context_note_limit` de `reglas/config.tuku.md` (25 por defecto), para que el listado no crezca con el vault. Si lo que dijo el autor nombra a una de ellas, el agente escribe la primera mención como link en el `--body` de `entry create`, `todo open` o `note create`: "llamé a don Rodolfo por la cotización" queda como `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md) por la cotización`. El texto del link es el que dijo el autor. Si el nombre calza con dos notas, es una ambigüedad y el agente pregunta antes de escribir ([flujo-informacion.md](flujo-informacion.md)). Una nota que `context` no trae no se enlaza: el comando no busca por su cuenta.
+Enlazar una nota al registrar lo decide el agente, con `tuku context note` de referencia. Por cada tipo enlazable trae las últimas notas, de la de `updated` más reciente a la más antigua, cada una con su título y sus `aliases`. El tope por tipo es `context_note_limit` de `reglas/config.tuku.md` (25 por defecto), para que el listado no crezca con el vault. Si lo que dijo el autor nombra a una de ellas, el agente escribe la primera mención como link en el `--body` de `entry create`, `todo open` o `note create`: "llamé a don Rodolfo por la cotización" queda como `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md) por la cotización`. El texto del link es el que dijo el autor. Si el nombre calza con dos notas, es una ambigüedad y el agente pregunta antes de escribir ([flujo-informacion.md](../../borradores/flujo-informacion.md)). Una nota que `context` no trae no se enlaza: el comando no busca por su cuenta.
 
 Los comandos no enlazan solos. Escriben el cuerpo como llega, y lo ya escrito no se toca: enlazar hacia atrás es una operación deliberada ([markdown.md](markdown.md), "Enlazar es deliberado"). Los ámbitos no se enlazan en el cuerpo: los pone `--scope`.
 
@@ -101,4 +101,4 @@ Toda creación de nota mediante `tuku note create` deja huella en la bitácora:
 
 ## No entra
 
-- **Destilar el histórico y proponer notas nuevas por iniciativa propia**, sin que el uso ya lo haya sugerido. Eso es inferencia semántica, una fase posterior de implementación (ver [`../devel/epics.md`](../devel/epics.md)). Acá solo la mecánica del tejido: crear, tipar, enlazar, indexar.
+- **Destilar el histórico y proponer notas nuevas por iniciativa propia**, sin que el uso ya lo haya sugerido. Eso es inferencia semántica, una fase posterior de implementación (ver [`../../epics.md`](../../epics.md)). Acá solo la mecánica del tejido: crear, tipar, enlazar, indexar.

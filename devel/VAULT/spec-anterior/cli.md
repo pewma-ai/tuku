@@ -8,13 +8,13 @@
 
 El corte no pasa entre estructura y lenguaje, pasa por los **campos**. Quien invoca llena los campos; `tuku` construye la línea canónica de [bitacora.md](bitacora.md), la sitúa en el día que corresponde y mantiene el orden cronológico. Llenar los campos es exactamente el trabajo de inferencia: de qué ámbito es, qué clasificación le cabe, si un dictado da uno o varios registros.
 
-Ese reparto sostiene el principio 1 de [`../docs/principios.md`](../docs/principios.md). Un autor disciplinado hace lo mismo a mano con un editor básico: el comando le ahorra el esfuerzo, no habilita nada que sin él sea imposible. Si un comando empieza a decidir cosas que una persona no podría reproducir a mano, el defecto está en el comando.
+Ese reparto sostiene el principio 1 de [`../../../docs/principios.md`](../../../docs/principios.md). Un autor disciplinado hace lo mismo a mano con un editor básico: el comando le ahorra el esfuerzo, no habilita nada que sin él sea imposible. Si un comando empieza a decidir cosas que una persona no podría reproducir a mano, el defecto está en el comando.
 
 **Ningún comando infiere un campo que quien invoca no dio**, salvo donde una spec declare un valor por defecto. Los que hay hoy: el día (la fecha actual, **HOY**) y la hora (la hora actual, **AHORA**) de un registro o de la huella en bitácora dejada por un comando mutador (`todo`, `scope`, `note`), evaluados en la zona horaria `TZ` del vault ([bitacora.md](bitacora.md)); y el horizonte de un pendiente sin `--due` ni `--horizon`, que es el primer escalón del autor ([pendientes.md](pendientes.md)).
 
 ## Sustantivo, verbo y parámetro
 
-Un comando es `tuku SUSTANTIVO VERBO [POSICIONAL] [--parámetro]`, y cada pieza significa lo mismo en todos los comandos: quien aprendió uno sabe leer los demás. Qué comandos hay y con qué firma está en [tuku.md](tuku.md).
+Un comando es `tuku SUSTANTIVO VERBO [POSICIONAL] [--parámetro]`, y cada pieza significa lo mismo en todos los comandos: quien aprendió uno sabe leer los demás. Qué comandos hay y con qué firma está en [tuku.md](../../../spec/tuku.md).
 
 **Los sustantivos** son las cosas del vault: `entry`, `todo`, `scope` y `note`. Dos más llevan un `TEMA` en lugar de verbo: `process`, las rutinas con nombre (`tuku process cycle`; sin nombre lista los de `tuku` y los de `procesos/`, [despacho.md](despacho.md)), y `context`, que solo lee (`tuku context scope`). `init`, `doctor`, `regenerate` y `fix` van sin sustantivo porque actúan sobre el vault entero.
 
@@ -67,7 +67,7 @@ Un solo mensaje en prosa, que sirve a los dos. **Sin `--json`.** Hoy no lo consu
 
 **Un aviso no es un error.** Cuando el comando procede pero algo merece mirarse, sale con 0 y escribe en `stderr` una línea `tuku <comando>: warning: ...` que dice qué pasó y qué revisar. Hoy: un `todo close` que no encontró su pendiente (se escribe el cierre, no se borra ninguna fila) y un `todo open --due` que ya venció o que vence antes de la promesa (el pendiente nace atrasado). Quien invoca que no lee `stderr` sigue funcionando; quien lo lee puede corregir.
 
-Que se cumpla es verificable: la ayuda y los códigos de cada epic se fijan en un escenario, según la convención de [`../devel/epics.md`](../devel/epics.md).
+Que se cumpla es verificable: la ayuda y los códigos de cada epic se fijan en un escenario, según la convención de [`../../epics.md`](../../epics.md).
 
 ## Fuera de un vault, ningún comando opera
 
@@ -75,7 +75,7 @@ Todo comando que recibe `--vault` (por defecto, el directorio actual) rechaza co
 
 ## Ante la duda, informar y no escribir
 
-Un comando que no puede determinar algo **no lo adivina y no escribe a medias**. Sale con el código que corresponde y dice qué le falta. Es el principio 3 de [`../docs/principios.md`](../docs/principios.md) aplicado a la capa determinista, y es lo que hace que la salida sirva como advertencia en vez de como registro de un daño ya hecho.
+Un comando que no puede determinar algo **no lo adivina y no escribe a medias**. Sale con el código que corresponde y dice qué le falta. Es el principio 3 de [`../../../docs/principios.md`](../../../docs/principios.md) aplicado a la capa determinista, y es lo que hace que la salida sirva como advertencia en vez de como registro de un daño ya hecho.
 
 De ahí la asimetría de `tuku doctor entry` ([bitacora.md](bitacora.md)): informa y nunca escribe. Verificar y corregir son operaciones distintas, y mezclarlas quita la oportunidad de revisar.
 
@@ -110,7 +110,7 @@ Repetir el comando basta porque todo mutador es idempotente.
 
 ## `tuku regenerate [TEMA]`
 
-Regenera lo derivado del conjunto canónico ([principio 9](../docs/principios.md#L79)). Cada tema regenera una derivación; sin tema, las cuatro.
+Regenera lo derivado del conjunto canónico ([principio 9](../../../docs/principios.md#L79)). Cada tema regenera una derivación; sin tema, las cuatro.
 
 | Tema | Regenera | Desde |
 | --- | --- | --- |
@@ -119,7 +119,7 @@ Regenera lo derivado del conjunto canónico ([principio 9](../docs/principios.md
 | `comandos` | `reglas/comandos.tuku.md` | La ayuda del `tuku` instalado |
 | `libro` | `LIBRO-DE-ESTILO.md` | El template del `tuku` instalado |
 
-- **Un tema toca solo lo suyo.** `scope` lleva a las páginas de ámbito lo escrito a mano en `AHORA.md` y deja `reglas/` como está. El agente modifica `reglas/` solo tras preguntar ([`AGENTS.md`](../template/vanilla/AGENTS.md), Límites).
+- **Un tema toca solo lo suyo.** `scope` lleva a las páginas de ámbito lo escrito a mano en `AHORA.md` y deja `reglas/` como está. El agente modifica `reglas/` solo tras preguntar ([`AGENTS.md`](../../../template/vanilla/AGENTS.md), Límites).
 - **Valida antes de escribir.** `todo` y `scope` rechazan sin escribir si `PENDIENTES.md` o `ambitos/` están rotos. `comandos` y `libro` dependen solo de la versión instalada. `libro` no toca `reglas/config.tuku.md`, que lleva los valores del autor, ni ningún `reglas/*.md` sin `.tuku`, que son del autor; `tuku doctor version` avisa cuando el libro del vault difiere del template antes de que se reemplace.
 - **Es idempotente.** Escribe lo que cambió; sobre un vault al día informa y deja todo igual.
 - **Un tema desconocido** es error de uso (código 2).
@@ -132,6 +132,6 @@ Ese párrafo, el de cada sustantivo con sus verbos anidados debajo, es también 
 
 ## No entra
 
-- Qué comandos existen, con qué firma y qué archivos leen y escriben. Eso es [tuku.md](tuku.md). Qué significa lo que escriben lo especifica la primitiva que tocan: el registro en [bitacora.md](bitacora.md), los pendientes en [pendientes.md](pendientes.md), el ciclo en [ciclo.md](ciclo.md).
-- Cómo se instala `tuku` y dónde vive su árbol. Eso es [`../devel/epics.md`](../devel/epics.md), epic 001.
+- Qué comandos existen, con qué firma y qué archivos leen y escriben. Eso es [tuku.md](../../../spec/tuku.md). Qué significa lo que escriben lo especifica la primitiva que tocan: el registro en [bitacora.md](bitacora.md), los pendientes en [pendientes.md](pendientes.md), el ciclo en [ciclo.md](../../borradores/ciclo.md).
+- Cómo se instala `tuku` y dónde vive su árbol. Eso es [`../../epics.md`](../../epics.md), epic 001.
 - Cómo un agente decide qué comandos emitir. Eso es [agente.md](agente.md).

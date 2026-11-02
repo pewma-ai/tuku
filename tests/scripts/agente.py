@@ -113,7 +113,7 @@ _EXPORTA_HERMES = [
 PREAMBULO = "Lee AGENTS.md antes de nada y opera este directorio según lo que diga. "
 
 #: La marca con que el `AGENTS.md` del vault reconoce el modo de mantenimiento
-#: (`spec/despacho.md`, "Dos modos"). Solo vale si el primer prompt **empieza**
+#: (el `AGENTS.md` del template, "Cómo te invocan"). Solo vale si el primer prompt **empieza**
 #: con ella, así que va delante de todo lo que el arnés agrega: el preámbulo y el
 #: reloj. Un prompt que no la lleva es una conversación con el autor.
 MANTENIMIENTO = "MAINTENANCE MODE"

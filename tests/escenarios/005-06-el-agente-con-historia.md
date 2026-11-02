@@ -1,6 +1,6 @@
 # 005-06 · El agente con historia
 
-> **Principio:** [P3 (el agente es un secretario, no un dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Brief:** [La organización emerge](../../docs/brief.md#L49) · **Spec:** [`spec/agente.md`](../../spec/agente.md), [`spec/ambitos.md`](../../spec/ambitos.md), [`spec/flujo-informacion.md`](../../spec/flujo-informacion.md) · **Tutorial:** [capítulo 4](../../docs/tutorial/04-una-semana-despues.md)
+> **Principio:** [P3 (el agente es un secretario, no un dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Brief:** [La organización emerge](../../docs/brief.md#L49) · **Spec:** [`spec/agente.md`](../../devel/VAULT/spec-anterior/agente.md), [`spec/ambitos.md`](../../devel/VAULT/spec-anterior/ambitos.md), [`spec/flujo-informacion.md`](../../devel/borradores/flujo-informacion.md) · **Tutorial:** [capítulo 4](../../docs/tutorial/04-una-semana-despues.md)
 
 Con dos semanas de historia, lo que Andrea dice ya no lleva el nombre completo ni el ámbito: dice «la Patricia» y «la Paula». El agente elige el ámbito leyendo las keywords de las páginas, escribe lo que ella dijo tal como lo dijo, y no adivina cuando dos personas se llaman igual.
 

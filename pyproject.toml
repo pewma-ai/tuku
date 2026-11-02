@@ -62,7 +62,7 @@ addopts = [
   "-m", "not agentic and not red and not pendiente",
 ]
 markers = [
-  "spec: caso extraído de un bloque normativo de spec/ (nivel 1)",
+  "spec: caso extraído de un bloque normativo de spec/tuku.md (nivel 1)",
   "invariante: viola una invariante a propósito y exige que el janitor la detecte (nivel 2)",
   "aceptacion: deriva de corpus/simulaciones/ (nivel 3)",
   "replay: reconstrucción con diff exactamente cero (nivel 4)",

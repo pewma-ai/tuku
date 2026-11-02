@@ -8,7 +8,7 @@ type: Style Guide
 
 ## Propósito del vault
 
-Aquí se registra lo que el autor cuenta, se ordena en archivos Markdown y eso permite recordar, priorizar y tomar decisiones. El autor dicta o escribe; los comandos `tuku` escriben los archivos y hacen cumplir lo determinista; el agente decide qué comando corre. Este libro dice solo lo que un comando no puede verificar.
+Aquí se registra lo que el autor cuenta, se ordena en archivos Markdown y eso permite recordar, priorizar y tomar decisiones. El autor dicta o escribe; los comandos `tuku` escriben los archivos y hacen cumplir lo determinista; el agente decide qué comando corre. Este libro es la norma de escritura: un comando, una persona o un agente deben ser compatibles con él, y lo que un comando ya verifica no se repite aquí.
 
 ## Autor
 
@@ -22,14 +22,19 @@ Un registro es una línea de la bitácora (`AHORA.md` mientras el ciclo está ab
 1. **Un comando por registro.** Una frase del autor puede dar varios registros: un comando por cada uno, y nunca dos para un mismo hecho.
 2. **El hecho, no la conversación.** Lo dirigido a quien escucha («recuérdame», «anota», «guárdame») queda fuera.
 3. **Autocontenido.** Se va a leer en años, sin el resto del día. Las personas se nombran con su rol la primera vez y «el otro día» se convierte en una fecha.
-4. **Precisión.** No se agrega información inferida.
+4. **Precisión.** No se agrega información inferida: lo que el hecho sugiere se propone y espera el sí del autor.
 5. **El día fuera del ciclo.** Si hoy cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros, con ese día explícito en `--at`. Un ciclo que quedó atrás no es motivo para cerrarlo: eso lo decide el autor.
-6. **Una nota nombrada se enlaza.** `tuku context` ofrece las últimas notas de cada tipo enlazable con su título y sus `aliases`. La primera mención de una va como enlace en el `--body`, con el texto que dijo el autor: `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md)`. Si el nombre calza con dos notas, se pregunta; si con ninguna, no se enlaza ni se inventan rutas.
+6. **Una nota nombrada se enlaza.** `tuku context` ofrece las últimas notas de cada tipo enlazable con su título y sus `aliases`. La primera mención de una va como enlace en el `--body`, con el texto que dijo el autor: `llamé a [don Rodolfo](notas/rodolfo-cifuentes.md)`. Si el nombre calza con dos notas, se pregunta; si con ninguna, no se enlaza ni se inventan rutas. Lo ya escrito no se enlaza hacia atrás por iniciativa propia: eso lo pide el autor.
+7. **Día y hora.** No vienen del dictado: se derivan de la jornada que describe. Sin dato, son hoy y ahora. Un día pasado va sin hora, al final de ese día: la hora de hoy sería inventada.
+8. **Voz y tiempo.** Los hechos van en pasado y primera persona, y lo que sigue vigente, en presente. Registro neutro, sin voseo. Lo evaluativo no va en el cuerpo: lo dice la clasificación.
+9. **Corregir es un comando.** `tuku entry update --match TEXTO --body …` cambia el cuerpo y `tuku entry move --match TEXTO --scope …` cambia el ámbito, siempre del último registro que calza. Para uno de un ciclo cerrado se antepone su día (`"2026-08-10"`). Un registro nunca se edita a mano.
 
 > [!example] Ejemplos tuku
 > ```bash
 > tuku entry create --body "entregué 40 cuadernos" --scope colegio-los-robles  # sin --at: hoy y ahora. Sin --scope: el por defecto.
 > tuku entry create --body "**señal**: la administradora responde tarde" --at "2026-08-11 09:12"
+> tuku entry update --match "entregué 40" --body "entregué 48 cuadernos"
+> tuku entry move --match "llamé a Rodolfo" --scope colegio-los-robles
 > ```
 
 ### Clasificaciones
@@ -47,9 +52,10 @@ Estas son las clasificaciones regularmente usadas por el autor, modificar esta t
 Un pendiente es un compromiso abierto: un registro con `**pendiente**` y una fila en la tabla de `PENDIENTES.md`. `tuku todo open` lo abre y `tuku todo close` lo cierra. Debe cumplir:
 1. **Un comando abre y otro cierra.** Escriben el registro y la fila, y dejan constancia en la bitácora: no se suma un `entry create` ni se edita `PENDIENTES.md` a mano.
 2. **En infinitivo y sin mayúscula inicial.** «pagar la sesión con el psicólogo», y no «Pagar la sesión» ni «hay que pagar la sesión».
-3. **El cierre repite el texto.** `todo close` encuentra la fila por su detalle, palabra por palabra: de eso depende que cerrarlo funcione sin que nadie interprete nada.
-4. **Dos fechas distintas.** `--at` es cuándo se prometió y nunca es un día futuro. `--due` es cuándo vence, con la hora si el autor la dijo («el viernes a las nueve»).
+3. **El cierre repite el texto.** `todo close` encuentra la fila por su detalle, palabra por palabra y sin contar los links: de eso depende que cerrarlo funcione sin que nadie interprete nada. Sin `--scope` cierra en el ámbito de la fila, y un pendiente abierto y cerrado el mismo día deja solo el cierre.
+4. **Dos fechas distintas.** `--at` es cuándo se prometió y nunca es un día futuro. `--due` es cuándo vence, con la hora si el autor la dijo («el viernes a las nueve»). No se combina con `--horizon`; un `--due` que ya pasó se acepta, y el comando avisa.
 5. **Postergar es deliberado.** Sin `--due`, nace en el primer horizonte; con `--horizon`, en el que se diga. Lo que se pospone ciclo tras ciclo no era un pendiente sino una nota.
+6. **Atrasado se calcula.** Un pendiente está atrasado si su `Vence` ya pasó o si el horizonte de su ciclo expiró: `tuku context todo` lo informa. Nada se mueve por calendario; mover un pendiente es decisión del autor.
 
 > [!example] Ejemplos tuku
 > ```bash
@@ -85,7 +91,14 @@ El ciclo en curso es `AHORA.md`; los cerrados están en `bitacoras/`. `tuku proc
 
 ## Ámbito
 
-Un ámbito es un frente de actividad con identidad propia: una carpeta en `ambitos/` con su página. Las keywords son las palabras que lo nombran en un dictado, y un hecho que nombra una keyword es de ese ámbito aunque parezca no tener relación. Un ámbito puede vivir dentro de otro. Se crea cuando el autor lo pide, o cuando TUKU ve que algo aparece seguido sin página y lo propone: solo se crea con el sí del autor.
+Un ámbito es un frente de actividad con identidad propia: una carpeta en `ambitos/` con su página. Las keywords son las palabras que lo nombran en un dictado, y un hecho que nombra una keyword es de ese ámbito aunque parezca no tener relación. Un ámbito puede vivir dentro de otro. Se crea cuando el autor lo pide, o cuando TUKU ve que algo aparece seguido sin página y lo propone: solo se crea con el sí del autor. Debe cumplir:
+1. **Un registro apunta a un ámbito, nunca a una categoría.** Una carpeta de `ambitos/` sin página propia es una categoría: agrupa y no tiene de qué hablar.
+2. **Un nombre, en kebab-case y único.** «Depto Centro» es `depto-centro` en la carpeta, la página y los enlaces, y dos ámbitos no se llaman igual aunque cuelguen de padres distintos. Un ámbito que no existe se rechaza: crearlo lo decide el autor.
+3. **Las keywords las dice el autor.** Se le preguntan al crear el ámbito y no se inventan. Van en kebab-case y sin el nombre del ámbito. Una palabra que ya nombra a otro ámbito es ambigua: se pregunta a cuál va.
+4. **Un ámbito dentro de otro.** `--parent` acepta el nombre o la ruta desde `ambitos/` (`negocio/clientes`). `scope move` y `scope rename` recalculan los links de todo el vault, también los de las bitácoras cerradas. Cada ámbito muestra solo lo suyo, no lo de sus hijos.
+5. **Lo escrito antes de abrir un ámbito se reubica.** `scope create` lista los registros de otros ámbitos que lo nombran: se decide cuáles son suyos, se pregunta por los dudosos y se pasan con `entry move`, sin tocar el cuerpo.
+6. **La página.** Lo que el autor escribe va arriba. Debajo van secciones que reescriben los comandos (pendientes, actividad, hijos): lo escrito a mano ahí se pierde.
+7. **Archivar es caro y el sistema no lo inicia.** Propone, y el autor delibera qué pasa con los pendientes, las cadencias y los links de lo archivado.
 
 > [!example] Ejemplos tuku
 > ```bash
@@ -102,12 +115,12 @@ La capacidad del autor vive en `ambitos/personal/CAPACIDAD.md` y se lee siempre 
 
 ## Nota
 
-Una nota es un archivo de `notas/` sobre algo que no pertenece a un día. `tuku note create` la escribe. Debe cumplir:
+Una nota es un archivo de `notas/` sobre algo que no pertenece a un día. Toda nota lleva `type: Note`, y las tipadas suman `subtype`. `tuku note create` la escribe. Debe cumplir:
 1. **Solo si el autor la pide.** Lo que parezca merecer nota se propone y espera el sí.
 2. **Deja una entrada en la bitácora**, con el enlace a la nota. La escribe el mismo `note create`: no se suma un `entry create`.
 3. **Cierra con `## Ver además`**, donde cada enlace dice para qué conecta.
 4. **Un tipo enlazable se enlaza al nombrarlo.** Si la columna `Enlazable` del tipo dice `sí`, `tuku context` ofrece sus últimas notas (hasta `context_note_limit`), y se enlazan como dice el capítulo Registro; dentro de una nota, la ruta es relativa a `notas/`. Una nota de un tipo no enlazable existe, pero nadie la enlaza sola.
-5. **Una persona sigue una plantilla** (`--subtype persona`): el nombre completo como título; quién es y de dónde se conoce; los hechos, cada uno con la fecha del registro que lo sostiene; las inferencias aparte y marcadas como tales. Solo se infiere lo que sirve para trabajar mejor con ella. Los otros nombres con que se la nombra van en `aliases`, con `--alias` (repetible, o separados por coma): `--alias "don Rodolfo,Rodolfo"`.
+5. **Una persona sigue una plantilla** (`--subtype persona`): el nombre completo como título; quién es y de dónde se conoce; los hechos, cada uno con la fecha del registro que lo sostiene; las inferencias aparte y marcadas como tales. Solo se infiere lo que sirve para trabajar mejor con ella, y una inferencia que no se le podría mostrar a la persona no se escribe. Los otros nombres con que se la nombra van en `aliases`, con `--alias` (repetible, o separados por coma): `--alias "don Rodolfo,Rodolfo"`.
 
 > [!example] Ejemplos tuku
 > ```bash
@@ -123,7 +136,7 @@ Lee también: Uso de Markdown y Formato OKF.
 
 ## Cadencia
 
-Una cadencia es algo que vuelve: se declara una vez y genera un pendiente con fecha cada vez que toca. Se evalúan al cambiar de ciclo: al crear una semana, o el ciclo propio del autor, cada cadencia que cae en ese rango se convierte en un pendiente. No hay comando para declararla; se escribe en un `CADENCIAS.md`. Se leen en cascada: las de `ambitos/CADENCIAS.md` valen para todos los ámbitos, y las del `CADENCIAS.md` de un ámbito, solo dentro de él.
+Una cadencia es algo que vuelve: se declara una vez y genera un pendiente con fecha cada vez que toca. Se evalúan al cambiar de ciclo: al crear una semana, o el ciclo propio del autor, cada cadencia que cae en ese rango se convierte en un pendiente. No hay comando para declararla; se escribe en un `CADENCIAS.md`. Se leen en cascada: las de `ambitos/CADENCIAS.md` valen para todos los ámbitos, y las del `CADENCIAS.md` de un ámbito, solo dentro de él. Se acumulan: una cadencia más adentro no cancela la de arriba. Es lo contrario de un `AGENTS.md`, donde el más cercano prevalece.
 
 Cada cadencia es un encabezado `##` con tres campos de máquina y dos de persona:
 
@@ -176,7 +189,7 @@ Los archivos `.user.md` son la memoria del autor: cuando dice cómo prefiere que
 
 [OKF](https://github.com/GoogleCloudPlatform/open-knowledge-format) es un formato abierto de Google para que personas y agentes compartan conocimiento: Markdown con un bloque YAML arriba, un concepto por archivo, sin herramientas obligatorias. TUKU lo usa porque un vault en OKF lo entiende algo que nunca oyó hablar de TUKU.
 
-Un campo es obligatorio, `type`, y dice qué clase de archivo es. Los nombres van en inglés. Se declara en todo archivo que guarde conocimiento; los `AGENTS.md` y los `SKILL.md` quedan fuera. Los `type` de TUKU son el contrato con OKF y no se renombran; uno propio del autor no puede repetir uno de estos.
+Un campo es obligatorio, `type`, y dice qué clase de archivo es. Los nombres de campo van en inglés y el cuerpo, en castellano. Se declara en todo archivo que guarde conocimiento; los `AGENTS.md` y los `SKILL.md` quedan fuera. Los `type` de TUKU son el contrato con OKF y no se renombran; uno propio del autor no puede repetir uno de estos.
 
 | `type` | Qué archivo | Se reconoce por |
 | --- | --- | --- |
@@ -207,6 +220,7 @@ Los valores que las automatizaciones necesitan saber de este vault.
 TUKU escribe CommonMark con las tablas y el tachado de GFM, y tres extensiones de Obsidian: el callout (`> [!todo] Título`), la transclusión (`![[archivo.md#^ancla]]`) y el ancla de bloque (`^ancla`). Lo que más se equivoca:
 1. **Un párrafo es una sola línea.** El editor la ajusta; un salto manual a mitad de párrafo lo rompe en dos.
 2. **Una línea en blanco** antes y después de una lista, una tabla o un bloque de código.
-3. **Enlace relativo, no wikilink.** `[texto](ruta/relativa.md)`, con la ruta relativa al archivo que lo contiene. La transclusión es el único wikilink admitido.
+3. **Enlace relativo, no wikilink.** `[texto](ruta/relativa.md)`, con la ruta relativa al archivo que lo contiene. La transclusión es el único wikilink admitido, y `tuku fix link` convierte los que se cuelen. La ruta de un ámbito la calcula `tuku` desde su nombre: nadie la escribe.
 4. **Un `|` dentro de una celda se escribe `\|`.**
 5. **Lo que lee una máquina está a la vista:** un campo `**Campo:** valor`, una tabla o un encabezado, sin comentarios HTML con significado.
+6. **Obsidian muestra, `tuku` calcula.** Una vista que importa es texto que genera `tuku`, no un plugin como Dataview o Bases: desaparece al abrir el vault en otro editor.

@@ -1,6 +1,6 @@
 # spec · bitácora
 
-> La única entrada del sistema. Se justifica por el principio 1 y el principio 3 de [`../docs/principios.md`](../docs/principios.md). El marco que la rodea (por qué el registro termina donde termina) está en [flujo-informacion.md](flujo-informacion.md).
+> La única entrada del sistema. Se justifica por el principio 1 y el principio 3 de [`../../../docs/principios.md`](../../../docs/principios.md). El marco que la rodea (por qué el registro termina donde termina) está en [flujo-informacion.md](../../borradores/flujo-informacion.md).
 
 Lo hablado y lo registrado no son lo mismo. El dictado va dirigido a quien lleva la bitácora; el registro captura el hecho. Son dos cosas distintas: el habla es situada y efímera, el registro tiene que sostenerse solo durante años.
 
@@ -25,7 +25,7 @@ El ámbito es un **link Markdown cuya ruta es relativa al archivo que contiene l
 
 ### De dónde salen el día y la hora
 
-**El día y la hora no vienen del dictado**: se derivan de la jornada que el dictado describe, y eso es juicio de quien registra, no lectura mecánica (ver [`../corpus/referencia/referencia-faena.md`](../corpus/referencia/referencia-faena.md), Parte 2).
+**El día y la hora no vienen del dictado**: se derivan de la jornada que el dictado describe, y eso es juicio de quien registra, no lectura mecánica (ver [`../../../corpus/referencia/referencia-faena.md`](../../../corpus/referencia/referencia-faena.md), Parte 2).
 
 Cuando quien invoca no proporciona el día o la hora (o no se pueden derivar), los valores por defecto son:
 - **El día:** la fecha actual (**HOY**), situando el registro bajo la sección correspondiente al día de hoy en `AHORA.md`.
@@ -78,7 +78,7 @@ El costo que la mantiene honesta: la lista vive en el código del linter, así q
 
 **Abierta, del autor.** `**progreso**`, `**decisión**`, `**fricción**`, `**señal**`, `**nota**`. Son **semánticos**: ningún comando actúa sobre ellos. Sirven para leer, filtrar y destilar. Si el autor usa un tipo nuevo se acepta, y en un ciclo posterior se le pregunta qué significa para formalizarlo.
 
-**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos son del autor y viven en `reglas/`, cada uno en su archivo `X.user.md`, con una sola tabla (semillas en [`../template/vanilla/reglas/`](../template/vanilla/reglas/)). De ahí los lee el comando, y el libro de estilo transcluye cada archivo en el capítulo de su entidad ([vault.md](vault.md), "El libro de estilo"):
+**Dónde vive cada una.** La cerrada es de TUKU: va en el código del linter y el autor no la puede cambiar. Los vocabularios abiertos son del autor y viven en `reglas/`, cada uno en su archivo `X.user.md`, con una sola tabla (semillas en [`../../../template/vanilla/reglas`](../../../template/vanilla/reglas)). De ahí los lee el comando, y el libro de estilo transcluye cada archivo en el capítulo de su entidad ([vault.md](vault.md), "El libro de estilo"):
 
 | Vocabulario abierto | Archivo | Capítulo del libro |
 | --- | --- | --- |

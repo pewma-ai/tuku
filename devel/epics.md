@@ -4,7 +4,7 @@
 
 ## Los epics mueven el diseño
 
-El diseño lo dirige la experimentación, no al revés: [`spec/`](../spec/README.md) y [`docs/`](../docs/README.md) cambian por efecto de los epics. Cada epic entrega dos cosas: su producto y lo que le enseñó al diseño. Dentro de un epic la spec manda sobre el código; entre epics, el experimento manda sobre la spec.
+El diseño lo dirige la experimentación, no al revés: el [libro de estilo](../template/vanilla/LIBRO-DE-ESTILO.md), [`spec/tuku.md`](../spec/tuku.md) y [`docs/`](../docs/README.md) cambian por efecto de los epics. Cada epic entrega dos cosas: su producto y lo que le enseñó al diseño. El libro manda sobre los comandos y `spec/tuku.md` sobre su código; el experimento manda sobre los dos.
 
 El orden de trabajo es siempre el mismo:
 1. **De lo determinista a lo agéntico:** un tramo determinista corre mil veces gratis; uno agéntico cuesta tokens y no repite resultado. El escenario con LLM va al final, nunca en la base de una cadena.
@@ -40,7 +40,7 @@ La numeración salta la fase 8 porque el endurecimiento pasó a la Wishlist: no 
 - **El LLM se aísla:** las fases 1, 7 y 9 lo usan y las demás no.
 - **Idempotencia:** correr cualquier operación dos veces da el mismo resultado (principio 9).
 - **La ayuda como equivalente manual:** ningún comando entra sin una descripción que diga qué archivos toca y cómo, para garantizar el principio 1.
-- **Contrato de [`spec/cli.md`](../spec/cli.md):** códigos de salida fijos, mensajes que nombran defecto y corrección, y ante la duda informar sin escribir.
+- **Contrato de [`spec/cli.md`](VAULT/spec-anterior/cli.md):** códigos de salida fijos, mensajes que nombran defecto y corrección, y ante la duda informar sin escribir.
 
 ## Estrategia de pruebas
 
@@ -113,11 +113,11 @@ El mismo día uno del epic 002, dictado en lenguaje natural en vez de invocado a
 
 Replica, y nada más. Un turno, un dictado, el mismo vault de salida. La conversación de ida y vuelta es el epic 004, y meterla acá haría que un fallo pudiera venir de dos sitios a la vez.
 
-- **Entregable:** el `AGENTS.md` del vault (invocación y límites) con la skill del asistente y el libro de estilo por capítulos, que hacen que cualquier arnés opere igual ([`../spec/despacho.md`](../spec/despacho.md)), la evidencia de que con él un agente vivo reproduce el día uno, y **el método para probarlo**. El arnés no es andamiaje de este epic: es lo que permite que el 004 y los siguientes afirmen algo sobre un agente en vez de mirarlo funcionar, y un método frágil no da un resultado dudoso, da uno falso.
+- **Entregable:** el `AGENTS.md` del vault (invocación y límites) con la skill del asistente y el libro de estilo por capítulos, que hacen que cualquier arnés opere igual ([`VAULT/spec-anterior/despacho.md`](VAULT/spec-anterior/despacho.md)), la evidencia de que con él un agente vivo reproduce el día uno, y **el método para probarlo**. El arnés no es andamiaje de este epic: es lo que permite que el 004 y los siguientes afirmen algo sobre un agente en vez de mirarlo funcionar, y un método frágil no da un resultado dudoso, da uno falso.
 - **Detalle completo:** [`../tests/escenarios/003-00-el-dia-uno-dictado.md`](../tests/escenarios/003-00-el-dia-uno-dictado.md).
 
 > [!tip] Mirar en VAULT al cerrar el epic
-> - [`VAULT/agentes.md`](VAULT/agentes.md), sección "Motores": lista de arneses validados y umbral de referencia por modelo. El brief sacó esa lista y dejó un `#REVISAR` pidiendo destino; este epic es el momento de moverla a [`entorno-devel.md`](entorno-devel.md) o a [`spec/agente.md`](../spec/agente.md).
+> - [`VAULT/agentes.md`](VAULT/agentes.md), sección "Motores": lista de arneses validados y umbral de referencia por modelo. El brief sacó esa lista y dejó un `#REVISAR` pidiendo destino; este epic es el momento de moverla a [`entorno-devel.md`](entorno-devel.md) o a [`spec/agente.md`](VAULT/spec-anterior/agente.md).
 > - [`VAULT/agentes.md`](VAULT/agentes.md), sección "Economía de contexto": contexto pertinente, sesión nueva tras una hora de inactividad y degradación entre 100 y 300 reglas. Sirve para medir el piso de la cascada de `AGENTS.md` (ver [`TODO.md`](../TODO.md)).
 > - [`VAULT/scratchpad/Comportamiento esperado de TUKU.md`](VAULT/scratchpad/Comportamiento%20esperado%20de%20TUKU.md): Hermes necesita configuración base (SOUL, lectura de `AGENTS.md`) que debe sembrar `tuku init`.
 
@@ -156,7 +156,7 @@ Que un ciclo se abra y se cierre sin perder nada, y que lo propuesto al abrirlo 
 
 > [!tip] Mirar en VAULT al diseñar cadencias y cierre
 > - [`VAULT/spec/cadencias.md`](VAULT/spec/cadencias.md): los cinco disparadores, en particular la cadencia por ausencia de actividad ("un cliente sin contacto hace cuatro semanas"), la más valiosa y la única que ningún cuaderno tiene. Y "el reporte es la memoria": lo que se conserva de un período largo es su relato.
-> - [`VAULT/old/decisiones/0006-regla-muere-emitido-sobrevive.md`](VAULT/old/decisiones/0006-regla-muere-emitido-sobrevive.md): al borrar una cadencia o su ámbito, lo ya emitido sobrevive y la referencia colgante no es error. Verificar que [`spec/cadencias.md`](../spec/cadencias.md) lo diga.
+> - [`VAULT/old/decisiones/0006-regla-muere-emitido-sobrevive.md`](VAULT/old/decisiones/0006-regla-muere-emitido-sobrevive.md): al borrar una cadencia o su ámbito, lo ya emitido sobrevive y la referencia colgante no es error. Verificar que [`spec/cadencias.md`](borradores/cadencias.md) lo diga.
 > - [`VAULT/old/decisiones/0010-friccion-no-se-declara.md`](VAULT/old/decisiones/0010-friccion-no-se-declara.md): la fricción no se etiqueta al escribir, se descubre en el cierre contrastando plan y actividad. Evidencia: 59 hitos, 22 decisiones y 0 fricciones en 8 ciclos reales. Útil para el resumen del cierre.
 > - [`VAULT/old/decisiones/0007-plan-es-calendario.md`](VAULT/old/decisiones/0007-plan-es-calendario.md) y [`VAULT/spec/old/artefactos-ciclo.md`](VAULT/spec/old/artefactos-ciclo.md): plan y reporte del ciclo en el modelo anterior.
 

@@ -1,20 +1,99 @@
 # spec · tuku
 
-> La superficie del CLI: qué comandos hay, con qué firma, y qué archivos del vault lee y escribe cada uno. La gramática que comparten está en [cli.md](cli.md), y qué significa lo que escriben, en la spec de cada primitiva. [`test_superficie.py`](../tests/unitarios/test_superficie.py) compara cada firma con el árbol de argparse.
+> La única spec del repositorio: la superficie del comando `tuku` y lo que garantiza. Es un mapa de alto nivel. El detalle de cada opción vive en `tuku … -h`, que dice qué archivos toca y cómo, y se copia en `reglas/comandos.tuku.md`.
 
-## Cómo se lee
+## Quién manda
 
-**La firma.** Un bloque por sección, y es lo normativo. `[x]` es opcional, `(a | b)` es uno de los dos y `…` es repetible. `--vault` vale en todos los comandos salvo `init` y no se repite. `# pendiente` marca un comando especificado y sin implementar; `# pendiente: --opción` marca las piezas que le faltan a uno que existe.
+1. **El [libro de estilo](../template/vanilla/LIBRO-DE-ESTILO.md) manda sobre todo.** Dice qué se escribe y cómo, y cualquier cosa debe ser compatible con él: un comando `tuku`, una persona o un agente. Si un comando lo contradice, el defecto está en el comando.
+2. **Este archivo manda sobre el código de los comandos.** Si discrepan, el defecto está en el código, salvo que este archivo contradiga al libro.
+3. **`tuku … -h` es el detalle**, y los escenarios de [`tests/escenarios/`](../tests/escenarios/README.md) son el comportamiento verificado. [`test_superficie.py`](../tests/unitarios/test_superficie.py) compara el mapa de abajo con el árbol de argparse.
 
-**El diagrama.** La línea continua escribe y la punteada lee. Un rótulo que empieza con "pendiente:" es comportamiento especificado y sin implementar.
+Esta spec cambia cuando el uso la contradice: el experimento manda sobre ella, no al revés ([`devel/epics.md`](../devel/epics.md)).
 
-| Color | Qué es |
-| --- | --- |
-| Verde | Comando que escribe |
-| Rosa | Comando que revisa o lee, sin escribir |
-| Gris punteado | Comando sin implementar |
-| Gris | Archivo del vault |
-| Ámbar | Lo derivado, lo que rehace [`tuku regenerate`](#mantención) |
+## Qué hace el comando y qué no
+
+`tuku` es la capa determinista. Es dueño de la **forma**: dónde va cada cosa, en qué orden y qué invariantes no se rompen. El **juicio** es de quien invoca: qué se registra, con qué palabras y a qué ámbito pertenece. Un autor disciplinado hace lo mismo a mano con un editor: el comando le ahorra el esfuerzo y no habilita nada imposible sin él (principio 1).
+
+- **Ningún comando infiere un campo que quien invoca no dio**, salvo los valores por defecto que declara el libro: hoy, ahora, y el primer horizonte.
+- **Ante la duda informa y no escribe.** Un comando que no puede determinar algo no lo adivina ni escribe a medias.
+- **Todo mutador es idempotente.** Repetirlo completa lo que falta y no duplica nada. Por eso el comando que repara un defecto es el comando original.
+- **Verificar no repara.** `doctor` nombra el defecto y la corrección y no modifica archivos; `fix` aplica lo determinista y devuelve como decisiones lo que requiere juicio.
+- **Fuera de un vault no opera.** Sin ninguno de los archivos requeridos, rechaza con código 1 y no lee ni escribe. `tuku init` rechaza además el home del usuario y todo directorio que lo contenga, aun con `--force`.
+- **Escribe con el vault abierto en otro editor.** Cada archivo se reemplaza de una vez y solo si no cambió desde que se leyó; si cambió, reintenta y, si sigue chocando, dice qué quedó escrito y que repetir el comando completa el resto.
+
+## Gramática
+
+`tuku SUSTANTIVO VERBO [POSICIONAL] [--opción]`, y cada pieza significa lo mismo en todos los comandos.
+
+- **Sustantivos:** `entry`, `todo`, `scope` y `note` son las cosas del vault. `process` y `context` llevan un `TEMA`. `init`, `doctor`, `regenerate` y `fix` actúan sobre el vault entero.
+- **Verbos:** `create` nace, `open` y `close` abren y cierran lo que tiene ciclo de vida, `update` cambia atributos, `move` cambia de dónde cuelga, `rename` cambia la identidad y con ella cada link, `archive` saca de circulación sin borrar.
+- **Opciones:** un parámetro tiene un solo significado en todo el CLI, y un comando nuevo usa el que ya existe antes de inventar otro. `--at` es cuándo ocurrió, `--scope` y `--parent` dicen dónde va, `--body` es el contenido, `--match` ubica un registro, `--since` dice desde cuándo leer, `--no-X` omite un efecto colateral. Solo `-h` y `-v` tienen forma corta.
+- **`TEMA`** es el nombre de la cosa y significa lo mismo en `doctor`, `fix`, `regenerate` y `context`. Uno desconocido es un error de uso.
+
+## Salida y códigos
+
+Un solo mensaje en prosa, para persona y para agente. Sin `--json`: los códigos de salida son el canal para máquinas.
+
+| Código | Significa | Qué hacer |
+| --- | --- | --- |
+| 0 | Éxito | Seguir |
+| 1 | Rechazo: el comando entendió y se negó por el estado del vault | Corregir el estado, o pasar la opción que la salida indica |
+| 2 | Error de uso: la invocación está mal formada | Corregir la invocación |
+| 3 | Entorno: la instalación de TUKU no está donde debería | No reintentar; se arregla la instalación |
+
+El 2 está reservado a argparse y ningún comando lo devuelve por otra causa. Un código nuevo entra en esta tabla antes que en el código, y vive en `tuku/cli/` como constante con nombre.
+
+**Toda salida de error nombra el defecto y la corrección.** Un aviso no es un error: el comando procede, sale con 0 y escribe en `stderr` una línea `tuku <comando>: warning: …`.
+
+## Cómo se lee el mapa
+
+Un bloque por sustantivo, con la firma en lo alto: los comandos y sus argumentos principales, sin cada opción. `# pendiente` marca un comando especificado y sin implementar. El diagrama dice qué archivos lee y escribe cada sustantivo: la línea continua escribe y la punteada lee.
+
+```mermaid
+%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '12px'}}}%%
+flowchart LR
+    subgraph CMD["Comandos"]
+        direction TB
+        INIT["init"]
+        ENTRY["entry"]
+        TODO["todo"]
+        SCOPE["scope"]
+        NOTE["note"]
+        PROC["process"]
+        CTX["context"]
+        MANT["doctor · fix · regenerate"]
+    end
+    subgraph VAULT["Vault"]
+        direction TB
+        AH["AHORA.md y bitacoras/"]
+        PE["PENDIENTES.md"]
+        AM["ambitos/"]
+        NO["notas/"]
+        LI["LIBRO-DE-ESTILO.md y reglas/"]
+        DER["Lo derivado"]
+    end
+
+    INIT -->|"siembra el vault"| LI
+    ENTRY -->|"escribe registros"| AH
+    TODO -->|"abre y cierra"| PE
+    TODO -->|"deja constancia"| AH
+    SCOPE -->|"crea y reorganiza"| AM
+    NOTE -->|"escribe"| NO
+    PROC -->|"abre el ciclo"| AH
+    CTX -.->|"lee, sin escribir"| VAULT
+    MANT -.->|"doctor revisa"| VAULT
+    MANT -->|"regenerate rehace"| DER
+
+    classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
+    classDef lee fill:#fce7f3,color:#831843,stroke:#f9a8d4
+    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
+    classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
+    class INIT,ENTRY,TODO,SCOPE,NOTE,PROC escribe
+    class CTX lee
+    class MANT escribe
+    class AH,PE,AM,NO,LI archivo
+    class DER derivado
+```
 
 ## Sembrar
 
@@ -22,77 +101,7 @@
 tuku init DIR [--variant] [--author] [--at] [--force]
 ```
 
-```mermaid
-%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart LR
-    subgraph CMD["tuku init"]
-        direction TB
-        IN["init DIR<br/>--variant --author --at --force"]
-    end
-    subgraph VAULT["Vault"]
-        direction TB
-        VA["Todo el vault"]
-        AH["AHORA.md"]
-        CF["reglas/config.tuku.md"]
-        LE["LIBRO-DE-ESTILO.md"]
-        CM["reglas/comandos.tuku.md"]
-    end
-
-    IN -->|"copia template/ de --variant;<br/>--force reemplaza un destino<br/>con contenido"| VA
-    IN -->|"desde la plantilla, con el ciclo de --at"| AH
-    IN -->|"la zona horaria de la máquina"| CF
-    IN -->|"la línea del autor de --author"| LE
-    IN -->|"la ayuda de cada comando"| CM
-
-    classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
-    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
-    class IN escribe
-    class VA,AH,CF,LE,CM archivo
-```
-
-## process
-
-Un proceso es una rutina con nombre ([despacho.md](despacho.md)). Los de `tuku` son deterministas; los de `procesos/` los escribe el autor y los ejecuta el agente.
-
-```text
-tuku process
-tuku process cycle [--from] [--to] [--name] [--force]
-```
-
-```mermaid
-%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart LR
-    subgraph CMD["tuku process"]
-        direction TB
-        PL["process"]
-        PC["process cycle<br/>--from --to --name --force"]
-    end
-    subgraph VAULT["Vault"]
-        direction TB
-        PR["procesos/"]
-        TP["reglas/plantilla/AHORA.md"]
-        BI["bitacoras/"]
-        AH["AHORA.md"]
-        PE["PENDIENTES.md"]
-        CF["reglas/config.tuku.md"]
-    end
-
-    PL -.->|"lista los de tuku<br/>y los de procesos/"| PR
-    PC -.->|"la plantilla"| TP
-    PC -->|"el rango de --from a --to;<br/>con semana, el que contiene --from<br/>y sin --from, el día siguiente al to anterior;<br/>si ya lo cubre, solo verifica"| AH
-    PC -->|"rechaza un --from que no sea<br/>el día siguiente al to del anterior,<br/>salvo repetir el ciclo abierto"| AH
-    PC -->|"un --from anterior al del ciclo abierto<br/>es un ciclo pasado, sin verificar"| BI
-    PC -->|"el nombre avanza en la tabla de ciclo.user.md;<br/>repetir el ciclo abierto lo conserva;<br/>--name fuera de la lista, solo con --force"| CF
-    PC -.->|"si hay una bitácora anterior"| BI
-    PC -->|"con bitácora anterior, abre<br/>revisar la bitácora anterior<br/>como tuku todo open"| PE
-
-    classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
-    classDef revisa fill:#fce7f3,color:#831843,stroke:#f9a8d4
-    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
-    class PC escribe
-    class PL revisa
-    class PR,TP,BI,AH,PE,CF archivo
-```
+Copia el template al directorio sin tocar la red y deja el primer ciclo abierto. Rechaza un destino con contenido salvo `--force`.
 
 ## entry
 
@@ -102,278 +111,67 @@ tuku entry update [CUÁNDO] --match TEXTO --body
 tuku entry move [CUÁNDO] --match TEXTO --scope
 ```
 
-`--match` ubica el último registro de `AHORA.md` que calza, y `CUÁNDO` busca en un ciclo cerrado ([bitacora.md](bitacora.md), "Corregir un registro ya escrito").
-
-```mermaid
-%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart LR
-    subgraph CMD["tuku entry"]
-        direction TB
-        EC["entry create<br/>--body --scope --at"]
-        EU["entry update<br/>CUÁNDO --match --body"]
-        EM["entry move<br/>CUÁNDO --match --scope"]
-    end
-    subgraph VAULT["Vault"]
-        direction TB
-        AH["AHORA.md"]
-        BI["bitacoras/"]
-        PE["PENDIENTES.md"]
-        AM["ambitos/"]
-        CF["reglas/config.tuku.md"]
-        DER["Lo derivado"]
-    end
-
-    EC -->|"el registro bajo el día de --at,<br/>en orden de hora"| AH
-    EC -->|"en un día pasado sin hora,<br/>al final del día"| AH
-    EC -.->|"sin --scope, scope_default"| CF
-    EC -.->|"que exista el ámbito de --scope,<br/>y su ruta para el link"| AM
-    EC -.->|"rechaza un día fuera del ciclo abierto:<br/>el ciclo cambió, y el mensaje dice cómo<br/>cerrarlo y nombra process cycle"| AH
-    EU -->|"el cuerpo del último registro<br/>que calza con --match"| AH
-    EU & EM -->|"si es pendiente, su fila"| PE
-    EM -->|"el ámbito del registro"| AH
-    EM -->|"con CUÁNDO, en un ciclo cerrado"| BI
-    EC & EU & EM -->|"rehace"| DER
-
-    classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
-    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
-    classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
-    class EC,EU,EM escribe
-    class AH,BI,PE,AM,CF archivo
-    class DER derivado
-```
+Escribe y corrige registros de la bitácora, en orden de hora. `--match` ubica el último registro que calza, y `CUÁNDO` busca en un ciclo cerrado. Rechaza un día fuera del ciclo abierto y dice cómo cambiar de ciclo. Qué es un registro y cómo se escribe está en el capítulo Registro del libro.
 
 ## todo
 
 ```text
-tuku todo open --body [--scope] [--at] [--due | --horizon] [--no-regenerate]
-tuku todo close TEXTO [--scope] [--at] [--no-regenerate]
+tuku todo open --body [--scope] [--at] [--due | --horizon]
+tuku todo close TEXTO [--scope] [--at]
+tuku todo update TEXTO [--horizon] [--due]                          # pendiente
 ```
 
-```mermaid
-%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart LR
-    subgraph CMD["tuku todo"]
-        direction TB
-        TO["todo open<br/>--body --scope --at<br/>--due o --horizon<br/>--no-regenerate"]
-        TC["todo close TEXTO<br/>--scope --at<br/>--no-regenerate"]
-    end
-    subgraph VAULT["Vault"]
-        direction TB
-        AH["AHORA.md"]
-        PE["PENDIENTES.md"]
-        CF["reglas/config.tuku.md"]
-        LE["LIBRO-DE-ESTILO.md"]
-        DER["Lo derivado<br/>vistas de pendientes,<br/>salvo --no-regenerate;<br/>actividad de los ámbitos, siempre"]
-    end
-
-    TO -->|"registro pendiente bajo el día de --at,<br/>una sola vez"| AH
-    TO -->|"fila bajo su horizonte:<br/>con fecha si --due,<br/>el de --horizon o el primero"| PE
-    TO -.->|"los horizontes"| LE
-    TC -->|"registro (Hecho) tachado;<br/>borra el pendiente si se abrió<br/>ese mismo día"| AH
-    TC -->|"borra la fila cuyo texto es TEXTO"| PE
-    TO -.->|"sin --scope, scope_default"| CF
-    TC -.->|"sin --scope, el ámbito de la fila;<br/>si no tiene, scope_default"| CF
-    TO & TC -->|"rehace"| DER
-
-    classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
-    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
-    classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
-    class TO,TC escribe
-    class AH,PE,CF,LE archivo
-    class DER derivado
-```
+Abre y cierra pendientes: el registro en la bitácora y la fila en `PENDIENTES.md`, sincronizados. `todo update` posterga un pendiente y corrige su `Vence`. Capítulo Pendiente.
 
 ## scope
 
 ```text
-tuku scope create NOMBRE [--parent] [--keyword…] [--at] [--since]
+tuku scope create NOMBRE [--parent] [--keyword…] [--since]
 tuku scope update NOMBRE [--keyword…]
 tuku scope move NOMBRE [--parent]
 tuku scope rename NOMBRE NUEVO
 tuku scope archive NOMBRE                                           # pendiente
 ```
 
-`--parent` acepta el nombre o la ruta (`negocio/clientes`). En `scope create`, `--since` vale 7 días por defecto ([ambitos.md](ambitos.md), "Lo escrito antes de abrir un ámbito").
-
-```mermaid
-%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart LR
-    subgraph CMD["tuku scope"]
-        direction TB
-        SC["scope create NOMBRE<br/>--parent --keyword --at --since"]
-        SU["scope update NOMBRE<br/>--keyword"]
-        SM["scope move NOMBRE<br/>--parent"]
-        SR["scope rename NOMBRE NUEVO"]
-        SA["scope archive NOMBRE"]
-    end
-    subgraph VAULT["Vault"]
-        direction TB
-        PG["ambitos/…/NOMBRE/NOMBRE.md"]
-        AH["AHORA.md"]
-        BI["bitacoras/"]
-        VA["Todo el vault"]
-        DER["Lo derivado: callout de hijos<br/>y parent: de cada página"]
-    end
-
-    SC -->|"carpeta dentro de --parent<br/>(crea la categoría que falta)<br/>o en la raíz, página con<br/>sus keywords y su parent:"| PG
-    SC -->|"constancia en la bitácora,<br/>con link al ámbito padre"| AH
-    SC -.->|"lista los registros que lo nombran,<br/>desde --since"| BI
-    SU -->|"suma cada --keyword a keywords"| PG
-    SM -->|"mueve la carpeta dentro de<br/>--parent o a la raíz"| PG
-    SR -->|"renombra carpeta, página,<br/>keywords y ancla"| PG
-    SM & SR -->|"ruta y texto de cada link<br/>al ámbito, también en bitacoras/"| VA
-    SC & SM & SR -->|"rehace"| DER
-
-    classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
-    classDef pendiente fill:#f8fafc,color:#64748b,stroke:#94a3b8,stroke-dasharray: 4 3
-    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
-    classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
-    class SC,SU,SM,SR escribe
-    class SA pendiente
-    class PG,AH,BI,VA archivo
-    class DER derivado
-```
+Crea y reorganiza el árbol de `ambitos/`. `move` y `rename` recalculan los links de todo el vault, también los de las bitácoras cerradas. Capítulo Ámbito.
 
 ## note
 
 ```text
-tuku note create TÍTULO (--body | --body-file) [--scope] [--subtype] [--alias] [--at] [--no-record]
+tuku note create TÍTULO (--body | --body-file) [--scope] [--subtype] [--alias…]
 tuku note rename TÍTULO NUEVO
 tuku note archive TÍTULO                                            # pendiente
 ```
 
-```mermaid
-%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart LR
-    subgraph CMD["tuku note"]
-        direction TB
-        NC["note create TÍTULO<br/>--body o --body-file<br/>--scope --subtype --alias --at --no-record"]
-        NR["note rename TÍTULO NUEVO"]
-        NA["note archive TÍTULO"]
-    end
-    subgraph VAULT["Vault"]
-        direction TB
-        NO["notas/TITULO-EN-SLUG.md"]
-        LE["LIBRO-DE-ESTILO.md"]
-        AH["AHORA.md"]
-        VA["Todo el vault"]
-        DER["Lo derivado: actividad<br/>de la página del ámbito"]
-    end
+Escribe la nota en `notas/` y deja su constancia en la bitácora. Capítulo Nota.
 
-    NC -->|"frontmatter con subtype, created y updated de --at,<br/>cuerpo y Ver además con --scope<br/>y los links del cuerpo"| NO
-    NC -.->|"--subtype debe ser una fila<br/>de Tipos de nota"| LE
-    NC -->|"constancia en la bitácora,<br/>salvo --no-record"| AH
-    NC -->|"con --scope, rehace"| DER
-    NR -->|"renombra archivo y título"| NO
-    NR -->|"ruta y texto de cada link<br/>a la nota, también en bitacoras/"| VA
+## process
 
-    classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
-    classDef pendiente fill:#f8fafc,color:#64748b,stroke:#94a3b8,stroke-dasharray: 4 3
-    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
-    classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
-    class NC,NR escribe
-    class NA pendiente
-    class NO,LE,AH,VA archivo
-    class DER derivado
+```text
+tuku process
+tuku process cycle [--from] [--to] [--name]
 ```
 
-## context
+Una rutina con nombre. Sin nombre lista las de `tuku` y las que el autor escribe en `procesos/`. `process cycle` abre el siguiente ciclo, o repite el abierto y solo verifica. Capítulo Ciclo.
 
-Lo que el agente necesita para decidir, sin abrir archivos. Sin `TEMA`, todos menos `cadence`.
+## context
 
 ```text
 tuku context [TEMA] [--since] [--late] [--chapter]
 ```
 
-`--since` (2 días por defecto) acota los registros de `entry`. `context note` trae las últimas notas de cada tipo enlazable, tantas como diga `context_note_limit` en `reglas/config.tuku.md` (25 por defecto). `--late` solo vale con `todo` y deja únicamente los pendientes atrasados. `context style` devuelve el libro de estilo con cada `![](reglas/X.md)` expandido en su lugar, de lo general a lo específico; con `--chapter NOMBRE`, un solo capítulo. Del archivo transcluido entran sus capítulos `##`, no lo que haya antes. Sin tema, `style` trae solo el autor, el lenguaje y los vocabularios ([vault.md](vault.md), "El libro de estilo"). `context cadence` devuelve las cadencias de todo el árbol en un solo texto, cada una con el `CADENCIAS.md` de donde viene y su alcance ([cadencias.md](cadencias.md)).
-
-```mermaid
-%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart LR
-    subgraph CMD["tuku context"]
-        direction TB
-        CX["context TEMA<br/>--since --late --chapter"]
-    end
-    subgraph VAULT["Vault"]
-        direction TB
-        AH["AHORA.md"]
-        BI["bitacoras/"]
-        AM["ambitos/"]
-        PE["PENDIENTES.md"]
-        LE["LIBRO-DE-ESTILO.md"]
-        NO["notas/"]
-    end
-
-    CX -.->|"entry: los registros<br/>desde --since"| AH
-    CX -.->|"entry: si --since cruza<br/>un ciclo cerrado"| BI
-    CX -.->|"scope: el árbol con sus keywords"| AM
-    CX -.->|"todo: abiertos y atrasados;<br/>con --late, solo los atrasados"| PE
-    CX -.->|"style: los capítulos del libro,<br/>con las reglas/ transcluidas"| LE
-    CX -.->|"note: por tipo enlazable, las últimas<br/>con título y aliases"| NO
-    CX -.->|"cadence: los CADENCIAS.md<br/>del árbol, en cascada"| AM
-
-    classDef revisa fill:#fce7f3,color:#831843,stroke:#f9a8d4
-    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
-    class CX revisa
-    class AH,BI,AM,PE,LE,NO archivo
-```
+Lo que el agente necesita para decidir, sin abrir archivos. Solo lee. `context style` devuelve el libro con las transclusiones expandidas, entero o un capítulo.
 
 ## Mantención
 
-Se distinguen por lo que escriben, y por eso se sabe cuál puede correr desatendido ([cli.md](cli.md)).
-
 ```text
-tuku doctor [TEMA] [ARCHIVO] [--verbose]
-tuku regenerate [TEMA]
+tuku doctor [TEMA] [ARCHIVO]
 tuku fix TEMA
+tuku regenerate [TEMA]
 ```
 
-| Comando | Escribe | Temas |
-| --- | --- | --- |
-| `doctor` | Nada | `config`, `version`, `types`, `files`, `frontmatter`, `dispatch`, `link`, `cycle`, `entry`, `todo`, `style`, `scope` y `note`, el único que acepta `ARCHIVO` |
-| `regenerate` | Solo lo derivado | `todo`, `scope`, `comandos` y `libro` |
-| `fix` | Lo canónico, solo lo determinista, y devuelve las decisiones del autor | `link` y `todo` |
+Se distinguen por lo que escriben. `doctor` no escribe nada y verifica el vault entero o un tema. `fix` repara solo lo determinista y devuelve lo demás como decisiones. `regenerate` rehace solo lo derivado: las vistas de pendientes, la actividad de los ámbitos, `reglas/comandos.tuku.md` y el libro de estilo.
 
-```mermaid
-%%{init: {'flowchart': {'useMaxWidth': true}, 'theme': 'neutral', 'themeVariables': {'fontSize': '11px'}}}%%
-flowchart LR
-    subgraph CMD["doctor, regenerate y fix"]
-        direction TB
-        DO["doctor TEMA ARCHIVO<br/>--verbose"]
-        RG["regenerate TEMA"]
-        FX["fix TEMA"]
-    end
-    subgraph VAULT["Vault"]
-        direction TB
-        VA["Todo el vault"]
-        PE["PENDIENTES.md"]
-        AH["AHORA.md"]
-        BI["bitacoras/"]
-        PA["ambitos/PENDIENTES-AMBITOS.md"]
-        PG["ambitos/…/NOMBRE/NOMBRE.md"]
-        CM["reglas/comandos.tuku.md"]
-    end
+## La ayuda es la spec del detalle
 
-    DO -.->|"cada tema; con TEMA, solo ese"| VA
-    RG -.->|"la tabla"| PE
-    RG -.->|"los registros de los<br/>últimos doce meses"| BI
-    RG -->|"todo: el callout de pendientes<br/>bajo cada día"| AH
-    RG -->|"todo: un callout por ámbito"| PA
-    RG -->|"scope: Esta semana, Actividad<br/>reciente y el callout de hijos"| PG
-    RG -->|"comandos: desde la ayuda"| CM
-    FX -->|"link: cada wikilink a link<br/>con ruta relativa"| VA
-    FX -->|"todo: borra el registro pendiente<br/>cerrado el mismo día, y rehace"| AH
-
-    classDef escribe fill:#dcfce7,color:#166534,stroke:#86efac
-    classDef revisa fill:#fce7f3,color:#831843,stroke:#f9a8d4
-    classDef archivo fill:#f1f5f9,color:#334155,stroke:#cbd5e1
-    classDef derivado fill:#fef3c7,color:#92400e,stroke:#fcd34d
-    class RG,FX escribe
-    class DO revisa
-    class VA,PE,AH,BI archivo
-    class PA,PG,CM derivado
-```
-
-## Lo que se retira
-
-Comandos y opciones que existen hoy y que la firma de arriba reemplaza. Una línea sale de aquí cuando sale del CLI ([`../TODO.md`](../TODO.md), "Superficie del CLI"). Hoy no se retira ninguno.
+Todo sustantivo y verbo lleva en `tuku … -h` un párrafo que dice qué archivos del vault lee o escribe y cómo, con precisión suficiente para hacerlo con un editor. Es el equivalente manual que pide el principio 1, y `tuku init` lo copia en `reglas/comandos.tuku.md` para que el vault lo diga aunque `tuku` no esté instalado. Un test exige que ningún comando invocable quede sin esa descripción.

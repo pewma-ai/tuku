@@ -5,7 +5,7 @@
 > Acá está **cómo se comporta** el agente. A dónde va lo que el autor dice, antes de todo esto, es [despacho.md](despacho.md).
 
 > [!question] Revisar contra el flujo nuevo #REVISAR
-> [`flujo-informacion.md`](flujo-informacion.md) se reescribió y ya no numera pasos. Esta spec sigue apoyada en el anterior:
+> [`../../borradores/flujo-informacion.md`](../../borradores/flujo-informacion.md) se reescribió y ya no numera pasos. Esta spec sigue apoyada en el anterior:
 > - La tabla de "Reparto entre LLM y script" y las frases sobre "el paso 4" y "el paso 5" se refieren a pasos que ya no existen. Ahora el juicio es interpretar (hechos, ámbito, hora, clase) y el resto lo hace el comando.
 > - "Qué se inyecta y cuándo" promete `tuku context show` y un vocabulario de ámbitos por comando. El flujo deja el contexto como concepto general: lo que hoy decide un cierre son los pendientes abiertos y las `keywords` de cada ámbito, que se leen de sus archivos.
 > - Faltan las reglas que el flujo delega acá: la ambigüedad (resolver lo que se puede, escribir lo demás tal cual y decidir cuando haga falta), el cierre no literal y qué hace un agente cuando es una entidad subordinada.
@@ -17,9 +17,9 @@ Al **inicio de sesión**, una sola vez y solo cuando se va a registrar algo en u
 - El **contexto reciente**, generado por comando desde `AHORA.md`.
 - El **vocabulario del autor**, generado por comando desde los frontmatter de `ambitos/`.
 
-Ninguno de los dos es un archivo: son la salida de un comando que se ejecuta en ese momento (ver [`vault.md`](vault.md), árbol de directorios). Esos comandos todavía no existen: hoy el agente lee `AHORA.md` y el árbol de `ambitos/` directamente ([`../TODO.md`](../TODO.md)). Quedan en **caché de sesión** y no se releen en cada turno. Una sesión que no va a escribir bitácora no necesita ninguno de los dos.
+Ninguno de los dos es un archivo: son la salida de un comando que se ejecuta en ese momento (ver [`vault.md`](vault.md), árbol de directorios). Esos comandos todavía no existen: hoy el agente lee `AHORA.md` y el árbol de `ambitos/` directamente ([`../../../TODO.md`](../../../TODO.md)). Quedan en **caché de sesión** y no se releen en cada turno. Una sesión que no va a escribir bitácora no necesita ninguno de los dos.
 
-Si el arnés no sabe ejecutar comandos y solo lee archivos, hay que materializarlos, y ahí reaparece el problema de que envejecen. Eso es limitación del arnés, no del diseño, y por eso vive en esta spec y no en [`flujo-informacion.md`](flujo-informacion.md).
+Si el arnés no sabe ejecutar comandos y solo lee archivos, hay que materializarlos, y ahí reaparece el problema de que envejecen. Eso es limitación del arnés, no del diseño, y por eso vive en esta spec y no en [`../../borradores/flujo-informacion.md`](../../borradores/flujo-informacion.md).
 
 ## El agente compila intención en comandos
 

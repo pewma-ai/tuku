@@ -38,7 +38,7 @@ El valor aparece en los cruces, y por eso los tres ejes son el diseño y no una 
 De ahí salen las primitivas, en ese orden y no al revés: la bitácora sirve al tiempo, los ámbitos a la estructura, las notas a la deliberación, y los pendientes y las cadencias son lo que cruza el tiempo con las otras dos.
 
 > [!question] Lo que esta sección deja abierto #REVISAR
-> La capacidad ya tiene dónde vivir y cómo se declara ([`../spec/ciclo.md`](../spec/ciclo.md) y [`../spec/ambitos.md`](../spec/ambitos.md)), pero sigue sin ubicarse respecto de los ejes: cuelga del ámbito y se gasta en el tiempo, así que no es un cuarto eje sino lo que mide cuánto cabe en el cruce de los dos primeros. Falta decidir si eso merece decirse aquí, en el brief, o si basta con que esté en las specs.
+> La capacidad ya tiene dónde vivir y cómo se declara ([`../devel/borradores/ciclo.md`](../devel/borradores/ciclo.md) y [`../devel/VAULT/spec-anterior/ambitos.md`](../devel/VAULT/spec-anterior/ambitos.md)), pero sigue sin ubicarse respecto de los ejes: cuelga del ámbito y se gasta en el tiempo, así que no es un cuarto eje sino lo que mide cuánto cabe en el cruce de los dos primeros. Falta decidir si eso merece decirse aquí, en el brief, o si basta con que esté en las specs.
 
 ### Cómo funciona
 
@@ -53,8 +53,8 @@ Tres niveles, en este orden de importancia:
 **Las reglas están escritas en prosa.** Cómo se escribe y cómo se organiza todo vive en un texto que leen igual el autor y la máquina, y del que nacen los automatismos. No hay lógica de gestión escondida dentro del código.
 
 > [!question] Qué salió de esta sección y dónde debería quedar #REVISAR
-> Se quitaron por ser implementación, no brief: los nombres del conjunto canónico (viven en [`../spec/vault.md`](../spec/vault.md)), los términos "comando", "transclusión", "secretario", "vault" y "estado cero" (glosario, specs y [`../template/README.md`](../template/README.md)), y la mención del libro de estilo como documento.
-> Se quitó también la lista de herramientas concretas: **Claude Code, Hermes, Antigravity, Obsidian, Telegram u otra mensajería, visualizadores web o CLI**. Hoy solo aparecen sueltas: el capítulo 1 del tutorial nombra los agentes y los escenarios de portabilidad del epic 003 nombran sus arneses (`agy`, `hermes`, `claude`), pero ninguna spec ni documento de `devel/` recoge la lista. Destino natural: [`../devel/entorno-devel.md`](../devel/entorno-devel.md) (lo que se usa hoy para desarrollar) o [`../spec/agente.md`](../spec/agente.md) (lo que se espera del canal). Decidir y mover.
+> Se quitaron por ser implementación, no brief: los nombres del conjunto canónico (viven en [`../devel/VAULT/spec-anterior/vault.md`](../devel/VAULT/spec-anterior/vault.md)), los términos "comando", "transclusión", "secretario", "vault" y "estado cero" (glosario, specs y [`../template/README.md`](../template/README.md)), y la mención del libro de estilo como documento.
+> Se quitó también la lista de herramientas concretas: **Claude Code, Hermes, Antigravity, Obsidian, Telegram u otra mensajería, visualizadores web o CLI**. Hoy solo aparecen sueltas: el capítulo 1 del tutorial nombra los agentes y los escenarios de portabilidad del epic 003 nombran sus arneses (`agy`, `hermes`, `claude`), pero ninguna spec ni documento de `devel/` recoge la lista. Destino natural: [`../devel/entorno-devel.md`](../devel/entorno-devel.md) (lo que se usa hoy para desarrollar) o [`../devel/VAULT/spec-anterior/agente.md`](../devel/VAULT/spec-anterior/agente.md) (lo que se espera del canal). Decidir y mover.
 
 ### Qué ofrece
 

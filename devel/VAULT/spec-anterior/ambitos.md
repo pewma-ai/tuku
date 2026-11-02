@@ -1,6 +1,6 @@
 # spec · ámbitos
 
-> El árbol donde aterriza cada registro. Se justifica por el principio 7 de [`../docs/principios.md`](../docs/principios.md) (la regla más cercana prevalece).
+> El árbol donde aterriza cada registro. Se justifica por el principio 7 de [`../../../docs/principios.md`](../../../docs/principios.md) (la regla más cercana prevalece).
 
 ## Tres roles, no tres niveles
 
@@ -37,7 +37,7 @@ ambitos/
 
 > **Provisional.** El template ya no siembra `Bruto` ni `Costo fijo`: `ambitos/personal/CAPACIDAD.md` es hoy un texto abierto sobre las restricciones de tiempo y recursos del autor (qué días hace deporte, cuánto del fin de semana es para otras cosas), que se infiere de las bitácoras si no se define, y que se lee siempre al crear un ciclo. Un ámbito puede tener el suyo si el autor lo considera necesario. Lo que sigue describe el diseño anterior hasta que se retome.
 
-Un ámbito puede declarar lo que cuesta sostenerlo, en un `CAPACIDAD.md` propio. Es lo que permite dimensionar el trabajo del ciclo antes de planificarlo, y su formato y uso están en [`ciclo.md`](ciclo.md).
+Un ámbito puede declarar lo que cuesta sostenerlo, en un `CAPACIDAD.md` propio. Es lo que permite dimensionar el trabajo del ciclo antes de planificarlo, y su formato y uso están en [`../../borradores/ciclo.md`](../../borradores/ciclo.md).
 
 **Es opcional en todas partes, incluida `ambitos/personal/`.** Deseable donde ayude, como muchas cadencias: TUKU se opera sin ninguno de los dos. El estado cero siembra uno en `ambitos/personal/`, sin datos: dice que todavía no se declaró nada y por qué conviene. Sin `CAPACIDAD.md` el plan se propone igual, solo que sin contraste de cuánto cabe, y el autor hace ese contraste en su cabeza como lo hacía antes. Degrada, no rompe. Es la misma relación que con las cadencias: sin ellas el sistema registra, con ellas además anticipa.
 
@@ -52,7 +52,7 @@ Cómo se comparan los tres archivos por directorio:
 
 **Si se declara un bruto, va en `ambitos/personal/`**, porque el bruto es uno solo: el tiempo de la persona no se reparte por ámbito, se gasta en ellos. Un ámbito sin `CAPACIDAD.md` no cobra costo fijo, que es el caso por defecto. Y sin bruto declarado en ninguna parte, no hay dimensionamiento: los costos fijos quedan como advertencias sueltas en el plan, sin nada de qué restarse.
 
-Se descartó la alternativa de que cada ámbito declare cuánto tiempo se le asigna y el total sea la suma: es más simétrica, pero obliga al autor a repartir por adelantado, antes de saber en qué se le va el ciclo, y deja con cero a un ámbito que no declaró nada. Cómo se suman las magnitudes sigue abierto ([README.md](README.md), "Decisiones abiertas").
+Se descartó la alternativa de que cada ámbito declare cuánto tiempo se le asigna y el total sea la suma: es más simétrica, pero obliga al autor a repartir por adelantado, antes de saber en qué se le va el ciclo, y deja con cero a un ámbito que no declaró nada. Cómo se suman las magnitudes sigue abierto ([README.md](../../../spec/README.md), "Decisiones abiertas").
 
 ## Transclusión de pendientes
 

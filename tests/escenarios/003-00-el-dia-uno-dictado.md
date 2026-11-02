@@ -8,7 +8,7 @@ El autor dicta su primer día en lenguaje natural y el agente ejecuta las operac
 
 1. **El agente es un secretario, no un dueño ([P3](../../docs/principios.md#L25)):** Traduce la intención del autor a operaciones del CLI y consulta ante ambigüedades; nunca inventa datos ni toma decisiones ejecutivas.
 2. **Todo baja hasta donde alcance el determinismo ([P4](../../docs/principios.md#L33)):** El agente compila el dictado a comandos CLI (`tuku`) y no toca archivos a mano; la ejecución en disco es 100% determinista.
-3. **Las reglas se escriben en prosa, en un solo lugar ([P5](../../docs/principios.md#L47)):** La conducta del agente se rige por el `AGENTS.md` sembrado en el vault ([`spec/despacho.md`](../../spec/despacho.md)) y sus contratos en [`spec/agente.md`](../../spec/agente.md).
+3. **Las reglas se escriben en prosa, en un solo lugar ([P5](../../docs/principios.md#L47)):** La conducta del agente se rige por el `AGENTS.md` sembrado en el vault ([`spec/despacho.md`](../../devel/VAULT/spec-anterior/despacho.md)) y sus contratos en [`spec/agente.md`](../../devel/VAULT/spec-anterior/agente.md).
 4. **Las carpetas archivan; los enlaces conectan ([P7](../../docs/principios.md#L63)):** La regla más cercana prevalece y el agente respeta las carpetas estructurales y la tabla de Límites.
 5. **Reconstrucción determinista ([P9](../../docs/principios.md#L79)):** El estado final generado por el dictado equivale en ontología cerrada y consecuencias al obtenido a mano en el [Epic 002](002-00-el-dia-uno-a-mano.md).
 

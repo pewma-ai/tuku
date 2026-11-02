@@ -1,6 +1,6 @@
 # spec · pendientes
 
-> `PENDIENTES.md` es fuente de verdad, nunca derivado. Se justifica por el principio 9 de [`../docs/principios.md`](../docs/principios.md), con la excepción declarada más abajo.
+> `PENDIENTES.md` es fuente de verdad, nunca derivado. Se justifica por el principio 9 de [`../../../docs/principios.md`](../../../docs/principios.md), con la excepción declarada más abajo.
 
 Ningún pendiente vive fuera de este archivo. Todo lo demás que los muestre (`AHORA.md`, páginas de ámbito, `reportes/`) se deriva de aquí, por propagación o por transclusión.
 
@@ -51,7 +51,7 @@ Cada pendiente está bajo exactamente un horizonte y baja de escalón a medida q
 
 `esta semana` → `próxima semana` / `fin de mes` → `con fecha` → cerrado
 
-**Los horizontes se nombran con el ciclo.** En `reglas/pendientes.user.md` el autor puede escribir `$cycle_name[N]` dentro del nombre de un escalón, y TUKU lo reemplaza por el N-ésimo nombre de la tabla de `reglas/ciclo.user.md` ([`ciclo.md`](ciclo.md)), contando desde 0. Cualquier índice vale, no solo el primero: con la tabla `turno, descanso`, `$cycle_name[0]` es `turno` y `$cycle_name[1]` es `descanso`. `esta $cycle_name[0]` es `esta semana` por defecto y `este turno` con esa lista; `este $cycle_name[1]` es `este descanso`. El artículo lo escribe el autor, porque no se deduce del nombre. Cada escalón cubre:
+**Los horizontes se nombran con el ciclo.** En `reglas/pendientes.user.md` el autor puede escribir `$cycle_name[N]` dentro del nombre de un escalón, y TUKU lo reemplaza por el N-ésimo nombre de la tabla de `reglas/ciclo.user.md` ([`../../borradores/ciclo.md`](../../borradores/ciclo.md)), contando desde 0. Cualquier índice vale, no solo el primero: con la tabla `turno, descanso`, `$cycle_name[0]` es `turno` y `$cycle_name[1]` es `descanso`. `esta $cycle_name[0]` es `esta semana` por defecto y `este turno` con esa lista; `este $cycle_name[1]` es `este descanso`. El artículo lo escribe el autor, porque no se deduce del nombre. Cada escalón cubre:
 
 | Escalón | Cubre | Con `semana` | Con `turno, descanso`, estando en turno |
 | --- | --- | --- | --- |
@@ -59,7 +59,7 @@ Cada pendiente está bajo exactamente un horizonte y baja de escalón a medida q
 | `próximo $cycle_name[N]` | El siguiente ciclo con ese nombre, pasando por los demás | Desde el lunes siguiente, fijo | El turno que viene después del descanso (`próximo turno`) |
 | `fin de mes` | Hasta el último día del mes, menos uno, por si acaso | Igual | Igual |
 
-Un `este …` solo vale mientras el ciclo en curso se llama así. Estando en el descanso, `este turno` es un error del autor y no un horizonte válido: el comando rechaza sin escribir, nombra la corrección (`próximo turno`, o `este descanso`) y el agente desambigua con el autor. Con los índices, la escalera puede declarar `este turno` y `este descanso` a la vez. Queda abierto cuál de los dos es el escalón del ciclo en curso para el callout y para un pendiente que no dice horizonte ([`../TODO.md`](../TODO.md), "Ciclos con nombre, config y libro de estilo").
+Un `este …` solo vale mientras el ciclo en curso se llama así. Estando en el descanso, `este turno` es un error del autor y no un horizonte válido: el comando rechaza sin escribir, nombra la corrección (`próximo turno`, o `este descanso`) y el agente desambigua con el autor. Con los índices, la escalera puede declarar `este turno` y `este descanso` a la vez. Queda abierto cuál de los dos es el escalón del ciclo en curso para el callout y para un pendiente que no dice horizonte ([`../../../TODO.md`](../../../TODO.md), "Ciclos con nombre, config y libro de estilo").
 
 **El primer escalón se reconoce por su posición en la escalera, no por su texto.** Renombrarlo no cambia qué pendientes entran al callout de la región del ciclo ni dónde nace un pendiente que no dice horizonte. Hoy el código lo busca por el texto `esta semana`, y es un defecto.
 
@@ -76,7 +76,7 @@ Un pendiente está atrasado por dos vías, las dos deducibles de la fila:
 
 Guardarlo además como encabezado repetía un dato que la columna `Vence` ya tenía, con el riesgo de que las dos copias discreparan. Un comando lo calcula y lo informa; en `PENDIENTES.md` no se mueve nada.
 
-Consecuencia: **ninguna automatización escribe en `PENDIENTES.md` por calendario.** El archivo cambia cuando el autor cambia algo, y no porque pasó la medianoche. Es el principio 3 de [`../docs/principios.md`](../docs/principios.md): una consecuencia mayor no ocurre sin que nadie la aprobara.
+Consecuencia: **ninguna automatización escribe en `PENDIENTES.md` por calendario.** El archivo cambia cuando el autor cambia algo, y no porque pasó la medianoche. Es el principio 3 de [`../../../docs/principios.md`](../../../docs/principios.md): una consecuencia mayor no ocurre sin que nadie la aprobara.
 
 Con fecha exacta pasa a `con fecha` y aparece bajo el día correspondiente de `AHORA.md`, propagado por un comando.
 
@@ -157,11 +157,11 @@ El ancla es el nombre del ámbito (sin `.md`). **Hay un callout por cada ámbito
 
 Eso es lo más importante del diseño: el ancla existe **siempre**, así que ninguna página de ámbito queda apuntando a un ancla que no existe. Esa era exactamente la falla silenciosa que este rediseño persigue, la de una vista que desaparece sin avisar. El callout con solo su título le dice al autor que ese ámbito está limpio, y su ancla sigue ahí.
 
-Esa transclusión es **permanente**, no de ciclo, así que no se aplana nunca. El aplanado de [`ciclo.md`](ciclo.md) es de las vistas del ciclo.
+Esa transclusión es **permanente**, no de ciclo, así que no se aplana nunca. El aplanado de [`../../borradores/ciclo.md`](../../borradores/ciclo.md) es de las vistas del ciclo.
 
 ## Lo que rueda queda escrito
 
-La cadencia de apertura del ciclo (ver [`cadencias.md`](cadencias.md) y `template/vanilla/ambitos/CADENCIAS.md`) deja en el `AHORA.md` recién abierto la constancia de qué pendientes rodaron desde el ciclo anterior al horizonte del ciclo en curso.
+La cadencia de apertura del ciclo (ver [`../../borradores/cadencias.md`](../../borradores/cadencias.md) y `template/vanilla/ambitos/CADENCIAS.md`) deja en el `AHORA.md` recién abierto la constancia de qué pendientes rodaron desde el ciclo anterior al horizonte del ciclo en curso.
 
 Un pendiente que rueda de ciclo en ciclo se vuelve invisible por costumbre, y lo que hace visible la reincidencia es que quede escrito en el ciclo donde reaparece. Además la cadena se lee de punta a punta sin recalcular nada: el ciclo cerrado dice qué se llevó consigo, el ciclo nuevo dice qué heredó.
 
@@ -170,7 +170,7 @@ Un pendiente que rueda de ciclo en ciclo se vuelve invisible por costumbre, y lo
 1. Un pendiente está en **una sola fila de `PENDIENTES.md`**, siempre. El alcance de la regla es este archivo: lo que aparece en un día o en la página de un ámbito es una vista derivada y no cuenta como segunda aparición. Sin esa distinción, la vista se confunde con el error que la regla prohíbe.
 2. **Nada se mueve por vencimiento.** Estar atrasado se calcula desde la fila, por `Vence` anterior a HOY o por horizonte expirado, y un comando lo informa sin tocar `PENDIENTES.md`. Guardar el atraso como encabezado duplicaba lo que la columna ya decía.
 3. Al cerrar ciclo, lo que quede sin fecha en el horizonte del ciclo en curso rueda al mismo horizonte del ciclo nuevo, y **rodar deja rastro**: la apertura marca en el `AHORA.md` recién abierto qué pendientes se trajeron desde el ciclo anterior.
-4. Al cerrar ciclo, la bitácora que queda archivada deja constancia de qué pendientes quedaron atrasados. Es un snapshot y no rompe la fuente única, por el mismo argumento con que [`ciclo.md`](ciclo.md) aplana el plan: al cerrar nada sigue vivo.
+4. Al cerrar ciclo, la bitácora que queda archivada deja constancia de qué pendientes quedaron atrasados. Es un snapshot y no rompe la fuente única, por el mismo argumento con que [`../../borradores/ciclo.md`](../../borradores/ciclo.md) aplana el plan: al cerrar nada sigue vivo.
 5. **La fecha vive en la columna `Vence` y en ningún otro lugar.** No se repite en el detalle ni se codifica en la estructura. La antigüedad se saca del historial de git de `PENDIENTES.md`, que se versiona como fuente.
 6. HOY se evalúa en la zona horaria del autor, la que declara `TZ` en `reglas/config.tuku.md`. La VM hereda el TZ del laptop, así que no hay que convertir, pero sí declararlo para que ningún comando asuma UTC.
 7. **Las vistas se regeneran, no se reparan.** Todo lo que muestra un pendiente fuera de `PENDIENTES.md` se deriva de él. Si una vista discrepa de la fuente, la que está mal es la vista, y la corrección es volver a propagar. `tuku doctor todo` lo detecta re-derivando y comparando.
@@ -181,4 +181,4 @@ Un pendiente que rueda de ciclo en ciclo se vuelve invisible por costumbre, y lo
 ## No entra
 
 - **Las reglas de tratamiento** de pendientes (prioridad, tipos, encadenamiento, criterios de vencimiento más allá de la fecha) van en un documento propio, aún por escribir. Esto cubre solo el modelo.
-- **Promover pendientes entre ciclos** en el detalle de apertura/cierre. La mecánica general está aquí (regla 3); la secuencia completa de abrir y cerrar un ciclo está en [`ciclo.md`](ciclo.md).
+- **Promover pendientes entre ciclos** en el detalle de apertura/cierre. La mecánica general está aquí (regla 3); la secuencia completa de abrir y cerrar un ciclo está en [`../../borradores/ciclo.md`](../../borradores/ciclo.md).

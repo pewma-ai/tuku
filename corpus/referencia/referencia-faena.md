@@ -165,12 +165,12 @@ Lo que trae al sistema: escribe mucho y ordena poco, sus pendientes se arrastran
 # Parte 2: Tabla de Verdad (Ground Truth — Formato Bitácora TUKU)
 
 > [!tip] Ground Truth para benchmarking de modelos
-> El registro canónico que corresponde a cada dictado de la Parte 1, según [`spec/bitacora.md`](../../spec/bitacora.md): `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`. Mide si un agente convierte habla desestructurada en registros que se sostienen solos.
+> El registro canónico que corresponde a cada dictado de la Parte 1, según [`spec/bitacora.md`](../../devel/VAULT/spec-anterior/bitacora.md): `- HH:MM - [[ambito]] ~~(Hecho)~~ **clasificacion**: cuerpo`. Mide si un agente convierte habla desestructurada en registros que se sostienen solos.
 >
 > **Las horas no vienen del dictado**: se derivan de la jornada que el dictado describe. La clasificación abierta usa el vocabulario del autor, no uno que fije TUKU.
 
 > [!question] Pendiente de decisión #REVISAR
-> 52 `~~(Hecho)~~` contra 15 `**pendiente**`: la mayoría de los cierres no tiene pareja previa, nacen y se cierran el mismo día porque así fue dictado. [`spec/pendientes.md`](../../spec/pendientes.md) dice que `~~(Hecho)~~` cierra un pendiente preexistente. O el corpus abre el pendiente implícito en la mismo registro, o la invariante admite el cierre sin pareja. Lo decide el escenario `002-04`, no el corpus.
+> 52 `~~(Hecho)~~` contra 15 `**pendiente**`: la mayoría de los cierres no tiene pareja previa, nacen y se cierran el mismo día porque así fue dictado. [`spec/pendientes.md`](../../devel/VAULT/spec-anterior/pendientes.md) dice que `~~(Hecho)~~` cierra un pendiente preexistente. O el corpus abre el pendiente implícito en la mismo registro, o la invariante admite el cierre sin pareja. Lo decide el escenario `002-04`, no el corpus.
 
 ## Turno Faena (11 al 19 de Agosto de 2026)
 
@@ -412,7 +412,7 @@ Lo que trae al sistema: escribe mucho y ordena poco, sus pendientes se arrastran
 > Esta sección describe el estado documental y relacional completo del repositorio que un sistema agéntico debe ser capaz de inferir, actualizar o reconstruir a partir de los inputs de actividad anteriores.
 
 > [!question] Pendiente de traducción #REVISAR
-> **Esta Parte 3 sigue en la estructura de `mac-jpgil`**: `org/<Organización>/VIGENTES/`, sin los `AGENTS.md` ni `CADENCIAS.md` que exige [`spec/ambitos.md`](../../spec/ambitos.md). El equivalente traducido está en la Parte 3 de [`referencia-pyme.md`](referencia-pyme.md). Traducirla es trabajo del epic 004, el que necesita el estado poblado: hacerlo ahora sería inventar la jerarquía sin un test que la fuerce. Mientras tanto los `[[ambito]]` de la Parte 2 usan nombre corto, único en este corpus.
+> **Esta Parte 3 sigue en la estructura de `mac-jpgil`**: `org/<Organización>/VIGENTES/`, sin los `AGENTS.md` ni `CADENCIAS.md` que exige [`spec/ambitos.md`](../../devel/VAULT/spec-anterior/ambitos.md). El equivalente traducido está en la Parte 3 de [`referencia-pyme.md`](referencia-pyme.md). Traducirla es trabajo del epic 004, el que necesita el estado poblado: hacerlo ahora sería inventar la jerarquía sin un test que la fuerce. Mientras tanto los `[[ambito]]` de la Parte 2 usan nombre corto, único en este corpus.
 
 ## 1. Árbol de Organizaciones y Áreas (ORG)
 

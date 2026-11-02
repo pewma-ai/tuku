@@ -1,6 +1,6 @@
 # 005-04 · Los atrasados se calculan
 
-> **Principio:** [P3 (el agente propone, el autor decide)](../../docs/principios.md#L25), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Tiempo × ámbito](../../docs/brief.md#L27) · **Spec:** [`spec/pendientes.md`](../../spec/pendientes.md), [`spec/cli.md`](../../spec/cli.md)
+> **Principio:** [P3 (el agente propone, el autor decide)](../../docs/principios.md#L25), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Tiempo × ámbito](../../docs/brief.md#L27) · **Spec:** [`spec/pendientes.md`](../../devel/VAULT/spec-anterior/pendientes.md), [`spec/cli.md`](../../devel/VAULT/spec-anterior/cli.md)
 
 Un pendiente atrasado se queda en su fila: se deduce de ella, y un comando lo dice. Con dos semanas de uso hay pendientes que vencieron mientras nadie miraba, y la promesa del producto es que abrir el ciclo muestre lo olvidado.
 

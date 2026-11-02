@@ -1,6 +1,6 @@
 # 005-03 · Reorganizar con historia
 
-> **Principio:** [P7 (las carpetas archivan, los enlaces conectan)](../../docs/principios.md#L65), [P1 (texto operable a mano)](../../docs/principios.md#L9), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Los tres ejes](../../docs/brief.md#L25) · **Spec:** [`spec/ambitos.md`](../../spec/ambitos.md)
+> **Principio:** [P7 (las carpetas archivan, los enlaces conectan)](../../docs/principios.md#L65), [P1 (texto operable a mano)](../../docs/principios.md#L9), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Los tres ejes](../../docs/brief.md#L25) · **Spec:** [`spec/ambitos.md`](../../devel/VAULT/spec-anterior/ambitos.md)
 
 En un vault nuevo, mover un ámbito es mover una carpeta. En uno con dos semanas, cada ámbito tiene registros, pendientes y una bitácora cerrada que lo enlaza, y reorganizar no puede dejar un solo link sin resolver: el archivo histórico tiene que seguir leyéndose.
 

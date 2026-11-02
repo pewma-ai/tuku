@@ -9,7 +9,7 @@
 | [`referencia/referencia-faena.md`](referencia/referencia-faena.md) | Damián Ulloa, jefe de software de un observatorio; por turnos, dominio propio del autor | Ground truth principal y columna de la escalera de estados. Su fecha de arranque (2026-08-11) es la que fijan los tests |
 | [`referencia/referencia-pyme.md`](referencia/referencia-pyme.md) | Andrea Bustos, dueña de una PYME de insumos educacionales | Dominio ajeno al del autor, y cadencias de fecha impuesta desde afuera |
 
-Los dos se leen igual: **Parte 1** es el dictado crudo, **Parte 2** la tabla de verdad en formato [`spec/bitacora.md`](../spec/bitacora.md), **Parte 3** el estado del repositorio reconstruible desde ahí.
+Los dos se leen igual: **Parte 1** es el dictado crudo, **Parte 2** la tabla de verdad en formato [`spec/bitacora.md`](../devel/VAULT/spec-anterior/bitacora.md), **Parte 3** el estado del repositorio reconstruible desde ahí.
 
 ## Qué cubre cada uno
 

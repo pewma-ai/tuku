@@ -1,6 +1,6 @@
 # 005-02 · Lo derivado se reconstruye
 
-> **Principio:** [P6 (conjunto canónico)](../../docs/principios.md#L55), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Cómo funciona](../../docs/brief.md#L47) · **Spec:** [`spec/pendientes.md`](../../spec/pendientes.md), [`spec/ambitos.md`](../../spec/ambitos.md), [`spec/ciclo.md`](../../spec/ciclo.md)
+> **Principio:** [P6 (conjunto canónico)](../../docs/principios.md#L55), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Cómo funciona](../../docs/brief.md#L47) · **Spec:** [`spec/pendientes.md`](../../devel/VAULT/spec-anterior/pendientes.md), [`spec/ambitos.md`](../../devel/VAULT/spec-anterior/ambitos.md), [`spec/ciclo.md`](../../devel/borradores/ciclo.md)
 
 Con dos semanas encima, el test fundamental de arquitectura se corre sobre un vault de verdad: se borra todo lo que el vault deriva, se regenera, y el vault queda idéntico byte a byte.
 

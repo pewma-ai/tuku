@@ -1,6 +1,6 @@
 # 005-07 · El límite de las notas
 
-> **Principio:** [P3 (el agente es un secretario, no un dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/notas.md`](../../spec/notas.md), "Enlazar notas"
+> **Principio:** [P3 (el agente es un secretario, no un dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/notas.md`](../../devel/VAULT/spec-anterior/notas.md), "Enlazar notas"
 
 Con treinta personas en `notas/`, `tuku context note` trae las veinticinco de `updated` más reciente (`context_note_limit`). El agente enlaza a las que `context` ofrece y no inventa la ruta de las que no.
 

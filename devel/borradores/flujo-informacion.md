@@ -1,8 +1,8 @@
 # spec · flujo de la información
 
-> El marco al que sirven las demás specs. Se justifica por los principios 1, 3, 4, 8 y 9 de [`../docs/principios.md`](../docs/principios.md).
+> El marco al que sirven las demás specs. Se justifica por los principios 1, 3, 4, 8 y 9 de [`../../docs/principios.md`](../../docs/principios.md).
 
-Lo que el autor dice llega al vault como uno o más comandos `tuku`, y cada comando escribe el registro y actualiza todo lo que depende de él. El flujo no depende de quién interprete lo dicho: una persona contratada para llevar la bitácora lo sigue igual que un agente. Lo que cambia con un agente de IA está en [agente.md](agente.md).
+Lo que el autor dice llega al vault como uno o más comandos `tuku`, y cada comando escribe el registro y actualiza todo lo que depende de él. El flujo no depende de quién interprete lo dicho: una persona contratada para llevar la bitácora lo sigue igual que un agente. Lo que cambia con un agente de IA está en [agente.md](../VAULT/spec-anterior/agente.md).
 
 ## Capturar la intención del autor
 
@@ -55,7 +55,7 @@ Las dos primeras escriben por un comando `tuku`. Las demás no lo necesitan, o l
 Para clasificar una entrada:
 
 - **Se reconoce por cómo habla el autor.** Dice «ya pagué el arriendo», no «cierra el pendiente». No tiene que aprender el vocabulario del sistema.
-- **Cada familia lleva a un solo destino:** un comando o una respuesta. La tabla de [despacho.md](despacho.md) dice qué comando corresponde a cada una.
+- **Cada familia lleva a un solo destino:** un comando o una respuesta. La tabla de [despacho.md](../VAULT/spec-anterior/despacho.md) dice qué comando corresponde a cada una.
 - **Si el comando todavía no existe, la familia no cambia.** «Los gastos comunes se revisan el día 10» es una decisión del autor aunque hoy no haya comando de cadencias. Cuando exista, cambia el comando, no la clasificación.
 
 ## Entidades subordinadas
@@ -131,7 +131,7 @@ El autor lee primero lo tercero, después lo segundo, y casi nunca lo primero. L
 
 ### La comunicación con el autor
 
-Por dónde viajan las alertas, las propuestas y las respuestas del autor es una decisión abierta ([README.md](README.md), "Decisiones abiertas"). Mientras no se tome, el vault es el único punto de encuentro: las entidades escriben en su log y el autor las lee ahí.
+Por dónde viajan las alertas, las propuestas y las respuestas del autor es una decisión abierta ([README.md](../../spec/README.md), "Decisiones abiertas"). Mientras no se tome, el vault es el único punto de encuentro: las entidades escriben en su log y el autor las lee ahí.
 
 El detalle de cada rol (cuándo se dispara, qué toca, con qué comandos) vive en la spec de la primitiva que atiende.
 
@@ -154,15 +154,15 @@ El autor habla como habla y quien interpreta no lo frena para que precise. Pero 
 - **Lo que no se puede resolver se escribe tal cual lo dijo el autor.** «Recuérdame a fin de mes renovar el seguro» abre el pendiente en el horizonte `fin de mes`, sin fecha. No se inventa un «31 de octubre». El horizonte es una ambigüedad escrita: dice «para fin de mes» y nada más preciso.
 - **Una ambigüedad de intención se consulta.** Si lo que el autor dijo puede querer decir dos cosas y escribir tiene consecuencias más allá de una línea en la bitácora, se le pregunta y no se escribe hasta que conteste. «Quedamos al día con Fabina», con dos pendientes de Fabina abiertos, pregunta si se anota como un registro o si cierra uno de los dos, y cuál. «Le mandé el catálogo a la Paula», con dos Paulas, pregunta a cuál. Mientras no contesta, nada se escribe y los pendientes siguen abiertos.
 
-Las preguntas son para una ambigüedad de intención, no para precisar por si acaso (una hora, un día, un «fin de mes» no se preguntan), y una pregunta no frena el resto del dictado: lo demás se atiende en orden mientras ella espera. Quién la plantea y cuándo es parte de la comunicación entre el autor y las entidades, que sigue abierta ([README.md](README.md), "Decisiones abiertas").
+Las preguntas son para una ambigüedad de intención, no para precisar por si acaso (una hora, un día, un «fin de mes» no se preguntan), y una pregunta no frena el resto del dictado: lo demás se atiende en orden mientras ella espera. Quién la plantea y cuándo es parte de la comunicación entre el autor y las entidades, que sigue abierta ([README.md](../../spec/README.md), "Decisiones abiertas").
 
 **Supuesto de diseño: los agentes resolverán cada vez mejor.** La spec no fija cuánto se resuelve al registrar. Fija qué queda escrito cuando una precisión no se resuelve y cuándo se consulta al autor. Un agente flojo deja más cosas tal cual las dijo el autor, y uno mejor las precisa al registrar. El vault es válido en los dos casos y su formato no cambia. Como lo impreciso conserva las palabras del autor, nada se pierde: un agente mejor, o una entidad, lo precisa después. Por eso los casos de arriba («el viernes» es el próximo viernes) ilustran lo que un agente puede resolver y no son un contrato, y las heurísticas que un modelo mejor ya no necesita no se escriben como reglas del vault.
 
-El detalle (cierres, horas, ámbitos, vocabularios) lo especifican [agente.md](agente.md), [bitacora.md](bitacora.md) y [pendientes.md](pendientes.md). Para decidir se necesita información del vault: los pendientes abiertos, los ámbitos con las palabras con que el autor los nombra, los vocabularios abiertos, lo reciente. El flujo exige que llegue a quien decide sin que sepa dónde vive ni en qué formato, y que ninguna sea requisito para registrar en un vault vacío (principio 2).
+El detalle (cierres, horas, ámbitos, vocabularios) lo especifican [agente.md](../VAULT/spec-anterior/agente.md), [bitacora.md](../VAULT/spec-anterior/bitacora.md) y [pendientes.md](../VAULT/spec-anterior/pendientes.md). Para decidir se necesita información del vault: los pendientes abiertos, los ámbitos con las palabras con que el autor los nombra, los vocabularios abiertos, lo reciente. El flujo exige que llegue a quien decide sin que sepa dónde vive ni en qué formato, y que ninguna sea requisito para registrar en un vault vacío (principio 2).
 
 ## Qué hace un comando
 
-`tuku todo close "pagar el arriendo"` busca ese cuerpo en `PENDIENTES.md`, borra la fila, escribe el registro de cierre en `AHORA.md` y regenera las vistas que dependían de ella. Si el cuerpo no calza con ningún pendiente abierto avisa que no borró nada y pide revisar el texto. Si lo repites no duplica el cierre. El comando es el dueño de todo lo que no es juicio (contrato en [cli.md](cli.md)): valida, escribe el registro, aplica las consecuencias, es idempotente, y cuando falta información la pide en su salida. `tuku scope create faena` responde pidiendo las keywords del frente nuevo, y el agente las pregunta al autor.
+`tuku todo close "pagar el arriendo"` busca ese cuerpo en `PENDIENTES.md`, borra la fila, escribe el registro de cierre en `AHORA.md` y regenera las vistas que dependían de ella. Si el cuerpo no calza con ningún pendiente abierto avisa que no borró nada y pide revisar el texto. Si lo repites no duplica el cierre. El comando es el dueño de todo lo que no es juicio (contrato en [cli.md](../VAULT/spec-anterior/cli.md)): valida, escribe el registro, aplica las consecuencias, es idempotente, y cuando falta información la pide en su salida. `tuku scope create faena` responde pidiendo las keywords del frente nuevo, y el agente las pregunta al autor.
 
 Toda consecuencia sale del texto del registro, no de la conversación. Cerrar un pendiente necesita su cuerpo y nada más. Si una consecuencia exige recordar lo que se dijo, o al registro le falta información, o esa operación no pertenece a este flujo.
 
@@ -181,7 +181,7 @@ La lista es abierta. Agregar una consecuencia es agregar su regla y su comando, 
 
 ## Despacho
 
-Un agente aprende a **despachar**: reconocer la entrada, interpretar los hechos y elegir el comando. Escribir lo hace el comando. Qué lleva su `AGENTS.md` y qué no, la tabla de despacho, el enrutamiento por directorio y los límites están en [despacho.md](despacho.md).
+Un agente aprende a **despachar**: reconocer la entrada, interpretar los hechos y elegir el comando. Escribir lo hace el comando. Qué lleva su `AGENTS.md` y qué no, la tabla de despacho, el enrutamiento por directorio y los límites están en [despacho.md](../VAULT/spec-anterior/despacho.md).
 
 ## A mano
 
@@ -195,7 +195,7 @@ Lo mismo vale para las entidades subordinadas. Cada una cumple un rol que el aut
 
 ## No entra
 
-- El formato de cada archivo. Está en [`ciclo.md`](ciclo.md), [`pendientes.md`](pendientes.md), [`cadencias.md`](cadencias.md) y [`bitacora.md`](bitacora.md).
-- Cómo se comporta un agente de IA: silencio por defecto, reparto entre LLM y comando. Está en [`agente.md`](agente.md).
-- Lo que el sistema devuelve al autor: la consulta del estado, abrir un ciclo y encontrarse con lo que había olvidado. Está en [`ciclo.md`](ciclo.md) y [`pendientes.md`](pendientes.md).
-- Qué garantiza un comando, sus códigos de salida y cómo informa. Está en [`cli.md`](cli.md). Acá se dice dónde cae el comando dentro del flujo, no cuál es su contrato.
+- El formato de cada archivo. Está en [`ciclo.md`](ciclo.md), [`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md), [`cadencias.md`](cadencias.md) y [`../VAULT/spec-anterior/bitacora.md`](../VAULT/spec-anterior/bitacora.md).
+- Cómo se comporta un agente de IA: silencio por defecto, reparto entre LLM y comando. Está en [`../VAULT/spec-anterior/agente.md`](../VAULT/spec-anterior/agente.md).
+- Lo que el sistema devuelve al autor: la consulta del estado, abrir un ciclo y encontrarse con lo que había olvidado. Está en [`ciclo.md`](ciclo.md) y [`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md).
+- Qué garantiza un comando, sus códigos de salida y cómo informa. Está en [`../VAULT/spec-anterior/cli.md`](../VAULT/spec-anterior/cli.md). Acá se dice dónde cae el comando dentro del flujo, no cuál es su contrato.

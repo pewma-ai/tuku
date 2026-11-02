@@ -1,6 +1,6 @@
 # 004-03 · Ratificar tras tres giros
 
-> **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/despacho.md`](../../spec/despacho.md), [`spec/agente.md`](../../spec/agente.md), [`spec/pendientes.md`](../../spec/pendientes.md)
+> **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/despacho.md`](../../devel/VAULT/spec-anterior/despacho.md), [`spec/agente.md`](../../devel/VAULT/spec-anterior/agente.md), [`spec/pendientes.md`](../../devel/VAULT/spec-anterior/pendientes.md)
 
 Damián cambia tres veces el día de una reunión y ratifica el último. El vault queda como si hubiera dictado solo ese acuerdo.
 

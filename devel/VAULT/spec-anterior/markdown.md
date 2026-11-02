@@ -1,6 +1,6 @@
 # spec · markdown
 
-> Cómo se escribe todo archivo del vault: el dialecto, dónde van los datos que lee una máquina y cómo se enlaza. Qué archivos hay y qué declara cada uno está en [vault.md](vault.md). Se justifica por los principios 1, 7 y 9 de [`../docs/principios.md`](../docs/principios.md).
+> Cómo se escribe todo archivo del vault: el dialecto, dónde van los datos que lee una máquina y cómo se enlaza. Qué archivos hay y qué declara cada uno está en [vault.md](vault.md). Se justifica por los principios 1, 7 y 9 de [`../../../docs/principios.md`](../../../docs/principios.md).
 
 ## El dialecto
 
@@ -18,7 +18,7 @@ El dialecto termina ahí. Los enlaces son links Markdown o transclusiones, los d
 
 El dialecto se elige para tres lectores:
 
-- **Un editor básico.** Un callout se lee como una cita y un ancla como una palabra al final de la línea. La transclusión muestra la ruta en vez del texto, y la ruta se sigue a mano. Por eso solo trae vistas de algo que vive en otro archivo, y la del plan se aplana al cerrar el ciclo ([ciclo.md](ciclo.md)).
+- **Un editor básico.** Un callout se lee como una cita y un ancla como una palabra al final de la línea. La transclusión muestra la ruta en vez del texto, y la ruta se sigue a mano. Por eso solo trae vistas de algo que vive en otro archivo, y la del plan se aplana al cerrar el ciclo ([ciclo.md](../../borradores/ciclo.md)).
 - **Obsidian.** Muestra el dialecto completo y es la referencia: TUKU escribe solo lo que Obsidian muestra.
 - **Un agente.** Un modelo de 2026 entiende callouts y transclusiones aunque estén fuera de CommonMark: lee `> [!todo]` como un bloque de pendientes y `![[...#^ancla]]` como una referencia que puede abrir. Para un agente, el dialecto completo es Markdown corriente.
 
@@ -36,11 +36,11 @@ El template siembra `.obsidian/app.json` con tres ajustes, para que Obsidian esc
 | `"newLinkFormat": "relative"` | Ruta relativa al archivo |
 | `"alwaysUpdateLinks": true` | Mover o renombrar un archivo en Obsidian actualiza los links que lo apuntan |
 
-Con el tercero, Obsidian reescribe archivos sin pasar por `tuku`. Es la familia "a mano" de [flujo-informacion.md](flujo-informacion.md): el autor actúa con su editor y `tuku doctor` revisa el resultado como revisa cualquier edición.
+Con el tercero, Obsidian reescribe archivos sin pasar por `tuku`. Es la familia "a mano" de [flujo-informacion.md](../../borradores/flujo-informacion.md): el autor actúa con su editor y `tuku doctor` revisa el resultado como revisa cualquier edición.
 
 ## Datos de máquina en estructura visible
 
-Lo que una automatización lee de un archivo está a la vista: un campo `**Campo:** valor`, una tabla o un encabezado. El `**Cuándo:**` de una cadencia ([cadencias.md](cadencias.md)), la tabla de `PENDIENTES.md` ([pendientes.md](pendientes.md)) y la tabla de `reglas/clasificaciones.user.md` ([bitacora.md](bitacora.md)) son de esa clase. El nombre del campo o del encabezado es contrato: renombrarlo rompe al comando, y que falte es un error ruidoso.
+Lo que una automatización lee de un archivo está a la vista: un campo `**Campo:** valor`, una tabla o un encabezado. El `**Cuándo:**` de una cadencia ([cadencias.md](../../borradores/cadencias.md)), la tabla de `PENDIENTES.md` ([pendientes.md](pendientes.md)) y la tabla de `reglas/clasificaciones.user.md` ([bitacora.md](bitacora.md)) son de esa clase. El nombre del campo o del encabezado es contrato: renombrarlo rompe al comando, y que falte es un error ruidoso.
 
 **Toda marca es visible.** Un comentario HTML o una marca invisible se rompe al editar el archivo sin que nadie lo note. Donde hace falta una frontera, la pone la estructura: la región propagada de un día termina donde empieza el primer `- HH:MM - ` ([pendientes.md](pendientes.md)).
 

@@ -1,14 +1,14 @@
 # spec · cadencias
 
-> Una cadencia es una regla que emite algo con regularidad. Se justifica por el principio 7 de [`../docs/principios.md`](../docs/principios.md): vive donde aplica, no en un archivo central.
+> Una cadencia es una regla que emite algo con regularidad. Se justifica por el principio 7 de [`../../docs/principios.md`](../../docs/principios.md): vive donde aplica, no en un archivo central.
 
 Vive **donde aplica**: en el ámbito o subdirectorio al que pertenece. Una cadencia de conversaciones individuales vive en `jefatura`; una de pagos mensuales vive en `personal`.
 
-**Se acumulan en cascada**, no prevalece la más cercana (ver [`ambitos.md`](ambitos.md)). Una cadencia no es una regla que afine a la de arriba: es algo que ocurre. Que `trabajo/turnos/` tenga la suya no cancela la que `trabajo/` declaró, igual que un costo fijo no cancela otro. Estar más adentro acota a quién le toca, no a qué se hereda.
+**Se acumulan en cascada**, no prevalece la más cercana (ver [`../VAULT/spec-anterior/ambitos.md`](../VAULT/spec-anterior/ambitos.md)). Una cadencia no es una regla que afine a la de arriba: es algo que ocurre. Que `trabajo/turnos/` tenga la suya no cancela la que `trabajo/` declaró, igual que un costo fijo no cancela otro. Estar más adentro acota a quién le toca, no a qué se hereda.
 
 Poner el alcance en la carpeta evita declararlo dentro de cada cadencia. El árbol ya lo dice.
 
-**Verlas todas juntas es un comando, no un archivo.** Cada ámbito nuevo trae sus cadencias, así que una lista materializada envejece apenas se crea el siguiente. Un comando de solo lectura recorre los `CADENCIAS.md` del árbol, las combina en cascada y devuelve todas en un solo texto, cada una con el `CADENCIAS.md` de donde viene, para saber dónde editar su `Historia`. Es `tuku context cadence`, un tema más de `context` que solo entra si se pide ([tuku.md](tuku.md)): cada cadencia sale con su `CADENCIAS.md` y su alcance, que es la carpeta del archivo. El libro de estilo dice el mecanismo y nombra el comando: no lista ni transcluye las cadencias del autor.
+**Verlas todas juntas es un comando, no un archivo.** Cada ámbito nuevo trae sus cadencias, así que una lista materializada envejece apenas se crea el siguiente. Un comando de solo lectura recorre los `CADENCIAS.md` del árbol, las combina en cascada y devuelve todas en un solo texto, cada una con el `CADENCIAS.md` de donde viene, para saber dónde editar su `Historia`. Es `tuku context cadence`, un tema más de `context` que solo entra si se pide ([tuku.md](../../spec/tuku.md)): cada cadencia sale con su `CADENCIAS.md` y su alcance, que es la carpeta del archivo. El libro de estilo dice el mecanismo y nombra el comando: no lista ni transcluye las cadencias del autor.
 
 Un comando recorre el árbol y colecta las cadencias vigentes del autor en una vista única. Esa vista es **derivada**: la fuente son los archivos por ámbito.
 
@@ -62,7 +62,7 @@ Tres campos son de máquina y dos son de persona:
 
 | Emite | Dónde aterriza |
 | --- | --- |
-| Un pendiente con fecha | `PENDIENTES.md`, y en el día que corresponde de `AHORA.md` por la propagación que ya existe (ver [`pendientes.md`](pendientes.md)) |
+| Un pendiente con fecha | `PENDIENTES.md`, y en el día que corresponde de `AHORA.md` por la propagación que ya existe (ver [`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md)) |
 | `AHORA.md` | El ciclo en curso, que es lo que emite la cadencia de apertura |
 | Una bitácora cerrada | `bitacoras/bitacora-<desde>-<hasta>-<ciclo>.md`, que es lo que emite la de cierre |
 | Un reporte | `reportes/` |
@@ -83,5 +83,5 @@ Dos trampas conocidas: los rangos que cruzan el borde de mes (*"entre el 31 y el
 
 ## No entra
 
-- **Inferir cadencias implícitas del histórico.** Eso es inferencia semántica y pertenece a una fase posterior de implementación (ver [`../devel/epics.md`](../devel/epics.md)), no al modelo aquí especificado.
+- **Inferir cadencias implícitas del histórico.** Eso es inferencia semántica y pertenece a una fase posterior de implementación (ver [`../epics.md`](../epics.md)), no al modelo aquí especificado.
 - **Las alertas sobre pendientes críticos.** Sigue abierto si son un comando propio o una forma de implementar una cadencia.

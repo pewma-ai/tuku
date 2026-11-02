@@ -30,11 +30,11 @@ Lo que trae `vanilla/` y nada más. Es la definición operativa del principio 2:
 | `reglas/*.user.md` | Lo que decide el autor sobre cada entidad, por declarar; el libro de estilo los transcluye |
 | `reglas/skills/asistente/SKILL.md` | Cómo despacha el agente lo que el autor dice: reglas de trabajo y ejemplos de petición, capítulo y comando |
 | `reglas/config.tuku.md` | `TZ`, `tuku_template`, `tuku_version` y `origen`, entre otros, en una tabla |
-| `.obsidian/app.json`, `.gitignore` | Que Obsidian escriba links Markdown con ruta relativa, y que de `.obsidian/` solo se versione eso ([`../spec/markdown.md`](../spec/markdown.md)) |
+| `.obsidian/app.json`, `.gitignore` | Que Obsidian escriba links Markdown con ruta relativa, y que de `.obsidian/` solo se versione eso ([`../devel/VAULT/spec-anterior/markdown.md`](../devel/VAULT/spec-anterior/markdown.md)) |
 
 La tabla es la referencia, no un inventario cerrado: lo que importa es que cualquier cosa que se agregue supone algo sobre el autor y hay que justificarlo.
 
-`CAPACIDAD.md` de `personal/` se siembra **sin un solo dato**, diciendo que todavía no se ha declarado nada y por qué conviene hacerlo. Es opcional y deseable, no un requisito (ver [`../spec/ambitos.md`](../spec/ambitos.md)): el vault opera sin él. El `AGENTS.md` y el `CADENCIAS.md` de un ámbito se crean cuando el autor declara su primera regla o cadencia. Existen en el estado cero porque un archivo que se explica solo es la forma barata de que el autor sepa que puede escribirlo, y no rompe el principio 2 mientras no le pida declarar nada para empezar.
+`CAPACIDAD.md` de `personal/` se siembra **sin un solo dato**, diciendo que todavía no se ha declarado nada y por qué conviene hacerlo. Es opcional y deseable, no un requisito (ver [`../devel/VAULT/spec-anterior/ambitos.md`](../devel/VAULT/spec-anterior/ambitos.md)): el vault opera sin él. El `AGENTS.md` y el `CADENCIAS.md` de un ámbito se crean cuando el autor declara su primera regla o cadencia. Existen en el estado cero porque un archivo que se explica solo es la forma barata de que el autor sepa que puede escribirlo, y no rompe el principio 2 mientras no le pida declarar nada para empezar.
 
 ## Instalar a mano
 

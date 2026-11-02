@@ -1,6 +1,6 @@
 # 003-01 · El vault dice a dónde va
 
-> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P4 (determinismo)](../../docs/principios.md#L33), [P5 (reglas en prosa)](../../docs/principios.md#L47) · **Brief:** [El agente y las herramientas](../../docs/brief.md#L60) · **Spec:** [`spec/despacho.md`](../../spec/despacho.md), [`spec/cli.md`](../../spec/cli.md)
+> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P4 (determinismo)](../../docs/principios.md#L33), [P5 (reglas en prosa)](../../docs/principios.md#L47) · **Brief:** [El agente y las herramientas](../../docs/brief.md#L60) · **Spec:** [`spec/despacho.md`](../../devel/VAULT/spec-anterior/despacho.md), [`spec/cli.md`](../../devel/VAULT/spec-anterior/cli.md)
 
 `AGENTS.md` gobierna el despacho del agente. `tuku doctor` comprueba deterministamente que la tabla de despacho sembrada por `tuku init` no nombre comandos inexistentes, reportando desalineaciones sin mutar el archivo.
 

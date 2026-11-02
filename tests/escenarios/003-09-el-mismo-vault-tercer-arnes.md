@@ -1,6 +1,6 @@
 # 003-09 · El mismo vault, tercer arnés
 
-> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P5 (reglas en prosa)](../../docs/principios.md#L47) · **Brief:** [El agente y las herramientas](../../docs/brief.md#L60) · **Spec:** [`spec/despacho.md`](../../spec/despacho.md)
+> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P5 (reglas en prosa)](../../docs/principios.md#L47) · **Brief:** [El agente y las herramientas](../../docs/brief.md#L60) · **Spec:** [`spec/despacho.md`](../../devel/VAULT/spec-anterior/despacho.md)
 
 Verifica la portabilidad agéntica ejecutando el mismo dictado simple bajo un tercer arnés (`claude`, con sonnet en esfuerzo bajo), garantizando que el comportamiento operativo es gobernado por el `AGENTS.md` del vault y no por peculiaridades del modelo.
 

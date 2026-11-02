@@ -15,7 +15,7 @@ El autor instala TUKU y opera su primer día entero mediante comandos directos (
 ## Qué se verifica
 
 - **Superficie del vault:** Diff exacto entre estados de `playground/`, sin efectos colaterales y con estricta idempotencia (el segundo pase produce diff vacío).
-- **Superficie del comando:** Códigos de salida y mensajes que nombran la corrección, según [`spec/cli.md`](../../spec/cli.md). Lo que no necesita un vault va en [`../unitarios/`](../unitarios/README.md).
+- **Superficie del comando:** Códigos de salida y mensajes que nombran la corrección, según [`spec/cli.md`](../../devel/VAULT/spec-anterior/cli.md). Lo que no necesita un vault va en [`../unitarios/`](../unitarios/README.md).
 - **Aceptación humana:** Criterios de legibilidad directa en Obsidian para asegurar experiencia natural y perdurabilidad a 20 años.
 
 ## Escenarios BDD del epic

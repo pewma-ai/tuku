@@ -16,7 +16,7 @@ Lo del epic 002 sobre un vault que ya tiene historia: ámbitos anidados con regi
 ## Qué se verifica
 
 - **Superficie del vault:** diff entre estados encadenados, con estricta idempotencia (el segundo pase da diff vacío).
-- **Superficie del comando:** códigos de salida y mensajes que nombran la corrección, según [`spec/cli.md`](../../spec/cli.md).
+- **Superficie del comando:** códigos de salida y mensajes que nombran la corrección, según [`spec/cli.md`](../../devel/VAULT/spec-anterior/cli.md).
 - **El agente (solo `005-06`):** la traza de lo que ejecutó, no lo que dijo.
 - **Aceptación humana:** legibilidad en Obsidian del vault de Andrea.
 

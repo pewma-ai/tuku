@@ -1,6 +1,6 @@
 # 003-10 · El día uno en un turno
 
-> **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Spec:** [`spec/despacho.md`](../../spec/despacho.md), [`spec/agente.md`](../../spec/agente.md), [`spec/flujo-informacion.md`](../../spec/flujo-informacion.md)
+> **Principio:** [P3 (secretario, no dueño)](../../docs/principios.md#L25), [P4 (determinismo)](../../docs/principios.md#L33), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Spec:** [`spec/despacho.md`](../../devel/VAULT/spec-anterior/despacho.md), [`spec/agente.md`](../../devel/VAULT/spec-anterior/agente.md), [`spec/flujo-informacion.md`](../../devel/borradores/flujo-informacion.md)
 
 El criterio de salida del epic en un solo turno: el autor dicta el día uno entero y el agente lo compila a comandos deterministas, dejando un vault equivalente al del [epic 002](002-00-el-dia-uno-a-mano.md). En el mismo turno van las frases que no se anotan: una consulta previa, una instrucción y una pregunta mezcladas con hechos, un cierre ambiguo y un pedido estructural sin comando.
 

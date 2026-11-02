@@ -1,14 +1,14 @@
 # spec · ciclo
 
-> `AHORA.md` es el ciclo en curso. Se justifica por el principio 1 y el principio 9 de [`../docs/principios.md`](../docs/principios.md). El ciclo es un proceso y no una primitiva: `tuku process cycle` lo abre, y se compone sobre la bitácora, los pendientes y las notas.
+> `AHORA.md` es el ciclo en curso. Se justifica por el principio 1 y el principio 9 de [`../../docs/principios.md`](../../docs/principios.md). El ciclo es un proceso y no una primitiva: `tuku process cycle` lo abre, y se compone sobre la bitácora, los pendientes y las notas.
 
 ## `AHORA.md`, el ciclo en curso
 
-Lo único canónico aquí son **los registros**. El resto es vista, y entra de dos maneras distintas: el plan por transclusión, los pendientes del día por propagación ([`pendientes.md`](pendientes.md), "dónde se muestra y cómo llega").
+Lo único canónico aquí son **los registros**. El resto es vista, y entra de dos maneras distintas: el plan por transclusión, los pendientes del día por propagación ([`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md), "dónde se muestra y cómo llega").
 
-El frontmatter es OKF, con los campos en inglés porque son superficie de máquina (ver [`vault.md`](vault.md), "El frontmatter"). `AHORA.md` y una bitácora cerrada llevan **el mismo `type`**, `Logbook`: los separa `status`, que es `draft` mientras el ciclo está abierto y `stable` cuando se archiva y deja de tocarse. `from` y `to` son el rango que cubre, y son lo que dice dónde termina el ciclo: no hay ninguna marca en el cuerpo que lo repita.
+El frontmatter es OKF, con los campos en inglés porque son superficie de máquina (ver [`../VAULT/spec-anterior/vault.md`](../VAULT/spec-anterior/vault.md), "El frontmatter"). `AHORA.md` y una bitácora cerrada llevan **el mismo `type`**, `Logbook`: los separa `status`, que es `draft` mientras el ciclo está abierto y `stable` cuando se archiva y deja de tocarse. `from` y `to` son el rango que cubre, y son lo que dice dónde termina el ciclo: no hay ninguna marca en el cuerpo que lo repita.
 
-**Cada ciclo tiene un nombre y un rango.** `cycle` dice cuál es (`cycle: semana`, `cycle: turno`) y `from` y `to`, el rango que cubre. Los nombres posibles los declara el autor en la tabla de [`reglas/ciclo.user.md`](vault.md), "El libro de estilo", una fila por ciclo en el orden en que se alternan (`turno`, `descanso`), y vale `semana` si no declara ninguno. **El ciclo siguiente es el siguiente de la tabla**, y al llegar al final vuelve al primero; con un solo nombre, es el mismo.
+**Cada ciclo tiene un nombre y un rango.** `cycle` dice cuál es (`cycle: semana`, `cycle: turno`) y `from` y `to`, el rango que cubre. Los nombres posibles los declara el autor en la tabla de [`reglas/ciclo.user.md`](../VAULT/spec-anterior/vault.md), "El libro de estilo", una fila por ciclo en el orden en que se alternan (`turno`, `descanso`), y vale `semana` si no declara ninguno. **El ciclo siguiente es el siguiente de la tabla**, y al llegar al final vuelve al primero; con un solo nombre, es el mismo.
 
 **El rango se deduce solo con `semana`**, que va de lunes a domingo: `tuku init --at` y `tuku process cycle --from` reciben un día cualquiera y abren la semana que lo contiene, así que `from` es siempre un lunes y `to`, el domingo siguiente. **Con cualquier otro nombre el rango es un dato del autor**, porque un turno dura 8 días, o 10, o 14, y nada lo deduce: el agente le pregunta hasta qué día va el ciclo y abre con ese rango. Decidir el rango es del autor; abrir un ciclo con un rango dado es determinista. Con `cycle_name: turno, descanso`, un turno del martes 11 al martes 18 de agosto y el descanso que le sigue, del miércoles 19 al lunes 24, son dos ciclos:
 
@@ -56,7 +56,7 @@ to: 2026-08-30
 > - [personal](ambitos/personal/personal.md) - pagar la sesión con el psicólogo
 ```
 
-Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku regenerate todo`. También lo es el callout de la semana, bajo `# Actividad diaria` y antes del primer día ([`pendientes.md`](pendientes.md)). Se distingue sin marca: los registros empiezan por `- HH:MM - `.
+Lo que va entre el encabezado del día y el primer registro es la **región propagada**, y su dueño es `tuku regenerate todo`. También lo es el callout de la semana, bajo `# Actividad diaria` y antes del primer día ([`../VAULT/spec-anterior/pendientes.md`](../VAULT/spec-anterior/pendientes.md)). Se distingue sin marca: los registros empiezan por `- HH:MM - `.
 
 **No tiene resumen.** El resumen se genera al cerrar, así que no existe mientras el ciclo está abierto.
 
@@ -130,7 +130,7 @@ Lo abre `process cycle` cuando crea el ciclo y `bitacoras/` tiene una bitácora.
 
 ### Un ciclo abierto con registros no se pisa
 
-Abrir un ciclo cuya fecha cae fuera del que ya está abierto **se rechaza** si ese ciclo tiene registros escritos. Archivar es una consecuencia mayor y nadie la aprobó (principio 3 de [`../docs/principios.md`](../docs/principios.md)): sobreescribir `AHORA.md` haría desaparecer registros sin dejar rastro en `bitacoras/`. El rechazo nombra el archivo destino con las fechas ya calculadas, para que cerrarlo sea copiar la línea.
+Abrir un ciclo cuya fecha cae fuera del que ya está abierto **se rechaza** si ese ciclo tiene registros escritos. Archivar es una consecuencia mayor y nadie la aprobó (principio 3 de [`../../docs/principios.md`](../../docs/principios.md)): sobreescribir `AHORA.md` haría desaparecer registros sin dejar rastro en `bitacoras/`. El rechazo nombra el archivo destino con las fechas ya calculadas, para que cerrarlo sea copiar la línea.
 
 Un ciclo abierto **sin registros sí se regenera**, porque no hay nada que perder. Y ante una fecha de otro ciclo se falla en vez de archivar solo, porque el caso frecuente es un dedazo y no el lunes nuevo: fallar es barato y deshacer un cierre no.
 
@@ -186,9 +186,9 @@ Calcular la capacidad antes de planificar → `capacity calc`:
 
 ### De dónde lee: `CAPACIDAD.md`
 
-> **Provisional.** Ver la nota de [`ambitos.md`](ambitos.md): la capacidad del autor es hoy un texto abierto y no las secciones `Bruto` y `Costo fijo` de más abajo.
+> **Provisional.** Ver la nota de [`../VAULT/spec-anterior/ambitos.md`](../VAULT/spec-anterior/ambitos.md): la capacidad del autor es hoy un texto abierto y no las secciones `Bruto` y `Costo fijo` de más abajo.
 
-El bruto y los costos fijos los declara el autor en archivos `CAPACIDAD.md` repartidos por el árbol de ámbitos (dónde vive cada uno y por qué se acumulan, en [`ambitos.md`](ambitos.md)).
+El bruto y los costos fijos los declara el autor en archivos `CAPACIDAD.md` repartidos por el árbol de ámbitos (dónde vive cada uno y por qué se acumulan, en [`../VAULT/spec-anterior/ambitos.md`](../VAULT/spec-anterior/ambitos.md)).
 
 **No se declara en horas.** Pedirle al autor que cuantifique su semana es la forma más rápida de que deje de mantener el archivo, y además es una precisión falsa: nadie sabe cuántas horas le va a costar un turno. Se declara con el mismo vocabulario grueso con que uno lo diría en voz alta.
 
@@ -268,4 +268,4 @@ El veredicto sale de comparar plan contra ejecución, no de resumir la actividad
 ## No entra
 
 - **Juzgar la calidad de la prosa** del plan o el resumen.
-- **Decidir cuánto dura un ciclo que no es `semana`.** Lo dice el autor y el agente se lo pregunta al cambiar de ciclo. El estado cero arranca en `semana` y los nombres verdaderos emergen después; esa regla de arranque vive en [`../devel/epics.md`](../devel/epics.md) (estrategia de pruebas, estado cero).
+- **Decidir cuánto dura un ciclo que no es `semana`.** Lo dice el autor y el agente se lo pregunta al cambiar de ciclo. El estado cero arranca en `semana` y los nombres verdaderos emergen después; esa regla de arranque vive en [`../epics.md`](../epics.md) (estrategia de pruebas, estado cero).

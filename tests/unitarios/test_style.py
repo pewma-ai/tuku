@@ -3,7 +3,7 @@
 Son los que otros comandos necesitan para funcionar: el marcador del autor, que
 `tuku init --author` sustituye, los capítulos de vocabulario, que `tuku context
 style` lee, una sola tabla por capítulo y transclusiones que apunten a un archivo.
-La regla transversal de `spec/cli.md` también se afirma acá, en un barrido:
+La regla transversal de `spec/tuku.md` también se afirma acá, en un barrido:
 ningún hallazgo puede quedar sin corrección.
 """
 
@@ -97,7 +97,7 @@ def test_un_archivo_del_autor_lleva_una_tabla_y_una_transclusion_apunta_a_un_arc
 
 
 def test_ningun_hallazgo_queda_sin_defecto_ni_correccion() -> None:
-    """La regla de `spec/cli.md`, como barrido: decir qué pasó no basta."""
+    """La regla de `spec/tuku.md`, como barrido: decir qué pasó no basta."""
     casos = (
         dict.fromkeys(COMPLETO),
         _con(reglas_pendientes_user_md="Sin tabla\n"),

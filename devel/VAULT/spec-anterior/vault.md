@@ -1,6 +1,6 @@
 # spec · vault
 
-> Qué hay en el disco, quién escribe cada cosa y qué declara cada archivo. Las demás specs lo dan por sabido. Se justifica por los principios 1, 5 y 7 de [`../docs/principios.md`](../docs/principios.md).
+> Qué hay en el disco, quién escribe cada cosa y qué declara cada archivo. Las demás specs lo dan por sabido. Se justifica por los principios 1, 5 y 7 de [`../../../docs/principios.md`](../../../docs/principios.md).
 
 ## Árbol de directorios
 
@@ -74,7 +74,7 @@ Lo marcado "todavía no existe" es diseño: el árbol lo muestra para que se sep
 
 El contexto reciente y el vocabulario de ámbitos no son archivos: son la **salida de un comando**, que se calcula cuando hace falta y se inyecta. Materializarlos solo agregaría copias que envejecen, porque una cola de bitácora queda vieja apenas se escribe el registro siguiente. Calcularla en el momento es más simple y además más correcto. Los calcula `tuku context` ([cli.md](cli.md)).
 
-Lo que sí se materializa, aunque sea generado, es lo que alguien mira o transcluye: `ambitos/PENDIENTES-AMBITOS.md` lo transcluyen las páginas de ámbito. Las cadencias vigentes no se materializan: las combina un comando que recorre los `CADENCIAS.md` del árbol ([cadencias.md](cadencias.md)), porque cada ámbito nuevo trae las suyas y una lista guardada envejecería.
+Lo que sí se materializa, aunque sea generado, es lo que alguien mira o transcluye: `ambitos/PENDIENTES-AMBITOS.md` lo transcluyen las páginas de ámbito. Las cadencias vigentes no se materializan: las combina un comando que recorre los `CADENCIAS.md` del árbol ([cadencias.md](../../borradores/cadencias.md)), porque cada ámbito nuevo trae las suyas y una lista guardada envejecería.
 
 ## El frontmatter
 
@@ -86,11 +86,11 @@ El formato es [OKF](https://github.com/GoogleCloudPlatform/open-knowledge-format
 
 **Los `type` de TUKU son contrato y viajan en el libro de estilo** (capítulo «Formato OKF», una tabla). Renombrar `Logbook` rompe los comandos y deja el vault ilegible para cualquier herramienta que hable OKF, así que esa tabla es de TUKU y el autor no la edita. Hoy son `Logbook`, `Todo`, `Derived`, `Scope`, `Note`, `Cadence`, `Capacity`, `Config` y `Style Guide`.
 
-**Los que el autor agrega viven en [`reglas/types.user.md`](../template/vanilla/reglas/types.user.md)**, otra tabla, y el libro la transcluye debajo de la de TUKU. Agregar un tipo propio es agregar una fila ahí. Un nombre no puede repetir uno de TUKU.
+**Los que el autor agrega viven en [`reglas/types.user.md`](../../../template/vanilla/reglas/types.user.md)**, otra tabla, y el libro la transcluye debajo de la de TUKU. Agregar un tipo propio es agregar una fila ahí. Un nombre no puede repetir uno de TUKU.
 
 **Los `AGENTS.md` quedan fuera** y no llevan frontmatter: son reglas de operación, no conocimiento.
 
-Un `type` puede pedir campos propios, y los declara la spec de esa primitiva: `Logbook` lleva además `status`, `from` y `to` ([ciclo.md](ciclo.md)). Los `reglas/*.user.md` son `Style Guide` y llevan `editable: true`; `modified_time`, que es `null` hasta que el agente anota en ellos una preferencia del autor y entonces lleva la fecha y la hora; y `rules`, una frase con sus reglas de edición.
+Un `type` puede pedir campos propios, y los declara la spec de esa primitiva: `Logbook` lleva además `status`, `from` y `to` ([ciclo.md](../../borradores/ciclo.md)). Los `reglas/*.user.md` son `Style Guide` y llevan `editable: true`; `modified_time`, que es `null` hasta que el agente anota en ellos una preferencia del autor y entonces lleva la fecha y la hora; y `rules`, una frase con sus reglas de edición.
 
 Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de las dos tablas en tiempo de ejecución y recorre el vault entero.
 
@@ -102,7 +102,7 @@ Que se cumpla lo verifica `tuku doctor`, que lee los tipos válidos de las dos t
 
 **Se organiza por tarea, con capítulos autocontenidos.** Propósito del vault, Autor, Registro, Pendiente, Ciclo, Ámbito, Capacidad, Nota, Cadencia, Proceso, Estructura del vault, Formato OKF, Configuración y Uso de Markdown. Quien va a escribir algo lee su capítulo y nada más; si depende de otro lo dice en «Lee también». Cada capítulo da las reglas de juicio, un ejemplo de comando y, al final, lo que el autor decidió para esa tarea.
 
-**Se lee una vez por sesión**, antes de la primera escritura de cada tipo: la regla está en el [`AGENTS.md`](../template/vanilla/AGENTS.md) del vault, en la columna «Lee antes». Se acepta que un agente se la salte. Si hiciera falta garantizarlo, el comando de escritura rechazaría con «lee primero `tuku context style --chapter X`», apoyado en un estado local (`.tuku/leidos`) con la fecha de cada capítulo leído; es una salida abierta y no está decidida.
+**Se lee una vez por sesión**, antes de la primera escritura de cada tipo: la regla está en el [`AGENTS.md`](../../../template/vanilla/AGENTS.md) del vault, en la columna «Lee antes». Se acepta que un agente se la salte. Si hiciera falta garantizarlo, el comando de escritura rechazaría con «lee primero `tuku context style --chapter X`», apoyado en un estado local (`.tuku/leidos`) con la fecha de cada capítulo leído; es una salida abierta y no está decidida.
 
 **Lo del autor vive en `reglas/X.user.md`, con lo mínimo.** Cada archivo trae el frontmatter y su contenido, una tabla o un texto, sin encabezados. Los encabezados `###` y las frases que lo presentan están en el libro, que transcluye cada archivo con `![](reglas/X.user.md)` en el capítulo que corresponde:
 
@@ -147,7 +147,7 @@ La escribe `tuku init`, que toma la zona horaria de la máquina. Cada campo que 
 
 La **especificación** viaja con el vault: `reglas/comandos.tuku.md` dice en prosa qué hace cada comando sobre los archivos del vault, para que alguien pueda operar el vault, o volver a implementar el comando, aunque el código de hoy ya no exista. Lo escribe `tuku init` desde el párrafo de ayuda de cada comando ([cli.md](cli.md)) y lo reescribe `tuku regenerate comandos`, porque es derivado: de la versión de `tuku` instalada, no del conjunto canónico.
 
-El **código** vive fuera del vault, en el paquete `tuku` que instala `uv tool install` o `pipx` (epic 001 de [`../devel/epics.md`](../devel/epics.md)). En el vault no hay código. El `AGENTS.md` de la raíz lo declara, así que quien opere el libro lo encuentra en el primer archivo que abre.
+El **código** vive fuera del vault, en el paquete `tuku` que instala `uv tool install` o `pipx` (epic 001 de [`../../epics.md`](../../epics.md)). En el vault no hay código. El `AGENTS.md` de la raíz lo declara, así que quien opere el libro lo encuentra en el primer archivo que abre.
 
 La división es la de siempre: **la especificación sobrevive, la implementación se reemplaza.** Un script de 2026 no va a correr en 2046, pero la descripción de lo que hacía sí se va a leer. Y así el repositorio del autor no se vuelve una copia del código de TUKU que después diverge por su cuenta.
 
@@ -163,5 +163,5 @@ Que el párrafo nombre archivos y cómo cambian no es cortesía documental, es l
 
 ## No entra
 
-- El formato de cada archivo. Lo especifica la spec de su primitiva: [bitacora.md](bitacora.md), [pendientes.md](pendientes.md), [ambitos.md](ambitos.md), [cadencias.md](cadencias.md), [notas.md](notas.md), [ciclo.md](ciclo.md).
-- Qué hay en un vault recién sembrado. Eso es [`../template/README.md`](../template/README.md).
+- El formato de cada archivo. Lo especifica la spec de su primitiva: [bitacora.md](bitacora.md), [pendientes.md](pendientes.md), [ambitos.md](ambitos.md), [cadencias.md](../../borradores/cadencias.md), [notas.md](notas.md), [ciclo.md](../../borradores/ciclo.md).
+- Qué hay en un vault recién sembrado. Eso es [`../../../template/README.md`](../../../template/README.md).

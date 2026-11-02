@@ -1,6 +1,6 @@
 # 002-14 · Casos borde del día uno
 
-> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P4 (determinismo)](../../docs/principios.md#L33), [P6 (conjunto canónico)](../../docs/principios.md#L55), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Soberanía de archivos y una sola fuente de verdad](../../docs/brief.md#L43) · **Spec:** [`spec/pendientes.md`](../../spec/pendientes.md), [`spec/bitacora.md`](../../spec/bitacora.md), [`spec/ambitos.md`](../../spec/ambitos.md)
+> **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P4 (determinismo)](../../docs/principios.md#L33), [P6 (conjunto canónico)](../../docs/principios.md#L55), [P9 (reconstrucción)](../../docs/principios.md#L79) · **Brief:** [Soberanía de archivos y una sola fuente de verdad](../../docs/brief.md#L43) · **Spec:** [`spec/pendientes.md`](../../devel/VAULT/spec-anterior/pendientes.md), [`spec/bitacora.md`](../../devel/VAULT/spec-anterior/bitacora.md), [`spec/ambitos.md`](../../devel/VAULT/spec-anterior/ambitos.md)
 
 El vault del día uno editado con cualquier editor: cada lint nombra el comando que corrige, el reparador deja el vault como lo habría dejado el comando, y lo derivado se regenera desde el canónico. Cada escenario parte del día uno completo.
 

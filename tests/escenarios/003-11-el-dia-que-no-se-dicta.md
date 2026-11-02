@@ -1,6 +1,6 @@
 # 003-11 · El día que no se dicta
 
-> **Principio:** [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/bitacora.md`](../../spec/bitacora.md), [`spec/agente.md`](../../spec/agente.md)
+> **Principio:** [P4 (determinismo)](../../docs/principios.md#L33) · **Spec:** [`spec/bitacora.md`](../../devel/VAULT/spec-anterior/bitacora.md), [`spec/agente.md`](../../devel/VAULT/spec-anterior/agente.md)
 
 El autor dicta una hora y no un día. El día se deriva del vault, con la regla del comando, que rechaza con la corrección: si HOY cae fuera del ciclo abierto, el registro va al último día del ciclo que ya tiene registros.
 
