@@ -106,3 +106,11 @@ def test_compose_escribe_los_aliases_que_context_ofrece_al_agente() -> None:
     )
     assert "subtype: persona\naliases: [don Rodolfo, Rodolfo]\ncreated: 2026-08-11" in texto
     assert note.aliases(texto) == ["don Rodolfo", "Rodolfo"]
+
+
+def test_compose_sin_ambito_ni_enlaces_cierra_con_ver_ademas_vacio() -> None:
+    from datetime import date
+
+    texto = note.compose(title="Patricia Soto", body="De la imprenta.", today=date(2026, 8, 21))
+    assert texto.rstrip().endswith("## Ver además")
+    assert note.lint(texto) == []

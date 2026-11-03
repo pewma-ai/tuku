@@ -167,7 +167,8 @@ def compose(
     items += [
         f"* [{texto}]({destino}) — mencionada en el cuerpo." for texto, destino in menciones
     ]
-    ver_ademas = f"\n{VER_ADEMAS}\n\n" + "\n".join(items) + "\n" if items else ""
+    listado = "\n".join(items) + "\n" if items else ""
+    ver_ademas = f"\n{VER_ADEMAS}\n\n{listado}"
 
     marca_subtype = f"subtype: {subtype}\n" if subtype else ""
     marca_aliases = f"aliases: [{', '.join(aliases)}]\n" if aliases else ""
