@@ -90,13 +90,14 @@ Actualizado el 2026-11-02.
 | 005 | El día ciento cincuenta | `poblado` | escenarios reescritos | ocho documentos en `tests/escenarios/005-*` rehechos para `AHORA.md` sin ciclos el 2026-11-03: 34 tests deterministas en verde y 7 agénticos sin volver a correr. Solo queda abierto B4 de la tabla de `005-00` (bajar un pendiente por la escalera de horizontes), que está en `TODO.md` |
 | 006 | Lo que vuelve solo | `poblado` | sin empezar | el diseño de las cadencias sin apertura de ciclo, sus escenarios y su capítulo del tutorial |
 | 007 | Que note lo que nadie pidió | `historico` | sin empezar | depende del epic 006 |
-| 010 | El tutorial entero | `vacio` → `poblado` | en curso | el arnés `test-tui tutorial` ya corre los capítulos. En el último recorrido (anterior a `AHORA.md` sin ciclos) pasaron 1, 2, 3, 6 y 7; 4, 5 y 8 fallan por el modelo barato y el sandbox de `agy`, no por el texto. Los capítulos 1, 2, 3, 5, 8 y 10 se ajustaron y el 9 es nuevo (`09-pasar-de-semana.md`), sin recorrer todavía; el 10 promete lo del epic 007 |
+| 010 | El tutorial entero | `vacio` → `poblado` | en curso | el arnés `test-tui tutorial` corre los diez capítulos. Verdes con `agy` (gemini-3.8-flash-low): 1 a 9, por capítulo y en cadena (cada tramo de la cadena pasa; el agente falla algún paso suelto por corrida, ver la iteración del 2026-11-03). El 10 queda en rojo a propósito: promete lo del epic 007 |
 
 ## Epic 001. Un TUKU mínimo instalable
 
 Que una persona nueva instale TUKU con un comando, siembre un vault en un directorio vacío y encuentre `AHORA.md` listo con su foco para escribir el mismo día, sin configurar nada y sin saber qué es TUKU. Cubre la fase 0.
 
 - **Entregable:** `uv tool install git+https://github.com/pewma-ai/tuku.git@devel` deja `tuku` en PATH; `tuku init mi-vault` produce el estado cero sin tocar la red ni leer el reloj: `AHORA.md` con su foco y ningún día, `PENDIENTES.md` con su tabla vacía y `reglas/config.tuku.md` con `window_days` y `archive_weeks`.
+- **Estado:** los capítulos 1 a 9 pasan con `agy`; el 10 sale en rojo hasta que el epic 007 construya las propuestas del agente. Los fallos que quedan en la cadena son del entorno o del modelo: el primer `tuku` de cada turno de `agy` choca con el sandbox (el agente repite una vez, y a veces no), y un modelo barato omite a veces un registro al contar lo pasado.
 - **Criterio de salida:** el árbol sembrado es idéntico a `template/vanilla/` salvo lo que `init` resuelve (`AHORA.md`, la configuración y el manual de comandos), un destino con contenido se rechaza salvo `--force`, `--author` deja el nombre en `reglas/autor.user.md` y `tuku doctor` da el vault por sano.
 - **Detalle completo:** [`../tests/escenarios/001-00-un-tuku-minimo-instalable.md`](../tests/escenarios/001-00-un-tuku-minimo-instalable.md). Seis escenarios (`001-01` a `001-04`, `001-06` y `001-07`).
 
