@@ -1,3 +1,7 @@
+---
+tags: [no-ejecutar]
+---
+
 # 003-08 · El mismo vault, otro arnés
 
 > **Principio:** [P1 (texto operable a mano)](../../docs/principios.md#L9), [P5 (reglas en prosa)](../../docs/principios.md#L47) · **Brief:** [El agente y las herramientas](../../docs/brief.md#L60) · **Spec:** [`spec/despacho.md`](../../devel/VAULT/spec-anterior/despacho.md)

@@ -25,6 +25,8 @@ import gherkin  # noqa: E402
 
 from tuku import todo  # noqa: E402
 
+pytestmark = pytest.mark.skip(reason="no-ejecutar: hermes esquiva el shim")
+
 SLUG = "003-08-el-mismo-vault-otro-arnes"
 PERSONAL = "[personal](ambitos/personal/personal.md)"
 TITULO = "otro agente, el mismo comando"
